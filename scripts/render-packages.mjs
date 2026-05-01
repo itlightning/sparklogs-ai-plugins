@@ -104,6 +104,14 @@ async function copyDirPreserve(src, dst, outAbs) {
   }
 }
 
+function marketplaceId(metadata) {
+  return metadata.marketplace?.name ?? 'sparklogs-ai-plugins';
+}
+
+function pluginCategory(metadata) {
+  return metadata.categories?.[0] ?? 'productivity';
+}
+
 function manifest(metadata, host, version) {
   return {
     author: metadata.author,
@@ -115,6 +123,75 @@ function manifest(metadata, host, version) {
     name: metadata.name,
     repository: metadata.repository,
     version,
+  };
+}
+
+/** Claude Code: top-level description, ./ source paths, Anthropic $schema */
+function buildClaudeMarketplace(metadata) {
+  const owner = { name: metadata.author.name };
+  if (metadata.author.email) owner.email = metadata.author.email;
+  return {
+    $schema: 'https://anthropic.com/claude-code/marketplace.schema.json',
+    name: marketplaceId(metadata),
+    description: metadata.description,
+    owner,
+    plugins: [
+      {
+        author: metadata.author,
+        category: pluginCategory(metadata),
+        description: metadata.description,
+        homepage: metadata.homepage,
+        license: metadata.license,
+        name: metadata.name,
+        repository: metadata.repository,
+        source: './plugins/claude/sparklogs',
+      },
+    ],
+  };
+}
+
+/** Cursor: metadata.description (not top-level), owner required, source without ./ — see Cursor plugins reference */
+function buildCursorMarketplace(metadata) {
+  const owner = { name: metadata.author.name };
+  if (metadata.author.email) owner.email = metadata.author.email;
+  return {
+    metadata: {
+      description: metadata.description,
+    },
+    name: marketplaceId(metadata),
+    owner,
+    plugins: [
+      {
+        author: metadata.author,
+        category: pluginCategory(metadata),
+        description: metadata.description,
+        homepage: metadata.homepage,
+        keywords: [...metadata.categories],
+        license: metadata.license,
+        logo: 'plugins/cursor/sparklogs/assets/logo.svg',
+        name: metadata.name,
+        repository: metadata.repository,
+        source: 'plugins/cursor/sparklogs',
+      },
+    ],
+  };
+}
+
+/** OpenAI Codex agents: plugins[].source.path (no ./) */
+function buildCodexMarketplace(metadata) {
+  return {
+    plugins: [
+      {
+        author: metadata.author,
+        category: pluginCategory(metadata),
+        description: metadata.description,
+        homepage: metadata.homepage,
+        license: metadata.license,
+        name: metadata.name,
+        repository: metadata.repository,
+        source: { path: 'plugins/codex/sparklogs' },
+      },
+    ],
   };
 }
 
@@ -165,15 +242,9 @@ async function renderHost(host, out, metadata, version) {
 }
 
 async function renderMarketplaces(out, metadata) {
-  await writeJson(path.join(out, '.claude-plugin', 'marketplace.json'), {
-    plugins: [{ description: metadata.description, name: metadata.name, source: './plugins/claude/sparklogs' }],
-  });
-  await writeJson(path.join(out, '.cursor-plugin', 'marketplace.json'), {
-    plugins: [{ description: metadata.description, name: metadata.name, source: './plugins/cursor/sparklogs' }],
-  });
-  await writeJson(path.join(out, '.agents', 'plugins', 'marketplace.json'), {
-    plugins: [{ description: metadata.description, name: metadata.name, source: { path: './plugins/codex/sparklogs' } }],
-  });
+  await writeJson(path.join(out, '.claude-plugin', 'marketplace.json'), buildClaudeMarketplace(metadata));
+  await writeJson(path.join(out, '.cursor-plugin', 'marketplace.json'), buildCursorMarketplace(metadata));
+  await writeJson(path.join(out, '.agents', 'plugins', 'marketplace.json'), buildCodexMarketplace(metadata));
 }
 
 async function main() {

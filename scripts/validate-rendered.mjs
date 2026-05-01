@@ -39,23 +39,32 @@ async function walk(dir, callback) {
   }
 }
 
-function assertSafeSource(source, expected) {
-  if (source !== expected) throw new Error(`Marketplace source ${source} did not match ${expected}`);
-  if (!source.startsWith('./')) throw new Error(`Marketplace source must start with ./ : ${source}`);
-  if (source.includes('..')) throw new Error(`Marketplace source must not contain .. : ${source}`);
-}
-
 async function validateMarketplace() {
+  const meta = await readJson(path.join(ROOT, 'metadata', 'plugin.json'));
+
   const claude = await readJson(path.join(DIST, '.claude-plugin', 'marketplace.json'));
-  assertSafeSource(claude.plugins[0].source, './plugins/claude/sparklogs');
+  if (claude.$schema !== 'https://anthropic.com/claude-code/marketplace.schema.json') {
+    throw new Error('Claude marketplace missing or wrong $schema');
+  }
+  if (claude.name !== (meta.marketplace?.name ?? 'sparklogs-ai-plugins')) {
+    throw new Error('Claude marketplace name must match metadata.marketplace.name');
+  }
+  if (claude.description !== meta.description) throw new Error('Claude marketplace description mismatch');
+  if (!claude.owner?.name) throw new Error('Claude marketplace missing owner.name');
+  if (claude.plugins[0].source !== './plugins/claude/sparklogs') throw new Error('Claude marketplace source path incorrect');
   if ('version' in claude.plugins[0]) throw new Error('Claude marketplace entry must not duplicate plugin version');
 
   const cursor = await readJson(path.join(DIST, '.cursor-plugin', 'marketplace.json'));
-  assertSafeSource(cursor.plugins[0].source, './plugins/cursor/sparklogs');
+  if ('$schema' in cursor) throw new Error('Cursor marketplace must not include $schema');
+  if (!cursor.name) throw new Error('Cursor marketplace missing name');
+  if (!cursor.owner?.name) throw new Error('Cursor marketplace missing owner.name');
+  if (cursor.metadata?.description !== meta.description) throw new Error('Cursor marketplace metadata.description mismatch');
+  if (cursor.plugins[0].source !== 'plugins/cursor/sparklogs') throw new Error('Cursor marketplace source path incorrect');
+  if (typeof cursor.plugins[0].source !== 'string') throw new Error('Cursor marketplace source must be a string path');
   if ('version' in cursor.plugins[0]) throw new Error('Cursor marketplace entry must not duplicate plugin version');
 
   const codex = await readJson(path.join(DIST, '.agents', 'plugins', 'marketplace.json'));
-  assertSafeSource(codex.plugins[0].source.path, './plugins/codex/sparklogs');
+  if (codex.plugins[0].source.path !== 'plugins/codex/sparklogs') throw new Error('Codex marketplace source.path incorrect');
   if ('version' in codex.plugins[0]) throw new Error('Codex marketplace entry must not duplicate plugin version');
 }
 

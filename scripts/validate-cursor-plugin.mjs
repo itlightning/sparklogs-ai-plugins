@@ -18,7 +18,7 @@ const marketplace = await readJson(path.join(DIST, '.cursor-plugin', 'marketplac
 if (!Array.isArray(marketplace.plugins) || marketplace.plugins.length !== 1) {
   throw new Error('Cursor marketplace must list one plugin');
 }
-if (marketplace.plugins[0].source !== './plugins/cursor/sparklogs') {
+if (marketplace.plugins[0].source !== 'plugins/cursor/sparklogs') {
   throw new Error('Cursor marketplace source path is incorrect');
 }
 
