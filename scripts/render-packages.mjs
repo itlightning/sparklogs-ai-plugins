@@ -10,6 +10,12 @@ assertRepoRoot(import.meta);
 
 const ROOT = process.cwd();
 const HOSTS = ['claude', 'cursor', 'codex', 'generic'];
+const HOST_LABELS = {
+  claude: 'Claude',
+  codex: 'Codex',
+  cursor: 'Cursor',
+  generic: 'generic Agent Skills hosts',
+};
 const BRAND_ASSETS = ['logo.svg', 'logo.png', 'icon.svg', 'icon-256.png', 'icon-512.png'];
 const SEMVER = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/;
 
@@ -126,7 +132,7 @@ function manifest(metadata, host, version) {
   };
 }
 
-/** Claude Code: top-level description, ./ source paths, Anthropic $schema */
+/** Claude (Code and Cowork): top-level description, ./ source paths, Anthropic $schema */
 function buildClaudeMarketplace(metadata) {
   const owner = { name: metadata.author.name };
   if (metadata.author.email) owner.email = metadata.author.email;
@@ -206,6 +212,34 @@ function mcpConfig(metadata) {
   };
 }
 
+function repositoryRootUrl(metadata) {
+  return String(metadata.repository ?? '').replace(/\.git\/?$/, '').replace(/\/$/, '');
+}
+
+/** README inside each built plugin package — not the repo root README (avoids broken links). */
+function pluginPackageReadme(host, metadata) {
+  const label = HOST_LABELS[host] ?? host;
+  const repo = repositoryRootUrl(metadata);
+  const display = metadata.hosts?.[host]?.displayName ?? metadata.displayName;
+  return `# ${display} — ${label} bundle
+
+This directory is the **built SparkLogs AI plugin** for **${label}**, shipped from the SparkLogs plugin repository.
+
+If you have a **full clone** of the repository, these paths are relative to this folder (\`plugins/${host}/${metadata.name}/\`):
+
+- [Install (${label})](../../../docs/install/${host}.md)
+- [Repository overview](../../../README.md)
+- [Contributing](../../../CONTRIBUTING.md)
+
+*(If you only have this plugin folder: open **${repo}** in the browser and open the same paths from the repository root.)*`;
+}
+
+async function writePluginReadme(base, host, metadata) {
+  const file = path.join(base, 'README.md');
+  await fs.writeFile(file, `${pluginPackageReadme(host, metadata)}\n`, 'utf8');
+  await fs.chmod(file, 0o644);
+}
+
 async function copyAssets(base) {
   for (const asset of BRAND_ASSETS) {
     const src = path.join(ROOT, 'assets', asset);
@@ -225,7 +259,7 @@ async function renderHost(host, out, metadata, version) {
     await copyDirMaterialized(path.join(ROOT, '.rulesync', 'rules'), path.join(base, 'rules'));
   }
   await copyAssets(base);
-  await copyFile(path.join(ROOT, 'README.md'), path.join(base, 'README.md'));
+  await writePluginReadme(base, host, metadata);
   await copyFile(path.join(ROOT, 'LICENSE'), path.join(base, 'LICENSE'));
   if (host === 'claude') {
     await writeJson(path.join(base, '.claude-plugin', 'plugin.json'), manifest(metadata, host, version));

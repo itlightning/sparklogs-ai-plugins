@@ -2,7 +2,7 @@
 
 ## Current MVP Targets
 
-- Claude Code: supported for Git-backed marketplace/plugin installation.
+- Claude: supported for Git-backed marketplace/plugin installation for Claude Code and Claude Cowork.
 - Cursor: supported for Git-backed marketplace/plugin installation.
 - Codex: supported for repo/local marketplace installation via `.agents/plugins/marketplace.json` while official public directory publishing matures.
 - Copilot Studio: MCP setup guide only.

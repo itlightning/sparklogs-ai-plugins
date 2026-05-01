@@ -1,6 +1,6 @@
 # Install SparkLogs (Generic Package)
 
-Use this path when your agent host loads **Agent Skills** (and related assets) from a directory tree but does **not** use the Claude Code, Cursor, or Codex marketplace installers.
+Use this path when your agent host loads **Agent Skills** (and related assets) from a directory tree but does **not** use the Claude, Cursor, or Codex marketplace installers.
 
 ## What you get
 

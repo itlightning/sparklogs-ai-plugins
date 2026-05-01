@@ -1,6 +1,6 @@
 # SparkLogs AI Plugins
 
-SparkLogs helps managed service providers investigate client issues with evidence instead of guesswork. This repository packages the SparkLogs AI skills, commands, subagents, and MCP configuration for Claude Code, Cursor, and Codex.
+SparkLogs helps managed service providers investigate client issues with evidence instead of guesswork. This repository packages the SparkLogs AI skills, commands, subagents, and MCP configuration for Claude Code and Cowork, Cursor, and Codex.
 
 The plugin gives your AI assistant a SparkLogs investigation workflow:
 
@@ -23,7 +23,7 @@ Expected outcomes:
 
 ## Supported Hosts
 
-Claude Code and Cursor are the recommended Foundry hosts. Codex is supported via repo/local marketplace installation while public directory flows mature. A neutral Agent Skills package is generated under `plugins/generic/sparklogs/` on `dist` for hosts that can import skills from a folder.
+Claude Code (and Cowork) and Cursor are the recommended Foundry hosts. Codex is supported via repo/local marketplace installation while public directory flows mature. A neutral Agent Skills package is generated under `plugins/generic/sparklogs/` on `dist` for hosts that can import skills from a folder.
 
 ## Install And Update
 
