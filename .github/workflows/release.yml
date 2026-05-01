@@ -1,0 +1,110 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing vMAJOR.MINOR.PATCH tag to re-render
+        required: true
+        type: string
+      overwrite_existing_release:
+        description: Allow replacing existing release assets for this tag
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-dist
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve release tag
+        id: release_tag
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            tag="${{ inputs.tag }}"
+          else
+            tag="${GITHUB_REF_NAME}"
+          fi
+          case "$tag" in
+            v[0-9]*.[0-9]*.[0-9]*) ;;
+            *) echo "Tag must look like vMAJOR.MINOR.PATCH"; exit 1 ;;
+          esac
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "version=${tag#v}" >> "$GITHUB_OUTPUT"
+      - name: Checkout tag
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          ref: ${{ steps.release_tag.outputs.tag }}
+          fetch-depth: 0
+      - name: Verify tag is reachable from source
+        run: |
+          set -euo pipefail
+          git fetch origin source
+          git merge-base --is-ancestor HEAD origin/source
+      - name: Setup Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '22'
+      - name: Enable Corepack
+        run: corepack enable
+      - name: Install dependencies
+        run: yarn install --immutable --check-cache
+      - name: Validate and render release
+        env:
+          SOURCE_DATE_EPOCH: ${{ steps.release_tag.outputs.tag }}
+        run: |
+          set -euo pipefail
+          yarn run validate
+          yarn run clean
+          node scripts/render-packages.mjs --out build/dist --version "${{ steps.release_tag.outputs.version }}"
+          yarn run validate:rendered
+          yarn run validate:cursor
+          yarn run smoke
+      - name: Package release assets
+        run: |
+          set -euo pipefail
+          mkdir -p build/release-assets
+          for host in claude cursor codex generic; do
+            (cd "build/dist/plugins/$host" && zip -qr "../../../release-assets/sparklogs-$host-${{ steps.release_tag.outputs.version }}.zip" sparklogs)
+          done
+          (cd build/release-assets && sha256sum *.zip > SHA256SUMS)
+      - name: Publish dist branch
+        run: |
+          set -euo pipefail
+          rm -rf /tmp/sparklogs-ai-plugins-dist
+          mkdir -p /tmp/sparklogs-ai-plugins-dist
+          cp -a build/dist/. /tmp/sparklogs-ai-plugins-dist/
+          cd /tmp/sparklogs-ai-plugins-dist
+          git init -b dist
+          git remote add origin "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY"
+          git add -A
+          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m "Generate dist for ${{ steps.release_tag.outputs.tag }}"
+          git push origin HEAD:dist --force-with-lease
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.release_tag.outputs.tag }}
+          VERSION: ${{ steps.release_tag.outputs.version }}
+          OVERWRITE: ${{ inputs.overwrite_existing_release || false }}
+        run: |
+          set -euo pipefail
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            if [ "$OVERWRITE" != "true" ]; then
+              echo "Release $TAG already exists. Re-run with overwrite_existing_release=true to replace assets."
+              exit 1
+            fi
+            gh release upload "$TAG" build/release-assets/* --clobber
+          else
+            gh release create "$TAG" build/release-assets/* --title "SparkLogs AI Plugins $VERSION" --generate-notes
+          fi

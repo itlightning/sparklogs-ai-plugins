@@ -1,0 +1,1 @@
+../../../../shared-references/scope-resolution.md
