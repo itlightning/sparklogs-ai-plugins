@@ -22,7 +22,7 @@ SparkLogs AI Agent runs in both Claude Code (terminal) and Claude Desktop.
    `~/.bashrc`, etc.):
 
 ```
-   export SPARKLOGS_MCP_TOKEN="your-token-here"
+   export SPARKLOGS_API_TOKEN="your-token-here"
 ```
 
    Restart your shell and Claude Code.
@@ -44,7 +44,7 @@ SparkLogs AI Agent runs in both Claude Code (terminal) and Claude Desktop.
 ```
 
 4. Find **sparklogs** in the marketplace listing and click **Install**.
-5. Set the `SPARKLOGS_MCP_TOKEN` environment variable and then re-launch
+5. Set `SPARKLOGS_API_TOKEN` environment variable and then re-launch
    Claude Desktop.
 6. Start a new conversation and try `/sparklogs-investigate`.
 
