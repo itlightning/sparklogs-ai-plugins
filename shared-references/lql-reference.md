@@ -13,9 +13,9 @@ Operator names, syntax forms, and edge cases are quoted from sparklogs.com docs.
 | Operator | Meaning | Notes |
 |---|---|---|
 | `:` | field contains | For string fields, substring/pattern match. For non-string fields, equivalent to `=`. For array fields, true if any element matches. |
-| `!:` | field does NOT contain | Inverse of `:`. For array fields, true if all elements do NOT match. |
+| `!:` | field does NOT contain | See **Negated operators (scalar vs array)** below. |
 | `=` | exact match | Pattern or regex allowed on right side. |
-| `!=` or `<>` | exact non-match | |
+| `!=` or `<>` | exact non-match | See **Negated operators (scalar vs array)** below. |
 | `>=`, `>`, `<`, `<=` | numeric/ordinal comparison | Right side must be a literal, not a pattern or regex. |
 | `<field>!` | field has any non-NULL value | Terse non-null check. e.g., `correlation_id!` |
 | `<field> between <literal> and <literal>` | inclusive range | Works for numeric and timestamp fields. |
@@ -45,6 +45,36 @@ Use `:`, `!:`, `=`, or `!=` followed by a slash-delimited regex.
 message: /[0-9A-F]{8}-[0-9A-F]{4}/    <- right (re2 syntax)
 message MATCHES "regex"               <- WRONG (no MATCHES)
 ```
+
+### Negated operators (scalar vs array)
+
+**Scalar fields** (including `subsource` and other string paths):
+
+- `!:` and `!=` match when the field is **absent or NULL** as well as when the value does not match.
+- `subsource!:win.servicing.dism` matches events with no `subsource` value.
+
+**Array fields** (unindexed `x.tags`, not `x.tags[0]`):
+
+- `!:` and `!=` apply only when the field is present **and** is a JSON array.
+- Absent or non-array values do **not** match.
+- To include rows with no array: `x.tags !: noise OR NOT x.tags!`
+
+**Search indexes:** scalar `!:` / `!=` and unary `NOT` on indexed terms do not use the search index. Positive `:` / `=` terms in the same `AND` may still use the index.
+
+### Empty string literals (scalar strings only)
+
+These rules apply to string fields such as `source`, `app`, `subsource`, and custom paths like `x.foo`. The behavior is the same for every string field name in LQL.
+
+| Form | Meaning |
+|---|---|
+| `field=""` | The field is missing, null, or the empty string |
+| `field!=""` | The field is present and has a non-empty string value |
+| `field in ("", a, …)` / `field=("", …)` with `""` in the list | The field is missing, null, empty, or matches any other listed value |
+| `field not in (…)` or a negated list that includes `""` | The opposite of the matching rules in the row above |
+
+**Numbers and other non-string types:** `x.count=0` matches only when the stored value is exactly `0`. It does not match a missing field, and a missing field is not treated as zero. Use `NOT x.count!` to test for absence on numeric fields.
+
+Do not use `field:""` (matches every event) or `field!:""` (matches no events). Use `NOT field!` to test for a missing field. Use `field#s!` when you need to assert JSON type on a custom path.
 
 ### No `CONTAINS` / `CONTAINS_ANY` / `CONTAINS_ALL` (array fields use scalar operators directly)
 
