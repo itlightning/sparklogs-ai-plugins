@@ -35,7 +35,7 @@ jobs:
           else
             range="HEAD"
           fi
-          for commit in $(git rev-list "$range"); do
+          for commit in $(git rev-list --no-merges "$range"); do
             git log -1 --format=%B "$commit" | grep -qi '^Signed-off-by:' || {
               echo "Commit $commit is missing Signed-off-by trailer"
               exit 1
