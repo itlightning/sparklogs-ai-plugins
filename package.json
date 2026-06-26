@@ -21,7 +21,10 @@
     "compare-dist": "node scripts/compare-dist-branch.mjs",
     "rulesync": "rulesync"
   },
+  "resolutions": {
+    "ip-address": "10.1.1"
+  },
   "devDependencies": {
-    "rulesync": "8.13.0"
+    "rulesync": "8.32.0"
   }
 }
