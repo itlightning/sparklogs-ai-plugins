@@ -26,6 +26,7 @@ concurrency:
 jobs:
   release:
     runs-on: ubuntu-latest
+    environment: release
     steps:
       - name: Resolve release tag
         id: release_tag
@@ -43,7 +44,7 @@ jobs:
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
           echo "version=${tag#v}" >> "$GITHUB_OUTPUT"
       - name: Checkout tag
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
           ref: ${{ steps.release_tag.outputs.tag }}
           fetch-depth: 0
@@ -53,7 +54,7 @@ jobs:
           git fetch origin source
           git merge-base --is-ancestor HEAD origin/source
       - name: Setup Node
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: '22'
       - name: Enable Corepack
@@ -79,7 +80,15 @@ jobs:
             (cd "build/dist/plugins/$host" && zip -qr "../../../release-assets/sparklogs-$host-${{ steps.release_tag.outputs.version }}.zip" sparklogs)
           done
           (cd build/release-assets && sha256sum *.zip > SHA256SUMS)
+      - name: Mint release app token
+        id: release_app_token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          client-id: ${{ vars.RELEASE_APP_CLIENT_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
       - name: Publish dist branch
+        env:
+          RELEASE_TOKEN: ${{ steps.release_app_token.outputs.token }}
         run: |
           set -euo pipefail
           rm -rf /tmp/sparklogs-ai-plugins-dist
@@ -87,7 +96,7 @@ jobs:
           cp -a build/dist/. /tmp/sparklogs-ai-plugins-dist/
           cd /tmp/sparklogs-ai-plugins-dist
           git init -b dist
-          git remote add origin "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY"
+          git remote add origin "https://x-access-token:${RELEASE_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
           git add -A
           git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m "Generate dist for ${{ steps.release_tag.outputs.tag }}"
           git push origin HEAD:dist --force-with-lease
