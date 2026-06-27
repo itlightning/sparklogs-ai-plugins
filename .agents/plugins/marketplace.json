@@ -1,0 +1,19 @@
+{
+  "plugins": [
+    {
+      "author": {
+        "email": "help@itlightning.com",
+        "name": "IT Lightning, LLC"
+      },
+      "category": "observability",
+      "description": "Investigate IT and MSP client issues with SparkLogs telemetry, evidence-cited summaries, and root-cause analysis.",
+      "homepage": "https://sparklogs.com/",
+      "license": "Apache-2.0",
+      "name": "sparklogs",
+      "repository": "https://github.com/itlightning/sparklogs-ai-plugins",
+      "source": {
+        "path": "plugins/codex/sparklogs"
+      }
+    }
+  ]
+}

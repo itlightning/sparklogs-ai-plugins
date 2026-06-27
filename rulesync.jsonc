@@ -1,0 +1,7 @@
+{
+  // Canonical source lives under .rulesync/. The SparkLogs renderer creates
+  // host plugin wrappers; rulesync remains pinned for neutral skill emission
+  // and future compatibility work.
+  "agents": [],
+  "targets": []
+}
