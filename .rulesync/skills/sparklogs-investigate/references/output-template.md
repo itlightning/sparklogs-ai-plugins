@@ -46,7 +46,7 @@ INVESTIGATION COST
 - Wall-clock: <minutes>
 
 AUDIT TRAIL
-get_query_metadata(investigation_request_id="<id>") -> <URL or instruction for engineer to inspect full per-query details>
+<the per-query query_id + query_url list from the local investigation-state document; inspect any one with get_query_metadata(query_id="<qid>"); every call is also tagged investigation_request_id="<id>" in the server-side audit>
 
 POSSIBLE NEXT DIRECTIONS
 [1-4 sentences max suggesting where investigation could go from here, ending with the invitation:]
@@ -143,10 +143,10 @@ Optional section. If anomaly fields helped you focus the investigation (e.g., `a
 - "anomaly_max_score >= 60 filter on the source-scoped backing query identified vss_writers and services as candidate subsources for deeper investigation. Anomaly fields supported finding-discovery efficiency; they are not surfaced as standalone problem indicators in this summary."
 
 ### Investigation Cost
-Pull from `get_query_metadata(investigation_request_id=...)`. Engineer-facing visibility into AI investigation cost; supports billing transparency.
+Track the running counts (backing queries, refinements, tokens) in your local investigation-state document as you go. Engineer-facing visibility into AI investigation cost; supports billing transparency.
 
 ### Audit Trail
-Provide the engineer with the means to inspect every query you ran. Either a direct URL (preferred when SparkLogs UX surfaces investigation-level audit) or instructions to call `get_query_metadata(investigation_request_id="<id>")`.
+Provide the engineer with the means to inspect every query you ran: the `query_id` + `query_url` list from the local investigation-state document, with per-query detail via `get_query_metadata(query_id="<qid>")`. Every call is also tagged `investigation_request_id` in the server-side audit (a direct investigation-level URL is preferred once SparkLogs UX surfaces it).
 
 ### POSSIBLE NEXT DIRECTIONS
 Bounded section at the end of the summary. 1-4 sentences max. Suggests where the investigation could go next - either more facts to dig into, or running `/sparklogs-analyze-cause` to derive candidate hypotheses. Always ends with the explicit invitation:
@@ -265,9 +265,10 @@ INVESTIGATION COST
 - Wall-clock: 4 minutes
 
 AUDIT TRAIL
-get_query_metadata(investigation_request_id="i9k2nf9x8a3b4c2d") returns full per-query details
-including parameters, cache_status, and bytes_scanned per query. Or browse interactively at:
-https://sparklogs.app/investigations/i9k2nf9x8a3b4c2d
+Backing queries (from the investigation-state document; every call tagged investigation_request_id="i9k2nf9x8a3b4c2d"):
+  q_ab12 https://sparklogs.app/explore?... | q_cd34 https://sparklogs.app/explore?...
+Per-query detail (parameters, cache status, schema): get_query_metadata(query_id="<qid>").
+Or browse interactively at: https://sparklogs.app/investigations/i9k2nf9x8a3b4c2d
 
 POSSIBLE NEXT DIRECTIONS
 The temporal correlation between the Tuesday KB install and the new error pattern, combined with
@@ -347,7 +348,7 @@ INVESTIGATION COST
 - Wall-clock: 2 minutes
 
 AUDIT TRAIL
-get_query_metadata(investigation_request_id="i7m3p1n9k2t4r8c5") for full per-query details.
+Backing-query query_id + query_url list in the investigation-state document (calls tagged investigation_request_id="i7m3p1n9k2t4r8c5"); per-query detail via get_query_metadata(query_id="<qid>").
 
 POSSIBLE NEXT DIRECTIONS
 The pattern of "user reports slow, server looks fine" frequently traces to client-side or

@@ -8,6 +8,13 @@ Per-category playbook outlines for common hard-mode investigation symptoms. Thre
 3. Always produce a system condition summary per `output-template.md`.
 4. Always populate OUTSIDE AGENT VISIBILITY per `off-endpoint-causes.md`.
 
+**v1 tool-surface translation (read before copying any recipe below).** These sketches predate the lean-7 v1 surface and use illustrative shorthand. Translate as you go:
+- **Time windows:** wherever a recipe shows `time_range={relative: "..."}` or a `time_range` object, the real tools take flat `start` / `end` in RFC3339 UTC. Compute the absolute window from the engineer's request.
+- **query_logs filter:** read `query_logs(filter_lql=...)` as `query_logs(lql=...)`.
+- **Refine filter:** read `refine_query_result(cache_filter_lql=...)` as `refine_query_result(filter_lql=...)`.
+- **Differential tools:** `query_period_diff`, `compare_populations`, `cluster_event_contexts`, and `describe_pattern` are FAST-FOLLOW, not yet available. For now: run two `query_grouped_aggregation` passes over adjacent windows for a period diff; run one `query_grouped_aggregation` per population and compare for a population diff; use `query_logs` + `refine_query_result` group_by for context clustering; use a `query_logs` message projection filtered to the `pattern_hash` to read a pattern's text. See `mcp-tool-decision-tree.md` for the full mapping.
+- **Aggregation-first still holds:** `query_grouped_aggregation` before `query_logs`; refine the cached slice instead of re-scanning.
+
 ---
 
 ## HM1 - VSS backup failure (FULL PLAYBOOK)
@@ -159,8 +166,8 @@ Confirms data completeness for the relevant window.
 
 **Step 12 - Cost rollup.**
 ```
-get_query_metadata(investigation_request_id="<id>")
--> investigation_summary
+# Roll up backing-query + refinement counts from your local investigation-state document.
+# Inspect any single cache with get_query_metadata(query_id="<qid>") for its status/schema.
 ```
 
 **Step 13 - System condition summary output per `output-template.md`.** Findings derive from Steps 3-11. OUTSIDE AGENT VISIBILITY enumerates per `off-endpoint-causes.md`. POSSIBLE NEXT DIRECTIONS section at the end with the explore-or-analyze invitation.

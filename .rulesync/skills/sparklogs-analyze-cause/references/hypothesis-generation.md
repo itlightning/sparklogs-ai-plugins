@@ -35,7 +35,7 @@ When the prior investigation surfaced "X happened concurrent with Y" Findings:
 When the prior investigation surfaced "this affects N sources" Findings:
 
 - **N = 1 (single source)** -> hypothesis space includes source-specific configuration, hardware, software state.
-- **N = small subset** -> hypothesis "shared factor among the subset." Discriminator: `compare_populations` between affected and unaffected.
+- **N = small subset** -> hypothesis "shared factor among the subset." Discriminator: contrast `query_grouped_aggregation` runs over the affected vs unaffected populations (in v1; `compare_populations` is a fast-follow tool).
 - **N = fleet-wide** -> hypothesis "environment-wide cause" - recent fleet-wide change (patch, GPO push, DNS change), or upstream service issue.
 
 ### Off-endpoint visibility patterns
@@ -138,7 +138,7 @@ Sometimes the prior investigation's findings are sufficient for analysis without
 
 **Make additional MCP calls when:**
 - A fleet pivot would discriminate between "single-source hypothesis" and "fleet-wide hypothesis." `query_grouped_aggregation` group_by source on the relevant pattern.
-- A `compare_populations` would discriminate between "affected sources have factor X" and "factor X is irrelevant." Use prior Findings to define the populations.
+- A population contrast would discriminate between "affected sources have factor X" and "factor X is irrelevant." In v1, run `query_grouped_aggregation` over each population separately and compare; use prior Findings to define the populations. (`compare_populations` is a fast-follow tool.)
 - A specific time-window check the prior investigation didn't cover would confirm/refute a hypothesis cheaply.
 
 **Skip additional MCP calls when:**

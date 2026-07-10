@@ -69,7 +69,8 @@ If a single org is identified and that org has sub-orgs (sites, locations, depar
 list_sources(
   org_ids: [<the resolved parent org>],
   include_sub_orgs: true,
-  time_range: {...},
+  start: "<investigation start, RFC3339 UTC>",
+  end: "<investigation end, RFC3339 UTC>",
   investigation_request_id: "<id>"
 )
 ```
@@ -99,7 +100,8 @@ Use `list_sources` with the investigation's actual time range. Do **not** filter
 list_sources(
   org_ids: [<from resolve_scope>],
   include_sub_orgs: true,
-  time_range: {start: "<investigation start>", end: "<investigation end>"},
+  start: "<investigation start, RFC3339 UTC>",
+  end: "<investigation end, RFC3339 UTC>",
   investigation_request_id: "<id>"
 )
 ```

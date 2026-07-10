@@ -1,6 +1,6 @@
 # LQL Reference - for the SparkLogs Investigator skill
 
-The complete, verified syntax of Lightning Query Language (LQL) - the filter language used by every `filter_lql`, `cache_filter_lql`, and similar parameter on the SparkLogs MCP tools. Read this file when composing any non-trivial LQL.
+The complete, verified syntax of Lightning Query Language (LQL) - the filter language used by every LQL parameter on the SparkLogs MCP tools: `lql` (on `query_logs` / `query_grouped_aggregation`), and `filter_lql` / `having_lql` (on `refine_query_result`). Read this file when composing any non-trivial LQL.
 
 Operator names, syntax forms, and edge cases are quoted from sparklogs.com docs.
 
@@ -269,7 +269,7 @@ Use this whenever you want to focus on signal-rich events without specifying a m
 source = "srv-fileshare01"
 ```
 
-Combined with `time_range` parameter (which is separate from `filter_lql`).
+Combined with the `start` / `end` window parameters (which are separate from the LQL filter).
 
 ### Multi-source set
 
@@ -341,7 +341,7 @@ Identifies warmup-complete and baseline-reset events.
 
 ### Time-range narrowing within an LQL filter
 
-The `time_range` parameter is the primary time scope. To narrow further inside a cached scan via `cache_filter_lql`:
+The `start` / `end` window is the primary time scope. To narrow further inside a cached scan via `refine_query_result`'s `filter_lql`:
 
 ```
 t between 2026-04-23T03:00:00Z and 2026-04-23T04:00:00Z
@@ -360,7 +360,7 @@ t between 2026-04-23T03:00:00Z and 2026-04-23T04:00:00Z
 7. **Quoting unquoted terms unnecessarily.** `severity = "error"` works but `severity = error` is fine and more readable.
 8. **Forgetting parentheses around OR with implicit AND.** `severity = error OR anomaly_max_score >= 60 source = "x"` parses unexpectedly. Use parentheses: `(severity = error OR anomaly_max_score >= 60) AND source = "x"`.
 9. **Mixing `&&` / `||` with `AND` / `OR` in the same expression.** Both work but consistency reads better.
-10. **Hallucinating field names.** When uncertain about a field name, check `unknown_field_paths` warnings in the response - if you see one, the field doesn't exist in any cached row. Use canonical field names from `mcp-tool-decision-tree.md` or via `list_fields` discovery.
+10. **Hallucinating field names.** When uncertain about a field name, check the response schema descriptor - a field you requested that doesn't resolve won't appear there. Use canonical field names from `mcp-tool-decision-tree.md`, `list_fields` discovery, or `get_query_metadata` field discovery over a cached query.
 
 ---
 
@@ -375,4 +375,4 @@ Common error messages and what they mean:
 - `'IS' is not a recognized operator` -> use `field!` or `NOT field!`.
 - `expected '(' at position N` -> value list needs parens, not brackets.
 - `unknown field 'state.services.*.status'` -> wildcard paths not supported; see workarounds above.
-- `field 'state.foo.bar' has no observed type` -> field doesn't exist in any cached row; will appear in `unknown_field_paths` response field too.
+- `field 'state.foo.bar' has no observed type` -> field doesn't exist in any cached row; it also won't appear in the response schema descriptor.

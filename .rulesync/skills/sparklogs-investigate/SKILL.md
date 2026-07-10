@@ -55,7 +55,7 @@ These principles bind every decision you make. The principles matter; you don't 
 
 **Human-in-the-loop for any consequential action.** You're read-only - you query data, you don't change anything. Recommendations for action belong to the engineer, not to you.
 
-**Auditable everything.** Every investigation produces a complete audit trail (via `get_query_metadata` and the local investigation-state document). The engineer can review what you did and why.
+**Auditable everything.** Every investigation produces a complete audit trail (the local investigation-state document plus the server-side per-call audit; inspect any single cached query with `get_query_metadata(query_id=...)`). The engineer can review what you did and why.
 
 **Earn trust incrementally.** When in doubt about whether to expand your scope, recommend an action, or assert a finding, default to the conservative choice. Trust is hard to gain and easy to lose.
 
@@ -109,7 +109,7 @@ INVESTIGATION COST
 - Wall-clock: <minutes>
 
 AUDIT TRAIL
-<URL or instruction to inspect full per-query details via get_query_metadata>
+<the running list of query_id + query_url per backing query, from the local investigation-state document; per-query detail via get_query_metadata(query_id=...)>
 
 POSSIBLE NEXT DIRECTIONS
 [1-4 sentences suggesting where investigation could go next, ending with the invitation:]
@@ -129,9 +129,11 @@ POSSIBLE NEXT DIRECTIONS
 
 **Every factual claim cites a `query_url`.** This is non-negotiable.
 
-When you call any data-access MCP tool (`query_logs`, `query_grouped_aggregation`, `query_period_diff`, `compare_populations`, `cluster_event_contexts`, `refine_query_result`, `describe_pattern`), the response includes a `query_url` field. You embed that URL in the **Evidence** field of every Finding that derives from that query.
+When you call any data-access MCP tool (`query_logs`, `query_grouped_aggregation`, `refine_query_result`, `get_query_metadata`), the response's header line carries both `query_id` and `query_url`. You embed that `query_url` in the **Evidence** field of every Finding that derives from that query.
 
-**Format:** the URL is the SparkLogs cached-query explorer URL the engineer can click to verify the underlying data. Do not modify the URL. Do not summarize "the data shows X" without a URL pointing to that data.
+**Format:** the URL is the SparkLogs explore deep link the engineer can click to verify the underlying data. Do not modify the URL. Do not summarize "the data shows X" without a URL pointing to that data.
+
+**Quote message text verbatim.** When a Finding rests on log content, copy the `message` bytes exactly as returned - never paraphrase or reconstruct an event's text.
 
 **Right (cite the URL):**
 ```
@@ -200,17 +202,20 @@ The complete per-investigation-type list is in `references/off-endpoint-causes.m
 
 ## Section 8. Investigation methodology - aggregation-first, progressive disclosure
 
-The engineer's per-investigation budget is small. Spend it efficiently:
+The engineer's per-investigation budget is small. Spend it efficiently. **Funnel before raw: scope cheaply, aggregate to narrow, then pull raw logs only over the narrowed slice.**
 
 1. **Plan the universe of backing queries up front.** Different question shapes require different backing queries. Multiple backing queries per investigation is normal; aim for 1-4 backing queries with many cached refinements within each.
 
-2. **Aggregate before retrieving.** When the question is "what changed" or "what's happening" or "is this just us" - use `query_period_diff`, `query_grouped_aggregation`, `compare_populations`, or `cluster_event_contexts` BEFORE reaching for `query_logs`. Aggregation answers in hundreds of tokens what raw retrieval takes tens of thousands. **Raw retrieval is the last resort, not the first.**
+2. **Follow the cost tiers, cheapest first.** There are three tiers; spend from the top down:
+   - **Tier 1 - cheap scoping:** `resolve_scope` (org/agent directory), `list_sources` (per-source counts in the window), `list_fields` (field catalog). Use these to fix `org_ids`, confirm the source has data, and learn the vocabulary BEFORE any billed scan.
+   - **Tier 2 - grouped aggregation:** `query_grouped_aggregation` groups every matching event by one field (`pattern_hash`, `source`, `severity`, a custom field) and returns top values by hit count. This is the workhorse for "what's happening" - it answers in hundreds of tokens what raw retrieval takes tens of thousands, and it tells you WHERE to point `query_logs`.
+   - **Tier 3 - raw events (last resort):** `query_logs` only AFTER the tiers above have narrowed the window and filter. Pull one broad-enough slice over the narrowed scope, then refine it (item 4). **Reaching for `query_logs` first is the top methodology failure.**
 
-3. **Use the three information levels.** Read `message` (Level 1) to triage. Read `event_summary` + top-level anomaly fields (Level 2) to assess. Read full `state.<category>.<key>` + `anomalies.<key>` (Level 3) only when you specifically need ground truth. Never read Level 3 by default.
+3. **Use the three information levels.** Read `message` (Level 1) to triage. Read `event_summary` + top-level anomaly fields (Level 2) to assess. Read full `state.<category>.<key>` + `anomalies.<key>` (Level 3) only when you specifically need ground truth. Never read Level 3 by default; use `return_field_list` to project only what you need.
 
-4. **Use refinements freely on cached scans.** `refine_query_result` against a `query_id` is essentially free. If you want a different view of cached data, refine - don't re-scan.
+4. **Refine the cached slice; don't re-query.** After ONE broad `query_logs` slice, prefer `refine_query_result` over issuing another backing query. Refine runs a relational engine over the CACHED result table (10-100x cheaper, never re-touches the source): `filter_lql` (WHERE over row columns), `group_by` + `aggregate` ({fn,col,as}; fn in count/count_distinct/sum/avg/min/max/stddev/p50/p90/p95/p99), `having_lql` (over post-group columns), `order_by`, `select` (projection), `limit`/`offset`. Queue one broad slice, then refine many times. To page a partial result, follow the response's structured `page.next` (it hands you the exact `refine_query_result` call + `offset`).
 
-5. **Always check ingest health before "no evidence" conclusions.** Run a quick check that the source had complete data ingestion during the relevant window: `query_logs(filter_lql='source = "<X>" AND event_kind = SLAAgentOp AND subsource in (ingest_drop, spool_full, backpressure)', ...)`. If drops happened, your conclusion must qualify "evidence is incomplete during <window>."
+5. **Always check ingest health before "no evidence" conclusions.** Run a quick check that the source had complete data ingestion during the relevant window: `query_logs(lql='source = "<X>" AND event_kind = SLAAgentOp AND subsource in (ingest_drop, spool_full, backpressure)', ...)`. If drops happened, your conclusion must qualify "evidence is incomplete during <window>."
 
 6. **Always confirm the source has data in the investigation window.** See Section 9 below for scope discovery.
 
@@ -236,7 +241,8 @@ Before any deep investigation, resolve the scope (which org / sources / time win
 ```
 list_sources(
   org_ids=[<from resolve_scope>],
-  time_range={start: "<investigation start>", end: "<investigation end>"},
+  start="<investigation start, RFC3339 UTC>",
+  end="<investigation end, RFC3339 UTC>",
   investigation_request_id="<id>"
 )
 ```
@@ -249,25 +255,44 @@ If the source has events in the window: proceed.
 
 ## Section 10. MCP tools quick reference
 
-| Tool | Use when |
-|---|---|
-| `resolve_scope` | Always first - turn natural-language scope into `org_ids`. Supports fuzzy matching, exact ID match, sub-org expansion via `include_sub_orgs`. |
-| `list_sources` | Confirm sources have data in the investigation window (require `time_range`). Enumerate fleet for cross-source pivots. |
-| `list_fields` | Custom field discovery - only if standard fields and known Managed Agent fields don't surface enough. Not a first-pass tool. |
-| `describe_pattern` | After identifying interesting `pattern_hash` from `query_grouped_aggregation` or `query_period_diff` - get pattern text + sample messages. Cheap. |
-| `query_logs` | Retrieve raw events. Last resort after aggregation. |
-| `query_grouped_aggregation` | Group-by any field; the workhorse for "what's happening" questions. For `pattern_hash` group-by, includes pattern text in response. |
-| `query_period_diff` | "What changed between then and now" - pattern-frequency diff between two windows. The workhorse for "something changed" questions. |
-| `compare_populations` | "What's different about the broken population vs the working one." Use when you have two filter expressions defining contrasting populations. |
-| `cluster_event_contexts` | "What context surrounds these specific events" - distinct contextual situations the events appear in. Intermediate primitive between aggregation and raw retrieval. |
-| `refine_query_result` | Re-project / re-filter / re-sort / re-sample / paginate an existing cached scan. Use freely; essentially free. |
-| `get_query_metadata` | Cache introspection. Pass `investigation_request_id` to get full investigation history (useful after compaction or session resume). |
+The v1 tool surface is these seven (the "lean-7"):
 
-**Always pass `investigation_request_id`** on every data-access and refinement call. Generate one base-36 16-char ID per investigation and reuse it for the entire session.
+| Tool | Tier | Use when |
+|---|---|---|
+| `resolve_scope` | cheap | Always first - turn natural-language scope into `org_ids` (orgs + agents). Fuzzy `query` match, sub-org expansion via `include_sub_orgs`. |
+| `list_sources` | cheap | Confirm sources have data in the window (require `start`/`end`). Per-source event counts; enumerate fleet for cross-source pivots. |
+| `list_fields` | cheap | Field catalog for building NEW queries - only if standard/known fields don't surface enough. Not a first-pass tool. |
+| `query_grouped_aggregation` | billed | Group every matching event by one `group_field`; top values by hit count. The workhorse for "what's happening" - run it BEFORE raw logs. |
+| `query_logs` | billed | Retrieve raw chronological events. Last resort, over an already-narrowed window/filter. |
+| `refine_query_result` | cheap | Relational engine over a cached `query_id` (filter/group/aggregate/having/order/select/page). Use freely; 10-100x cheaper than a backing query. |
+| `get_query_metadata` | cheap* | Cache/field introspection over a `query_id`. Default = bookkeeping only (fast, free). *`top_n`/`field_match` deep field discovery is a BILLED catalog scan - use deliberately. |
+
+Differential tools (`query_period_diff`, `compare_populations`, `cluster_event_contexts`, `describe_pattern`) are FAST-FOLLOW, not in the v1 surface. Until they ship, do the same work with `query_grouped_aggregation` + `refine_query_result` (e.g. two grouped calls over two windows for a period diff; group-by `pattern_hash` for pattern triage).
+
+**Always pass `investigation_request_id`** on every call. Generate one base-36 16-char ID once at investigation start and reuse it for the entire session (it links the audit trail).
 
 **Always pass `org_ids`** explicitly (derived from `resolve_scope`). Empty = all-orgs is strongly discouraged.
 
-**Cost shape.** Backing queries (the data-access tools above) are roughly 10-100x more expensive than `refine_query_result` calls. Plan for 1-4 backing queries; refine many times within each.
+**Cost shape.** Billed backing queries (`query_logs`, `query_grouped_aggregation`) are roughly 10-100x more expensive than cheap tools and `refine_query_result`. Plan for 1-4 backing queries; refine many times within each.
+
+### Reading the response envelope
+
+Every data-tool response is ONE text block, not JSON you parse as a whole:
+
+1. **Header line** - one minified JSON object: `meta` (`query_id`, `query_url`, tool, `investigation_request_id`), `summary` (grounding aggregates over the MATCHED POPULATION: total count, time span, severity histogram, cache status), `schema` (columns in `name#typecode` form + fill rates), `lookups` (hash dictionary), `page` (`rows_returned`, `rows_cached`, `offset`, and `next` when partial), `data_content_type`.
+2. **Delimiter line** - restates shape and counts, e.g. `rows (tsv, 78 of 300 cached, ordered by t asc):`.
+3. **Rows** - TSV (dense shapes: grouped aggregation, most refine outputs) or omit-empty JSONL (ragged raw events).
+4. **Trailing hint line** - present only when a limit was hit; it gives the exact next call.
+
+**Three-tier vocabulary (contract).** `summary.total_count` = the matched population (all events matching the query). `page.rows_cached` = the slice the cache holds. `page.rows_returned` = the rows on THIS page. Ground every count claim in the matched population, never in the page you happened to see.
+
+**Hash-dictionary rule.** Rows carry `*_hash` companions for five fields (pattern, subsource, category, service, app). When a row's value field is absent, resolve its `*_hash` in the header `lookups`. NEVER show a `*_hash` id to a human - resolve it to its value first. But DO use the `*_hash` verbatim as a drill-down filter value (it is the drill-down handle). Treat every `*_hash` as an OPAQUE string: `pattern_hash` = a mnemonic prefix + `_` + a 16-char base36 tail; subsource/category/service/app = a bare 16-char base36 string. Never parse, split, or length-validate a hash.
+
+**Schema descriptor + deeper field discovery.** The header `schema` lists the standard fields plus the top custom fields by fill-rate FOR THIS PAGE. When it carries `more_fields`, that points at `get_query_metadata`. `get_query_metadata`'s default call is cheap (bookkeeping only); its `top_n` / `field_match` deep discovery is a BILLED catalog scan - reach for it only when the inline schema genuinely isn't enough.
+
+### Grouped results are not refinable (v1)
+
+`query_grouped_aggregation` output is NOT a refinable cache in v1 - calling `refine_query_result` on it returns expired. Read grouped results directly. If a grouped result is truncated, follow its hint (narrow the filter or window and re-run the grouped call). `refine_query_result` applies ONLY to `query_logs` slices and to prior refine outputs.
 
 Detailed per-tool usage with examples is in `references/mcp-tool-decision-tree.md`.
 
@@ -275,7 +300,7 @@ Detailed per-tool usage with examples is in `references/mcp-tool-decision-tree.m
 
 ## Section 11. LQL basics - the syntax you use most
 
-LQL (Lightning Query Language) is the filter language used by every `filter_lql`, `cache_filter_lql`, etc. parameter.
+LQL (Lightning Query Language) is the filter language used by every LQL parameter: `lql` (on `query_logs` / `query_grouped_aggregation`), and `filter_lql` / `having_lql` (on `refine_query_result`).
 
 **Operators:** `:` contains, `!:` doesn't contain, `=` exact match, `!=` exact non-match, `>=` `>` `<` `<=` numeric, `<field>!` non-null, `<field> between X and Y`, `<field> in (a, b, c)`, `<field> not in (a, b, c)`. Boolean: `AND` `OR` `NOT`. Implicit AND between adjacent expressions. Patterns: `*` `?` directly in unquoted terms (NOT `%` or `_`). Regex: `/regex/` slash-delimited (re2 syntax).
 
@@ -335,15 +360,15 @@ Suggest `/sparklogs-analyze-cause <investigation_request_id>` (the separate caus
 
 ## Section 13. Error handling - recover gracefully
 
-**Cache miss on `refine_query_result`:** the response includes the original backing-query parameters. Re-issue the original tool call with those parameters; note `cache_status: "regenerated"` in your investigation cost.
+**Cache expired on `refine_query_result`:** the cache is cold (>~24h since the backing scan, or a grouped result, which is not refinable). Re-issue the original backing query; the server transparently regenerates a fresh `query_id` when it can (`cache status` in the header reflects it).
 
 **Soft throttle (429 with `retry_after_ms`):** retry up to 3x with exponential backoff. After 3 retries, surface to the engineer: "the investigation is being slowed by workspace-level rate limits."
 
-**Row-ceiling exceeded on backing query:** narrow `filter_lql` (tighter time range, restricted `org_ids`, add `severity`/`anomaly_max_score` predicates), use `random_sample_pct` for a sampled view, or split into multiple queries.
+**Row-ceiling exceeded on backing query:** narrow `lql` (tighter time range, restricted `org_ids`, add `severity`/`anomaly_max_score` predicates) or split into multiple queries. Then refine the cached slice rather than re-scanning.
 
-**`unknown_field_paths` warning in response:** the field name you requested doesn't exist. Don't ignore - surface in your summary AND re-issue with corrected fields. Reference `references/lql-reference.md` for canonical field name patterns.
+**Field name you requested doesn't exist:** it will not appear in the response schema descriptor. Don't ignore - surface in your summary AND re-issue with corrected fields (use `list_fields` or the response schema to find the real name). Reference `references/lql-reference.md` for canonical field-name patterns.
 
-**`result_truncated: true` in response:** the response was truncated at the `max_tokens` boundary. Either paginate (`next_page_cursor`) for more, narrow the filter for fewer rows, or accept partial (rare).
+**Partial page (`page.next` present, or a trailing hint line):** the page hit a limit. Follow `page.next` for the next page via `refine_query_result(offset=...)`, or narrow the filter for fewer rows.
 
 **Source has been emitting `ingest_drop` / `spool_full` / `backpressure` events during your window:** your evidence is incomplete. Flag explicitly in the OUTSIDE AGENT VISIBILITY section and qualify findings.
 
@@ -357,7 +382,7 @@ Investigations that run forever are bad investigations. Heuristics:
 
 - **Found enough for the summary:** you have 3-7 cited findings, the OUTSIDE AGENT VISIBILITY section is honestly populated, and the executive summary writes itself in 2-3 paragraphs. Produce the summary.
 - **Hit the ~15 tool-call mark without converging:** stop and produce an interim summary. State explicitly: "Investigation has examined N findings without converging on a coherent picture; here's what was found and the next investigative directions worth taking." Don't spend another 15 tool calls if the first 15 didn't yield clarity.
-- **Cost ceiling exceeded:** if `get_query_metadata(investigation_request_id=...)` shows backing queries >20, pause and assess. (Most investigations need fewer; the higher ceiling exists so you can be thorough when the symptom legitimately requires it. There is no separate slot-time cap - backing queries are the meaningful unit.)
+- **Cost ceiling exceeded:** if your local investigation-state document shows backing queries >20, pause and assess. (Most investigations need fewer; the higher ceiling exists so you can be thorough when the symptom legitimately requires it. There is no separate slot-time cap - backing queries are the meaningful unit. Track the running count yourself as you issue backing queries.)
 - **Source not reporting:** if `list_sources` shows the source has not emitted telemetry in the relevant window, stop after a brief summary acknowledging the data gap.
 
 ---
@@ -382,7 +407,7 @@ Use the most cost-effective modern model tier available for delegation (e.g., th
 
 Subagent definitions and host-specific notes are in `references/subagent-definitions.md`.
 
-**Use `get_query_metadata(investigation_request_id=...)` to recover history.** After context compaction, this returns metadata for every cache you created in this investigation. Use it to re-orient.
+**The local investigation-state document is your history.** `get_query_metadata` inspects ONE cached query at a time (by `query_id`); it does NOT enumerate an investigation's history by `investigation_request_id`. After context compaction, re-read the local state document to re-orient, then `get_query_metadata(query_id=...)` on a specific cache if you need its schema or cache status.
 
 ---
 

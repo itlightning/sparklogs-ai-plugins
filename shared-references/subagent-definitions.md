@@ -61,7 +61,7 @@ events_summarized: <count>
 
 ## Subagent: `sparklogs-pattern-enumerator`
 
-**Purpose.** Given a `query_grouped_aggregation` result with many groups, summarize the top N pattern_hashes with their meanings (looking up via `describe_pattern` if needed) and produce a structured enumeration the orchestrator can use as Findings input.
+**Purpose.** Given a `query_grouped_aggregation` result with many groups, summarize the top N pattern_hashes with their meanings (looking up pattern text via a `query_logs` message projection filtered to the `pattern_hash` if needed) and produce a structured enumeration the orchestrator can use as Findings input.
 
 **Model tier:** fast/cheap tier.
 
@@ -73,7 +73,7 @@ events_summarized: <count>
 ```yaml
 top_patterns:
   - pattern_hash: <hash>
-    pattern_text: <from describe_pattern>
+    pattern_text: <from a query_logs message projection filtered to the pattern_hash>
     count: <int>
     likely_meaning: <if matches a catalog entry, the catalog meaning; else null>
     catalog_match: <pattern_catalog.md entry name or null>
@@ -84,6 +84,8 @@ top_patterns:
 ---
 
 ## Subagent: `sparklogs-cluster-interpreter`
+
+**Fast-follow (not v1).** This subagent depends on `cluster_event_contexts`, which is not in the v1 lean-7 surface. Until it ships, approximate clustering with a `query_logs` slice narrowed to the pattern plus `refine_query_result` group_by over the surrounding context fields.
 
 **Purpose.** Given a `cluster_event_contexts` result with multiple distinct clusters, interpret each cluster's representative_surround and produce a structured human-readable description.
 

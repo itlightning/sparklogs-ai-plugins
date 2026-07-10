@@ -61,7 +61,7 @@ The mistakes are grouped by the operating principle they violate.
 
 **Why it's wrong.** Misrepresentation is worse than absent citation - engineer assumes you've supported the claim and won't double-check.
 
-**Recovery.** When you write a Finding, ask: "If the engineer clicks this URL and looks at the data, will they see what I'm asserting?" If unsure, refine the cached query (`refine_query_result` with `cache_filter_lql` to narrow) so the URL points to the specific evidence subset.
+**Recovery.** When you write a Finding, ask: "If the engineer clicks this URL and looks at the data, will they see what I'm asserting?" If unsure, refine the cached query (`refine_query_result` with `filter_lql` to narrow) so the URL points to the specific evidence subset.
 
 ### Executive Summary makes claims not in any Finding
 
@@ -153,7 +153,7 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` or `low`.
 
 **Symptom.** You make MCP calls without including `investigation_request_id`.
 
-**Why it's wrong.** The audit trail breaks. `get_query_metadata(investigation_request_id=...)` won't surface the orphan calls. The engineer can't reconstruct the full investigation.
+**Why it's wrong.** The audit trail breaks. The server-side per-call audit is keyed on `investigation_request_id`; calls that omit it become orphans the engineer can't tie back to the investigation, and they won't roll up in your local investigation-state document either.
 
 **Recovery.** Generate one base-36 16-char ID at investigation start. Pass it on every data-access and refinement call. If you're resuming a paused investigation, recover from the local investigation-state document. If you forgot mid-investigation, generate a new ID and note in the summary that the audit trail is split.
 
@@ -175,7 +175,7 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` or `low`.
 
 **Why it's wrong.** Aggregation first. `query_logs` is the *last resort*, not the first. Aggregation cuts substantial token use AND improves correctness in published observability-MCP retrospectives.
 
-**Recovery.** First substantive call should usually be `query_grouped_aggregation` or `query_period_diff` (depending on the question shape). Use `query_logs` only when aggregation has narrowed to a specific small set whose raw text matters.
+**Recovery.** First substantive call should usually be `query_grouped_aggregation` (group by the field the question is about). Use `query_logs` only when aggregation has narrowed to a specific small set whose raw text matters.
 
 ### Reading Level 3 by default
 
@@ -199,7 +199,7 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` or `low`.
 
 **Why it's wrong.** Source might have been emitting `ingest_drop` / `spool_full` / `backpressure` events during the window, in which case "no evidence" might just mean "data was incomplete."
 
-**Recovery.** Before any "no evidence found" conclusion, run a quick check: `query_logs(filter_lql='source = "<X>" AND event_kind = SLAAgentOp AND subsource in (ingest_drop, spool_full, backpressure)', time_range=<window>)`. If drops occurred, qualify the Finding's confidence and surface in OUTSIDE AGENT VISIBILITY.
+**Recovery.** Before any "no evidence found" conclusion, run a quick check: `query_logs(lql='source = "<X>" AND event_kind = SLAAgentOp AND subsource in (ingest_drop, spool_full, backpressure)', start=..., end=...)`. If drops occurred, qualify the Finding's confidence and surface in OUTSIDE AGENT VISIBILITY.
 
 ### Failing to check that the source has data in the investigation window
 
@@ -207,7 +207,7 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` or `low`.
 
 **Why it's wrong.** Wastes investigation budget. Also produces a confidently-wrong conclusion because absence of evidence is treated as evidence of absence.
 
-**Recovery.** Always run `list_sources` with the investigation's `time_range` as your first or second tool call (after `resolve_scope`). If the source has no data in the window, halt and ask the engineer for clarification per `scope-resolution.md`.
+**Recovery.** Always run `list_sources` with the investigation's `start`/`end` window as your first or second tool call (after `resolve_scope`). If the source has no data in the window, halt and ask the engineer for clarification per `scope-resolution.md`.
 
 ### Running 30 tool calls without converging
 

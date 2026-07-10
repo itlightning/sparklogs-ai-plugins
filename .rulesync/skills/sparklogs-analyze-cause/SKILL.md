@@ -18,8 +18,8 @@ Your output is a clearly-labeled set of candidate hypotheses, each anchored on p
 
 When the engineer invokes you with `/sparklogs-analyze-cause [investigation_request_id]`, you:
 
-1. Recover the prior investigation's system condition summary (from the local investigation-state document, or via `get_query_metadata(investigation_request_id=...)` to identify the relevant caches and re-read findings).
-2. Optionally make additional MCP calls if the cause analysis requires evidence not in the prior summary's findings (typically: cross-source pivots to test "is this fleet-wide", or `compare_populations` to test "what's different about affected vs unaffected", or to analyze additional pattern or log detail for specific log (sub)sources in *narrow* time ranges).
+1. Recover the prior investigation's system condition summary from the local investigation-state document (which holds the findings + the per-query `query_id`/`query_url` list). Inspect any specific cached query with `get_query_metadata(query_id=...)` if you need its schema or cache status.
+2. Optionally make additional MCP calls if the cause analysis requires evidence not in the prior summary's findings (typically: cross-source pivots to test "is this fleet-wide" via `query_grouped_aggregation` group_field `source`, contrasting two grouped runs over affected vs unaffected populations to test "what's different", or analyzing additional pattern or log detail for specific log (sub)sources in *narrow* time ranges).
 3. Generate candidate cause hypotheses anchored on the prior findings.
 4. For each hypothesis: state the hypothesis, cite which prior findings support it, give a confidence band, specify what would confirm it, what would refute it, and whether off-endpoint checks are needed.
 5. Identify alternative framings of the symptom.
@@ -136,7 +136,7 @@ Sometimes the prior investigation's evidence is sufficient to derive candidate h
 
 **Make additional MCP calls when:**
 - A hypothesis would benefit from a quick fleet pivot ("is this just this source or fleet-wide?") via `query_grouped_aggregation` group_by source.
-- A hypothesis would benefit from a quick population comparison ("what's different about the affected vs unaffected?") via `compare_populations`.
+- A hypothesis would benefit from a quick population comparison ("what's different about the affected vs unaffected?") - in v1, contrast two `query_grouped_aggregation` runs (one per population) over the same field. (`compare_populations` is a fast-follow tool, not yet in the v1 surface.)
 - A hypothesis would benefit from analyzing additional patterns or raw logs for certain (sub)sources in *narrow* time ranges.
 - A hypothesis depends on a specific time-window check the prior investigation didn't include.
 
