@@ -149,13 +149,21 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` or `low`.
 
 ## Mistakes against auditability
 
-### Forgetting `investigation_request_id` on calls
+### Forgetting `external_investigation_id` on calls
 
-**Symptom.** You make MCP calls without including `investigation_request_id`.
+**Symptom.** You make MCP calls without including `external_investigation_id`.
 
-**Why it's wrong.** The audit trail breaks. The server-side per-call audit is keyed on `investigation_request_id`; calls that omit it become orphans the engineer can't tie back to the investigation, and they won't roll up in your local investigation-state document either.
+**Why it's wrong.** It's a REQUIRED parameter - the tool rejects the call. The server-side per-call audit is keyed on `external_investigation_id`; omitting it isn't just an audit gap, it's a hard failure.
 
-**Recovery.** Generate one base-36 16-char ID at investigation start. Pass it on every data-access and refinement call. If you're resuming a paused investigation, recover from the local investigation-state document. If you forgot mid-investigation, generate a new ID and note in the summary that the audit trail is split.
+**Recovery.** Pick one distinctive, human-meaningful value at investigation start (8-200 chars free text, e.g. `investigate-ticket-4781-veeam-backup`; embed a ticket/incident id or a nonce so it's unique per real investigation). Pass it on every data-access and refinement call. If you're resuming a paused investigation, recover the id from the local investigation-state document and reuse it - reusing an id RESUMES that investigation. Don't reuse a generic string like `diskcheck` across unrelated incidents; they'd merge into one investigation.
+
+### `external_investigation_id` validation error
+
+**Symptom.** A tool call fails with a validation error on `external_investigation_id`.
+
+**Why it's wrong.** It didn't fit the 8-200 char bound. This isn't a generated hash - it's free text you choose.
+
+**Recovery.** Read the error message, shorten or lengthen the id to fit, and retry. Don't loop on the same out-of-bounds value.
 
 ### Not maintaining the local investigation-state document
 
@@ -163,7 +171,7 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` or `low`.
 
 **Why it's wrong.** Investigation continuity breaks. Re-investigation costs more than maintaining state.
 
-**Recovery.** At minimum, write the document at investigation start (scope, time window, investigation_request_id) and update after each major Finding accumulates. Use the host's filesystem tool. Schema is in SKILL.md Section 15.
+**Recovery.** At minimum, write the document at investigation start (scope, time window, external_investigation_id) and update after each major Finding accumulates. Use the host's filesystem tool. Schema is in SKILL.md Section 15.
 
 ---
 
@@ -183,7 +191,7 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` or `low`.
 
 **Why it's wrong.** Level 3 is roughly 10-100x more expensive in tokens than Level 1 or 2. Default should be Level 1 (triage) -> Level 2 (assess) -> Level 3 only when ground truth is needed.
 
-**Recovery.** Always set `return_field_list` explicitly. Use the level-recipes from `mcp-tool-decision-tree.md`. Override per-field with `max_field_chars_override` only when you specifically need uncapped data.
+**Recovery.** Always set `return_field_list` explicitly. Use the level-recipes from `mcp-tool-decision-tree.md`. Field-length caps are SERVER-ENFORCED - there is no client override. If a capped field is truncating data you need, narrow the query (tighter `lql`, fewer subsources) or project a smaller field set with `return_field_list` / `select`, then page or refine to reach the specific rows.
 
 ### Re-running queries instead of refining cached results
 
@@ -199,7 +207,15 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` or `low`.
 
 **Why it's wrong.** Source might have been emitting `ingest_drop` / `spool_full` / `backpressure` events during the window, in which case "no evidence" might just mean "data was incomplete."
 
-**Recovery.** Before any "no evidence found" conclusion, run a quick check: `query_logs(lql='source = "<X>" AND event_kind = SLAAgentOp AND subsource in (ingest_drop, spool_full, backpressure)', start=..., end=...)`. If drops occurred, qualify the Finding's confidence and surface in OUTSIDE AGENT VISIBILITY.
+**Recovery.** Before any "no evidence found" conclusion, run a quick check: `query_logs(lql='source = "<X>" AND event_kind = SLAAgentOp AND subsource in (ingest_drop, spool_full, backpressure)', start=..., end=...)`. If drops occurred, qualify the Finding's confidence and surface in OUTSIDE AGENT VISIBILITY. **Caveat today: `event_kind` / `SLAAgentOp` are deep fields the Managed Agent doesn't emit yet, so this check returns empty on every source regardless of true ingest health.** Treat an empty result as inconclusive, not "no drops," and fall back to `list_sources` event-count trends as the current completeness signal.
+
+### Reading an empty deep-field query as a clean bill of health
+
+**Symptom.** You filter on `event_kind`, `SLAAgentOp`, `anomaly_max_score`, `anomaly_categories`, or any `state.*` field, get zero rows back, and conclude the system is healthy or the check passed.
+
+**Why it's wrong.** These are DESIGNED fields in the schema, but itl-agent has zero production emission of them today. Every query filtering on them returns empty on every source, whether or not a problem exists. Empty means "not emitted yet," never "no problem found."
+
+**Recovery.** Fall back to shallow-triage fields that ARE emitted today: `message`, `severity`, `source`, `app`, `subsource`, `pattern` / `pattern_hash`, timestamps. Use `query_grouped_aggregation` on `severity` or `pattern` for volume/anomaly triage instead of the deep fields. State explicitly in the Finding or OUTSIDE AGENT VISIBILITY that the deep-field check came back empty because the telemetry isn't emitted yet, not because nothing is wrong.
 
 ### Failing to check that the source has data in the investigation window
 

@@ -4,7 +4,7 @@ Per-tool detailed usage with parameter notes, decision tree for which tool to us
 
 The v1 tool surface is the **lean-7**: `resolve_scope`, `list_sources`, `list_fields`, `query_grouped_aggregation`, `query_logs`, `refine_query_result`, `get_query_metadata`. Four differential tools (`query_period_diff`, `compare_populations`, `cluster_event_contexts`, `describe_pattern`) are FAST-FOLLOW, not yet available; see the bottom of this file for the v1 equivalents.
 
-**Every tool takes `investigation_request_id`** (a 16-char base-36 id, generated once at investigation start, tagged on every call).
+**Every tool takes `external_investigation_id`** (REQUIRED; a friendly, human-meaningful correlation handle you supply, 8-200 chars free text, e.g. `investigate-ticket-1234-disk-errors` - not a generated hash. Reusing the same value RESUMES that investigation; use a fresh, distinctive value to start a new one; tagged on every call).
 **Time windows are flat `start` / `end` in RFC3339 UTC** (e.g. `2026-07-01T00:00:00Z`). There is no `time_range` object and no `relative:` shorthand - compute the absolute window yourself.
 
 ---
@@ -45,7 +45,7 @@ resolve_scope(
   org_ids: ["..."],              # optional; omit for all orgs the token can access
   include_agents: true,          # default true
   include_sub_orgs: true,        # default true; expand each org to its sub-org subtree
-  investigation_request_id: "..."
+  external_investigation_id: "..."
 )
 -> rows: org rows {kind:"org", id, name, parent_id} and agent rows {kind:"agent", id, name, org_id, status}
 ```
@@ -69,7 +69,7 @@ list_sources(
   start: "2026-07-01T00:00:00Z",   # REQUIRED
   end: "2026-07-02T00:00:00Z",     # REQUIRED, exclusive
   include_sub_orgs: true,          # default true
-  investigation_request_id: "..."
+  external_investigation_id: "..."
 )
 -> rows: {source, event_count, billable_bytes}
 ```
@@ -93,7 +93,7 @@ list_fields(
   start: "...",                    # REQUIRED
   end: "...",                      # REQUIRED, exclusive
   include_sub_orgs: true,
-  investigation_request_id: "..."
+  external_investigation_id: "..."
 )
 -> rows: {field, type, event_count}
 ```
@@ -115,7 +115,7 @@ query_grouped_aggregation(
   group_field: "pattern" | "source" | "severity" | "<custom.field>",   # a single field
   lql: "...",                      # optional LQL filter applied before grouping
   limit: 50,                       # max distinct groups by hit count (default 50, hard cap 10000)
-  investigation_request_id: "..."
+  external_investigation_id: "..."
 )
 -> rows: {<group_field>, hits, max_severity}   # dense TSV
 ```
@@ -142,7 +142,7 @@ query_logs(
   lql: "...",                      # optional LQL filter; omit to match all in scope
   limit: 1000,                     # max events to scan + cache (default 1000)
   return_field_list: [...],        # projection; response-only, cache keeps full width. Set explicitly.
-  investigation_request_id: "..."
+  external_investigation_id: "..."
 )
 -> header (query_id, query_url, summary, schema, lookups, page) + one page of events (JSONL)
 ```
@@ -158,7 +158,7 @@ query_logs(
 - Reaching for this first. Aggregation first.
 - Omitting `return_field_list` (returns the standard set; usually too much).
 - Reading Level 3 by default.
-- Forgetting `investigation_request_id`.
+- Forgetting `external_investigation_id`.
 
 ---
 
@@ -178,7 +178,7 @@ refine_query_result(
   limit: 500,
   offset: 0,                       # deterministic paging over the cached slice
   sample: {n: ..., method: ...},   # optional down-sampling
-  investigation_request_id: "..."
+  external_investigation_id: "..."
 )
 -> same envelope shape as query_logs (dense TSV for grouped/projected output)
 ```
@@ -205,7 +205,7 @@ get_query_metadata(
   query_id: "...",
   top_n: 500,                      # OPT-IN deep discovery: expand ranked custom-field list (hard cap 5000). BILLED catalog scan.
   field_match: {mode: "equals"|"contains"|"regex", pattern: "..."},   # OPT-IN deep discovery: grep custom field NAMES. BILLED.
-  investigation_request_id: "..."
+  external_investigation_id: "..."
 )
 -> bookkeeping (schema, custom_source, stats, cache status, tie-breaker/sort); or, with top_n/field_match, a ranked/matched custom-field list
 ```
@@ -270,7 +270,7 @@ get_query_metadata(
 
 **Showing a `*_hash` id to a human.** Resolve it via the header `lookups` first. Use the hash verbatim only as a drill-down filter value.
 
-**Not setting `investigation_request_id`.** Audit trail breaks. Always set it.
+**Not setting `external_investigation_id`.** Audit trail breaks. Always set it.
 
 ---
 

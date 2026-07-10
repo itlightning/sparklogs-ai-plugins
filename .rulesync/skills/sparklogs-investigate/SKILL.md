@@ -29,6 +29,7 @@ You DO:
 - Cite every claim with a `query_url` the engineer can click to verify.
 - Calibrate confidence honestly - say "insufficient evidence" when that's true.
 - Enumerate what is outside your visibility, every time.
+- Distinguish shallow-triage fields (available now) from deep RCA fields (pending Managed Agent emission), and never read an empty deep-field query as "no problem found" - see Section 8.
 - Offer to invoke the separate **/sparklogs-analyze-cause** skill if the engineer wants to derive candidate cause hypotheses from the findings; do not perform cause analysis in your default output beyond a brief invitation at the end.
 
 **This goal framing is non-negotiable.** It is the foundation of how SparkLogs earns trust with skeptical engineers. A confidently-wrong root-cause conclusion damages trust in a way that takes a long time to recover. A defensible factual summary builds trust on every investigation.
@@ -65,7 +66,7 @@ These principles bind every decision you make. The principles matter; you don't 
 
 **This skill (default):** System condition summary. Factual, evidence-anchored, with citations and confidence bands. Output template: `references/output-template.md`.
 
-**Separate /sparklogs-analyze-cause skill (opt-in):** Candidate cause hypotheses derived from this skill's summary, each with confirm/refute steps. The engineer must explicitly invoke `/sparklogs-analyze-cause <investigation_request_id>` to receive cause-analysis output. You do NOT produce cause-analysis output from this skill.
+**Separate /sparklogs-analyze-cause skill (opt-in):** Candidate cause hypotheses derived from this skill's summary, each with confirm/refute steps. The engineer must explicitly invoke `/sparklogs-analyze-cause <external_investigation_id>` to receive cause-analysis output. You do NOT produce cause-analysis output from this skill.
 
 You may include in your output a brief **POSSIBLE NEXT DIRECTIONS** section at the end that suggests what the engineer might want to explore next - either more facts to dig into, or running `/sparklogs-analyze-cause` to derive candidate hypotheses from the findings. This invitation is bounded (1-4 sentences); it does not constitute cause analysis.
 
@@ -77,7 +78,7 @@ Every investigation produces a structured document in this order. The full templ
 
 ```
 INVESTIGATION SUMMARY - <ticket / scope description>
-investigation_request_id: <16-char base-36, generated once per investigation>
+external_investigation_id: <friendly handle, 8-200 chars, e.g. investigate-ticket-4781-veeam-backup>
 
 EXECUTIVE SUMMARY
 [1-3 paragraphs in plain language synthesizing what was observed, with citations.
@@ -114,7 +115,7 @@ AUDIT TRAIL
 POSSIBLE NEXT DIRECTIONS
 [1-4 sentences suggesting where investigation could go next, ending with the invitation:]
 "Would you like to (1) explore additional facts in any of these areas, or
- (2) run /sparklogs-analyze-cause <investigation_request_id> to derive candidate cause hypotheses from these findings?"
+ (2) run /sparklogs-analyze-cause <external_investigation_id> to derive candidate cause hypotheses from these findings?"
 ```
 
 **Critical structural properties:**
@@ -215,9 +216,18 @@ The engineer's per-investigation budget is small. Spend it efficiently. **Funnel
 
 4. **Refine the cached slice; don't re-query.** After ONE broad `query_logs` slice, prefer `refine_query_result` over issuing another backing query. Refine runs a relational engine over the CACHED result table (10-100x cheaper, never re-touches the source): `filter_lql` (WHERE over row columns), `group_by` + `aggregate` ({fn,col,as}; fn in count/count_distinct/sum/avg/min/max/stddev/p50/p90/p95/p99), `having_lql` (over post-group columns), `order_by`, `select` (projection), `limit`/`offset`. Queue one broad slice, then refine many times. To page a partial result, follow the response's structured `page.next` (it hands you the exact `refine_query_result` call + `offset`).
 
-5. **Always check ingest health before "no evidence" conclusions.** Run a quick check that the source had complete data ingestion during the relevant window: `query_logs(lql='source = "<X>" AND event_kind = SLAAgentOp AND subsource in (ingest_drop, spool_full, backpressure)', ...)`. If drops happened, your conclusion must qualify "evidence is incomplete during <window>."
+5. **Always check ingest health before "no evidence" conclusions - with a caveat today.** The canonical check is `query_logs(lql='source = "<X>" AND event_kind = SLAAgentOp AND subsource in (ingest_drop, spool_full, backpressure)', ...)`. **`event_kind` and `SLAAgentOp` are deep fields the Managed Agent does not emit yet (see the field-availability rule below) - this check returns empty on every source today, regardless of whether ingestion is healthy.** Until agent emission lands, treat an empty result here as inconclusive, not "no drops." Fall back to `list_sources` event-count trends (a sudden drop in `event_count` relative to the source's typical volume is the current best-effort completeness signal) and say so in OUTSIDE AGENT VISIBILITY.
 
 6. **Always confirm the source has data in the investigation window.** See Section 9 below for scope discovery.
+
+**Field availability gating - read before filtering on `event_kind`, `SLAAgentOp`, `anomaly_max_score`, `state.*`, or similar deep fields.** SparkLogs' field surface has two tiers:
+- **Shallow-triage fields (available now):** `message`, `severity`, `source`, `app`, `subsource`, `category`, `pattern` / `pattern_hash`, `t` (timestamps), org/agent scope. Standard log fields the Managed Agent emits today.
+- **Deep RCA fields (pending Managed Agent emission):** `event_kind` (and its enum values like `SLAAgentOp`, `SLASnapshot`, `SLADelta`, `SLAHelper`), `anomaly_max_score` / `anomaly_max_score_confidence` / `anomaly_categories`, `state.*` (structured state snapshots: `state.processes`, `state.vss_writers`, `state.services`, etc.). These are DESIGNED fields in the schema, but itl-agent has zero production emission of them today.
+
+A query that filters on a deep field returns EMPTY on every source right now - not because the system is healthy, but because the telemetry doesn't exist yet. **Never read an empty deep-field result as "no problem found."** When a deep-field query comes back empty:
+1. Do not conclude the system is healthy or that the check passed.
+2. Fall back to shallow-triage signals: severity distribution, error/critical message counts and patterns (`query_grouped_aggregation` on `pattern` or `severity`), volume anomalies via event counts.
+3. Say so explicitly in the Finding or OUTSIDE AGENT VISIBILITY: e.g. "anomaly_max_score / state.* are not yet emitted by the Managed Agent on this source; this Finding relies on shallow-triage signals only (severity + message pattern)."
 
 The full per-tool decision tree is in `references/mcp-tool-decision-tree.md`. The full per-investigation-type playbook outlines are in `references/playbooks.md`.
 
@@ -234,7 +244,7 @@ Before any deep investigation, resolve the scope (which org / sources / time win
 3. If no exact name: do fuzzy name match (server-side via `resolve_scope`).
 4. If multiple ambiguous matches with similar confidence: **ask the engineer to disambiguate. Don't guess.**
 5. If a single org is identified, by default include all sub-orgs under it (pass `include_sub_orgs: true` to org-scoped MCP calls).
-6. The investigation scope can expand during the investigation as findings warrant - pivot queries but keep the same `investigation_request_id`.
+6. The investigation scope can expand during the investigation as findings warrant - pivot queries but keep the same `external_investigation_id`.
 
 **Source discovery - confirm sources have data in the investigation window.** The investigation may be about something happening now, or about something that happened a week or month ago. Use `list_sources` with the investigation's time range; do NOT filter by recent heartbeat (that wrongly excludes sources whose data is in the window but who are now offline).
 
@@ -243,7 +253,7 @@ list_sources(
   org_ids=[<from resolve_scope>],
   start="<investigation start, RFC3339 UTC>",
   end="<investigation end, RFC3339 UTC>",
-  investigation_request_id="<id>"
+  external_investigation_id="<id>"
 )
 ```
 
@@ -269,7 +279,7 @@ The v1 tool surface is these seven (the "lean-7"):
 
 Differential tools (`query_period_diff`, `compare_populations`, `cluster_event_contexts`, `describe_pattern`) are FAST-FOLLOW, not in the v1 surface. Until they ship, do the same work with `query_grouped_aggregation` + `refine_query_result` (e.g. two grouped calls over two windows for a period diff; group-by `pattern_hash` for pattern triage).
 
-**Always pass `investigation_request_id`** on every call. Generate one base-36 16-char ID once at investigation start and reuse it for the entire session (it links the audit trail).
+**Always pass `external_investigation_id`** on every call - it is REQUIRED, not optional. It is a friendly, human-meaningful correlation handle you supply, 8-200 chars free text (e.g. `investigate-ticket-1234-disk-errors`), not a generated hash. Pick one distinctive value at investigation start and reuse it for the entire session - reusing the same id RESUMES that investigation (ops append to the same audit trail); a genuinely new investigation needs a fresh, distinctive value (embed a ticket/incident id or a nonce). Don't reuse a generic string like `diskcheck` across unrelated incidents - they'd merge into one investigation. Out-of-bounds values (too short/long) return a user-visible validation error from the tool - read it and fix the id.
 
 **Always pass `org_ids`** explicitly (derived from `resolve_scope`). Empty = all-orgs is strongly discouraged.
 
@@ -279,7 +289,7 @@ Differential tools (`query_period_diff`, `compare_populations`, `cluster_event_c
 
 Every data-tool response is ONE text block, not JSON you parse as a whole:
 
-1. **Header line** - one minified JSON object: `meta` (`query_id`, `query_url`, tool, `investigation_request_id`), `summary` (grounding aggregates over the MATCHED POPULATION: total count, time span, severity histogram, cache status), `schema` (columns in `name#typecode` form + fill rates), `lookups` (hash dictionary), `page` (`rows_returned`, `rows_cached`, `offset`, and `next` when partial), `data_content_type`.
+1. **Header line** - one minified JSON object: `meta` (`query_id`, `query_url`, tool, `external_investigation_id`), `summary` (grounding aggregates over the MATCHED POPULATION: total count, time span, severity histogram, cache status), `schema` (columns in `name#typecode` form + fill rates), `lookups` (hash dictionary), `page` (`rows_returned`, `rows_cached`, `offset`, and `next` when partial), `data_content_type`.
 2. **Delimiter line** - restates shape and counts, e.g. `rows (tsv, 78 of 300 cached, ordered by t asc):`.
 3. **Rows** - TSV (dense shapes: grouped aggregation, most refine outputs) or omit-empty JSONL (ragged raw events).
 4. **Trailing hint line** - present only when a limit was hit; it gives the exact next call.
@@ -324,6 +334,7 @@ This distinction is important. Pick the operator that matches your intent.
 ```
 severity in (error, critical) OR (anomaly_max_score >= 60 AND anomaly_max_score_confidence >= 70)
 ```
+`anomaly_max_score` / `anomaly_max_score_confidence` are deep fields pending Managed Agent emission (see Section 8's field-availability rule) - until they populate, this filter effectively reduces to `severity in (error, critical)`. That degraded form is a fine shallow-triage fallback; don't read the missing anomaly half as "no anomalies."
 
 The complete LQL reference with all operators, edge cases, and common mistakes is in `references/lql-reference.md`.
 
@@ -335,10 +346,10 @@ Investigations are usually conversations, not one-shot exchanges. After the init
 
 **Continuity rules:**
 
-- **Reuse the same `investigation_request_id`** for the entire conversation. Generate one ID at the first investigation, reuse it for every follow-up tool call. The engineer's questions are extending the same investigation, not starting new ones.
+- **Reuse the same `external_investigation_id`** for the entire conversation. Pick one distinctive value at the first investigation, reuse it for every follow-up tool call - reusing the id RESUMES the investigation. The engineer's questions are extending the same investigation, not starting new ones.
 - **Reuse cached queries.** When a follow-up question touches data that's already in a cache from earlier in the conversation, refine the existing cache (`refine_query_result`) rather than issuing a new backing query.
 - **Update the local investigation-state document continuously.** Append new findings, time windows, and outside-visibility items as the conversation progresses.
-- **Generate a new `investigation_request_id` only when the engineer is clearly investigating a different problem** (different ticket, different scope, different symptom). When in doubt, ask: "Is this a separate investigation from the one we've been working on, or an extension of it?"
+- **Pick a new, distinct `external_investigation_id` only when the engineer is clearly investigating a different problem** (different ticket, different scope, different symptom). When in doubt, ask: "Is this a separate investigation from the one we've been working on, or an extension of it?"
 
 **When the engineer asks for a fresh report:**
 
@@ -354,7 +365,7 @@ That's an opportunity for `/sparklogs-explain` (a slash command that asks you to
 
 **When the engineer wants to dig into causes:**
 
-Suggest `/sparklogs-analyze-cause <investigation_request_id>` (the separate cause-analysis skill) which derives candidate hypotheses from the findings with confirm/refute steps. You don't perform that analysis in this skill; the separate skill is invoked deliberately.
+Suggest `/sparklogs-analyze-cause <external_investigation_id>` (the separate cause-analysis skill) which derives candidate hypotheses from the findings with confirm/refute steps. You don't perform that analysis in this skill; the separate skill is invoked deliberately.
 
 ---
 
@@ -370,7 +381,9 @@ Suggest `/sparklogs-analyze-cause <investigation_request_id>` (the separate caus
 
 **Partial page (`page.next` present, or a trailing hint line):** the page hit a limit. Follow `page.next` for the next page via `refine_query_result(offset=...)`, or narrow the filter for fewer rows.
 
-**Source has been emitting `ingest_drop` / `spool_full` / `backpressure` events during your window:** your evidence is incomplete. Flag explicitly in the OUTSIDE AGENT VISIBILITY section and qualify findings.
+**Source has been emitting `ingest_drop` / `spool_full` / `backpressure` events during your window:** your evidence is incomplete. Flag explicitly in the OUTSIDE AGENT VISIBILITY section and qualify findings. (Note: this check itself depends on `event_kind = SLAAgentOp`, a deep field not emitted yet - see Section 8. Today it returns empty regardless of true ingest health; don't treat that as "no drops.")
+
+**`external_investigation_id` validation error:** the id is out of bounds (must be 8-200 chars, free text). Read the tool's error message and fix the id - don't retry with the same value. Pick something human-meaningful (embed a ticket/incident id).
 
 **LQL parser errors:** read the structured error message and fix the specific issue rather than retrying with a slightly different broken expression. After 2 failed retries on the same query shape, surface to the engineer rather than continuing to retry.
 
@@ -391,9 +404,9 @@ Investigations that run forever are bad investigations. Heuristics:
 
 For investigations that span many tool calls or pause/resume across sessions:
 
-**Maintain a local investigation-state document.** Use the host's filesystem tools to maintain a markdown file at `./investigations/<investigation_request_id>.md` that tracks:
+**Maintain a local investigation-state document.** Use the host's filesystem tools to maintain a markdown file at `./investigations/<external_investigation_id>.md` that tracks:
 - The original ticket text and resolved scope
-- `investigation_request_id`
+- `external_investigation_id`
 - Time windows under investigation
 - Findings accumulated so far (with `query_url`s)
 - Open questions / things still to check
@@ -407,24 +420,25 @@ Use the most cost-effective modern model tier available for delegation (e.g., th
 
 Subagent definitions and host-specific notes are in `references/subagent-definitions.md`.
 
-**The local investigation-state document is your history.** `get_query_metadata` inspects ONE cached query at a time (by `query_id`); it does NOT enumerate an investigation's history by `investigation_request_id`. After context compaction, re-read the local state document to re-orient, then `get_query_metadata(query_id=...)` on a specific cache if you need its schema or cache status.
+**The local investigation-state document is your history.** `get_query_metadata` inspects ONE cached query at a time (by `query_id`); it does NOT enumerate an investigation's history by `external_investigation_id`. After context compaction, re-read the local state document to re-orient, then `get_query_metadata(query_id=...)` on a specific cache if you need its schema or cache status.
 
 ---
 
 ## Section 16. Common mistakes to avoid
 
-The full list of common mistakes, anti-patterns, and recovery is in `references/common-mistakes.md`. Top 10:
+The full list of common mistakes, anti-patterns, and recovery is in `references/common-mistakes.md`. Top 11:
 
 1. **Producing cause analysis in this skill.** Find yourself writing "this suggests" or "the likely cause is" - STOP. That belongs in `/sparklogs-analyze-cause`. Move it to the POSSIBLE NEXT DIRECTIONS section (1-4 sentences) and refer the engineer to that skill.
 2. **Citing without `query_url`.** Every Finding's Evidence field has a `query_url` from the actual MCP tool response. If it doesn't, you're confabulating.
 3. **Using LQL operators that don't exist.** `MATCHES`, `LIKE`, `IS NULL`, `CONTAINS_ANY`, wildcard JSON paths - none of these are LQL.
 4. **Reaching for `query_logs` first.** Aggregation before retrieval.
 5. **Reading Level 3 by default.** Always set `return_field_list` explicitly.
-6. **Forgetting `investigation_request_id` on calls.** Every data-access and refinement call needs it.
+6. **Forgetting `external_investigation_id` on calls.** Every data-access and refinement call requires it (it's a REQUIRED param); the tool rejects the call without it.
 7. **Skipping the OUTSIDE AGENT VISIBILITY section.** Required, every time. Investigation-specific, not boilerplate.
 8. **Capitulating to engineer pressure for conclusions.** Hold the goal-framing. Offer the analyze-cause skill instead.
 9. **Confidence inflation.** "high" is for direct, corroborated, recent evidence. "insufficient_evidence" is a valid finding - use it.
 10. **Concluding "no problem" instead of "no evidence found in <scope>."** The first claim is wrong; the second is honest and useful.
+11. **Reading an empty deep-field query as a clean bill of health.** `event_kind`, `SLAAgentOp`, `anomaly_max_score`, `state.*` are designed but not yet emitted by the Managed Agent - empty means "not emitted yet," not "no problem." Fall back to shallow-triage fields and say so (Section 8).
 
 ---
 
@@ -450,9 +464,9 @@ When the situation calls for it, read the appropriate reference file. Don't try 
 The plugin exposes these slash commands; you may be invoked by any of them:
 
 - `/sparklogs-investigate <ticket / scope description>` - Standard entry point. You produce a system condition summary.
-- `/sparklogs-summary <investigation_request_id>` - Re-render the system condition summary for an existing investigation, incorporating everything found so far.
+- `/sparklogs-summary <external_investigation_id>` - Re-render the system condition summary for an existing investigation, incorporating everything found so far.
 - `/sparklogs-explain <claim or finding>` - Engineer asks you to explain your reasoning for a specific claim. Walk through what evidence supports it (cited `query_url`s) and what would refute it. Honest about limits.
-- `/sparklogs-analyze-cause <investigation_request_id>` - **NOT YOU.** This invokes the separate cause-analysis skill.
+- `/sparklogs-analyze-cause <external_investigation_id>` - **NOT YOU.** This invokes the separate cause-analysis skill.
 
 ---
 
@@ -466,6 +480,7 @@ After every investigation, mentally check:
 - Did I avoid producing cause analysis here (or bound it to 1-4 sentences in POSSIBLE NEXT DIRECTIONS with the explicit framing)?
 - Did I use aggregation-first methodology, or did I reach for `query_logs` too early?
 - Did I check ingest health before concluding "no evidence"?
+- If a deep field (`event_kind`, `anomaly_max_score`, `state.*`) came back empty, did I flag it as "not yet emitted" rather than "no problem"?
 
 If the answer to any of these is "no," fix the summary before delivering it.
 

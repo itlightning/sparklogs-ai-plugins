@@ -255,13 +255,15 @@ any: "credit card"                       <- search all fields for "credit card"
 
 ## Canonical recurring patterns
 
+**Field-availability note.** Several patterns below filter on `event_kind`, `anomaly_max_score`/`anomaly_categories`, or `state.*` - deep RCA fields the Managed Agent doesn't emit yet (zero production emission today; see SKILL.md Section 8). These queries are syntactically valid and will be the right shape once emission lands, but they return EMPTY right now on every source. An empty result from one of these is "not emitted yet," never "no problem." Fall back to `severity`/`message`/`pattern` shallow-triage fields, which ARE emitted today.
+
 ### Context-reduction filter (the most common starting filter)
 
 ```
 severity in (error, critical) OR (anomaly_max_score >= 60 AND anomaly_max_score_confidence >= 70)
 ```
 
-Use this whenever you want to focus on signal-rich events without specifying a more targeted filter. The OR is deliberate - severity catches what the source flagged as bad; anomaly score catches what the local detector judged unusual.
+Use this whenever you want to focus on signal-rich events without specifying a more targeted filter. The OR is deliberate - severity catches what the source flagged as bad; anomaly score catches what the local detector judged unusual. (Today the anomaly half is a no-op per the field-availability note above; the filter degrades gracefully to `severity in (error, critical)`.)
 
 ### Single-source single-time-window scope
 
@@ -331,11 +333,15 @@ correlation_id = "abc123def456"
 event_kind = SLAAgentOp AND subsource in (ingest_drop, spool_full, backpressure)
 ```
 
+`event_kind` / `SLAAgentOp` aren't emitted yet (see the field-availability note above) - this returns empty today regardless of true ingest health. Treat empty as inconclusive, not "no drops."
+
 ### Detector lifecycle awareness
 
 ```
 event_kind = SLAAgentOp AND subsource: anomaly_detector_*
 ```
+
+Same caveat: empty today because `event_kind` isn't emitted, not because detectors are absent.
 
 Identifies warmup-complete and baseline-reset events.
 

@@ -8,7 +8,7 @@ This is the canonical template every investigation produces. Use these field def
 
 ```
 INVESTIGATION SUMMARY - <ticket / scope description>
-investigation_request_id: <16-char base-36>
+external_investigation_id: <friendly handle, 8-200 chars>
 
 EXECUTIVE SUMMARY
 [1-3 paragraphs in plain language synthesizing the Findings, with citations to query_urls.
@@ -46,14 +46,14 @@ INVESTIGATION COST
 - Wall-clock: <minutes>
 
 AUDIT TRAIL
-<the per-query query_id + query_url list from the local investigation-state document; inspect any one with get_query_metadata(query_id="<qid>"); every call is also tagged investigation_request_id="<id>" in the server-side audit>
+<the per-query query_id + query_url list from the local investigation-state document; inspect any one with get_query_metadata(query_id="<qid>"); every call is also tagged external_investigation_id="<id>" in the server-side audit>
 
 POSSIBLE NEXT DIRECTIONS
 [1-4 sentences max suggesting where investigation could go from here, ending with the invitation:]
 
 "Would you like to:
  (1) explore additional facts in any of the areas mentioned above, or
- (2) run /sparklogs-analyze-cause <investigation_request_id> to derive candidate cause hypotheses
+ (2) run /sparklogs-analyze-cause <external_investigation_id> to derive candidate cause hypotheses
      from these findings?"
 ```
 
@@ -61,8 +61,8 @@ POSSIBLE NEXT DIRECTIONS
 
 ## Field definitions
 
-### investigation_request_id
-16-character base-36 random string. Generate once at the start of an investigation; reuse for every MCP call within that investigation. Format: `[a-z0-9]{16}`. If you're resuming a paused investigation, recover the ID from the local investigation-state document at `./investigations/<id>.md`.
+### external_investigation_id
+A friendly, human-meaningful correlation handle you supply - free text, 8-200 chars, e.g. `investigate-ticket-4781-veeam-backup`. REQUIRED on every MCP call. Pick one distinctive value at the start of an investigation and reuse it for every call within that investigation; reusing the same value RESUMES the investigation (the server appends to the same audit trail). A genuinely new investigation needs a fresh, distinctive value - embed a ticket/incident id or a nonce so it doesn't collide with unrelated investigations. Out-of-bounds values return a user-visible validation error from the tool. If you're resuming a paused investigation, recover the id from the local investigation-state document at `./investigations/<id>.md`.
 
 ### EXECUTIVE SUMMARY (placed first, after the header)
 1-3 paragraphs synthesizing the Findings. Plain language; engineer audience. **Every claim derives from a Finding** - don't introduce new evidence in the summary. Include citations (query_urls) inline where helpful.
@@ -146,17 +146,17 @@ Optional section. If anomaly fields helped you focus the investigation (e.g., `a
 Track the running counts (backing queries, refinements, tokens) in your local investigation-state document as you go. Engineer-facing visibility into AI investigation cost; supports billing transparency.
 
 ### Audit Trail
-Provide the engineer with the means to inspect every query you ran: the `query_id` + `query_url` list from the local investigation-state document, with per-query detail via `get_query_metadata(query_id="<qid>")`. Every call is also tagged `investigation_request_id` in the server-side audit (a direct investigation-level URL is preferred once SparkLogs UX surfaces it).
+Provide the engineer with the means to inspect every query you ran: the `query_id` + `query_url` list from the local investigation-state document, with per-query detail via `get_query_metadata(query_id="<qid>")`. Every call is also tagged `external_investigation_id` in the server-side audit (a direct investigation-level URL is preferred once SparkLogs UX surfaces it).
 
 ### POSSIBLE NEXT DIRECTIONS
 Bounded section at the end of the summary. 1-4 sentences max. Suggests where the investigation could go next - either more facts to dig into, or running `/sparklogs-analyze-cause` to derive candidate hypotheses. Always ends with the explicit invitation:
 
-> "Would you like to (1) explore additional facts in any of the areas mentioned above, or (2) run /sparklogs-analyze-cause <investigation_request_id> to derive candidate cause hypotheses from these findings?"
+> "Would you like to (1) explore additional facts in any of the areas mentioned above, or (2) run /sparklogs-analyze-cause <external_investigation_id> to derive candidate cause hypotheses from these findings?"
 
 **Right:**
 "The temporal correlation between the Tuesday KB install and the new error pattern, combined with the fleet-wide consistency, is worth exploring further. The disk-pressure cluster (Finding 5b) is a separate area on a small subset of sources.
 
-Would you like to (1) explore additional facts in any of the areas mentioned above, or (2) run /sparklogs-analyze-cause i9k2nf9x8a3b4c2d to derive candidate cause hypotheses from these findings?"
+Would you like to (1) explore additional facts in any of the areas mentioned above, or (2) run /sparklogs-analyze-cause investigate-ticket-4781-veeam-backup to derive candidate cause hypotheses from these findings?"
 
 **Wrong (presents as conclusion):**
 "The root cause is KB5034441 affecting Veeam VSS interaction. Roll back the patch on affected endpoints."
@@ -172,7 +172,7 @@ Would you like to (1) explore additional facts in any of the areas mentioned abo
 
 ```
 INVESTIGATION SUMMARY - Veeam backup failure on srv-fileshare01 (ticket #4781)
-investigation_request_id: i9k2nf9x8a3b4c2d
+external_investigation_id: investigate-ticket-4781-veeam-backup
 
 EXECUTIVE SUMMARY
 The investigation surfaced a VSS writer failure on srv-fileshare01 at 03:14 UTC concurrent with a
@@ -265,10 +265,10 @@ INVESTIGATION COST
 - Wall-clock: 4 minutes
 
 AUDIT TRAIL
-Backing queries (from the investigation-state document; every call tagged investigation_request_id="i9k2nf9x8a3b4c2d"):
+Backing queries (from the investigation-state document; every call tagged external_investigation_id="investigate-ticket-4781-veeam-backup"):
   q_ab12 https://sparklogs.app/explore?... | q_cd34 https://sparklogs.app/explore?...
 Per-query detail (parameters, cache status, schema): get_query_metadata(query_id="<qid>").
-Or browse interactively at: https://sparklogs.app/investigations/i9k2nf9x8a3b4c2d
+Or browse interactively at: https://sparklogs.app/investigations/investigate-ticket-4781-veeam-backup
 
 POSSIBLE NEXT DIRECTIONS
 The temporal correlation between the Tuesday KB install and the new error pattern, combined with
@@ -277,14 +277,14 @@ cluster (Finding 5b) is a separate factor on a small subset of sources that coul
 independently.
 
 Would you like to (1) explore additional facts in any of the areas mentioned above, or (2) run
-/sparklogs-analyze-cause i9k2nf9x8a3b4c2d to derive candidate cause hypotheses from these findings?
+/sparklogs-analyze-cause investigate-ticket-4781-veeam-backup to derive candidate cause hypotheses from these findings?
 ```
 
 ### Example 2: Investigation finds insufficient evidence (still useful)
 
 ```
 INVESTIGATION SUMMARY - slow file share complaint on srv-fileshare02
-investigation_request_id: i7m3p1n9k2t4r8c5
+external_investigation_id: investigate-srv-fileshare02-slow-share
 
 EXECUTIVE SUMMARY
 The on-endpoint perf and event data for srv-fileshare02 in the user-reported window shows no signs
@@ -348,7 +348,7 @@ INVESTIGATION COST
 - Wall-clock: 2 minutes
 
 AUDIT TRAIL
-Backing-query query_id + query_url list in the investigation-state document (calls tagged investigation_request_id="i7m3p1n9k2t4r8c5"); per-query detail via get_query_metadata(query_id="<qid>").
+Backing-query query_id + query_url list in the investigation-state document (calls tagged external_investigation_id="investigate-srv-fileshare02-slow-share"); per-query detail via get_query_metadata(query_id="<qid>").
 
 POSSIBLE NEXT DIRECTIONS
 The pattern of "user reports slow, server looks fine" frequently traces to client-side or
@@ -357,7 +357,7 @@ or checking switch/AP/firewall logs between the user and the server, may reveal 
 
 Would you like to (1) explore the user's workstation (give me the workstation name), check
 network-path data, or extend the investigation in some other direction, or (2) run
-/sparklogs-analyze-cause i7m3p1n9k2t4r8c5 to derive candidate cause hypotheses from what was
+/sparklogs-analyze-cause investigate-srv-fileshare02-slow-share to derive candidate cause hypotheses from what was
 observed (and not observed) so far?
 ```
 
