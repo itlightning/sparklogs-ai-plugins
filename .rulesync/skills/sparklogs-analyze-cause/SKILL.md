@@ -136,7 +136,7 @@ The full hypothesis-generation guidance is in `references/hypothesis-generation.
 Sometimes the prior investigation's evidence is sufficient to derive candidate hypotheses without further data gathering. Other times, a quick additional check substantially strengthens or weakens a hypothesis. Heuristics:
 
 **Make additional MCP calls when:**
-- A hypothesis would benefit from a quick fleet pivot ("is this just this source or fleet-wide?") via `query_grouped_aggregation` group_by source.
+- A hypothesis would benefit from a quick fleet pivot ("is this just this source or fleet-wide?") via `query_grouped_aggregation` group_field `source`, or a scope-ladder field (`service`, `app`, `subsource`, `category`) to test whether affected sources share a component.
 - A hypothesis would benefit from a quick population comparison ("what's different about the affected vs unaffected?") - in v1, contrast two `query_grouped_aggregation` runs (one per population) over the same field. (`compare_populations` is a fast-follow tool, not yet in the v1 surface.)
 - A hypothesis would benefit from analyzing additional patterns or raw logs for certain (sub)sources in *narrow* time ranges.
 - A hypothesis depends on a specific time-window check the prior investigation didn't include.
@@ -144,9 +144,9 @@ Sometimes the prior investigation's evidence is sufficient to derive candidate h
 **Skip additional MCP calls when:**
 - The prior investigation's findings already provide sufficient evidence for the hypothesis.
 - The check would be off-endpoint (in which case, surface as "off-endpoint check needed" in the hypothesis).
-- The check would significantly expand investigation cost without proportional benefit.
+- The check would significantly expand the investigation without proportional benefit.
 
-When you do make additional MCP calls, reuse the prior investigation's `external_investigation_id`. Cached queries from the prior investigation may be reusable via `refine_query_result` - much cheaper than fresh backing queries. You MUST only re-use the same query scope (list of organization IDs) that was resolved during the prior investigation; if you need to expand query scope, you MUST get explicit permission to do so.
+When you do make additional MCP calls, reuse the prior investigation's `external_investigation_id`. Cached queries from the prior investigation may be reusable via `refine_query_result`, which runs against the cache instead of issuing a fresh backing query. You MUST only re-use the same query scope (list of organization IDs) that was resolved during the prior investigation; if you need to expand query scope, you MUST get explicit permission to do so.
 
 ---
 
@@ -162,6 +162,7 @@ When you do make additional MCP calls, reuse the prior investigation's `external
 
 - `references/output-template.md` - full output template with field definitions and worked examples.
 - `references/hypothesis-generation.md` - detailed guidance on deriving cause candidates from findings.
+- `references/scope-ladder.md` - same content as the investigate skill's scope-ladder reference (the five grouping fields and their `_hash` companions; useful for fleet-pivot discriminators).
 - `references/scope-resolution.md` - same content as the investigate skill's scope-resolution reference (reused if you make additional MCP calls).
 - `references/lql-reference.md` - same content as the investigate skill's LQL reference.
 - `references/mcp-tool-decision-tree.md` - same content as the investigate skill's MCP tool reference.

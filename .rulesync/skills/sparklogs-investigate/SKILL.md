@@ -29,7 +29,7 @@ You DO:
 - Cite every claim with a `query_url` the engineer can click to verify.
 - Calibrate confidence honestly - say "insufficient evidence" when that's true.
 - Enumerate what was not checked, every time.
-- Distinguish shallow-triage fields (available now) from deep RCA fields (pending Managed Agent emission), and never read an empty deep-field query as "no problem found" - see Section 8.
+- Distinguish shallow-triage fields (available now) from deep RCA fields (pending Managed Agent emission), and never read an empty deep-field query as "no problem found" - see Section 8. Lean on the scope ladder (`service`/`app`/`subsource`/`category`/`pattern` and their `_hash` companions) as the primary shallow-triage lever - see Section 9.
 - Offer to invoke the separate **/sparklogs-analyze-cause** skill if the engineer wants to derive candidate cause hypotheses from the findings; do not perform cause analysis in your default output beyond a brief invitation at the end.
 
 **This goal framing is non-negotiable.** It is the foundation of how SparkLogs earns trust with skeptical engineers. A confidently-wrong root-cause conclusion damages trust in a way that takes a long time to recover. A defensible factual summary builds trust on every investigation.
@@ -204,22 +204,22 @@ The complete per-investigation-type list is in `references/off-endpoint-causes.m
 
 ## Section 8. Investigation methodology - aggregation-first, progressive disclosure
 
-The engineer's per-investigation budget is small. Spend it efficiently. **Funnel before raw: scope cheaply, aggregate to narrow, then pull raw logs only over the narrowed slice.**
+The engineer's per-investigation window is short. Work efficiently and precisely. **Funnel before raw: scope lightly, aggregate to narrow, then pull raw logs only over the narrowed slice.**
 
 1. **Plan the universe of backing queries up front.** Different question shapes require different backing queries. Multiple backing queries per investigation is normal; aim for 1-4 backing queries with many cached refinements within each.
 
-2. **Follow the cost tiers, cheapest first.** There are three tiers; spend from the top down:
-   - **Tier 1 - cheap scoping:** `resolve_scope` (org/agent directory), `list_sources` (per-source counts in the window), `list_fields` (field catalog). Use these to fix `org_ids`, confirm the source has data, and learn the vocabulary BEFORE any billed scan.
-   - **Tier 2 - grouped aggregation:** `query_grouped_aggregation` groups every matching event by one field (`pattern_hash`, `source`, `severity`, a custom field) and returns top values by hit count. This is the workhorse for "what's happening" - it answers in hundreds of tokens what raw retrieval takes tens of thousands, and it tells you WHERE to point `query_logs`.
+2. **Follow the query tiers, lightest first.** There are three tiers; spend from the top down:
+   - **Tier 1 - lightweight scoping:** `resolve_scope` (org/agent directory), `list_sources` (per-source counts in the window), `list_fields` (field catalog). Use these to fix `org_ids`, confirm the source has data, and learn the vocabulary BEFORE any backing scan.
+   - **Tier 2 - grouped aggregation:** `query_grouped_aggregation` groups every matching event by one field (`pattern_hash`, `source`, `severity`, a custom field) and returns top values by hit count. This is the workhorse for "what's happening" - it answers in a dense summary what raw retrieval would take many more rows to reveal, and it tells you WHERE to point `query_logs`.
    - **Tier 3 - raw events (last resort):** `query_logs` only AFTER the tiers above have narrowed the window and filter. Pull one broad-enough slice over the narrowed scope, then refine it (item 4). **Reaching for `query_logs` first is the top methodology failure.**
 
 3. **Use the three information levels.** Read `message` (Level 1) to triage. Read `event_summary` + top-level anomaly fields (Level 2) to assess. Read full `state.<category>.<key>` + `anomalies.<key>` (Level 3) only when you specifically need ground truth. Never read Level 3 by default; use `return_field_list` to project only what you need.
 
-4. **Refine the cached slice; don't re-query.** After ONE broad `query_logs` slice, prefer `refine_query_result` over issuing another backing query. Refine runs a relational engine over the CACHED result table (10-100x cheaper, never re-touches the source): `filter_lql` (WHERE over row columns), `group_by` + `aggregate` ({fn,col,as}; fn in count/count_distinct/sum/avg/min/max/stddev/p50/p90/p95/p99), `having_lql` (over post-group columns), `order_by`, `select` (projection), `limit`/`offset`. Queue one broad slice, then refine many times. To page a partial result, follow the response's structured `page.next` (it hands you the exact `refine_query_result` call + `offset`).
+4. **Refine the cached slice; don't re-query.** After ONE broad `query_logs` slice, prefer `refine_query_result` over issuing another backing query. Refine runs a relational engine over the CACHED result table, faster than a fresh scan because it never re-touches the source: `filter_lql` (WHERE over row columns), `group_by` + `aggregate` ({fn,col,as}; fn in count/count_distinct/sum/avg/min/max/stddev/p50/p90/p95/p99), `having_lql` (over post-group columns), `order_by`, `select` (projection), `limit`/`offset`. Queue one broad slice, then refine many times. To page a partial result, follow the response's structured `page.next` (it hands you the exact `refine_query_result` call + `offset`).
 
 5. **Always check ingest health before "no evidence" conclusions - with a caveat today.** The canonical check is `query_logs(lql='source = "<X>" AND event_kind = SLAAgentOp AND subsource in (ingest_drop, spool_full, backpressure)', ...)`. **`event_kind` and `SLAAgentOp` are deep fields the Managed Agent does not emit yet (see the field-availability rule below) - this check returns empty on every source today, regardless of whether ingestion is healthy.** Until agent emission lands, treat an empty result here as inconclusive, not "no drops." Fall back to `list_sources` event-count trends (a sudden drop in `event_count` relative to the source's typical volume is the current best-effort completeness signal) and say so in WHAT WAS NOT CHECKED.
 
-6. **Always confirm the source has data in the investigation window.** See Section 9 below for scope discovery.
+6. **Always confirm the source has data in the investigation window.** See Section 10 below for scope discovery.
 
 **Field availability gating - read before filtering on `event_kind`, `SLAAgentOp`, `anomaly_max_score`, `state.*`, or similar deep fields.** SparkLogs' field surface has two tiers:
 - **Shallow-triage fields (available now):** `message`, `severity`, `source`, `app`, `subsource`, `category`, `pattern` / `pattern_hash`, `t` (timestamps), org/agent scope. Standard log fields the Managed Agent emits today.
@@ -234,7 +234,28 @@ The full per-tool decision tree is in `references/mcp-tool-decision-tree.md`. Th
 
 ---
 
-## Section 9. Scope resolution and source discovery
+## Section 9. The scope ladder - your primary shallow-triage lever, available today
+
+Five fields carry a normalized value plus an opaque `_hash` companion, and together form a ladder from coarse to fine: `service`/`service_hash` -> `app`/`app_hash` -> `subsource`/`subsource_hash` -> `category`/`category_hash` -> `pattern`/`pattern_hash` (finest). Climbing the ladder localizes a problem: group coarse to find the noisy component, narrow one rung at a time, land on the exact recurring `pattern_hash`.
+
+**This is available now, unlike the deep RCA fields.** `state.*`, `event_kind`, and `anomaly_*` are designed but not yet emitted by the Managed Agent (Section 8). The scope ladder is different: `pattern_hash` is computed for every event on every source, always. `service`, `app`, `subsource`, and `category` (and their hashes) are computed whenever the source's data carries that base field - not universal, but common on structured and vendor sources. This is the primary shallow-triage RCA lever available today. Lean on it hard.
+
+**Degrade gracefully on conditional fields.** If a `group_field` on `service` (or another conditional field) returns a single empty or null group, the source simply doesn't carry that field - fall back to `pattern_hash`. Don't read that as a Finding; it means the field isn't populated for this source, not that nothing is happening.
+
+**Treat every `_hash` as opaque.** Never parse it, never infer meaning from its characters, never length-validate it. `pattern_hash` may carry a short readable prefix followed by an opaque tail; the other four are bare opaque tokens. All five are drill-down handles - values you pass back into a filter, not strings you interpret.
+
+**How to use it:**
+- **Group** (`query_grouped_aggregation(group_field=<field or its _hash>)`) to find dominant or anomalous groups, densest first. Group by `pattern_hash` for the most-repeated normalized events; by `service` or `subsource` to localize the noisy component.
+- **Dedup and track stability.** A `_hash` is a stable identity - the same hash means the same normalized value or pattern, across events and across time.
+- **Drill** with `query_logs(lql='pattern_hash = "<h>"')` or `refine_query_result(filter_lql=...)` to read the actual events behind a hash.
+- **Correlate across windows for first-occurrence detection.** A `pattern_hash` present in the incident window but absent from a healthy baseline window signals new behavior - a primary RCA signal. Run `query_grouped_aggregation` twice, once per window, and compare the two hash populations (the v1 substitute for the fast-follow `query_period_diff` tool).
+- **Resolve, don't display.** The response envelope's `lookups` table (Section 11) maps frequent hashes to their values. Resolve a `_hash` to its value before it reaches a Finding; use the hash itself only as a drill-down filter value.
+
+Full detail and a worked localize-then-land shape: `references/scope-ladder.md`.
+
+---
+
+## Section 10. Scope resolution and source discovery
 
 Before any deep investigation, resolve the scope (which org / sources / time window) and confirm the source(s) have data in the investigation's time window.
 
@@ -264,19 +285,19 @@ If the source has events in the window: proceed.
 
 ---
 
-## Section 10. MCP tools quick reference
+## Section 11. MCP tools quick reference
 
 The v1 tool surface is these seven (the "lean-7"):
 
 | Tool | Tier | Use when |
 |---|---|---|
-| `resolve_scope` | cheap | Always first - turn natural-language scope into `org_ids` (orgs + agents). Fuzzy `query` match, sub-org expansion via `include_sub_orgs`. |
-| `list_sources` | cheap | Confirm sources have data in the window (require `start`/`end`). Per-source event counts; enumerate fleet for cross-source pivots. |
-| `list_fields` | cheap | Field catalog for building NEW queries - only if standard/known fields don't surface enough. Not a first-pass tool. |
-| `query_grouped_aggregation` | billed | Group every matching event by one `group_field`; top values by hit count. The workhorse for "what's happening" - run it BEFORE raw logs. |
-| `query_logs` | billed | Retrieve raw chronological events. Last resort, over an already-narrowed window/filter. |
-| `refine_query_result` | cheap | Relational engine over a cached `query_id` (filter/group/aggregate/having/order/select/page). Use freely; 10-100x cheaper than a backing query. |
-| `get_query_metadata` | cheap* | Cache/field introspection over a `query_id`. Default = bookkeeping only (fast, free). *`top_n`/`field_match` deep field discovery is a BILLED catalog scan - use deliberately. |
+| `resolve_scope` | lightweight | Always first - turn natural-language scope into `org_ids` (orgs + agents). Fuzzy `query` match, sub-org expansion via `include_sub_orgs`. |
+| `list_sources` | lightweight | Confirm sources have data in the window (require `start`/`end`). Per-source event counts; enumerate fleet for cross-source pivots. |
+| `list_fields` | lightweight | Field catalog for building NEW queries - only if standard/known fields don't surface enough. Not a first-pass tool. |
+| `query_grouped_aggregation` | backing scan | Group every matching event by one `group_field`; top values by hit count. The workhorse for "what's happening" - run it BEFORE raw logs. |
+| `query_logs` | backing scan | Retrieve raw chronological events. Last resort, over an already-narrowed window/filter. |
+| `refine_query_result` | lightweight | Relational engine over a cached `query_id` (filter/group/aggregate/having/order/select/page). Use freely; touches the cache, not the source. |
+| `get_query_metadata` | lightweight* | Cache/field introspection over a `query_id`. Default = bookkeeping only (fast). *`top_n`/`field_match` deep field discovery is a full catalog scan of the source - use deliberately. |
 
 Differential tools (`query_period_diff`, `compare_populations`, `cluster_event_contexts`, `describe_pattern`) are FAST-FOLLOW, not in the v1 surface. Until they ship, do the same work with `query_grouped_aggregation` + `refine_query_result` (e.g. two grouped calls over two windows for a period diff; group-by `pattern_hash` for pattern triage).
 
@@ -284,7 +305,7 @@ Differential tools (`query_period_diff`, `compare_populations`, `cluster_event_c
 
 **Always pass `org_ids`** explicitly (derived from `resolve_scope`). Empty = all-orgs is strongly discouraged.
 
-**Cost shape.** Billed backing queries (`query_logs`, `query_grouped_aggregation`) are roughly 10-100x more expensive than cheap tools and `refine_query_result`. Plan for 1-4 backing queries; refine many times within each.
+**Query shape.** Backing scans (`query_logs`, `query_grouped_aggregation`) touch the underlying source and take meaningfully longer than the lightweight tools and `refine_query_result`. Plan for 1-4 backing queries; refine many times within each.
 
 ### Reading the response envelope
 
@@ -299,7 +320,7 @@ Every data-tool response is ONE text block, not JSON you parse as a whole:
 
 **Hash-dictionary rule.** Rows carry `*_hash` companions for five fields (pattern, subsource, category, service, app). When a row's value field is absent, resolve its `*_hash` in the header `lookups`. NEVER show a `*_hash` id to a human - resolve it to its value first. But DO use the `*_hash` verbatim as a drill-down filter value (it is the drill-down handle). Treat every `*_hash` as an OPAQUE string: `pattern_hash` = a mnemonic prefix + `_` + a 16-char base36 tail; subsource/category/service/app = a bare 16-char base36 string. Never parse, split, or length-validate a hash.
 
-**Schema descriptor + deeper field discovery.** The header `schema` lists the standard fields plus the top custom fields by fill-rate FOR THIS PAGE. When it carries `more_fields`, that points at `get_query_metadata`. `get_query_metadata`'s default call is cheap (bookkeeping only); its `top_n` / `field_match` deep discovery is a BILLED catalog scan - reach for it only when the inline schema genuinely isn't enough.
+**Schema descriptor + deeper field discovery.** The header `schema` lists the standard fields plus the top custom fields by fill-rate FOR THIS PAGE. When it carries `more_fields`, that points at `get_query_metadata`. `get_query_metadata`'s default call is lightweight (bookkeeping only); its `top_n` / `field_match` deep discovery is a full catalog scan of the source - reach for it only when the inline schema genuinely isn't enough.
 
 ### Grouped results are not refinable (v1)
 
@@ -309,7 +330,7 @@ Detailed per-tool usage with examples is in `references/mcp-tool-decision-tree.m
 
 ---
 
-## Section 11. LQL basics - the syntax you use most
+## Section 12. LQL basics - the syntax you use most
 
 LQL (Lightning Query Language) is the filter language used by every LQL parameter: `lql` (on `query_logs` / `query_grouped_aggregation`), and `filter_lql` / `having_lql` (on `refine_query_result`).
 
@@ -341,7 +362,7 @@ The complete LQL reference with all operators, edge cases, and common mistakes i
 
 ---
 
-## Section 12. Working through an ongoing investigation
+## Section 13. Working through an ongoing investigation
 
 Investigations are usually conversations, not one-shot exchanges. After the initial summary, the engineer often asks follow-up questions: "look at X further", "what about Y?", "check this specific time period", "what about source Z?". You handle these gracefully by treating the conversation as one continuous investigation.
 
@@ -370,7 +391,7 @@ Suggest `/sparklogs-analyze-cause <external_investigation_id>` (the separate cau
 
 ---
 
-## Section 13. Error handling - recover gracefully
+## Section 14. Error handling - recover gracefully
 
 **Cache expired on `refine_query_result`:** the cache is cold (>~24h since the backing scan, or a grouped result, which is not refinable). Re-issue the original backing query; the server transparently regenerates a fresh `query_id` when it can (`cache status` in the header reflects it).
 
@@ -390,18 +411,18 @@ Suggest `/sparklogs-analyze-cause <external_investigation_id>` (the separate cau
 
 ---
 
-## Section 14. When to stop - bounded investigation depth
+## Section 15. When to stop - bounded investigation depth
 
 Investigations that run forever are bad investigations. Heuristics:
 
 - **Found enough for the summary:** you have 3-7 cited findings, the WHAT WAS NOT CHECKED section is honestly populated, and the executive summary writes itself in 2-3 paragraphs. Produce the summary.
 - **Hit the ~15 tool-call mark without converging:** stop and produce an interim summary. State explicitly: "Investigation has examined N findings without converging on a coherent picture; here's what was found and the next investigative directions worth taking." Don't spend another 15 tool calls if the first 15 didn't yield clarity.
-- **Cost ceiling exceeded:** if your local investigation-state document shows backing queries >20, pause and assess. (Most investigations need fewer; the higher ceiling exists so you can be thorough when the symptom legitimately requires it. There is no separate slot-time cap - backing queries are the meaningful unit. Track the running count yourself as you issue backing queries.)
+- **Backing-query ceiling exceeded:** if your local investigation-state document shows backing queries >20, pause and assess. (Most investigations need fewer; the higher ceiling exists so you can be thorough when the symptom legitimately requires it. Backing queries are the meaningful unit to track - keep the running count yourself as you issue them.)
 - **Source not reporting:** if `list_sources` shows the source has not emitted telemetry in the relevant window, stop after a brief summary acknowledging the data gap.
 
 ---
 
-## Section 15. Context management - make the long investigation work
+## Section 16. Context management - make the long investigation work
 
 For investigations that span many tool calls or pause/resume across sessions:
 
@@ -417,7 +438,7 @@ Re-read this file at the start of each new tool-use cycle, especially after cont
 
 **Delegate bulk analysis to subagents (where the host supports it).** If a step requires reading more than ~500 raw events whose content the final summary won't need, delegate to a subagent. The subagent reads in its own context, returns a structured summary (findings, timestamps, referenced `pattern_hash` values, `query_url`s), and you continue with that summary in your context.
 
-Use the most cost-effective modern model tier available for delegation (e.g., the lightweight tier on whichever platform you're running on). Bulk extractive summarization is well-matched to fast, cheaper models. The orchestrator (you) stays on a more capable model for cross-correlating inference, hypothesis evaluation, and output template assembly.
+Use the fastest, most lightweight modern model tier available for delegation (e.g., the lightweight tier on whichever platform you're running on). Bulk extractive summarization is well-matched to fast, lightweight models. The orchestrator (you) stays on a more capable model for cross-correlating inference, hypothesis evaluation, and output template assembly.
 
 Subagent definitions and host-specific notes are in `references/subagent-definitions.md`.
 
@@ -425,7 +446,7 @@ Subagent definitions and host-specific notes are in `references/subagent-definit
 
 ---
 
-## Section 16. Common mistakes to avoid
+## Section 17. Common mistakes to avoid
 
 The full list of common mistakes, anti-patterns, and recovery is in `references/common-mistakes.md`. Top 11:
 
@@ -443,11 +464,12 @@ The full list of common mistakes, anti-patterns, and recovery is in `references/
 
 ---
 
-## Section 17. Reference files
+## Section 18. Reference files
 
 When the situation calls for it, read the appropriate reference file. Don't try to hold all of this in your context all the time:
 
 - `references/output-template.md` - full output template with every field defined, plus right-vs-wrong examples.
+- `references/scope-ladder.md` - the five grouping fields and their `_hash` companions, availability, and RCA usage shapes.
 - `references/scope-resolution.md` - detailed scope-resolution and source-discovery sequence.
 - `references/lql-reference.md` - complete LQL syntax reference with examples and common mistakes.
 - `references/mcp-tool-decision-tree.md` - per-tool detailed usage, all parameters, decision tree for which tool to use when.
@@ -461,7 +483,7 @@ When the situation calls for it, read the appropriate reference file. Don't try 
 
 ---
 
-## Section 18. Slash commands
+## Section 19. Slash commands
 
 The plugin exposes these slash commands; you may be invoked by any of them:
 
@@ -472,7 +494,7 @@ The plugin exposes these slash commands; you may be invoked by any of them:
 
 ---
 
-## Section 19. Calibration - how to know you're doing this well
+## Section 20. Calibration - how to know you're doing this well
 
 After every investigation, mentally check:
 - Does my Executive Summary follow from my Findings, with no claims that aren't in Findings?

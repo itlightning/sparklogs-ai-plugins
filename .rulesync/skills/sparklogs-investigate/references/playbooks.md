@@ -12,6 +12,8 @@ Per-category playbook outlines for common hard-mode investigation symptoms. Thre
 
 **Fast-follow tools still not shipped.** `query_period_diff`, `compare_populations`, `cluster_event_contexts`, and `describe_pattern` are FAST-FOLLOW, not in the v1 lean-7 surface. Substitute their v1 equivalents: two `query_grouped_aggregation` passes over adjacent windows for a period diff; one `query_grouped_aggregation` per population (via distinct `lql`) and compare for a population diff; `query_logs` narrowed to the pattern, then `refine_query_result` with `group_by` over context fields, for clustering; a `query_logs` message projection filtered to the `pattern_hash` to read a pattern's text. See `mcp-tool-decision-tree.md` for the full mapping. **Aggregation-first still holds:** `query_grouped_aggregation` before `query_logs`; refine the cached slice instead of re-scanning.
 
+**The scope ladder is the lever most of these recipes actually run on today.** `service`/`app`/`subsource`/`category`/`pattern` (and their `_hash` companions) are available now, unlike the deep RCA fields above. Group by a coarse field to localize the noisy component, narrow rung by rung, and land on the `pattern_hash` that carries the recurring event. See `scope-ladder.md`.
+
 ---
 
 ## HM1 - VSS backup failure (FULL PLAYBOOK)
@@ -71,7 +73,7 @@ query_grouped_aggregation(org_ids=[...], start="<24h before failure window>", en
 query_grouped_aggregation(org_ids=[...], start="<failure window start>", end="<now>",
   lql='source = "<X>"', group_field="pattern", external_investigation_id="<id>")   # period B (failure window)
 ```
-Compare the two grouped results locally: identifies new VSS-related patterns, disappeared patterns (e.g., successful-backup pattern that stopped), accelerated patterns.
+Compare the two grouped results locally: identifies new VSS-related patterns, disappeared patterns (e.g., successful-backup pattern that stopped), accelerated patterns. This is the scope ladder's cross-window correlation shape: a `pattern_hash` present in period B but absent from period A is new behavior worth chasing first.
 
 **Step 5 - Read the new patterns' text (fast-follow `describe_pattern` not shipped; v1 substitute below).**
 ```
@@ -126,7 +128,7 @@ refine_query_result(query_id=<qid_state>, filter_lql='subsource = scheduled_task
 refine_query_result(query_id=<qid_state>, filter_lql='subsource = installed_products',
                    select=['t', 'event_summary'])
 ```
-Per-subsource Level-3 reads. Cheap; cached. (Field-availability caveat from Step 7 applies to the `state.*` / `anomalies` projections here too.)
+Per-subsource Level-3 reads against the cache, not fresh scans. (Field-availability caveat from Step 7 applies to the `state.*` / `anomalies` projections here too.)
 
 **Step 9 - Cross-product check.**
 From Step 8's installed_products refinement, check `event_summary.by_category` and `event_summary.multiple_in_category`. If multiple backup products detected (e.g., `multiple_in_category: ["backup"]`), note in summary as a likely cross-product conflict - two backup products competing for VSS snapshots is a recurring cause.
@@ -156,19 +158,7 @@ query_logs(
 ```
 `event_kind = SLAAgentOp` is not emitted yet - this returns empty regardless of true ingest health. Treat empty as inconclusive, not "no drops"; cross-check `list_sources` event-count trends from Step 2 instead, and note the gap in WHAT WAS NOT CHECKED.
 
-**Step 12 - Cost rollup.**
-```
-# Roll up backing-query + refinement counts from your local investigation-state document.
-# Inspect any single cache with get_query_metadata(query_id="<qid>") for its status/schema.
-```
-
-**Step 13 - System condition summary output per `output-template.md`.** Findings derive from Steps 3-11. WHAT WAS NOT CHECKED enumerates per `off-endpoint-causes.md`. POSSIBLE NEXT DIRECTIONS section at the end with the explore-or-analyze invitation.
-
-### Cost summary
-- Backing queries: 4-5 (period_diff, cluster_contexts, query_logs Level-3, optional fleet pivot, ingest-health)
-- Refinements: ~4-6 (subsource splits within Step 7's cache)
-- Metadata: ~3 (resolve_scope, list_sources, get_query_metadata)
-- Typically $0.50-2.00 per investigation.
+**Step 12 - System condition summary output per `output-template.md`.** Findings derive from Steps 3-11. Tally backing queries and refinements from your local investigation-state document for WHAT WAS EXAMINED (`get_query_metadata(query_id="<qid>")` on any single cache if you need its status or schema). WHAT WAS NOT CHECKED enumerates per `off-endpoint-causes.md`. POSSIBLE NEXT DIRECTIONS section at the end with the explore-or-analyze invitation.
 
 ---
 
@@ -312,8 +302,8 @@ query_logs(
 ```
 `event_kind = SLAAgentOp` isn't emitted yet - empty here is inconclusive, not "no drops." Cross-check `list_sources` event-count trends instead.
 
-**Step 12 - Cost rollup and system condition summary output.**
-HM3 is one of the more expensive investigations (7-day window). Typically $1.50-4.00.
+**Step 12 - System condition summary output.**
+HM3 needs more backing queries than most playbooks here because the 7-day window (leak trajectory) is broader than the typical 24h investigation.
 
 ### Findings shape for HM3
 - Finding N: "MyApp.exe working_set_bytes grew from <X>MB to <Y>MB over <N> days, across <K> PID lifetimes" - leak signature.
@@ -341,7 +331,7 @@ Per `off-endpoint-causes.md` HM4: WSUS server health, MS Update CDN status, cont
 4. `query_logs` Level-3 on `subsource in (windows_updates, services, system_health)` for the relevant window.
 5. `cluster_event_contexts` on update-failure pattern if found.
 6. Cross-source pivot if multiple sources affected by same KB.
-7. Ingest-health check, cost rollup, system condition summary output.
+7. Ingest-health check, system condition summary output.
 
 ---
 
@@ -482,7 +472,7 @@ The endpoint may be powered off, network-isolated, or the Managed Agent itself h
 - OBSERVED CONDITIONS Finding 1: "Managed Agent telemetry absent from <source> in the past 6 hours; last observed telemetry at <timestamp> (from list_sources query)."
 - WHAT WAS NOT CHECKED: full HM10 list, especially "without Managed Agent telemetry, both endpoint state and RMM connectivity from the endpoint are off-endpoint for this investigation."
 - EXECUTIVE SUMMARY: "The endpoint may be powered off, network-isolated, or the Managed Agent itself has failed. Recommend out-of-band check (physical, IPMI, vendor-specific tools)."
-- Investigation ends with bounded conclusion. Cost: ~$0.05.
+- Investigation ends with a bounded conclusion after a single `list_sources` call - no backing query needed.
 
 **Branch B - Managed Agent reporting. Continue.**
 
@@ -551,13 +541,11 @@ Vendor-specific channels and Application channel for RMM-vendor errors. This is 
 
 **Step 8 - Investigation-mode amplification.** Live amplification of source collection is not currently available. Skip this step.
 
-**Step 9 - Ingest-health and cost rollup.** As HM1 (same deep-field caveat on the ingest-health check).
+**Step 9 - Ingest-health check.** As HM1 (same deep-field caveat on the ingest-health check).
 
 **Step 10 - system condition summary output.** Findings cite step 4-7 query_urls. EXECUTIVE SUMMARY synthesizes which layer (service, network adapter, DNS, TCP-to-cloud, proxy, RMM agent itself) shows the issue - today, primarily from Step 7's winlog evidence since Steps 4-6's `state.*` fields aren't emitted yet. WHAT WAS NOT CHECKED flags RMM cloud health and EDR quarantine if symptom is consistent, AND notes that `state.services` / `state.system_health` are not yet available from the Managed Agent (once emitted, "service is missing entirely from state.services" becomes a possible EDR-quarantine signal worth checking against the EDR admin console).
 
-### Cost summary
-- Branch A: ~$0.05 (just list_sources).
-- Branch B: 1 backing query + 4-5 refinements + 1-2 metadata calls. Typical $0.30-1.50.
+Branch A resolves from `list_sources` alone; Branch B runs one backing query plus several refinements against its cache.
 
 ---
 

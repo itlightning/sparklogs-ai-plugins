@@ -144,7 +144,7 @@ Optional section. If anomaly fields helped you focus the investigation (e.g., `a
 - "anomaly_max_score >= 60 filter on the source-scoped backing query identified vss_writers and services as candidate subsources for deeper investigation. Anomaly fields supported finding-discovery efficiency; they are not surfaced as standalone problem indicators in this summary."
 
 ### What Was Examined
-Track the running counts (backing queries, refinements, sources/orgs covered, matched population) in your local investigation-state document as you go. All figures here come from server-returned query summaries, not self-reported estimates. This section shows the engineer how much evidence backs the summary: how many queries ran, how broad a scope they covered, how many events were in the matched population. It is not a cost or billing disclosure.
+Track the running counts (backing queries, refinements, sources/orgs covered, matched population) in your local investigation-state document as you go. All figures here come from server-returned query summaries, not self-reported estimates. This section shows the engineer how much evidence backs the summary: how many queries ran, how broad a scope they covered, how many events were in the matched population.
 
 ### Audit Trail
 Provide the engineer with the means to inspect every query you ran: the `query_id` + `query_url` list from the local investigation-state document, with per-query detail via `get_query_metadata(query_id="<qid>")`. Every call is also tagged `external_investigation_id` in the server-side audit (a direct investigation-level URL is preferred once SparkLogs UX surfaces it).

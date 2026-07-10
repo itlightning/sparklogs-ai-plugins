@@ -9,15 +9,15 @@ The v1 tool surface is the **lean-7**: `resolve_scope`, `list_sources`, `list_fi
 
 ---
 
-## Cost tiers - funnel before raw
+## Query tiers - funnel before raw
 
 Spend from the top down:
 
-- **Tier 1, cheap scoping:** `resolve_scope`, `list_sources`, `list_fields`. Fix `org_ids`, confirm the source has data, learn the field vocabulary. Do this before any billed scan.
-- **Tier 2, grouped aggregation:** `query_grouped_aggregation`. Groups every matching event by one field, returns top values by hit count. The workhorse for "what's happening" - it tells you where to point `query_logs`.
-- **Tier 3, raw events (last resort):** `query_logs`, only after Tiers 1-2 narrowed the window and filter. Then `refine_query_result` (cheap) over that cached slice - do NOT re-scan.
+- **Tier 1, lightweight scoping:** `resolve_scope`, `list_sources`, `list_fields`. Fix `org_ids`, confirm the source has data, learn the field vocabulary. Do this before any backing scan.
+- **Tier 2, grouped aggregation:** `query_grouped_aggregation`. Groups every matching event by one field, returns top values by hit count. The workhorse for "what's happening" - it tells you where to point `query_logs`. Group by a scope-ladder field (`service`, `app`, `subsource`, `category`, `pattern`, or a `_hash`) to localize before drilling - see `scope-ladder.md`.
+- **Tier 3, raw events (last resort):** `query_logs`, only after Tiers 1-2 narrowed the window and filter. Then `refine_query_result` (lightweight) over that cached slice - do NOT re-scan.
 
-`refine_query_result` and the default `get_query_metadata` are cheap. Billed backing scans (`query_logs`, `query_grouped_aggregation`, and the opt-in `get_query_metadata` deep discovery) are 10-100x more expensive.
+`refine_query_result` and the default `get_query_metadata` are lightweight - they run against the cache. Backing scans (`query_logs`, `query_grouped_aggregation`, and the opt-in `get_query_metadata` deep discovery) touch the underlying source and take meaningfully longer.
 
 ---
 
@@ -112,7 +112,7 @@ query_grouped_aggregation(
   start: "...",
   end: "...",
   include_sub_orgs: true,
-  group_field: "pattern" | "source" | "severity" | "<custom.field>",   # a single field
+  group_field: "pattern" | "source" | "severity" | "service" | "app" | "subsource" | "category" | "<field>_hash" | "<custom.field>",   # a single field
   lql: "...",                      # optional LQL filter applied before grouping
   limit: 50,                       # max distinct groups by hit count (default 50, hard cap 10000)
   external_investigation_id: "..."
@@ -124,6 +124,7 @@ query_grouped_aggregation(
 - "What patterns appeared most?" -> group_field `pattern`.
 - "Which sources show this?" -> filter on a `pattern_hash` in `lql`, group_field `source`.
 - "Severity distribution" -> group_field `severity`.
+- "Which component is noisiest?" -> group_field `service` or `subsource`, then narrow with a second call - see the scope ladder (`scope-ladder.md`).
 
 **Not refinable (v1).** Grouped output is NOT a refinable cache - calling `refine_query_result` on its `query_id` returns expired. Read grouped results directly. If a grouped result is truncated, follow its hint (narrow the `lql`/window and re-run). To then pull raw events for an interesting group, run `query_logs` with that group's value in `lql` (use the `*_hash` verbatim for the five hash fields).
 
@@ -164,7 +165,7 @@ query_logs(
 
 ### `refine_query_result`
 
-An in-cache relational engine over a `query_logs` (or prior refine) result. 10-100x cheaper than a backing query; never re-touches the source.
+An in-cache relational engine over a `query_logs` (or prior refine) result. Meaningfully faster than a backing query; never re-touches the source.
 
 ```
 refine_query_result(
@@ -183,7 +184,7 @@ refine_query_result(
 -> same envelope shape as query_logs (dense TSV for grouped/projected output)
 ```
 
-**The central economic lever.** Queue one broad slice, then refine many times against the same `query_id`. Multiple refines are encouraged.
+**The central efficiency lever.** Queue one broad slice, then refine many times against the same `query_id`. Multiple refines are encouraged.
 
 **Binding rule:** `filter_lql` resolves against the cached table's ROW columns (see the response schema descriptor for the vocabulary); `having_lql` resolves against the POST-GROUP columns (group + aggregate aliases).
 
@@ -203,17 +204,17 @@ Cache and field introspection over a cached `query_id`.
 ```
 get_query_metadata(
   query_id: "...",
-  top_n: 500,                      # OPT-IN deep discovery: expand ranked custom-field list (hard cap 5000). BILLED catalog scan.
-  field_match: {mode: "equals"|"contains"|"regex", pattern: "..."},   # OPT-IN deep discovery: grep custom field NAMES. BILLED.
+  top_n: 500,                      # OPT-IN deep discovery: expand ranked custom-field list (hard cap 5000). Full catalog scan of the source.
+  field_match: {mode: "equals"|"contains"|"regex", pattern: "..."},   # OPT-IN deep discovery: grep custom field NAMES. Full catalog scan.
   external_investigation_id: "..."
 )
 -> bookkeeping (schema, custom_source, stats, cache status, tie-breaker/sort); or, with top_n/field_match, a ranked/matched custom-field list
 ```
 
-**Default call is cheap** (bookkeeping row only, sub-ms, no BQ). **`top_n` / `field_match` deep discovery is a BILLED catalog scan** scoped to the cached query's window + orgs - use deliberately, only when the inline response schema isn't enough.
+**Default call is lightweight** (bookkeeping row only, sub-ms, no backing scan). **`top_n` / `field_match` deep discovery is a full catalog scan of the source** scoped to the cached query's window + orgs - use deliberately, only when the inline response schema isn't enough.
 
 **Use cases:**
-- Cost/cache introspection after a query.
+- Cache introspection after a query.
 - Deep custom-field discovery within a specific cached result (distinct from `list_fields`, which builds NEW queries over a source).
 
 ---
@@ -229,7 +230,7 @@ get_query_metadata(
 4. query_logs over the narrowed window/filter - primary cache
 5. Multiple refine_query_result per subsource / field of interest
 6. query_logs ingest-health check (subsource in ingest_drop/spool_full/backpressure)
-7. get_query_metadata for cost rollup
+7. get_query_metadata on any cache whose schema or status needs a check
 8. system condition summary output
 ```
 
@@ -266,7 +267,7 @@ get_query_metadata(
 
 **Refining a grouped result.** `query_grouped_aggregation` output is not refinable (v1); it returns expired. Read it directly or pull raw events with `query_logs`.
 
-**Re-scanning instead of refining.** After ONE broad `query_logs` slice, use `refine_query_result` for other views - it is 10-100x cheaper.
+**Re-scanning instead of refining.** After ONE broad `query_logs` slice, use `refine_query_result` for other views - it's a cache lookup, not a fresh scan.
 
 **Showing a `*_hash` id to a human.** Resolve it via the header `lookups` first. Use the hash verbatim only as a drill-down filter value.
 

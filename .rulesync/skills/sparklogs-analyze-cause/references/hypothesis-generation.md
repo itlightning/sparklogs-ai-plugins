@@ -35,7 +35,7 @@ When the prior investigation surfaced "X happened concurrent with Y" Findings:
 When the prior investigation surfaced "this affects N sources" Findings:
 
 - **N = 1 (single source)** -> hypothesis space includes source-specific configuration, hardware, software state.
-- **N = small subset** -> hypothesis "shared factor among the subset." Discriminator: contrast `query_grouped_aggregation` runs over the affected vs unaffected populations (in v1; `compare_populations` is a fast-follow tool).
+- **N = small subset** -> hypothesis "shared factor among the subset." Discriminator: contrast `query_grouped_aggregation` runs over the affected vs unaffected populations (in v1; `compare_populations` is a fast-follow tool). Group by a scope-ladder field (`service`, `app`, `subsource`, `category`) to test whether the subset shares a component.
 - **N = fleet-wide** -> hypothesis "environment-wide cause" - recent fleet-wide change (patch, GPO push, DNS change), or upstream service issue.
 
 ### Off-endpoint visibility patterns
@@ -143,16 +143,16 @@ Write the hypothesis statement as a direct, specific claim, not a hedge. "Disk s
 Sometimes the prior investigation's findings are sufficient for analysis without further data gathering. Other times, a quick additional check substantially strengthens or weakens a hypothesis.
 
 **Make additional MCP calls when:**
-- A fleet pivot would discriminate between "single-source hypothesis" and "fleet-wide hypothesis." `query_grouped_aggregation` group_by source on the relevant pattern.
+- A fleet pivot would discriminate between "single-source hypothesis" and "fleet-wide hypothesis." `query_grouped_aggregation` group_field `source` on the relevant pattern.
 - A population contrast would discriminate between "affected sources have factor X" and "factor X is irrelevant." In v1, run `query_grouped_aggregation` over each population separately and compare; use prior Findings to define the populations. (`compare_populations` is a fast-follow tool.)
-- A specific time-window check the prior investigation didn't cover would confirm/refute a hypothesis cheaply.
+- A specific time-window check the prior investigation didn't cover would confirm/refute a hypothesis with a single targeted call.
 
 **Skip additional MCP calls when:**
 - Prior findings already provide sufficient evidence.
 - The check is off-endpoint (surface as "off-endpoint check needed" instead).
-- The check would significantly expand investigation cost without proportional analytic benefit.
+- The check would significantly expand the investigation without proportional analytic benefit.
 
 When you do make additional calls:
 - Reuse the prior investigation's `external_investigation_id`.
-- Prefer cached refinements (`refine_query_result`) over fresh backing queries - much cheaper.
+- Prefer cached refinements (`refine_query_result`) over fresh backing queries - they run against the cache, not the source.
 - Cite the resulting `query_url`s in the hypothesis's Evidence support if they support a specific hypothesis.

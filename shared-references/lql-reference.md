@@ -138,7 +138,7 @@ Slash-delimited, re2 syntax. Used with operators `:`, `!:`, `=`, `!=`. **The cho
 message: /[0-9A-F]{8}(-[0-9A-F]{4}){3}-[0-9A-F]{12}/      <- contains a UUID anywhere in message
 ```
 
-The full power of re2 is available; use sparingly because regex is more expensive than substring matching.
+The full power of re2 is available; use sparingly because regex evaluation is slower than substring matching.
 
 ### Operator + regex semantics
 
@@ -237,7 +237,7 @@ Auto-resolves type when omitted. Only use type suffix when the field has multipl
 
 ## `any` meta field
 
-Searches all standard string + custom fields. Only with `:` operator. Expensive - use sparingly.
+Searches all standard string + custom fields. Only with `:` operator. Slow - use sparingly.
 
 ```
 any: "credit card"                       <- search all fields for "credit card"

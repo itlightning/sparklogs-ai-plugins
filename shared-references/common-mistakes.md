@@ -169,9 +169,9 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` or `low`.
 
 **Symptom.** Long investigation, context compacts, you lose track of what was found, what was checked, what's still open.
 
-**Why it's wrong.** Investigation continuity breaks. Re-investigation costs more than maintaining state.
+**Why it's wrong.** Investigation continuity breaks. Re-investigating from scratch duplicates work that maintaining state would have avoided.
 
-**Recovery.** At minimum, write the document at investigation start (scope, time window, external_investigation_id) and update after each major Finding accumulates. Use the host's filesystem tool. Schema is in SKILL.md Section 15.
+**Recovery.** At minimum, write the document at investigation start (scope, time window, external_investigation_id) and update after each major Finding accumulates. Use the host's filesystem tool. Schema is in SKILL.md Section 16.
 
 ---
 
@@ -181,7 +181,7 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` or `low`.
 
 **Symptom.** First MCP call (after `resolve_scope` and `list_sources`) is `query_logs` for a broad raw retrieval.
 
-**Why it's wrong.** Aggregation first. `query_logs` is the *last resort*, not the first. Aggregation cuts substantial token use AND improves correctness in published observability-MCP retrospectives.
+**Why it's wrong.** Aggregation first. `query_logs` is the *last resort*, not the first. Aggregation returns a dense, denominated answer instead of a pile of raw rows, and improves correctness in published observability-MCP retrospectives.
 
 **Recovery.** First substantive call should usually be `query_grouped_aggregation` (group by the field the question is about). Use `query_logs` only when aggregation has narrowed to a specific small set whose raw text matters.
 
@@ -189,7 +189,7 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` or `low`.
 
 **Symptom.** Your `return_field_list` includes `state.<category>` or `anomalies` on every call.
 
-**Why it's wrong.** Level 3 is roughly 10-100x more expensive in tokens than Level 1 or 2. Default should be Level 1 (triage) -> Level 2 (assess) -> Level 3 only when ground truth is needed.
+**Why it's wrong.** Level 3 returns far more data than Level 1 or 2. Default should be Level 1 (triage) -> Level 2 (assess) -> Level 3 only when ground truth is needed.
 
 **Recovery.** Always set `return_field_list` explicitly. Use the level-recipes from `mcp-tool-decision-tree.md`. Field-length caps are SERVER-ENFORCED - there is no client override. If a capped field is truncating data you need, narrow the query (tighter `lql`, fewer subsources) or project a smaller field set with `return_field_list` / `select`, then page or refine to reach the specific rows.
 
@@ -197,7 +197,7 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` or `low`.
 
 **Symptom.** You issue a fresh `query_logs` or `query_grouped_aggregation` when you already had a relevant cached query.
 
-**Why it's wrong.** Backing queries are 10-100x more expensive than `refine_query_result`. The cache lasts a long time; reuse it.
+**Why it's wrong.** Backing queries do meaningfully more work than `refine_query_result`, which runs against the cache. The cache lasts a long time; reuse it.
 
 **Recovery.** Before issuing a fresh backing query, check if an existing `query_id` (from earlier in this investigation) covers the universe you need. If yes, refine.
 
@@ -229,7 +229,7 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` or `low`.
 
 **Symptom.** Investigation has 20+ tool calls and you're still chasing leads without a coherent picture.
 
-**Why it's wrong.** Cost ceiling violated; engineer's wall-clock budget violated; usually means the investigation is structurally stuck.
+**Why it's wrong.** Backing-query ceiling violated; engineer's wall-clock budget violated; usually means the investigation is structurally stuck.
 
 **Recovery.** Stop at ~15 tool calls if not converging. Produce an interim summary that says "Investigation has examined N findings without converging on a coherent picture; here's what was found and the next investigative directions worth taking." Honest and useful; better than 30 tool calls of confused thrashing.
 

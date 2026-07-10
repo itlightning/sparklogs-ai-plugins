@@ -16,6 +16,7 @@ const SHARED_REFERENCES = [
   'msp-tool-registry.md',
   'off-endpoint-causes.md',
   'pattern-catalog.md',
+  'scope-ladder.md',
   'scope-resolution.md',
   'subagent-definitions.md',
   'writing-voice.md',
