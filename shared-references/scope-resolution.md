@@ -110,7 +110,7 @@ The response includes each source's last-event timestamp within the window plus 
 **Decision logic:**
 
 - **The relevant source is in the response with events in the window** -> proceed.
-- **The relevant source is in the response but with very few events / sparse coverage** -> proceed but flag in OUTSIDE AGENT VISIBILITY: "Source X had limited telemetry in the window (N events). Findings may be incomplete due to data sparsity."
+- **The relevant source is in the response but with very few events / sparse coverage** -> proceed but flag in WHAT WAS NOT CHECKED: "Source X had limited telemetry in the window (N events). Findings may be incomplete due to data sparsity."
 - **The relevant source is NOT in the response (no events in the window)** -> halt and ask the engineer:
   > "I don't see Managed Agent telemetry from `<source>` during `<window>`. Did you mean a different source name, or is the source perhaps offline / not deployed during that window?"
 
@@ -142,4 +142,4 @@ ASK the engineer to clarify the time zone of the system(s) under investigation.
 
 **Starting a new `external_investigation_id` when the scope expands.** The investigation is the same; the scope is updating. Reuse the same id throughout the conversation.
 
-**Not flagging sparse-data sources.** A source with 3 events in the investigation window is technically "in scope" but realistically inadequate to support strong findings. Flag the sparsity in OUTSIDE AGENT VISIBILITY rather than producing high-confidence findings on thin data.
+**Not flagging sparse-data sources.** A source with 3 events in the investigation window is technically "in scope" but realistically inadequate to support strong findings. Flag the sparsity in WHAT WAS NOT CHECKED rather than producing high-confidence findings on thin data.

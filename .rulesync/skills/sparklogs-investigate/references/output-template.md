@@ -20,7 +20,7 @@ SCOPE CHECKED
 - Org(s): [list]
 - Time window: [start UTC] to [end UTC]
 - Data sources queried: [list - subsources, channels, helpers]
-- OUTSIDE AGENT VISIBILITY: [list - investigation-specific; see references/off-endpoint-causes.md]
+- WHAT WAS NOT CHECKED: [list - investigation-specific; see references/off-endpoint-causes.md]
 
 OBSERVED CONDITIONS
 
@@ -38,11 +38,12 @@ ANOMALY SIGNALS USED (if any)
 [brief enumeration, with explicit framing: "These anomaly indicators helped focus the investigation
  on signal-rich events. They are internal investigation tools, not standalone problem alerts."]
 
-INVESTIGATION COST
+WHAT WAS EXAMINED
 - Backing queries: <N>
 - Cached refinements: <M>
-- Tokens consumed: ~<K>
-- BigQuery slot-time: <seconds>
+- Sources covered: <list or count>
+- Org(s) covered: <list or count>
+- Matched population examined: <total rows/events, from query summaries>
 - Wall-clock: <minutes>
 
 AUDIT TRAIL
@@ -89,9 +90,9 @@ Absolute UTC timestamps for the investigation's data window. Not relative ("last
 ### Data sources queried
 The subsources, channels, and helper outputs you actually queried during the investigation. Be specific; e.g., `state/services`, `state/vss_writers`, `state/volumes`, `state/system_health`, `winlog/Microsoft-Windows-Backup/Operational`, `winlog/VSS`. This list lets the engineer (and future investigations) understand the investigation's coverage.
 
-### OUTSIDE AGENT VISIBILITY
+### WHAT WAS NOT CHECKED
 Investigation-specific list of off-endpoint sources and conditions you couldn't check. Per-investigation-type reference: `references/off-endpoint-causes.md`. Examples:
-- "Backup target NAS-01 is outside agent visibility (it does not run a Managed Agent). Recommend checking NAS-01 health logs directly."
+- "Backup target NAS-01 was not checked (it does not run a Managed Agent). Recommend checking NAS-01 health logs directly."
 - "Cloud identity audit logs (Azure AD / Entra) are outside SparkLogs ingestion. Sign-in failures from cloud-side conditional access policies would not appear in this investigation."
 - "EDR cloud audit (SentinelOne) is outside SparkLogs ingestion. EDR-side blocks of VSS operations would not appear in on-endpoint state."
 
@@ -142,8 +143,8 @@ NOT:
 Optional section. If anomaly fields helped you focus the investigation (e.g., `anomaly_max_score >= 60` filter narrowed your candidate set), list briefly. Required framing: anomalies are internal investigation tools, not standalone problem alerts. Example:
 - "anomaly_max_score >= 60 filter on the source-scoped backing query identified vss_writers and services as candidate subsources for deeper investigation. Anomaly fields supported finding-discovery efficiency; they are not surfaced as standalone problem indicators in this summary."
 
-### Investigation Cost
-Track the running counts (backing queries, refinements, tokens) in your local investigation-state document as you go. Engineer-facing visibility into AI investigation cost; supports billing transparency.
+### What Was Examined
+Track the running counts (backing queries, refinements, sources/orgs covered, matched population) in your local investigation-state document as you go. All figures here come from server-returned query summaries, not self-reported estimates. This section shows the engineer how much evidence backs the summary: how many queries ran, how broad a scope they covered, how many events were in the matched population. It is not a cost or billing disclosure.
 
 ### Audit Trail
 Provide the engineer with the means to inspect every query you ran: the `query_id` + `query_url` list from the local investigation-state document, with per-query detail via `get_query_metadata(query_id="<qid>")`. Every call is also tagged `external_investigation_id` in the server-side audit (a direct investigation-level URL is preferred once SparkLogs UX surfaces it).
@@ -191,7 +192,7 @@ SCOPE CHECKED
 - Data sources queried: state/services, state/vss_writers, state/volumes, state/installed_products,
   state/system_health, winlog/Application, winlog/VSS, winlog/Microsoft-Windows-Backup/Operational,
   agent_op/ingest_drop, agent_op/spool_full, agent_op/backpressure
-- OUTSIDE AGENT VISIBILITY:
+- WHAT WAS NOT CHECKED:
   - Backup target NAS-01 (does not run Managed Agent). Recommend checking NAS-01 health directly
     if the on-endpoint evidence below is insufficient.
   - EDR cloud audit (SentinelOne SaaS): EDR-side blocks of VSS operations would not appear in
@@ -257,11 +258,12 @@ ANOMALY SIGNALS USED
   are internal investigation tools, not standalone problem alerts - this Finding is surfaced
   because the engineer asked about backups, not because the anomaly fired.
 
-INVESTIGATION COST
+WHAT WAS EXAMINED
 - Backing queries: 4
 - Cached refinements: 6
-- Tokens consumed: ~12,400
-- BigQuery slot-time: 38s
+- Sources covered: srv-fileshare01 (primary); 8 fleet sources for the cross-source pivot (Finding 6)
+- Org(s) covered: org_acme_dental
+- Matched population examined: 8,614 events across the 4 backing queries
 - Wall-clock: 4 minutes
 
 AUDIT TRAIL
@@ -291,7 +293,7 @@ The on-endpoint perf and event data for srv-fileshare02 in the user-reported win
 of resource saturation, SMB-server-side errors, or AV-induced spikes (Findings 1-3). The source's
 data is complete (Finding 4). However, the user reported slowness - the absence of server-side
 evidence does not mean the user is wrong; it suggests the slowness may have a cause outside this
-server's visibility. Common causes outside scope (see OUTSIDE AGENT VISIBILITY) include client-side
+server's visibility. Common causes outside scope (see WHAT WAS NOT CHECKED) include client-side
 issues, network path issues, and per-workstation AV scanning each opened file.
 
 SCOPE CHECKED
@@ -301,7 +303,7 @@ SCOPE CHECKED
 - Data sources queried: state/services, state/processes, state/perf_counters_curated,
   state/network_connections, state/system_health, winlog/Microsoft-Windows-SMBServer/Operational,
   winlog/Microsoft-Windows-Windows Defender/Operational, agent_op/ingest_drop
-- OUTSIDE AGENT VISIBILITY:
+- WHAT WAS NOT CHECKED:
   - User workstations making SMB requests (only the file server is in scope).
   - Network path between user workstations and srv-fileshare02 (switches, APs, firewall).
   - Any client-side issue (per-workstation AV scanning each opened file).
@@ -340,11 +342,12 @@ Finding 5: No evidence of slowness, congestion, or unusual activity on srv-files
               not show slowness - but the user reported slowness, which suggests the cause may be
               outside this server's visibility)
 
-INVESTIGATION COST
+WHAT WAS EXAMINED
 - Backing queries: 1
 - Cached refinements: 4
-- Tokens consumed: ~3,200
-- BigQuery slot-time: 8s
+- Sources covered: srv-fileshare02
+- Org(s) covered: org_acme_dental
+- Matched population examined: 142 events
 - Wall-clock: 2 minutes
 
 AUDIT TRAIL

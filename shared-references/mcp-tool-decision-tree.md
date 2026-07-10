@@ -79,7 +79,7 @@ list_sources(
 **Use cases:**
 - **Scope discovery:** check whether the suspected source has events in the window. If not, halt and ask the engineer (per `scope-resolution.md`).
 - **Fleet enumeration:** for cross-source investigations, get the source list within the relevant window.
-- **Coverage validation:** confirm the sources you're investigating actually have Managed Agent telemetry in the window. Sparse-data sources should be flagged in OUTSIDE AGENT VISIBILITY.
+- **Coverage validation:** confirm the sources you're investigating actually have Managed Agent telemetry in the window. Sparse-data sources should be flagged in WHAT WAS NOT CHECKED.
 
 ---
 

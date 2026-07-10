@@ -103,13 +103,13 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` or `low`.
 
 **Why it's wrong.** You can only conclude that from the data you actually checked. The user reported a problem; concluding "no problem" overrides their experience based on incomplete data.
 
-**Recovery.** Phrase factually: "No evidence of <specific symptom> in the checked sources during the checked time window." Combine with OUTSIDE AGENT VISIBILITY section listing where else to look.
+**Recovery.** Phrase factually: "No evidence of <specific symptom> in the checked sources during the checked time window." Combine with WHAT WAS NOT CHECKED section listing where else to look.
 
 ---
 
 ## Mistakes against "Show what you can't see"
 
-### Skipping the OUTSIDE AGENT VISIBILITY section
+### Skipping the WHAT WAS NOT CHECKED section
 
 **Symptom.** Your summary doesn't have the section, or the section is just "n/a."
 
@@ -119,7 +119,7 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` or `low`.
 
 ### Generic boilerplate instead of investigation-specific limits
 
-**Symptom.** OUTSIDE AGENT VISIBILITY section says "many off-endpoint causes are possible" or "we don't see everything" or "cloud services are out of scope."
+**Symptom.** WHAT WAS NOT CHECKED section says "many off-endpoint causes are possible" or "we don't see everything" or "cloud services are out of scope."
 
 **Why it's wrong.** Boilerplate is noise. The point of the section is to give the engineer concrete next-step pointers.
 
@@ -131,7 +131,7 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` or `low`.
 
 **Why it's wrong.** Confidently-wrong conclusion when actual cause is off-endpoint. The engineer wastes time on the wrong remediation.
 
-**Recovery.** When you suspect the cause might be off-endpoint, name the suspected off-endpoint source explicitly in the OUTSIDE AGENT VISIBILITY section AND in POSSIBLE NEXT DIRECTIONS. Don't leave it implicit.
+**Recovery.** When you suspect the cause might be off-endpoint, name the suspected off-endpoint source explicitly in the WHAT WAS NOT CHECKED section AND in POSSIBLE NEXT DIRECTIONS. Don't leave it implicit.
 
 ---
 
@@ -207,7 +207,7 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` or `low`.
 
 **Why it's wrong.** Source might have been emitting `ingest_drop` / `spool_full` / `backpressure` events during the window, in which case "no evidence" might just mean "data was incomplete."
 
-**Recovery.** Before any "no evidence found" conclusion, run a quick check: `query_logs(lql='source = "<X>" AND event_kind = SLAAgentOp AND subsource in (ingest_drop, spool_full, backpressure)', start=..., end=...)`. If drops occurred, qualify the Finding's confidence and surface in OUTSIDE AGENT VISIBILITY. **Caveat today: `event_kind` / `SLAAgentOp` are deep fields the Managed Agent doesn't emit yet, so this check returns empty on every source regardless of true ingest health.** Treat an empty result as inconclusive, not "no drops," and fall back to `list_sources` event-count trends as the current completeness signal.
+**Recovery.** Before any "no evidence found" conclusion, run a quick check: `query_logs(lql='source = "<X>" AND event_kind = SLAAgentOp AND subsource in (ingest_drop, spool_full, backpressure)', start=..., end=...)`. If drops occurred, qualify the Finding's confidence and surface in WHAT WAS NOT CHECKED. **Caveat today: `event_kind` / `SLAAgentOp` are deep fields the Managed Agent doesn't emit yet, so this check returns empty on every source regardless of true ingest health.** Treat an empty result as inconclusive, not "no drops," and fall back to `list_sources` event-count trends as the current completeness signal.
 
 ### Reading an empty deep-field query as a clean bill of health
 
@@ -215,7 +215,7 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` or `low`.
 
 **Why it's wrong.** These are DESIGNED fields in the schema, but itl-agent has zero production emission of them today. Every query filtering on them returns empty on every source, whether or not a problem exists. Empty means "not emitted yet," never "no problem found."
 
-**Recovery.** Fall back to shallow-triage fields that ARE emitted today: `message`, `severity`, `source`, `app`, `subsource`, `pattern` / `pattern_hash`, timestamps. Use `query_grouped_aggregation` on `severity` or `pattern` for volume/anomaly triage instead of the deep fields. State explicitly in the Finding or OUTSIDE AGENT VISIBILITY that the deep-field check came back empty because the telemetry isn't emitted yet, not because nothing is wrong.
+**Recovery.** Fall back to shallow-triage fields that ARE emitted today: `message`, `severity`, `source`, `app`, `subsource`, `pattern` / `pattern_hash`, timestamps. Use `query_grouped_aggregation` on `severity` or `pattern` for volume/anomaly triage instead of the deep fields. State explicitly in the Finding or WHAT WAS NOT CHECKED that the deep-field check came back empty because the telemetry isn't emitted yet, not because nothing is wrong.
 
 ### Failing to check that the source has data in the investigation window
 
@@ -265,7 +265,7 @@ Don't keep retrying with slightly different broken expressions. If the LQL parse
 
 ### Skipping required sections
 
-Every summary MUST have: EXECUTIVE SUMMARY (at top), SCOPE CHECKED, OBSERVED CONDITIONS, OUTSIDE AGENT VISIBILITY (which lives inside SCOPE CHECKED), INVESTIGATION COST, AUDIT TRAIL, POSSIBLE NEXT DIRECTIONS (with the explore-or-analyze invitation). ANOMALY SIGNALS USED is required only if you used anomaly fields.
+Every summary MUST have: EXECUTIVE SUMMARY (at top), SCOPE CHECKED, OBSERVED CONDITIONS, WHAT WAS NOT CHECKED (which lives inside SCOPE CHECKED), WHAT WAS EXAMINED, AUDIT TRAIL, POSSIBLE NEXT DIRECTIONS (with the explore-or-analyze invitation). ANOMALY SIGNALS USED is required only if you used anomaly fields.
 
 ### Making the POSSIBLE NEXT DIRECTIONS section longer than 3 sentences
 

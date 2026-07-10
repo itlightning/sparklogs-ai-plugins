@@ -115,7 +115,7 @@ cluster_interpretations:
 - **Cross-correlating inference.** "Does Finding X explain Finding Y?" - orchestrator's job.
 - **Anomaly judgment requiring domain knowledge.** "Is this anomaly meaningful in this investigation context?" - orchestrator's job.
 - **Hypothesis evaluation.** "Does the evidence support hypothesis H?" - orchestrator's job (and `/sparklogs-analyze-cause`'s job for cause hypotheses).
-- **Output template assembly.** Orchestrator assembles Findings, Executive Summary, Visibility Limits.
+- **Output template assembly.** Orchestrator assembles Findings, Executive Summary, What Was Not Checked.
 - **Citation discipline.** Orchestrator owns ensuring every Finding cites a query_url; subagents pass through the URL but don't author the Findings.
 
 ---

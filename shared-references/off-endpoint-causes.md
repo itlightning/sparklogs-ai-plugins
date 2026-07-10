@@ -1,6 +1,6 @@
 # Off-Endpoint Causes - per-symptom-category visibility-limit reference
 
-Every system condition summary enumerates the OUTSIDE AGENT VISIBILITY section. This file lists the recurring off-endpoint causes per common symptom category so you can populate the section investigation-specifically.
+Every system condition summary enumerates the WHAT WAS NOT CHECKED section. This file lists the recurring off-endpoint causes per common symptom category so you can populate the section investigation-specifically.
 
 The list is **not exhaustive** - it's a starting set covering common patterns. It expands over time as more symptom categories are observed.
 
@@ -8,7 +8,7 @@ The list is **not exhaustive** - it's a starting set covering common patterns. I
 
 1. When you start an investigation, identify which symptom category the engineer's request falls under.
 2. Read the relevant section(s) below.
-3. In your OUTSIDE AGENT VISIBILITY section, list the items from below that are *actually relevant* to the specific investigation scope. **Do not list every item generically - that becomes boilerplate noise.** List what's outside *this* investigation's visibility.
+3. In your WHAT WAS NOT CHECKED section, list the items from below that are *actually relevant* to the specific investigation scope. **Do not list every item generically - that becomes boilerplate noise.** List what wasn't checked for *this* investigation.
 4. If on-endpoint evidence is sufficient and off-endpoint causes are not implicated, the section can be brief: "The off-endpoint causes typically associated with this kind of investigation were considered but the on-endpoint evidence is sufficient to characterize the observed conditions - see Findings."
 
 ---
@@ -153,12 +153,12 @@ Some off-endpoint causes apply across many symptom categories and are worth flag
 
 ---
 
-## Honest framing in the OUTSIDE AGENT VISIBILITY section
+## Honest framing in the WHAT WAS NOT CHECKED section
 
 The point of enumeration is to support the engineer's decision about where to investigate next, not to pad the summary with caveats. Prefer specific, actionable wording.
 
 **Right (specific, actionable):**
-- "Backup target NAS-01 is outside agent visibility (it does not run a Managed Agent). Recommend checking NAS-01 health logs directly to confirm or rule out a target-side cause."
+- "Backup target NAS-01 was not checked (it does not run a Managed Agent). Recommend checking NAS-01 health logs directly to confirm or rule out a target-side cause."
 - "Azure AD audit logs are outside SparkLogs ingestion currently. If on-endpoint evidence does not explain the logon failures (Findings 1-3 are inconclusive), check the Azure AD admin center for recent conditional-access policy changes."
 
 **Wrong (generic boilerplate):**

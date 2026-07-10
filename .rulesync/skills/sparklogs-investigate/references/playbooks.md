@@ -6,9 +6,9 @@ Per-category playbook outlines for common hard-mode investigation symptoms. Thre
 1. Identify which symptom category the engineer's request falls under.
 2. Read the relevant section. The playbook is a *suggested* call sequence, not a script - adapt to the specific investigation.
 3. Always produce a system condition summary per `output-template.md`.
-4. Always populate OUTSIDE AGENT VISIBILITY per `off-endpoint-causes.md`.
+4. Always populate WHAT WAS NOT CHECKED per `off-endpoint-causes.md`.
 
-**Field-availability gating - read before running any recipe below.** Nearly every "canonical evidence" field cited in these playbooks - `state.*` (state.vss_writers, state.processes, state.services, state.memory, state.system_health, etc.), `event_kind` (SLASnapshot, SLADelta, SLAAgentOp, SLAHelper), and `anomaly_max_score` / `anomaly_categories` - is a deep RCA field the Managed Agent does not emit yet (zero production emission today). Every filter or projection on these fields returns EMPTY on every source right now. **An empty result from a deep-field query means "not emitted yet," never "no problem found."** Per SKILL.md Section 8: fall back to shallow-triage fields (`message`, `severity`, `source`, `app`, `subsource`, `pattern`/`pattern_hash`) and say so explicitly in the Finding or OUTSIDE AGENT VISIBILITY. These playbooks describe the target end-state call shape for when emission lands; today, expect the deep-field portions to come back empty and plan the investigation's shallow-triage fallback accordingly.
+**Field-availability gating - read before running any recipe below.** Nearly every "canonical evidence" field cited in these playbooks - `state.*` (state.vss_writers, state.processes, state.services, state.memory, state.system_health, etc.), `event_kind` (SLASnapshot, SLADelta, SLAAgentOp, SLAHelper), and `anomaly_max_score` / `anomaly_categories` - is a deep RCA field the Managed Agent does not emit yet (zero production emission today). Every filter or projection on these fields returns EMPTY on every source right now. **An empty result from a deep-field query means "not emitted yet," never "no problem found."** Per SKILL.md Section 8: fall back to shallow-triage fields (`message`, `severity`, `source`, `app`, `subsource`, `pattern`/`pattern_hash`) and say so explicitly in the Finding or WHAT WAS NOT CHECKED. These playbooks describe the target end-state call shape for when emission lands; today, expect the deep-field portions to come back empty and plan the investigation's shallow-triage fallback accordingly.
 
 **Fast-follow tools still not shipped.** `query_period_diff`, `compare_populations`, `cluster_event_contexts`, and `describe_pattern` are FAST-FOLLOW, not in the v1 lean-7 surface. Substitute their v1 equivalents: two `query_grouped_aggregation` passes over adjacent windows for a period diff; one `query_grouped_aggregation` per population (via distinct `lql`) and compare for a population diff; `query_logs` narrowed to the pattern, then `refine_query_result` with `group_by` over context fields, for clustering; a `query_logs` message projection filtered to the `pattern_hash` to read a pattern's text. See `mcp-tool-decision-tree.md` for the full mapping. **Aggregation-first still holds:** `query_grouped_aggregation` before `query_logs`; refine the cached slice instead of re-scanning.
 
@@ -22,7 +22,7 @@ Per-category playbook outlines for common hard-mode investigation symptoms. Thre
 ### Canonical evidence
 vss_writers state, recent volume snapshots, recent `Microsoft-Windows-Backup` and `VSS` event-log channels, disk free-space (system_health), scheduled-task state for the backup job, installed_products (to detect cross-product backup conflicts), system_health for ingest health and overall picture.
 
-### Off-endpoint causes to flag in OUTSIDE AGENT VISIBILITY
+### Off-endpoint causes to flag in WHAT WAS NOT CHECKED
 Per `off-endpoint-causes.md` HM1: backup target NAS/cloud, EDR cloud blocking VSS, bespoke vendor without autodetect, Veeam credential vault, Hyper-V/VMware guest writers, backup-job server-side state.
 
 ### Call sequence
@@ -61,7 +61,7 @@ query_logs(
   external_investigation_id="<id>"
 )
 ```
-`state.system_health` is a deep field pending Managed Agent emission - expect this to return rows with `event_summary` populated but `state.system_health` empty until emission lands. Establishes overall_severity, disk space, network reachability, etc. where available; note the gap in OUTSIDE AGENT VISIBILITY otherwise.
+`state.system_health` is a deep field pending Managed Agent emission - expect this to return rows with `event_summary` populated but `state.system_health` empty until emission lands. Establishes overall_severity, disk space, network reachability, etc. where available; note the gap in WHAT WAS NOT CHECKED otherwise.
 
 **Step 4 - Backing query: what changed (fast-follow tool - not yet shipped; v1 substitute below).**
 ```
@@ -154,7 +154,7 @@ query_logs(
   external_investigation_id="<id>"
 )
 ```
-`event_kind = SLAAgentOp` is not emitted yet - this returns empty regardless of true ingest health. Treat empty as inconclusive, not "no drops"; cross-check `list_sources` event-count trends from Step 2 instead, and note the gap in OUTSIDE AGENT VISIBILITY.
+`event_kind = SLAAgentOp` is not emitted yet - this returns empty regardless of true ingest health. Treat empty as inconclusive, not "no drops"; cross-check `list_sources` event-count trends from Step 2 instead, and note the gap in WHAT WAS NOT CHECKED.
 
 **Step 12 - Cost rollup.**
 ```
@@ -162,7 +162,7 @@ query_logs(
 # Inspect any single cache with get_query_metadata(query_id="<qid>") for its status/schema.
 ```
 
-**Step 13 - System condition summary output per `output-template.md`.** Findings derive from Steps 3-11. OUTSIDE AGENT VISIBILITY enumerates per `off-endpoint-causes.md`. POSSIBLE NEXT DIRECTIONS section at the end with the explore-or-analyze invitation.
+**Step 13 - System condition summary output per `output-template.md`.** Findings derive from Steps 3-11. WHAT WAS NOT CHECKED enumerates per `off-endpoint-causes.md`. POSSIBLE NEXT DIRECTIONS section at the end with the explore-or-analyze invitation.
 
 ### Cost summary
 - Backing queries: 4-5 (period_diff, cluster_contexts, query_logs Level-3, optional fleet pivot, ingest-health)
@@ -480,7 +480,7 @@ Filtered for the source. **This is the discriminator for the entire investigatio
 The endpoint may be powered off, network-isolated, or the Managed Agent itself has failed. system condition summary output:
 - SCOPE CHECKED notes: "<source> has not emitted Managed Agent telemetry in the last 6 hours."
 - OBSERVED CONDITIONS Finding 1: "Managed Agent telemetry absent from <source> in the past 6 hours; last observed telemetry at <timestamp> (from list_sources query)."
-- OUTSIDE AGENT VISIBILITY: full HM10 list, especially "without Managed Agent telemetry, both endpoint state and RMM connectivity from the endpoint are off-endpoint for this investigation."
+- WHAT WAS NOT CHECKED: full HM10 list, especially "without Managed Agent telemetry, both endpoint state and RMM connectivity from the endpoint are off-endpoint for this investigation."
 - EXECUTIVE SUMMARY: "The endpoint may be powered off, network-isolated, or the Managed Agent itself has failed. Recommend out-of-band check (physical, IPMI, vendor-specific tools)."
 - Investigation ends with bounded conclusion. Cost: ~$0.05.
 
@@ -553,7 +553,7 @@ Vendor-specific channels and Application channel for RMM-vendor errors. This is 
 
 **Step 9 - Ingest-health and cost rollup.** As HM1 (same deep-field caveat on the ingest-health check).
 
-**Step 10 - system condition summary output.** Findings cite step 4-7 query_urls. EXECUTIVE SUMMARY synthesizes which layer (service, network adapter, DNS, TCP-to-cloud, proxy, RMM agent itself) shows the issue - today, primarily from Step 7's winlog evidence since Steps 4-6's `state.*` fields aren't emitted yet. OUTSIDE AGENT VISIBILITY flags RMM cloud health and EDR quarantine if symptom is consistent, AND notes that `state.services` / `state.system_health` are not yet available from the Managed Agent (once emitted, "service is missing entirely from state.services" becomes a possible EDR-quarantine signal worth checking against the EDR admin console).
+**Step 10 - system condition summary output.** Findings cite step 4-7 query_urls. EXECUTIVE SUMMARY synthesizes which layer (service, network adapter, DNS, TCP-to-cloud, proxy, RMM agent itself) shows the issue - today, primarily from Step 7's winlog evidence since Steps 4-6's `state.*` fields aren't emitted yet. WHAT WAS NOT CHECKED flags RMM cloud health and EDR quarantine if symptom is consistent, AND notes that `state.services` / `state.system_health` are not yet available from the Managed Agent (once emitted, "service is missing entirely from state.services" becomes a possible EDR-quarantine signal worth checking against the EDR admin console).
 
 ### Cost summary
 - Branch A: ~$0.05 (just list_sources).
@@ -568,7 +568,7 @@ If the engineer's request doesn't map cleanly to HM1-HM10:
 2. Run system health overview (universally informative - the system_health subsource is designed for exactly this case).
 3. Run `query_period_diff` over 24h (or vs 7d prior) to spot what changed.
 4. Use the Findings to guide whether you need deeper investigation in any specific subsource.
-5. system condition summary output with appropriate OUTSIDE AGENT VISIBILITY enumeration based on what the symptom turned out to involve.
+5. system condition summary output with appropriate WHAT WAS NOT CHECKED enumeration based on what the symptom turned out to involve.
 
 ---
 
