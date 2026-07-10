@@ -18,6 +18,7 @@ const SHARED_REFERENCES = [
   'pattern-catalog.md',
   'scope-resolution.md',
   'subagent-definitions.md',
+  'writing-voice.md',
 ];
 
 async function exists(file) {
