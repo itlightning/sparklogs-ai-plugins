@@ -71,7 +71,7 @@ list_sources(
   include_sub_orgs: true,          # default true
   external_investigation_id: "..."
 )
--> rows: {source, event_count, billable_bytes}
+-> rows: {source, event_count, bytes_ingested}
 ```
 
 **Use the investigation's actual window.** Different investigations span different windows (live troubleshooting vs historical RCA over a past incident). Do NOT default to "is this source reporting right now?" - that wrongly excludes sources whose data is in the historical window but who are now offline.
