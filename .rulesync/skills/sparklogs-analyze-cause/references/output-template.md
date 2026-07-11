@@ -1,4 +1,4 @@
-# Output Template - Speculative Analysis
+# Output Template - Root-Cause Analysis
 
 This is the canonical template every cause-analysis output produces. Use these field definitions and follow these rules. Right-vs-wrong examples below.
 
@@ -7,16 +7,16 @@ This is the canonical template every cause-analysis output produces. Use these f
 ## Required structure
 
 ```
-SPECULATIVE ANALYSIS - <ticket / scope description>
-investigation_request_id: <reused from prior investigation>
+ROOT-CAUSE ANALYSIS: <ticket / scope description>
+external_investigation_id: <reused from prior investigation>
 
-WARNING: SPECULATION
-These are candidate hypotheses, not established conclusions. Each hypothesis derives from
-prior Findings and should be independently validated before any action is taken.
+WORKING THEORIES
+Below are <N> ranked explanations that fit the investigation evidence.
+Verify with the confirm/refute steps and use judgment before acting.
 
 INPUT
 The prior investigation's system condition summary
-(referenced by investigation_request_id <id>, accessible via /sparklogs-summary <id>).
+(referenced by external_investigation_id <id>, accessible via /sparklogs-summary <id>).
 
 CANDIDATE HYPOTHESES (ranked by evidence support)
 
@@ -35,7 +35,7 @@ CANDIDATE HYPOTHESES (ranked by evidence support)
 ALTERNATIVE FRAMINGS
 [If the symptom could mean something different than the obvious interpretation, enumerate.]
 
-WHAT THE ANALYZER IS MOST UNCERTAIN ABOUT
+WHAT IS UNCERTAIN
 [Explicit enumeration of weak evidence and gaps in reasoning. Do not minimize.]
 
 RECOMMENDED NEXT STEPS (suggested, not prescribed)
@@ -43,10 +43,10 @@ RECOMMENDED NEXT STEPS (suggested, not prescribed)
  Phrased as "you could ...", "consider checking ...", "running X would distinguish A from B".
  Never as "do X" or "you should Y".]
 
-ANALYSIS COST (incremental over the prior investigation)
+WHAT WAS EXAMINED (incremental over the prior investigation)
 - Additional backing queries: <N>
 - Additional cached refinements: <M>
-- Additional tokens: ~<K>
+- Additional matched population examined: <rows/events, from query summaries, if any additional queries ran>
 - Wall-clock: <minutes>
 ```
 
@@ -54,25 +54,26 @@ ANALYSIS COST (incremental over the prior investigation)
 
 ## Field definitions
 
-### investigation_request_id
+### external_investigation_id
 Reused from the prior investigation. Do not generate a new one - this analysis extends the prior investigation.
 
-### WARNING: SPECULATION warning
-Required at the top of every analysis. Visually prominent. Verbatim wording suggested above.
+### WORKING THEORIES intro
+Required at the top of every analysis, right after the title. Plain, calm framing: these are ranked explanations that fit the evidence, not established conclusions. Verbatim wording suggested above. Every hypothesis still needs the confirm/refute steps below; the intro sets expectations once instead of repeating a warning per hypothesis.
 
 ### INPUT
 Reference to the prior investigation summary. The engineer can re-display it via `/sparklogs-summary <id>`.
 
 ### Hypothesis statement
-A plain-language statement of the candidate cause. Specific, not generic.
+A plain-language statement of the candidate cause. State it directly and specifically - the Confidence field and the WORKING THEORIES intro already carry the "candidate, not proven" framing, so the statement itself shouldn't hedge.
 
-**Right:**
+**Right (direct, specific):**
 - "Hypothesis #1: KB5034441 (installed at 02:45 UTC per Finding 4) changed something in the storage stack that interacts negatively with Veeam VSS operations on this Windows version."
 - "Hypothesis #2: VSS shadow storage exhaustion on a subset of sources (Finding 5b cluster) is a separate factor compounding with the patch-related issue."
+- "Hypothesis #1: Disk signature collision on Harddisk2."
 
-**Wrong:**
-- "Hypothesis #1: There may be a problem." (too generic)
-- "Hypothesis #1: KB5034441 broke Veeam." (too conclusive - phrase as candidate)
+**Wrong (vague hedging - state it directly instead):**
+- "Hypothesis #1: It's possible there may be some kind of disk issue." (say what the disk issue is: "Disk signature collision on Harddisk2")
+- "Hypothesis #1: There may be a problem." (too generic to anchor confirm/refute steps)
 
 ### Evidence support
 List which prior Finding numbers support this hypothesis. Without prior Findings backing it, you don't have evidence - the hypothesis isn't grounded. Drop the hypothesis or downgrade confidence.
@@ -104,10 +105,10 @@ If the symptom could mean something different than the obvious interpretation, e
 - "The 'fleet-wide pattern' finding could mean these sources share a common factor that isn't the KB (e.g., shared backup target NAS, shared backup window timing)."
 - "The 'concurrent KB install timing' is correlation, not necessarily causation."
 
-### What the analyzer is most uncertain about
+### What is uncertain
 Explicit enumeration of weak evidence and gaps. **Do not minimize.** Examples:
 - "Whether the disk-pressure cluster (Finding 5b) is independent or related to the primary pattern."
-- "Whether NAS-01 issues are contributing - backup target is outside agent visibility."
+- "Whether NAS-01 issues are contributing - backup target was not checked (no Managed Agent)."
 - "Whether there is a non-KB factor common to the 7 affected sources."
 
 ### Recommended next steps
@@ -127,17 +128,17 @@ Concrete things the engineer could do. Framed as suggestions, not prescriptions.
 ## Worked example
 
 ```
-SPECULATIVE ANALYSIS - Veeam backup failure on srv-fileshare01 (ticket #4781)
-investigation_request_id: i9k2nf9x8a3b4c2d
+ROOT-CAUSE ANALYSIS: Veeam backup failure on srv-fileshare01 (ticket #4781)
+external_investigation_id: investigate-ticket-4781-veeam-backup
 
-WARNING: SPECULATION
-These are candidate hypotheses, not established conclusions. Each hypothesis derives from
-prior Findings and should be independently validated before any action is taken.
+WORKING THEORIES
+Below are 3 ranked explanations that fit the investigation evidence.
+Verify with the confirm/refute steps and use judgment before acting.
 
 INPUT
 The prior investigation's system condition summary
-(referenced by investigation_request_id i9k2nf9x8a3b4c2d, accessible via
- /sparklogs-summary i9k2nf9x8a3b4c2d).
+(referenced by external_investigation_id investigate-ticket-4781-veeam-backup, accessible via
+ /sparklogs-summary investigate-ticket-4781-veeam-backup).
 
 CANDIDATE HYPOTHESES
 
@@ -162,8 +163,8 @@ HYPOTHESIS #2: Disk pressure on the small subset of sources in cluster B (Findin
   Off-endpoint check needed: no
 
 HYPOTHESIS #3: Backup target NAS-01 issues compound with VSS issues.
-  Evidence support: indirect - backup target is outside agent visibility per the prior
-                    investigation's OUTSIDE AGENT VISIBILITY section.
+  Evidence support: indirect - backup target was not checked, per the prior
+                    investigation's WHAT WAS NOT CHECKED section.
   Confidence: low
   What would confirm this: check NAS-01 health logs directly during the error windows.
   What would refute this: NAS-01 health is normal during the windows.
@@ -176,10 +177,10 @@ ALTERNATIVE FRAMINGS
 - The temporal correlation between the KB install and the error (Finding 4) is observational;
   causation requires the rollback or population-comparison test.
 
-WHAT THE ANALYZER IS MOST UNCERTAIN ABOUT
+WHAT IS UNCERTAIN
 - Whether the disk-pressure cluster (Hypothesis #2) is independent or related to the
   KB-related hypothesis (Hypothesis #1).
-- Whether NAS-01 issues (Hypothesis #3) are contributing - outside agent visibility.
+- Whether NAS-01 issues (Hypothesis #3) are contributing - not checked.
 - Whether there is a non-KB factor common to the 7 affected sources that we haven't checked.
 - Whether the error pattern would also appear on sources NOT in the 7 affected - we have not
   tested for absence on the broader fleet.
@@ -193,15 +194,15 @@ RECOMMENDED NEXT STEPS (suggested, not prescribed)
 3. Running `query_grouped_aggregation` to compare installed_products across the 7 affected
    sources vs unaffected fleet sources could surface non-KB factors.
 
-ANALYSIS COST
+WHAT WAS EXAMINED
 - Additional backing queries: 0
-- Additional cached refinements: 2
-- Additional tokens: ~3,800
+- Additional cached refinements: 2 (reused the prior investigation's cached queries)
+- Additional matched population examined: none (refinements only, no new backing query)
 - Wall-clock: 1.5 minutes
 ```
 
 This worked example shows:
-- SPECULATION warning prominent.
+- WORKING THEORIES intro sets calm, verifiable expectations up front.
 - Each hypothesis cited prior Finding numbers.
 - Each hypothesis has confirm/refute steps.
 - Off-endpoint checks explicitly named.

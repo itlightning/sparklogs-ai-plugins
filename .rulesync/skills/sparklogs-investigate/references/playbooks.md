@@ -6,7 +6,13 @@ Per-category playbook outlines for common hard-mode investigation symptoms. Thre
 1. Identify which symptom category the engineer's request falls under.
 2. Read the relevant section. The playbook is a *suggested* call sequence, not a script - adapt to the specific investigation.
 3. Always produce a system condition summary per `output-template.md`.
-4. Always populate OUTSIDE AGENT VISIBILITY per `off-endpoint-causes.md`.
+4. Always populate WHAT WAS NOT CHECKED per `off-endpoint-causes.md`.
+
+**Field-availability gating - read before running any recipe below.** Nearly every "canonical evidence" field cited in these playbooks - `state.*` (state.vss_writers, state.processes, state.services, state.memory, state.system_health, etc.), `event_kind` (SLASnapshot, SLADelta, SLAAgentOp, SLAHelper), and `anomaly_max_score` / `anomaly_categories` - is a deep RCA field the Managed Agent does not emit yet (zero production emission today). Every filter or projection on these fields returns EMPTY on every source right now. **An empty result from a deep-field query means "not emitted yet," never "no problem found."** Per SKILL.md Section 8: fall back to shallow-triage fields (`message`, `severity`, `source`, `app`, `subsource`, `pattern`/`pattern_hash`) and say so explicitly in the Finding or WHAT WAS NOT CHECKED. These playbooks describe the target end-state call shape for when emission lands; today, expect the deep-field portions to come back empty and plan the investigation's shallow-triage fallback accordingly.
+
+**Fast-follow tools still not shipped.** `query_period_diff`, `compare_populations`, `cluster_event_contexts`, and `describe_pattern` are FAST-FOLLOW, not in the v1 lean-7 surface. Substitute their v1 equivalents: two `query_grouped_aggregation` passes over adjacent windows for a period diff; one `query_grouped_aggregation` per population (via distinct `lql`) and compare for a population diff; `query_logs` narrowed to the pattern, then `refine_query_result` with `group_by` over context fields, for clustering; a `query_logs` message projection filtered to the `pattern_hash` to read a pattern's text. See `mcp-tool-decision-tree.md` for the full mapping. **Aggregation-first still holds:** `query_grouped_aggregation` before `query_logs`; refine the cached slice instead of re-scanning.
+
+**The scope ladder is the lever most of these recipes actually run on today.** `service`/`app`/`subsource`/`category`/`pattern` (and their `_hash` companions) are available now, unlike the deep RCA fields above. Group by a coarse field to localize the noisy component, narrow rung by rung, and land on the `pattern_hash` that carries the recurring event. See `scope-ladder.md`.
 
 ---
 
@@ -18,26 +24,30 @@ Per-category playbook outlines for common hard-mode investigation symptoms. Thre
 ### Canonical evidence
 vss_writers state, recent volume snapshots, recent `Microsoft-Windows-Backup` and `VSS` event-log channels, disk free-space (system_health), scheduled-task state for the backup job, installed_products (to detect cross-product backup conflicts), system_health for ingest health and overall picture.
 
-### Off-endpoint causes to flag in OUTSIDE AGENT VISIBILITY
+### Off-endpoint causes to flag in WHAT WAS NOT CHECKED
 Per `off-endpoint-causes.md` HM1: backup target NAS/cloud, EDR cloud blocking VSS, bespoke vendor without autodetect, Veeam credential vault, Hyper-V/VMware guest writers, backup-job server-side state.
 
 ### Call sequence
 
-**Step 0 - Investigation session.** Generate `investigation_request_id`. Write local investigation-state document at `./investigations/<id>.md`.
+**Step 0 - Investigation session.** Pick an `external_investigation_id` (friendly, 8-200 chars, e.g. `investigate-<ticket>-<X>-vss-backup`). Write local investigation-state document at `./investigations/<id>.md`.
 
 **Step 1 - Scope resolution.**
 ```
-resolve_scope("<source name from ticket>")
--> org_ids, sources_hint
+resolve_scope(
+  query="<source name from ticket>",
+  external_investigation_id="<id>"
+)
+-> org_ids, agent rows
 ```
 
 **Step 2 - Source health discovery.**
 ```
 list_sources(
   org_ids=[<from step 1>],
-  time_range={start: "<investigation start>", end: "<investigation end>"},
+  start="<investigation start, RFC3339 UTC>",
+  end="<investigation end, RFC3339 UTC>",
   include_sub_orgs=true,
-  app_filter='app: agent_op/*'
+  external_investigation_id="<id>"
 )
 ```
 If the source has no data in the investigation's time window -> halt and ask the engineer (per `scope-resolution.md`): "I don't see Managed Agent telemetry from `<source>` during `<window>`. Did you mean a different source name, or is the source perhaps offline / not deployed during that window?"
@@ -46,130 +56,109 @@ If the source has no data in the investigation's time window -> halt and ask the
 ```
 query_logs(
   org_ids=[...],
-  filter_lql='source = "<X>" AND subsource = system_health',
-  time_range={relative: "last_24h"},
+  start="<24h before window>",
+  end="<window end>",
+  lql='source = "<X>" AND subsource = system_health',
   return_field_list=['t', 'event_summary', 'state.system_health'],
-  max_field_chars_override={'event_summary': 0, 'state.system_health': 4096},
-  investigation_request_id="<id>",
-  purpose="HM1: system_health overview for <X>"
+  external_investigation_id="<id>"
 )
 ```
-Establishes overall_severity, disk space, network reachability, etc. - context for the rest of the investigation.
+`state.system_health` is a deep field pending Managed Agent emission - expect this to return rows with `event_summary` populated but `state.system_health` empty until emission lands. Establishes overall_severity, disk space, network reachability, etc. where available; note the gap in WHAT WAS NOT CHECKED otherwise.
 
-**Step 4 - Backing query: what changed.**
+**Step 4 - Backing query: what changed (fast-follow tool - not yet shipped; v1 substitute below).**
 ```
-query_period_diff(
-  org_ids=[...],
-  period_a={start: "<24h before failure window>", end: "<failure window start>"},
-  period_b={start: "<failure window start>", end: "now"},
-  group_by='pattern_hash',
-  filter_lql='source = "<X>"',
-  investigation_request_id="<id>",
-  purpose="HM1: what changed pre-failure vs failure window"
-)
--> qid_diff, query_url
+# query_period_diff is fast-follow. v1 substitute: two query_grouped_aggregation calls.
+query_grouped_aggregation(org_ids=[...], start="<24h before failure window>", end="<failure window start>",
+  lql='source = "<X>"', group_field="pattern", external_investigation_id="<id>")   # period A (baseline)
+query_grouped_aggregation(org_ids=[...], start="<failure window start>", end="<now>",
+  lql='source = "<X>"', group_field="pattern", external_investigation_id="<id>")   # period B (failure window)
 ```
-Identifies new VSS-related patterns, disappeared patterns (e.g., successful-backup pattern that stopped), accelerated patterns.
+Compare the two grouped results locally: identifies new VSS-related patterns, disappeared patterns (e.g., successful-backup pattern that stopped), accelerated patterns. This is the scope ladder's cross-window correlation shape: a `pattern_hash` present in period B but absent from period A is new behavior worth chasing first.
 
-**Step 5 - Describe the new patterns.**
+**Step 5 - Read the new patterns' text (fast-follow `describe_pattern` not shipped; v1 substitute below).**
 ```
-describe_pattern(
+query_logs(
   org_ids=[...],
-  pattern_hashes=[<top 3-5 new VSS-related hashes from step 4>],
-  samples_per_pattern=5,
-  investigation_request_id="<id>"
+  start="<failure window start>", end="<failure window end>",
+  lql='pattern_hash in (<top 3-5 new VSS-related hashes from step 4>)',
+  return_field_list=['t', 'pattern_hash', 'message'],
+  limit=25,
+  external_investigation_id="<id>"
 )
 ```
 Returns pattern text + sample messages. Now you have the actual error wording (e.g., "Veeam VSS error 0x80042308").
 
-**Step 6 - Backing query: surrounding context for primary error.**
-```
-cluster_event_contexts(
-  org_ids=[...],
-  filter_lql='pattern_hash = "<primary new error hash>"',
-  time_range={relative: "last_24h"},
-  sample_n_matches=100,
-  window_pre_s=300,
-  window_post_s=60,
-  investigation_request_id="<id>",
-  purpose="HM1: surround context for primary error"
-)
--> qid_clusters, query_url
-```
-Returns distinct contextual situations. Often surfaces "SCM service activity precedes most occurrences" or "disk-pressure precedes a subset" or "isolated occurrences with no precursor."
-
-**Step 7 - Backing query: vss_writers state at failure window (Level 3 ground truth).**
+**Step 6 - Surrounding context for primary error (fast-follow `cluster_event_contexts` not shipped; v1 substitute below).**
 ```
 query_logs(
   org_ids=[...],
-  filter_lql='source = "<X>" AND subsource in (vss_writers, volumes, scheduled_tasks, installed_products) AND t between <failure_window_start> and <failure_window_end>',
+  start="<24h before failure window>", end="<failure window end>",
+  lql='source = "<X>"',
+  return_field_list=['t', 'subsource', 'severity', 'pattern_hash', 'message'],
+  external_investigation_id="<id>"
+)
+-> qid_context, query_url
+refine_query_result(query_id=<qid_context>, filter_lql='t between <primary_error_t - 300s> and <primary_error_t>',
+  select=['t', 'subsource', 'severity', 'pattern_hash', 'message'], order_by=[{col: 't', dir: 'asc'}])
+```
+Manually read the preceding-context rows. Often surfaces "SCM service activity precedes most occurrences" or "disk-pressure precedes a subset" or "isolated occurrences with no precursor."
+
+**Step 7 - Backing query: vss_writers state at failure window (Level 3 ground truth - deep field, likely empty today).**
+```
+query_logs(
+  org_ids=[...],
+  start="<failure_window_start>", end="<failure_window_end>",
+  lql='source = "<X>" AND subsource in (vss_writers, volumes, scheduled_tasks, installed_products)',
   return_field_list=['t', 'event_kind', 'snapshot_id', 'prev_delta_id', 'event_summary',
                      'state.vss_writers', 'state.volumes', 'state.scheduled_tasks', 'anomalies'],
-  max_field_chars_override={'event_summary': 0, 'state.vss_writers': 4096, 'state.volumes': 2048,
-                            'state.scheduled_tasks': 4096, 'anomalies': 0},
-  investigation_request_id="<id>",
-  purpose="HM1: vss_writers + volumes + scheduled_tasks + installed_products at failure window"
+  external_investigation_id="<id>"
 )
 -> qid_state, query_url
 ```
-Note: broadened to multiple subsources so the same cache feeds Steps 7-9 without additional backing queries.
+`event_kind`, `state.vss_writers`, `state.volumes`, `state.scheduled_tasks`, and `anomalies` are deep fields pending Managed Agent emission - expect them empty today (see the field-availability note at the top of this file). `event_summary` and the row-level fields (t, subsource) are shallow and populate normally. Note: broadened to multiple subsources so the same cache feeds Steps 7-9 without additional backing queries.
 
 **Step 8 - Refinements within Step 7's cache.**
 ```
-refine_query_result(query_id=<qid_state>, cache_filter_lql='subsource = vss_writers',
-                   return_field_list=['t', 'state.vss_writers', 'anomalies'])
-refine_query_result(query_id=<qid_state>, cache_filter_lql='subsource = volumes',
-                   return_field_list=['t', 'state.volumes'])
-refine_query_result(query_id=<qid_state>, cache_filter_lql='subsource = scheduled_tasks',
-                   return_field_list=['t', 'state.scheduled_tasks'])
-refine_query_result(query_id=<qid_state>, cache_filter_lql='subsource = installed_products',
-                   return_field_list=['t', 'event_summary'])
+refine_query_result(query_id=<qid_state>, filter_lql='subsource = vss_writers',
+                   select=['t', 'state.vss_writers', 'anomalies'])
+refine_query_result(query_id=<qid_state>, filter_lql='subsource = volumes',
+                   select=['t', 'state.volumes'])
+refine_query_result(query_id=<qid_state>, filter_lql='subsource = scheduled_tasks',
+                   select=['t', 'state.scheduled_tasks'])
+refine_query_result(query_id=<qid_state>, filter_lql='subsource = installed_products',
+                   select=['t', 'event_summary'])
 ```
-Per-subsource Level-3 reads. Cheap; cached.
+Per-subsource Level-3 reads against the cache, not fresh scans. (Field-availability caveat from Step 7 applies to the `state.*` / `anomalies` projections here too.)
 
 **Step 9 - Cross-product check.**
 From Step 8's installed_products refinement, check `event_summary.by_category` and `event_summary.multiple_in_category`. If multiple backup products detected (e.g., `multiple_in_category: ["backup"]`), note in summary as a likely cross-product conflict - two backup products competing for VSS snapshots is a recurring cause.
 
 **Step 10 - Cross-source pivot if cause looks environmental.**
-If Step 4's `query_period_diff` showed the new pattern across multiple sources (suggesting environment-wide), or if you want to confirm scope:
+If Step 4's grouped-aggregation comparison showed the new pattern across multiple sources (suggesting environment-wide), or if you want to confirm scope:
 ```
 query_grouped_aggregation(
   org_ids=[<broader scope, e.g., all msp orgs>],
-  filter_lql='subsource in (vss_writers, backup_jobs) AND (severity in (error, warning) OR anomaly_max_score >= 60)',
-  time_range={relative: "last_24h"},
-  group_by=['source'],
-  aggregations=[{op:'count'}, {op:'min', field:'t'}, {op:'max', field:'t'}],
-  investigation_request_id="<id>",
-  purpose="HM1: fleet pivot for VSS-related anomalies"
+  start="<failure window start>", end="<failure window end>",
+  lql='subsource in (vss_writers, backup_jobs) AND severity in (error, warning)',
+  group_field="source",
+  external_investigation_id="<id>"
 )
 ```
-1 source = isolated; few sources = local cluster; many sources = environment-wide.
+(The `anomaly_max_score` half of the usual context-reduction filter is dropped here - deep field, not emitted yet; `severity` alone is the shallow-triage fallback.) This result is terminal - not refinable. To drill into a specific source's hits, issue a new `query_logs` filtered to that source, not a refine. 1 source = isolated; few sources = local cluster; many sources = environment-wide.
 
-**Step 11 - Ingest-health check.**
+**Step 11 - Ingest-health check (deep-field caveat).**
 ```
 query_logs(
   org_ids=[...],
-  filter_lql='source = "<X>" AND event_kind = SLAAgentOp AND subsource in (ingest_drop, spool_full, backpressure)',
-  time_range={relative: "last_24h"},
+  start="<24h before failure window>", end="<failure window end>",
+  lql='source = "<X>" AND event_kind = SLAAgentOp AND subsource in (ingest_drop, spool_full, backpressure)',
   return_field_list=['t', 'subsource', 'event_summary', 'message'],
-  investigation_request_id="<id>"
+  external_investigation_id="<id>"
 )
 ```
-Confirms data completeness for the relevant window.
+`event_kind = SLAAgentOp` is not emitted yet - this returns empty regardless of true ingest health. Treat empty as inconclusive, not "no drops"; cross-check `list_sources` event-count trends from Step 2 instead, and note the gap in WHAT WAS NOT CHECKED.
 
-**Step 12 - Cost rollup.**
-```
-get_query_metadata(investigation_request_id="<id>")
--> investigation_summary
-```
-
-**Step 13 - System condition summary output per `output-template.md`.** Findings derive from Steps 3-11. OUTSIDE AGENT VISIBILITY enumerates per `off-endpoint-causes.md`. POSSIBLE NEXT DIRECTIONS section at the end with the explore-or-analyze invitation.
-
-### Cost summary
-- Backing queries: 4-5 (period_diff, cluster_contexts, query_logs Level-3, optional fleet pivot, ingest-health)
-- Refinements: ~4-6 (subsource splits within Step 7's cache)
-- Metadata: ~3 (resolve_scope, list_sources, get_query_metadata)
-- Typically $0.50-2.00 per investigation.
+**Step 12 - System condition summary output per `output-template.md`.** Findings derive from Steps 3-11. Tally backing queries and refinements from your local investigation-state document for WHAT WAS EXAMINED (`get_query_metadata(query_id="<qid>")` on any single cache if you need its status or schema). WHAT WAS NOT CHECKED enumerates per `off-endpoint-causes.md`. POSSIBLE NEXT DIRECTIONS section at the end with the explore-or-analyze invitation.
 
 ---
 
@@ -205,6 +194,8 @@ Per `off-endpoint-causes.md` HM2: Azure AD conditional-access policy, MFA cloud,
 ### Canonical evidence
 Processes snapshot+delta chain showing the leaking PID's memory and handle count growing monotonically; correlated with process start time and parent process; cross-validated with system memory pressure trajectory; recent windows_updates / installed_software / services to identify recent changes correlated with leak onset.
 
+**Field-availability warning: HM3's core evidence is deep-tier.** `state.processes`, `state.memory`, and `event_kind`/`snapshot_id`/`anomalies` are all deep fields pending Managed Agent emission (see the note at the top of this file) - the working-set/handle-count trajectory this playbook is built around is NOT available today. Until emission lands, HM3 investigations must lean on shallow-triage fallback: `severity` trend on the source, `pattern_hash` frequency for any app-crash or OOM-related winlog patterns, and engineer-reported symptom timing. Say so explicitly in the summary rather than producing a confident leak-trajectory Finding from empty data.
+
 ### Off-endpoint causes to flag
 Per `off-endpoint-causes.md` HM3: vendor app internals, container/VM nested processes, GPU memory, vendor app server-side state.
 
@@ -216,109 +207,103 @@ Per `off-endpoint-causes.md` HM3: vendor app internals, container/VM nested proc
 ```
 query_logs(
   org_ids=[...],
-  filter_lql='source = "<X>" AND subsource = system_health',
-  time_range={relative: "last_7d"},
+  start="<7d before window>", end="<window end>",
+  lql='source = "<X>" AND subsource = system_health',
   return_field_list=['t', 'event_summary', 'state.system_health'],
-  ...
+  external_investigation_id="<id>"
 )
 ```
-Note: HM3 needs a 7-day window to see leak trajectory (broader than HM1's 24h).
+Note: HM3 needs a 7-day window to see leak trajectory (broader than HM1's 24h). `state.system_health` is deep-tier; expect it empty today.
 
 **Step 4 - Backing query: 7d trajectory for processes / memory / services.**
 ```
 query_logs(
   org_ids=[...],
-  time_range={relative: "last_7d"},
-  filter_lql='source = "<X>" AND subsource in (processes, memory, services, system_health, installed_software, windows_updates)',
+  start="<7d before window>", end="<window end>",
+  lql='source = "<X>" AND subsource in (processes, memory, services, system_health, installed_software, windows_updates)',
   return_field_list=['t', 'event_kind', 'subsource', 'event_summary',
                      'anomaly_max_score', 'anomaly_max_score_confidence', 'anomaly_categories',
                      'snapshot_id', 'prev_delta_id'],
-  investigation_request_id="<id>",
-  purpose="HM3: 7d trajectory for <X> across leak-relevant subsources"
+  external_investigation_id="<id>"
 )
 -> qid_main, query_url
 ```
-This 7-day cache is the primary working set for the rest of the investigation.
+This 7-day cache is the primary working set for the rest of the investigation. `event_kind`, `anomaly_max_score*`, and `snapshot_id`/`prev_delta_id` are deep fields - expect them empty; `subsource` and `event_summary` are shallow and populate normally.
 
-**Step 5 - Refine for the suspect process at Level 3.**
+**Step 5 - Refine for the suspect process at Level 3 (deep field - likely empty today).**
 ```
 refine_query_result(
   query_id=<qid_main>,
-  cache_filter_lql='subsource = processes AND (event_kind = SLASnapshot OR event_kind = SLADelta)',
-  return_field_list=['t', 'event_kind', 'snapshot_id', 'prev_delta_id', 'event_summary',
-                     'state.processes', 'anomalies'],
-  max_field_chars_override={'event_summary': 0, 'state.processes': 8192, 'anomalies': 0}
+  filter_lql='subsource = processes',
+  select=['t', 'event_kind', 'snapshot_id', 'prev_delta_id', 'event_summary',
+                     'state.processes', 'anomalies']
 )
 ```
-Returns time-series of processes state. Extract MyApp.exe trajectory locally:
+Returns time-series of processes state, once `state.processes` is emitted. Extract MyApp.exe trajectory locally:
 - Working set (RSS) over time, across multiple PID lifetimes (process restarts may reset).
 - Handle count over time.
 - top_n_by_total_cpu_time - cumulative CPU time since process start.
 - top_n_by_cpu (instantaneous %).
 
-A monotonically-increasing working_set or handle_count across PID lifetimes is the leak signature.
+A monotonically-increasing working_set or handle_count across PID lifetimes is the leak signature. **Today `state.processes` is not emitted - this refine will return rows with an empty `state.processes` column. Don't read that as "no leak"; flag it as "process-level state unavailable" and fall back to `event_summary` / shallow signals.**
 
 **Step 6 - Refine for memory pressure cross-validation.**
 ```
 refine_query_result(
   query_id=<qid_main>,
-  cache_filter_lql='subsource = memory AND event_kind = SLASnapshot',
-  return_field_list=['t', 'event_summary', 'state.memory', 'anomalies'],
-  max_field_chars_override={'state.memory': 4096}
+  filter_lql='subsource = memory',
+  select=['t', 'event_summary', 'state.memory', 'anomalies']
 )
 ```
-Confirms whether system-level memory pressure trajectory matches the process-level trajectory.
+Confirms whether system-level memory pressure trajectory matches the process-level trajectory, once `state.memory` is emitted (deep field, empty today).
 
 **Step 7 - Refine for system_health context.**
 ```
 refine_query_result(
   query_id=<qid_main>,
-  cache_filter_lql='subsource = system_health',
-  return_field_list=['t', 'event_summary']
+  filter_lql='subsource = system_health',
+  select=['t', 'event_summary']
 )
 ```
 Surfaces overall_severity trajectory. If overall_severity escalated to error/fatal at the time the user noticed slowness, that's a corroborating signal.
 
-**Step 8 - Backing query: comparison source if available.**
+**Step 8 - Backing query: comparison source if available (fast-follow `compare_populations` not shipped; v1 substitute below).**
 If the user has a sister server (e.g., srv-app04) running the same app, compare:
 ```
-compare_populations(
-  org_ids=[...],
-  population_a={label: "<X>_processes_busy",
-               filter_lql: 'source = "<X>" AND subsource = processes AND event_kind = SLASnapshot AND state.processes."<MyApp.exe key>".working_set_bytes >= 1000000000'},
-  population_b={label: "<sister>_processes_normal",
-               filter_lql: 'source = "<sister>" AND subsource = processes AND event_kind = SLASnapshot AND state.processes."<MyApp.exe key>".working_set_bytes >= 1000000000'},
-  time_range={relative: "last_7d"},
-  investigation_request_id="<id>",
-  purpose="HM3: compare leak source vs sister"
-)
+query_grouped_aggregation(org_ids=[...], start="<7d before window>", end="<window end>",
+  lql='source = "<X>" AND subsource in (processes, memory)', group_field="severity",
+  external_investigation_id="<id>")
+query_grouped_aggregation(org_ids=[...], start="<7d before window>", end="<window end>",
+  lql='source = "<sister>" AND subsource in (processes, memory)', group_field="severity",
+  external_investigation_id="<id>")
 ```
-Identifies whether leak is on both servers (suggests app-version issue or workload pattern) or just one (suggests box-specific config or workload).
+Compare the two grouped results (severity distribution today; once `state.processes` emits, compare working-set trajectories directly instead). Identifies whether the symptom is on both servers (suggests app-version issue or workload pattern) or just one (suggests box-specific config or workload).
 
 **Step 9 - Recent change correlation.**
 ```
 refine_query_result(
   query_id=<qid_main>,
-  cache_filter_lql='subsource in (windows_updates, installed_software, services, drivers)',
-  return_field_list=['t', 'subsource', 'event_summary']
+  filter_lql='subsource in (windows_updates, installed_software, services, drivers)',
+  select=['t', 'subsource', 'event_summary']
 )
 ```
 Identifies recent changes that might correlate with leak onset.
 
 **Step 10 - Investigation-mode amplification.** Not currently available. Skip this step.
 
-**Step 11 - Ingest-health check.**
+**Step 11 - Ingest-health check (deep-field caveat).**
 ```
 query_logs(
   org_ids=[...],
-  filter_lql='source = "<X>" AND event_kind = SLAAgentOp AND subsource in (ingest_drop, spool_full, backpressure)',
-  time_range={relative: "last_7d"},
-  ...
+  start="<7d before window>", end="<window end>",
+  lql='source = "<X>" AND event_kind = SLAAgentOp AND subsource in (ingest_drop, spool_full, backpressure)',
+  external_investigation_id="<id>"
 )
 ```
+`event_kind = SLAAgentOp` isn't emitted yet - empty here is inconclusive, not "no drops." Cross-check `list_sources` event-count trends instead.
 
-**Step 12 - Cost rollup and system condition summary output.**
-HM3 is one of the more expensive investigations (7-day window). Typically $1.50-4.00.
+**Step 12 - System condition summary output.**
+HM3 needs more backing queries than most playbooks here because the 7-day window (leak trajectory) is broader than the typical 24h investigation.
 
 ### Findings shape for HM3
 - Finding N: "MyApp.exe working_set_bytes grew from <X>MB to <Y>MB over <N> days, across <K> PID lifetimes" - leak signature.
@@ -346,7 +331,7 @@ Per `off-endpoint-causes.md` HM4: WSUS server health, MS Update CDN status, cont
 4. `query_logs` Level-3 on `subsource in (windows_updates, services, system_health)` for the relevant window.
 5. `cluster_event_contexts` on update-failure pattern if found.
 6. Cross-source pivot if multiple sources affected by same KB.
-7. Ingest-health check, cost rollup, system condition summary output.
+7. Ingest-health check, system condition summary output.
 
 ---
 
@@ -365,7 +350,7 @@ Per `off-endpoint-causes.md` HM5: mounted network shares, backup software shadow
 1. Investigation session, scope, source health.
 2. System health overview - likely the fastest path to the issue (system_health.os_volume_free_pct + worst_indicators surfaces disk-space severity prominently).
 3. `query_logs` over 7d on `subsource in (volumes, scheduled_tasks, system_health)`.
-4. `query_grouped_aggregation` group_by source for fleet pivot if applicable.
+4. `query_grouped_aggregation` group_field `source` for fleet pivot if applicable.
 5. System condition summary output. Disk-space severity (especially OS-volume) gets prominent treatment in EXECUTIVE SUMMARY - disk-full causes are common, fast-cascading, and high-impact.
 
 ---
@@ -427,7 +412,7 @@ Per `off-endpoint-causes.md` HM8: WAN between DCs, DNS infrastructure not on a D
 2. Source health on both DCs.
 3. System health on both - pay attention to `network_reachability_to_dc` and `time_sync_detail`.
 4. `query_logs` Level-3 on `subsource in (ad_replication, system_health)` for both DCs.
-5. `query_grouped_aggregation` group_by source filtered on `subsource = ad_replication AND severity in (error, warning)` across all DCs in the workspace.
+5. `query_grouped_aggregation` group_field `source` filtered on `subsource = ad_replication AND severity in (error, warning)` across all DCs in the workspace.
 6. `compare_populations` (failing DC vs working DCs) if appropriate.
 7. system condition summary output.
 
@@ -461,6 +446,8 @@ Per `off-endpoint-causes.md` HM9: public CA cert lifecycle (DigiCert/Let's Encry
 ### Canonical evidence
 Managed Agent's own ingest_health and system_health (especially network_reachability_to_rmm), RMM service state in `state.services`, DNS resolution to RMM cloud endpoints, network adapter state, proxy configuration, system uptime.
 
+**Field-availability warning:** `state.services`, `state.system_health`, and the DNS/network helper output (behind `event_kind = SLAHelper`) are deep fields pending Managed Agent emission - empty today regardless of true RMM connectivity. Step 7's winlog evidence (shallow-tier) is the reliable signal until emission lands; say so explicitly rather than treating empty `state.*` as "connectivity fine."
+
 ### Off-endpoint causes to flag
 Per `off-endpoint-causes.md` HM10: RMM cloud service health, EDR cloud quarantine of RMM agent, network path between endpoint and RMM cloud, corporate proxy / TLS inspection.
 
@@ -472,9 +459,9 @@ Per `off-endpoint-causes.md` HM10: RMM cloud service health, EDR cloud quarantin
 ```
 list_sources(
   org_ids=[<from step 1>],
-  time_range={relative: "last_6h"},
+  start="<6h before now>", end="<now>",
   include_sub_orgs=true,
-  app_filter='app: agent_op/*'
+  external_investigation_id="<id>"
 )
 ```
 Filtered for the source. **This is the discriminator for the entire investigation.**
@@ -483,9 +470,9 @@ Filtered for the source. **This is the discriminator for the entire investigatio
 The endpoint may be powered off, network-isolated, or the Managed Agent itself has failed. system condition summary output:
 - SCOPE CHECKED notes: "<source> has not emitted Managed Agent telemetry in the last 6 hours."
 - OBSERVED CONDITIONS Finding 1: "Managed Agent telemetry absent from <source> in the past 6 hours; last observed telemetry at <timestamp> (from list_sources query)."
-- OUTSIDE AGENT VISIBILITY: full HM10 list, especially "without Managed Agent telemetry, both endpoint state and RMM connectivity from the endpoint are off-endpoint for this investigation."
+- WHAT WAS NOT CHECKED: full HM10 list, especially "without Managed Agent telemetry, both endpoint state and RMM connectivity from the endpoint are off-endpoint for this investigation."
 - EXECUTIVE SUMMARY: "The endpoint may be powered off, network-isolated, or the Managed Agent itself has failed. Recommend out-of-band check (physical, IPMI, vendor-specific tools)."
-- Investigation ends with bounded conclusion. Cost: ~$0.05.
+- Investigation ends with a bounded conclusion after a single `list_sources` call - no backing query needed.
 
 **Branch B - Managed Agent reporting. Continue.**
 
@@ -493,37 +480,35 @@ The endpoint may be powered off, network-isolated, or the Managed Agent itself h
 ```
 query_logs(
   org_ids=[...],
-  time_range={relative: "last_6h"},
-  filter_lql='source = "<X>"',
+  start="<6h before now>", end="<now>",
+  lql='source = "<X>"',
   return_field_list=['t', 'event_kind', 'app', 'subsource', 'severity', 'message', 'event_summary',
                      'anomaly_max_score', 'anomaly_max_score_confidence', 'anomaly_categories'],
-  investigation_request_id="<id>",
-  purpose="HM10: <X> RMM connectivity opening scan"
+  external_investigation_id="<id>"
 )
 -> qid_main, query_url
 ```
+`event_kind` and `anomaly_max_score*` are deep fields pending Managed Agent emission - expect them empty today. `app`, `subsource`, `severity`, `message`, `event_summary` are shallow and populate normally.
 
-**Step 4 - Refine to system_health.**
+**Step 4 - Refine to system_health (deep field - likely empty today).**
 ```
 refine_query_result(
   query_id=<qid_main>,
-  cache_filter_lql='subsource = system_health',
-  return_field_list=['t', 'event_summary', 'state.system_health'],
-  max_field_chars_override={'state.system_health': 4096}
+  filter_lql='subsource = system_health',
+  select=['t', 'event_summary', 'state.system_health']
 )
 ```
-Quick triage - `state.system_health.network_reachability_to_rmm`, `network_reachability_to_cloud`, `network_link_type`, `agent_ingest_health_status` all surface here. If `network_reachability_to_rmm = error`, the endpoint can't reach RMM cloud - strong signal.
+Quick triage, once emitted - `state.system_health.network_reachability_to_rmm`, `network_reachability_to_cloud`, `network_link_type`, `agent_ingest_health_status` all surface here. If `network_reachability_to_rmm = error`, the endpoint can't reach RMM cloud - strong signal. **`state.system_health` is not emitted today; this refine returns rows with that column empty. Fall back to `event_summary` and winlog/service evidence (Steps 5-7) and say so in the Finding.**
 
-**Step 5 - Refine to RMM service state.**
+**Step 5 - Refine to RMM service state (deep field - likely empty today).**
 ```
 refine_query_result(
   query_id=<qid_main>,
-  cache_filter_lql='subsource = services',
-  return_field_list=['t', 'event_summary', 'state.services', 'anomalies'],
-  max_field_chars_override={'state.services': 8192}
+  filter_lql='subsource = services',
+  select=['t', 'event_summary', 'state.services', 'anomalies']
 )
 ```
-RMM-vendor service-name patterns to look for (from `msp-tool-registry.md`):
+RMM-vendor service-name patterns to look for, once `state.services` is emitted (from `msp-tool-registry.md`):
 - ConnectWise Automate: `LTService`, `LTSvcMon`
 - ConnectWise RMM (newer): `Datto.RMM.Agent`
 - NinjaOne: `NinjaRMMAgent`
@@ -532,37 +517,35 @@ RMM-vendor service-name patterns to look for (from `msp-tool-registry.md`):
 - Atera: `AteraAgent`
 - N-able N-central: `Windows Agent Maintenance`, `N-Central Agent`
 
-If the relevant RMM service is STOPPED with start_type AUTOMATIC - clear local cause.
+If the relevant RMM service is STOPPED with start_type AUTOMATIC - clear local cause. **Today, fall back to Step 7's winlog evidence and the shallow `severity`/`message` fields from Step 3 while `state.services` is unavailable.**
 
-**Step 6 - Refine to network helper output.**
+**Step 6 - Refine to network helper output (deep field via `event_kind` - likely empty today).**
 ```
 refine_query_result(
   query_id=<qid_main>,
-  cache_filter_lql='event_kind = SLAHelper AND subsource in (dns_lookup, tcpconnect_probe, network_adapters, proxy_config)',
-  return_field_list=['t', 'subsource', 'event_summary', 'message']
+  filter_lql='event_kind = SLAHelper AND subsource in (dns_lookup, tcpconnect_probe, network_adapters, proxy_config)',
+  select=['t', 'subsource', 'event_summary', 'message']
 )
 ```
-Helper output reveals: DNS resolves the RMM cloud endpoint? TCP connect succeeds? Network adapter has valid IP? System proxy configured?
+Helper output reveals, once `event_kind` is emitted: DNS resolves the RMM cloud endpoint? TCP connect succeeds? Network adapter has valid IP? System proxy configured? Today this filter returns empty because `event_kind` isn't emitted - don't read that as "no helper issues." If you need this evidence now, drop the `event_kind = SLAHelper` predicate and filter on `subsource` alone.
 
 **Step 7 - Refine to RMM-related winlog.**
 ```
 refine_query_result(
   query_id=<qid_main>,
-  cache_filter_lql='app: winlog/* AND (message: <rmm_vendor_name> OR app: winlog/Application)',
-  return_field_list=['t', 'app', 'severity', 'message']
+  filter_lql='app: winlog/* AND (message: <rmm_vendor_name> OR app: winlog/Application)',
+  select=['t', 'app', 'severity', 'message']
 )
 ```
-Vendor-specific channels and Application channel for RMM-vendor errors.
+Vendor-specific channels and Application channel for RMM-vendor errors. This is shallow-tier (message/severity/app) and works today - the most reliable evidence source in this playbook until `state.*` emission lands.
 
 **Step 8 - Investigation-mode amplification.** Live amplification of source collection is not currently available. Skip this step.
 
-**Step 9 - Ingest-health and cost rollup.** As HM1.
+**Step 9 - Ingest-health check.** As HM1 (same deep-field caveat on the ingest-health check).
 
-**Step 10 - system condition summary output.** Findings cite step 4-7 query_urls. EXECUTIVE SUMMARY synthesizes which layer (service, network adapter, DNS, TCP-to-cloud, proxy, RMM agent itself) shows the issue. OUTSIDE AGENT VISIBILITY flags RMM cloud health and EDR quarantine if symptom is consistent (e.g., "service is missing entirely from state.services - possible EDR quarantine; recommend checking SentinelOne admin console for quarantine events on this source").
+**Step 10 - system condition summary output.** Findings cite step 4-7 query_urls. EXECUTIVE SUMMARY synthesizes which layer (service, network adapter, DNS, TCP-to-cloud, proxy, RMM agent itself) shows the issue - today, primarily from Step 7's winlog evidence since Steps 4-6's `state.*` fields aren't emitted yet. WHAT WAS NOT CHECKED flags RMM cloud health and EDR quarantine if symptom is consistent, AND notes that `state.services` / `state.system_health` are not yet available from the Managed Agent (once emitted, "service is missing entirely from state.services" becomes a possible EDR-quarantine signal worth checking against the EDR admin console).
 
-### Cost summary
-- Branch A: ~$0.05 (just list_sources).
-- Branch B: 1 backing query + 4-5 refinements + 1-2 metadata calls. Typical $0.30-1.50.
+Branch A resolves from `list_sources` alone; Branch B runs one backing query plus several refinements against its cache.
 
 ---
 
@@ -573,7 +556,7 @@ If the engineer's request doesn't map cleanly to HM1-HM10:
 2. Run system health overview (universally informative - the system_health subsource is designed for exactly this case).
 3. Run `query_period_diff` over 24h (or vs 7d prior) to spot what changed.
 4. Use the Findings to guide whether you need deeper investigation in any specific subsource.
-5. system condition summary output with appropriate OUTSIDE AGENT VISIBILITY enumeration based on what the symptom turned out to involve.
+5. system condition summary output with appropriate WHAT WAS NOT CHECKED enumeration based on what the symptom turned out to involve.
 
 ---
 

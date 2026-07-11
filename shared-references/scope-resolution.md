@@ -10,13 +10,12 @@ Approach in order of preference; stop at the first step that gives an unambiguou
 
 ### Step 1: Parse the engineer's message for an explicit ID
 
-If the engineer's message includes a customer ID, org ID, or workspace identifier (e.g., "ACME-DENT", "client_id=42", "org_acme_dental"), try exact ID match first via `resolve_scope`:
+If the engineer's message includes a customer ID, org ID, or workspace identifier (e.g., "ACME-DENT", "client_id=42", "org_acme_dental"), pass it as `org_ids` directly if it's already a UUID you recognize, or as the `query` substring otherwise:
 
 ```
 resolve_scope(
-  scope_text: "<extracted ID>",
-  exact_id_match: true,
-  investigation_request_id: "<id>"
+  query: "<extracted ID or name>",
+  external_investigation_id: "<id>"
 )
 ```
 
@@ -28,8 +27,8 @@ If no explicit ID, try the org name verbatim as the engineer used it:
 
 ```
 resolve_scope(
-  scope_text: "Acme Dental",
-  investigation_request_id: "<id>"
+  query: "Acme Dental",
+  external_investigation_id: "<id>"
 )
 ```
 
@@ -69,8 +68,9 @@ If a single org is identified and that org has sub-orgs (sites, locations, depar
 list_sources(
   org_ids: [<the resolved parent org>],
   include_sub_orgs: true,
-  time_range: {...},
-  investigation_request_id: "<id>"
+  start: "<investigation start, RFC3339 UTC>",
+  end: "<investigation end, RFC3339 UTC>",
+  external_investigation_id: "<id>"
 )
 ```
 
@@ -78,7 +78,7 @@ This puts the burden of tree expansion on the server rather than on you. If the 
 
 ### Step 8: Scope can expand during the investigation
 
-The investigation scope is not fixed at the start. As findings warrant - for example, a fleet pivot from a single source's pattern reveals 7 affected sources - pivot queries to the new scope but **keep the same `investigation_request_id`**. Don't restart the investigation.
+The investigation scope is not fixed at the start. As findings warrant - for example, a fleet pivot from a single source's pattern reveals 7 affected sources - pivot queries to the new scope but **keep the same `external_investigation_id`**. Don't restart the investigation.
 
 If the engineer explicitly redirects ("forget that source, look at this one instead" or "actually, I want to investigate this whole site"), update scope and continue with the same investigation. Note the scope expansion in the EXECUTIVE SUMMARY.
 
@@ -99,8 +99,9 @@ Use `list_sources` with the investigation's actual time range. Do **not** filter
 list_sources(
   org_ids: [<from resolve_scope>],
   include_sub_orgs: true,
-  time_range: {start: "<investigation start>", end: "<investigation end>"},
-  investigation_request_id: "<id>"
+  start: "<investigation start, RFC3339 UTC>",
+  end: "<investigation end, RFC3339 UTC>",
+  external_investigation_id: "<id>"
 )
 ```
 
@@ -109,7 +110,7 @@ The response includes each source's last-event timestamp within the window plus 
 **Decision logic:**
 
 - **The relevant source is in the response with events in the window** -> proceed.
-- **The relevant source is in the response but with very few events / sparse coverage** -> proceed but flag in OUTSIDE AGENT VISIBILITY: "Source X had limited telemetry in the window (N events). Findings may be incomplete due to data sparsity."
+- **The relevant source is in the response but with very few events / sparse coverage** -> proceed but flag in WHAT WAS NOT CHECKED: "Source X had limited telemetry in the window (N events). Findings may be incomplete due to data sparsity."
 - **The relevant source is NOT in the response (no events in the window)** -> halt and ask the engineer:
   > "I don't see Managed Agent telemetry from `<source>` during `<window>`. Did you mean a different source name, or is the source perhaps offline / not deployed during that window?"
 
@@ -139,6 +140,6 @@ ASK the engineer to clarify the time zone of the system(s) under investigation.
 
 **Forgetting to expand sub-orgs.** Most engineer requests at the org level implicitly include sub-orgs. Default to `include_sub_orgs: true` unless the engineer specifically scopes narrower.
 
-**Starting a new investigation_request_id when the scope expands.** The investigation is the same; the scope is updating. Reuse the same ID throughout the conversation.
+**Starting a new `external_investigation_id` when the scope expands.** The investigation is the same; the scope is updating. Reuse the same id throughout the conversation.
 
-**Not flagging sparse-data sources.** A source with 3 events in the investigation window is technically "in scope" but realistically inadequate to support strong findings. Flag the sparsity in OUTSIDE AGENT VISIBILITY rather than producing high-confidence findings on thin data.
+**Not flagging sparse-data sources.** A source with 3 events in the investigation window is technically "in scope" but realistically inadequate to support strong findings. Flag the sparsity in WHAT WAS NOT CHECKED rather than producing high-confidence findings on thin data.
