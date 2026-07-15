@@ -2,7 +2,7 @@
 
 Per-tool detailed usage with parameter notes, decision tree for which tool to use when, and worked-example call sequences.
 
-The v1 tool surface is the **lean-7**: `resolve_scope`, `list_sources`, `list_fields`, `query_grouped_aggregation`, `query_logs`, `refine_query_result`, `get_query_metadata`. Four differential tools (`query_period_diff`, `compare_populations`, `cluster_event_contexts`, `describe_pattern`) are FAST-FOLLOW, not yet available; see the bottom of this file for the v1 equivalents.
+The v1 tool surface is the **lean-9**: `resolve_scope`, `list_sources`, `list_scope_ladder`, `describe_pattern`, `list_fields`, `query_grouped_aggregation`, `query_logs`, `refine_query_result`, `get_query_metadata`. Three differential tools (`query_period_diff`, `compare_populations`, `cluster_event_contexts`) are fast-follow; see the bottom of this file for v1 equivalents.
 
 **Every tool takes `external_investigation_id`** (REQUIRED; a friendly, human-meaningful correlation handle you supply, 8-200 chars free text, e.g. `investigate-ticket-1234-disk-errors` - not a generated hash. Reusing the same value RESUMES that investigation; use a fresh, distinctive value to start a new one; tagged on every call).
 **Time windows are flat `start` / `end` in RFC3339 UTC** (e.g. `2026-07-01T00:00:00Z`). There is no `time_range` object and no `relative:` shorthand - compute the absolute window yourself.
@@ -13,7 +13,8 @@ The v1 tool surface is the **lean-7**: `resolve_scope`, `list_sources`, `list_fi
 
 Spend from the top down:
 
-- **Tier 1, lightweight scoping:** `resolve_scope`, `list_sources`, `list_fields`. Fix `org_ids`, confirm the source has data, learn the field vocabulary. Do this before any backing scan.
+- **Tier 1, lightweight scoping:** `resolve_scope`, `list_fields`. Fix `org_ids` and fleet directory (agents, ingest keys, verdicts). Do this before backing scans.
+- **Tier 1b, billed discovery:** `list_sources`, `list_scope_ladder`, `describe_pattern` (stats). Confirm data in window, enumerate structure, read pattern detail. See `scope-resolution.md` and `scope-ladder.md`.
 - **Tier 2, grouped aggregation:** `query_grouped_aggregation`. Groups every matching event by one field, returns top values by hit count. The workhorse for "what's happening" - it tells you where to point `query_logs`. Group by a scope-ladder field (`service`, `app`, `subsource`, `category`, `pattern`, or a `_hash`) to localize before drilling - see `scope-ladder.md`.
 - **Tier 3, raw events (last resort):** `query_logs`, only after Tiers 1-2 narrowed the window and filter. Then `refine_query_result` (lightweight) over that cached slice - do NOT re-scan.
 
@@ -24,8 +25,10 @@ Spend from the top down:
 ## Quick decision tree
 
 **"What scope am I working in?"** -> `resolve_scope` (always first)
-**"Does this source have data in the investigation window?"** -> `list_sources` with the investigation's `start`/`end`, filtered to source
-**"What's happening on this source / fleet?"** -> `query_grouped_aggregation` group_field `pattern` (or `source` for fleet)
+**"Does this collector/source have data in the investigation window?"** -> `list_sources` with the investigation's `start`/`end` (see `scope-resolution.md` cross-check)
+**"What app/service/subsource structure exists here?"** -> `list_scope_ladder` (structure discovery; not LQL-filtered)
+**"What's happening on this source / fleet (within an LQL slice)?"** -> `query_grouped_aggregation` group_field `pattern` (or `source` for fleet)
+**"What is this pattern_hash?"** -> `describe_pattern` (required before citing teaser patterns)
 **"What changed in the last N hours?"** -> two `query_grouped_aggregation` runs over two windows, compared (see fast-follow note)
 **"Show me the actual events (last resort)"** -> `query_logs`
 **"Same data, different view"** -> `refine_query_result` against an existing `query_logs` `query_id`
@@ -37,31 +40,32 @@ Spend from the top down:
 
 ### `resolve_scope`
 
-Always first. Turn natural-language scope into `org_ids`, and enumerate agents (devices/hosts) in scope.
+Always first. Turn natural-language scope into `org_ids`, and enumerate orgs, managed agents, and ingest keys in scope.
 
 ```
 resolve_scope(
-  query: "the dental office" | "Acme's file server" | "srv-fileshare01",   # optional case-insensitive substring over org + agent names; omit to list everything in scope
+  query: "Acme Dental" | "srv-fileshare01",   # optional; ranked match on org names and agent name/reported_hostname (exact/prefix/word/substring). Omit to list everything in scope.
   org_ids: ["..."],              # optional; omit for all orgs the token can access
-  include_agents: true,          # default true
+  include_agents: true,          # default true; includes managed agents AND ingest keys
   include_sub_orgs: true,        # default true; expand each org to its sub-org subtree
   external_investigation_id: "..."
 )
--> rows: org rows {kind:"org", id, name, parent_id} and agent rows {kind:"agent", id, name, org_id, status}
+-> rows: kind org | agent | ingest_key; match_kind when query set; agent rows include verdict, reported_hostname, last_seen_at, versions, OS, etc.
 ```
 
 **Decision logic:**
-- One clear org match: proceed with that scope.
-- Multiple ambiguous matches with no clear winner: ask the engineer conversationally; don't guess.
-- Zero matches: surface to the engineer with the candidate list.
+- One row with `match_kind` **`exact`**: proceed.
+- Multiple rows at the same best `match_kind`: ask the engineer; don't guess.
+- Sole match at `prefix`/`word`/`substring`: confirm before proceeding.
+- Zero matches: surface closest candidates.
 
-**Common mistake:** skipping this and assuming you know the scope from the engineer's wording. Engineers refer to clients by short names that may be ambiguous; resolve.
+**Common mistake:** skipping this and assuming scope from wording. Engineers use ambiguous short names; resolve.
 
 ---
 
 ### `list_sources`
 
-Source enumeration and scope discovery within the investigation window.
+Per **(collector `agent_id`, origin `source`)** activity in the investigation window. Billed backing scan.
 
 ```
 list_sources(
@@ -69,17 +73,59 @@ list_sources(
   start: "2026-07-01T00:00:00Z",   # REQUIRED
   end: "2026-07-02T00:00:00Z",     # REQUIRED, exclusive
   include_sub_orgs: true,          # default true
+  include_top_interesting_patterns: true,   # default true; summary teaser ~8 patterns
   external_investigation_id: "..."
 )
--> rows: {source, event_count, bytes_ingested}
+-> rows: agent_id, collector_kind, name, verdict, source, event_count, cnt_interesting, cnt_severe, distinct_interesting, bytes_ingested, first/last_event_at
+-> summary may include top_interesting_patterns; call describe_pattern before citing
 ```
 
-**Use the investigation's actual window.** Different investigations span different windows (live troubleshooting vs historical RCA over a past incident). Do NOT default to "is this source reporting right now?" - that wrongly excludes sources whose data is in the historical window but who are now offline.
+**Use the investigation's actual window.** Do NOT infer scope from recent heartbeat alone.
 
 **Use cases:**
-- **Scope discovery:** check whether the suspected source has events in the window. If not, halt and ask the engineer (per `scope-resolution.md`).
-- **Fleet enumeration:** for cross-source investigations, get the source list within the relevant window.
-- **Coverage validation:** confirm the sources you're investigating actually have Managed Agent telemetry in the window. Sparse-data sources should be flagged in WHAT WAS NOT CHECKED.
+- **Scope discovery:** confirm expected collector/source pairs have events; cross-check `verdict` (stuck/offline halt rules in `scope-resolution.md`).
+- **Fleet enumeration:** list collector/origin pairs in the window.
+- **Triage:** `cnt_interesting` / `cnt_severe` before deep queries.
+
+---
+
+### `list_scope_ladder`
+
+Discover app / service / subsource structure via cheap discovery scan. **Not LQL-filtered** (cheap steering). For counts within an LQL slice, use `query_grouped_aggregation`.
+
+```
+list_scope_ladder(
+  org_ids: ["..."],
+  start: "...",
+  end: "...",
+  agent_ids: ["..."],              # optional collector UUIDs
+  source: "hostname-substring",    # optional
+  field_match: {mode, pattern},    # optional name grep over ladder dims
+  include_top_interesting_patterns: true,
+  external_investigation_id: "..."
+)
+-> rows: agent_id, source, app, service, subsource, triage columns, first/last_event_at
+```
+
+See `scope-ladder.md` for ladder vs grouped-aggregation guidance.
+
+---
+
+### `describe_pattern`
+
+Pattern detail for one or more `pattern_hash` values. **Call before citing any `top_interesting_patterns` teaser row.**
+
+```
+describe_pattern(
+  org_ids: ["..."],
+  start: "...",
+  end: "...",
+  pattern_hashes: ["..."],
+  max_samples_per_pattern: 5,        # default 5; set 0 for stats only (mcp:observe)
+  external_investigation_id: "..."
+)
+-> pattern text, stats, fleet spread; optional sample messages when max_samples_per_pattern > 0 (requires mcp:query)
+```
 
 ---
 
@@ -126,7 +172,7 @@ query_grouped_aggregation(
 - "Severity distribution" -> group_field `severity`.
 - "Which component is noisiest?" -> group_field `service` or `subsource`, then narrow with a second call - see the scope ladder (`scope-ladder.md`).
 
-**Not refinable (v1).** Grouped output is NOT a refinable cache - calling `refine_query_result` on its `query_id` returns expired. Read grouped results directly. If a grouped result is truncated, follow its hint (narrow the `lql`/window and re-run). To then pull raw events for an interesting group, run `query_logs` with that group's value in `lql` (use the `*_hash` verbatim for the five hash fields).
+**Not refinable (v1).** Grouped output is NOT a refinable cache - calling `refine_query_result` on its `query_id` returns expired. Read grouped results directly. If a grouped result is truncated, follow its hint (narrow the `lql`/window and re-run). To then pull raw events for an interesting group, run `query_logs` with that group's value in `lql` (use the `*_hash` verbatim for the six hash fields).
 
 ---
 
@@ -188,7 +234,7 @@ refine_query_result(
 
 **Binding rule:** `filter_lql` resolves against the cached table's ROW columns (see the response schema descriptor for the vocabulary); `having_lql` resolves against the POST-GROUP columns (group + aggregate aliases).
 
-**Cache expiry:** the underlying rows live in BQ's ~24h native cache. A refine much later, or a refine of a grouped (non-refinable) result, returns expired - re-issue the original backing query (the server regenerates a fresh `query_id` when it can).
+**Cache expiry:** the underlying rows live in the server-side cache (~24h). A refine much later, or a refine of a grouped (non-refinable) result, returns expired - re-issue the original backing query (the server regenerates a fresh `query_id` when it can).
 
 **Common patterns:**
 - After a broad raw scan, filter per-subsource to drill into specific categories.
@@ -275,11 +321,10 @@ get_query_metadata(
 
 ---
 
-## Fast-follow tools (NOT in v1)
+## Fast-follow tools (NOT yet available)
 
-These land shortly after the lean-7; until then, use the v1 equivalent:
+These land after the lean-9; until then, use the v1 equivalent:
 
 - **`query_period_diff`** ("what changed between two windows") -> run `query_grouped_aggregation` over each window (group_field `pattern`) and compare the two grouped results.
 - **`compare_populations`** ("what's different about broken vs working") -> run `query_grouped_aggregation` over each population separately (via distinct `lql`) and compare.
 - **`cluster_event_contexts`** ("distinct contexts around these events") -> `query_logs` narrowed to the pattern, then `refine_query_result` group_by to cluster.
-- **`describe_pattern`** ("what is this pattern_hash, sample messages") -> `query_logs` with `lql` filtering to the `pattern_hash`, projecting `message`.

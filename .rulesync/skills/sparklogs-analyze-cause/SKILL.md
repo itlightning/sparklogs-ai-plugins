@@ -162,7 +162,7 @@ When you do make additional MCP calls, reuse the prior investigation's `external
 
 - `references/output-template.md` - full output template with field definitions and worked examples.
 - `references/hypothesis-generation.md` - detailed guidance on deriving cause candidates from findings.
-- `references/scope-ladder.md` - same content as the investigate skill's scope-ladder reference (the five grouping fields and their `_hash` companions; useful for fleet-pivot discriminators).
+- `references/scope-ladder.md` - same content as the investigate skill's scope-ladder reference (the six grouping fields and their `_hash` companions; useful for fleet-pivot discriminators).
 - `references/scope-resolution.md` - same content as the investigate skill's scope-resolution reference (reused if you make additional MCP calls).
 - `references/lql-reference.md` - same content as the investigate skill's LQL reference.
 - `references/mcp-tool-decision-tree.md` - same content as the investigate skill's MCP tool reference.
