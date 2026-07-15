@@ -1,6 +1,8 @@
 # Scope Ladder - grouping fields and their hash companions
 
-Six fields carry a normalized value plus an opaque `_hash` companion: `pattern`/`pattern_hash`, `subsource`/`subsource_hash`, `category`/`category_hash`, `service`/`service_hash`, `app`/`app_hash`, `source`/`source_hash`. Together they form a ladder from coarse to fine that localizes a problem to the exact recurring event shape. This is the primary shallow-triage RCA lever available today - lean on it hard.
+Six fields carry a normalized value plus an opaque `_hash` companion: `pattern`/`pattern_hash`, `source`/`source_hash`, `subsource`/`subsource_hash`, `category`/`category_hash`, `service`/`service_hash`, `app`/`app_hash`.
+Together they form a ladder from coarse to fine that localizes a problem to the exact recurring event shape.
+This is the primary shallow-triage RCA lever available today: lean on it hard.
 
 ---
 
@@ -8,17 +10,19 @@ Six fields carry a normalized value plus an opaque `_hash` companion: `pattern`/
 
 **`pattern_hash` is universal.** Computed for every event on every source. Always present.
 
-**`service`, `app`, `subsource`, `category` (and their hashes) are conditional.** Present when the source's data carries the base field - structured or vendor sources that emit it. The hash is computed only when the base field is detected. Not every source carries every field.
+**`source`, `service`, `app`, `subsource`, `category` (and their hashes) are conditional.** Present when the source's data carries the base field. The hash is computed only when the base field is detected. Not every source carries every field.
 
-**Degrade gracefully.** If a `group_field` on `service` (or another conditional field) returns a single empty or null group, that source simply does not carry `service` - fall back to `pattern_hash`. Do not read "no groups" (or one empty group) as a Finding; it means the field isn't populated for this source, not that the field has no values worth reporting.
+**Degrade gracefully.** If a `group_field` on `service` (or another conditional field) returns a single empty or null group, that source simply does not carry `service`. Fall back to `pattern_hash`. Do not read "no groups" (or one empty group) as a Finding; it means the field is not populated for this source.
 
-**This differs from the deep RCA fields.** `state.*`, `event_kind`, and `anomaly_*` are designed but not yet emitted by the Managed Agent - see the field-availability rule in SKILL.md Section 8. The scope ladder is not in that category: it is available today, on every source for `pattern_hash` and on any source whose data carries the other four fields. Treat it as the primary shallow-triage lever, not a pending capability.
+**This differs from the deep RCA fields.** `state.*`, `event_kind`, and `anomaly_*` are designed but not yet emitted by the Managed Agent (see the field-availability rule in SKILL.md Section 8). The scope ladder is available today: `pattern_hash` on every source, the other five when data carries them.
 
 ---
 
 ## Treat every `_hash` as opaque
 
-Never parse a `_hash`, never infer meaning from its characters, never length-validate it. `pattern_hash` may carry a short readable prefix followed by an opaque tail; `subsource_hash`, `category_hash`, `service_hash`, `app_hash`, and `source_hash` are bare opaque tokens. All six are drill-down handles only - values to pass back into a filter, not strings to interpret.
+Never parse a `_hash`, never infer meaning from its characters, never length-validate it.
+`pattern_hash` may carry a short readable prefix followed by an opaque tail; `source_hash`, `subsource_hash`, `category_hash`, `service_hash`, and `app_hash` are bare opaque tokens.
+All six are drill-down handles only: values to pass back into a filter, not strings to interpret.
 
 ---
 
@@ -28,20 +32,50 @@ Never parse a `_hash`, never infer meaning from its characters, never length-val
 service -> app -> subsource -> category -> pattern (finest: pattern_hash)
 ```
 
-Climb it to localize a problem: group coarse to find the noisy component, narrow one rung at a time, land on the exact recurring `pattern_hash`.
+**`source`** sits beside this ladder as the origin-host dimension (who the event is about), not a finer grain of event shape.
+Use `source` / `source_hash` for fleet or host pivots; climb the ladder to localize within a host.
+
+Climb the ladder to localize a problem: group coarse to find the noisy component, narrow one rung at a time, land on the exact recurring `pattern_hash`.
+
+---
+
+## Discover structure vs measure within a filter
+
+**`list_scope_ladder`** (cheap discovery, not LQL-filtered):
+- Runs a cheap discovery scan for app / service / subsource structure in org scope and time window.
+- Per-row triage: `event_count`, `cnt_interesting`, `cnt_severe`, `distinct_interesting`, `first_event_at`, `last_event_at`.
+- Narrow with `agent_ids` (collector UUIDs), `source` substring, or `field_match` over dimension names.
+- Summary may include `top_interesting_patterns` teaser; call **`describe_pattern`** before citing any teaser pattern.
+
+**`query_grouped_aggregation`** (billed, LQL-filtered measure):
+- Groups events matching an **`lql`** filter by one `group_field`.
+- Use when you already have a hypothesis slice (severity, time sub-range, `pattern_hash`, `agent_id`, etc.) and need counts or ranking within that slice.
+
+Rule of thumb: ladder tool = "what app/service/subsource combinations exist here?"; grouped aggregation = "within this filtered population, which values dominate?"
 
 ---
 
 ## How to use the ladder for RCA
 
-**GROUP - find dominant or anomalous groups.**
+**DISCOVER - enumerate structure before heavy scans.**
 ```
-query_grouped_aggregation(group_field=<field or its _hash>, ...)
+list_scope_ladder(
+  org_ids: [...],
+  start: "...",
+  end: "...",
+  agent_ids: ["<collector uuid>"],
+  external_investigation_id: "..."
+)
 ```
-Group by `pattern_hash` to surface the most-repeated normalized events, densest first. Group by `service` or `subsource` to localize which component is noisy before narrowing further.
+
+**GROUP - find dominant or anomalous groups (filtered measure).**
+```
+query_grouped_aggregation(group_field=<field or its _hash>, lql='...', ...)
+```
+Group by `pattern_hash` for the most-repeated normalized events; by `service` or `subsource` to localize the noisy component.
 
 **DEDUP / STABILITY - track one pattern over time.**
-A `_hash` is a stable identity: the same hash means the same normalized value or pattern, across events and across time. Use it to deduplicate and to follow one pattern through an investigation.
+A `_hash` is a stable identity: the same hash means the same normalized value or pattern, across events and across time.
 
 **DRILL - read the events behind a hash.**
 ```
@@ -49,19 +83,27 @@ query_logs(lql='pattern_hash = "<h>"', ...)
 refine_query_result(query_id=<qid>, filter_lql='pattern_hash = "<h>"', ...)
 ```
 
+**DESCRIBE - read pattern text and exemplars before citing.**
+```
+describe_pattern(pattern_hashes=["<h>"], start="...", end="...", ...)
+```
+Required after any `top_interesting_patterns` teaser row before the pattern appears in a Finding.
+
 **CORRELATE ACROSS WINDOWS - first-occurrence detection.**
-A `pattern_hash` present in the incident window but absent from a healthy baseline window signals new behavior - a primary RCA signal. Run `query_grouped_aggregation` twice, once per window, and compare the two hash populations. This is the v1 substitute for the fast-follow `query_period_diff` tool (see `mcp-tool-decision-tree.md`).
+A `pattern_hash` present in the incident window but absent from a healthy baseline window signals new behavior. Run `query_grouped_aggregation` twice, once per window, and compare hash populations (v1 substitute for the fast-follow `query_period_diff` tool; see `mcp-tool-decision-tree.md`).
 
 **RESOLVE - read the value, not the hash.**
-The response envelope's header carries a hash-dictionary `lookups` table mapping frequent hashes to their values, so long strings aren't re-carried on every row. The `*_hash` column is always present as the handle; rare hashes stay inline. When a row's inline value is blank, resolve it from `lookups`. Never show a raw `_hash` to the engineer - resolve it to its value first. Use the hash itself only as a drill-down filter value, passed back verbatim.
+The response envelope header carries a hash-dictionary `lookups` table mapping frequent hashes to their values.
+When a row's inline value is blank, resolve it from `lookups`. Never show a raw `_hash` to the engineer; use the hash verbatim only as a drill-down filter value.
 
 ---
 
 ## Worked shape: localize then land
 
-1. `query_grouped_aggregation(group_field="service", ...)` over the fleet or source - which component is noisiest.
-2. `query_grouped_aggregation(group_field="pattern", lql='service = "<noisy service>"', ...)` - which pattern within that component dominates.
-3. Compare that grouped result against the same call over a healthy baseline window - is the top pattern new, or does it just recur at normal volume.
-4. `query_logs(lql='pattern_hash = "<h>"', ...)` on the surviving `pattern_hash` to read the actual event text and cite it as evidence.
+1. `list_scope_ladder` or `query_grouped_aggregation(group_field="service", ...)` over the fleet or source: which component is noisiest.
+2. `query_grouped_aggregation(group_field="pattern", lql='service = "<noisy service>"', ...)`: which pattern within that component dominates.
+3. Compare against a healthy baseline window: is the top pattern new, or normal volume?
+4. `describe_pattern` on the surviving `pattern_hash`, then `query_logs(lql='pattern_hash = "<h>"', ...)` for event-level evidence.
 
-This is the shape, not a script - skip rungs when the symptom already points at a specific field, and fall back to `pattern_hash` alone whenever a conditional field isn't populated for the source in scope.
+Skip rungs when the symptom already points at a specific field.
+Fall back to `pattern_hash` alone whenever a conditional field is not populated for the source in scope.

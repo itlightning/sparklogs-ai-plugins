@@ -261,45 +261,50 @@ Before any deep investigation, resolve the scope (which org / sources / time win
 
 **Scope resolution sequence - see `references/scope-resolution.md` for details.** In brief:
 
-1. Parse the engineer's message for an explicit customer or org ID. If found, try exact ID match via `resolve_scope`.
-2. If no exact ID: try exact name match on org name.
-3. If no exact name: do fuzzy name match (server-side via `resolve_scope`).
-4. If multiple ambiguous matches with similar confidence: **ask the engineer to disambiguate. Don't guess.**
-5. If a single org is identified, by default include all sub-orgs under it (pass `include_sub_orgs: true` to org-scoped MCP calls).
-6. The investigation scope can expand during the investigation as findings warrant - pivot queries but keep the same `external_investigation_id`.
+1. Parse the engineer's message for an explicit customer, org, or agent UUID. Pass UUIDs via `org_ids` when recognized; otherwise use `query`.
+2. **Host-first:** when the engineer names a host/device, pass it as `query`; the server matches `name` and `reported_hostname` across authorized orgs.
+3. Otherwise try org or customer name via `query`. Matching is ranked by **`match_kind`** (`exact` > `prefix` > `word` > `substring`). There are no numeric confidence scores.
+4. Single row with `match_kind` **`exact`**: proceed. Multiple rows at the same best tier, or a sole weak (`prefix`/`word`/`substring`) match: **ask the engineer. Don't guess.**
+5. Read **`verdict`** on agent rows (`running`, `offline`, `stuck`, …) and ingest-key freshness (`active`, `idle`, `never`). `include_agents` (default true) returns managed agents **and** ingest keys.
+6. Default `include_sub_orgs: true` on org-scoped calls. Scope may expand mid-investigation; keep the same `external_investigation_id`.
 
-**Source discovery - confirm sources have data in the investigation window.** The investigation may be about something happening now, or about something that happened a week or month ago. Use `list_sources` with the investigation's time range; do NOT filter by recent heartbeat (that wrongly excludes sources whose data is in the window but who are now offline).
+**Source discovery - confirm sources have trustworthy data in the window.** Use `list_sources` with the investigation's `start`/`end`; do NOT infer scope from recent heartbeat alone.
 
 ```
 list_sources(
   org_ids=[<from resolve_scope>],
+  include_sub_orgs=true,
   start="<investigation start, RFC3339 UTC>",
   end="<investigation end, RFC3339 UTC>",
   external_investigation_id="<id>"
 )
 ```
 
-If the relevant source has no events in the investigation's time window, halt and ask the engineer: "I don't see Managed Agent telemetry from <source> during <window>. Did you mean a different source name, or is the source perhaps offline / not deployed during that window?"
+Each row is a **(collector `agent_id`, origin `source`)** pair with triage columns (`cnt_interesting`, `cnt_severe`, …) and optional summary **`top_interesting_patterns`** teaser. Call **`describe_pattern`** before citing any teaser pattern.
 
-If the source has events in the window: proceed.
+**Cross-check verdict + data presence:** if the collector is **`stuck`** or **`offline`** and there are no (or negligible) events for that `agent_id` in the window, **halt**: missing logs may reflect collector failure, not a healthy endpoint. Otherwise, if the expected source has no events, ask the engineer (wrong name, window, or origin label).
+
+**Collector-first LQL:** filter with `agent_id = "<uuid>"` for everything a collector shipped; use `source` for origin-host pivots. See `references/scope-resolution.md`.
 
 ---
 
 ## Section 11. MCP tools quick reference
 
-The v1 tool surface is these seven (the "lean-7"):
+The v1 catalog is these nine tools (lean-9):
 
 | Tool | Tier | Use when |
 |---|---|---|
-| `resolve_scope` | lightweight | Always first - turn natural-language scope into `org_ids` (orgs + agents). Fuzzy `query` match, sub-org expansion via `include_sub_orgs`. |
-| `list_sources` | lightweight | Confirm sources have data in the window (require `start`/`end`). Per-source event counts; enumerate fleet for cross-source pivots. |
+| `resolve_scope` | lightweight | Always first - turn natural-language scope into `org_ids` (orgs, managed agents, ingest keys). Ranked `match_kind` on org names and agent name/`reported_hostname`. `include_agents` = agents and ingest keys (default true). |
+| `list_sources` | billed discovery | Confirm collector/origin pairs have data in the window (`start`/`end` required). Triage columns, `collector_kind`, optional `top_interesting_patterns` teaser. |
+| `list_scope_ladder` | billed discovery | Discover app/service/subsource structure (not LQL-filtered). Narrow with `agent_ids` / `source` / `field_match`. For filtered counts within an LQL slice, use `query_grouped_aggregation`. |
+| `describe_pattern` | billed* | Full pattern text, stats, fleet spread, optional sample messages for one or more `pattern_hash` values. *Exemplars (`max_samples_per_pattern` > 0) require `mcp:query`; stats-only works on `mcp:observe`. Required before citing teaser patterns. |
 | `list_fields` | lightweight | Field catalog for building NEW queries - only if standard/known fields don't surface enough. Not a first-pass tool. |
-| `query_grouped_aggregation` | backing scan | Group every matching event by one `group_field`; top values by hit count. The workhorse for "what's happening" - run it BEFORE raw logs. |
+| `query_grouped_aggregation` | backing scan | Group every matching event by one `group_field`; top values by hit count. The workhorse for "what's happening" within an LQL filter - run it BEFORE raw logs. |
 | `query_logs` | backing scan | Retrieve raw chronological events. Last resort, over an already-narrowed window/filter. |
 | `refine_query_result` | lightweight | Relational engine over a cached `query_id` (filter/group/aggregate/having/order/select/page). Use freely; touches the cache, not the source. |
 | `get_query_metadata` | lightweight* | Cache/field introspection over a `query_id`. Default = bookkeeping only (fast). *`top_n`/`field_match` deep field discovery is a full catalog scan of the source - use deliberately. |
 
-Differential tools (`query_period_diff`, `compare_populations`, `cluster_event_contexts`, `describe_pattern`) are FAST-FOLLOW, not in the v1 surface. Until they ship, do the same work with `query_grouped_aggregation` + `refine_query_result` (e.g. two grouped calls over two windows for a period diff; group-by `pattern_hash` for pattern triage).
+Fast-follow differential tools (`query_period_diff`, `compare_populations`, `cluster_event_contexts`) are not yet available. Until they ship, use two `query_grouped_aggregation` runs over two windows for period diff, or grouped aggregation over distinct `lql` populations for compare.
 
 **Always pass `external_investigation_id`** on every call - it is REQUIRED, not optional. It is a friendly, human-meaningful correlation handle you supply, 8-200 chars free text (e.g. `investigate-ticket-1234-disk-errors`), not a generated hash. Pick one distinctive value at investigation start and reuse it for the entire session - reusing the same id RESUMES that investigation (ops append to the same audit trail); a genuinely new investigation needs a fresh, distinctive value (embed a ticket/incident id or a nonce). Don't reuse a generic string like `diskcheck` across unrelated incidents - they'd merge into one investigation. Out-of-bounds values (too short/long) return a user-visible validation error from the tool - read it and fix the id.
 
@@ -469,7 +474,7 @@ The full list of common mistakes, anti-patterns, and recovery is in `references/
 When the situation calls for it, read the appropriate reference file. Don't try to hold all of this in your context all the time:
 
 - `references/output-template.md` - full output template with every field defined, plus right-vs-wrong examples.
-- `references/scope-ladder.md` - the five grouping fields and their `_hash` companions, availability, and RCA usage shapes.
+- `references/scope-ladder.md` - the six grouping fields and their `_hash` companions (incl. `source`/`source_hash`), availability, `list_scope_ladder` vs grouped aggregation, and RCA usage shapes.
 - `references/scope-resolution.md` - detailed scope-resolution and source-discovery sequence.
 - `references/lql-reference.md` - complete LQL syntax reference with examples and common mistakes.
 - `references/mcp-tool-decision-tree.md` - per-tool detailed usage, all parameters, decision tree for which tool to use when.
