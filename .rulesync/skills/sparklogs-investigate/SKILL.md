@@ -236,13 +236,13 @@ The full per-tool decision tree is in `references/mcp-tool-decision-tree.md`. Th
 
 ## Section 9. The scope ladder - your primary shallow-triage lever, available today
 
-Five fields carry a normalized value plus an opaque `_hash` companion, and together form a ladder from coarse to fine: `service`/`service_hash` -> `app`/`app_hash` -> `subsource`/`subsource_hash` -> `category`/`category_hash` -> `pattern`/`pattern_hash` (finest). Climbing the ladder localizes a problem: group coarse to find the noisy component, narrow one rung at a time, land on the exact recurring `pattern_hash`.
+Six fields carry a normalized value plus an opaque `_hash` companion, and together form a ladder from coarse to fine: `service`/`service_hash` -> `app`/`app_hash` -> `subsource`/`subsource_hash` -> `category`/`category_hash` -> `pattern`/`pattern_hash` (finest); `source`/`source_hash` anchors host-level scope alongside the ladder. Climbing the ladder localizes a problem: group coarse to find the noisy component, narrow one rung at a time, land on the exact recurring `pattern_hash`.
 
 **This is available now, unlike the deep RCA fields.** `state.*`, `event_kind`, and `anomaly_*` are designed but not yet emitted by the Managed Agent (Section 8). The scope ladder is different: `pattern_hash` is computed for every event on every source, always. `service`, `app`, `subsource`, and `category` (and their hashes) are computed whenever the source's data carries that base field - not universal, but common on structured and vendor sources. This is the primary shallow-triage RCA lever available today. Lean on it hard.
 
 **Degrade gracefully on conditional fields.** If a `group_field` on `service` (or another conditional field) returns a single empty or null group, the source simply doesn't carry that field - fall back to `pattern_hash`. Don't read that as a Finding; it means the field isn't populated for this source, not that nothing is happening.
 
-**Treat every `_hash` as opaque.** Never parse it, never infer meaning from its characters, never length-validate it. `pattern_hash` may carry a short readable prefix followed by an opaque tail; the other four are bare opaque tokens. All five are drill-down handles - values you pass back into a filter, not strings you interpret.
+**Treat every `_hash` as opaque.** Never parse it, never infer meaning from its characters, never length-validate it. `pattern_hash` may carry a short readable prefix followed by an opaque tail; the other five (`subsource_hash`, `category_hash`, `service_hash`, `app_hash`, `source_hash`) are bare opaque tokens. All six are drill-down handles - values you pass back into a filter, not strings you interpret.
 
 **How to use it:**
 - **Group** (`query_grouped_aggregation(group_field=<field or its _hash>)`) to find dominant or anomalous groups, densest first. Group by `pattern_hash` for the most-repeated normalized events; by `service` or `subsource` to localize the noisy component.

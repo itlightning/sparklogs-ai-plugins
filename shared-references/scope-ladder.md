@@ -1,6 +1,6 @@
 # Scope Ladder - grouping fields and their hash companions
 
-Five fields carry a normalized value plus an opaque `_hash` companion: `pattern`/`pattern_hash`, `subsource`/`subsource_hash`, `category`/`category_hash`, `service`/`service_hash`, `app`/`app_hash`. Together they form a ladder from coarse to fine that localizes a problem to the exact recurring event shape. This is the primary shallow-triage RCA lever available today - lean on it hard.
+Six fields carry a normalized value plus an opaque `_hash` companion: `pattern`/`pattern_hash`, `subsource`/`subsource_hash`, `category`/`category_hash`, `service`/`service_hash`, `app`/`app_hash`, `source`/`source_hash`. Together they form a ladder from coarse to fine that localizes a problem to the exact recurring event shape. This is the primary shallow-triage RCA lever available today - lean on it hard.
 
 ---
 
@@ -18,7 +18,7 @@ Five fields carry a normalized value plus an opaque `_hash` companion: `pattern`
 
 ## Treat every `_hash` as opaque
 
-Never parse a `_hash`, never infer meaning from its characters, never length-validate it. `pattern_hash` may carry a short readable prefix followed by an opaque tail; `subsource_hash`, `category_hash`, `service_hash`, and `app_hash` are bare opaque tokens. All five are drill-down handles only - values to pass back into a filter, not strings to interpret.
+Never parse a `_hash`, never infer meaning from its characters, never length-validate it. `pattern_hash` may carry a short readable prefix followed by an opaque tail; `subsource_hash`, `category_hash`, `service_hash`, `app_hash`, and `source_hash` are bare opaque tokens. All six are drill-down handles only - values to pass back into a filter, not strings to interpret.
 
 ---
 
