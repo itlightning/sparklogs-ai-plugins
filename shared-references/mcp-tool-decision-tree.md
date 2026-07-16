@@ -120,12 +120,16 @@ describe_pattern(
   org_ids: ["..."],
   start: "...",
   end: "...",
-  pattern_hashes: ["..."],
-  max_samples_per_pattern: 5,        # default 5; set 0 for stats only (mcp:observe)
+  pattern_hashes: ["..."],           # order = your priority; examples cover roughly the first 25
+  include_examples: true,            # default true; false for stats only
   external_investigation_id: "..."
 )
--> pattern text, stats, fleet spread; optional sample messages when max_samples_per_pattern > 0 (requires mcp:query)
+-> pattern text, stats, fleet spread; diverse example messages with recurrence
 ```
+
+**Examples are server-chosen, diverse, and truthful.** You do not pick counts: the server returns a text-diverse set of example messages per pattern (not just the most recent), sized to fit the response. List your highest-interest `pattern_hashes` FIRST: examples cover roughly the first 25 by list order; the rest get stats only (the scope line says so). Each example carries `count`, `[first, last]`, and (when it recurred 3+ times) `seen_at`: times this exact message recurred, identical except embedded timestamps.
+
+**Access tiers:** stats work on `mcp:observe`; examples additionally need query authority. If the token lacks it, the call succeeds with stats only (no error): do not retry, read the stats.
 
 ---
 

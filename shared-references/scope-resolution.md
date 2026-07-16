@@ -161,7 +161,7 @@ Each row is one **(collector, origin)** pair in the window:
 | `first_event_at`, `last_event_at` | Exact window bounds for this pair |
 
 The summary may include **`top_interesting_patterns`**: a short ranked teaser (~8 entries) of high-signal patterns in scope.
-Teaser rows are previews only. **Before citing any pattern in a Finding, call `describe_pattern(pattern_hashes=[...])`** for full pattern text, stats, fleet spread, and optional sample messages.
+Teaser rows are previews only. **Before citing any pattern in a Finding, call `describe_pattern(pattern_hashes=[...])`** for full pattern text, stats, fleet spread, and diverse example messages with recurrence.
 The tool response includes a hint when the teaser is present.
 
 ### Decision logic
