@@ -301,7 +301,7 @@ The v1 catalog is these nine tools (lean-9):
 | `list_fields` | lightweight | Field catalog for building NEW queries - only if standard/known fields don't surface enough. Not a first-pass tool. |
 | `query_grouped_aggregation` | backing scan | Group every matching event by one `group_field`; top values by hit count. The workhorse for "what's happening" within an LQL filter - run it BEFORE raw logs. |
 | `query_logs` | backing scan | Retrieve raw chronological events. Last resort, over an already-narrowed window/filter. |
-| `refine_query_result` | lightweight | Relational engine over a cached `query_id` (filter/group/aggregate/having/order/select/page). Use freely; touches the cache, not the source. |
+| `refine_query_result` | lightweight | Relational engine over a cached `query_logs` result (filter/group/aggregate/having/order/select/page). Use freely; touches the cache, not the source. Responses keep the same `query_id`; refine that id again for other views. |
 | `get_query_metadata` | lightweight* | Cache/field introspection over a `query_id`. Default = bookkeeping only (fast). *`top_n`/`field_match` deep field discovery is a full catalog scan of the source - use deliberately. |
 
 Fast-follow differential tools (`query_period_diff`, `compare_populations`, `cluster_event_contexts`) are not yet available. Until they ship, use two `query_grouped_aggregation` runs over two windows for period diff, or grouped aggregation over distinct `lql` populations for compare.
@@ -329,7 +329,7 @@ Every data-tool response is ONE text block, not JSON you parse as a whole:
 
 ### Grouped results are not refinable (v1)
 
-`query_grouped_aggregation` output is NOT a refinable cache in v1 - calling `refine_query_result` on it returns expired. Read grouped results directly. If a grouped result is truncated, follow its hint (narrow the filter or window and re-run the grouped call). `refine_query_result` applies ONLY to `query_logs` slices and to prior refine outputs.
+`query_grouped_aggregation` output is NOT a refinable cache in v1 - calling `refine_query_result` on it returns expired. Read grouped results directly. If a grouped result is truncated, follow its hint (narrow the filter or window and re-run the grouped call). `refine_query_result` applies ONLY to `query_logs` slices; a refine response keeps the same `query_id`, so run every further refine against that same id.
 
 Detailed per-tool usage with examples is in `references/mcp-tool-decision-tree.md`.
 
@@ -398,9 +398,9 @@ Suggest `/sparklogs-analyze-cause <external_investigation_id>` (the separate cau
 
 ## Section 14. Error handling - recover gracefully
 
-**Cache expired on `refine_query_result`:** the cache is cold (>~24h since the backing scan, or a grouped result, which is not refinable). Re-issue the original backing query; the server transparently regenerates a fresh `query_id` when it can (`cache status` in the header reflects it).
+**Cache expired on `refine_query_result`:** a cold `query_logs` cache regenerates automatically under the SAME `query_id` when you refine it (the header's cache status reflects it). A grouped result is not refinable (re-run the grouped call). If the server reports the cache cannot be restored, re-issue the original backing query.
 
-**Soft throttle (429 with `retry_after_ms`):** retry up to 3x with exponential backoff. After 3 retries, surface to the engineer: "the investigation is being slowed by workspace-level rate limits."
+**Rate or capacity errors:** if a tool call fails with a retryable server error, retry up to 2x with a brief backoff, then surface to the engineer rather than hammering the same call.
 
 **Row-ceiling exceeded on backing query:** narrow `lql` (tighter time range, restricted `org_ids`, add `severity`/`anomaly_max_score` predicates) or split into multiple queries. Then refine the cached slice rather than re-scanning.
 
