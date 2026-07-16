@@ -166,6 +166,8 @@ query_grouped_aggregation(
 -> rows: {<group_field>, hits, max_severity}   # dense TSV
 ```
 
+**Sampled counts:** on very large populations the server may compute hits from a partial sample; the response then carries `summary.sampled` + `sample_pct` and its scope line says so. Cite such counts as approximate (small ones are rough); narrow the window or filter for exact figures. Same marker applies to `query_logs` grounding totals.
+
 **Use cases:**
 - "What patterns appeared most?" -> group_field `pattern`.
 - "Which sources show this?" -> filter on a `pattern_hash` in `lql`, group_field `source`.
