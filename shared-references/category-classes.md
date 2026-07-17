@@ -30,7 +30,7 @@ Never infer "worse" from ELEVATED vs NOTABLE. To rank concern, read `severity` (
 ## Pair convention (one slug across the lifecycle)
 
 Onset, held, and closure of one condition share a single reason slug across the three classes:
-`NOTABLE.io-saturated` (onset) -> `ELEVATED.io-saturated` (held) -> `RECOVERED.io-saturated` (closure).
+`NOTABLE.io_saturated` (onset) -> `ELEVATED.io_saturated` (held) -> `RECOVERED.io_saturated` (closure).
 Pivot on the slug to see a condition's full lifecycle without a join. A `RECOVERED.<slug>` always has a
 matching `ELEVATED.<slug>` on the same source.
 
