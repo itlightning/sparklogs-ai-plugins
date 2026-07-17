@@ -10,6 +10,7 @@ const ROOT = process.cwd();
 const PORTABLE = /^[a-z0-9][a-z0-9-]*[a-z0-9]$/;
 const REQUIRED_ASSETS = ['logo.svg', 'logo.png', 'icon.svg', 'icon-256.png', 'icon-512.png'];
 const SHARED_REFERENCES = [
+  'category-classes.md',
   'common-mistakes.md',
   'lql-reference.md',
   'mcp-tool-decision-tree.md',

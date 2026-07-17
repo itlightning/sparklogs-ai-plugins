@@ -475,6 +475,7 @@ When the situation calls for it, read the appropriate reference file. Don't try 
 
 - `references/output-template.md` - full output template with every field defined, plus right-vs-wrong examples.
 - `references/scope-ladder.md` - the six grouping fields and their `_hash` companions (incl. `source`/`source_hash`), availability, `list_scope_ladder` vs grouped aggregation, and RCA usage shapes.
+- `references/category-classes.md` - what NOTABLE / ELEVATED / RECOVERED mean in `category` (temporal shape, not importance), the lifecycle pair convention, and how "interesting" counts fold them in.
 - `references/scope-resolution.md` - detailed scope-resolution and source-discovery sequence.
 - `references/lql-reference.md` - complete LQL syntax reference with examples and common mistakes.
 - `references/mcp-tool-decision-tree.md` - per-tool detailed usage, all parameters, decision tree for which tool to use when.
