@@ -120,12 +120,16 @@ describe_pattern(
   org_ids: ["..."],
   start: "...",
   end: "...",
-  pattern_hashes: ["..."],
-  max_samples_per_pattern: 5,        # default 5; set 0 for stats only (mcp:observe)
+  pattern_hashes: ["..."],           # order = your priority; examples cover roughly the first 25
+  include_examples: true,            # default true; false for stats only
   external_investigation_id: "..."
 )
--> pattern text, stats, fleet spread; optional sample messages when max_samples_per_pattern > 0 (requires mcp:query)
+-> pattern text, stats, fleet spread; diverse example messages with recurrence
 ```
+
+**Examples are server-chosen, diverse, and truthful.** You do not pick counts: the server returns a text-diverse set of example messages per pattern (not just the most recent), sized to fit the response. List your highest-interest `pattern_hashes` FIRST: examples cover roughly the first 25 by list order; the rest get stats only (the scope line says so). Each example carries `count`, `[first, last]`, and (when it recurred 3+ times) `seen_at`: times this exact message recurred, identical except embedded timestamps.
+
+**Access tiers:** stats work on `mcp:observe`; examples additionally need query authority. If the token lacks it (or the workspace trial has expired), the call succeeds with stats only (no error) and the scope line names the reason: do not retry; read the stats and, when relevant, tell the engineer why examples are missing (e.g. expired trial).
 
 ---
 
@@ -166,6 +170,8 @@ query_grouped_aggregation(
 -> rows: {<group_field>, hits, max_severity}   # dense TSV
 ```
 
+**Sampled counts:** on very large populations the server may compute hits from a partial sample; the response then carries `summary.sampled` + `sample_pct` and its scope line says so. Cite such counts as approximate (small ones are rough); narrow the window or filter for exact figures. Same marker applies to `query_logs` grounding totals.
+
 **Use cases:**
 - "What patterns appeared most?" -> group_field `pattern`.
 - "Which sources show this?" -> filter on a `pattern_hash` in `lql`, group_field `source`.
@@ -187,7 +193,6 @@ query_logs(
   end: "...",
   include_sub_orgs: true,
   lql: "...",                      # optional LQL filter; omit to match all in scope
-  limit: 1000,                     # max events to scan + cache (default 1000)
   return_field_list: [...],        # projection; response-only, cache keeps full width. Set explicitly.
   external_investigation_id: "..."
 )
@@ -211,11 +216,11 @@ query_logs(
 
 ### `refine_query_result`
 
-An in-cache relational engine over a `query_logs` (or prior refine) result. Meaningfully faster than a backing query; never re-touches the source.
+An in-cache relational engine over a `query_logs` result. Meaningfully faster than a backing query; never re-touches the source.
 
 ```
 refine_query_result(
-  query_id: "...",                 # from a prior query_logs or refine
+  query_id: "...",                 # from a prior query_logs result
   filter_lql: "...",               # WHERE over the cached table's ROW columns
   group_by: [ {col} | {time bucket expr} ],   # present => aggregation; absent => filtered/projected row slice
   aggregate: [ {fn, col, as} ],    # fn in count/count_distinct/sum/avg/min/max/stddev/p50/p90/p95/p99
@@ -223,18 +228,24 @@ refine_query_result(
   order_by: [ {col_or_alias, dir} ],
   select: [...],                   # row-mode projection
   limit: 500,
-  offset: 0,                       # deterministic paging over the cached slice
-  sample: {n: ..., method: ...},   # optional down-sampling
+  offset: 0,                       # deterministic paging of the transformed output
+  sample: {n: ..., method: ...},   # optional row-mode down-sampling (see restrictions below)
   external_investigation_id: "..."
 )
 -> same envelope shape as query_logs (dense TSV for grouped/projected output)
 ```
 
-**The central efficiency lever.** Queue one broad slice, then refine many times against the same `query_id`. Multiple refines are encouraged.
+**The central efficiency lever.** Queue one broad slice, then refine many times against the same `query_id`. Multiple refines are encouraged; each is an independent view over that same cached slice.
+
+**A refine response keeps the `query_id` you gave it.** Refined output is not a separate cache: run every further refine against the original `query_logs` `query_id`. On refine responses, `page.rows_cached` means rows in that underlying cache, not the size of your transformed output.
+
+**Pagination:** repeat the SAME refine arguments and change only `offset`. A partial page's `page.next` hands the full continuation back (your arguments + the next `offset`); follow it verbatim.
 
 **Binding rule:** `filter_lql` resolves against the cached table's ROW columns (see the response schema descriptor for the vocabulary); `having_lql` resolves against the POST-GROUP columns (group + aggregate aliases).
 
-**Cache expiry:** the underlying rows live in the server-side cache (~24h). A refine much later, or a refine of a grouped (non-refinable) result, returns expired - re-issue the original backing query (the server regenerates a fresh `query_id` when it can).
+**Sample restrictions:** `sample` is row mode only; combining it with `group_by`/`aggregate`/`having_lql` is rejected (a sampled aggregate would look exact without being exact). Sampled paging is approximate: each call may select a different subset.
+
+**Cache expiry:** a cold cache (roughly a day old) regenerates automatically under the SAME `query_id` when you refine it (the header's cache status reflects it). Grouped results remain non-refinable (re-run the grouped call). If the server reports the cache cannot be restored, re-issue the original backing query.
 
 **Common patterns:**
 - After a broad raw scan, filter per-subsource to drill into specific categories.

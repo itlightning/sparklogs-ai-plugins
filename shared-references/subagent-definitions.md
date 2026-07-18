@@ -85,7 +85,7 @@ top_patterns:
 
 ## Subagent: `sparklogs-cluster-interpreter`
 
-**Fast-follow (not v1).** This subagent depends on `cluster_event_contexts`, which is not in the v1 lean-7 surface. Until it ships, approximate clustering with a `query_logs` slice narrowed to the pattern plus `refine_query_result` group_by over the surrounding context fields.
+**Fast-follow (not v1).** This subagent depends on `cluster_event_contexts`, which is not in the v1 tool surface. Until it ships, approximate clustering with a `query_logs` slice narrowed to the pattern plus `refine_query_result` group_by over the surrounding context fields.
 
 **Purpose.** Given a `cluster_event_contexts` result with multiple distinct clusters, interpret each cluster's representative_surround and produce a structured human-readable description.
 
