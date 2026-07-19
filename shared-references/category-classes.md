@@ -42,3 +42,10 @@ matching `ELEVATED.<slug>` on the same source.
   closure (RECOVERED, counted as NOTABLE). To get onsets only, filter on the reason **slug**, not the
   class.
 - **Fleet "currently degraded"** = the latest ELEVATED with severity >= Warning per host.
+- **Critical+ is a fetch-first contract.** Any non-zero critical+ count (severity >= critical; the
+  dedicated `cnt_critical_plus` triage column where surfaced, else a grouped aggregation on
+  `severity`) in scope means: fetch those events before proceeding, regardless of the investigation
+  topic. Producers admit critical+ only for facts an engineer on an unrelated ticket must always be
+  told (confirmed integrity loss or compromise), and critical+ auto-elevates into daily fleet
+  reporting, so the count is small and always material. The Info..Error bands are used normally:
+  read and weigh them per the evidence; they carry no fetch-first mandate.

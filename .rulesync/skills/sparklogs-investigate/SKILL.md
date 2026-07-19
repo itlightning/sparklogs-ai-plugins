@@ -251,7 +251,7 @@ Six fields carry a normalized value plus an opaque `_hash` companion, and togeth
 - **Correlate across windows for first-occurrence detection.** A `pattern_hash` present in the incident window but absent from a healthy baseline window signals new behavior - a primary RCA signal. Run `query_grouped_aggregation` twice, once per window, and compare the two hash populations (the v1 substitute for the fast-follow `query_period_diff` tool).
 - **Resolve, don't display.** The response envelope's `lookups` table (Section 11) maps frequent hashes to their values. Resolve a `_hash` to its value before it reaches a Finding; use the hash itself only as a drill-down filter value.
 
-Full detail and a worked localize-then-land shape: `references/scope-ladder.md`.
+Full detail and a worked localize-then-land shape: `references/scope-ladder.md`. The controlled `service` vocabulary (the cross-vendor ticket-class values worth pivoting on, e.g. `backup`, `storage`, `security_audit`) is in `references/service-taxonomy.md`.
 
 ---
 
@@ -281,6 +281,8 @@ list_sources(
 ```
 
 Each row is a **(collector `agent_id`, origin `source`)** pair with triage columns (`cnt_interesting`, `cnt_severe`, …) and optional summary **`top_interesting_patterns`** teaser. Call **`describe_pattern`** before citing any teaser pattern.
+
+**Critical+ fetch-first rule:** any non-zero critical+ count in scope (severity >= critical; the dedicated `cnt_critical_plus` triage column where surfaced, else a grouped aggregation on `severity`) means fetch those events before proceeding, regardless of the investigation topic. Critical+ admissions are rare, always-surface facts (confirmed integrity loss or compromise) and auto-elevate into daily fleet reporting; never leave one unread in a Finding's scope. The Info..Error bands carry no fetch-first mandate - weigh them normally. See `references/category-classes.md`, Query notes.
 
 **Cross-check verdict + data presence:** if the collector is **`stuck`** or **`offline`** and there are no (or negligible) events for that `agent_id` in the window, **halt**: missing logs may reflect collector failure, not a healthy endpoint. Otherwise, if the expected source has no events, ask the engineer (wrong name, window, or origin label).
 
@@ -475,7 +477,9 @@ When the situation calls for it, read the appropriate reference file. Don't try 
 
 - `references/output-template.md` - full output template with every field defined, plus right-vs-wrong examples.
 - `references/scope-ladder.md` - the six grouping fields and their `_hash` companions (incl. `source`/`source_hash`), availability, `list_scope_ladder` vs grouped aggregation, and RCA usage shapes.
-- `references/category-classes.md` - what NOTABLE / ELEVATED / RECOVERED mean in `category` (temporal shape, not importance), the lifecycle pair convention, and how "interesting" counts fold them in.
+- `references/category-classes.md` - what NOTABLE / ELEVATED / RECOVERED mean in `category` (temporal shape, not importance), the lifecycle pair convention, how "interesting" counts fold them in, and the critical+ fetch-first contract.
+- `references/service-taxonomy.md` - the controlled `service` ticket-class vocabulary (cross-vendor pivot values), the audit-adjacent demarcation list (why `security_audit` is not the whole audit surface), and boundary rules.
+- `references/windows-eventlog-reasons.md` - per-module reason rows for the Windows Event Log classic channels (Setup / System / Application): slug meanings, services, severity posture, cross-witness slug pairs, and the change-analysis recipe.
 - `references/scope-resolution.md` - detailed scope-resolution and source-discovery sequence.
 - `references/lql-reference.md` - complete LQL syntax reference with examples and common mistakes.
 - `references/mcp-tool-decision-tree.md` - per-tool detailed usage, all parameters, decision tree for which tool to use when.

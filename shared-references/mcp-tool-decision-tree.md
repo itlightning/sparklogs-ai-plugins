@@ -86,6 +86,9 @@ list_sources(
 - **Scope discovery:** confirm expected collector/source pairs have events; cross-check `verdict` (stuck/offline halt rules in `scope-resolution.md`).
 - **Fleet enumeration:** list collector/origin pairs in the window.
 - **Triage:** `cnt_interesting` / `cnt_severe` before deep queries.
+- **Critical+ fetch-first:** any non-zero critical+ count in scope (`cnt_critical_plus` where
+  surfaced, else group by `severity`) means fetch those events before proceeding, whatever the
+  investigation topic (`category-classes.md`, Query notes).
 
 ---
 

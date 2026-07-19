@@ -44,6 +44,7 @@ Climb the ladder to localize a problem: group coarse to find the noisy component
 **`list_scope_ladder`** (cheap discovery, not LQL-filtered):
 - Runs a cheap discovery scan for app / service / subsource structure in org scope and time window.
 - Per-row triage: `event_count`, `cnt_interesting`, `cnt_severe`, `distinct_interesting`, `first_event_at`, `last_event_at`.
+- Critical+ fetch-first: a non-zero critical+ count in any row in scope means fetch those events before proceeding, whatever the investigation topic (`category-classes.md`, Query notes).
 - Narrow with `agent_ids` (collector UUIDs), `source` substring, or `field_match` over dimension names.
 - Summary may include `top_interesting_patterns` teaser; call **`describe_pattern`** before citing any teaser pattern.
 
