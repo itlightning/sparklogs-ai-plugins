@@ -8,7 +8,7 @@ This is the canonical template every investigation produces. Use these field def
 
 ```
 INVESTIGATION SUMMARY - <ticket / scope description>
-investigation_request_id: <16-char base-36>
+external_investigation_id: <friendly handle, 8-200 chars>
 
 EXECUTIVE SUMMARY
 [1-3 paragraphs in plain language synthesizing the Findings, with citations to query_urls.
@@ -20,7 +20,7 @@ SCOPE CHECKED
 - Org(s): [list]
 - Time window: [start UTC] to [end UTC]
 - Data sources queried: [list - subsources, channels, helpers]
-- OUTSIDE AGENT VISIBILITY: [list - investigation-specific; see references/off-endpoint-causes.md]
+- WHAT WAS NOT CHECKED: [list - investigation-specific; see references/off-endpoint-causes.md]
 
 OBSERVED CONDITIONS
 
@@ -38,22 +38,23 @@ ANOMALY SIGNALS USED (if any)
 [brief enumeration, with explicit framing: "These anomaly indicators helped focus the investigation
  on signal-rich events. They are internal investigation tools, not standalone problem alerts."]
 
-INVESTIGATION COST
+WHAT WAS EXAMINED
 - Backing queries: <N>
 - Cached refinements: <M>
-- Tokens consumed: ~<K>
-- BigQuery slot-time: <seconds>
+- Sources covered: <list or count>
+- Org(s) covered: <list or count>
+- Matched population examined: <total rows/events, from query summaries>
 - Wall-clock: <minutes>
 
 AUDIT TRAIL
-get_query_metadata(investigation_request_id="<id>") -> <URL or instruction for engineer to inspect full per-query details>
+<the per-query query_id + query_url list from the local investigation-state document; inspect any one with get_query_metadata(query_id="<qid>"); every call is also tagged external_investigation_id="<id>" in the server-side audit>
 
 POSSIBLE NEXT DIRECTIONS
 [1-4 sentences max suggesting where investigation could go from here, ending with the invitation:]
 
 "Would you like to:
  (1) explore additional facts in any of the areas mentioned above, or
- (2) run /sparklogs-analyze-cause <investigation_request_id> to derive candidate cause hypotheses
+ (2) run /sparklogs-analyze-cause <external_investigation_id> to derive candidate cause hypotheses
      from these findings?"
 ```
 
@@ -61,8 +62,8 @@ POSSIBLE NEXT DIRECTIONS
 
 ## Field definitions
 
-### investigation_request_id
-16-character base-36 random string. Generate once at the start of an investigation; reuse for every MCP call within that investigation. Format: `[a-z0-9]{16}`. If you're resuming a paused investigation, recover the ID from the local investigation-state document at `./investigations/<id>.md`.
+### external_investigation_id
+A friendly, human-meaningful correlation handle you supply - free text, 8-200 chars, e.g. `investigate-ticket-4781-veeam-backup`. REQUIRED on every MCP call. Pick one distinctive value at the start of an investigation and reuse it for every call within that investigation; reusing the same value RESUMES the investigation (the server appends to the same audit trail). A genuinely new investigation needs a fresh, distinctive value - embed a ticket/incident id or a nonce so it doesn't collide with unrelated investigations. Out-of-bounds values return a user-visible validation error from the tool. If you're resuming a paused investigation, recover the id from the local investigation-state document at `./investigations/<id>.md`.
 
 ### EXECUTIVE SUMMARY (placed first, after the header)
 1-3 paragraphs synthesizing the Findings. Plain language; engineer audience. **Every claim derives from a Finding** - don't introduce new evidence in the summary. Include citations (query_urls) inline where helpful.
@@ -89,9 +90,9 @@ Absolute UTC timestamps for the investigation's data window. Not relative ("last
 ### Data sources queried
 The subsources, channels, and helper outputs you actually queried during the investigation. Be specific; e.g., `state/services`, `state/vss_writers`, `state/volumes`, `state/system_health`, `winlog/Microsoft-Windows-Backup/Operational`, `winlog/VSS`. This list lets the engineer (and future investigations) understand the investigation's coverage.
 
-### OUTSIDE AGENT VISIBILITY
+### WHAT WAS NOT CHECKED
 Investigation-specific list of off-endpoint sources and conditions you couldn't check. Per-investigation-type reference: `references/off-endpoint-causes.md`. Examples:
-- "Backup target NAS-01 is outside agent visibility (it does not run a Managed Agent). Recommend checking NAS-01 health logs directly."
+- "Backup target NAS-01 was not checked (it does not run a Managed Agent). Recommend checking NAS-01 health logs directly."
 - "Cloud identity audit logs (Azure AD / Entra) are outside SparkLogs ingestion. Sign-in failures from cloud-side conditional access policies would not appear in this investigation."
 - "EDR cloud audit (SentinelOne) is outside SparkLogs ingestion. EDR-side blocks of VSS operations would not appear in on-endpoint state."
 
@@ -142,21 +143,21 @@ NOT:
 Optional section. If anomaly fields helped you focus the investigation (e.g., `anomaly_max_score >= 60` filter narrowed your candidate set), list briefly. Required framing: anomalies are internal investigation tools, not standalone problem alerts. Example:
 - "anomaly_max_score >= 60 filter on the source-scoped backing query identified vss_writers and services as candidate subsources for deeper investigation. Anomaly fields supported finding-discovery efficiency; they are not surfaced as standalone problem indicators in this summary."
 
-### Investigation Cost
-Pull from `get_query_metadata(investigation_request_id=...)`. Engineer-facing visibility into AI investigation cost; supports billing transparency.
+### What Was Examined
+Track the running counts (backing queries, refinements, sources/orgs covered, matched population) in your local investigation-state document as you go. All figures here come from server-returned query summaries, not self-reported estimates. This section shows the engineer how much evidence backs the summary: how many queries ran, how broad a scope they covered, how many events were in the matched population.
 
 ### Audit Trail
-Provide the engineer with the means to inspect every query you ran. Either a direct URL (preferred when SparkLogs UX surfaces investigation-level audit) or instructions to call `get_query_metadata(investigation_request_id="<id>")`.
+Provide the engineer with the means to inspect every query you ran: the `query_id` + `query_url` list from the local investigation-state document, with per-query detail via `get_query_metadata(query_id="<qid>")`. Every call is also tagged `external_investigation_id` in the server-side audit (a direct investigation-level URL is preferred once SparkLogs UX surfaces it).
 
 ### POSSIBLE NEXT DIRECTIONS
 Bounded section at the end of the summary. 1-4 sentences max. Suggests where the investigation could go next - either more facts to dig into, or running `/sparklogs-analyze-cause` to derive candidate hypotheses. Always ends with the explicit invitation:
 
-> "Would you like to (1) explore additional facts in any of the areas mentioned above, or (2) run /sparklogs-analyze-cause <investigation_request_id> to derive candidate cause hypotheses from these findings?"
+> "Would you like to (1) explore additional facts in any of the areas mentioned above, or (2) run /sparklogs-analyze-cause <external_investigation_id> to derive candidate cause hypotheses from these findings?"
 
 **Right:**
 "The temporal correlation between the Tuesday KB install and the new error pattern, combined with the fleet-wide consistency, is worth exploring further. The disk-pressure cluster (Finding 5b) is a separate area on a small subset of sources.
 
-Would you like to (1) explore additional facts in any of the areas mentioned above, or (2) run /sparklogs-analyze-cause i9k2nf9x8a3b4c2d to derive candidate cause hypotheses from these findings?"
+Would you like to (1) explore additional facts in any of the areas mentioned above, or (2) run /sparklogs-analyze-cause investigate-ticket-4781-veeam-backup to derive candidate cause hypotheses from these findings?"
 
 **Wrong (presents as conclusion):**
 "The root cause is KB5034441 affecting Veeam VSS interaction. Roll back the patch on affected endpoints."
@@ -172,7 +173,7 @@ Would you like to (1) explore additional facts in any of the areas mentioned abo
 
 ```
 INVESTIGATION SUMMARY - Veeam backup failure on srv-fileshare01 (ticket #4781)
-investigation_request_id: i9k2nf9x8a3b4c2d
+external_investigation_id: investigate-ticket-4781-veeam-backup
 
 EXECUTIVE SUMMARY
 The investigation surfaced a VSS writer failure on srv-fileshare01 at 03:14 UTC concurrent with a
@@ -191,7 +192,7 @@ SCOPE CHECKED
 - Data sources queried: state/services, state/vss_writers, state/volumes, state/installed_products,
   state/system_health, winlog/Application, winlog/VSS, winlog/Microsoft-Windows-Backup/Operational,
   agent_op/ingest_drop, agent_op/spool_full, agent_op/backpressure
-- OUTSIDE AGENT VISIBILITY:
+- WHAT WAS NOT CHECKED:
   - Backup target NAS-01 (does not run Managed Agent). Recommend checking NAS-01 health directly
     if the on-endpoint evidence below is insufficient.
   - EDR cloud audit (SentinelOne SaaS): EDR-side blocks of VSS operations would not appear in
@@ -257,17 +258,19 @@ ANOMALY SIGNALS USED
   are internal investigation tools, not standalone problem alerts - this Finding is surfaced
   because the engineer asked about backups, not because the anomaly fired.
 
-INVESTIGATION COST
+WHAT WAS EXAMINED
 - Backing queries: 4
 - Cached refinements: 6
-- Tokens consumed: ~12,400
-- BigQuery slot-time: 38s
+- Sources covered: srv-fileshare01 (primary); 8 fleet sources for the cross-source pivot (Finding 6)
+- Org(s) covered: org_acme_dental
+- Matched population examined: 8,614 events across the 4 backing queries
 - Wall-clock: 4 minutes
 
 AUDIT TRAIL
-get_query_metadata(investigation_request_id="i9k2nf9x8a3b4c2d") returns full per-query details
-including parameters, cache_status, and bytes_scanned per query. Or browse interactively at:
-https://sparklogs.app/investigations/i9k2nf9x8a3b4c2d
+Backing queries (from the investigation-state document; every call tagged external_investigation_id="investigate-ticket-4781-veeam-backup"):
+  q_ab12 https://sparklogs.app/explore?... | q_cd34 https://sparklogs.app/explore?...
+Per-query detail (parameters, cache status, schema): get_query_metadata(query_id="<qid>").
+Or browse interactively at: https://sparklogs.app/investigations/investigate-ticket-4781-veeam-backup
 
 POSSIBLE NEXT DIRECTIONS
 The temporal correlation between the Tuesday KB install and the new error pattern, combined with
@@ -276,21 +279,21 @@ cluster (Finding 5b) is a separate factor on a small subset of sources that coul
 independently.
 
 Would you like to (1) explore additional facts in any of the areas mentioned above, or (2) run
-/sparklogs-analyze-cause i9k2nf9x8a3b4c2d to derive candidate cause hypotheses from these findings?
+/sparklogs-analyze-cause investigate-ticket-4781-veeam-backup to derive candidate cause hypotheses from these findings?
 ```
 
 ### Example 2: Investigation finds insufficient evidence (still useful)
 
 ```
 INVESTIGATION SUMMARY - slow file share complaint on srv-fileshare02
-investigation_request_id: i7m3p1n9k2t4r8c5
+external_investigation_id: investigate-srv-fileshare02-slow-share
 
 EXECUTIVE SUMMARY
 The on-endpoint perf and event data for srv-fileshare02 in the user-reported window shows no signs
 of resource saturation, SMB-server-side errors, or AV-induced spikes (Findings 1-3). The source's
 data is complete (Finding 4). However, the user reported slowness - the absence of server-side
 evidence does not mean the user is wrong; it suggests the slowness may have a cause outside this
-server's visibility. Common causes outside scope (see OUTSIDE AGENT VISIBILITY) include client-side
+server's visibility. Common causes outside scope (see WHAT WAS NOT CHECKED) include client-side
 issues, network path issues, and per-workstation AV scanning each opened file.
 
 SCOPE CHECKED
@@ -300,7 +303,7 @@ SCOPE CHECKED
 - Data sources queried: state/services, state/processes, state/perf_counters_curated,
   state/network_connections, state/system_health, winlog/Microsoft-Windows-SMBServer/Operational,
   winlog/Microsoft-Windows-Windows Defender/Operational, agent_op/ingest_drop
-- OUTSIDE AGENT VISIBILITY:
+- WHAT WAS NOT CHECKED:
   - User workstations making SMB requests (only the file server is in scope).
   - Network path between user workstations and srv-fileshare02 (switches, APs, firewall).
   - Any client-side issue (per-workstation AV scanning each opened file).
@@ -339,15 +342,16 @@ Finding 5: No evidence of slowness, congestion, or unusual activity on srv-files
               not show slowness - but the user reported slowness, which suggests the cause may be
               outside this server's visibility)
 
-INVESTIGATION COST
+WHAT WAS EXAMINED
 - Backing queries: 1
 - Cached refinements: 4
-- Tokens consumed: ~3,200
-- BigQuery slot-time: 8s
+- Sources covered: srv-fileshare02
+- Org(s) covered: org_acme_dental
+- Matched population examined: 142 events
 - Wall-clock: 2 minutes
 
 AUDIT TRAIL
-get_query_metadata(investigation_request_id="i7m3p1n9k2t4r8c5") for full per-query details.
+Backing-query query_id + query_url list in the investigation-state document (calls tagged external_investigation_id="investigate-srv-fileshare02-slow-share"); per-query detail via get_query_metadata(query_id="<qid>").
 
 POSSIBLE NEXT DIRECTIONS
 The pattern of "user reports slow, server looks fine" frequently traces to client-side or
@@ -356,7 +360,7 @@ or checking switch/AP/firewall logs between the user and the server, may reveal 
 
 Would you like to (1) explore the user's workstation (give me the workstation name), check
 network-path data, or extend the investigation in some other direction, or (2) run
-/sparklogs-analyze-cause i7m3p1n9k2t4r8c5 to derive candidate cause hypotheses from what was
+/sparklogs-analyze-cause investigate-srv-fileshare02-slow-share to derive candidate cause hypotheses from what was
 observed (and not observed) so far?
 ```
 

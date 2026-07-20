@@ -61,7 +61,7 @@ The mistakes are grouped by the operating principle they violate.
 
 **Why it's wrong.** Misrepresentation is worse than absent citation - engineer assumes you've supported the claim and won't double-check.
 
-**Recovery.** When you write a Finding, ask: "If the engineer clicks this URL and looks at the data, will they see what I'm asserting?" If unsure, refine the cached query (`refine_query_result` with `cache_filter_lql` to narrow) so the URL points to the specific evidence subset.
+**Recovery.** When you write a Finding, ask: "If the engineer clicks this URL and looks at the data, will they see what I'm asserting?" If unsure, refine the cached query (`refine_query_result` with `filter_lql` to narrow) so the URL points to the specific evidence subset.
 
 ### Executive Summary makes claims not in any Finding
 
@@ -103,13 +103,13 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` or `low`.
 
 **Why it's wrong.** You can only conclude that from the data you actually checked. The user reported a problem; concluding "no problem" overrides their experience based on incomplete data.
 
-**Recovery.** Phrase factually: "No evidence of <specific symptom> in the checked sources during the checked time window." Combine with OUTSIDE AGENT VISIBILITY section listing where else to look.
+**Recovery.** Phrase factually: "No evidence of <specific symptom> in the checked sources during the checked time window." Combine with WHAT WAS NOT CHECKED section listing where else to look.
 
 ---
 
 ## Mistakes against "Show what you can't see"
 
-### Skipping the OUTSIDE AGENT VISIBILITY section
+### Skipping the WHAT WAS NOT CHECKED section
 
 **Symptom.** Your summary doesn't have the section, or the section is just "n/a."
 
@@ -119,7 +119,7 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` or `low`.
 
 ### Generic boilerplate instead of investigation-specific limits
 
-**Symptom.** OUTSIDE AGENT VISIBILITY section says "many off-endpoint causes are possible" or "we don't see everything" or "cloud services are out of scope."
+**Symptom.** WHAT WAS NOT CHECKED section says "many off-endpoint causes are possible" or "we don't see everything" or "cloud services are out of scope."
 
 **Why it's wrong.** Boilerplate is noise. The point of the section is to give the engineer concrete next-step pointers.
 
@@ -131,7 +131,7 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` or `low`.
 
 **Why it's wrong.** Confidently-wrong conclusion when actual cause is off-endpoint. The engineer wastes time on the wrong remediation.
 
-**Recovery.** When you suspect the cause might be off-endpoint, name the suspected off-endpoint source explicitly in the OUTSIDE AGENT VISIBILITY section AND in POSSIBLE NEXT DIRECTIONS. Don't leave it implicit.
+**Recovery.** When you suspect the cause might be off-endpoint, name the suspected off-endpoint source explicitly in the WHAT WAS NOT CHECKED section AND in POSSIBLE NEXT DIRECTIONS. Don't leave it implicit.
 
 ---
 
@@ -149,21 +149,29 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` or `low`.
 
 ## Mistakes against auditability
 
-### Forgetting `investigation_request_id` on calls
+### Forgetting `external_investigation_id` on calls
 
-**Symptom.** You make MCP calls without including `investigation_request_id`.
+**Symptom.** You make MCP calls without including `external_investigation_id`.
 
-**Why it's wrong.** The audit trail breaks. `get_query_metadata(investigation_request_id=...)` won't surface the orphan calls. The engineer can't reconstruct the full investigation.
+**Why it's wrong.** It's a REQUIRED parameter - the tool rejects the call. The server-side per-call audit is keyed on `external_investigation_id`; omitting it isn't just an audit gap, it's a hard failure.
 
-**Recovery.** Generate one base-36 16-char ID at investigation start. Pass it on every data-access and refinement call. If you're resuming a paused investigation, recover from the local investigation-state document. If you forgot mid-investigation, generate a new ID and note in the summary that the audit trail is split.
+**Recovery.** Pick one distinctive, human-meaningful value at investigation start (8-200 chars free text, e.g. `investigate-ticket-4781-veeam-backup`; embed a ticket/incident id or a nonce so it's unique per real investigation). Pass it on every data-access and refinement call. If you're resuming a paused investigation, recover the id from the local investigation-state document and reuse it - reusing an id RESUMES that investigation. Don't reuse a generic string like `diskcheck` across unrelated incidents; they'd merge into one investigation.
+
+### `external_investigation_id` validation error
+
+**Symptom.** A tool call fails with a validation error on `external_investigation_id`.
+
+**Why it's wrong.** It didn't fit the 8-200 char bound. This isn't a generated hash - it's free text you choose.
+
+**Recovery.** Read the error message, shorten or lengthen the id to fit, and retry. Don't loop on the same out-of-bounds value.
 
 ### Not maintaining the local investigation-state document
 
 **Symptom.** Long investigation, context compacts, you lose track of what was found, what was checked, what's still open.
 
-**Why it's wrong.** Investigation continuity breaks. Re-investigation costs more than maintaining state.
+**Why it's wrong.** Investigation continuity breaks. Re-investigating from scratch duplicates work that maintaining state would have avoided.
 
-**Recovery.** At minimum, write the document at investigation start (scope, time window, investigation_request_id) and update after each major Finding accumulates. Use the host's filesystem tool. Schema is in SKILL.md Section 15.
+**Recovery.** At minimum, write the document at investigation start (scope, time window, external_investigation_id) and update after each major Finding accumulates. Use the host's filesystem tool. Schema is in SKILL.md Section 16.
 
 ---
 
@@ -173,23 +181,23 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` or `low`.
 
 **Symptom.** First MCP call (after `resolve_scope` and `list_sources`) is `query_logs` for a broad raw retrieval.
 
-**Why it's wrong.** Aggregation first. `query_logs` is the *last resort*, not the first. Aggregation cuts substantial token use AND improves correctness in published observability-MCP retrospectives.
+**Why it's wrong.** Aggregation first. `query_logs` is the *last resort*, not the first. Aggregation returns a dense, denominated answer instead of a pile of raw rows, and improves correctness in published observability-MCP retrospectives.
 
-**Recovery.** First substantive call should usually be `query_grouped_aggregation` or `query_period_diff` (depending on the question shape). Use `query_logs` only when aggregation has narrowed to a specific small set whose raw text matters.
+**Recovery.** First substantive call should usually be `query_grouped_aggregation` (group by the field the question is about). Use `query_logs` only when aggregation has narrowed to a specific small set whose raw text matters.
 
 ### Reading Level 3 by default
 
 **Symptom.** Your `return_field_list` includes `state.<category>` or `anomalies` on every call.
 
-**Why it's wrong.** Level 3 is roughly 10-100x more expensive in tokens than Level 1 or 2. Default should be Level 1 (triage) -> Level 2 (assess) -> Level 3 only when ground truth is needed.
+**Why it's wrong.** Level 3 returns far more data than Level 1 or 2. Default should be Level 1 (triage) -> Level 2 (assess) -> Level 3 only when ground truth is needed.
 
-**Recovery.** Always set `return_field_list` explicitly. Use the level-recipes from `mcp-tool-decision-tree.md`. Override per-field with `max_field_chars_override` only when you specifically need uncapped data.
+**Recovery.** Always set `return_field_list` explicitly. Use the level-recipes from `mcp-tool-decision-tree.md`. Field-length caps are SERVER-ENFORCED - there is no client override. If a capped field is truncating data you need, narrow the query (tighter `lql`, fewer subsources) or project a smaller field set with `return_field_list` / `select`, then page or refine to reach the specific rows.
 
 ### Re-running queries instead of refining cached results
 
 **Symptom.** You issue a fresh `query_logs` or `query_grouped_aggregation` when you already had a relevant cached query.
 
-**Why it's wrong.** Backing queries are 10-100x more expensive than `refine_query_result`. The cache lasts a long time; reuse it.
+**Why it's wrong.** Backing queries do meaningfully more work than `refine_query_result`, which runs against the cache. The cache lasts a long time; reuse it.
 
 **Recovery.** Before issuing a fresh backing query, check if an existing `query_id` (from earlier in this investigation) covers the universe you need. If yes, refine.
 
@@ -199,7 +207,15 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` or `low`.
 
 **Why it's wrong.** Source might have been emitting `ingest_drop` / `spool_full` / `backpressure` events during the window, in which case "no evidence" might just mean "data was incomplete."
 
-**Recovery.** Before any "no evidence found" conclusion, run a quick check: `query_logs(filter_lql='source = "<X>" AND event_kind = SLAAgentOp AND subsource in (ingest_drop, spool_full, backpressure)', time_range=<window>)`. If drops occurred, qualify the Finding's confidence and surface in OUTSIDE AGENT VISIBILITY.
+**Recovery.** Before any "no evidence found" conclusion, run a quick check: `query_logs(lql='source = "<X>" AND event_kind = SLAAgentOp AND subsource in (ingest_drop, spool_full, backpressure)', start=..., end=...)`. If drops occurred, qualify the Finding's confidence and surface in WHAT WAS NOT CHECKED. **Caveat today: `event_kind` / `SLAAgentOp` are deep fields the Managed Agent doesn't emit yet, so this check returns empty on every source regardless of true ingest health.** Treat an empty result as inconclusive, not "no drops," and fall back to `list_sources` event-count trends as the current completeness signal.
+
+### Reading an empty deep-field query as a clean bill of health
+
+**Symptom.** You filter on `event_kind`, `SLAAgentOp`, `anomaly_max_score`, `anomaly_categories`, or any `state.*` field, get zero rows back, and conclude the system is healthy or the check passed.
+
+**Why it's wrong.** These are DESIGNED fields in the schema, but itl-agent has zero production emission of them today. Every query filtering on them returns empty on every source, whether or not a problem exists. Empty means "not emitted yet," never "no problem found."
+
+**Recovery.** Fall back to shallow-triage fields that ARE emitted today: `message`, `severity`, `source`, `app`, `subsource`, `pattern` / `pattern_hash`, timestamps. Use `query_grouped_aggregation` on `severity` or `pattern` for volume/anomaly triage instead of the deep fields. State explicitly in the Finding or WHAT WAS NOT CHECKED that the deep-field check came back empty because the telemetry isn't emitted yet, not because nothing is wrong.
 
 ### Failing to check that the source has data in the investigation window
 
@@ -207,13 +223,13 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` or `low`.
 
 **Why it's wrong.** Wastes investigation budget. Also produces a confidently-wrong conclusion because absence of evidence is treated as evidence of absence.
 
-**Recovery.** Always run `list_sources` with the investigation's `time_range` as your first or second tool call (after `resolve_scope`). If the source has no data in the window, halt and ask the engineer for clarification per `scope-resolution.md`.
+**Recovery.** Always run `list_sources` with the investigation's `start`/`end` window as your first or second tool call (after `resolve_scope`). If the source has no data in the window, halt and ask the engineer for clarification per `scope-resolution.md`.
 
 ### Running 30 tool calls without converging
 
 **Symptom.** Investigation has 20+ tool calls and you're still chasing leads without a coherent picture.
 
-**Why it's wrong.** Cost ceiling violated; engineer's wall-clock budget violated; usually means the investigation is structurally stuck.
+**Why it's wrong.** Backing-query ceiling violated; engineer's wall-clock budget violated; usually means the investigation is structurally stuck.
 
 **Recovery.** Stop at ~15 tool calls if not converging. Produce an interim summary that says "Investigation has examined N findings without converging on a coherent picture; here's what was found and the next investigative directions worth taking." Honest and useful; better than 30 tool calls of confused thrashing.
 
@@ -249,7 +265,7 @@ Don't keep retrying with slightly different broken expressions. If the LQL parse
 
 ### Skipping required sections
 
-Every summary MUST have: EXECUTIVE SUMMARY (at top), SCOPE CHECKED, OBSERVED CONDITIONS, OUTSIDE AGENT VISIBILITY (which lives inside SCOPE CHECKED), INVESTIGATION COST, AUDIT TRAIL, POSSIBLE NEXT DIRECTIONS (with the explore-or-analyze invitation). ANOMALY SIGNALS USED is required only if you used anomaly fields.
+Every summary MUST have: EXECUTIVE SUMMARY (at top), SCOPE CHECKED, OBSERVED CONDITIONS, WHAT WAS NOT CHECKED (which lives inside SCOPE CHECKED), WHAT WAS EXAMINED, AUDIT TRAIL, POSSIBLE NEXT DIRECTIONS (with the explore-or-analyze invitation). ANOMALY SIGNALS USED is required only if you used anomaly fields.
 
 ### Making the POSSIBLE NEXT DIRECTIONS section longer than 3 sentences
 

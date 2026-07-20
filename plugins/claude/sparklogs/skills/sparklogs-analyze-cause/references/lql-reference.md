@@ -1,6 +1,8 @@
 # LQL Reference - for the SparkLogs Investigator skill
 
-The complete, verified syntax of Lightning Query Language (LQL) - the filter language used by every `filter_lql`, `cache_filter_lql`, and similar parameter on the SparkLogs MCP tools. Read this file when composing any non-trivial LQL.
+The complete, verified syntax of Lightning Query Language (LQL) - the filter language used by every LQL parameter on the SparkLogs MCP tools: `lql` (on `query_logs` / `query_grouped_aggregation`), and `filter_lql` / `having_lql` (on `refine_query_result`). Read this file when composing any non-trivial LQL.
+
+An empty or omitted `lql` matches everything in the tool's `start`/`end` window and `org_ids` scope - useful as a starting point before narrowing.
 
 Operator names, syntax forms, and edge cases are quoted from sparklogs.com docs.
 
@@ -136,7 +138,7 @@ Slash-delimited, re2 syntax. Used with operators `:`, `!:`, `=`, `!=`. **The cho
 message: /[0-9A-F]{8}(-[0-9A-F]{4}){3}-[0-9A-F]{12}/      <- contains a UUID anywhere in message
 ```
 
-The full power of re2 is available; use sparingly because regex is more expensive than substring matching.
+The full power of re2 is available; use sparingly because regex evaluation is slower than substring matching.
 
 ### Operator + regex semantics
 
@@ -235,7 +237,7 @@ Auto-resolves type when omitted. Only use type suffix when the field has multipl
 
 ## `any` meta field
 
-Searches all standard string + custom fields. Only with `:` operator. Expensive - use sparingly.
+Searches all standard string + custom fields. Only with `:` operator. Slow - use sparingly.
 
 ```
 any: "credit card"                       <- search all fields for "credit card"
@@ -255,13 +257,15 @@ any: "credit card"                       <- search all fields for "credit card"
 
 ## Canonical recurring patterns
 
+**Field-availability note.** Several patterns below filter on `event_kind`, `anomaly_max_score`/`anomaly_categories`, or `state.*` - deep RCA fields the Managed Agent doesn't emit yet (zero production emission today; see SKILL.md Section 8). These queries are syntactically valid and will be the right shape once emission lands, but they return EMPTY right now on every source. An empty result from one of these is "not emitted yet," never "no problem." Fall back to `severity`/`message`/`pattern` shallow-triage fields, which ARE emitted today.
+
 ### Context-reduction filter (the most common starting filter)
 
 ```
 severity in (error, critical) OR (anomaly_max_score >= 60 AND anomaly_max_score_confidence >= 70)
 ```
 
-Use this whenever you want to focus on signal-rich events without specifying a more targeted filter. The OR is deliberate - severity catches what the source flagged as bad; anomaly score catches what the local detector judged unusual.
+Use this whenever you want to focus on signal-rich events without specifying a more targeted filter. The OR is deliberate - severity catches what the source flagged as bad; anomaly score catches what the local detector judged unusual. (Today the anomaly half is a no-op per the field-availability note above; the filter degrades gracefully to `severity in (error, critical)`.)
 
 ### Single-source single-time-window scope
 
@@ -269,7 +273,7 @@ Use this whenever you want to focus on signal-rich events without specifying a m
 source = "srv-fileshare01"
 ```
 
-Combined with `time_range` parameter (which is separate from `filter_lql`).
+Combined with the `start` / `end` window parameters (which are separate from the LQL filter).
 
 ### Multi-source set
 
@@ -331,17 +335,21 @@ correlation_id = "abc123def456"
 event_kind = SLAAgentOp AND subsource in (ingest_drop, spool_full, backpressure)
 ```
 
+`event_kind` / `SLAAgentOp` aren't emitted yet (see the field-availability note above) - this returns empty today regardless of true ingest health. Treat empty as inconclusive, not "no drops."
+
 ### Detector lifecycle awareness
 
 ```
 event_kind = SLAAgentOp AND subsource: anomaly_detector_*
 ```
 
+Same caveat: empty today because `event_kind` isn't emitted, not because detectors are absent.
+
 Identifies warmup-complete and baseline-reset events.
 
 ### Time-range narrowing within an LQL filter
 
-The `time_range` parameter is the primary time scope. To narrow further inside a cached scan via `cache_filter_lql`:
+The `start` / `end` window is the primary time scope. To narrow further inside a cached scan via `refine_query_result`'s `filter_lql`:
 
 ```
 t between 2026-04-23T03:00:00Z and 2026-04-23T04:00:00Z
@@ -360,7 +368,7 @@ t between 2026-04-23T03:00:00Z and 2026-04-23T04:00:00Z
 7. **Quoting unquoted terms unnecessarily.** `severity = "error"` works but `severity = error` is fine and more readable.
 8. **Forgetting parentheses around OR with implicit AND.** `severity = error OR anomaly_max_score >= 60 source = "x"` parses unexpectedly. Use parentheses: `(severity = error OR anomaly_max_score >= 60) AND source = "x"`.
 9. **Mixing `&&` / `||` with `AND` / `OR` in the same expression.** Both work but consistency reads better.
-10. **Hallucinating field names.** When uncertain about a field name, check `unknown_field_paths` warnings in the response - if you see one, the field doesn't exist in any cached row. Use canonical field names from `mcp-tool-decision-tree.md` or via `list_fields` discovery.
+10. **Hallucinating field names.** When uncertain about a field name, check the response schema descriptor - a field you requested that doesn't resolve won't appear there. Use canonical field names from `mcp-tool-decision-tree.md`, `list_fields` discovery, or `get_query_metadata` field discovery over a cached query.
 
 ---
 
@@ -375,4 +383,4 @@ Common error messages and what they mean:
 - `'IS' is not a recognized operator` -> use `field!` or `NOT field!`.
 - `expected '(' at position N` -> value list needs parens, not brackets.
 - `unknown field 'state.services.*.status'` -> wildcard paths not supported; see workarounds above.
-- `field 'state.foo.bar' has no observed type` -> field doesn't exist in any cached row; will appear in `unknown_field_paths` response field too.
+- `field 'state.foo.bar' has no observed type` -> field doesn't exist in any cached row; it also won't appear in the response schema descriptor.

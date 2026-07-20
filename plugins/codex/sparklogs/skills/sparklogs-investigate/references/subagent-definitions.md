@@ -10,16 +10,16 @@ Subagent support varies by host:
 
 ## Choosing the model tier for delegated work
 
-For delegated bulk-summarization work, use **the most cost-effective modern model tier available on the platform you're running on**. Specific lightweight tiers across major platforms:
+For delegated bulk-summarization work, use **the fastest, most lightweight modern model tier available on the platform you're running on**. Specific lightweight tiers across major platforms:
 - Claude -> Haiku (e.g., `model: haiku` or platform-equivalent)
 - Gemini -> Flash (or platform-equivalent fast tier)
 - GPT family -> GPT-mini / fast tier
 - Cursor -> Composer 2 or equivalent modern fast tier
-- Other -> whichever fast/cheap tier the host exposes
+- Other -> whichever fast, lightweight tier the host exposes
 
-**Why a faster tier for delegated work.** Bulk extractive summarization producing structured output is well-matched to smaller models. The orchestrator (you) stays on a more capable tier for cross-correlating inference, hypothesis evaluation, and output template assembly. The cost and latency reduction compounds across an investigation that delegates several times.
+**Why a faster tier for delegated work.** Bulk extractive summarization producing structured output is well-matched to smaller models - the task is well-defined and doesn't need the orchestrator's full reasoning depth. The orchestrator (you) stays on a more capable tier for cross-correlating inference, hypothesis evaluation, and output template assembly. Delegating to a faster tier also speeds up an investigation that delegates several times.
 
-**If the host doesn't support per-subagent model selection,** delegation falls back to single-tier (orchestrator's tier). Correct, just without the cost/latency benefit. If the host doesn't support subagents at all, the orchestrator does the work in-context. Costs tokens but doesn't break the investigation.
+**If the host doesn't support per-subagent model selection,** delegation falls back to single-tier (orchestrator's tier). Correct, just slower than delegating to a lighter tier. If the host doesn't support subagents at all, the orchestrator does the work in-context. Uses more of the orchestrator's context but doesn't break the investigation.
 
 ---
 
@@ -27,7 +27,7 @@ For delegated bulk-summarization work, use **the most cost-effective modern mode
 
 **Purpose.** Read a large set of raw log events (typically Level-1 or Level-2 events from a `query_logs` cache) and return a structured summary the orchestrator can use without reading the raw events itself.
 
-**Model tier:** fast/cheap tier per the platform you're running on.
+**Model tier:** fast, lightweight tier per the platform you're running on.
 
 **Inputs the orchestrator passes:**
 - The `query_id` and `query_url` of a cached query.
@@ -55,15 +55,15 @@ events_summarized: <count>
 
 **The orchestrator uses the structured output as evidence in Findings, citing the same query_urls.** The orchestrator never receives the raw events back - only the summary.
 
-**Delegation heuristic:** if a step would require reading >500 raw events whose content the final summary won't need, delegate. If the step's likely output exceeds ~2K tokens of intermediate data, delegate.
+**Delegation heuristic:** if a step would require reading >500 raw events whose content the final summary won't need, delegate. If the step's likely output is a large volume of intermediate data the orchestrator doesn't need to see directly, delegate.
 
 ---
 
 ## Subagent: `sparklogs-pattern-enumerator`
 
-**Purpose.** Given a `query_grouped_aggregation` result with many groups, summarize the top N pattern_hashes with their meanings (looking up via `describe_pattern` if needed) and produce a structured enumeration the orchestrator can use as Findings input.
+**Purpose.** Given a `query_grouped_aggregation` result with many groups, summarize the top N pattern_hashes with their meanings (looking up pattern text via a `query_logs` message projection filtered to the `pattern_hash` if needed) and produce a structured enumeration the orchestrator can use as Findings input.
 
-**Model tier:** fast/cheap tier.
+**Model tier:** fast, lightweight tier.
 
 **Inputs:**
 - The `query_id` and `query_url` of the grouped aggregation result.
@@ -73,7 +73,7 @@ events_summarized: <count>
 ```yaml
 top_patterns:
   - pattern_hash: <hash>
-    pattern_text: <from describe_pattern>
+    pattern_text: <from a query_logs message projection filtered to the pattern_hash>
     count: <int>
     likely_meaning: <if matches a catalog entry, the catalog meaning; else null>
     catalog_match: <pattern_catalog.md entry name or null>
@@ -85,9 +85,11 @@ top_patterns:
 
 ## Subagent: `sparklogs-cluster-interpreter`
 
+**Fast-follow (not v1).** This subagent depends on `cluster_event_contexts`, which is not in the v1 tool surface. Until it ships, approximate clustering with a `query_logs` slice narrowed to the pattern plus `refine_query_result` group_by over the surrounding context fields.
+
 **Purpose.** Given a `cluster_event_contexts` result with multiple distinct clusters, interpret each cluster's representative_surround and produce a structured human-readable description.
 
-**Model tier:** fast/cheap tier.
+**Model tier:** fast, lightweight tier.
 
 **Inputs:**
 - The cluster_event_contexts result (clusters list).
@@ -113,7 +115,7 @@ cluster_interpretations:
 - **Cross-correlating inference.** "Does Finding X explain Finding Y?" - orchestrator's job.
 - **Anomaly judgment requiring domain knowledge.** "Is this anomaly meaningful in this investigation context?" - orchestrator's job.
 - **Hypothesis evaluation.** "Does the evidence support hypothesis H?" - orchestrator's job (and `/sparklogs-analyze-cause`'s job for cause hypotheses).
-- **Output template assembly.** Orchestrator assembles Findings, Executive Summary, Visibility Limits.
+- **Output template assembly.** Orchestrator assembles Findings, Executive Summary, What Was Not Checked.
 - **Citation discipline.** Orchestrator owns ensuring every Finding cites a query_url; subagents pass through the URL but don't author the Findings.
 
 ---
@@ -126,4 +128,4 @@ Subagent definitions live in the plugin's `subagents/` directory. The orchestrat
 
 ### Codex / Gemini CLI / Cursor / Copilot Studio
 
-Varying support. The skill expresses delegation *intent* - "this work is bulk extractive summarization, suitable for a faster tier where supported" - and the host fulfills with whatever it has. In hosts without per-subagent model selection, delegation falls back to single-tier (orchestrator's tier), which is correct but loses the cost/latency benefit. In hosts without subagent support at all, the orchestrator does the work in-context.
+Varying support. The skill expresses delegation *intent* - "this work is bulk extractive summarization, suitable for a faster tier where supported" - and the host fulfills with whatever it has. In hosts without per-subagent model selection, delegation falls back to single-tier (orchestrator's tier), which is correct but loses the speed benefit. In hosts without subagent support at all, the orchestrator does the work in-context.
