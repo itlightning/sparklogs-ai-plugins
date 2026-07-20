@@ -156,7 +156,7 @@ function buildClaudeMarketplace(metadata) {
   };
 }
 
-/** Cursor: metadata.description (not top-level), owner required, source without ./ — see Cursor plugins reference */
+/** Cursor: metadata.description (not top-level), owner required, source without ./: see Cursor plugins reference */
 function buildCursorMarketplace(metadata) {
   const owner = { name: metadata.author.name };
   if (metadata.author.email) owner.email = metadata.author.email;
@@ -216,12 +216,12 @@ function repositoryRootUrl(metadata) {
   return String(metadata.repository ?? '').replace(/\.git\/?$/, '').replace(/\/$/, '');
 }
 
-/** README inside each built plugin package — not the repo root README (avoids broken links). */
+/** README inside each built plugin package: not the repo root README (avoids broken links). */
 function pluginPackageReadme(host, metadata) {
   const label = HOST_LABELS[host] ?? host;
   const repo = repositoryRootUrl(metadata);
   const display = metadata.hosts?.[host]?.displayName ?? metadata.displayName;
-  return `# ${display} — ${label} bundle
+  return `# ${display}: ${label} bundle
 
 This directory is the **built SparkLogs AI plugin** for **${label}**, shipped from the SparkLogs plugin repository.
 
