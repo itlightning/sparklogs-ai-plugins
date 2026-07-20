@@ -4,7 +4,8 @@
 
 - **`source`**: authoring branch. All PRs target `source`.
 - **`dist`**: generated default branch on GitHub. Repo root on `dist` matches release CI output (`build/dist`). Marketplace installs use the default branch.
-- **`dist` does not share git history with `source`** (one force-pushed commit per release). Seeing `dist` N commits behind `source` is normal. Do not merge `source` into `dist`.
+- **`dist` does not share history with `source`.** Each release appends **one linear commit** on `dist` whose tree is byte-identical to that release's `build/dist` (parent = previous `dist` tip). Consumers can `git pull` / FF-update. Do not merge `source` into `dist`.
+- Seeing `dist` "behind" `source` in commit count is normal; the histories are separate.
 
 Contributor-facing branch guidance is in [CONTRIBUTING.md](../CONTRIBUTING.md).
 
@@ -25,14 +26,15 @@ git tag v1.2.3
 git push origin v1.2.3
 ```
 
-4. The release workflow verifies the tag is reachable from `origin/source`, renders packages, updates `dist`, creates zip assets, publishes `SHA256SUMS`, and creates a GitHub Release.
-
-5. After the workflow succeeds:
-   - Run the [CI-equivalent `compare-dist`](#validate-a-published-release-compare-dist) steps (render from the tag, not from `dist`).
+4. The release workflow (workflow file from the **tagged `source` commit** on tag-push) verifies the tag is reachable from `origin/source`, renders packages, FF-commits the tree onto `dist`, creates zip assets, publishes `SHA256SUMS`, and creates a GitHub Release.
+5. CI then verifies:
+   - **Same job:** `compare-dist` of the job's `build/dist` vs freshly fetched `origin/dist` (push matches render).
+   - **Follow-on job:** re-render from the tag and `compare-dist` again (reproducibility).
+6. After both jobs succeed:
    - On the GitHub Release, confirm four host zips (`sparklogs-claude`, `sparklogs-cursor`, `sparklogs-codex`, `sparklogs-generic`) and `SHA256SUMS` (four lines matching the zips).
    - Optionally smoke-test marketplace install on Claude Code, Cursor, or Codex.
 
-`workflow_dispatch` can re-render an existing tag. Manual dispatch uses the workflow file from the default branch (`dist`); until the next tag publish copies workflow changes from `source`, dispatch may run an older workflow file.
+`workflow_dispatch` can re-render an existing tag. Manual dispatch uses the workflow file from the default branch (`dist`); until the next successful publish copies an updated `release.yml` onto `dist`, dispatch may run an older workflow. Prefer tag-push from an updated `source` commit when changing the release workflow.
 
 ## Local Release Dry Run (before tagging)
 
@@ -51,18 +53,18 @@ yarn run smoke
 
 For convenience, `yarn run fullrebuild` runs those same steps in that order. Local builds use a dev version (`0.0.0-dev+…`) unless you pass `--version` to the renderer.
 
-Release CI runs the same validators, then renders with an explicit `--version` and publishes `build/dist` to the `dist` branch. CI does **not** run `compare-dist`.
+Release CI runs the same validators, then renders with an explicit `--version`, FF-publishes `build/dist` onto `dist`, and runs `compare-dist` (same job + reproducibility job).
 
 ## Validate a Published Release (`compare-dist`)
 
-Use **`yarn run compare-dist`** after a tagged release to confirm `origin/dist` matches a **CI-equivalent** local render. The script is maintainer-local only; it is not part of [`.github/workflows/release.yml`](.github/workflows/release.yml).
+Release CI runs **`yarn run compare-dist`** automatically. Maintainers can still run it locally.
 
 **Do not** pair `fullrebuild` or a render on a checked-out `dist` branch with `compare-dist` when validating an official release:
 
 - `fullrebuild` stamps dev versions into `plugin.json` (real content diff).
 - Rendering on `dist` records provenance for the publish commit (`dist` @ `<publish-sha>`), while CI renders from the **tag checkout** on `source` (`HEAD` @ `<tagged-source-sha>`). Plugin content may match, but `DIST.md` and `dist-manifest.json` will differ.
 
-To mirror release CI for tag `v1.2.3`:
+To mirror the reproducibility job for tag `v1.2.3`:
 
 ```bash
 git fetch origin dist tag v1.2.3
@@ -93,7 +95,7 @@ You can also run `validate:rendered`, `validate:cursor`, and `smoke` against a c
 
 ## Rollback
 
-Do not delete releases or rewrite `dist` history. To roll back, tag a new patch/minor version from a known-good source commit, publish it, and communicate the replacement version to MSPs.
+Do not delete GitHub Releases or rewrite `dist` history by hand. To roll back, tag a new patch/minor version from a known-good source commit, publish it (new linear `dist` commit), and communicate the replacement version to MSPs. Force-push to `dist` is emergency-only (Release App bypass).
 
 ---
 
@@ -142,7 +144,7 @@ Use **Settings → Rules → Rulesets** (branch rulesets + tag rulesets). Do **n
 | Rule | Setting |
 |------|---------|
 | **Restrict updates** | On (only bypass actors may push; blocks human writes) |
-| Block force pushes | On for everyone except bypass actors (release uses `--force-with-lease`; bypass actor must use **Always allow**, not pull-request-only bypass) |
+| Block force pushes | On for everyone except bypass actors (normal release is FF-only; App bypass remains for emergency recovery). Bypass mode: **Always allow**, not pull-request-only |
 | Restrict deletions | On |
 | **Bypass list** | **Release GitHub App only** (see below). **Not** `github-actions[bot]`. |
 
@@ -222,7 +224,7 @@ Do **not** add `source` or arbitrary feature branches to this environment.
 
 **Settings → Rules → Rulesets** → **`dist`** ruleset → **Bypass list** → **Add bypass** → search the App **name** (e.g. `sparklogs-ai-plugins-releaser`; not `github-actions[bot]`).
 
-Bypass mode: **Always allow** (release uses `git push --force-with-lease` outside pull requests).
+Bypass mode: **Always allow** (emergency force-push recovery; normal release publishes with a fast-forward commit).
 
 Enable **Restrict updates** on **`dist`** only after steps 1–3 and the workflow wiring below are merged to **`source`** and verified on a tag release.
 
