@@ -121,11 +121,15 @@ process_name: msedge*                     <- anything starting with msedge
 http_status_code: ?00                     <- matches 100, 200, 300, ..., 900
 ```
 
-A bare term with no field name searches the `message` field:
+A bare term with no field name searches the standard string fields: `message`, `pattern`, `category`,
+`subsource`, `source`, `app`, `service`, `trace_id`, `span_id`, and the companion hash fields
+(`pattern_hash`, `category_hash`, `subsource_hash`, `source_hash`, `app_hash`, `service_hash`).
+It does NOT search custom fields; use the `any` meta field for that.
 
 ```
-failed                                    <- matches events with "failed" in message
-"timed out"                               <- matches events with "timed out" in message
+failed                                    <- matches events with "failed" in any standard string field
+"timed out"                               <- matches events with "timed out" in any standard string field
+win.servicing.dism                        <- matches events with that subsource (or any standard string field)
 ```
 
 ---
@@ -237,7 +241,7 @@ Auto-resolves type when omitted. Only use type suffix when the field has multipl
 
 ## `any` meta field
 
-Searches all standard string + custom fields. Only with `:` operator. Slow - use sparingly.
+Searches all standard string + custom fields (same standard string fields as a bare term, plus every custom field). Only with `:` operator. Slow - use sparingly.
 
 ```
 any: "credit card"                       <- search all fields for "credit card"
