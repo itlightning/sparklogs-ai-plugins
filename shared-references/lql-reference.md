@@ -114,6 +114,7 @@ state.services.spooler.status = STOPPED  <- right (direct key)
 Pattern operators in unquoted terms:
 - `*` - matches any number of any character (zero or more).
 - `?` - matches any single character.
+- Pattern operators only work on STRING-typed fields; on a numeric field they fail to compile ("invalid numeric value"). Coerce with the `#s` type suffix: `x.http.response.status#s not in (2??, 3??)`.
 
 ```
 app: winlog/Microsoft-Windows-*           <- any Microsoft-Windows winlog channel
