@@ -477,7 +477,7 @@ When the situation calls for it, read the appropriate reference file. Don't try 
 
 - `references/output-template.md` - full output template with every field defined, plus right-vs-wrong examples.
 - `references/scope-ladder.md` - the six grouping fields and their `_hash` companions (incl. `source`/`source_hash`), availability, `list_scope_ladder` vs grouped aggregation, and RCA usage shapes.
-- `references/category-classes.md` - what NOTABLE / ELEVATED / RECOVERED mean in `category` (temporal shape, not importance), the lifecycle pair convention, how "interesting" counts fold them in, and the critical+ fetch-first contract.
+- `references/category-classes.md` - what NOTABLE / ELEVATED / RECOVERED mean in `category` (temporal shape, not importance), **open monitor ≠ problem**, the lifecycle pair convention, how "interesting" counts fold them in, and the critical+ fetch-first contract.
 - `references/service-taxonomy.md` - the controlled `service` ticket-class vocabulary (cross-vendor pivot values), the audit-adjacent demarcation list (why `security_audit` is not the whole audit surface), and boundary rules.
 - `references/windows-eventlog-reasons.md` - per-module reason rows for the Windows Event Log classic channels (Setup / System / Application): slug meanings, services, severity posture, cross-witness slug pairs, and the change-analysis recipe.
 - `references/scope-resolution.md` - detailed scope-resolution and source-discovery sequence.

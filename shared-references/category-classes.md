@@ -27,6 +27,15 @@ Pick class by temporal shape (discrete vs sustained), never by importance. So:
 
 Never infer "worse" from ELEVATED vs NOTABLE. To rank concern, read `severity` (and `cnt_severe`).
 
+## Open monitor ≠ problem (must always remember)
+
+An **open monitor** (holding episode / open condition) is an **interesting signal**, not automatically a problem that needs a human.
+
+- Problemhood = **severity** (+ MSP policy / report curation), never “there is an open monitor.”
+- Do **not** treat `open_monitors_count` or a dump of open episodes as the finding list.
+- ELEVATED + Info can be normal forever on a large % of hosts (busy CPU, SQL memory dominance, crash dumps disabled on desktops) and still matter as RCA context.
+- Daily fleet report selects **serious, human-actionable** issues; it does **not** report all open monitors.
+
 ## Pair convention (one slug across the lifecycle)
 
 Onset, held, and closure of one condition share a single reason slug across the three classes:
