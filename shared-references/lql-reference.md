@@ -19,7 +19,7 @@ Operator names, syntax forms, and edge cases are quoted from sparklogs.com docs.
 | `=` | exact match | Pattern or regex allowed on right side. |
 | `!=` or `<>` | exact non-match | See **Negated operators (scalar vs array)** below. |
 | `>=`, `>`, `<`, `<=` | numeric/ordinal comparison | Right side must be a literal, not a pattern or regex. |
-| `<field>!` | field has any non-NULL value | Terse non-null check. e.g., `correlation_id!` |
+| `<field>!` | field is present in the event | Presence check; matches even when the value is an explicit JSON `null` (absent field = no match). e.g., `correlation_id!` |
 | `<field> between <literal> and <literal>` | inclusive range | Works for numeric and timestamp fields. |
 | `<field> in (a, b, c)` | match any in value list | Comma-separated, parenthesized. NOT `[a, b, c]`. |
 | `<field> not in (a, b, c)` | match NONE in value list | Inverse of `in`. |
