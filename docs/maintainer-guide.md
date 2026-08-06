@@ -16,6 +16,11 @@ anchors. The content is authored nowhere in this repo. It is produced by the Spa
 library (`tools/gen-ai-schema.py`) and synced here as a checked-in build input, so a plugin
 package carries the reference set offline and a contributor can read it without a second checkout.
 
+The library renders two trees and owns the split. `docs/generated/` keeps the verification and
+sourcing detail its own authors work against; `docs/generated-public/` is the reader-facing render,
+same filenames, no provenance artifact. **This repo consumes the public tree verbatim.** Nothing is
+transformed on the way through, which is what lets the drift check compare bytes.
+
 Refresh it from a sibling source-library checkout:
 
 ```bash
@@ -45,8 +50,10 @@ it deliberately before a release, or after any library change.
 - **Gate A**: no file under a synced module directory may carry the library's spec-versus-observed
   evidence columns, its witness counts, or the prose that makes observation claims from them. Those
   are the library's own confidence instrument; a consumer reading them as a contract would treat an
-  unwitnessed decode as a broken one. Prose coverage is a fixed token list, not the concept, so it
-  catches the shapes the library actually emits rather than every possible phrasing.
+  unwitnessed decode as a broken one. **Upstream already withholds all of this, so gate A is a
+  tripwire rather than the mechanism:** it exists so that a regression in the public render fails
+  here instead of shipping. Prose coverage is a fixed token list, not the concept, so it catches the
+  shapes the library has actually emitted rather than every possible phrasing.
 - **Gate B**: two rules over `patterns.md`. The decision procedure must file a pattern whose head
   matched nothing as UNCURATED, never UNEXPECTED. And a surface whose reason name carries a mixed
   letter-and-digit token must not claim it renders a stable named pattern, because AutoExtract
@@ -61,17 +68,17 @@ Every rule re-proves itself on each run against the planted-positive fixtures in
 **Known defects** in library content that this repo cannot fix are pinned in `KNOWN_DEFECTS`, each
 naming one exact file, surface and claim, and citing the escalation it is filed under. The check
 runs in both directions: an entry that no longer matches anything FAILS, so a pin dies with its
-defect instead of outliving it and quietly excusing the next occurrence.
+defect instead of outliving it and quietly excusing the next occurrence. The list is empty today,
+which is the healthy state.
 
 Adding a module or an artifact is a decision, recorded in `scripts/generated-references.config.mjs`.
 The sync fails on any library MODULE not listed in `MODULES` and on any library ARTIFACT that
 appears in neither the public nor the internal list, so nothing new arrives unnoticed at either
 level.
 
-`recipes.md` is currently held back as internal. Three of its worked pivots do not parse as query
-language, and the generator's recipe check only resolves paths under the module's own prefixes, so
-platform field names and query syntax reach a reader unchecked. One line in the config moves it back
-when the library fix lands.
+`INTERNAL_ARTIFACTS` is empty: upstream already withholds what stays internal. The list is kept
+because the sync fails on any artifact appearing in neither it nor `PUBLIC_ARTIFACTS`, so nothing
+new arrives unnoticed in either direction.
 
 ## Versioning
 

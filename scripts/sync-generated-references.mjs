@@ -3,6 +3,10 @@
 
 // Sync the generated AI reference set from a sibling source-library checkout into generated/.
 //
+// The library renders a reader-facing tree and owns what it withholds from it. This is a verbatim
+// copy of that tree: nothing is transformed on the way through, so the drift check compares bytes
+// and the gates in lint-generated-references.mjs are a tripwire on upstream rather than a filter.
+//
 // Usage:
 //   node scripts/sync-generated-references.mjs           write generated/ and the sync manifest
 //   node scripts/sync-generated-references.mjs --check   fail if generated/ differs from a re-sync
@@ -26,8 +30,6 @@ import {
   LIBRARY_GENERATED_SUBPATH,
   MANIFEST_FILE,
   MODULES,
-  PROJECTION,
-  PROJECTION_NOTE,
   PUBLIC_ARTIFACTS,
   ROUTER_BEGIN,
   ROUTER_END,
@@ -47,155 +49,6 @@ async function exists(file) {
   } catch {
     return false;
   }
-}
-
-// Split a table row on separators the generator did not escape.
-function splitRow(line) {
-  const cells = [];
-  let current = '';
-  for (let i = 0; i < line.length; i += 1) {
-    const ch = line[i];
-    if (ch === '\\' && line[i + 1] === '|') {
-      current += '\\|';
-      i += 1;
-    } else if (ch === '|') {
-      cells.push(current);
-      current = '';
-    } else {
-      current += ch;
-    }
-  }
-  cells.push(current);
-  return cells;
-}
-
-function joinRow(cells) {
-  return cells.join('|');
-}
-
-function isDelimiterRow(line) {
-  return /^\s*\|?[\s:|-]+\|[\s:|-]*$/.test(line) && line.includes('-');
-}
-
-// Remove every column whose header cell matches, from the header, the delimiter and the body.
-function dropTableColumns(lines, headers) {
-  const wanted = new Set(headers.map((h) => h.toLowerCase()));
-  const out = [];
-  for (let i = 0; i < lines.length; i += 1) {
-    const line = lines[i];
-    const next = lines[i + 1];
-    if (!line.trimStart().startsWith('|') || next === undefined || !isDelimiterRow(next)) {
-      out.push(line);
-      continue;
-    }
-    const headerCells = splitRow(line);
-    const doomed = headerCells
-      .map((cell, index) => (wanted.has(cell.trim().toLowerCase()) ? index : -1))
-      .filter((index) => index >= 0);
-    if (doomed.length === 0) {
-      out.push(line);
-      continue;
-    }
-    const keep = (cells) => joinRow(cells.filter((_, index) => !doomed.includes(index)));
-    out.push(keep(headerCells));
-    out.push(keep(splitRow(next)));
-    i += 1;
-    while (i + 1 < lines.length && lines[i + 1].trimStart().startsWith('|')) {
-      i += 1;
-      out.push(keep(splitRow(lines[i])));
-    }
-  }
-  return out;
-}
-
-function headingLevel(line) {
-  const match = /^(#{1,6})\s/.exec(line);
-  return match ? match[1].length : 0;
-}
-
-// Remove a section by heading text, through to the next heading of the same or higher level.
-function dropSections(lines, titles) {
-  const wanted = new Set(titles.map((t) => t.toLowerCase()));
-  const out = [];
-  let skippingAt = 0;
-  for (const line of lines) {
-    const level = headingLevel(line);
-    if (skippingAt > 0) {
-      if (level > 0 && level <= skippingAt) skippingAt = 0;
-      else continue;
-    }
-    if (level > 0 && wanted.has(line.slice(level).trim().toLowerCase())) {
-      skippingAt = level;
-      continue;
-    }
-    out.push(line);
-  }
-  return out;
-}
-
-// Remove whole blank-line-delimited blocks when any line matches.
-function dropBlocks(lines, patterns) {
-  const out = [];
-  let block = [];
-  const flush = () => {
-    if (block.length > 0 && !block.some((line) => patterns.some((p) => p.test(line)))) out.push(...block);
-    block = [];
-  };
-  for (const line of lines) {
-    if (line.trim() === '') {
-      flush();
-      out.push(line);
-    } else {
-      block.push(line);
-    }
-  }
-  flush();
-  return out;
-}
-
-function dropLinksTo(lines, artifacts) {
-  return lines.filter((line) => !artifacts.some((artifact) => line.includes(`(${artifact})`)));
-}
-
-function collapseBlankRuns(lines) {
-  const out = [];
-  for (const line of lines) {
-    if (line.trim() === '' && out.length > 0 && out[out.length - 1].trim() === '') continue;
-    out.push(line);
-  }
-  while (out.length > 0 && out[out.length - 1].trim() === '') out.pop();
-  return out;
-}
-
-// Exact-text repairs, applied after the mechanical rules. Each must match exactly once.
-function applyRewrites(artifact, text) {
-  let out = text;
-  for (const rule of PROJECTION.rewrites) {
-    if (rule.artifact !== artifact) continue;
-    const hits = out.split(rule.find).length - 1;
-    if (hits !== 1) {
-      throw new Error(
-        `Projection rewrite for ${artifact} matched ${hits} times, expected exactly 1: "${rule.find.slice(0, 60)}...". `
-        + 'The library text changed; re-derive the rule or drop it.',
-      );
-    }
-    out = out.split(rule.find).join(rule.replace);
-  }
-  return out;
-}
-
-function project(artifact, text) {
-  let lines = text.split('\n');
-  lines = dropSections(lines, PROJECTION.dropSections);
-  lines = dropBlocks(lines, PROJECTION.dropBlocks);
-  lines = dropLinksTo(lines, PROJECTION.dropLinksTo);
-  lines = dropTableColumns(lines, PROJECTION.dropTableColumns);
-  lines = collapseBlankRuns(lines);
-  lines = applyRewrites(artifact, lines.join('\n')).split('\n');
-  const generatorNotes = [];
-  while (lines.length > 0 && lines[0].startsWith('<!--')) generatorNotes.push(lines.shift());
-  while (lines.length > 0 && lines[0].trim() === '') lines.shift();
-  return `${[...generatorNotes, PROJECTION_NOTE, '', ...lines].join('\n')}\n`;
 }
 
 function libraryDir() {
@@ -232,7 +85,7 @@ async function readModule(libDir, module) {
   if (missing.length > 0) throw new Error(`Source library is missing expected artifacts for ${module}: ${missing.join(', ')}`);
   const files = new Map();
   for (const name of PUBLIC_ARTIFACTS) {
-    files.set(name, project(name, await fs.readFile(path.join(src, name), 'utf8')));
+    files.set(name, await fs.readFile(path.join(src, name), 'utf8'));
   }
   return files;
 }
@@ -246,14 +99,11 @@ function manifestBody(commit, modules) {
       commit: commit.sha,
       generatedSubpath: LIBRARY_GENERATED_SUBPATH,
     },
-    projection: {
+    consumption: {
+      mode: 'verbatim',
+      tree: LIBRARY_GENERATED_SUBPATH,
       internalArtifacts: INTERNAL_ARTIFACTS,
-      droppedTableColumns: PROJECTION.dropTableColumns,
-      droppedSections: PROJECTION.dropSections,
-      droppedBlocksMatching: PROJECTION.dropBlocks.map((p) => p.source),
-      droppedLinksTo: PROJECTION.dropLinksTo,
-      rewrites: PROJECTION.rewrites.map((rule) => ({ artifact: rule.artifact, find: rule.find, replace: rule.replace, why: rule.why })),
-      why: 'Evidence tiers (spec versus observed claims and witness counts) are an internal instrument, not a consumer contract.',
+      why: 'The source library renders a reader-facing tree and owns what it withholds. Nothing is transformed here, so the drift check compares bytes.',
     },
     knownDefects: KNOWN_DEFECTS,
     modules: modules.map(([module, files]) => ({
