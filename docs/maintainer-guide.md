@@ -8,6 +8,47 @@
 
 Contributor-facing branch guidance is in [CONTRIBUTING.md](../CONTRIBUTING.md).
 
+## Generated Reference Set (`generated/`)
+
+`generated/<module>/` holds the AI reference set for each source module: field schema, closed
+vocabularies, the expected-pattern decision procedure, worked query recipes, and external-taxonomy
+anchors. The content is authored nowhere in this repo. It is produced by the SparkLogs source
+library (`tools/gen-ai-schema.py`) and synced here as a checked-in build input, so a plugin
+package carries the reference set offline and a contributor can read it without a second checkout.
+
+Refresh it from a sibling source-library checkout:
+
+```bash
+SPARKLOGS_SOURCE_LIBRARY_DIR=../sparklogs-source-library yarn sync-generated
+```
+
+The environment variable is optional when the checkout sits beside this repo. A path that is set
+but unusable is a hard failure rather than a fallback: a drift guard that quietly reads a different
+checkout reports green about the wrong tree.
+
+`generated/SYNC-MANIFEST.json` records the library branch and commit the current content came from,
+plus every projection rule that ran. Do not hand-edit anything under `generated/`: an edit is
+reverted by the next sync and fails the drift check in the meantime.
+
+`yarn validate:generated` runs three things:
+
+- **Drift**: re-sync into memory and compare. Without a library checkout this SKIPS and says so; it
+  never reports success it did not earn.
+- **Gate A**: no synced artifact may carry the library's spec-versus-observed evidence columns or
+  witness counts. Those are the library's own confidence instrument; a consumer reading them as a
+  contract would treat an unwitnessed decode as a broken one.
+- **Gate B**: the expected-pattern decision procedure must file a pattern whose head matched
+  nothing as UNCURATED, never UNEXPECTED. Reason names carrying a mixed letter-and-digit token are
+  variabilized away before the pattern is derived, so their rendered pattern legitimately matches
+  no head; filing that as unexpected turns a harmless shape into a standing drift alarm.
+
+Both gates re-prove themselves on every run against the planted-positive fixtures in
+`scripts/fixtures/generated-reference-gates/`. Correcting a fixture disarms the rule it proves.
+
+Adding a module or an artifact is a decision, recorded in `scripts/generated-references.config.mjs`.
+The sync fails on any library artifact that appears in neither the public nor the internal list, so
+a new artifact cannot arrive unnoticed in either direction.
+
 ## Versioning
 
 All hosts share one product version. Source files do not contain a release version. The release workflow derives `VERSION` from a human-created tag such as `v1.2.3`.

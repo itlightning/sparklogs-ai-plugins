@@ -255,6 +255,9 @@ async function renderHost(host, out, metadata, version) {
   await copyDirMaterialized(path.join(ROOT, '.rulesync', 'skills'), path.join(base, 'skills'));
   await copyDirMaterialized(path.join(ROOT, '.rulesync', 'commands'), path.join(base, 'commands'));
   await copyDirMaterialized(path.join(ROOT, '.rulesync', 'subagents'), path.join(base, 'agents'));
+  // Skills cite generated artifacts as `generated/<module>/<file>.md`. Carrying the tree into the
+  // package keeps that one path string true both inside an installed plugin and in a source checkout.
+  await copyDirMaterialized(path.join(ROOT, 'generated'), path.join(base, 'generated'));
   if (host === 'cursor' || host === 'generic') {
     await copyDirMaterialized(path.join(ROOT, '.rulesync', 'rules'), path.join(base, 'rules'));
   }
