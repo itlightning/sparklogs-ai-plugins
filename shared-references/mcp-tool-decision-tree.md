@@ -135,8 +135,9 @@ list_device_health(
 **Use cases:**
 - **Honesty check:** was this device reporting during the window, and are its episode spans
   trustworthy? Read `episode_age_basis`, `episode_clear_time_basis`, `window_partial`.
-- **What is on the box:** inventory rows. Keep `inventory` in `kinds`; it is normally
-  `class=CONTEXT` and it is the ground truth an RCA needs.
+- **What is on the box:** inventory rows. Keep `inventory` in `kinds`; those rows normally carry no
+  class at all, and they are the ground truth an RCA needs. `CONTEXT` is the absence of a class, not
+  a filterable value.
 - **Fleet shape of a condition:** `group_by_reason` with `fieldset: "fleet"`.
 
 **Read before using:** `device-state-fields.md` for the column names, the honesty fields, and what

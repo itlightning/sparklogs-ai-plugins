@@ -14,7 +14,7 @@ Read the CALL SHAPE and the INVESTIGATIVE LOGIC of each step, and substitute the
 
 - morphology is `sparklogs.kind` (`inventory`, `monitor`, `delta`, `agent_op`, `config_change`), not `event_kind`
 - the payload is the `message` plus the promoted fields for that source; there is no `event_summary` rollup
-- the era a row belongs to is `sparklogs.epoch.id` / `sparklogs.epoch.seq`, not `snapshot_id` / `prev_delta_id`
+- the era a row belongs to is `sparklogs.epoch.id` / `sparklogs.epoch.seq` (replacing `snapshot_id` / `prev_snapshot_id`), and the delta chain is its own family, `sparklogs.delta.id` / `sparklogs.delta.prev_id` (replacing `prev_delta_id`)
 - device and agent state, including the honesty fields, is in `device-state-fields.md`
 - which fields a given source actually writes is generated per source: route through `generated-reference-router.md`
 
@@ -73,7 +73,7 @@ query_logs(
   external_investigation_id="<id>"
 )
 ```
-`state.system_health` is a a retired field name (see the stale-vocabulary note at the top) - expect these projections to resolve to nothing until this playbook is rewritten against the current field surface. Establishes overall_severity, disk space, network reachability, etc. where available; note the gap in WHAT WAS NOT CHECKED otherwise.
+`state.system_health` is a retired field name (see the stale-vocabulary note at the top) - expect these projections to resolve to nothing until this playbook is rewritten against the current field surface. Establishes overall_severity, disk space, network reachability, etc. where available; note the gap in WHAT WAS NOT CHECKED otherwise.
 
 **Step 4 - Backing query: what changed (fast-follow tool - not yet shipped; v1 substitute below).**
 ```
@@ -126,7 +126,7 @@ query_logs(
 )
 -> qid_state, query_url
 ```
-`event_kind`, `state.vss_writers`, `state.volumes`, `state.scheduled_tasks`, and `anomalies` are retired field names (see the stale-vocabulary note at the top) - expect them to resolve to nothing (see the field-availability note at the top of this file). `event_summary` and the row-level fields (t, subsource) are shallow and populate normally. Note: broadened to multiple subsources so the same cache feeds Steps 7-9 without additional backing queries.
+`event_kind`, `state.vss_writers`, `state.volumes`, `state.scheduled_tasks`, and `anomalies` are retired field names (see the stale-vocabulary note at the top) - expect them to resolve to nothing. `event_summary` is retired too; the row-level fields (`t`, `subsource`) populate normally. Note: broadened to multiple subsources so the same cache feeds Steps 7-9 without additional backing queries.
 
 **Step 8 - Refinements within Step 7's cache.**
 ```
@@ -142,7 +142,7 @@ refine_query_result(query_id=<qid_state>, filter_lql='subsource = installed_prod
 Per-subsource Level-3 reads against the cache, not fresh scans. (Field-availability caveat from Step 7 applies to the `state.*` / `anomalies` projections here too.)
 
 **Step 9 - Cross-product check.**
-From Step 8's installed_products refinement, check `event_summary.by_category` and `event_summary.multiple_in_category`. If multiple backup products detected (e.g., `multiple_in_category: ["backup"]`), note in summary as a likely cross-product conflict - two backup products competing for VSS snapshots is a recurring cause.
+From Step 8's installed_products refinement, look for more than one backup product on the box. Two backup products competing for VSS snapshots is a recurring cause, so note it in the summary. **The `event_summary.by_category` / `event_summary.multiple_in_category` rollups this step was written against are retired names and resolve to nothing**; read the inventory rows and their messages instead.
 
 **Step 10 - Cross-source pivot if cause looks environmental.**
 If Step 4's grouped-aggregation comparison showed the new pattern across multiple sources (suggesting environment-wide), or if you want to confirm scope:
@@ -155,7 +155,7 @@ query_grouped_aggregation(
   external_investigation_id="<id>"
 )
 ```
-(The `anomaly_max_score` half of the usual context-reduction filter is dropped here - a retired name; `severity` alone is the shallow-triage fallback.) This result is terminal - not refinable. To drill into a specific source's hits, issue a new `query_logs` filtered to that source, not a refine. 1 source = isolated; few sources = local cluster; many sources = environment-wide.
+(The `anomaly_max_score` half of the usual context-reduction filter is dropped here: nothing emits it today, so `severity` alone is the fallback.) This result is terminal - not refinable. To drill into a specific source's hits, issue a new `query_logs` filtered to that source, not a refine. 1 source = isolated; few sources = local cluster; many sources = environment-wide.
 
 **Step 11 - Ingest-health check (stale-name caveat).**
 ```
@@ -239,7 +239,7 @@ query_logs(
 )
 -> qid_main, query_url
 ```
-This 7-day cache is the primary working set for the rest of the investigation. `event_kind`, `snapshot_id`/`prev_delta_id` and `event_summary` are retired names and resolve to nothing; `anomaly_max_score*` is a cloud detector field that not every source carries. `t`, `subsource`, `severity` and `message` populate normally.
+This 7-day cache is the primary working set for the rest of the investigation. `event_kind`, `snapshot_id`/`prev_delta_id` and `event_summary` are retired names and resolve to nothing; `anomaly_max_score*` is not emitted anywhere in the product today. `t`, `subsource`, `severity` and `message` populate normally.
 
 **Step 5 - Refine for the suspect process at Level 3 (retired field names).**
 ```
@@ -266,7 +266,7 @@ refine_query_result(
   select=['t', 'event_summary', 'state.memory', 'anomalies']
 )
 ```
-Confirms whether system-level memory pressure trajectory matches the process-level trajectory, once this playbook is rewritten against the current field surface.
+Confirms whether system-level memory pressure trajectory matches the process-level trajectory. The field this step reads is retired, so the confirmation is unavailable until an equivalent is identified on the current surface.
 
 **Step 7 - Refine for system_health context.**
 ```
@@ -443,7 +443,7 @@ Per `off-endpoint-causes.md` HM9: public CA cert lifecycle (DigiCert/Let's Encry
 ### Call sequence (sketch)
 1. Investigation session, scope, source health.
 2. System health overview (system_health.certs_expiring_within_30_days_count is the quick triage).
-3. `query_logs` Level-3 on `subsource = certificates` filtered to expiring/expired certs (`state.certificates.<thumbprint>.not_after` queries). Note: no wildcard JSON paths, but `event_summary` for certificates carries rolled-up expiry counts.
+3. `query_logs` on `subsource = certificates`, narrowed to expiring or expired certs. **`state.certificates.*` and the `event_summary` expiry rollups this step names are retired and resolve to nothing**, and LQL has no wildcard JSON paths, so read the certificate inventory rows and their messages rather than composing a path query.
 4. Cross-reference with `subsource = scheduled_tasks` for cert-renewal jobs.
 5. system condition summary output. Visibility section flags federation/internal-CA if affected app uses cert chain that crosses those.
 
@@ -499,7 +499,7 @@ query_logs(
 )
 -> qid_main, query_url
 ```
-`event_kind` and `anomaly_max_score*` are retired field names (see the stale-vocabulary note at the top) - expect them to resolve to nothing. `app`, `subsource`, `severity`, `message`, `event_summary` are shallow and populate normally.
+`event_kind` and `event_summary` are retired field names (see the stale-vocabulary note at the top) and resolve to nothing; `anomaly_max_score*` is not emitted anywhere in the product today. `app`, `subsource`, `severity` and `message` populate normally.
 
 **Step 4 - Refine to system_health (retired field names).**
 ```
@@ -509,7 +509,7 @@ refine_query_result(
   select=['t', 'event_summary', 'state.system_health']
 )
 ```
-Quick triage, once rewritten against the current field surface - `state.system_health.network_reachability_to_rmm`, `network_reachability_to_cloud`, `network_link_type`, `agent_ingest_health_status` all surface here. If `network_reachability_to_rmm = error`, the endpoint can't reach RMM cloud - strong signal. **`state.system_health` is a retired name; this refine returns rows with that column empty whatever the connectivity is. Fall back to winlog and service evidence (Steps 5-7) and say so in the Finding.**
+The triage this step wants is reachability to the RMM cloud, reachability to the SparkLogs cloud, the network link type, and the agent's own ingest health. **`state.system_health` is a retired name, so this refine returns rows with that column empty whatever the connectivity is.** Fall back to winlog and service evidence (Steps 5-7) and say so in the Finding.
 
 **Step 5 - Refine to RMM service state (retired field names).**
 ```
@@ -538,7 +538,7 @@ refine_query_result(
   select=['t', 'subsource', 'event_summary', 'message']
 )
 ```
-Helper output reveals, once rewritten against the current field surface: DNS resolves the RMM cloud endpoint? TCP connect succeeds? Network adapter has valid IP? System proxy configured? Today this filter returns empty because `event_kind` isn't emitted - don't read that as "no helper issues." If you need this evidence now, drop the `event_kind = SLAHelper` predicate and filter on `subsource` alone.
+The questions this step exists to answer are: does DNS resolve the RMM cloud endpoint, does TCP connect succeed, does the adapter hold a valid IP, is a system proxy configured. **The `event_kind = SLAHelper` predicate is a retired name and matches nothing**, so drop it and filter on `subsource` alone. An empty result after that is inconclusive, not "no helper issues".
 
 **Step 7 - Refine to RMM-related winlog.**
 ```
@@ -554,7 +554,7 @@ Vendor-specific channels and Application channel for RMM-vendor errors. This is 
 
 **Step 9 - Ingest-health check.** As HM1 (same stale-name caveat on the ingest-health check).
 
-**Step 10 - system condition summary output.** Findings cite step 4-7 query_urls. EXECUTIVE SUMMARY synthesizes which layer (service, network adapter, DNS, TCP-to-cloud, proxy, RMM agent itself) shows the issue - today, primarily from Step 7's winlog evidence since Steps 4-6's `state.*` fields aren't emitted yet. WHAT WAS NOT CHECKED flags RMM cloud health and EDR quarantine if symptom is consistent, AND notes that `state.services` / `state.system_health` are not yet available from the Managed Agent (once rewritten against the current field surface, "service is missing entirely from state.services" becomes a possible EDR-quarantine signal worth checking against the EDR admin console).
+**Step 10 - system condition summary output.** Findings cite step 4-7 query_urls. EXECUTIVE SUMMARY synthesizes which layer (service, network adapter, DNS, TCP-to-cloud, proxy, RMM agent itself) shows the issue - primarily from Step 7's winlog evidence, since Steps 4-6 name retired fields. WHAT WAS NOT CHECKED flags RMM cloud health and EDR quarantine where the symptom is consistent, and records that the service-state and system-health evidence those steps wanted has no equivalent named on the current surface yet. A service absent from the box's service inventory would be a possible EDR-quarantine signal worth checking against the EDR admin console, once that read is written against a field that exists.
 
 Branch A resolves from `list_sources` alone; Branch B runs one backing query plus several refinements against its cache.
 

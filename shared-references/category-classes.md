@@ -20,14 +20,19 @@ Read all three. None of them implies another.
 | `BENIGN` | a line whose TEXT reads like a problem and is not: a known false positive, kept and labeled |
 | `CONTEXT` | kept, unlabeled: nothing claimed it as signal |
 
+**`CONTEXT` is never written.** It is the ABSENCE of a class, not a value, so `sparklogs.class = CONTEXT`
+returns zero rows on a fleet full of context rows. To select them, test for the absence:
+`NOT sparklogs.class!`. To select context rows of a given morphology, filter on the kind instead,
+which IS written: `sparklogs.kind = inventory`.
+
 `NOISE` exists as an authoring outcome and never reaches you: it is the one class that drops an event.
 
 **BENIGN is about TEXT, not outcome.** A routine success is `CONTEXT`, not `BENIGN`. `BENIGN` means a
 naive reader would think the line is bad and it is not.
 
-**`CONTEXT` is not "unimportant", it is "unrecognized".** Inventory rows are normally `CONTEXT`, and
-inventory is the ground truth of what is on the box. Excluding `CONTEXT` from an RCA read throws away
-the answer to "what is actually installed / running / mounted here".
+**`CONTEXT` is not "unimportant", it is "unrecognized".** Inventory rows normally carry no class at
+all, and inventory is the ground truth of what is on the box. Excluding unclassed rows from an RCA
+read throws away the answer to "what is actually installed, running and mounted here".
 
 **Never infer "worse" from `ELEVATED` versus `NOTABLE`.** Concern rides severity.
 

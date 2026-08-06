@@ -372,7 +372,7 @@ This distinction is important. Pick the operator that matches your intent.
 ```
 severity in (error, critical) OR (anomaly_max_score >= 60 AND anomaly_max_score_confidence >= 70)
 ```
-`anomaly_max_score` / `anomaly_max_score_confidence` are cloud detector fields and are not populated on every source (see Section 8's field-availability rule) - where they are absent this filter reduces to `severity in (error, critical)`. That degraded form is a fine fallback; do not read the missing anomaly half as "no anomalies."
+`anomaly_max_score` / `anomaly_max_score_confidence` are designed and not emitted anywhere in the product today, so this filter reduces to `severity in (error, critical)` on every source. That degraded form is a fine fallback; do not read the missing anomaly half as "no anomalies."
 
 The complete LQL reference with all operators, edge cases, and common mistakes is in `references/lql-reference.md`.
 

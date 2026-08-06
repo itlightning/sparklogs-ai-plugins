@@ -48,12 +48,18 @@ truncated.
 
 ## Column names
 
-Device-health rows use these names. They are the same names the underlying store uses, so a name you
-read in a response is a name you can filter and group on.
+Device-health rows use these names, and they are the names of the stored columns, so they are the
+grouping and filtering surface WHERE A TOOL EXPOSES ONE (`kinds`, `reasons`, `group_by_reason`).
+
+**They are not LQL field names.** A column like `episode_replaced_id` is derived from the wire path
+`sparklogs.episode.replaced_id`, and an LQL filter on `query_logs` must use the dotted path. Reading
+a name out of a device-health response and pasting it into `lql` returns nothing. Same concepts,
+two surfaces.
 
 | Column | Carries |
 |---|---|
-| `kind` | `inventory` / `monitor` / `delta` / `agent_op` / `config_change` |
+| `kind` | `inventory` / `monitor` / `delta` / `agent_op` / `config_change` / `malformed` |
+| `malformed_event` | true when the row did not parse cleanly. **Read it beside `kind`, never instead of it:** a row can keep a valid `kind` and still carry `malformed_event=true`, so filtering on `kind=malformed` alone misses those. Any row with either set is a row whose other fields you should not trust without looking |
 | `topic` | the fine discriminator inside a kind (`disk_volumes`, …) |
 | `class` | temporal shape (see `category-classes.md`) |
 | `reason` | the stable identity of the condition |

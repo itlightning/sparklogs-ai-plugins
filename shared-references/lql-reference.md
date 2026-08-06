@@ -98,7 +98,7 @@ LQL does NOT support `state.services.*.status = STOPPED`. Type resolution requir
 
 **Workarounds:**
 - Filter on a promoted field instead. Curated sources promote the values worth querying to named paths (`sparklogs.*` and the module-prefixed fields); the generated per-source field schema lists them.
-- Use top-level anomaly fields (`anomaly_max_score`, `anomaly_categories`) where the source carries them.
+- Use top-level anomaly fields (`anomaly_max_score`, `anomaly_categories`) once they are emitted; nothing in the product writes them today.
 - Use a direct keyed lookup when the key is known: `x.services.spooler.status = STOPPED` works fine.
 
 ```
@@ -262,7 +262,7 @@ any: "credit card"                       <- search all fields for "credit card"
 
 ## Canonical recurring patterns
 
-**Field-availability note.** `sparklogs.*` curated fields exist on events a source pack curated, and only on the surfaces that promote them; module-prefixed fields are narrower still. `anomaly_max_score` / `anomaly_categories` depend on the source carrying detector output. An empty result on any of these may mean the source never writes that field, so check what the source carries before reading anything into it, and fall back to `severity` / `message` / `pattern`, which every source carries. The retired names `event_kind`, `SLASnapshot`, `SLAAgentOp`, `event_summary`, `snapshot_id` and `state.*` resolve to nothing at all: an empty result there is a spelling problem, not a health signal.
+**Field-availability note.** `sparklogs.*` curated fields exist on events a source pack curated, and only on the surfaces that promote them; module-prefixed fields are narrower still. `anomaly_max_score` / `anomaly_categories` are designed and not emitted anywhere in the product today, so they return empty on every source. An empty result on a curated or module field may mean the source never writes that field, so check what the source carries before reading anything into it, and fall back to `severity` / `message` / `pattern`, which every source carries. The retired names `event_kind`, `SLASnapshot`, `SLAAgentOp`, `event_summary`, `snapshot_id` and `state.*` resolve to nothing at all: an empty result there is a spelling problem, not a health signal.
 
 ### Context-reduction filter (the most common starting filter)
 
