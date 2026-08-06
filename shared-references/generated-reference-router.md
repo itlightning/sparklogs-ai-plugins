@@ -16,10 +16,14 @@ the wrong one.
 |---|---|---|
 | "Which field carries X on this source, and what happens when it is missing?" | `fields.md` | every promoted field, which curated surface writes it, and the raw provider fallback when nothing does |
 | "What values can this token take, and is it safe to group by?" | `enums.md` | the closed vocabularies, with what each token means |
-| "How do I actually answer this investigation question here?" | `recipes.md` | worked pivots for that source, each written against real field names |
 | "Is this pattern string something the pack meant to produce?" | `patterns.md` | a decision procedure: expected, unexpected, or uncurated |
 | "I know this data as ECS or OCSF, what is it called here?" | `mapping-ecs.md` / `mapping-ocsf.md` | anchors from the external taxonomy onto these fields |
 | "What is on this box right now?" | none of the above | inventory rows from the MCP tools, not reference content |
+
+**Worked query recipes are held back for now.** The source library generates a `recipes.md` per
+module, and it is not shipped here: three of its pivots do not parse as query language, and the
+generator's own check cannot see that class of defect. Write the query yourself from `fields.md`
+and `enums.md` rather than reaching for a recipe you cannot verify.
 
 Two shapes deserve their own line because they are the ones people get wrong:
 
@@ -68,7 +72,6 @@ say in your findings that you were reading uncurated text.
 - `generated/win.eventlog.security/fields.md`: what exists at rest, which surface writes it, and the raw fallback when nothing does
 - `generated/win.eventlog.security/enums.md`: the closed token vocabularies that are safe to group by
 - `generated/win.eventlog.security/patterns.md`: the decision procedure for whether a rendered pattern is expected, unexpected, or uncurated
-- `generated/win.eventlog.security/recipes.md`: worked pivots, each resolving against the field schema
 - `generated/win.eventlog.security/mapping-ecs.md`: ECS anchors for a query written against another taxonomy
 - `generated/win.eventlog.security/mapping-ocsf.md`: OCSF anchors for a query written against another taxonomy
 

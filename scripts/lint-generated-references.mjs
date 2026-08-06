@@ -20,9 +20,12 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { assertRepoRoot } from './assert-repo-root.mjs';
 import {
+  ALNUM_TOKEN,
   FORBIDDEN_TABLE_HEADERS,
   FORBIDDEN_TOKENS,
   GENERATED_DIR,
+  HEAD_CAVEAT,
+  KNOWN_DEFECTS,
   MODULES,
   PUBLIC_ARTIFACTS,
 } from './generated-references.config.mjs';
@@ -89,10 +92,50 @@ function ruleUncuratedVerdict(lines) {
   return findings;
 }
 
+// B2: a surface whose reason name carries a mixed letter-and-digit token must not claim it renders
+// a stable named pattern, because the head is variabilized away before the pattern is derived.
+function ruleAlnumHeadClaim(lines) {
+  const findings = [];
+  let surface = null;
+  let surfaceLine = 0;
+  let alnum = false;
+  let claim = null;
+  let claimLine = 0;
+  let caveat = false;
+  const close = () => {
+    if (surface && alnum && claim && !caveat) {
+      findings.push({ line: claimLine, detail: `surface ${surface} claims "${claim}" on a head carrying a mixed letter-and-digit token`, surface, claim });
+    }
+  };
+  lines.forEach((line, index) => {
+    const heading = /^###\s+(.*)$/.exec(line);
+    if (heading) {
+      close();
+      surface = heading[1].trim();
+      surfaceLine = index + 1;
+      const reason = /`([^`]+)`/.exec(surface);
+      alnum = reason ? ALNUM_TOKEN.test(reason[1]) : false;
+      claim = null;
+      caveat = false;
+      return;
+    }
+    if (!surface) return;
+    if (HEAD_CAVEAT.test(line)) caveat = true;
+    if (claim) return;
+    if (/renders exactly one pattern/i.test(line) || /^\*\*Renders:\*\*/.test(line)) {
+      claim = line.trim();
+      claimLine = index + 1;
+    }
+  });
+  close();
+  return findings;
+}
+
 const RULES = [
   { id: 'A1-evidence-column', gate: 'A', appliesTo: () => true, run: ruleEvidenceColumn },
   { id: 'A2-evidence-prose', gate: 'A', appliesTo: () => true, run: ruleEvidenceProse },
   { id: 'B1-uncurated-verdict', gate: 'B', appliesTo: (file) => path.basename(file) === 'patterns.md', run: ruleUncuratedVerdict },
+  { id: 'B2-alnum-head-claim', gate: 'B', appliesTo: (file) => path.basename(file) === 'patterns.md', run: ruleAlnumHeadClaim },
 ];
 
 function runRules(file, text) {
@@ -111,6 +154,7 @@ const FIXTURE_EXPECTATIONS = [
   { file: 'gate-a-witness-prose.md', rule: 'A2-evidence-prose' },
   { file: 'gate-b-verdict-unexpected.patterns.md', rule: 'B1-uncurated-verdict' },
   { file: 'gate-b-verdict-missing.patterns.md', rule: 'B1-uncurated-verdict' },
+  { file: 'gate-b-alnum-head-claim.patterns.md', rule: 'B2-alnum-head-claim' },
 ];
 
 async function proveGatesFire() {
@@ -129,27 +173,64 @@ async function proveGatesFire() {
   console.log(`generated-references gates: ${FIXTURE_EXPECTATIONS.length} planted positives all fired`);
 }
 
+function matchesKnownDefect(artifact, finding) {
+  return KNOWN_DEFECTS.find((defect) => defect.artifact === artifact
+    && defect.surface === finding.surface
+    && defect.claim === finding.claim);
+}
+
 async function scanGenerated() {
   const findings = [];
+  const excused = new Set();
   let scanned = 0;
   for (const module of MODULES) {
+    const dir = path.join(ROOT, GENERATED_DIR, module);
+    // Enumerate the directory rather than the config list. Iterating only the artifacts we expect
+    // makes every gate blind to anything else committed alongside them, which is the one file
+    // that would most want to hide there.
+    let present;
+    try {
+      present = (await fs.readdir(dir)).sort();
+    } catch {
+      throw new Error(`Missing synced module directory ${path.relative(ROOT, dir)}. Run: yarn sync-generated`);
+    }
     for (const artifact of PUBLIC_ARTIFACTS) {
-      const file = path.join(ROOT, GENERATED_DIR, module, artifact);
-      let text;
-      try {
-        text = await fs.readFile(file, 'utf8');
-      } catch {
-        throw new Error(`Missing synced artifact ${path.relative(ROOT, file)}. Run: yarn sync-generated`);
+      if (!present.includes(artifact)) {
+        throw new Error(`Missing synced artifact ${path.relative(ROOT, path.join(dir, artifact))}. Run: yarn sync-generated`);
       }
+    }
+    const stray = present.filter((name) => !PUBLIC_ARTIFACTS.includes(name));
+    if (stray.length > 0) {
+      throw new Error(
+        `${path.relative(ROOT, dir)} holds files the sync does not produce: ${stray.join(', ')}. `
+        + 'Nothing may be added to a synced module by hand.',
+      );
+    }
+    for (const artifact of present) {
       scanned += 1;
-      findings.push(...runRules(artifact, text).map((finding) => ({ ...finding, file: path.relative(ROOT, file) })));
+      const text = await fs.readFile(path.join(dir, artifact), 'utf8');
+      for (const finding of runRules(artifact, text)) {
+        const defect = matchesKnownDefect(artifact, finding);
+        if (defect) {
+          excused.add(`${defect.artifact}::${defect.surface}::${defect.claim}`);
+          continue;
+        }
+        findings.push({ ...finding, file: path.relative(ROOT, path.join(dir, artifact)) });
+      }
     }
   }
   if (findings.length > 0) {
     const lines = findings.map((f) => `  [${f.rule}] ${f.file}:${f.line} ${f.detail}`);
     throw new Error(`generated-references gates failed:\n${lines.join('\n')}`);
   }
-  console.log(`generated-references gates: ${scanned} synced artifact(s) clean`);
+  // Checked in both directions: an entry that no longer excuses anything is a defect the library
+  // has fixed, and leaving it here would quietly excuse the next occurrence.
+  const stale = KNOWN_DEFECTS.filter((defect) => !excused.has(`${defect.artifact}::${defect.surface}::${defect.claim}`));
+  if (stale.length > 0) {
+    const lines = stale.map((d) => `  ${d.artifact} ${d.surface}: "${d.claim}" (${d.escalation})`);
+    throw new Error(`Known-defect entries no longer match anything; delete them:\n${lines.join('\n')}`);
+  }
+  console.log(`generated-references gates: ${scanned} synced artifact(s) clean, ${KNOWN_DEFECTS.length} known defect(s) pinned`);
 }
 
 async function main() {

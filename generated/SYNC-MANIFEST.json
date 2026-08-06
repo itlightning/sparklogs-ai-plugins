@@ -8,7 +8,8 @@
   },
   "projection": {
     "internalArtifacts": [
-      "provenance.md"
+      "provenance.md",
+      "recipes.md"
     ],
     "droppedTableColumns": [
       "Evidence",
@@ -24,10 +25,52 @@
       "evidence axes"
     ],
     "droppedLinksTo": [
-      "provenance.md"
+      "provenance.md",
+      "recipes.md"
+    ],
+    "rewrites": [
+      {
+        "artifact": "enums.md",
+        "find": "Every token an agent can group by, with what it means and how far it can be trusted.",
+        "replace": "Every token an agent can group by, with what it means.",
+        "why": "trust promise the removed evidence columns were carrying"
+      },
+      {
+        "artifact": "enums.md",
+        "find": " It is the one rung with no portable kind beside it on the actor family, because nothing has yet witnessed a group as the actor.",
+        "replace": " It is the one rung with no portable kind beside it on the actor family.",
+        "why": "observation claim about the capture corpus"
+      },
+      {
+        "artifact": "enums.md",
+        "find": "auth_negoextender is the Entra negotiate-extension package (NegoExtender), witnessed on cloud-joined endpoints.",
+        "replace": "auth_negoextender is the Entra negotiate-extension package (NegoExtender) used by cloud-joined endpoints.",
+        "why": "observation claim about the capture corpus"
+      },
+      {
+        "artifact": "enums.md",
+        "find": "The deny tier and the message-catalog reference payload form have no witness anywhere; a value",
+        "replace": "A value",
+        "why": "observation claim about the capture corpus"
+      },
+      {
+        "artifact": "README.md",
+        "find": "- [`fields.md`](fields.md): what exists at rest, what writes it, and how far to trust it",
+        "replace": "- [`fields.md`](fields.md): what exists at rest, what writes it, and the raw fallback when nothing does",
+        "why": "trust promise the removed evidence columns were carrying"
+      }
     ],
     "why": "Evidence tiers (spec versus observed claims and witness counts) are an internal instrument, not a consumer contract."
   },
+  "knownDefects": [
+    {
+      "artifact": "patterns.md",
+      "surface": "`kerberos_rc4_ticket` / `default`",
+      "claim": "**Renders:** `kerberos_rc4_ticket: NOTABLE: Kerberos service ticket used weak encryption`",
+      "escalation": "E2",
+      "why": "AutoExtract variabilizes the rc4 head, so the rendered pattern carries no reason name. Fix belongs in the library generator."
+    }
+  ],
   "modules": [
     {
       "module": "win.eventlog.security",
@@ -47,10 +90,6 @@
         {
           "file": "patterns.md",
           "summary": "the decision procedure for whether a rendered pattern is expected, unexpected, or uncurated"
-        },
-        {
-          "file": "recipes.md",
-          "summary": "worked pivots, each resolving against the field schema"
         },
         {
           "file": "mapping-ecs.md",

@@ -30,24 +30,48 @@ checkout reports green about the wrong tree.
 plus every projection rule that ran. Do not hand-edit anything under `generated/`: an edit is
 reverted by the next sync and fails the drift check in the meantime.
 
-`yarn validate:generated` runs three things:
+`yarn validate:generated` runs the gates and then the drift check. **They are enforced in different
+places, and the split is worth knowing:**
 
-- **Drift**: re-sync into memory and compare. Without a library checkout this SKIPS and says so; it
-  never reports success it did not earn.
-- **Gate A**: no synced artifact may carry the library's spec-versus-observed evidence columns or
-  witness counts. Those are the library's own confidence instrument; a consumer reading them as a
-  contract would treat an unwitnessed decode as a broken one.
-- **Gate B**: the expected-pattern decision procedure must file a pattern whose head matched
-  nothing as UNCURATED, never UNEXPECTED. Reason names carrying a mixed letter-and-digit token are
-  variabilized away before the pattern is derived, so their rendered pattern legitimately matches
-  no head; filing that as unexpected turns a harmless shape into a standing drift alarm.
+| Check | Needs a library checkout? | Runs in CI? |
+|---|---|---|
+| Gate A, Gate B, stray-file scan | no, they read committed files | yes, on every PR via `yarn validate` |
+| Drift against the library | yes | no. CI checks out this repo alone, so the drift half logs SKIPPED and passes |
 
-Both gates re-prove themselves on every run against the planted-positive fixtures in
+The drift check is a workstation guard. It is honest about skipping rather than reporting a success
+it did not earn, but nothing unattended re-derives "the committed content matches its source". Run
+it deliberately before a release, or after any library change.
+
+- **Gate A**: no file under a synced module directory may carry the library's spec-versus-observed
+  evidence columns, its witness counts, or the prose that makes observation claims from them. Those
+  are the library's own confidence instrument; a consumer reading them as a contract would treat an
+  unwitnessed decode as a broken one. Prose coverage is a fixed token list, not the concept, so it
+  catches the shapes the library actually emits rather than every possible phrasing.
+- **Gate B**: two rules over `patterns.md`. The decision procedure must file a pattern whose head
+  matched nothing as UNCURATED, never UNEXPECTED. And a surface whose reason name carries a mixed
+  letter-and-digit token must not claim it renders a stable named pattern, because AutoExtract
+  variabilizes that head away before the pattern is derived.
+- **Stray files**: the gates enumerate each synced module DIRECTORY rather than the configured
+  artifact list, so anything committed alongside the synced artifacts fails loudly. The drift check
+  enumerates the destination for the same reason.
+
+Every rule re-proves itself on each run against the planted-positive fixtures in
 `scripts/fixtures/generated-reference-gates/`. Correcting a fixture disarms the rule it proves.
 
+**Known defects** in library content that this repo cannot fix are pinned in `KNOWN_DEFECTS`, each
+naming one exact file, surface and claim, and citing the escalation it is filed under. The check
+runs in both directions: an entry that no longer matches anything FAILS, so a pin dies with its
+defect instead of outliving it and quietly excusing the next occurrence.
+
 Adding a module or an artifact is a decision, recorded in `scripts/generated-references.config.mjs`.
-The sync fails on any library artifact that appears in neither the public nor the internal list, so
-a new artifact cannot arrive unnoticed in either direction.
+The sync fails on any library MODULE not listed in `MODULES` and on any library ARTIFACT that
+appears in neither the public nor the internal list, so nothing new arrives unnoticed at either
+level.
+
+`recipes.md` is currently held back as internal. Three of its worked pivots do not parse as query
+language, and the generator's recipe check only resolves paths under the module's own prefixes, so
+platform field names and query syntax reach a reader unchecked. One line in the config moves it back
+when the library fix lands.
 
 ## Versioning
 

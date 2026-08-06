@@ -13,5 +13,6 @@ are the negative proof, and they run on every validate rather than once at autho
 | `gate-a-witness-prose.md` | `A2-evidence-prose` | the witness-counting instrument explained in prose |
 | `gate-b-verdict-unexpected.patterns.md` | `B1-uncurated-verdict` | a decision procedure filing an unmatched head as unexpected |
 | `gate-b-verdict-missing.patterns.md` | `B1-uncurated-verdict` | a decision procedure with no unmatched-head verdict at all |
+| `gate-b-alnum-head-claim.patterns.md` | `B2-alnum-head-claim` | a surface with a digit-bearing reason name claiming it renders a stable named pattern. The file also carries a control surface with no digit, which must NOT fire |
 
 Do not "fix" these files. Correcting one silently disarms the rule it proves.

@@ -4,7 +4,7 @@
 
 # Vocabularies: `win.eventlog.security`
 
-Every token an agent can group by, with what it means and how far it can be trusted.
+Every token an agent can group by, with what it means.
 These sets are closed: a value outside them leaves its field unset rather than being invented.
 
 ## `status_codes`
@@ -105,7 +105,7 @@ Rendered as bare words in the curated first line, so they are part of the derive
 
 ### `subject_kind`
 
-What sort of principal acted. Wider than the portable `kind` vocabulary, which collapses the three platform service identities into one service value: they are different operational shapes and scanning them apart is the point of the token. by_account states an ordinary directory account and never a person: no identifier proves a person without a directory lookup, so the token under-claims and a resolved value joins the vocabulary later rather than correcting this one. by_anonymous states that the source said there was NO identity, which is a positive fact rather than an absent one, so the portable kind anonymous is written beside the token wherever a branch renders it. by_group reaches the sign-in id and the two ticket ids because the kind ladder reads group SID shapes on every principal pair, and every surface it can reach claims nothing about the principal in prose: a group cannot authenticate, so no headline naming a principal class could be true of one. It is the one rung with no portable kind beside it on the actor family, because nothing has yet witnessed a group as the actor.
+What sort of principal acted. Wider than the portable `kind` vocabulary, which collapses the three platform service identities into one service value: they are different operational shapes and scanning them apart is the point of the token. by_account states an ordinary directory account and never a person: no identifier proves a person without a directory lookup, so the token under-claims and a resolved value joins the vocabulary later rather than correcting this one. by_anonymous states that the source said there was NO identity, which is a positive fact rather than an absent one, so the portable kind anonymous is written beside the token wherever a branch renders it. by_group reaches the sign-in id and the two ticket ids because the kind ladder reads group SID shapes on every principal pair, and every surface it can reach claims nothing about the principal in prose: a group cannot authenticate, so no headline naming a principal class could be true of one. It is the one rung with no portable kind beside it on the actor family.
 
 - `by_account`
 - `by_machine`
@@ -118,7 +118,7 @@ What sort of principal acted. Wider than the portable `kind` vocabulary, which c
 
 ### `auth_package`
 
-Which authentication package answered. Only the curated packages render; any other package leaves the slot absent and stays queryable through the module auth_package field. auth_negoextender is the Entra negotiate-extension package (NegoExtender), witnessed on cloud-joined endpoints.
+Which authentication package answered. Only the curated packages render; any other package leaves the slot absent and stays queryable through the module auth_package field. auth_negoextender is the Entra negotiate-extension package (NegoExtender) used by cloud-joined endpoints.
 
 - `auth_kerberos`
 - `auth_ntlm`
@@ -141,7 +141,7 @@ What UAC did to the created process token, decoded from the TokenElevationType m
 
 ### `logon_right`
 
-Which system logon right a policy change granted or removed, decoded from the Se*Right literal constant the provider writes into AccessGranted or AccessRemoved. A closed set of ten: the five ways Windows lets a principal sign in, and the five deny counterparts that block each of them. No token carries a digit, so every value is tokenizer-safe. The deny tier and the message-catalog reference payload form have no witness anywhere; a value the map does not carry renders no token and the raw value stays in the retained payload, so a decode gap reads as a token-less pattern rather than an invented meaning.
+Which system logon right a policy change granted or removed, decoded from the Se*Right literal constant the provider writes into AccessGranted or AccessRemoved. A closed set of ten: the five ways Windows lets a principal sign in, and the five deny counterparts that block each of them. No token carries a digit, so every value is tokenizer-safe. A value the map does not carry renders no token and the raw value stays in the retained payload, so a decode gap reads as a token-less pattern rather than an invented meaning.
 
 - `interactive`
 - `network`

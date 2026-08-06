@@ -19,6 +19,7 @@ import { execFileSync } from 'node:child_process';
 import { assertRepoRoot } from './assert-repo-root.mjs';
 import {
   ARTIFACT_SUMMARY,
+  KNOWN_DEFECTS,
   DEFAULT_SOURCE_LIBRARY_DIR,
   GENERATED_DIR,
   INTERNAL_ARTIFACTS,
@@ -166,13 +167,31 @@ function collapseBlankRuns(lines) {
   return out;
 }
 
-function project(text) {
+// Exact-text repairs, applied after the mechanical rules. Each must match exactly once.
+function applyRewrites(artifact, text) {
+  let out = text;
+  for (const rule of PROJECTION.rewrites) {
+    if (rule.artifact !== artifact) continue;
+    const hits = out.split(rule.find).length - 1;
+    if (hits !== 1) {
+      throw new Error(
+        `Projection rewrite for ${artifact} matched ${hits} times, expected exactly 1: "${rule.find.slice(0, 60)}...". `
+        + 'The library text changed; re-derive the rule or drop it.',
+      );
+    }
+    out = out.split(rule.find).join(rule.replace);
+  }
+  return out;
+}
+
+function project(artifact, text) {
   let lines = text.split('\n');
   lines = dropSections(lines, PROJECTION.dropSections);
   lines = dropBlocks(lines, PROJECTION.dropBlocks);
   lines = dropLinksTo(lines, PROJECTION.dropLinksTo);
   lines = dropTableColumns(lines, PROJECTION.dropTableColumns);
   lines = collapseBlankRuns(lines);
+  lines = applyRewrites(artifact, lines.join('\n')).split('\n');
   const generatorNotes = [];
   while (lines.length > 0 && lines[0].startsWith('<!--')) generatorNotes.push(lines.shift());
   while (lines.length > 0 && lines[0].trim() === '') lines.shift();
@@ -186,6 +205,11 @@ function libraryDir() {
 }
 
 function libraryCommit(dir) {
+  try {
+    execFileSync('git', ['rev-parse', '--git-dir'], { cwd: dir, stdio: 'ignore' });
+  } catch {
+    throw new Error(`Source library path ${dir} is not a git checkout, so no commit can be recorded in the sync manifest`);
+  }
   const sha = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: dir, encoding: 'utf8' }).trim();
   const branch = execFileSync('git', ['rev-parse', '--abbrev-ref', 'HEAD'], { cwd: dir, encoding: 'utf8' }).trim();
   const dirty = execFileSync('git', ['status', '--porcelain'], { cwd: dir, encoding: 'utf8' }).trim();
@@ -208,7 +232,7 @@ async function readModule(libDir, module) {
   if (missing.length > 0) throw new Error(`Source library is missing expected artifacts for ${module}: ${missing.join(', ')}`);
   const files = new Map();
   for (const name of PUBLIC_ARTIFACTS) {
-    files.set(name, project(await fs.readFile(path.join(src, name), 'utf8')));
+    files.set(name, project(name, await fs.readFile(path.join(src, name), 'utf8')));
   }
   return files;
 }
@@ -228,8 +252,10 @@ function manifestBody(commit, modules) {
       droppedSections: PROJECTION.dropSections,
       droppedBlocksMatching: PROJECTION.dropBlocks.map((p) => p.source),
       droppedLinksTo: PROJECTION.dropLinksTo,
+      rewrites: PROJECTION.rewrites.map((rule) => ({ artifact: rule.artifact, find: rule.find, replace: rule.replace, why: rule.why })),
       why: 'Evidence tiers (spec versus observed claims and witness counts) are an internal instrument, not a consumer contract.',
     },
+    knownDefects: KNOWN_DEFECTS,
     modules: modules.map(([module, files]) => ({
       module,
       artifacts: [...files.keys()].map((name) => ({ file: name, summary: ARTIFACT_SUMMARY[name] ?? '' })),
@@ -279,6 +305,18 @@ async function main() {
   const commit = libraryCommit(dir);
   if (commit.dirty) throw new Error(`Source library checkout at ${dir} has uncommitted changes; sync only from a clean tree`);
 
+  const libraryModules = (await fs.readdir(path.join(dir, LIBRARY_GENERATED_SUBPATH), { withFileTypes: true }))
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
+    .sort();
+  const unlisted = libraryModules.filter((name) => !MODULES.includes(name));
+  if (unlisted.length > 0) {
+    throw new Error(
+      `Source library produces modules this repo has not ruled on: ${unlisted.join(', ')}. `
+      + 'Add each to MODULES in scripts/generated-references.config.mjs, or record why it is held back.',
+    );
+  }
+
   const modules = [];
   for (const module of MODULES) modules.push([module, await readModule(dir, module)]);
   const manifest = `${JSON.stringify(manifestBody(commit, modules), null, 2)}\n`;
@@ -287,10 +325,17 @@ async function main() {
   if (CHECK) {
     const drifted = [];
     for (const [module, files] of modules) {
+      const dest = path.join(ROOT, GENERATED_DIR, module);
       for (const [name, body] of files) {
-        const target = path.join(ROOT, GENERATED_DIR, module, name);
+        const target = path.join(dest, name);
         const current = await exists(target) ? await fs.readFile(target, 'utf8') : null;
         if (current !== body) drifted.push(path.relative(ROOT, target));
+      }
+      // Enumerate the destination too. Comparing only the expected paths is blind to anything
+      // extra that was committed there, which is exactly how a stripped artifact leaks back.
+      const present = await exists(dest) ? (await fs.readdir(dest)).sort() : [];
+      for (const name of present) {
+        if (!files.has(name)) drifted.push(`${path.relative(ROOT, path.join(dest, name))} (not produced by the sync)`);
       }
     }
     const manifestPath = path.join(ROOT, MANIFEST_FILE);
