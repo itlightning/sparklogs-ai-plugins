@@ -14,6 +14,9 @@ export const DEFAULT_SOURCE_LIBRARY_DIR = '../sparklogs-source-library';
 export const LIBRARY_GENERATED_SUBPATH = 'docs/generated';
 export const GENERATED_DIR = 'generated';
 export const MANIFEST_FILE = 'generated/SYNC-MANIFEST.json';
+export const ROUTER_FILE = 'shared-references/generated-reference-router.md';
+export const ROUTER_BEGIN = '<!-- BEGIN GENERATED INVENTORY -->';
+export const ROUTER_END = '<!-- END GENERATED INVENTORY -->';
 
 // Every module carried into this repo. A module directory in the library that is not listed
 // here is not synced; a module listed here that the library does not produce is a sync failure.

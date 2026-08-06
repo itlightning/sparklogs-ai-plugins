@@ -12,6 +12,7 @@ const REQUIRED_ASSETS = ['logo.svg', 'logo.png', 'icon.svg', 'icon-256.png', 'ic
 const SHARED_REFERENCES = [
   'category-classes.md',
   'common-mistakes.md',
+  'generated-reference-router.md',
   'lql-reference.md',
   'mcp-tool-decision-tree.md',
   'msp-tool-registry.md',
