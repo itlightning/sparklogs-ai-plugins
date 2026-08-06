@@ -38,7 +38,7 @@ fact witnessed from the event channel and from CBS.log, one fleet reason-pivot.
 | `disk_io_retried` | disk/153: IO operation retried. | storage | Warning |
 | `disk_surprise_removal` | disk/157: disk removed unexpectedly. | storage | Warning |
 | `storage_controller_reset` | storahci AHCI port reset/timeout (level-gated within the provider). | storage | Error |
-| `ntfs_corruption` | Ntfs/55: corruption discovered, chkdsk required (Critical); Ntfs/130 repair-activity arm shares the slug at Error. | storage | Critical (55) / Error (130) |
+| `ntfs_corruption` | Ntfs/55: corruption discovered, chkdsk required (Critical); Ntfs/130 repair-activity arm shares the reason at Error. | storage | Critical (55) / Error (130) |
 | `vss_shadow_lost` | Volsnap/25: shadow copies deleted (realized restore-point loss). | backup | Error |
 | `vss_shadow_aborted` | Volsnap/36: shadow copies aborted on the storage limit. | backup | Error |
 | `dirty_shutdown` | Kernel-Power/41: rebooted without clean shutdown. | os_stability | Error (server/unknown) / Warning (workstation) |
@@ -60,7 +60,7 @@ fact witnessed from the event channel and from CBS.log, one fleet reason-pivot.
 | `dcom_activation_timeout` | DistributedCOM/10029: CLSID activation timed out. | app_stability | Error |
 | `dcom_start_error` | DistributedCOM/10005: DCOM error starting a service. | app_stability | Error |
 | `app_popup_error` | Application Popup/26: a crash surfaced as an error dialog. | app_stability | Warning |
-| `vswitch_offload_change` | Hyper-V-VmSwitch 291/292: RSC offload modified (BENIGN on workstations; same slug). | virtualization | Info (pinned) |
+| `vswitch_offload_change` | Hyper-V-VmSwitch 291/292: RSC offload modified (BENIGN on workstations; same reason). | virtualization | Info (pinned) |
 | `vswitch_topology_change` | Hyper-V-VmSwitch NIC/port connect/disconnect family (BENIGN on workstations). | virtualization | Info (pinned) |
 | `vswitch_config_restore_failed` | Hyper-V-VmSwitch/15: failed to restore port configuration. | virtualization | Warning floor, native may raise (Info on workstation) |
 | `iis_worker_crash` | WAS/5011: IIS worker terminated unexpectedly. The pool respawns; the durable outage is 5002. | web | Warning |
@@ -115,9 +115,9 @@ Module notes:
 - **Bare-id collision:** Microsoft-Windows-EventSystem emits event id 4625 (a benign COM+ notice) on
   every machine, colliding with Security 4625 (logon failure). Never key on an event id alone;
   provider + channel + id together identify an event family.
-- Cross-witness slug pairs are intentional: `service_installed` (System SCM 7045 / Security 4697),
+- Cross-witness reason pairs are intentional: `service_installed` (System SCM 7045 / Security 4697),
   `iis_worker_crash` (System WAS / Application IIS), `store_corruption` (Setup / CBS.log).
-  Same slug = same fact from two witnesses; one fleet pivot.
+  Same reason = same fact from two witnesses; one fleet pivot.
 - `gpu_driver_reset` (System) and `gpu_tdr` (Application) are the same subsystem witnessed on
   different channels; the distinct spellings are frozen.
 

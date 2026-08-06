@@ -8,11 +8,21 @@ Per-category playbook outlines for common hard-mode investigation symptoms. Thre
 3. Always produce a system condition summary per `output-template.md`.
 4. Always populate WHAT WAS NOT CHECKED per `off-endpoint-causes.md`.
 
-**Field-availability gating - read before running any recipe below.** Nearly every "canonical evidence" field cited in these playbooks - `state.*` (state.vss_writers, state.processes, state.services, state.memory, state.system_health, etc.), `event_kind` (SLASnapshot, SLADelta, SLAAgentOp, SLAHelper), and `anomaly_max_score` / `anomaly_categories` - is a deep RCA field the Managed Agent does not emit yet (zero production emission today). Every filter or projection on these fields returns EMPTY on every source right now. **An empty result from a deep-field query means "not emitted yet," never "no problem found."** Per SKILL.md Section 8: fall back to shallow-triage fields (`message`, `severity`, `source`, `app`, `subsource`, `pattern`/`pattern_hash`) and say so explicitly in the Finding or WHAT WAS NOT CHECKED. These playbooks describe the target end-state call shape for when emission lands; today, expect the deep-field portions to come back empty and plan the investigation's shallow-triage fallback accordingly.
+**Stale field vocabulary - read before running any recipe below.** The deep-evidence steps in these playbooks were written against an earlier data model and still name fields that no longer exist: `state.*` (`state.vss_writers`, `state.processes`, `state.services`, `state.memory`, `state.system_health`), `event_kind` and its `SLASnapshot` / `SLADelta` / `SLAAgentOp` / `SLAHelper` values, `event_summary`, `snapshot_id`, `prev_delta_id`, and `anomalies`. Those names resolve to nothing. A query naming one of them returns empty because the NAME is wrong, which is the most misleading empty result there is.
+
+Read the CALL SHAPE and the INVESTIGATIVE LOGIC of each step, and substitute the current field surface:
+
+- morphology is `sparklogs.kind` (`inventory`, `monitor`, `delta`, `agent_op`, `config_change`), not `event_kind`
+- the payload is the `message` plus the promoted fields for that source; there is no `event_summary` rollup
+- the era a row belongs to is `sparklogs.epoch.id` / `sparklogs.epoch.seq`, not `snapshot_id` / `prev_delta_id`
+- device and agent state, including the honesty fields, is in `device-state-fields.md`
+- which fields a given source actually writes is generated per source: route through `generated-reference-router.md`
+
+Until each playbook below is rewritten against that surface, treat its deep-evidence steps as an outline of what to look for rather than as call text to paste.
 
 **Fast-follow tools still not shipped.** `query_period_diff`, `compare_populations`, and `cluster_event_contexts` are FAST-FOLLOW. Substitute: two `query_grouped_aggregation` passes over adjacent windows for a period diff; one `query_grouped_aggregation` per population (via distinct `lql`) and compare for a population diff; `query_logs` narrowed to the pattern, then `refine_query_result` with `group_by` over context fields, for clustering. **`describe_pattern` is shipped** for pattern text/stats (use it before citing teaser patterns). See `mcp-tool-decision-tree.md` and `scope-resolution.md`. **Aggregation-first still holds:** `query_grouped_aggregation` before `query_logs`; refine the cached slice instead of re-scanning.
 
-**The scope ladder is the lever most of these recipes actually run on today.** `service`/`app`/`subsource`/`category`/`pattern` (and their `_hash` companions) are available now, unlike the deep RCA fields above. Group by a coarse field to localize the noisy component, narrow rung by rung, and land on the `pattern_hash` that carries the recurring event. See `scope-ladder.md`.
+**The scope ladder is the lever most of these recipes actually run on.** `service`/`app`/`subsource`/`category`/`pattern` (and their `_hash` companions) are computed on every source and are unaffected by the stale names above. Group by a coarse field to localize the noisy component, narrow rung by rung, and land on the `pattern_hash` that carries the recurring event. See `scope-ladder.md`.
 
 ---
 
@@ -63,7 +73,7 @@ query_logs(
   external_investigation_id="<id>"
 )
 ```
-`state.system_health` is a deep field pending Managed Agent emission - expect this to return rows with `event_summary` populated but `state.system_health` empty until emission lands. Establishes overall_severity, disk space, network reachability, etc. where available; note the gap in WHAT WAS NOT CHECKED otherwise.
+`state.system_health` is a a retired field name (see the stale-vocabulary note at the top) - expect these projections to resolve to nothing until this playbook is rewritten against the current field surface. Establishes overall_severity, disk space, network reachability, etc. where available; note the gap in WHAT WAS NOT CHECKED otherwise.
 
 **Step 4 - Backing query: what changed (fast-follow tool - not yet shipped; v1 substitute below).**
 ```
@@ -104,7 +114,7 @@ refine_query_result(query_id=<qid_context>, filter_lql='t between <primary_error
 ```
 Manually read the preceding-context rows. Often surfaces "SCM service activity precedes most occurrences" or "disk-pressure precedes a subset" or "isolated occurrences with no precursor."
 
-**Step 7 - Backing query: vss_writers state at failure window (Level 3 ground truth - deep field, likely empty today).**
+**Step 7 - Backing query: vss_writers state at failure window (ground truth, written against retired field names).**
 ```
 query_logs(
   org_ids=[...],
@@ -116,7 +126,7 @@ query_logs(
 )
 -> qid_state, query_url
 ```
-`event_kind`, `state.vss_writers`, `state.volumes`, `state.scheduled_tasks`, and `anomalies` are deep fields pending Managed Agent emission - expect them empty today (see the field-availability note at the top of this file). `event_summary` and the row-level fields (t, subsource) are shallow and populate normally. Note: broadened to multiple subsources so the same cache feeds Steps 7-9 without additional backing queries.
+`event_kind`, `state.vss_writers`, `state.volumes`, `state.scheduled_tasks`, and `anomalies` are retired field names (see the stale-vocabulary note at the top) - expect them to resolve to nothing (see the field-availability note at the top of this file). `event_summary` and the row-level fields (t, subsource) are shallow and populate normally. Note: broadened to multiple subsources so the same cache feeds Steps 7-9 without additional backing queries.
 
 **Step 8 - Refinements within Step 7's cache.**
 ```
@@ -145,9 +155,9 @@ query_grouped_aggregation(
   external_investigation_id="<id>"
 )
 ```
-(The `anomaly_max_score` half of the usual context-reduction filter is dropped here - deep field, not emitted yet; `severity` alone is the shallow-triage fallback.) This result is terminal - not refinable. To drill into a specific source's hits, issue a new `query_logs` filtered to that source, not a refine. 1 source = isolated; few sources = local cluster; many sources = environment-wide.
+(The `anomaly_max_score` half of the usual context-reduction filter is dropped here - a retired name; `severity` alone is the shallow-triage fallback.) This result is terminal - not refinable. To drill into a specific source's hits, issue a new `query_logs` filtered to that source, not a refine. 1 source = isolated; few sources = local cluster; many sources = environment-wide.
 
-**Step 11 - Ingest-health check (deep-field caveat).**
+**Step 11 - Ingest-health check (stale-name caveat).**
 ```
 query_logs(
   org_ids=[...],
@@ -157,7 +167,7 @@ query_logs(
   external_investigation_id="<id>"
 )
 ```
-`event_kind = SLAAgentOp` is not emitted yet - this returns empty regardless of true ingest health. Treat empty as inconclusive, not "no drops"; cross-check `list_sources` event-count trends from Step 2 instead, and note the gap in WHAT WAS NOT CHECKED.
+`event_kind = SLAAgentOp` is a retired name - this returns empty because the field name is retired, whatever the true ingest health. Treat empty as inconclusive, not "no drops"; cross-check `list_sources` event-count trends from Step 2 instead, and note the gap in WHAT WAS NOT CHECKED.
 
 **Step 12 - System condition summary output per `output-template.md`.** Findings derive from Steps 3-11. Tally backing queries and refinements from your local investigation-state document for WHAT WAS EXAMINED (`get_query_metadata(query_id="<qid>")` on any single cache if you need its status or schema). WHAT WAS NOT CHECKED enumerates per `off-endpoint-causes.md`. POSSIBLE NEXT DIRECTIONS section at the end with the explore-or-analyze invitation.
 
@@ -195,7 +205,7 @@ Per `off-endpoint-causes.md` HM2: Azure AD conditional-access policy, MFA cloud,
 ### Canonical evidence
 Processes snapshot+delta chain showing the leaking PID's memory and handle count growing monotonically; correlated with process start time and parent process; cross-validated with system memory pressure trajectory; recent windows_updates / installed_software / services to identify recent changes correlated with leak onset.
 
-**Field-availability warning: HM3's core evidence is deep-tier.** `state.processes`, `state.memory`, and `event_kind`/`snapshot_id`/`anomalies` are all deep fields pending Managed Agent emission (see the note at the top of this file) - the working-set/handle-count trajectory this playbook is built around is NOT available today. Until emission lands, HM3 investigations must lean on shallow-triage fallback: `severity` trend on the source, `pattern_hash` frequency for any app-crash or OOM-related winlog patterns, and engineer-reported symptom timing. Say so explicitly in the summary rather than producing a confident leak-trajectory Finding from empty data.
+**Stale-name warning: HM3's core evidence names retired fields.** `state.processes`, `state.memory`, and `event_kind`/`snapshot_id`/`anomalies` are all retired field names (see the stale-vocabulary note at the top) - the working-set/handle-count trajectory this playbook is built around is NOT available today. Until this playbook is rewritten against the current field surface, HM3 investigations must lean on shallow-triage fallback: `severity` trend on the source, `pattern_hash` frequency for any app-crash or OOM-related winlog patterns, and engineer-reported symptom timing. Say so explicitly in the summary rather than producing a confident leak-trajectory Finding from empty data.
 
 ### Off-endpoint causes to flag
 Per `off-endpoint-causes.md` HM3: vendor app internals, container/VM nested processes, GPU memory, vendor app server-side state.
@@ -214,7 +224,7 @@ query_logs(
   external_investigation_id="<id>"
 )
 ```
-Note: HM3 needs a 7-day window to see leak trajectory (broader than HM1's 24h). `state.system_health` is deep-tier; expect it empty today.
+Note: HM3 needs a 7-day window to see leak trajectory (broader than HM1's 24h). `state.system_health` is a retired name; expect it to resolve to nothing.
 
 **Step 4 - Backing query: 7d trajectory for processes / memory / services.**
 ```
@@ -229,9 +239,9 @@ query_logs(
 )
 -> qid_main, query_url
 ```
-This 7-day cache is the primary working set for the rest of the investigation. `event_kind`, `anomaly_max_score*`, and `snapshot_id`/`prev_delta_id` are deep fields - expect them empty; `subsource` and `event_summary` are shallow and populate normally.
+This 7-day cache is the primary working set for the rest of the investigation. `event_kind`, `snapshot_id`/`prev_delta_id` and `event_summary` are retired names and resolve to nothing; `anomaly_max_score*` is a cloud detector field that not every source carries. `t`, `subsource`, `severity` and `message` populate normally.
 
-**Step 5 - Refine for the suspect process at Level 3 (deep field - likely empty today).**
+**Step 5 - Refine for the suspect process at Level 3 (retired field names).**
 ```
 refine_query_result(
   query_id=<qid_main>,
@@ -246,7 +256,7 @@ Returns time-series of processes state, once `state.processes` is emitted. Extra
 - top_n_by_total_cpu_time - cumulative CPU time since process start.
 - top_n_by_cpu (instantaneous %).
 
-A monotonically-increasing working_set or handle_count across PID lifetimes is the leak signature. **Today `state.processes` is not emitted - this refine will return rows with an empty `state.processes` column. Don't read that as "no leak"; flag it as "process-level state unavailable" and fall back to `event_summary` / shallow signals.**
+A monotonically-increasing working_set or handle_count across PID lifetimes is the leak signature. **`state.processes` is a retired name, so this refine returns rows with that column empty whatever the machine is doing. Do not read it as "no leak": flag it as "process-level state unavailable" and fall back to severity, message and pattern signals.**
 
 **Step 6 - Refine for memory pressure cross-validation.**
 ```
@@ -256,7 +266,7 @@ refine_query_result(
   select=['t', 'event_summary', 'state.memory', 'anomalies']
 )
 ```
-Confirms whether system-level memory pressure trajectory matches the process-level trajectory, once `state.memory` is emitted (deep field, empty today).
+Confirms whether system-level memory pressure trajectory matches the process-level trajectory, once this playbook is rewritten against the current field surface.
 
 **Step 7 - Refine for system_health context.**
 ```
@@ -292,7 +302,7 @@ Identifies recent changes that might correlate with leak onset.
 
 **Step 10 - Investigation-mode amplification.** Not currently available. Skip this step.
 
-**Step 11 - Ingest-health check (deep-field caveat).**
+**Step 11 - Ingest-health check (stale-name caveat).**
 ```
 query_logs(
   org_ids=[...],
@@ -301,7 +311,7 @@ query_logs(
   external_investigation_id="<id>"
 )
 ```
-`event_kind = SLAAgentOp` isn't emitted yet - empty here is inconclusive, not "no drops." Cross-check `list_sources` event-count trends instead.
+`event_kind = SLAAgentOp` is a retired name - empty here is inconclusive, not "no drops." Cross-check `list_sources` event-count trends instead.
 
 **Step 12 - System condition summary output.**
 HM3 needs more backing queries than most playbooks here because the 7-day window (leak trajectory) is broader than the typical 24h investigation.
@@ -447,7 +457,7 @@ Per `off-endpoint-causes.md` HM9: public CA cert lifecycle (DigiCert/Let's Encry
 ### Canonical evidence
 Managed Agent's own ingest_health and system_health (especially network_reachability_to_rmm), RMM service state in `state.services`, DNS resolution to RMM cloud endpoints, network adapter state, proxy configuration, system uptime.
 
-**Field-availability warning:** `state.services`, `state.system_health`, and the DNS/network helper output (behind `event_kind = SLAHelper`) are deep fields pending Managed Agent emission - empty today regardless of true RMM connectivity. Step 7's winlog evidence (shallow-tier) is the reliable signal until emission lands; say so explicitly rather than treating empty `state.*` as "connectivity fine."
+**Field-availability warning:** `state.services`, `state.system_health`, and the DNS/network helper output (behind `event_kind = SLAHelper`) are retired field names (see the stale-vocabulary note at the top) - empty regardless of true RMM connectivity, because the names are wrong. Step 7's winlog evidence (shallow-tier) is the reliable signal until this playbook is rewritten against the current field surface; say so explicitly rather than treating empty `state.*` as "connectivity fine."
 
 ### Off-endpoint causes to flag
 Per `off-endpoint-causes.md` HM10: RMM cloud service health, EDR cloud quarantine of RMM agent, network path between endpoint and RMM cloud, corporate proxy / TLS inspection.
@@ -489,9 +499,9 @@ query_logs(
 )
 -> qid_main, query_url
 ```
-`event_kind` and `anomaly_max_score*` are deep fields pending Managed Agent emission - expect them empty today. `app`, `subsource`, `severity`, `message`, `event_summary` are shallow and populate normally.
+`event_kind` and `anomaly_max_score*` are retired field names (see the stale-vocabulary note at the top) - expect them to resolve to nothing. `app`, `subsource`, `severity`, `message`, `event_summary` are shallow and populate normally.
 
-**Step 4 - Refine to system_health (deep field - likely empty today).**
+**Step 4 - Refine to system_health (retired field names).**
 ```
 refine_query_result(
   query_id=<qid_main>,
@@ -499,9 +509,9 @@ refine_query_result(
   select=['t', 'event_summary', 'state.system_health']
 )
 ```
-Quick triage, once emitted - `state.system_health.network_reachability_to_rmm`, `network_reachability_to_cloud`, `network_link_type`, `agent_ingest_health_status` all surface here. If `network_reachability_to_rmm = error`, the endpoint can't reach RMM cloud - strong signal. **`state.system_health` is not emitted today; this refine returns rows with that column empty. Fall back to `event_summary` and winlog/service evidence (Steps 5-7) and say so in the Finding.**
+Quick triage, once rewritten against the current field surface - `state.system_health.network_reachability_to_rmm`, `network_reachability_to_cloud`, `network_link_type`, `agent_ingest_health_status` all surface here. If `network_reachability_to_rmm = error`, the endpoint can't reach RMM cloud - strong signal. **`state.system_health` is a retired name; this refine returns rows with that column empty whatever the connectivity is. Fall back to winlog and service evidence (Steps 5-7) and say so in the Finding.**
 
-**Step 5 - Refine to RMM service state (deep field - likely empty today).**
+**Step 5 - Refine to RMM service state (retired field names).**
 ```
 refine_query_result(
   query_id=<qid_main>,
@@ -520,7 +530,7 @@ RMM-vendor service-name patterns to look for, once `state.services` is emitted (
 
 If the relevant RMM service is STOPPED with start_type AUTOMATIC - clear local cause. **Today, fall back to Step 7's winlog evidence and the shallow `severity`/`message` fields from Step 3 while `state.services` is unavailable.**
 
-**Step 6 - Refine to network helper output (deep field via `event_kind` - likely empty today).**
+**Step 6 - Refine to network helper output (retired field names).**
 ```
 refine_query_result(
   query_id=<qid_main>,
@@ -528,7 +538,7 @@ refine_query_result(
   select=['t', 'subsource', 'event_summary', 'message']
 )
 ```
-Helper output reveals, once `event_kind` is emitted: DNS resolves the RMM cloud endpoint? TCP connect succeeds? Network adapter has valid IP? System proxy configured? Today this filter returns empty because `event_kind` isn't emitted - don't read that as "no helper issues." If you need this evidence now, drop the `event_kind = SLAHelper` predicate and filter on `subsource` alone.
+Helper output reveals, once rewritten against the current field surface: DNS resolves the RMM cloud endpoint? TCP connect succeeds? Network adapter has valid IP? System proxy configured? Today this filter returns empty because `event_kind` isn't emitted - don't read that as "no helper issues." If you need this evidence now, drop the `event_kind = SLAHelper` predicate and filter on `subsource` alone.
 
 **Step 7 - Refine to RMM-related winlog.**
 ```
@@ -538,13 +548,13 @@ refine_query_result(
   select=['t', 'app', 'severity', 'message']
 )
 ```
-Vendor-specific channels and Application channel for RMM-vendor errors. This is shallow-tier (message/severity/app) and works today - the most reliable evidence source in this playbook until `state.*` emission lands.
+Vendor-specific channels and Application channel for RMM-vendor errors. This is shallow-tier (message/severity/app) and works today - the most reliable evidence source in this playbook until it is rewritten against the current field surface.
 
 **Step 8 - Investigation-mode amplification.** Live amplification of source collection is not currently available. Skip this step.
 
-**Step 9 - Ingest-health check.** As HM1 (same deep-field caveat on the ingest-health check).
+**Step 9 - Ingest-health check.** As HM1 (same stale-name caveat on the ingest-health check).
 
-**Step 10 - system condition summary output.** Findings cite step 4-7 query_urls. EXECUTIVE SUMMARY synthesizes which layer (service, network adapter, DNS, TCP-to-cloud, proxy, RMM agent itself) shows the issue - today, primarily from Step 7's winlog evidence since Steps 4-6's `state.*` fields aren't emitted yet. WHAT WAS NOT CHECKED flags RMM cloud health and EDR quarantine if symptom is consistent, AND notes that `state.services` / `state.system_health` are not yet available from the Managed Agent (once emitted, "service is missing entirely from state.services" becomes a possible EDR-quarantine signal worth checking against the EDR admin console).
+**Step 10 - system condition summary output.** Findings cite step 4-7 query_urls. EXECUTIVE SUMMARY synthesizes which layer (service, network adapter, DNS, TCP-to-cloud, proxy, RMM agent itself) shows the issue - today, primarily from Step 7's winlog evidence since Steps 4-6's `state.*` fields aren't emitted yet. WHAT WAS NOT CHECKED flags RMM cloud health and EDR quarantine if symptom is consistent, AND notes that `state.services` / `state.system_health` are not yet available from the Managed Agent (once rewritten against the current field surface, "service is missing entirely from state.services" becomes a possible EDR-quarantine signal worth checking against the EDR admin console).
 
 Branch A resolves from `list_sources` alone; Branch B runs one backing query plus several refinements against its cache.
 

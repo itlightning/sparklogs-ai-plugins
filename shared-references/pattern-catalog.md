@@ -8,6 +8,7 @@ The catalog covers ~25 commonly-seen patterns and is expanded over time as more 
 - This catalog is a starting reference, not a substitute for investigation. A pattern's "likely meaning" is a starting point, not a Finding-grade conclusion.
 - Each entry has a "vendor docs URL" for authoritative reference. When investigating, point the engineer at the docs URL.
 - Pattern text uses `<X>` placeholders for variable parts that AutoClassify normalizes.
+- Entries here are vendor TEXT shapes, so they survive pack releases. **Curated sources are different:** a source-pack release recomputes pattern identity for the sources it curates, so a `pattern_hash` captured before a release will not match the same event after it. Do not carry a saved curated hash across a release boundary, and do not compare a baseline window to an incident window that straddles one.
 
 ---
 

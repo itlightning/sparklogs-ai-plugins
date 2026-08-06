@@ -114,6 +114,37 @@ See `scope-ladder.md` for ladder vs grouped-aggregation guidance.
 
 ---
 
+### `list_device_health`
+
+Latest curated device state: monitor rows for conditions, inventory rows for what is on the box.
+**Supporting evidence, not the entry point.** Reach for it when you are about to conclude something
+from an absence and need to know whether the agent was observing.
+
+```
+list_device_health(
+  org_ids: ["..."],
+  fieldset: "rca" | "fleet" | "minimal",   # rca is the default
+  kinds: ["inventory", "monitor"],          # default; agent_op and delta are opt-in
+  reasons: ["..."],                         # optional, filter to named conditions
+  group_by_reason: false,                   # true returns the fleet shape of each reason
+  external_investigation_id: "..."
+)
+-> data rows keyed by `kind`; silent devices as separate `row_kind=silent_device` rows
+```
+
+**Use cases:**
+- **Honesty check:** was this device reporting during the window, and are its episode spans
+  trustworthy? Read `episode_age_basis`, `episode_clear_time_basis`, `window_partial`.
+- **What is on the box:** inventory rows. Keep `inventory` in `kinds`; it is normally
+  `class=CONTEXT` and it is the ground truth an RCA needs.
+- **Fleet shape of a condition:** `group_by_reason` with `fieldset: "fleet"`.
+
+**Read before using:** `device-state-fields.md` for the column names, the honesty fields, and what
+you may and may not say about a duration or a clear time. Two traps live there: the silent-device
+list can TRUNCATE while the response summary stays honest, and silence is not evidence of health.
+
+---
+
 ### `describe_pattern`
 
 Pattern detail for one or more `pattern_hash` values. **Call before citing any `top_interesting_patterns` teaser row.**
@@ -162,6 +193,7 @@ query_grouped_aggregation(
   end: "...",
   include_sub_orgs: true,
   group_field: "pattern" | "source" | "severity" | "service" | "app" | "subsource" | "category" | "<field>_hash" | "<custom.field>",   # a single field
+  group_fields: ["...", "..."],    # 2-3 fields for a cross-tab; use instead of group_field
   lql: "...",                      # optional LQL filter applied before grouping
   limit: 50,                       # max distinct groups by hit count (default 50, hard cap 10000)
   external_investigation_id: "..."
@@ -174,6 +206,7 @@ query_grouped_aggregation(
 - "Which sources show this?" -> filter on a `pattern_hash` in `lql`, group_field `source`.
 - "Severity distribution" -> group_field `severity`.
 - "Which component is noisiest?" -> group_field `service` or `subsource`, then narrow with a second call - see the scope ladder (`scope-ladder.md`).
+- "Which reason, on which machines?" -> `group_fields` with two fields (reason by instance, config-change type by target). One call answers what two single-field passes only hint at, because the pairing is what carries the shape.
 
 **Not refinable (v1).** Grouped output is NOT a refinable cache - calling `refine_query_result` on its `query_id` returns expired. Read grouped results directly. If a grouped result is truncated, follow its hint (narrow the `lql`/window and re-run). To then pull raw events for an interesting group, run `query_logs` with that group's value in `lql` (use the `*_hash` verbatim for the six hash fields).
 

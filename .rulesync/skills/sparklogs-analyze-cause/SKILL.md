@@ -171,6 +171,9 @@ When you do make additional MCP calls, reuse the prior investigation's `external
 - `references/msp-tool-registry.md` - same content as the investigate skill's MSP tool registry.
 - `references/pattern-catalog.md` - same content as the investigate skill's pattern catalog.
 - `references/subagent-definitions.md` - same content as the investigate skill's subagent reference.
+- `references/category-classes.md` - class, the class-last category ladder, and the severity ladder. Read before ranking a hypothesis by anything other than severity.
+- `references/device-state-fields.md` - device and agent state, and the honesty fields that decide whether a duration or a clear time can carry a hypothesis at all.
+- `references/generated-reference-router.md` - how to reach the per-source generated reference set by question shape, when a hypothesis needs a confirm step written against real field names.
 - `references/writing-voice.md` - same content as the investigate skill's writing-voice reference: style rules for report text.
 
 Shared reference files are symlinked during authoring and materialized as real files in rendered plugin packages.

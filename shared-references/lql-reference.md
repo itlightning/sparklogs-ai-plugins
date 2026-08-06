@@ -97,14 +97,14 @@ anomaly_categories CONTAINS_ANY ["spike"]    <- WRONG
 LQL does NOT support `state.services.*.status = STOPPED`. Type resolution requires exact paths.
 
 **Workarounds:**
-- Use `event_summary` rolled-up fields (each state category declares per-category fields in event_summary) which carry per-category cross-key answers like `auto_start_not_running: ["spooler"]`. e.g., `event_summary.auto_start_not_running!` finds events where any service is in unexpected stopped state.
-- Use top-level anomaly fields (`anomaly_max_score`, `anomaly_categories`) which the local detectors populate when keys are unusual.
-- Use direct keyed lookups when the key is known: `state.services.spooler.status = STOPPED` works fine.
+- Filter on a promoted field instead. Curated sources promote the values worth querying to named paths (`sparklogs.*` and the module-prefixed fields); the generated per-source field schema lists them.
+- Use top-level anomaly fields (`anomaly_max_score`, `anomaly_categories`) where the source carries them.
+- Use a direct keyed lookup when the key is known: `x.services.spooler.status = STOPPED` works fine.
 
 ```
-state.services.*.status = STOPPED     <- WRONG (wildcard JSON paths not supported)
-event_summary.auto_start_not_running! <- right (use rolled-up field)
-state.services.spooler.status = STOPPED  <- right (direct key)
+x.services.*.status = STOPPED     <- WRONG (wildcard JSON paths not supported)
+sparklogs.reason = service_not_running   <- right (promoted field)
+x.services.spooler.status = STOPPED      <- right (direct key)
 ```
 
 ---
@@ -262,7 +262,7 @@ any: "credit card"                       <- search all fields for "credit card"
 
 ## Canonical recurring patterns
 
-**Field-availability note.** Several patterns below filter on `event_kind`, `anomaly_max_score`/`anomaly_categories`, or `state.*` - deep RCA fields the Managed Agent doesn't emit yet (zero production emission today; see SKILL.md Section 8). These queries are syntactically valid and will be the right shape once emission lands, but they return EMPTY right now on every source. An empty result from one of these is "not emitted yet," never "no problem." Fall back to `severity`/`message`/`pattern` shallow-triage fields, which ARE emitted today.
+**Field-availability note.** `sparklogs.*` curated fields exist on events a source pack curated, and only on the surfaces that promote them; module-prefixed fields are narrower still. `anomaly_max_score` / `anomaly_categories` depend on the source carrying detector output. An empty result on any of these may mean the source never writes that field, so check what the source carries before reading anything into it, and fall back to `severity` / `message` / `pattern`, which every source carries. The retired names `event_kind`, `SLASnapshot`, `SLAAgentOp`, `event_summary`, `snapshot_id` and `state.*` resolve to nothing at all: an empty result there is a spelling problem, not a health signal.
 
 ### Context-reduction filter (the most common starting filter)
 
@@ -299,12 +299,13 @@ subsource = vss_writers
 subsource in (vss_writers, volumes, scheduled_tasks)   <- multi-subsource
 ```
 
-### Specific event_kind
+### Specific kind
 
 ```
-event_kind = SLASnapshot
-event_kind in (SLASnapshot, SLADelta)                  <- snapshot or delta
-event_kind = SLAAgentOp                                <- agent self-observability
+sparklogs.kind = inventory
+sparklogs.kind in (inventory, delta)                   <- what is on the box, or what changed
+sparklogs.kind = monitor                               <- a tracked condition
+sparklogs.kind = agent_op                              <- agent self-observability
 ```
 
 ### Winlog channel pattern
@@ -322,11 +323,13 @@ state.services.spooler.status = STOPPED
 state.vss_writers."Microsoft Exchange Writer".state = "Failed"   <- writer name needs quotes
 ```
 
-### Chain walk (snapshot + all deltas)
+### Chain walk (one era of state)
 
 ```
-snapshot_id = "qX9k2mp4n7t1c8r5"
+sparklogs.epoch.id = "qX9k2mp4n7t1c8r5"
 ```
+
+Order within the era on `sparklogs.epoch.seq`, which is monotonic, rather than on the timestamp.
 
 ### Correlation ID
 
@@ -337,20 +340,18 @@ correlation_id = "abc123def456"
 ### Ingest-health check
 
 ```
-event_kind = SLAAgentOp AND subsource in (ingest_drop, spool_full, backpressure)
+sparklogs.kind = agent_op
 ```
 
-`event_kind` / `SLAAgentOp` aren't emitted yet (see the field-availability note above) - this returns empty today regardless of true ingest health. Treat empty as inconclusive, not "no drops."
+`agent_op` rows are stamped when an investigator must distrust or re-interpret other data on that host. Treat an EMPTY result as inconclusive rather than reassuring: a healthy agent, an agent that is not reporting, and a topic disabled for that agent's rollout ring look identical from here.
 
 ### Detector lifecycle awareness
 
 ```
-event_kind = SLAAgentOp AND subsource: anomaly_detector_*
+sparklogs.kind = agent_op AND subsource: anomaly_detector_*
 ```
 
-Same caveat: empty today because `event_kind` isn't emitted, not because detectors are absent.
-
-Identifies warmup-complete and baseline-reset events.
+Identifies warmup-complete and baseline-reset events. Same caveat: empty is inconclusive.
 
 ### Time-range narrowing within an LQL filter
 
@@ -368,7 +369,7 @@ t between 2026-04-23T03:00:00Z and 2026-04-23T04:00:00Z
 2. **`MATCHES "regex"` instead of `: /regex/`.** Slash-delimited.
 3. **`IS NULL` / `IS NOT NULL` instead of `NOT field!` / `field!`.** Different syntax.
 4. **`CONTAINS "value"` for arrays instead of `field: value` or `field = value`.** Array fields use scalar operators directly.
-5. **Wildcard JSON paths.** `state.services.*.status = STOPPED` does not work. Use rolled-up event_summary fields.
+5. **Wildcard JSON paths.** `x.services.*.status = STOPPED` does not work. Use a promoted field or a direct keyed lookup.
 6. **Square brackets for value lists.** `severity in [error, critical]` is wrong. Use `severity in (error, critical)` with parentheses.
 7. **Quoting unquoted terms unnecessarily.** `severity = "error"` works but `severity = error` is fine and more readable.
 8. **Forgetting parentheses around OR with implicit AND.** `severity = error OR anomaly_max_score >= 60 source = "x"` parses unexpectedly. Use parentheses: `(severity = error OR anomaly_max_score >= 60) AND source = "x"`.

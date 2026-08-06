@@ -38,7 +38,7 @@ For delegated bulk-summarization work, use **the fastest, most lightweight moder
 ```yaml
 findings:
   - timestamp_utc: <ISO>
-    event_kind: <SLAEvent | SLASnapshot | etc.>
+    kind: <inventory | monitor | delta | agent_op | config_change>
     severity: <ok | warn | error | critical>
     pattern_hash: <if applicable>
     summary: <one-sentence factual statement>

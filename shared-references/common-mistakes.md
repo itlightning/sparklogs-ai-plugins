@@ -207,11 +207,11 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` or `low`.
 
 **Why it's wrong.** Source might have been emitting `ingest_drop` / `spool_full` / `backpressure` events during the window, in which case "no evidence" might just mean "data was incomplete."
 
-**Recovery.** Before any "no evidence found" conclusion, run a quick check: `query_logs(lql='source = "<X>" AND event_kind = SLAAgentOp AND subsource in (ingest_drop, spool_full, backpressure)', start=..., end=...)`. If drops occurred, qualify the Finding's confidence and surface in WHAT WAS NOT CHECKED. **Caveat today: `event_kind` / `SLAAgentOp` are deep fields the Managed Agent doesn't emit yet, so this check returns empty on every source regardless of true ingest health.** Treat an empty result as inconclusive, not "no drops," and fall back to `list_sources` event-count trends as the current completeness signal.
+**Recovery.** Before any "no evidence found" conclusion, run `query_logs(lql='source = "<X>" AND sparklogs.kind = agent_op', start=..., end=...)`. Those rows are stamped when an investigator must distrust other data on that host. If any fired, qualify the Finding's confidence and surface it in WHAT WAS NOT CHECKED. An EMPTY result is inconclusive rather than reassuring: a healthy agent, an agent that is not reporting, and a topic disabled for that agent's rollout ring all look identical from here. Cross-check `list_sources` event-count trends and say which case you could not rule out.
 
 ### Reading an empty deep-field query as a clean bill of health
 
-**Symptom.** You filter on `event_kind`, `SLAAgentOp`, `anomaly_max_score`, `anomaly_categories`, or any `state.*` field, get zero rows back, and conclude the system is healthy or the check passed.
+**Symptom.** You filter on a curated field (`sparklogs.reason`, a module-prefixed field) or on a retired name (`event_kind`, `SLAAgentOp`, `event_summary`, `state.*`), get zero rows back, and conclude the system is healthy or the check passed.
 
 **Why it's wrong.** These are DESIGNED fields in the schema, but itl-agent has zero production emission of them today. Every query filtering on them returns empty on every source, whether or not a problem exists. Empty means "not emitted yet," never "no problem found."
 
@@ -245,7 +245,7 @@ These don't exist in LQL. Use `:`/`*`/`?`, `:`/`/regex/`, `<field>!`/`NOT <field
 
 ### Wildcard JSON paths
 
-`state.services.*.status = STOPPED` does NOT work. Use `event_summary.auto_start_not_running!` or top-level anomaly fields, or direct keyed lookup when key is known.
+`x.services.*.status = STOPPED` does NOT work: type resolution needs an exact path. Use a promoted field, the message, or a direct keyed lookup when the key is known.
 
 ### Square brackets for value lists
 
