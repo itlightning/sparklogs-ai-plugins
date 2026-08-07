@@ -27,6 +27,9 @@ jobs:
   release:
     runs-on: ubuntu-latest
     environment: release
+    outputs:
+      tag: ${{ steps.release_tag.outputs.tag }}
+      version: ${{ steps.release_tag.outputs.version }}
     steps:
       - name: Resolve release tag
         id: release_tag
@@ -89,17 +92,29 @@ jobs:
       - name: Publish dist branch
         env:
           RELEASE_TOKEN: ${{ steps.release_app_token.outputs.token }}
+          TAG: ${{ steps.release_tag.outputs.tag }}
         run: |
           set -euo pipefail
           rm -rf /tmp/sparklogs-ai-plugins-dist
-          mkdir -p /tmp/sparklogs-ai-plugins-dist
-          cp -a build/dist/. /tmp/sparklogs-ai-plugins-dist/
+          git clone --depth 1 --branch dist \
+            "https://x-access-token:${RELEASE_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" \
+            /tmp/sparklogs-ai-plugins-dist
+          rsync -a --delete --exclude .git build/dist/ /tmp/sparklogs-ai-plugins-dist/
           cd /tmp/sparklogs-ai-plugins-dist
-          git init -b dist
-          git remote add origin "https://x-access-token:${RELEASE_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add -A
-          git -c user.name='github-actions[bot]' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m "Generate dist for ${{ steps.release_tag.outputs.tag }}"
-          git push origin HEAD:dist --force-with-lease
+          if git diff --cached --quiet; then
+            echo "dist tree unchanged; skipping commit"
+          else
+            git commit -m "Release ${TAG}"
+            git push origin HEAD:dist
+          fi
+      - name: Verify published dist matches render
+        run: |
+          set -euo pipefail
+          git fetch origin refs/heads/dist:refs/remotes/origin/dist
+          yarn run compare-dist
       - name: Publish GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -117,3 +132,33 @@ jobs:
           else
             gh release create "$TAG" build/release-assets/* --title "SparkLogs AI Plugins $VERSION" --generate-notes
           fi
+
+  verify-reproducibility:
+    name: Verify dist reproducibility
+    needs: release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout tag
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          ref: ${{ needs.release.outputs.tag }}
+          fetch-depth: 0
+      - name: Setup Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+      - name: Enable Corepack
+        run: corepack enable
+      - name: Install dependencies
+        run: yarn install --immutable --check-cache
+      - name: Re-render from tag and compare to origin/dist
+        env:
+          SOURCE_DATE_EPOCH: ${{ needs.release.outputs.tag }}
+        run: |
+          set -euo pipefail
+          yarn run clean
+          node scripts/render-packages.mjs --out build/dist --version "${{ needs.release.outputs.version }}"
+          git fetch origin refs/heads/dist:refs/remotes/origin/dist
+          yarn run compare-dist

@@ -328,11 +328,11 @@ The catalog is these eleven tools:
 | `resolve_scope` | lightweight | Always first - turn natural-language scope into `org_ids` (orgs, managed agents, ingest keys). Ranked `match_kind` on org names and agent name/`reported_hostname`. `include_agents` = agents and ingest keys (default true). |
 | `list_sources` | billed discovery | Confirm collector/origin pairs have data in the window (`start`/`end` required). Triage columns, `collector_kind`, optional `top_interesting_patterns` teaser. |
 | `list_scope_ladder` | billed discovery | Discover app/service/subsource structure (not LQL-filtered). Narrow with `agent_ids` / `source` / `field_match`. For filtered counts within an LQL slice, use `query_grouped_aggregation`. |
-| `describe_pattern` | billed* | Full pattern text, stats, fleet spread, and example messages. The parameter is **`pattern_hashes`, a LIST**, even for one hash. There is no per-pattern sample count to set: counts are chosen server-side for diversity, and examples come back for roughly your first 25 hashes by list order, so list the highest-interest ones first. *Examples require `mcp:query`; stats-only works on `mcp:observe`. Required before citing teaser patterns. |
+| `describe_pattern` | billed* | Full pattern text, stats, fleet spread, and diverse example messages (with recurrence `count`/`seen_at`). The parameter is **`pattern_hashes`, a LIST**, even for one hash. There is no per-pattern sample count to set: counts are chosen server-side for diversity, and examples come back for roughly your first 25 hashes by list order, so list the highest-interest ones first. *Examples require `mcp:query`; stats-only works on `mcp:observe` (the call degrades, never errors). Required before citing teaser patterns. |
 | `list_fields` | lightweight | Field catalog for building NEW queries - only if standard/known fields don't surface enough. Not a first-pass tool. |
 | `query_grouped_aggregation` | backing scan | Group every matching event by one `group_field`, or by 2-3 fields with `group_fields` for a cross-tab. Top values by hit count. The workhorse for "what's happening" within an LQL filter - run it BEFORE raw logs. |
 | `query_logs` | backing scan | Retrieve raw chronological events. Last resort, over an already-narrowed window/filter. No `limit`: you get one server-sized page, `summary` carries the matched total, and further pages come from `refine_query_result` on the returned `query_id`. |
-| `refine_query_result` | lightweight | Relational engine over a cached `query_id` (filter/group/aggregate/having/order/select/page). Use freely; touches the cache, not the source. |
+| `refine_query_result` | lightweight | Relational engine over a cached `query_logs` result (filter/group/aggregate/having/order/select/page). Use freely; touches the cache, not the source. Responses keep the same `query_id`; refine that id again for other views. |
 | `get_query_metadata` | lightweight* | Cache/field introspection over a `query_id`. Default = bookkeeping only (fast). *`top_n`/`field_match` deep field discovery is a full catalog scan of the source - use deliberately. |
 | `list_device_health` | billed discovery | Latest curated device state: monitor rows for conditions, inventory rows for what is on the box, plus silent devices. `start`/`end` are REQUIRED. Supporting honesty check, not the entry point - reach for it when you are about to conclude something from an absence. See `references/device-state-fields.md`. |
 | `server_info` | lightweight | Server name, version, region, transport and the authenticated workspace id. Takes NO parameters, including no `external_investigation_id`. Confirm which region and workspace you are on before citing anything. |
@@ -356,13 +356,15 @@ Every data-tool response is ONE text block, not JSON you parse as a whole:
 
 **Three-tier vocabulary (contract).** `summary.total_count` = the matched population (all events matching the query). `page.rows_cached` = the slice the cache holds. `page.rows_returned` = the rows on THIS page. Ground every count claim in the matched population, never in the page you happened to see.
 
+**Sampled results.** When `summary.sampled` is true, the matched-population aggregates (total count, severity histogram, grouped hit counts) are statistical estimates from a `sample_pct`% sample; the returned raw rows are still exact matches. Cite sampled totals as approximate in Findings, and treat SMALL estimated counts as rough (a small scaled count can come from a single sampled row). For exact figures, narrow the query (tighter window, tighter LQL) and re-run. When `sampled` is absent, aggregates are exact.
+
 **Hash-dictionary rule.** Rows carry `*_hash` companions for six fields (pattern, source, subsource, category, service, app). When a row's value field is absent, resolve its `*_hash` in the header `lookups`. NEVER show a `*_hash` id to a human - resolve it to its value first. But DO use the `*_hash` verbatim as a drill-down filter value (it is the drill-down handle). Treat every `*_hash` as an OPAQUE string: `pattern_hash` = a mnemonic prefix + `_` + a 16-char base36 tail; source/subsource/category/service/app = a bare 16-char base36 string. Never parse, split, or length-validate a hash.
 
 **Schema descriptor + deeper field discovery.** The header `schema` lists the standard fields plus the top custom fields by fill-rate FOR THIS PAGE. When it carries `more_fields`, that points at `get_query_metadata`. `get_query_metadata`'s default call is lightweight (bookkeeping only); its `top_n` / `field_match` deep discovery is a full catalog scan of the source - reach for it only when the inline schema genuinely isn't enough.
 
 ### Grouped results are not refinable
 
-`query_grouped_aggregation` output is NOT a refinable cache - calling `refine_query_result` on it returns expired. Read grouped results directly. If a grouped result is truncated, follow its hint (narrow the filter or window and re-run the grouped call). `refine_query_result` applies ONLY to `query_logs` slices and to prior refine outputs.
+`query_grouped_aggregation` output is NOT a refinable cache - calling `refine_query_result` on it returns expired. Read grouped results directly. If a grouped result is truncated, follow its hint (narrow the filter or window and re-run the grouped call). `refine_query_result` applies ONLY to `query_logs` slices; a refine response keeps the same `query_id`, so run every further refine against that same id.
 
 Detailed per-tool usage with examples is in `references/mcp-tool-decision-tree.md`.
 
@@ -431,9 +433,9 @@ Suggest `/sparklogs-analyze-cause <external_investigation_id>` (the separate cau
 
 ## Section 14. Error handling - recover gracefully
 
-**Cache expired on `refine_query_result`:** the cache is cold (>~24h since the backing scan, or a grouped result, which is not refinable). Re-issue the original backing query; the server transparently regenerates a fresh `query_id` when it can (`cache status` in the header reflects it).
+**Cache expired on `refine_query_result`:** a cold `query_logs` cache regenerates automatically under the SAME `query_id` when you refine it (the header's cache status reflects it). A grouped result is not refinable (re-run the grouped call). If the server reports the cache cannot be restored, re-issue the original backing query.
 
-**Soft throttle (429 with `retry_after_ms`):** retry up to 3x with exponential backoff. After 3 retries, surface to the engineer: "the investigation is being slowed by workspace-level rate limits."
+**Rate or capacity errors:** if a tool call fails with a retryable server error, retry up to 2x with a brief backoff, then surface to the engineer rather than hammering the same call.
 
 **Row-ceiling exceeded on backing query:** narrow `lql` (tighter time range, restricted `org_ids`, add `severity`/`anomaly_max_score` predicates) or split into multiple queries. Then refine the cached slice rather than re-scanning.
 
