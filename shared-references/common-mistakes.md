@@ -181,7 +181,7 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` or `low`.
 
 **Symptom.** First MCP call (after `resolve_scope` and `list_sources`) is `query_logs` for a broad raw retrieval.
 
-**Why it's wrong.** Aggregation first. `query_logs` is the *last resort*, not the first. Aggregation returns a dense, denominated answer instead of a pile of raw rows, and improves correctness in published observability-MCP retrospectives.
+**Why it's wrong.** Aggregation first. `query_logs` is the *last resort*, not the first. Aggregation returns a dense, denominated answer instead of a pile of raw rows: you learn what the population looks like before you spend the window reading a slice of it.
 
 **Recovery.** First substantive call should usually be `query_grouped_aggregation` (group by the field the question is about). Use `query_logs` only when aggregation has narrowed to a specific small set whose raw text matters.
 

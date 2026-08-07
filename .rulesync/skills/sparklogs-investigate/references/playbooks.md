@@ -25,10 +25,10 @@ curated reasons with promoted fields; others still come down to reading a vendor
 text. Each section says which, under Evidence today. Where it says the evidence is thin, that
 belongs in WHAT WAS NOT CHECKED, not in a confident Finding.
 
-**Fast-follow tools.** `query_period_diff`, `compare_populations` and `cluster_event_contexts` do
-not exist yet. Substitute two `query_grouped_aggregation` runs over adjacent windows for a period
-diff; one run per population (distinct `lql`) for a compare; `query_logs` narrowed to the pattern
-then `refine_query_result` with `group_by` for clustering.
+**Three tools do not exist**, and reaching for them wastes a turn. For a period diff, run
+`query_grouped_aggregation` twice over adjacent windows and compare. For a population compare, run
+it once per population with a different `lql`. For clustering, narrow `query_logs` to the pattern
+then `refine_query_result` with `group_by` over the surrounding fields.
 
 ---
 
@@ -477,13 +477,3 @@ agent, the network path.
 5. Only then `query_logs`, narrowed to what the groupings pointed at.
 6. Summary per `output-template.md`, with WHAT WAS NOT CHECKED built from what the symptom turned
    out to involve.
-
----
-
-## Maintenance
-
-This file updates when:
-- A new symptom category warrants its own playbook.
-- A category's evidence depth changes because a source pack curated something new.
-- A real investigation shows a call sequence here is the wrong shape.
-- A scheduled refresh comes round.

@@ -109,10 +109,3 @@ When investigating:
 2. If you see unexpected services in `state.services`, check the registry - recognize MSP-tool services so you can frame them correctly.
 
 ---
-
-## Maintenance
-
-This file updates when:
-- New MSP tools become common in customer environments.
-- Existing entries' service names or log locations change with new versions.
-- A scheduled refresh comes round.

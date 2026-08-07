@@ -169,11 +169,3 @@ The point of enumeration is to support the engineer's decision about where to in
 The right form gives the engineer a concrete next step. The wrong form is noise.
 
 ---
-
-## Maintenance
-
-This file updates when:
-- A new symptom category warrants its own visibility-limit list.
-- A recurring off-endpoint cause is observed and added to the catalog.
-- A previously-off-endpoint source becomes on-endpoint (i.e., SparkLogs starts ingesting it) - remove from this list.
-- A scheduled refresh comes round.

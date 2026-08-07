@@ -158,11 +158,3 @@ When the local detector flags an event with `anomaly_categories`:
 The catalog entries above include `HM` tags so you can cross-reference: when investigating HM<N>, the catalog's HM-tagged patterns are the most relevant.
 
 ---
-
-## Maintenance
-
-This catalog updates when:
-- A recurring pattern is observed and added to the catalog.
-- A pattern's likely meaning is corrected based on real investigation outcomes.
-- New vendor products produce patterns we haven't catalogued.
-- A scheduled refresh comes round.

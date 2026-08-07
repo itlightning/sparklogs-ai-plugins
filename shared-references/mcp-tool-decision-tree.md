@@ -2,7 +2,7 @@
 
 Per-tool detailed usage with parameter notes, decision tree for which tool to use when, and worked-example call sequences.
 
-The v1 tool surface is these **eleven** tools: `resolve_scope`, `list_sources`, `list_scope_ladder`, `list_device_health`, `describe_pattern`, `list_fields`, `query_grouped_aggregation`, `query_logs`, `refine_query_result`, `get_query_metadata`, `server_info`. Three differential tools (`query_period_diff`, `compare_populations`, `cluster_event_contexts`) are fast-follow; see the bottom of this file for v1 equivalents.
+The tool surface is these **eleven** tools: `resolve_scope`, `list_sources`, `list_scope_ladder`, `list_device_health`, `describe_pattern`, `list_fields`, `query_grouped_aggregation`, `query_logs`, `refine_query_result`, `get_query_metadata`, `server_info`. Three differential tools (`query_period_diff`, `compare_populations`, `cluster_event_contexts`) are fast-follow; see the bottom of this file for v1 equivalents.
 
 **Every scoped or data tool takes `external_investigation_id`** (REQUIRED on all of them except
 `server_info`, which takes NO parameters at all and REJECTS an id; a friendly, human-meaningful correlation handle you supply, 8-200 chars free text, e.g. `investigate-ticket-1234-disk-errors` - not a generated hash. Reusing the same value RESUMES that investigation; use a fresh, distinctive value to start a new one; tagged on every call).
@@ -228,7 +228,7 @@ query_grouped_aggregation(
   group_field: "pattern" | "source" | "severity" | "service" | "app" | "subsource" | "category" | "<field>_hash" | "<custom.field>",   # a single field
   group_fields: ["...", "..."],    # 2-3 fields for a cross-tab; use INSTEAD of group_field, not with it
   lql: "...",                      # optional LQL filter applied before grouping
-  limit: 50,                       # max distinct groups by hit count (default 50, hard cap 10000)
+  limit: 50,                       # max distinct groups returned, by hit count (default 50)
   external_investigation_id: "..."
 )
 -> rows: {<group_field>, hits, max_severity}   # dense TSV
@@ -241,7 +241,7 @@ query_grouped_aggregation(
 - "Which component is noisiest?" -> group_field `service` or `subsource`, then narrow with a second call - see the scope ladder (`scope-ladder.md`).
 - "Which reason, on which machines?" -> `group_fields` with two fields (reason by instance, config-change type by target). One call answers what two single-field passes only hint at, because the pairing is what carries the shape.
 
-**Not refinable (v1).** Grouped output is NOT a refinable cache - calling `refine_query_result` on its `query_id` returns expired. Read grouped results directly. If a grouped result is truncated, follow its hint (narrow the `lql`/window and re-run). To then pull raw events for an interesting group, run `query_logs` with that group's value in `lql` (use the `*_hash` verbatim for the six hash fields).
+**Grouped output is not a refinable cache.** Calling `refine_query_result` on its `query_id` returns expired. Read grouped results directly. If a grouped result is truncated, follow its hint (narrow the `lql`/window and re-run). To then pull raw events for an interesting group, run `query_logs` with that group's value in `lql` (use the `*_hash` verbatim for the six hash fields).
 
 ---
 
@@ -322,14 +322,14 @@ Cache and field introspection over a cached `query_id`.
 ```
 get_query_metadata(
   query_id: "...",
-  top_n: 500,                      # OPT-IN deep discovery: expand ranked custom-field list (hard cap 5000). Full catalog scan of the source.
+  top_n: 500,                      # OPT-IN deep discovery: ranked custom-field list. Full catalog scan of the source.
   field_match: {mode: "equals"|"contains"|"regex", pattern: "..."},   # OPT-IN deep discovery: grep custom field NAMES. Full catalog scan.
   external_investigation_id: "..."
 )
 -> bookkeeping (schema, custom_source, stats, cache status, tie-breaker/sort); or, with top_n/field_match, a ranked/matched custom-field list
 ```
 
-**Default call is lightweight** (bookkeeping row only, sub-ms, no backing scan). **`top_n` / `field_match` deep discovery is a full catalog scan of the source** scoped to the cached query's window + orgs - use deliberately, only when the inline response schema isn't enough.
+**The default call is cheap** (bookkeeping only, no backing scan). **`top_n` / `field_match` deep discovery is a full catalog scan of the source** scoped to the cached query's window + orgs - use deliberately, only when the inline response schema isn't enough.
 
 **Use cases:**
 - Cache introspection after a query.
@@ -398,7 +398,7 @@ the pass-the-id-everywhere rule: there is no scope and no query to correlate.
 
 **Skipping `list_sources`.** Source might not have data in the investigation's window. Always confirm with `list_sources` scoped to the investigation's `start`/`end`.
 
-**Refining a grouped result.** `query_grouped_aggregation` output is not refinable (v1); it returns expired. Read it directly or pull raw events with `query_logs`.
+**Refining a grouped result.** `query_grouped_aggregation` output is not refinable; it returns expired. Read it directly or pull raw events with `query_logs`.
 
 **Re-scanning instead of refining.** After ONE broad `query_logs` slice, use `refine_query_result` for other views - it's a cache lookup, not a fresh scan.
 
@@ -408,9 +408,9 @@ the pass-the-id-everywhere rule: there is no scope and no query to correlate.
 
 ---
 
-## Fast-follow tools (NOT yet available)
+## Tools that do not exist
 
-These land after v1; until then, use the v1 equivalent:
+If you find yourself reaching for one of these, use the substitute:
 
 - **`query_period_diff`** ("what changed between two windows") -> run `query_grouped_aggregation` over each window (group_field `pattern`) and compare the two grouped results.
 - **`compare_populations`** ("what's different about broken vs working") -> run `query_grouped_aggregation` over each population separately (via distinct `lql`) and compare.
