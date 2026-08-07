@@ -133,14 +133,18 @@ POSSIBLE NEXT DIRECTIONS
 
 When you call any data-access MCP tool (`query_logs`, `query_grouped_aggregation`, `refine_query_result`, `get_query_metadata`), the response's header line carries both `query_id` and `query_url`. You embed that `query_url` in the **Evidence** field of every Finding that derives from that query.
 
-**Format:** the URL is the SparkLogs explore deep link the engineer can click to verify the underlying data. Do not modify the URL. Do not summarize "the data shows X" without a URL pointing to that data.
+**What the URL actually resolves to.** It is a SparkLogs explore link scoped to the ORG AND TIME WINDOW the query ran over, not a replay of your exact filtered result. The engineer lands where the evidence lives and can see it; they do not land on your cached rows. Copy it verbatim and do not modify it.
+
+**So record the `query_id` beside it.** The `query_id` is the discriminator that identifies the exact query, and `get_query_metadata(query_id=...)` recovers its filter, schema and cache status. A citation is the URL plus that id: the URL locates the evidence, the id reproduces the query. Citing the URL alone leaves a reader unable to tell which of several queries over the same window produced the claim.
+
+Do not summarize "the data shows X" without a citation pointing to that data.
 
 **Quote message text verbatim.** When a Finding rests on log content, copy the `message` bytes exactly as returned - never paraphrase or reconstruct an event's text.
 
-**Right (cite the URL):**
+**Right (URL plus the query_id that reproduces it):**
 ```
 Finding 1: VSS writer SqlServerWriter was in FAILED state at 2026-04-23 03:14:32 UTC
-  Evidence: https://sparklogs.app/explore/cached/qXY9a3m...
+  Evidence: <query_url as returned> (query_id: qXY9a3m...)
   Confidence: high
 ```
 
@@ -308,18 +312,18 @@ The v1 catalog is these eleven tools:
 | `resolve_scope` | lightweight | Always first - turn natural-language scope into `org_ids` (orgs, managed agents, ingest keys). Ranked `match_kind` on org names and agent name/`reported_hostname`. `include_agents` = agents and ingest keys (default true). |
 | `list_sources` | billed discovery | Confirm collector/origin pairs have data in the window (`start`/`end` required). Triage columns, `collector_kind`, optional `top_interesting_patterns` teaser. |
 | `list_scope_ladder` | billed discovery | Discover app/service/subsource structure (not LQL-filtered). Narrow with `agent_ids` / `source` / `field_match`. For filtered counts within an LQL slice, use `query_grouped_aggregation`. |
-| `describe_pattern` | billed* | Full pattern text, stats, fleet spread, optional sample messages for one or more `pattern_hash` values. *Exemplars (`max_samples_per_pattern` > 0) require `mcp:query`; stats-only works on `mcp:observe`. Required before citing teaser patterns. |
+| `describe_pattern` | billed* | Full pattern text, stats, fleet spread, and example messages for one or more `pattern_hash` values. There is no per-pattern sample count to set: counts are chosen server-side for diversity, and examples come back for roughly your first 25 hashes by list order, so list the highest-interest ones first. *Examples require `mcp:query`; stats-only works on `mcp:observe`. Required before citing teaser patterns. |
 | `list_fields` | lightweight | Field catalog for building NEW queries - only if standard/known fields don't surface enough. Not a first-pass tool. |
 | `query_grouped_aggregation` | backing scan | Group every matching event by one `group_field`; top values by hit count. The workhorse for "what's happening" within an LQL filter - run it BEFORE raw logs. |
-| `query_logs` | backing scan | Retrieve raw chronological events. Last resort, over an already-narrowed window/filter. |
+| `query_logs` | backing scan | Retrieve raw chronological events. Last resort, over an already-narrowed window/filter. No `limit`: you get one server-sized page, `summary` carries the matched total, and further pages come from `refine_query_result` on the returned `query_id`. |
 | `refine_query_result` | lightweight | Relational engine over a cached `query_id` (filter/group/aggregate/having/order/select/page). Use freely; touches the cache, not the source. |
 | `get_query_metadata` | lightweight* | Cache/field introspection over a `query_id`. Default = bookkeeping only (fast). *`top_n`/`field_match` deep field discovery is a full catalog scan of the source - use deliberately. |
-| `list_device_health` | billed discovery | Latest curated device state: monitor rows for conditions, inventory rows for what is on the box, plus silent devices. Supporting honesty check, not the entry point - reach for it when you are about to conclude something from an absence. See `references/device-state-fields.md`. |
-| `server_info` | lightweight | Server name, version, region, transport and the authenticated workspace id. No query, no billing. Confirm which region and workspace you are on before citing anything. |
+| `list_device_health` | billed discovery | Latest curated device state: monitor rows for conditions, inventory rows for what is on the box, plus silent devices. `start`/`end` are REQUIRED. Supporting honesty check, not the entry point - reach for it when you are about to conclude something from an absence. See `references/device-state-fields.md`. |
+| `server_info` | lightweight | Server name, version, region, transport and the authenticated workspace id. Takes NO parameters, including no `external_investigation_id`. Confirm which region and workspace you are on before citing anything. |
 
 Fast-follow differential tools (`query_period_diff`, `compare_populations`, `cluster_event_contexts`) are not yet available. Until they ship, use two `query_grouped_aggregation` runs over two windows for period diff, or grouped aggregation over distinct `lql` populations for compare.
 
-**Always pass `external_investigation_id`** on every call - it is REQUIRED, not optional. It is a friendly, human-meaningful correlation handle you supply, 8-200 chars free text (e.g. `investigate-ticket-1234-disk-errors`), not a generated hash. Pick one distinctive value at investigation start and reuse it for the entire session - reusing the same id RESUMES that investigation (ops append to the same audit trail); a genuinely new investigation needs a fresh, distinctive value (embed a ticket/incident id or a nonce). Don't reuse a generic string like `diskcheck` across unrelated incidents - they'd merge into one investigation. Out-of-bounds values (too short/long) return a user-visible validation error from the tool - read it and fix the id.
+**Always pass `external_investigation_id`** on every scoped or data call - it is REQUIRED, not optional. The one exception is `server_info`, which takes NO parameters and REJECTS an id. It is a friendly, human-meaningful correlation handle you supply, 8-200 chars free text (e.g. `investigate-ticket-1234-disk-errors`), not a generated hash. Pick one distinctive value at investigation start and reuse it for the entire session - reusing the same id RESUMES that investigation (ops append to the same audit trail); a genuinely new investigation needs a fresh, distinctive value (embed a ticket/incident id or a nonce). Don't reuse a generic string like `diskcheck` across unrelated incidents - they'd merge into one investigation. Out-of-bounds values (too short/long) return a user-visible validation error from the tool - read it and fix the id.
 
 **Always pass `org_ids`** explicitly (derived from `resolve_scope`). Empty = all-orgs is strongly discouraged.
 

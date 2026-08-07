@@ -203,33 +203,33 @@ SCOPE CHECKED
 OBSERVED CONDITIONS
 
 Finding 1: VSS writer SqlServerWriter was in FAILED state at 2026-04-23 03:14:32 UTC
-  Evidence: https://sparklogs.app/explore/cached/qXY9a3m2k7n1p4t8
+  Evidence: <query_url as returned> (query_id: qXY9a3m2k7n1p4t8)
   Confidence: high
   Sources contributing: srv-fileshare01
   Time window of evidence: 2026-04-23 03:14:00 to 03:14:45 UTC
 
 Finding 2: Veeam Application channel logged error 0x80042308 at 2026-04-23 03:14:30 UTC, in same window as Finding 1
-  Evidence: https://sparklogs.app/explore/cached/qP4n8k2r9c6m3y1z
+  Evidence: <query_url as returned> (query_id: qP4n8k2r9c6m3y1z)
   Confidence: high
   Sources contributing: srv-fileshare01
   Time window of evidence: 2026-04-23 03:14:30 UTC
 
 Finding 3: New pattern_hash "h7Vjf2Xk9a" appeared in last 24h that wasn't present in prior 24h
-  Evidence: https://sparklogs.app/explore/cached/qK7m2p1n8r4t9c2v
+  Evidence: <query_url as returned> (query_id: qK7m2p1n8r4t9c2v)
   Confidence: high
   Pattern text: "Veeam VSS error 0x80042308 on volume <X> for job <Y>"
   Sources contributing: srv-fileshare01 (and 7 fleet sources per Finding 6)
   Time window of evidence: 2026-04-22 00:00 to 2026-04-23 14:00 UTC
 
 Finding 4: KB5034441 was installed on srv-fileshare01 at 2026-04-23 02:45 UTC
-  Evidence: https://sparklogs.app/explore/cached/qB8t4r2y9c1m6p3n
+  Evidence: <query_url as returned> (query_id: qB8t4r2y9c1m6p3n)
   Confidence: high
   Sources contributing: srv-fileshare01
   Time window of evidence: 2026-04-23 02:45 UTC
   Note: Temporal proximity to Finding 1 is observation only - causality is not asserted in this summary.
 
 Finding 5: Cluster analysis of the new error pattern shows 3 distinct contextual situations
-  Evidence: https://sparklogs.app/explore/cached/qC5g7n3p2k8m1y4r
+  Evidence: <query_url as returned> (query_id: qC5g7n3p2k8m1y4r)
   Confidence: medium (cluster analysis is sample-based; sample_n_matches=100 of 412 total occurrences)
   Sources contributing: srv-fileshare01 (47), srv-fileshare02 (38), srv-app01 (12), other fleet (5)
   Time window of evidence: 2026-04-22 00:00 to 2026-04-23 14:00 UTC
@@ -238,14 +238,14 @@ Finding 5: Cluster analysis of the new error pattern shows 3 distinct contextual
         occurrences) has no obvious common precursor pattern.
 
 Finding 6: Same Veeam error pattern fired on 7 other sources in this MSP fleet during same window
-  Evidence: https://sparklogs.app/explore/cached/qF2h9k4n7m3p1c8y
+  Evidence: <query_url as returned> (query_id: qF2h9k4n7m3p1c8y)
   Confidence: high
   Sources contributing: srv-fileshare01, srv-fileshare02, srv-app01, srv-app02, srv-mail01, srv-db01,
                         srv-web01, srv-print01
   Time window of evidence: 2026-04-22 00:00 to 2026-04-23 14:00 UTC
 
 Finding 7: No ingest_drop, spool_full, or backpressure events on srv-fileshare01 during window
-  Evidence: https://sparklogs.app/explore/cached/qH6l1p5n2k7t3m8r
+  Evidence: <query_url as returned> (query_id: qH6l1p5n2k7t3m8r)
   Confidence: high
   Sources contributing: srv-fileshare01
   Time window of evidence: 2026-04-22 00:00 to 2026-04-23 14:00 UTC
@@ -312,7 +312,7 @@ SCOPE CHECKED
 OBSERVED CONDITIONS
 
 Finding 1: srv-fileshare02 perf counters within normal range during the user-reported window
-  Evidence: https://sparklogs.app/explore/cached/qN3k7m1p2r8t4c9y
+  Evidence: <query_url as returned> (query_id: qN3k7m1p2r8t4c9y)
   Confidence: high
   Sources contributing: srv-fileshare02
   Time window of evidence: 2026-04-23 13:00 to 14:30 UTC
@@ -320,19 +320,19 @@ Finding 1: srv-fileshare02 perf counters within normal range during the user-rep
         no perf-counter anomalies fired.
 
 Finding 2: No SMB Server channel error or warning events in the window
-  Evidence: https://sparklogs.app/explore/cached/qP5g9n2k7m1t3r8c
+  Evidence: <query_url as returned> (query_id: qP5g9n2k7m1t3r8c)
   Confidence: high
   Sources contributing: srv-fileshare02
   Time window of evidence: 2026-04-23 06:00 to 14:30 UTC
 
 Finding 3: Defender real-time scanning was active but with no scan-related events in the window
-  Evidence: https://sparklogs.app/explore/cached/qR8m2p4n7k1t9c5y
+  Evidence: <query_url as returned> (query_id: qR8m2p4n7k1t9c5y)
   Confidence: high
   Sources contributing: srv-fileshare02
   Time window of evidence: 2026-04-23 06:00 to 14:30 UTC
 
 Finding 4: No ingest_drop / spool_full / backpressure events on srv-fileshare02 during window
-  Evidence: https://sparklogs.app/explore/cached/qY1k9p2m7n4t3r6c
+  Evidence: <query_url as returned> (query_id: qY1k9p2m7n4t3r6c)
   Confidence: high
 
 Finding 5: No evidence of slowness, congestion, or unusual activity on srv-fileshare02 in the

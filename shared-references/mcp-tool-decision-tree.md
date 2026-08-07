@@ -4,7 +4,8 @@ Per-tool detailed usage with parameter notes, decision tree for which tool to us
 
 The v1 tool surface is these **eleven** tools: `resolve_scope`, `list_sources`, `list_scope_ladder`, `list_device_health`, `describe_pattern`, `list_fields`, `query_grouped_aggregation`, `query_logs`, `refine_query_result`, `get_query_metadata`, `server_info`. Three differential tools (`query_period_diff`, `compare_populations`, `cluster_event_contexts`) are fast-follow; see the bottom of this file for v1 equivalents.
 
-**Every tool takes `external_investigation_id`** (REQUIRED; a friendly, human-meaningful correlation handle you supply, 8-200 chars free text, e.g. `investigate-ticket-1234-disk-errors` - not a generated hash. Reusing the same value RESUMES that investigation; use a fresh, distinctive value to start a new one; tagged on every call).
+**Every scoped or data tool takes `external_investigation_id`** (REQUIRED on all of them except
+`server_info`, which takes NO parameters at all and REJECTS an id; a friendly, human-meaningful correlation handle you supply, 8-200 chars free text, e.g. `investigate-ticket-1234-disk-errors` - not a generated hash. Reusing the same value RESUMES that investigation; use a fresh, distinctive value to start a new one; tagged on every call).
 **Time windows are flat `start` / `end` in RFC3339 UTC** (e.g. `2026-07-01T00:00:00Z`). There is no `time_range` object and no `relative:` shorthand - compute the absolute window yourself.
 
 ---
@@ -48,6 +49,8 @@ resolve_scope(
   org_ids: ["..."],              # optional; omit for all orgs the token can access
   include_agents: true,          # default true; includes managed agents AND ingest keys
   include_sub_orgs: true,        # default true; expand each org to its sub-org subtree
+  rmm_client_id: "...",          # optional EXACT match; the correct path for automated per-ticket scoping
+  psa_client_id: "...",          # optional EXACT match; same
   external_investigation_id: "..."
 )
 -> rows: kind org | agent | ingest_key; match_kind when query set; agent rows include verdict, reported_hostname, last_seen_at, versions, OS, etc.
@@ -104,6 +107,7 @@ list_scope_ladder(
   agent_ids: ["..."],              # optional collector UUIDs
   source: "hostname-substring",    # optional
   field_match: {mode, pattern},    # optional name grep over ladder dims
+  include_sub_orgs: true,          # default true
   include_top_interesting_patterns: true,
   external_investigation_id: "..."
 )
@@ -123,9 +127,15 @@ from an absence and need to know whether the agent was observing.
 ```
 list_device_health(
   org_ids: ["..."],
-  fieldset: "rca" | "fleet" | "minimal",   # rca is the default
+  start: "...",                             # REQUIRED
+  end: "...",                               # REQUIRED, exclusive
+  include_sub_orgs: true,                   # default true
+  agent_ids: ["..."],                       # optional collector UUIDs
+  fieldset: "rca" | "fleet" | "minimal",    # rca is the default
+  fields: ["..."],                          # optional; ADDS to the fieldset, never replaces it
   kinds: ["inventory", "monitor"],          # default; agent_op and delta are opt-in
   reasons: ["..."],                         # optional, filter to named conditions
+  min_severity: 13,                         # optional integer floor on the ladder
   group_by_reason: false,                   # true returns the fleet shape of each reason
   external_investigation_id: "..."
 )
@@ -155,11 +165,12 @@ describe_pattern(
   org_ids: ["..."],
   start: "...",
   end: "...",
-  pattern_hashes: ["..."],
-  max_samples_per_pattern: 5,        # default 5; set 0 for stats only (mcp:observe)
+  pattern_hashes: ["..."],           # REQUIRED
+  include_sub_orgs: true,            # default true
+  include_examples: true,            # optional; there is no per-pattern sample count to set
   external_investigation_id: "..."
 )
--> pattern text, stats, fleet spread; optional sample messages when max_samples_per_pattern > 0 (requires mcp:query)
+-> pattern text, stats, fleet spread; examples where available. Example COUNTS are chosen server-side for diversity, and examples are returned for roughly your first 25 patterns by list order, so list the highest-interest hashes first. Examples need `mcp:query`; without it the response is stats-only, never an error.
 ```
 
 ---
@@ -224,11 +235,14 @@ query_logs(
   end: "...",
   include_sub_orgs: true,
   lql: "...",                      # optional LQL filter; omit to match all in scope
-  limit: 1000,                     # max events to scan + cache (default 1000)
   return_field_list: [...],        # projection; response-only, cache keeps full width. Set explicitly.
   external_investigation_id: "..."
 )
 -> header (query_id, query_url, summary, schema, lookups, page) + one page of events (JSONL)
+
+**There is no `limit`.** The response carries ONE PAGE, sized by the server, not the whole match.
+`summary` reports the matched TOTAL, so read that rather than counting rows. Further pages come from
+`refine_query_result` against the returned `query_id`, never from re-running this tool.
 ```
 
 **Use cases:**
@@ -304,9 +318,16 @@ get_query_metadata(
 
 ### `server_info`
 
+```
+server_info()
+```
+
 Static server metadata (name, version, region, transport) plus the authenticated workspace id. No
 query, no billing. Use it to confirm which region and workspace you are talking to before citing
 anything, or when a call fails and you need to know whether the transport and auth are the problem.
+
+**It takes no parameters, and it REJECTS `external_investigation_id`.** It is the one exception to
+the pass-the-id-everywhere rule: there is no scope and no query to correlate.
 
 ---
 
