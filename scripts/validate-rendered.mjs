@@ -13,6 +13,11 @@ const BRAND_ASSETS = ['logo.svg', 'logo.png', 'icon.svg', 'icon-256.png', 'icon-
 const HOSTS = ['claude', 'cursor', 'codex', 'generic'];
 const ALLOWED_EXTS = new Set(['.md', '.json', '.svg', '.png']);
 const ALLOWED_NAMES = new Set(['README.md', 'LICENSE', '.mcp.json', 'mcp.json']);
+// Build inputs that must never appear inside a shipped package. This is a FILE-INVENTORY
+// assertion, deliberately separate from the content checks: the manifest leaked into four packages
+// while every content lens passed, because none of them looked at what files were present.
+const MAINTAINER_ONLY = ['SYNC-MANIFEST.json'];
+
 const ALLOWED_MCP_HOSTS = new Set(['mcp.sparklogs.app', 'us.mcp.sparklogs.app', 'eu.mcp.sparklogs.app']);
 const SEMVER = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/;
 
@@ -78,6 +83,9 @@ async function validatePackage(host) {
     if (stat.isFile()) {
       const ext = path.extname(file);
       const name = path.basename(file);
+      if (MAINTAINER_ONLY.includes(name)) {
+        throw new Error(`${host} package ships a maintainer-only build input: ${relative}. It records where content came from, which no reader of the package can act on.`);
+      }
       if (!ALLOWED_NAMES.has(name) && !ALLOWED_EXTS.has(ext)) throw new Error(`Unexpected rendered file type: ${relative}`);
     }
   });
