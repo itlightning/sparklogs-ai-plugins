@@ -234,13 +234,19 @@ withdrawal.
      external_investigation_id="<id>")
    ```
 
-4. Fleet shape, when the question is "is it just us".
+4. Fleet shape. "Is it just us" is one noun and takes `group_field="source"` over a pinned reason.
+   "Which patching failures, on which machines" is two nouns and takes the cross-tab, which is the
+   more useful read when a patch window went badly across a client.
 
    ```
    query_grouped_aggregation(org_ids=[...], start=..., end=...,
-     lql='sparklogs.reason = "<reason>"', group_field="source",
-     external_investigation_id="<id>")
+     lql='service = patching AND severity >= 17',
+     group_fields=["reason", "source"], external_investigation_id="<id>")
    ```
+
+   One reason across every host is a bad KB; many reasons on one host is a broken machine. A pair of
+   single-field runs shows you the busiest reason and the busiest host and cannot tell you which of
+   those two stories you are in.
 
 5. Whether a reboot is pending, and whether the component store is healthy, come from the same
    servicing reasons; read them off step 2 rather than issuing another scan.

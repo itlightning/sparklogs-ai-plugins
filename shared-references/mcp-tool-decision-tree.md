@@ -23,17 +23,35 @@ Spend from the top down:
 
 ---
 
-## Quick decision tree
+## Reach for this when
 
-**"What scope am I working in?"** -> `resolve_scope` (always first)
-**"Does this collector/source have data in the investigation window?"** -> `list_sources` with the investigation's `start`/`end` (see `scope-resolution.md` cross-check)
-**"What app/service/subsource structure exists here?"** -> `list_scope_ladder` (structure discovery; not LQL-filtered)
-**"What's happening on this source / fleet (within an LQL slice)?"** -> `query_grouped_aggregation` group_field `pattern` (or `source` for fleet)
-**"What is this pattern_hash?"** -> `describe_pattern` (required before citing teaser patterns)
-**"What changed in the last N hours?"** -> two `query_grouped_aggregation` runs over two windows, compared (see fast-follow note)
-**"Show me the actual events (last resort)"** -> `query_logs`
-**"Same data, different view"** -> `refine_query_result` against an existing `query_logs` `query_id`
-**"What custom fields exist?" (rarely first)** -> `list_fields`, or `get_query_metadata` deep discovery over a cached query
+One trigger per tool. If your question is not on this list, it is almost always a
+`query_grouped_aggregation` question.
+
+| Tool | Reach for it when |
+|---|---|
+| `resolve_scope` | You have a name (client, host, ticket) and need an `org_id`. Always first. |
+| `list_sources` | Before concluding anything from an absence: did this source send data in THIS window? |
+| `list_device_health` | You need standing condition, what is installed or mounted, or which devices reported nothing. State, not sequence. |
+| `query_grouped_aggregation` | "What is going on here", at any altitude. The default tool. Group by `reason` or `pattern`; use `group_fields` when the question has two nouns in it. |
+| `query_logs` | The grouping pointed somewhere specific and you now need the actual events. Last resort, over a narrowed filter. |
+| `refine_query_result` | You already pulled a slice and want a different view of it. Free; never re-scans the source. |
+| `describe_pattern` | You are about to cite a `pattern_hash` and need its text and spread. Required before citing any teaser pattern. |
+| `list_scope_ladder` | You do not know what this client HAS: which apps, services and subsources exist at all. Orientation on an unfamiliar estate. |
+| `get_query_metadata` | A cached result behaved oddly and you need its schema, filter or cache status. |
+| `list_fields` | Rarely. See below. |
+| `server_info` | A call failed and you need to know whether region, transport or auth is the problem. |
+
+**Two honest demotions.** Both tools below exist and work; neither is where you should start.
+
+- **`list_fields` is usually the wrong way to learn a source's vocabulary.** It returns a field
+  catalog, which is a list of names with no sense of what matters. `query_grouped_aggregation` on
+  `reason` or `pattern` tells you what the source is actually SAYING, ranked by volume, in one call
+  that also advances the investigation. Reach for `list_fields` when you need a field that the data
+  you have already seen did not surface, which is a real but narrow case.
+- **`get_query_metadata`'s deep discovery (`top_n` / `field_match`) is a full catalog scan.** The
+  inline response schema on every query already names the columns and their fill rates. Use the deep
+  mode when that is genuinely not enough, not as a routine step.
 
 ---
 
@@ -180,7 +198,7 @@ describe_pattern(
 
 ### `list_fields`
 
-Custom field discovery for building NEW queries. **NOT a first-pass tool.** Use standard fields, pattern analysis, and known Managed Agent fields (the three information levels) for first-pass investigations. Only reach for `list_fields` when those aren't surfacing what you need. To discover fields WITHIN an existing cached result, use `get_query_metadata` instead.
+Field catalog over a source and window. **Rarely the right call.** A catalog of names does not tell you which fields carry the answer; a grouping on `reason` or `pattern` does, and it moves the investigation forward at the same time. Reach for this when you need a field the data you have already read did not surface. To inspect fields WITHIN a cached result, use `get_query_metadata`.
 
 ```
 list_fields(
@@ -193,7 +211,7 @@ list_fields(
 -> rows: {field, type, event_count}
 ```
 
-**Common mistake:** running this as the first MCP call and overwhelming context with field names that don't matter for the investigation.
+**Common mistake:** running this as the first MCP call and filling context with field names that do not matter for this investigation.
 
 ---
 
