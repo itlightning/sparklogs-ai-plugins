@@ -21,13 +21,10 @@
     "clean": "node scripts/clean.mjs",
     "fullrebuild": "yarn run clean && yarn run validate && yarn run build && yarn run validate:rendered && yarn run validate:cursor && yarn run smoke",
     "compare-dist": "node scripts/compare-dist-branch.mjs",
-    "rulesync": "rulesync"
+    "rulesync": "yarn dlx rulesync"
   },
   "resolutions": {
     "ip-address": "10.1.1",
     "js-yaml": "4.2.0"
-  },
-  "devDependencies": {
-    "rulesync": "8.32.0"
   }
 }
