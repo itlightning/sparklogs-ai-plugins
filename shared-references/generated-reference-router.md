@@ -55,9 +55,9 @@ say in your findings that you were reading uncurated text.
   `fields.md`.
 - **Not a list of every pattern.** `patterns.md` is a procedure, because the legal pattern language
   of one module runs to tens of thousands of strings.
-- **Not fully machine-checked.** `recipes.md` states exactly which of its claims the generator
-  verifies. Everything outside that list is prose, so read a recipe's reasoning as reasoning and
-  confirm the shape against `fields.md` before leaning on it.
+- **Not a substitute for reading the schema.** A recipe's field names and query shapes resolve, but
+  its reasoning is prose: read it as reasoning, and confirm the shape against `fields.md` before a
+  finding rests on it.
 
 ## Inventory
 

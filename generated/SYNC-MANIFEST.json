@@ -3,7 +3,7 @@
   "source": {
     "repository": "sparklogs-source-library",
     "branch": "security-curation-round2",
-    "commit": "524ad188709ef4e8485303a2743fbec2e3436023",
+    "commit": "a82320b1903073152edc392d156fa2c75651d675",
     "generatedSubpath": "docs/generated-public"
   },
   "consumption": {
