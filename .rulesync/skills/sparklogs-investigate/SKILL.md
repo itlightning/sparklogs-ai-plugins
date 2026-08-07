@@ -29,6 +29,7 @@ You DO:
 - Cite every claim with a `query_url` the engineer can click to verify.
 - Calibrate confidence honestly - say "insufficient evidence" when that's true.
 - Enumerate what was not checked, every time.
+- **Never mistake the rows in front of you for the population.** Every response reports how many rows matched IN TOTAL, separately from how many it returned. Read the total. A result that came back short may be a short answer or a capped page, and the two look identical in the rows.
 - Know which fields a given source actually carries, and never read an empty result on a field the source does not populate as "no problem found" - see Section 8. Lean on the scope ladder (`service`/`app`/`subsource`/`category`/`pattern` and their `_hash` companions) as the primary shallow-triage lever - see Section 9.
 - Offer to invoke the separate **/sparklogs-analyze-cause** skill if the engineer wants to derive candidate cause hypotheses from the findings; do not perform cause analysis in your default output beyond a brief invitation at the end.
 
@@ -212,6 +213,12 @@ The complete per-investigation-type list is in `references/off-endpoint-causes.m
 
 The engineer's per-investigation window is short. Work efficiently and precisely. **Funnel before raw: scope lightly, aggregate to narrow, then pull raw logs only over the narrowed slice.**
 
+> **Rows returned are not the population.** Before any claim about how much, how many, or how long,
+> read the matched TOTAL from the response summary, and read `last_event_at` for when the data
+> actually stops. A capped page and a complete short answer are indistinguishable from the rows
+> alone. Counting the rows you can see is how an investigation reports an outage that never
+> happened.
+
 1. **Plan the universe of backing queries up front.** Different question shapes require different backing queries. Multiple backing queries per investigation is normal; aim for 1-4 backing queries with many cached refinements within each.
 
 2. **Follow the query tiers, lightest first.** There are three tiers; spend from the top down:
@@ -300,7 +307,13 @@ Each row is a **(collector `agent_id`, origin `source`)** pair with triage colum
 
 **Critical+ fetch-first rule:** any non-zero critical+ count in scope (severity >= critical; the dedicated `cnt_critical_plus` triage column where surfaced, else a grouped aggregation on `severity`) means fetch those events before proceeding, regardless of the investigation topic. Critical+ admissions are rare, always-surface facts (confirmed integrity loss or compromise) and auto-elevate into daily fleet reporting; never leave one unread in a Finding's scope. The Info..Error bands carry no fetch-first mandate - weigh them normally. See `references/category-classes.md`, Query notes.
 
-**Cross-check verdict + data presence:** if the collector is **`stuck`** or **`offline`** and there are no (or negligible) events for that `agent_id` in the window, **halt**: missing logs may reflect collector failure, not a healthy endpoint. Otherwise, if the expected source has no events, ask the engineer (wrong name, window, or origin label).
+**The verdict and the event stream describe DIFFERENT planes, and they can legitimately disagree.** `verdict` describes the AGENT SERVICE plane: whether the agent is checking in on its own control channel. Event flow describes the COLLECTOR plane: whether data reached us. A machine whose agent service looks `offline` while events arrive minutes later is a normal and common shape, not a contradiction to resolve by picking one.
+
+- **Trust the event stream for what ARRIVED.** Data in the window is evidence regardless of the verdict.
+- **Treat the verdict as an open question, not a conclusion.** A disagreement goes in WHAT WAS NOT CHECKED, named as a disagreement.
+- **Never silently pick a plane.** Reporting "the agent is offline so we have no data" while data is in front of you, or "data is flowing so the agent is fine", are the two failure modes.
+
+Halt in one case only: the verdict says `stuck` or `offline` AND there are no events for that `agent_id` in the window. Then absence is a finding about the collector, not proof the endpoint is healthy. If the expected source has no events while the verdict is healthy, ask the engineer: wrong name, wrong window, or origin labeled differently.
 
 **Collector-first LQL:** filter with `agent_id = "<uuid>"` for everything a collector shipped; use `source` for origin-host pivots. See `references/scope-resolution.md`.
 
@@ -315,7 +328,7 @@ The catalog is these eleven tools:
 | `resolve_scope` | lightweight | Always first - turn natural-language scope into `org_ids` (orgs, managed agents, ingest keys). Ranked `match_kind` on org names and agent name/`reported_hostname`. `include_agents` = agents and ingest keys (default true). |
 | `list_sources` | billed discovery | Confirm collector/origin pairs have data in the window (`start`/`end` required). Triage columns, `collector_kind`, optional `top_interesting_patterns` teaser. |
 | `list_scope_ladder` | billed discovery | Discover app/service/subsource structure (not LQL-filtered). Narrow with `agent_ids` / `source` / `field_match`. For filtered counts within an LQL slice, use `query_grouped_aggregation`. |
-| `describe_pattern` | billed* | Full pattern text, stats, fleet spread, and example messages for one or more `pattern_hash` values. There is no per-pattern sample count to set: counts are chosen server-side for diversity, and examples come back for roughly your first 25 hashes by list order, so list the highest-interest ones first. *Examples require `mcp:query`; stats-only works on `mcp:observe`. Required before citing teaser patterns. |
+| `describe_pattern` | billed* | Full pattern text, stats, fleet spread, and example messages. The parameter is **`pattern_hashes`, a LIST**, even for one hash. There is no per-pattern sample count to set: counts are chosen server-side for diversity, and examples come back for roughly your first 25 hashes by list order, so list the highest-interest ones first. *Examples require `mcp:query`; stats-only works on `mcp:observe`. Required before citing teaser patterns. |
 | `list_fields` | lightweight | Field catalog for building NEW queries - only if standard/known fields don't surface enough. Not a first-pass tool. |
 | `query_grouped_aggregation` | backing scan | Group every matching event by one `group_field`, or by 2-3 fields with `group_fields` for a cross-tab. Top values by hit count. The workhorse for "what's happening" within an LQL filter - run it BEFORE raw logs. |
 | `query_logs` | backing scan | Retrieve raw chronological events. Last resort, over an already-narrowed window/filter. No `limit`: you get one server-sized page, `summary` carries the matched total, and further pages come from `refine_query_result` on the returned `query_id`. |

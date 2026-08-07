@@ -36,7 +36,7 @@ One trigger per tool. If your question is not on this list, it is almost always 
 | `query_grouped_aggregation` | "What is going on here", at any altitude. The default tool. Group by `reason` or `pattern`; use `group_fields` when the question has two nouns in it. |
 | `query_logs` | The grouping pointed somewhere specific and you now need the actual events. Last resort, over a narrowed filter. |
 | `refine_query_result` | You already pulled a slice and want a different view of it. Free; never re-scans the source. |
-| `describe_pattern` | You are about to cite a `pattern_hash` and need its text and spread. Required before citing any teaser pattern. |
+| `describe_pattern` | You are about to cite a pattern and need its text and spread. Pass `pattern_hashes` (a list). Required before citing any teaser pattern. |
 | `list_scope_ladder` | You do not know what this client HAS: which apps, services and subsources exist at all. Orientation on an unfamiliar estate. |
 | `get_query_metadata` | A cached result behaved oddly and you need its schema, filter or cache status. |
 | `list_fields` | Rarely. See below. |
@@ -106,7 +106,7 @@ list_sources(
 **Use cases:**
 - **Scope discovery:** confirm expected collector/source pairs have events; cross-check `verdict` (stuck/offline halt rules in `scope-resolution.md`).
 - **Fleet enumeration:** list collector/origin pairs in the window.
-- **Triage:** `cnt_interesting` and `cnt_warn_error` (severity 13-19: warning, minor, error, serious, severe) before deep queries.
+- **Triage:** `cnt_interesting` and `cnt_warn_error` (severity 13-19) before deep queries. The name, integer and histogram-key spellings of each rung are mapped in `category-classes.md`.
 - **Critical+ fetch-first:** any non-zero `cnt_critical_plus` (severity >= 20) in scope means fetch
   those events before proceeding, whatever the investigation topic (`category-classes.md`, Query
   notes). Where the count is not surfaced on a row, group by `severity`.
@@ -179,7 +179,7 @@ list can TRUNCATE while the response summary stays honest, and silence is not ev
 
 ### `describe_pattern`
 
-Pattern detail for one or more `pattern_hash` values. **Call before citing any `top_interesting_patterns` teaser row.**
+Pattern detail for one or more patterns. The parameter is **`pattern_hashes`, a LIST**, even when you have one hash: `pattern_hash` (singular) is the FIELD name on an event row, not the parameter name. **Call before citing any `top_interesting_patterns` teaser row.**
 
 ```
 describe_pattern(
@@ -289,10 +289,10 @@ An in-cache relational engine over a `query_logs` (or prior refine) result. Mean
 refine_query_result(
   query_id: "...",                 # from a prior query_logs or refine
   filter_lql: "...",               # WHERE over the cached table's ROW columns
-  group_by: [ {col} | {time bucket expr} ],   # present => aggregation; absent => filtered/projected row slice
-  aggregate: [ {fn, col, as} ],    # fn in count/count_distinct/sum/avg/min/max/stddev/p50/p90/p95/p99
+  group_by: [ {"col": "severity"} ],          # LIST OF OBJECTS; present => aggregation, absent => row slice
+  aggregate: [ {"fn": "count", "col": "*", "as": "hits"} ],   # fn in count/count_distinct/sum/avg/min/max/stddev/p50/p90/p95/p99
   having_lql: "...",               # HAVING over POST-GROUP columns (group + aggregate aliases)
-  order_by: [ {col_or_alias, dir} ],
+  order_by: [ {"col": "hits", "dir": "desc"} ],   # LIST OF OBJECTS; col may be a group column or an aggregate alias
   select: [...],                   # row-mode projection
   limit: 500,
   offset: 0,                       # deterministic paging over the cached slice
@@ -308,9 +308,32 @@ refine_query_result(
 
 **Cache expiry:** the underlying rows live in the server-side cache (~24h). A refine much later, or a refine of a grouped (non-refinable) result, returns expired - re-issue the original backing query (the server regenerates a fresh `query_id` when it can).
 
+**`group_by` and `order_by` items are OBJECTS, not bare column names.** Passing a string is the most
+common way to lose a turn here. Two worked shapes:
+
+```
+# distribution over a cached slice
+refine_query_result(query_id="<qid>",
+  group_by=[{"col": "severity"}],
+  aggregate=[{"fn": "count", "col": "*", "as": "hits"}],
+  external_investigation_id="<id>")
+
+# same, densest first
+refine_query_result(query_id="<qid>",
+  group_by=[{"col": "source"}],
+  aggregate=[{"fn": "count", "col": "*", "as": "hits"}],
+  order_by=[{"col": "hits", "dir": "desc"}],
+  external_investigation_id="<id>")
+```
+
+`order_by` accepts a group column or an aggregate alias; `dir` is `asc` or `desc`. Group on the
+STANDARD columns (`severity`, `source`, `subsource`, `app`, `service`, `pattern`, `t`); grouping on
+a custom field is not reliable today. Time bucketing is not currently usable: state a time question
+as a narrower window plus a count instead.
+
 **Common patterns:**
 - After a broad raw scan, filter per-subsource to drill into specific categories.
-- Group the cached slice (`group_by` + `aggregate`) to get a distribution without a new backing scan.
+- Group the cached slice to get a distribution without a new backing scan.
 - Page a large slice via `offset` following `page.next`.
 
 ---

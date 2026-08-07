@@ -104,7 +104,7 @@ When a row's inline value is blank, resolve it from `lookups`. Never show a raw 
 1. `list_scope_ladder` or `query_grouped_aggregation(group_field="service", ...)` over the fleet or source: which component is noisiest.
 2. `query_grouped_aggregation(group_field="pattern", lql='service = "<noisy service>"', ...)`: which pattern within that component dominates.
 3. Compare against a healthy baseline window: is the top pattern new, or normal volume?
-4. `describe_pattern` on the surviving `pattern_hash`, then `query_logs(lql='pattern_hash = "<h>"', ...)` for event-level evidence.
+4. `describe_pattern(pattern_hashes=["<h>"])` on the surviving hash, then `query_logs(lql='pattern_hash = "<h>"', ...)` for event-level evidence.
 
 Skip rungs when the symptom already points at a specific field.
 Fall back to `pattern_hash` alone whenever a conditional field is not populated for the source in scope.
