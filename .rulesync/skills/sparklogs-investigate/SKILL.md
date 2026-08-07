@@ -81,18 +81,19 @@ INVESTIGATION SUMMARY - <ticket / scope description>
 external_investigation_id: <friendly handle, 8-200 chars, e.g. investigate-ticket-4781-veeam-backup>
 
 EXECUTIVE SUMMARY
-[1-3 paragraphs in plain language synthesizing what was observed, with citations.
- Headline-first: the engineer reads this first.]
+[ONE paragraph, six sentences maximum, plain language, citing Finding numbers.
+ Headline-first: the engineer reads this to decide whether to open the Findings.]
 
 SCOPE CHECKED
 - Source(s): [list]
 - Org(s): [list]
 - Time window: [start UTC] to [end UTC]
 - Data sources queried: [list of subsources, channels, helpers]
-- WHAT WAS NOT CHECKED (not checked / not available): [investigation-specific list]
+- WHAT WAS NOT CHECKED (not checked / not available): [one bullet per item, one sentence each]
 
 OBSERVED CONDITIONS
-[one structured Finding per material observation, each with:]
+[one structured Finding per material observation. One sentence, then the fields; no prose
+ paragraph restating what the fields already say:]
   Finding N: <one-sentence factual statement, observation-grounded>
   Evidence: [<query_url(s)>]
   Confidence: high | medium | low | insufficient_evidence
@@ -307,7 +308,7 @@ Each row is a **(collector `agent_id`, origin `source`)** pair with triage colum
 
 ## Section 11. MCP tools quick reference
 
-The v1 catalog is these eleven tools:
+The catalog is these eleven tools:
 
 | Tool | Tier | Use when |
 |---|---|---|
@@ -323,7 +324,7 @@ The v1 catalog is these eleven tools:
 | `list_device_health` | billed discovery | Latest curated device state: monitor rows for conditions, inventory rows for what is on the box, plus silent devices. `start`/`end` are REQUIRED. Supporting honesty check, not the entry point - reach for it when you are about to conclude something from an absence. See `references/device-state-fields.md`. |
 | `server_info` | lightweight | Server name, version, region, transport and the authenticated workspace id. Takes NO parameters, including no `external_investigation_id`. Confirm which region and workspace you are on before citing anything. |
 
-Fast-follow differential tools (`query_period_diff`, `compare_populations`, `cluster_event_contexts`) are not yet available. Until they ship, use two `query_grouped_aggregation` runs over two windows for period diff, or grouped aggregation over distinct `lql` populations for compare.
+Three differential tools do not exist (`query_period_diff`, `compare_populations`, `cluster_event_contexts`). Instead use two `query_grouped_aggregation` runs over two windows for period diff, or grouped aggregation over distinct `lql` populations for compare.
 
 **Always pass `external_investigation_id`** on every scoped or data call - it is REQUIRED, not optional. The one exception is `server_info`, which takes NO parameters and REJECTS an id. It is a friendly, human-meaningful correlation handle you supply, 8-200 chars free text (e.g. `investigate-ticket-1234-disk-errors`), not a generated hash. Pick one distinctive value at investigation start and reuse it for the entire session - reusing the same id RESUMES that investigation (ops append to the same audit trail); a genuinely new investigation needs a fresh, distinctive value (embed a ticket/incident id or a nonce). Don't reuse a generic string like `diskcheck` across unrelated incidents - they'd merge into one investigation. Out-of-bounds values (too short/long) return a user-visible validation error from the tool - read it and fix the id.
 
@@ -346,9 +347,9 @@ Every data-tool response is ONE text block, not JSON you parse as a whole:
 
 **Schema descriptor + deeper field discovery.** The header `schema` lists the standard fields plus the top custom fields by fill-rate FOR THIS PAGE. When it carries `more_fields`, that points at `get_query_metadata`. `get_query_metadata`'s default call is lightweight (bookkeeping only); its `top_n` / `field_match` deep discovery is a full catalog scan of the source - reach for it only when the inline schema genuinely isn't enough.
 
-### Grouped results are not refinable (v1)
+### Grouped results are not refinable
 
-`query_grouped_aggregation` output is NOT a refinable cache in v1 - calling `refine_query_result` on it returns expired. Read grouped results directly. If a grouped result is truncated, follow its hint (narrow the filter or window and re-run the grouped call). `refine_query_result` applies ONLY to `query_logs` slices and to prior refine outputs.
+`query_grouped_aggregation` output is NOT a refinable cache - calling `refine_query_result` on it returns expired. Read grouped results directly. If a grouped result is truncated, follow its hint (narrow the filter or window and re-run the grouped call). `refine_query_result` applies ONLY to `query_logs` slices and to prior refine outputs.
 
 Detailed per-tool usage with examples is in `references/mcp-tool-decision-tree.md`.
 

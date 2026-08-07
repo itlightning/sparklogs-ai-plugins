@@ -71,9 +71,9 @@ POSSIBLE NEXT DIRECTIONS
 A friendly, human-meaningful correlation handle you supply - free text, 8-200 chars, e.g. `investigate-ticket-4781-veeam-backup`. REQUIRED on every MCP call. Pick one distinctive value at the start of an investigation and reuse it for every call within that investigation; reusing the same value RESUMES the investigation (the server appends to the same audit trail). A genuinely new investigation needs a fresh, distinctive value - embed a ticket/incident id or a nonce so it doesn't collide with unrelated investigations. Out-of-bounds values return a user-visible validation error from the tool. If you're resuming a paused investigation, recover the id from the local investigation-state document at `./investigations/<id>.md`.
 
 ### EXECUTIVE SUMMARY (placed first, after the header)
-1-3 paragraphs synthesizing the Findings. Plain language; engineer audience. **Every claim derives from a Finding** - don't introduce new evidence in the summary. Include citations (query_urls) inline where helpful.
+**One paragraph, at most six sentences.** Plain language; engineer audience. **Every claim derives from a Finding** - do not introduce new evidence here. Cite the Finding numbers rather than restating their evidence.
 
-The summary is at the top because engineers read headlines first. They scan the EXECUTIVE SUMMARY to decide whether to dig into the Findings.
+The cap is the point. An engineer reads this to decide whether to open the Findings; a summary that reproduces them has replaced the decision with a second read.
 
 **Right (factual synthesis):**
 "The investigation surfaced a VSS writer failure on srv-fileshare01 at 03:14 UTC concurrent with a Veeam error and a recent KB5034441 install (Findings 1, 2, 4). The same pattern appeared on 7 other fleet sources (Finding 6). The cluster analysis (Finding 5) shows the error happens in multiple contexts, with the most common involving SCM service activity preceding the failure. No ingest gaps during the relevant window (Finding 7), so the evidence is complete on the on-endpoint side."
@@ -101,13 +101,17 @@ Investigation-specific list of off-endpoint sources and conditions you couldn't 
 - "Cloud identity audit logs (Azure AD / Entra) are outside SparkLogs ingestion. Sign-in failures from cloud-side conditional access policies would not appear in this investigation."
 - "EDR cloud audit (SentinelOne) is outside SparkLogs ingestion. EDR-side blocks of VSS operations would not appear in on-endpoint state."
 
-If the on-endpoint evidence is complete and off-endpoint causes are not relevant, the section is short:
-- "The off-endpoint causes typically associated with backup investigations (backup target health, EDR blocking VSS) were considered but the on-endpoint evidence is sufficient to characterize the observed conditions - see Findings."
+**One bullet per item, one sentence each. Never prose.** Each bullet names the thing not checked and why it matters; the engineer scans this list for the gap that changes their next move, and a paragraph hides it.
 
-The section is required even when short.
+Where nothing material was unchecked, one bullet says so:
+- "Off-endpoint backup causes (target health, EDR blocking VSS) considered; on-endpoint evidence is sufficient."
+
+The section is required even when it is one line.
 
 ### Finding N
-A single, observation-grounded factual statement. Format: `<subject> was <state> at <time>` or `<event class> occurred N times in <window>` or similar.
+**One sentence for the statement, then the fields. No prose paragraph.** The fields below already carry the evidence, the sources and the window; repeating them in sentences is the single most common way these summaries get long without getting more useful.
+
+Format: `<subject> was <state> at <time>`, or `<event class> occurred N times in <window>`, or similar.
 
 **Right:**
 - "VSS writer SqlServerWriter was in FAILED state at 2026-04-23 03:14:32 UTC."
