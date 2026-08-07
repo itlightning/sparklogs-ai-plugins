@@ -1,0 +1,109 @@
+<!-- GENERATED reference. Do not hand-edit. -->
+<!-- Public reference tree: field meaning and usage. All example values are synthetic. -->
+
+# ECS anchors: `win.eventlog.security`
+
+Orientation for a reader carrying Elastic Common Schema priors.
+An anchor names the neighbouring idea in that taxonomy; it is not a claim of identical semantics, and the governing definition is always the one in the field schema.
+An empty cell means there is no honest neighbour, which is a stated answer rather than a gap.
+
+This lives in its own file on purpose: an inline mapping column taxes every read of the field schema for the minority of readers who need it.
+
+ECS is field-per-concept and flat-dotted. Its identity fields collapse the initiator and the execution context into one `user.*` object, so the running_as family has no clean ECS home outside the process user.
+
+## Portable families
+
+| LQL path | ECS |
+|---|---|
+| `sparklogs.actor.id` | `user.id` |
+| `sparklogs.actor.name` | `user.name` |
+| `sparklogs.actor.type` |  |
+| `sparklogs.actor.kind` |  |
+| `sparklogs.actor.domain` | `user.domain` |
+| `sparklogs.actor.session` |  |
+| `sparklogs.running_as.id` |  |
+| `sparklogs.running_as.name` | `process.user.name` |
+| `sparklogs.running_as.type` |  |
+| `sparklogs.running_as.kind` |  |
+| `sparklogs.running_as.domain` | `process.user.domain` |
+| `sparklogs.target.id` | `user.target.id` |
+| `sparklogs.target.name` | `user.target.name` |
+| `sparklogs.target.type` |  |
+| `sparklogs.target.kind` |  |
+| `sparklogs.target.domain` | `user.target.domain` |
+| `sparklogs.process.id` | `process.pid` |
+| `sparklogs.process.path` | `process.executable` |
+| `sparklogs.process.name` | `process.name` |
+| `sparklogs.member.id` |  |
+| `sparklogs.member.name` |  |
+| `sparklogs.member.type` |  |
+| `sparklogs.member.kind` |  |
+| `sparklogs.origin.ip` | `source.ip` |
+| `sparklogs.origin.host` | `source.domain` |
+| `sparklogs.origin.port` | `source.port` |
+| `sparklogs.destination.host` | `destination.domain` |
+| `sparklogs.error.code` |  |
+| `sparklogs.error.code_space` |  |
+| `sparklogs.config_change.type` |  |
+| `sparklogs.config_change.action` | `event.action` |
+| `sparklogs.config_change.target` |  |
+
+### What each family means here
+
+- **`actor`**: The initiator. Who wanted the thing done. ECS has one `user.*` object for the initiator and the execution context together, so this family and running_as both land near it and only running_as is pushed onto the process user.
+- **`running_as`**: The execution context: the account the performing process runs as. Populated only when it differs from the actor, so its presence is itself the signal. No clean ECS home. The process user is the closest neighbour and it is not the same claim: ECS does not distinguish "ran as" from "is".
+- **`target`**: The principal the action was done TO. A group acted upon is this family with kind=group, because a group is a principal here rather than a separate object. Anchors ECS `user.target.*`, the one place ECS does separate the affected principal.
+- **`process`**: The process the event is about.
+- **`member`**: The principal whose membership in the target changed. A member is only ever a member, so no role collision is possible; group-in-group nesting reads member kind=group. No ECS neighbour. ECS models group membership nowhere.
+- **`origin`**: The initiating network endpoint. Populated only when the value names a machine other than the reporting host, which is what makes the populated side the direction. Caution: Windows WorkstationName lands on ECS `source.domain`, a wart worth knowing when translating queries. Our `origin.host` is a host name, never a domain.
+- **`destination`**: The receiving network endpoint.
+- **`error`**: The failure code the source reported, plus the number space it belongs to.
+- **`config_change`**: What configuration changed, in what direction, on what.
+
+## Module fields
+
+| LQL path | ECS |
+|---|---|
+| `win.eventlog.security.logon_guid` |  |
+| `win.eventlog.security.logon_type` | `winlog.logon.type` |
+| `win.eventlog.security.logon_type_name` | `winlog.logon.type` |
+| `win.eventlog.security.auth_package` | `winlog.event_data.AuthenticationPackageName` |
+| `win.eventlog.security.lm_package` |  |
+| `win.eventlog.security.elevated` |  |
+| `win.eventlog.security.privileges` |  |
+| `win.eventlog.security.workstation` | `source.domain` |
+| `win.eventlog.security.caller_computer` | `source.domain` |
+| `win.eventlog.security.status` |  |
+| `win.eventlog.security.substatus` |  |
+| `win.eventlog.security.status_meaning` | `event.reason` |
+| `win.eventlog.security.kerberos_target` | `service.name` |
+| `win.eventlog.security.ticket_encryption_type` |  |
+| `win.eventlog.security.etype_meaning` |  |
+| `win.eventlog.security.target_server` | `destination.domain` |
+| `win.eventlog.security.audit_subcategory_guid` |  |
+| `win.eventlog.security.new_process_id` | `process.pid` |
+| `win.eventlog.security.token_elevation` |  |
+| `win.eventlog.security.parent_process_name` | `process.parent.executable` |
+| `win.eventlog.security.service_name` | `service.name` |
+| `win.eventlog.security.service_image_path` | `process.executable` |
+| `win.eventlog.security.service_account` | `user.name` |
+| `win.eventlog.security.task_name` |  |
+| `win.eventlog.security.object_name` |  |
+| `win.eventlog.security.object_type` |  |
+| `win.eventlog.security.object_value_name` | `registry.value` |
+| `win.eventlog.security.operation_meaning` | `event.action` |
+| `win.eventlog.security.previous_time` |  |
+| `win.eventlog.security.new_time` |  |
+| `win.eventlog.security.insecure_boot_flags` |  |
+| `win.eventlog.security.rule_name` | `rule.name` |
+| `win.eventlog.security.rule_id` | `rule.id` |
+| `win.eventlog.security.share_name` |  |
+| `win.eventlog.security.share_path` | `file.directory` |
+| `win.eventlog.security.old_target_user` | `user.target.name` |
+| `win.eventlog.security.new_target_user` | `user.target.name` |
+| `win.eventlog.security.object_dn` |  |
+| `win.eventlog.security.attribute_name` |  |
+| `win.eventlog.security.nps_reason_code` |  |
+| `win.eventlog.security.nps_reason_meaning` | `event.reason` |
+| `win.eventlog.security.nps_policy` | `rule.name` |
+| `win.eventlog.security.publisher_id` | `event.provider` |

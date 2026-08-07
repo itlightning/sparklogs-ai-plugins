@@ -1,7 +1,9 @@
 {
-  // Canonical source lives under .rulesync/. The SparkLogs renderer creates
-  // host plugin wrappers; rulesync remains pinned for neutral skill emission
-  // and future compatibility work.
+  // Canonical source lives under .rulesync/, a layout convention only: the
+  // SparkLogs renderer in scripts/ produces every published package, and the
+  // rulesync tool is NOT a dependency of this repo (run it ad hoc with
+  // `yarn rulesync` if you ever want it). This file exists so that layout has
+  // a stated owner rather than looking like the output of a build step.
   "agents": [],
   "targets": []
 }

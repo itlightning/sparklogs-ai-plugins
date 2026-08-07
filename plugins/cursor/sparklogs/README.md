@@ -1,4 +1,4 @@
-# SparkLogs — Cursor bundle
+# SparkLogs: Cursor bundle
 
 This directory is the **built SparkLogs AI plugin** for **Cursor**, shipped from the SparkLogs plugin repository.
 

@@ -1,4 +1,4 @@
-# SparkLogs — generic Agent Skills hosts bundle
+# SparkLogs: generic Agent Skills hosts bundle
 
 This directory is the **built SparkLogs AI plugin** for **generic Agent Skills hosts**, shipped from the SparkLogs plugin repository.
 

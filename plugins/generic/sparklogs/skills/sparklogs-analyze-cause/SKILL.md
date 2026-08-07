@@ -19,7 +19,7 @@ Your output is a clearly-labeled set of candidate hypotheses, each anchored on p
 When the engineer invokes you with `/sparklogs-analyze-cause [external_investigation_id]`, you:
 
 1. Recover the prior investigation's system condition summary from the local investigation-state document (which holds the findings + the per-query `query_id`/`query_url` list). Inspect any specific cached query with `get_query_metadata(query_id=...)` if you need its schema or cache status.
-2. Optionally make additional MCP calls if the cause analysis requires evidence not in the prior summary's findings (typically: cross-source pivots to test "is this fleet-wide" via `query_grouped_aggregation` group_field `source`, contrasting two grouped runs over affected vs unaffected populations to test "what's different", or analyzing additional pattern or log detail for specific log (sub)sources in *narrow* time ranges).
+2. Optionally make additional MCP calls where the analysis needs evidence the prior summary does not carry. Section 5 gives the trigger per tool; the common three are a fleet pivot on `source`, a cross-tab on `group_fields` to characterize the affected population, and `list_device_health` to check the agent was observing.
 3. Generate candidate cause hypotheses anchored on the prior findings.
 4. For each hypothesis: state the hypothesis, cite which prior findings support it, give a confidence band, specify what would confirm it, what would refute it, and whether off-endpoint checks are needed.
 5. Identify alternative framings of the symptom.
@@ -133,13 +133,14 @@ The full hypothesis-generation guidance is in `references/hypothesis-generation.
 
 ## Section 5. When to make additional MCP calls
 
-Sometimes the prior investigation's evidence is sufficient to derive candidate hypotheses without further data gathering. Other times, a quick additional check substantially strengthens or weakens a hypothesis. Heuristics:
+Sometimes the prior investigation's evidence is enough. Other times one cheap check moves a hypothesis materially. One trigger per tool, same discipline as the investigate skill's decision tree:
 
 **Make additional MCP calls when:**
-- A hypothesis would benefit from a quick fleet pivot ("is this just this source or fleet-wide?") via `query_grouped_aggregation` group_field `source`, or a scope-ladder field (`service`, `app`, `subsource`, `category`) to test whether affected sources share a component.
-- A hypothesis would benefit from a quick population comparison ("what's different about the affected vs unaffected?") - in v1, contrast two `query_grouped_aggregation` runs (one per population) over the same field. (`compare_populations` is a fast-follow tool, not yet in the v1 surface.)
-- A hypothesis would benefit from analyzing additional patterns or raw logs for certain (sub)sources in *narrow* time ranges.
-- A hypothesis depends on a specific time-window check the prior investigation didn't include.
+- **Is this one host or the fleet?** `query_grouped_aggregation(group_field="source")` over the filter that produced the Finding, or over a scope-ladder field (`service`, `app`, `subsource`, `category`) to test whether the affected hosts share a component.
+- **What is DIFFERENT about the affected population?** This is the cross-tab question, and it is the one most often answered badly. `group_fields=["<a>", "<b>"]` groups by 2-3 fields at once: `["reason", "source"]` separates one reason concentrated on one host from the same volume spread across forty, which two single-field runs cannot distinguish. `["config_change_type", "config_change_target"]` answers "what changed, on what". Reach for it whenever the hypothesis names two things. Contrasting two single-field runs (one per population) still works where the populations need different `lql`; `compare_populations` is fast-follow and not in the surface.
+- **What is standing on the box right now?** `list_device_health` for open conditions, what is installed, and whether the device reported at all. A hypothesis that assumes the agent was watching should be checked against the honesty fields before it is offered.
+- A hypothesis needs a pattern's text or spread before it can be cited: `describe_pattern`.
+- A hypothesis depends on a narrow time-window check the prior investigation did not include.
 
 **Skip additional MCP calls when:**
 - The prior investigation's findings already provide sufficient evidence for the hypothesis.
@@ -171,9 +172,10 @@ When you do make additional MCP calls, reuse the prior investigation's `external
 - `references/msp-tool-registry.md` - same content as the investigate skill's MSP tool registry.
 - `references/pattern-catalog.md` - same content as the investigate skill's pattern catalog.
 - `references/subagent-definitions.md` - same content as the investigate skill's subagent reference.
+- `references/category-classes.md` - class, the class-last category ladder, and the severity ladder. Read before ranking a hypothesis by anything other than severity.
+- `references/device-state-fields.md` - device and agent state, and the honesty fields that decide whether a duration or a clear time can carry a hypothesis at all.
+- `references/generated-reference-router.md` - how to reach the per-source generated reference set by question shape, when a hypothesis needs a confirm step written against real field names.
 - `references/writing-voice.md` - same content as the investigate skill's writing-voice reference: style rules for report text.
-
-Shared reference files are symlinked during authoring and materialized as real files in rendered plugin packages.
 
 ---
 

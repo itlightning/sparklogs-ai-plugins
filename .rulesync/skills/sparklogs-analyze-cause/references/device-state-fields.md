@@ -1,0 +1,1 @@
+../../../../shared-references/device-state-fields.md

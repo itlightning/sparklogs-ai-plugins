@@ -1,4 +1,4 @@
-# SparkLogs — Claude bundle
+# SparkLogs: Claude bundle
 
 This directory is the **built SparkLogs AI plugin** for **Claude**, shipped from the SparkLogs plugin repository.
 

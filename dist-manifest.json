@@ -1,8 +1,8 @@
 {
-  "generatedAt": "v1.1.0",
+  "generatedAt": "v1.2.0",
   "generator": "scripts/render-packages.mjs",
   "plugin": "sparklogs",
   "sourceRef": "HEAD",
-  "sourceSha": "2f551f7ac6dad7cefaf361943502866b8f4d33c5",
-  "version": "1.1.0"
+  "sourceSha": "44c3553fdde2eb7476ceea022aab63bd1f29785e",
+  "version": "1.2.0"
 }

@@ -26,13 +26,13 @@ Shared references live in `shared-references/` and are symlinked into `.rulesync
 
 ## DCO Sign-Off
 
-Every commit must include a Developer Certificate of Origin trailer:
+Contributions from a fork must carry a Developer Certificate of Origin trailer on every commit:
 
 ```text
 Signed-off-by: Your Name <you@example.com>
 ```
 
-Use `git commit -s` to add it automatically.
+Use `git commit -s` to add it automatically. CI enforces this on pull requests from forks, which is where the trailer does its job: it records that a contributor has the right to submit work this project does not already hold the rights to. Branches pushed directly to this repository are not gated, though signing off is still welcome.
 
 ## Contribution License
 

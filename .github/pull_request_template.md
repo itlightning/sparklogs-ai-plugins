@@ -10,7 +10,7 @@
 ## Contributor attestation
 
 - [ ] I have the right to submit this contribution, and I agree that it is licensed under the Apache License, Version 2.0.
-- [ ] Every commit in this PR includes a `Signed-off-by:` trailer (use `git commit -s`; see [CONTRIBUTING.md](../CONTRIBUTING.md)).
+- [ ] If this PR comes from a fork, every commit includes a `Signed-off-by:` trailer (use `git commit -s`; see [CONTRIBUTING.md](../CONTRIBUTING.md)).
 
 ## Security-sensitive changes
 

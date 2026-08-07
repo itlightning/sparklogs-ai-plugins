@@ -38,8 +38,8 @@ For delegated bulk-summarization work, use **the fastest, most lightweight moder
 ```yaml
 findings:
   - timestamp_utc: <ISO>
-    event_kind: <SLAEvent | SLASnapshot | etc.>
-    severity: <ok | warn | error | critical>
+    kind: <inventory | monitor | delta | agent_op | config_change | malformed>
+    severity: <ok | warning | error | critical>
     pattern_hash: <if applicable>
     summary: <one-sentence factual statement>
     evidence_query_url: <the query_url passed in, optionally with a refinement param>
@@ -52,6 +52,22 @@ notable_observations:
 events_examined: <count>
 events_summarized: <count>
 ```
+
+**The `severity` field is a four-bucket summary, and it is lossy on purpose.** SparkLogs severity is
+a twelve-rung ladder; this schema collapses it so an orchestrator can scan many findings at once. Map
+it this way, and keep the exact returned value in `summary` whenever the rung matters:
+
+| Bucket | Ladder rungs |
+|---|---|
+| `ok` | Trace, Debug, Verbose, Info, Display, Notice |
+| `warning` | Warning, Minor |
+| `error` | Error, Serious, Severe |
+| `critical` | Critical, Fatal (severity >= 20) |
+
+The lossy edge worth knowing: `Severe` and `Error` both land in `error`, and `Severe` is
+availability-threatening while `Error` is bounded in scope. If a finding turns on that difference,
+name the rung in `summary` rather than leaving the bucket to carry it. `critical` is the one bucket
+with a contract attached: it means fetch-first, whatever the ticket was about.
 
 **The orchestrator uses the structured output as evidence in Findings, citing the same query_urls.** The orchestrator never receives the raw events back - only the summary.
 
@@ -85,7 +101,7 @@ top_patterns:
 
 ## Subagent: `sparklogs-cluster-interpreter`
 
-**Fast-follow (not v1).** This subagent depends on `cluster_event_contexts`, which is not in the v1 tool surface. Until it ships, approximate clustering with a `query_logs` slice narrowed to the pattern plus `refine_query_result` group_by over the surrounding context fields.
+**Not usable yet.** This subagent depends on `cluster_event_contexts`, which does not exist. Approximate clustering with a `query_logs` slice narrowed to the pattern plus `refine_query_result` group_by over the surrounding context fields.
 
 **Purpose.** Given a `cluster_event_contexts` result with multiple distinct clusters, interpret each cluster's representative_surround and produce a structured human-readable description.
 

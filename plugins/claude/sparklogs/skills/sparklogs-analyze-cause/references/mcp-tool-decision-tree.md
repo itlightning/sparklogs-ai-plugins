@@ -2,9 +2,10 @@
 
 Per-tool detailed usage with parameter notes, decision tree for which tool to use when, and worked-example call sequences.
 
-The v1 tool surface is the **lean-9**: `resolve_scope`, `list_sources`, `list_scope_ladder`, `describe_pattern`, `list_fields`, `query_grouped_aggregation`, `query_logs`, `refine_query_result`, `get_query_metadata`. Three differential tools (`query_period_diff`, `compare_populations`, `cluster_event_contexts`) are fast-follow; see the bottom of this file for v1 equivalents.
+The tool surface is these **eleven** tools: `resolve_scope`, `list_sources`, `list_scope_ladder`, `list_device_health`, `describe_pattern`, `list_fields`, `query_grouped_aggregation`, `query_logs`, `refine_query_result`, `get_query_metadata`, `server_info`. Three differential tools (`query_period_diff`, `compare_populations`, `cluster_event_contexts`) are fast-follow; see the bottom of this file for v1 equivalents.
 
-**Every tool takes `external_investigation_id`** (REQUIRED; a friendly, human-meaningful correlation handle you supply, 8-200 chars free text, e.g. `investigate-ticket-1234-disk-errors` - not a generated hash. Reusing the same value RESUMES that investigation; use a fresh, distinctive value to start a new one; tagged on every call).
+**Every scoped or data tool takes `external_investigation_id`** (REQUIRED on all of them except
+`server_info`, which takes NO parameters at all and REJECTS an id; a friendly, human-meaningful correlation handle you supply, 8-200 chars free text, e.g. `investigate-ticket-1234-disk-errors` - not a generated hash. Reusing the same value RESUMES that investigation; use a fresh, distinctive value to start a new one; tagged on every call).
 **Time windows are flat `start` / `end` in RFC3339 UTC** (e.g. `2026-07-01T00:00:00Z`). There is no `time_range` object and no `relative:` shorthand - compute the absolute window yourself.
 
 ---
@@ -22,17 +23,35 @@ Spend from the top down:
 
 ---
 
-## Quick decision tree
+## Reach for this when
 
-**"What scope am I working in?"** -> `resolve_scope` (always first)
-**"Does this collector/source have data in the investigation window?"** -> `list_sources` with the investigation's `start`/`end` (see `scope-resolution.md` cross-check)
-**"What app/service/subsource structure exists here?"** -> `list_scope_ladder` (structure discovery; not LQL-filtered)
-**"What's happening on this source / fleet (within an LQL slice)?"** -> `query_grouped_aggregation` group_field `pattern` (or `source` for fleet)
-**"What is this pattern_hash?"** -> `describe_pattern` (required before citing teaser patterns)
-**"What changed in the last N hours?"** -> two `query_grouped_aggregation` runs over two windows, compared (see fast-follow note)
-**"Show me the actual events (last resort)"** -> `query_logs`
-**"Same data, different view"** -> `refine_query_result` against an existing `query_logs` `query_id`
-**"What custom fields exist?" (rarely first)** -> `list_fields`, or `get_query_metadata` deep discovery over a cached query
+One trigger per tool. If your question is not on this list, it is almost always a
+`query_grouped_aggregation` question.
+
+| Tool | Reach for it when |
+|---|---|
+| `resolve_scope` | You have a name (client, host, ticket) and need an `org_id`. Always first. |
+| `list_sources` | Before concluding anything from an absence: did this source send data in THIS window? |
+| `list_device_health` | You need standing condition, what is installed or mounted, or which devices reported nothing. State, not sequence. |
+| `query_grouped_aggregation` | "What is going on here", at any altitude. The default tool. Group by `reason` or `pattern`; use `group_fields` when the question has two nouns in it. |
+| `query_logs` | The grouping pointed somewhere specific and you now need the actual events. Last resort, over a narrowed filter. |
+| `refine_query_result` | You already pulled a slice and want a different view of it. Free; never re-scans the source. |
+| `describe_pattern` | You are about to cite a pattern and need its text and spread. Pass `pattern_hashes` (a list). Required before citing any teaser pattern. |
+| `list_scope_ladder` | You do not know what this client HAS: which apps, services and subsources exist at all. Orientation on an unfamiliar estate. |
+| `get_query_metadata` | A cached result behaved oddly and you need its schema, filter or cache status. |
+| `list_fields` | Rarely. See below. |
+| `server_info` | A call failed and you need to know whether region, transport or auth is the problem. |
+
+**Two honest demotions.** Both tools below exist and work; neither is where you should start.
+
+- **`list_fields` is usually the wrong way to learn a source's vocabulary.** It returns a field
+  catalog, which is a list of names with no sense of what matters. `query_grouped_aggregation` on
+  `reason` or `pattern` tells you what the source is actually SAYING, ranked by volume, in one call
+  that also advances the investigation. Reach for `list_fields` when you need a field that the data
+  you have already seen did not surface, which is a real but narrow case.
+- **`get_query_metadata`'s deep discovery (`top_n` / `field_match`) is a full catalog scan.** The
+  inline response schema on every query already names the columns and their fill rates. Use the deep
+  mode when that is genuinely not enough, not as a routine step.
 
 ---
 
@@ -48,6 +67,8 @@ resolve_scope(
   org_ids: ["..."],              # optional; omit for all orgs the token can access
   include_agents: true,          # default true; includes managed agents AND ingest keys
   include_sub_orgs: true,        # default true; expand each org to its sub-org subtree
+  rmm_client_id: "...",          # optional EXACT match; the correct path for automated per-ticket scoping
+  psa_client_id: "...",          # optional EXACT match; same
   external_investigation_id: "..."
 )
 -> rows: kind org | agent | ingest_key; match_kind when query set; agent rows include verdict, reported_hostname, last_seen_at, versions, OS, etc.
@@ -76,7 +97,7 @@ list_sources(
   include_top_interesting_patterns: true,   # default true; summary teaser ~8 patterns
   external_investigation_id: "..."
 )
--> rows: agent_id, collector_kind, name, verdict, source, event_count, cnt_interesting, cnt_severe, distinct_interesting, bytes_ingested, first/last_event_at
+-> rows: agent_id, collector_kind, name, verdict, source, event_count, cnt_interesting, cnt_warn_error, cnt_critical_plus, distinct_interesting, bytes_ingested, first/last_event_at
 -> summary may include top_interesting_patterns; call describe_pattern before citing
 ```
 
@@ -85,7 +106,10 @@ list_sources(
 **Use cases:**
 - **Scope discovery:** confirm expected collector/source pairs have events; cross-check `verdict` (stuck/offline halt rules in `scope-resolution.md`).
 - **Fleet enumeration:** list collector/origin pairs in the window.
-- **Triage:** `cnt_interesting` / `cnt_severe` before deep queries.
+- **Triage:** `cnt_interesting` and `cnt_warn_error` (severity 13-19) before deep queries. The name, integer and histogram-key spellings of each rung are mapped in `category-classes.md`.
+- **Critical+ fetch-first:** any non-zero `cnt_critical_plus` (severity >= 20) in scope means fetch
+  those events before proceeding, whatever the investigation topic (`category-classes.md`, Query
+  notes). Where the count is not surfaced on a row, group by `severity`.
 
 ---
 
@@ -101,6 +125,7 @@ list_scope_ladder(
   agent_ids: ["..."],              # optional collector UUIDs
   source: "hostname-substring",    # optional
   field_match: {mode, pattern},    # optional name grep over ladder dims
+  include_sub_orgs: true,          # default true
   include_top_interesting_patterns: true,
   external_investigation_id: "..."
 )
@@ -111,20 +136,62 @@ See `scope-ladder.md` for ladder vs grouped-aggregation guidance.
 
 ---
 
+### `list_device_health`
+
+Latest curated device state: monitor rows for conditions, inventory rows for what is on the box.
+**Supporting evidence, not the entry point.** Reach for it when you are about to conclude something
+from an absence and need to know whether the agent was observing.
+
+```
+list_device_health(
+  org_ids: ["..."],
+  start: "...",                             # REQUIRED
+  end: "...",                               # REQUIRED, exclusive
+  include_sub_orgs: true,                   # default true
+  agent_ids: ["..."],                       # optional collector UUIDs
+  fieldset: "rca" | "fleet" | "minimal",    # rca is the default
+  fields: ["..."],                          # optional; ADDS to the fieldset, never replaces it
+  kinds: ["inventory", "monitor"],          # default; agent_op and delta are opt-in
+  reasons: ["..."],                         # optional, filter to named conditions
+  min_severity: 13,                         # optional integer floor on the ladder
+  group_by_reason: false,                   # true returns the fleet shape of each reason
+  external_investigation_id: "..."
+)
+-> data rows keyed by `kind`; silent devices as separate `row_kind=silent_device` rows
+```
+
+**Use cases:**
+- **Honesty check:** was this device reporting during the window, and are its episode spans
+  trustworthy? Read `episode_age_basis`, `episode_clear_time_basis`, `window_partial`.
+- **What is on the box:** inventory rows. Keep `inventory` in `kinds`; those rows normally carry no
+  class at all, and they are the ground truth an RCA needs. `CONTEXT` is the absence of a class, not
+  a filterable value.
+- **Fleet shape of a condition:** `group_by_reason: true`. **Grouped mode takes no `fieldset` and no
+  `fields`:** it returns fixed per-reason columns, not device rows, so there is no projection to
+  choose. Passing `fields` alongside it is an error; passing `fieldset` does nothing. Pick the
+  fieldset only on the row-mode call.
+
+**Read before using:** `device-state-fields.md` for the column names, the honesty fields, and what
+you may and may not say about a duration or a clear time. Two traps live there: the silent-device
+list can TRUNCATE while the response summary stays honest, and silence is not evidence of health.
+
+---
+
 ### `describe_pattern`
 
-Pattern detail for one or more `pattern_hash` values. **Call before citing any `top_interesting_patterns` teaser row.**
+Pattern detail for one or more patterns. The parameter is **`pattern_hashes`, a LIST**, even when you have one hash: `pattern_hash` (singular) is the FIELD name on an event row, not the parameter name. **Call before citing any `top_interesting_patterns` teaser row.**
 
 ```
 describe_pattern(
   org_ids: ["..."],
   start: "...",
   end: "...",
-  pattern_hashes: ["..."],           # order = your priority; examples cover roughly the first 25
-  include_examples: true,            # default true; false for stats only
+  pattern_hashes: ["..."],           # REQUIRED; order = your priority, examples cover roughly the first 25
+  include_sub_orgs: true,            # default true
+  include_examples: true,            # default true; false for stats only. There is no per-pattern sample count to set
   external_investigation_id: "..."
 )
--> pattern text, stats, fleet spread; diverse example messages with recurrence
+-> pattern text, stats, fleet spread; diverse example messages with recurrence `count`/`seen_at`. Example COUNTS are chosen server-side for diversity, and examples are returned for roughly your first 25 patterns by list order, so list the highest-interest hashes first. Examples need `mcp:query`; without it the response is stats-only, never an error.
 ```
 
 **Examples are server-chosen, diverse, and truthful.** You do not pick counts: the server returns a text-diverse set of example messages per pattern (not just the most recent), sized to fit the response. List your highest-interest `pattern_hashes` FIRST: examples cover roughly the first 25 by list order; the rest get stats only (the scope line says so). Each example carries `count`, `[first, last]`, and (when it recurred 3+ times) `seen_at`: times this exact message recurred, identical except embedded timestamps.
@@ -135,7 +202,7 @@ describe_pattern(
 
 ### `list_fields`
 
-Custom field discovery for building NEW queries. **NOT a first-pass tool.** Use standard fields, pattern analysis, and known Managed Agent fields (the three information levels) for first-pass investigations. Only reach for `list_fields` when those aren't surfacing what you need. To discover fields WITHIN an existing cached result, use `get_query_metadata` instead.
+Field catalog over a source and window. **Rarely the right call.** A catalog of names does not tell you which fields carry the answer; a grouping on `reason` or `pattern` does, and it moves the investigation forward at the same time. Reach for this when you need a field the data you have already read did not surface. To inspect fields WITHIN a cached result, use `get_query_metadata`.
 
 ```
 list_fields(
@@ -148,7 +215,7 @@ list_fields(
 -> rows: {field, type, event_count}
 ```
 
-**Common mistake:** running this as the first MCP call and overwhelming context with field names that don't matter for the investigation.
+**Common mistake:** running this as the first MCP call and filling context with field names that do not matter for this investigation.
 
 ---
 
@@ -163,8 +230,9 @@ query_grouped_aggregation(
   end: "...",
   include_sub_orgs: true,
   group_field: "pattern" | "source" | "severity" | "service" | "app" | "subsource" | "category" | "<field>_hash" | "<custom.field>",   # a single field
+  group_fields: ["...", "..."],    # 2-3 fields for a cross-tab; use INSTEAD of group_field, not with it
   lql: "...",                      # optional LQL filter applied before grouping
-  limit: 50,                       # max distinct groups by hit count (default 50, hard cap 10000)
+  limit: 50,                       # max distinct groups returned, by hit count (default 50)
   external_investigation_id: "..."
 )
 -> rows: {<group_field>, hits, max_severity}   # dense TSV
@@ -177,8 +245,9 @@ query_grouped_aggregation(
 - "Which sources show this?" -> filter on a `pattern_hash` in `lql`, group_field `source`.
 - "Severity distribution" -> group_field `severity`.
 - "Which component is noisiest?" -> group_field `service` or `subsource`, then narrow with a second call - see the scope ladder (`scope-ladder.md`).
+- "Which reason, on which machines?" -> `group_fields` with two fields (reason by instance, config-change type by target). One call answers what two single-field passes only hint at, because the pairing is what carries the shape.
 
-**Not refinable (v1).** Grouped output is NOT a refinable cache - calling `refine_query_result` on its `query_id` returns expired. Read grouped results directly. If a grouped result is truncated, follow its hint (narrow the `lql`/window and re-run). To then pull raw events for an interesting group, run `query_logs` with that group's value in `lql` (use the `*_hash` verbatim for the six hash fields).
+**Grouped output is not a refinable cache.** Calling `refine_query_result` on its `query_id` returns expired. Read grouped results directly. If a grouped result is truncated, follow its hint (narrow the `lql`/window and re-run). To then pull raw events for an interesting group, run `query_logs` with that group's value in `lql` (use the `*_hash` verbatim for the six hash fields).
 
 ---
 
@@ -197,6 +266,10 @@ query_logs(
   external_investigation_id: "..."
 )
 -> header (query_id, query_url, summary, schema, lookups, page) + one page of events (JSONL)
+
+**There is no `limit`.** The response carries ONE PAGE, sized by the server, not the whole match.
+`summary` reports the matched TOTAL, so read that rather than counting rows. Further pages come from
+`refine_query_result` against the returned `query_id`, never from re-running this tool.
 ```
 
 **Use cases:**
@@ -222,10 +295,10 @@ An in-cache relational engine over a `query_logs` result. Meaningfully faster th
 refine_query_result(
   query_id: "...",                 # from a prior query_logs result
   filter_lql: "...",               # WHERE over the cached table's ROW columns
-  group_by: [ {col} | {time bucket expr} ],   # present => aggregation; absent => filtered/projected row slice
-  aggregate: [ {fn, col, as} ],    # fn in count/count_distinct/sum/avg/min/max/stddev/p50/p90/p95/p99
+  group_by: [ {"col": "severity"} ],          # LIST OF OBJECTS; present => aggregation, absent => row slice
+  aggregate: [ {"fn": "count", "col": "*", "as": "hits"} ],   # fn in count/count_distinct/sum/avg/min/max/stddev/p50/p90/p95/p99
   having_lql: "...",               # HAVING over POST-GROUP columns (group + aggregate aliases)
-  order_by: [ {col_or_alias, dir} ],
+  order_by: [ {"col": "hits", "dir": "desc"} ],   # LIST OF OBJECTS; col may be a group column or an aggregate alias
   select: [...],                   # row-mode projection
   limit: 500,
   offset: 0,                       # deterministic paging of the transformed output
@@ -247,9 +320,32 @@ refine_query_result(
 
 **Cache expiry:** a cold cache (roughly a day old) regenerates automatically under the SAME `query_id` when you refine it (the header's cache status reflects it). Grouped results remain non-refinable (re-run the grouped call). If the server reports the cache cannot be restored, re-issue the original backing query.
 
+**`group_by` and `order_by` items are OBJECTS, not bare column names.** Passing a string is the most
+common way to lose a turn here. Two worked shapes:
+
+```
+# distribution over a cached slice
+refine_query_result(query_id="<qid>",
+  group_by=[{"col": "severity"}],
+  aggregate=[{"fn": "count", "col": "*", "as": "hits"}],
+  external_investigation_id="<id>")
+
+# same, densest first
+refine_query_result(query_id="<qid>",
+  group_by=[{"col": "source"}],
+  aggregate=[{"fn": "count", "col": "*", "as": "hits"}],
+  order_by=[{"col": "hits", "dir": "desc"}],
+  external_investigation_id="<id>")
+```
+
+`order_by` accepts a group column or an aggregate alias; `dir` is `asc` or `desc`. Group on the
+STANDARD columns (`severity`, `source`, `subsource`, `app`, `service`, `pattern`, `t`); grouping on
+a custom field is not reliable today. Time bucketing is not currently usable: state a time question
+as a narrower window plus a count instead.
+
 **Common patterns:**
 - After a broad raw scan, filter per-subsource to drill into specific categories.
-- Group the cached slice (`group_by` + `aggregate`) to get a distribution without a new backing scan.
+- Group the cached slice to get a distribution without a new backing scan.
 - Page a large slice via `offset` following `page.next`.
 
 ---
@@ -261,18 +357,33 @@ Cache and field introspection over a cached `query_id`.
 ```
 get_query_metadata(
   query_id: "...",
-  top_n: 500,                      # OPT-IN deep discovery: expand ranked custom-field list (hard cap 5000). Full catalog scan of the source.
+  top_n: 500,                      # OPT-IN deep discovery: ranked custom-field list. Full catalog scan of the source.
   field_match: {mode: "equals"|"contains"|"regex", pattern: "..."},   # OPT-IN deep discovery: grep custom field NAMES. Full catalog scan.
   external_investigation_id: "..."
 )
 -> bookkeeping (schema, custom_source, stats, cache status, tie-breaker/sort); or, with top_n/field_match, a ranked/matched custom-field list
 ```
 
-**Default call is lightweight** (bookkeeping row only, sub-ms, no backing scan). **`top_n` / `field_match` deep discovery is a full catalog scan of the source** scoped to the cached query's window + orgs - use deliberately, only when the inline response schema isn't enough.
+**The default call is cheap** (bookkeeping only, no backing scan). **`top_n` / `field_match` deep discovery is a full catalog scan of the source** scoped to the cached query's window + orgs - use deliberately, only when the inline response schema isn't enough.
 
 **Use cases:**
 - Cache introspection after a query.
 - Deep custom-field discovery within a specific cached result (distinct from `list_fields`, which builds NEW queries over a source).
+
+---
+
+### `server_info`
+
+```
+server_info()
+```
+
+Static server metadata (name, version, region, transport) plus the authenticated workspace id. No
+query, no billing. Use it to confirm which region and workspace you are talking to before citing
+anything, or when a call fails and you need to know whether the transport and auth are the problem.
+
+**It takes no parameters, and it REJECTS `external_investigation_id`.** It is the one exception to
+the pass-the-id-everywhere rule: there is no scope and no query to correlate.
 
 ---
 
@@ -322,7 +433,7 @@ get_query_metadata(
 
 **Skipping `list_sources`.** Source might not have data in the investigation's window. Always confirm with `list_sources` scoped to the investigation's `start`/`end`.
 
-**Refining a grouped result.** `query_grouped_aggregation` output is not refinable (v1); it returns expired. Read it directly or pull raw events with `query_logs`.
+**Refining a grouped result.** `query_grouped_aggregation` output is not refinable; it returns expired. Read it directly or pull raw events with `query_logs`.
 
 **Re-scanning instead of refining.** After ONE broad `query_logs` slice, use `refine_query_result` for other views - it's a cache lookup, not a fresh scan.
 
@@ -332,9 +443,9 @@ get_query_metadata(
 
 ---
 
-## Fast-follow tools (NOT yet available)
+## Tools that do not exist
 
-These land after the lean-9; until then, use the v1 equivalent:
+If you find yourself reaching for one of these, use the substitute:
 
 - **`query_period_diff`** ("what changed between two windows") -> run `query_grouped_aggregation` over each window (group_field `pattern`) and compare the two grouped results.
 - **`compare_populations`** ("what's different about broken vs working") -> run `query_grouped_aggregation` over each population separately (via distinct `lql`) and compare.

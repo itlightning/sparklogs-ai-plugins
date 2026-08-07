@@ -9,6 +9,78 @@
 
 Contributor-facing branch guidance is in [CONTRIBUTING.md](../CONTRIBUTING.md).
 
+## Generated Reference Set (`generated/`)
+
+`generated/<module>/` holds the AI reference set for each source module: field schema, closed
+vocabularies, the expected-pattern decision procedure, worked query recipes, and external-taxonomy
+anchors. The content is authored nowhere in this repo. It is produced by the SparkLogs source
+library (`tools/gen-ai-schema.py`) and synced here as a checked-in build input, so a plugin
+package carries the reference set offline and a contributor can read it without a second checkout.
+
+The library renders two trees and owns the split. `docs/generated/` keeps the verification and
+sourcing detail its own authors work against; `docs/generated-public/` is the reader-facing render,
+same filenames, no provenance artifact. **This repo consumes the public tree verbatim.** Nothing is
+transformed on the way through, which is what lets the drift check compare bytes.
+
+Refresh it from a sibling source-library checkout:
+
+```bash
+SPARKLOGS_SOURCE_LIBRARY_DIR=../sparklogs-source-library yarn sync-generated
+```
+
+The environment variable is optional when the checkout sits beside this repo. A path that is set
+but unusable is a hard failure rather than a fallback: a drift guard that quietly reads a different
+checkout reports green about the wrong tree.
+
+`generated/SYNC-MANIFEST.json` records the library branch and commit the current content came from,
+plus every projection rule that ran. Do not hand-edit anything under `generated/`: an edit is
+reverted by the next sync and fails the drift check in the meantime.
+
+`yarn validate:generated` runs the gates and then the drift check. **They are enforced in different
+places, and the split is worth knowing:**
+
+| Check | Needs a library checkout? | Runs in CI? |
+|---|---|---|
+| Gate A, Gate B, stray-file scan | no, they read committed files | yes, on every PR via `yarn validate` |
+| Drift against the library | yes | no. CI checks out this repo alone, so the drift half logs SKIPPED and passes |
+
+The drift check is a workstation guard. It is honest about skipping rather than reporting a success
+it did not earn, but nothing unattended re-derives "the committed content matches its source". Run
+it deliberately before a release, or after any library change.
+
+- **Gate A**: no file under a synced module directory may carry the library's spec-versus-observed
+  evidence columns, its witness counts, or the prose that makes observation claims from them. Those
+  are the library's own confidence instrument; a consumer reading them as a contract would treat an
+  unwitnessed decode as a broken one. **Upstream already withholds all of this, so gate A is a
+  tripwire rather than the mechanism:** it exists so that a regression in the public render fails
+  here instead of shipping. Prose coverage is a fixed token list, not the concept, so it catches the
+  shapes the library has actually emitted rather than every possible phrasing.
+- **Gate B**: two rules over `patterns.md`. The decision procedure must file a pattern whose head
+  matched nothing as UNCURATED, never UNEXPECTED. And a surface whose reason name carries a mixed
+  letter-and-digit token must not claim it renders a stable named pattern, because AutoExtract
+  variabilizes that head away before the pattern is derived.
+- **Stray files**: the gates enumerate each synced module DIRECTORY rather than the configured
+  artifact list, so anything committed alongside the synced artifacts fails loudly. The drift check
+  enumerates the destination for the same reason.
+
+Every rule re-proves itself on each run against the planted-positive fixtures in
+`scripts/fixtures/generated-reference-gates/`. Correcting a fixture disarms the rule it proves.
+
+**Known defects** in library content that this repo cannot fix are pinned in `KNOWN_DEFECTS`, each
+naming one exact file, surface and claim, and citing the escalation it is filed under. The check
+runs in both directions: an entry that no longer matches anything FAILS, so a pin dies with its
+defect instead of outliving it and quietly excusing the next occurrence. The list is empty today,
+which is the healthy state.
+
+Adding a module or an artifact is a decision, recorded in `scripts/generated-references.config.mjs`.
+The sync fails on any library MODULE not listed in `MODULES` and on any library ARTIFACT that
+appears in neither the public nor the internal list, so nothing new arrives unnoticed at either
+level.
+
+`INTERNAL_ARTIFACTS` is empty: upstream already withholds what stays internal. The list is kept
+because the sync fails on any artifact appearing in neither it nor `PUBLIC_ARTIFACTS`, so nothing
+new arrives unnoticed in either direction.
+
 ## Versioning
 
 All hosts share one product version. Source files do not contain a release version. The release workflow derives `VERSION` from a human-created tag such as `v1.2.3`.

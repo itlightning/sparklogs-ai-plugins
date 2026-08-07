@@ -1,4 +1,4 @@
-# SparkLogs — Codex bundle
+# SparkLogs: Codex bundle
 
 This directory is the **built SparkLogs AI plugin** for **Codex**, shipped from the SparkLogs plugin repository.
 

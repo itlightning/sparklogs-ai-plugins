@@ -34,9 +34,14 @@ OBSERVED CONDITIONS
   Finding 2: ...
   ... (typically 3-7 findings)
 
-ANOMALY SIGNALS USED (if any)
+ANOMALY SIGNALS USED (if any; normally absent, see below)
 [brief enumeration, with explicit framing: "These anomaly indicators helped focus the investigation
  on signal-rich events. They are internal investigation tools, not standalone problem alerts."]
+
+  `anomaly_max_score` / `anomaly_max_score_confidence` are designed and not emitted anywhere in
+  the product today, so this section is normally absent. Include it only when you actually read an
+  anomaly field and it carried a value. Do not model a Finding on one: a citation for a signal no
+  source emits is the exact confidently-wrong shape this template exists to prevent.
 
 WHAT WAS EXAMINED
 - Backing queries: <N>
@@ -66,9 +71,9 @@ POSSIBLE NEXT DIRECTIONS
 A friendly, human-meaningful correlation handle you supply - free text, 8-200 chars, e.g. `investigate-ticket-4781-veeam-backup`. REQUIRED on every MCP call. Pick one distinctive value at the start of an investigation and reuse it for every call within that investigation; reusing the same value RESUMES the investigation (the server appends to the same audit trail). A genuinely new investigation needs a fresh, distinctive value - embed a ticket/incident id or a nonce so it doesn't collide with unrelated investigations. Out-of-bounds values return a user-visible validation error from the tool. If you're resuming a paused investigation, recover the id from the local investigation-state document at `./investigations/<id>.md`.
 
 ### EXECUTIVE SUMMARY (placed first, after the header)
-1-3 paragraphs synthesizing the Findings. Plain language; engineer audience. **Every claim derives from a Finding** - don't introduce new evidence in the summary. Include citations (query_urls) inline where helpful.
+**One paragraph, at most six sentences.** Plain language; engineer audience. **Every claim derives from a Finding** - do not introduce new evidence here. Cite the Finding numbers rather than restating their evidence.
 
-The summary is at the top because engineers read headlines first. They scan the EXECUTIVE SUMMARY to decide whether to dig into the Findings.
+The cap is the point. An engineer reads this to decide whether to open the Findings; a summary that reproduces them has replaced the decision with a second read.
 
 **Right (factual synthesis):**
 "The investigation surfaced a VSS writer failure on srv-fileshare01 at 03:14 UTC concurrent with a Veeam error and a recent KB5034441 install (Findings 1, 2, 4). The same pattern appeared on 7 other fleet sources (Finding 6). The cluster analysis (Finding 5) shows the error happens in multiple contexts, with the most common involving SCM service activity preceding the failure. No ingest gaps during the relevant window (Finding 7), so the evidence is complete on the on-endpoint side."
@@ -96,13 +101,17 @@ Investigation-specific list of off-endpoint sources and conditions you couldn't 
 - "Cloud identity audit logs (Azure AD / Entra) are outside SparkLogs ingestion. Sign-in failures from cloud-side conditional access policies would not appear in this investigation."
 - "EDR cloud audit (SentinelOne) is outside SparkLogs ingestion. EDR-side blocks of VSS operations would not appear in on-endpoint state."
 
-If the on-endpoint evidence is complete and off-endpoint causes are not relevant, the section is short:
-- "The off-endpoint causes typically associated with backup investigations (backup target health, EDR blocking VSS) were considered but the on-endpoint evidence is sufficient to characterize the observed conditions - see Findings."
+**One bullet per item, one sentence each. Never prose.** Each bullet names the thing not checked and why it matters; the engineer scans this list for the gap that changes their next move, and a paragraph hides it.
 
-The section is required even when short.
+Where nothing material was unchecked, one bullet says so:
+- "Off-endpoint backup causes (target health, EDR blocking VSS) considered; on-endpoint evidence is sufficient."
+
+The section is required even when it is one line.
 
 ### Finding N
-A single, observation-grounded factual statement. Format: `<subject> was <state> at <time>` or `<event class> occurred N times in <window>` or similar.
+**One sentence for the statement, then the fields. No prose paragraph.** The fields below already carry the evidence, the sources and the window; repeating them in sentences is the single most common way these summaries get long without getting more useful.
+
+Format: `<subject> was <state> at <time>`, or `<event class> occurred N times in <window>`, or similar.
 
 **Right:**
 - "VSS writer SqlServerWriter was in FAILED state at 2026-04-23 03:14:32 UTC."
@@ -140,8 +149,9 @@ NOT:
 - "Note: recommend restarting the service" <- recommendation; not this skill's role
 
 ### Anomaly Signals Used
-Optional section. If anomaly fields helped you focus the investigation (e.g., `anomaly_max_score >= 60` filter narrowed your candidate set), list briefly. Required framing: anomalies are internal investigation tools, not standalone problem alerts. Example:
-- "anomaly_max_score >= 60 filter on the source-scoped backing query identified vss_writers and services as candidate subsources for deeper investigation. Anomaly fields supported finding-discovery efficiency; they are not surfaced as standalone problem indicators in this summary."
+Optional section, and **normally absent**: `anomaly_max_score` / `anomaly_max_score_confidence` are designed and not emitted anywhere in the product today, so the canonical context-reduction filter reduces to its `severity` half on every source. Omitting the section is the usual correct outcome, and the missing anomaly half is never "no anomalies."
+
+Include it only if you actually read an anomaly field and it carried a value. Then list briefly, with the required framing: anomalies are internal investigation tools, not standalone problem alerts. Never build a Finding on one: a citation for a signal no source emits is the confidently-wrong shape this template exists to prevent.
 
 ### What Was Examined
 Track the running counts (backing queries, refinements, sources/orgs covered, matched population) in your local investigation-state document as you go. All figures here come from server-returned query summaries, not self-reported estimates. This section shows the engineer how much evidence backs the summary: how many queries ran, how broad a scope they covered, how many events were in the matched population.
@@ -203,33 +213,33 @@ SCOPE CHECKED
 OBSERVED CONDITIONS
 
 Finding 1: VSS writer SqlServerWriter was in FAILED state at 2026-04-23 03:14:32 UTC
-  Evidence: https://sparklogs.app/explore/cached/qXY9a3m2k7n1p4t8
+  Evidence: <query_url as returned> (query_id: qXY9a3m2k7n1p4t8)
   Confidence: high
   Sources contributing: srv-fileshare01
   Time window of evidence: 2026-04-23 03:14:00 to 03:14:45 UTC
 
 Finding 2: Veeam Application channel logged error 0x80042308 at 2026-04-23 03:14:30 UTC, in same window as Finding 1
-  Evidence: https://sparklogs.app/explore/cached/qP4n8k2r9c6m3y1z
+  Evidence: <query_url as returned> (query_id: qP4n8k2r9c6m3y1z)
   Confidence: high
   Sources contributing: srv-fileshare01
   Time window of evidence: 2026-04-23 03:14:30 UTC
 
 Finding 3: New pattern_hash "h7Vjf2Xk9a" appeared in last 24h that wasn't present in prior 24h
-  Evidence: https://sparklogs.app/explore/cached/qK7m2p1n8r4t9c2v
+  Evidence: <query_url as returned> (query_id: qK7m2p1n8r4t9c2v)
   Confidence: high
   Pattern text: "Veeam VSS error 0x80042308 on volume <X> for job <Y>"
   Sources contributing: srv-fileshare01 (and 7 fleet sources per Finding 6)
   Time window of evidence: 2026-04-22 00:00 to 2026-04-23 14:00 UTC
 
 Finding 4: KB5034441 was installed on srv-fileshare01 at 2026-04-23 02:45 UTC
-  Evidence: https://sparklogs.app/explore/cached/qB8t4r2y9c1m6p3n
+  Evidence: <query_url as returned> (query_id: qB8t4r2y9c1m6p3n)
   Confidence: high
   Sources contributing: srv-fileshare01
   Time window of evidence: 2026-04-23 02:45 UTC
   Note: Temporal proximity to Finding 1 is observation only - causality is not asserted in this summary.
 
 Finding 5: Cluster analysis of the new error pattern shows 3 distinct contextual situations
-  Evidence: https://sparklogs.app/explore/cached/qC5g7n3p2k8m1y4r
+  Evidence: <query_url as returned> (query_id: qC5g7n3p2k8m1y4r)
   Confidence: medium (cluster analysis is sample-based; sample_n_matches=100 of 412 total occurrences)
   Sources contributing: srv-fileshare01 (47), srv-fileshare02 (38), srv-app01 (12), other fleet (5)
   Time window of evidence: 2026-04-22 00:00 to 2026-04-23 14:00 UTC
@@ -238,25 +248,18 @@ Finding 5: Cluster analysis of the new error pattern shows 3 distinct contextual
         occurrences) has no obvious common precursor pattern.
 
 Finding 6: Same Veeam error pattern fired on 7 other sources in this MSP fleet during same window
-  Evidence: https://sparklogs.app/explore/cached/qF2h9k4n7m3p1c8y
+  Evidence: <query_url as returned> (query_id: qF2h9k4n7m3p1c8y)
   Confidence: high
   Sources contributing: srv-fileshare01, srv-fileshare02, srv-app01, srv-app02, srv-mail01, srv-db01,
                         srv-web01, srv-print01
   Time window of evidence: 2026-04-22 00:00 to 2026-04-23 14:00 UTC
 
 Finding 7: No ingest_drop, spool_full, or backpressure events on srv-fileshare01 during window
-  Evidence: https://sparklogs.app/explore/cached/qH6l1p5n2k7t3m8r
+  Evidence: <query_url as returned> (query_id: qH6l1p5n2k7t3m8r)
   Confidence: high
   Sources contributing: srv-fileshare01
   Time window of evidence: 2026-04-22 00:00 to 2026-04-23 14:00 UTC
   Note: Source data is complete for the relevant window. Evidence is not affected by ingest gaps.
-
-ANOMALY SIGNALS USED
-- anomaly_max_score=88 with rule_state_expectation detector flagged Finding 1's vss_writers state
-  change as anomalous (writer in FAILED state when baseline is Idle). This signal supported
-  finding-discovery efficiency by pointing the investigation at vss_writers early. Anomaly fields
-  are internal investigation tools, not standalone problem alerts - this Finding is surfaced
-  because the engineer asked about backups, not because the anomaly fired.
 
 WHAT WAS EXAMINED
 - Backing queries: 4
@@ -312,7 +315,7 @@ SCOPE CHECKED
 OBSERVED CONDITIONS
 
 Finding 1: srv-fileshare02 perf counters within normal range during the user-reported window
-  Evidence: https://sparklogs.app/explore/cached/qN3k7m1p2r8t4c9y
+  Evidence: <query_url as returned> (query_id: qN3k7m1p2r8t4c9y)
   Confidence: high
   Sources contributing: srv-fileshare02
   Time window of evidence: 2026-04-23 13:00 to 14:30 UTC
@@ -320,19 +323,19 @@ Finding 1: srv-fileshare02 perf counters within normal range during the user-rep
         no perf-counter anomalies fired.
 
 Finding 2: No SMB Server channel error or warning events in the window
-  Evidence: https://sparklogs.app/explore/cached/qP5g9n2k7m1t3r8c
+  Evidence: <query_url as returned> (query_id: qP5g9n2k7m1t3r8c)
   Confidence: high
   Sources contributing: srv-fileshare02
   Time window of evidence: 2026-04-23 06:00 to 14:30 UTC
 
 Finding 3: Defender real-time scanning was active but with no scan-related events in the window
-  Evidence: https://sparklogs.app/explore/cached/qR8m2p4n7k1t9c5y
+  Evidence: <query_url as returned> (query_id: qR8m2p4n7k1t9c5y)
   Confidence: high
   Sources contributing: srv-fileshare02
   Time window of evidence: 2026-04-23 06:00 to 14:30 UTC
 
 Finding 4: No ingest_drop / spool_full / backpressure events on srv-fileshare02 during window
-  Evidence: https://sparklogs.app/explore/cached/qY1k9p2m7n4t3r6c
+  Evidence: <query_url as returned> (query_id: qY1k9p2m7n4t3r6c)
   Confidence: high
 
 Finding 5: No evidence of slowness, congestion, or unusual activity on srv-fileshare02 in the
