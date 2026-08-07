@@ -289,7 +289,7 @@ list_sources(
 )
 ```
 
-Each row is a **(collector `agent_id`, origin `source`)** pair with triage columns (`cnt_interesting`, `cnt_severe`, …) and optional summary **`top_interesting_patterns`** teaser. Call **`describe_pattern`** before citing any teaser pattern.
+Each row is a **(collector `agent_id`, origin `source`)** pair with triage columns (`cnt_interesting`, `cnt_warn_error` for severity 13-19, `cnt_critical_plus` for severity >= 20, `distinct_interesting`) and optional summary **`top_interesting_patterns`** teaser. Call **`describe_pattern`** before citing any teaser pattern.
 
 **Critical+ fetch-first rule:** any non-zero critical+ count in scope (severity >= critical; the dedicated `cnt_critical_plus` triage column where surfaced, else a grouped aggregation on `severity`) means fetch those events before proceeding, regardless of the investigation topic. Critical+ admissions are rare, always-surface facts (confirmed integrity loss or compromise) and auto-elevate into daily fleet reporting; never leave one unread in a Finding's scope. The Info..Error bands carry no fetch-first mandate - weigh them normally. See `references/category-classes.md`, Query notes.
 
@@ -301,7 +301,7 @@ Each row is a **(collector `agent_id`, origin `source`)** pair with triage colum
 
 ## Section 11. MCP tools quick reference
 
-The v1 catalog is these nine tools (lean-9):
+The v1 catalog is these eleven tools:
 
 | Tool | Tier | Use when |
 |---|---|---|
@@ -314,6 +314,8 @@ The v1 catalog is these nine tools (lean-9):
 | `query_logs` | backing scan | Retrieve raw chronological events. Last resort, over an already-narrowed window/filter. |
 | `refine_query_result` | lightweight | Relational engine over a cached `query_id` (filter/group/aggregate/having/order/select/page). Use freely; touches the cache, not the source. |
 | `get_query_metadata` | lightweight* | Cache/field introspection over a `query_id`. Default = bookkeeping only (fast). *`top_n`/`field_match` deep field discovery is a full catalog scan of the source - use deliberately. |
+| `list_device_health` | billed discovery | Latest curated device state: monitor rows for conditions, inventory rows for what is on the box, plus silent devices. Supporting honesty check, not the entry point - reach for it when you are about to conclude something from an absence. See `references/device-state-fields.md`. |
+| `server_info` | lightweight | Server name, version, region, transport and the authenticated workspace id. No query, no billing. Confirm which region and workspace you are on before citing anything. |
 
 Fast-follow differential tools (`query_period_diff`, `compare_populations`, `cluster_event_contexts`) are not yet available. Until they ship, use two `query_grouped_aggregation` runs over two windows for period diff, or grouped aggregation over distinct `lql` populations for compare.
 

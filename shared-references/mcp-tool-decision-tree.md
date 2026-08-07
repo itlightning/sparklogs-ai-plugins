@@ -2,7 +2,7 @@
 
 Per-tool detailed usage with parameter notes, decision tree for which tool to use when, and worked-example call sequences.
 
-The v1 tool surface is the **lean-9**: `resolve_scope`, `list_sources`, `list_scope_ladder`, `describe_pattern`, `list_fields`, `query_grouped_aggregation`, `query_logs`, `refine_query_result`, `get_query_metadata`. Three differential tools (`query_period_diff`, `compare_populations`, `cluster_event_contexts`) are fast-follow; see the bottom of this file for v1 equivalents.
+The v1 tool surface is these **eleven** tools: `resolve_scope`, `list_sources`, `list_scope_ladder`, `list_device_health`, `describe_pattern`, `list_fields`, `query_grouped_aggregation`, `query_logs`, `refine_query_result`, `get_query_metadata`, `server_info`. Three differential tools (`query_period_diff`, `compare_populations`, `cluster_event_contexts`) are fast-follow; see the bottom of this file for v1 equivalents.
 
 **Every tool takes `external_investigation_id`** (REQUIRED; a friendly, human-meaningful correlation handle you supply, 8-200 chars free text, e.g. `investigate-ticket-1234-disk-errors` - not a generated hash. Reusing the same value RESUMES that investigation; use a fresh, distinctive value to start a new one; tagged on every call).
 **Time windows are flat `start` / `end` in RFC3339 UTC** (e.g. `2026-07-01T00:00:00Z`). There is no `time_range` object and no `relative:` shorthand - compute the absolute window yourself.
@@ -76,7 +76,7 @@ list_sources(
   include_top_interesting_patterns: true,   # default true; summary teaser ~8 patterns
   external_investigation_id: "..."
 )
--> rows: agent_id, collector_kind, name, verdict, source, event_count, cnt_interesting, cnt_severe, distinct_interesting, bytes_ingested, first/last_event_at
+-> rows: agent_id, collector_kind, name, verdict, source, event_count, cnt_interesting, cnt_warn_error, cnt_critical_plus, distinct_interesting, bytes_ingested, first/last_event_at
 -> summary may include top_interesting_patterns; call describe_pattern before citing
 ```
 
@@ -85,10 +85,10 @@ list_sources(
 **Use cases:**
 - **Scope discovery:** confirm expected collector/source pairs have events; cross-check `verdict` (stuck/offline halt rules in `scope-resolution.md`).
 - **Fleet enumeration:** list collector/origin pairs in the window.
-- **Triage:** `cnt_interesting` / `cnt_severe` before deep queries.
-- **Critical+ fetch-first:** any non-zero critical+ count in scope (`cnt_critical_plus` where
-  surfaced, else group by `severity`) means fetch those events before proceeding, whatever the
-  investigation topic (`category-classes.md`, Query notes).
+- **Triage:** `cnt_interesting` and `cnt_warn_error` (severity 13-19: warning, minor, error, serious, severe) before deep queries.
+- **Critical+ fetch-first:** any non-zero `cnt_critical_plus` (severity >= 20) in scope means fetch
+  those events before proceeding, whatever the investigation topic (`category-classes.md`, Query
+  notes). Where the count is not surfaced on a row, group by `severity`.
 
 ---
 
@@ -302,6 +302,14 @@ get_query_metadata(
 
 ---
 
+### `server_info`
+
+Static server metadata (name, version, region, transport) plus the authenticated workspace id. No
+query, no billing. Use it to confirm which region and workspace you are talking to before citing
+anything, or when a call fails and you need to know whether the transport and auth are the problem.
+
+---
+
 ## Common call sequences (recipes)
 
 ### Recipe: "Investigate <single source> for <symptom>"
@@ -360,7 +368,7 @@ get_query_metadata(
 
 ## Fast-follow tools (NOT yet available)
 
-These land after the lean-9; until then, use the v1 equivalent:
+These land after v1; until then, use the v1 equivalent:
 
 - **`query_period_diff`** ("what changed between two windows") -> run `query_grouped_aggregation` over each window (group_field `pattern`) and compare the two grouped results.
 - **`compare_populations`** ("what's different about broken vs working") -> run `query_grouped_aggregation` over each population separately (via distinct `lql`) and compare.

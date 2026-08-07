@@ -157,7 +157,9 @@ Each row is one **(collector, origin)** pair in the window:
 | `name`, `verdict` | Present when the collector resolves; empty for `unresolved` |
 | `source` | Origin host label |
 | `event_count`, `bytes_ingested` | Volume in the window |
-| `cnt_interesting`, `cnt_severe`, `distinct_interesting` | Triage: notable vs error-grade signal |
+| `cnt_interesting`, `distinct_interesting` | Triage: how much is going on here |
+| `cnt_warn_error` | Severity 13-19: warning, minor, error, serious, severe |
+| `cnt_critical_plus` | Severity >= 20: critical, fatal and above. Rare, and fetch-first whatever the ticket was about |
 | `first_event_at`, `last_event_at` | Exact window bounds for this pair |
 
 The summary may include **`top_interesting_patterns`**: a short ranked teaser (~8 entries) of high-signal patterns in scope.
