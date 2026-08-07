@@ -3,7 +3,7 @@
 
 # AI reference set: `win.eventlog.security`
 
-Generated from the source-library SoT for this module.
+Generated reference for this module.
 Read in this order when investigating the channel for the first time.
 
 - [`fields.md`](fields.md): what exists at rest and what writes it

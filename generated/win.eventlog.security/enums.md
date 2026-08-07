@@ -8,7 +8,7 @@ These sets are closed: a value outside them leaves its field unset rather than b
 
 ## `status_codes`
 
-25 row(s), from `enrichment/status_codes.csv`.
+25 row(s).
 
 | Code | Token | Meaning | Constant |
 |---|---|---|---|
@@ -40,7 +40,7 @@ These sets are closed: a value outside them leaves its field unset rather than b
 
 ## `kerberos`
 
-17 row(s), from `enrichment/kerberos.csv`.
+17 row(s).
 
 | Code | Token | Meaning | Constant |
 |---|---|---|---|
@@ -64,7 +64,7 @@ These sets are closed: a value outside them leaves its field unset rather than b
 
 ## `logon_types`
 
-12 row(s), from `enrichment/logon_types.csv`.
+12 row(s).
 
 | Code | Token | Meaning | Constant |
 |---|---|---|---|
@@ -83,7 +83,7 @@ These sets are closed: a value outside them leaves its field unset rather than b
 
 ## `nps_reason_codes`
 
-10 row(s), from `enrichment/nps_reason_codes.csv`.
+10 row(s).
 
 | Code | Token | Meaning | Constant |
 |---|---|---|---|
