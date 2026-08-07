@@ -6,9 +6,9 @@ Windows Server Backup all emit `service = "backup"`), so fleet-wide analysis spa
 `app` is the complementary axis (product identity as users know it); a vendor spans services and a
 service spans vendors; neither nests in the other.
 
-Values are snake_case and registry-gated: the authoritative additive-only registry is
-`service_vocabulary` in the SparkLogs source library (`registry.yaml`). Values are never renamed or
-removed. The table below covers every registry value; see the coverage contract at the end.
+Values are snake_case and drawn from a closed, registry-gated vocabulary. The set is additive-only:
+values are never renamed and never removed, so a query written against one keeps working. The table
+below is the whole vocabulary.
 
 `service` is a conditional scope-ladder field: present when the source's shaping carries it, absent
 otherwise (see `scope-ladder.md` for the degrade-gracefully rule). It is set per event; CONTEXT
@@ -70,9 +70,7 @@ Maintained list (grows as Windows Event Log modules land):
 **Rule for forensic/audit sweeps: pivot on reason slugs, channel (`subsource`), and `category`,
 never on `service = "security_audit"` alone.**
 
-## Coverage contract
+## Coverage
 
-This table covers every `service_vocabulary` value in the source-library registry (additive-only).
-`yarn run validate` (`scripts/validate-skills.mjs`) fails when this table drifts from its pinned
-registry snapshot. When the registry adds a value, add its row here and to the validator's pinned
-list in the same change.
+This table is the complete `service` vocabulary, and it is kept complete: it cannot drift from the
+vocabulary without failing a check. A value you see in data and cannot find here is worth reporting.

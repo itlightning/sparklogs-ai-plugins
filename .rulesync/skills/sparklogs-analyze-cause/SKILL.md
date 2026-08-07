@@ -176,8 +176,6 @@ When you do make additional MCP calls, reuse the prior investigation's `external
 - `references/generated-reference-router.md` - how to reach the per-source generated reference set by question shape, when a hypothesis needs a confirm step written against real field names.
 - `references/writing-voice.md` - same content as the investigate skill's writing-voice reference: style rules for report text.
 
-Shared reference files are symlinked during authoring and materialized as real files in rendered plugin packages.
-
 ---
 
 ## Section 8. Slash commands

@@ -32,16 +32,24 @@ on the box.
 Naming an explicit field ADDS it; it does not replace the fieldset.
 
 **`kinds`** filters `kind`. The default is `inventory` and `monitor`. Inventory is ON by default and
-should stay on for RCA: inventory rows are normally `class=CONTEXT`, and they are the ground truth of
-what is installed, mounted and running. `agent_op` and `delta` are opt-in.
+should stay on for RCA: inventory rows normally carry no class at all, and they are the ground truth
+of what is installed, mounted and running. `agent_op` and `delta` are opt-in.
+
+**A kind outside the known vocabulary survives the filter by design.** If a newer agent emits a kind
+this surface does not know, an explicit `kinds` list does not silence it: the alternative is dropping
+rows nobody has decided about yet, which loses evidence exactly when something new is happening. So a
+`kinds` filter is a narrowing, not a guarantee, and a row with an unfamiliar `kind` is a real row.
 
 **`reasons`** filters to named conditions. **`group_by_reason`** returns the fleet shape of a reason
 ("17 hosts have this") instead of a row per device.
 
 **Silent devices** come back as a separate envelope row, `row_kind=silent_device`. That list is
-CAPPED so a fleet-wide outage cannot push condition rows out of the response, and it can truncate
-while the response summary's scope stays honest. If the silent list looks suspiciously round, it was
-truncated.
+CAPPED so a fleet-wide outage cannot push condition rows out of the response, and it can truncate.
+The count in `summary.scope` is the EXACT total, counted before the cap, so read the count rather
+than tallying rows. If the silent list looks suspiciously round, it was truncated.
+
+That accounting is trustworthy. What the silence MEANS is a separate question, and a narrower one:
+see "What silence does and does not tell you" below before any conclusion rests on it.
 
 `row_kind` is an envelope discriminator for that one case only. Every data row says what it is with
 `kind`, not with `row_kind`.
@@ -66,7 +74,7 @@ two surfaces.
 | `instance` | the subject when the detector is multi-instance; null means host-scoped |
 | `display_name` | a friendlier name when it differs from `instance`; read `coalesce(display_name, instance)` |
 | `open_monitors_count` | how many monitors are open. Not a problem count |
-| `window_partial` | the measurement window was only partly observed |
+| `window_partial` | the measurement window was only partly observed. A ROW-level flag, deliberately NOT under the `episode_` prefix like the honesty fields around it: it describes this row's own measurement window, not the episode's whole span. There is no `episode_window_partial` |
 | `episode_id` | identity of one continuous occurrence, never recycled |
 | `episode_replaced_id` | the episode this one SUPERSEDES, when an episode was replaced |
 | `episode_occurrence` | which occurrence of this reason on this subject |
@@ -106,7 +114,9 @@ spot. Never date a cause to a clamped clear. Say "cleared at or before <ts>, exa
 ABSENT value is not a claim that there was no gap.
 
 **`window_partial`** means the window was only partly observed. Do not change a verdict on a partial
-window.
+window. It is the one honesty field with no `episode_` prefix, because it describes one row's
+measurement window rather than the episode's crossing lifecycle: do not look for
+`episode_window_partial`, and do not read a partial row as a partially observed episode.
 
 **`episode_post_gap_s`** on the first reading after an outage says this reading resumed after a blind
 spot. A post-gap sample is trusted to say a condition is no longer holding, never to say WHEN it
@@ -125,11 +135,23 @@ episodes over time, and that is what recurrence means.
 - **Correlation is your job.** Nothing joins a monitor row to the raw events that explain it. Take
   the reason, the instance and the span, then query the events yourself.
 
-## Silence is not yet a trustworthy signal
+## What silence does and does not tell you
 
-A device returning no state rows may mean the agent is not reporting, or may mean the topic is not
-enabled for that agent's rollout ring, or may mean the collector never started. Those are
-indistinguishable from here today.
+Two different claims hide behind the word silence, and only one of them is available today.
+
+**Device-level silence is real and usable.** A device appearing in the `row_kind=silent_device` list
+reported no state rows in the window. That is an exact, counted fact about the fleet, disclosed with
+its own cap, and you may report it: "this device reported nothing in the window." It is a genuine
+finding, and it is often the finding that matters.
+
+**Topic-level silence is not yet interpretable.** Reading the absence of a particular topic's rows as
+meaning something about that topic, on a device that is otherwise reporting, is not supported yet: no
+snapshot topic has reached the rollout ring where its absence would be evidence. Until it does, an
+absent topic tells you nothing about the topic.
+
+What neither one licenses is a CAUSE. A device returning no state rows may mean the agent is not
+reporting, or may mean the topic is not enabled for that agent's rollout ring, or may mean the
+collector never started. Those are indistinguishable from here today.
 
 Report silence as "no state data in this window, cause not established", never as "the device is
 healthy" and never as "the agent is down". If silence matters to the conclusion, say so in what was

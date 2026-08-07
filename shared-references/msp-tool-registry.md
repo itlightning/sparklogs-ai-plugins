@@ -115,4 +115,4 @@ When investigating:
 This file updates when:
 - New MSP tools become common in customer environments.
 - Existing entries' service names or log locations change with new versions.
-- Quarterly review.
+- A scheduled refresh comes round.

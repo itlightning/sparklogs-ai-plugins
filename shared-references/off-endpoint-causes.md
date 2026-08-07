@@ -176,4 +176,4 @@ This file updates when:
 - A new symptom category warrants its own visibility-limit list.
 - A recurring off-endpoint cause is observed and added to the catalog.
 - A previously-off-endpoint source becomes on-endpoint (i.e., SparkLogs starts ingesting it) - remove from this list.
-- Quarterly review.
+- A scheduled refresh comes round.

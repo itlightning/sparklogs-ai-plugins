@@ -106,7 +106,7 @@ BENIGN rows (defused false positives; kept, capped Info):
 
 | Reason | Meaning | Service |
 |---|---|---|
-| `restart_blocked` | RestartManager 10006/10007: an open app blocked an install restart. Native Error, routine in practice. | patching |
+| `restart_blocked` | RestartManager 10006/10007: an open app blocked an install restart. Native Error, reclassified BENIGN: the install retries once the app closes, so the line is not actionable on its own. | patching |
 | `install_failed` / `install_error` (retry arms) | The same MsiInstaller ids reclass BENIGN when the result code is MSI 1618 / 0x80070652: another install in progress, try again later. | patching |
 | `e2e_test_event` | SparkLogsE2E/777: SparkLogs' own end-to-end test marker. | rmm |
 
@@ -139,11 +139,19 @@ The recipe (query family + actor-in-window):
 4. Expand actor-in-window: fetch everything the same `SubjectLogonId` / `SubjectUserName` touched
    inside the window.
 
-Availability caveat: System 7045 and Application MSI evidence is live today; the Security-channel
-families (4688, 4624, task/account/policy changes) land with `win.eventlog.security`.
+System 7045 and Application MSI evidence is live, and so are the Security-channel families
+(4688, 4624, task, account and policy changes): those ship in `win.eventlog.security`.
 
-## Pending: `win.eventlog.security`
+## Security channel: `win.eventlog.security`
 
-TODO (tracked): reason rows for `win.eventlog.security` land here when that module ships.
-Security-channel slugs referenced above are frozen vocabulary, not yet queryable data; do not
-conclude "no evidence" from their absence.
+This module is shipped and curated, and it has its own generated reference set rather than reason
+rows here: 50 curated surfaces with a field schema, closed vocabularies, an expected-pattern
+decision procedure and worked query recipes.
+
+Route to it through `generated-reference-router.md`, which sends you to one artifact under
+`generated/win.eventlog.security/` by the shape of the question you are holding. Start at that
+module's `README.md` if you are not sure which one you want.
+
+Two things this table cannot tell you that the generated set can: which curated surface writes a
+given field (promotion is per surface, not per module), and whether a rendered pattern string is one
+the pack meant to produce.

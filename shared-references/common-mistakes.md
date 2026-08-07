@@ -213,7 +213,7 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` or `low`.
 
 **Symptom.** You filter on a curated field (`sparklogs.reason`, a module-prefixed field) or on a retired name (`event_kind`, `SLAAgentOp`, `event_summary`, `state.*`), get zero rows back, and conclude the system is healthy or the check passed.
 
-**Why it's wrong.** These are DESIGNED fields in the schema, but itl-agent has zero production emission of them today. Every query filtering on them returns empty on every source, whether or not a problem exists. Empty means "not emitted yet," never "no problem found."
+**Why it's wrong.** These are DESIGNED fields in the schema, but the SparkLogs Managed Agent has zero production emission of them today. Every query filtering on them returns empty on every source, whether or not a problem exists. Empty means "not emitted yet," never "no problem found."
 
 **Recovery.** Fall back to shallow-triage fields that ARE emitted today: `message`, `severity`, `source`, `app`, `subsource`, `pattern` / `pattern_hash`, timestamps. Use `query_grouped_aggregation` on `severity` or `pattern` for volume/anomaly triage instead of the deep fields. State explicitly in the Finding or WHAT WAS NOT CHECKED that the deep-field check came back empty because the telemetry isn't emitted yet, not because nothing is wrong.
 

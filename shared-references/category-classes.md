@@ -25,7 +25,7 @@ returns zero rows on a fleet full of context rows. To select them, test for the 
 `NOT sparklogs.class!`. To select context rows of a given morphology, filter on the kind instead,
 which IS written: `sparklogs.kind = inventory`.
 
-`NOISE` exists as an authoring outcome and never reaches you: it is the one class that drops an event.
+`NOISE` never reaches you: it is the one class that drops an event, so no query can return one.
 
 **BENIGN is about TEXT, not outcome.** A routine success is `CONTEXT`, not `BENIGN`. `BENIGN` means a
 naive reader would think the line is bad and it is not.
@@ -111,6 +111,12 @@ severity >= 20.**
 aliases that normalize third-party logs onto this ladder, and they are worth naming only when you are
 explaining that normalization to someone.
 
+**Returned values are data; your prose is yours.** Server responses may render an intermediate rung
+under a short form such as `WARN2` or `WARN3`. When you quote a returned value, quote it VERBATIM: it
+is the datum, and paraphrasing it breaks the link between your finding and the row it came from. When
+you write in your own voice, use the primary name for that rung. Both appear in one sentence
+naturally: `severity WARN3 (minor)`.
+
 **Critical+ is a fetch-first contract.** Any non-zero critical+ count in scope means: fetch those
 events before proceeding, whatever the ticket was about. Producers admit `Critical` only for facts an
 engineer working an unrelated issue must always be told, so the count is small and always material.
@@ -122,7 +128,12 @@ vendor's taxonomy. A curated pack re-grades by consequence.
 ## Kind, and why counts double
 
 `sparklogs.kind` says what MORPHOLOGY a row is: `inventory`, `monitor`, `delta`, `agent_op`,
-`config_change`. It is a different question from class and from severity.
+`config_change`, `malformed`. It is a different question from class and from severity.
+
+`malformed` marks a row that did not parse cleanly, and it does not stand alone: a row can keep a
+valid `kind` and still carry `malformed_event=true`, so a `kind=malformed` filter by itself misses
+those. Read the pair. A kind outside this list is possible and is not a bug: a newer agent may emit
+one, and it is deliberately not dropped, so an unfamiliar `kind` is a real row rather than noise.
 
 Counts are keyed on `kind`, and one underlying fault can legitimately appear twice: a failing volume
 shows up as a `monitor` row for the condition and again inside the `inventory` row for the box. That

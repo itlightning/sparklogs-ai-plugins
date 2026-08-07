@@ -165,4 +165,4 @@ This catalog updates when:
 - A recurring pattern is observed and added to the catalog.
 - A pattern's likely meaning is corrected based on real investigation outcomes.
 - New vendor products produce patterns we haven't catalogued.
-- Quarterly review.
+- A scheduled refresh comes round.
