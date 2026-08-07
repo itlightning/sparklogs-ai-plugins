@@ -177,6 +177,16 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` or `low`.
 
 ## Methodology mistakes (efficiency / correctness)
 
+### Reading returned rows as the whole population
+
+**Symptom.** A query comes back with N rows. You count them, or you read the earliest and latest row as the data's start and end, and report from that.
+
+**Why it's wrong.** Responses are capped: a wide fieldset or a big match returns ONE PAGE, and the page looks exactly like a complete short answer. The envelope already tells you otherwise: the summary carries the matched TOTAL, and `last_event_at` carries when data actually stops.
+
+**The failure this produces.** An investigation read the first page of a capped result, saw its oldest rows dated four days back, and reported that both monitored systems had been dead for four days. Both were healthy and reporting; the later pages were simply never fetched. The contradicting total was in the same response, unread.
+
+**Recovery.** Before any claim about how much, how many, or how long: read the matched total, read `last_event_at`, and page with `refine_query_result` if you need rows the first page did not carry. If the total is larger than what you received, say which you are quoting.
+
 ### Reaching for `query_logs` first
 
 **Symptom.** First MCP call (after `resolve_scope` and `list_sources`) is `query_logs` for a broad raw retrieval.
