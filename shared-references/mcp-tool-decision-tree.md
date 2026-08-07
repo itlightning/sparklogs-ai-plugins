@@ -148,7 +148,10 @@ list_device_health(
 - **What is on the box:** inventory rows. Keep `inventory` in `kinds`; those rows normally carry no
   class at all, and they are the ground truth an RCA needs. `CONTEXT` is the absence of a class, not
   a filterable value.
-- **Fleet shape of a condition:** `group_by_reason` with `fieldset: "fleet"`.
+- **Fleet shape of a condition:** `group_by_reason: true`. **Grouped mode takes no `fieldset` and no
+  `fields`:** it returns fixed per-reason columns, not device rows, so there is no projection to
+  choose. Passing `fields` alongside it is an error; passing `fieldset` does nothing. Pick the
+  fieldset only on the row-mode call.
 
 **Read before using:** `device-state-fields.md` for the column names, the honesty fields, and what
 you may and may not say about a duration or a clear time. Two traps live there: the silent-device
@@ -205,7 +208,7 @@ query_grouped_aggregation(
   end: "...",
   include_sub_orgs: true,
   group_field: "pattern" | "source" | "severity" | "service" | "app" | "subsource" | "category" | "<field>_hash" | "<custom.field>",   # a single field
-  group_fields: ["...", "..."],    # 2-3 fields for a cross-tab; use instead of group_field
+  group_fields: ["...", "..."],    # 2-3 fields for a cross-tab; use INSTEAD of group_field, not with it
   lql: "...",                      # optional LQL filter applied before grouping
   limit: 50,                       # max distinct groups by hit count (default 50, hard cap 10000)
   external_investigation_id: "..."

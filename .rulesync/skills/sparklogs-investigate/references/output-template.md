@@ -34,9 +34,14 @@ OBSERVED CONDITIONS
   Finding 2: ...
   ... (typically 3-7 findings)
 
-ANOMALY SIGNALS USED (if any)
+ANOMALY SIGNALS USED (if any; normally absent, see below)
 [brief enumeration, with explicit framing: "These anomaly indicators helped focus the investigation
  on signal-rich events. They are internal investigation tools, not standalone problem alerts."]
+
+  `anomaly_max_score` / `anomaly_max_score_confidence` are designed and not emitted anywhere in
+  the product today, so this section is normally absent. Include it only when you actually read an
+  anomaly field and it carried a value. Do not model a Finding on one: a citation for a signal no
+  source emits is the exact confidently-wrong shape this template exists to prevent.
 
 WHAT WAS EXAMINED
 - Backing queries: <N>
@@ -140,8 +145,9 @@ NOT:
 - "Note: recommend restarting the service" <- recommendation; not this skill's role
 
 ### Anomaly Signals Used
-Optional section. If anomaly fields helped you focus the investigation (e.g., `anomaly_max_score >= 60` filter narrowed your candidate set), list briefly. Required framing: anomalies are internal investigation tools, not standalone problem alerts. Example:
-- "anomaly_max_score >= 60 filter on the source-scoped backing query identified vss_writers and services as candidate subsources for deeper investigation. Anomaly fields supported finding-discovery efficiency; they are not surfaced as standalone problem indicators in this summary."
+Optional section, and **normally absent**: `anomaly_max_score` / `anomaly_max_score_confidence` are designed and not emitted anywhere in the product today, so the canonical context-reduction filter reduces to its `severity` half on every source. Omitting the section is the usual correct outcome, and the missing anomaly half is never "no anomalies."
+
+Include it only if you actually read an anomaly field and it carried a value. Then list briefly, with the required framing: anomalies are internal investigation tools, not standalone problem alerts. Never build a Finding on one: a citation for a signal no source emits is the confidently-wrong shape this template exists to prevent.
 
 ### What Was Examined
 Track the running counts (backing queries, refinements, sources/orgs covered, matched population) in your local investigation-state document as you go. All figures here come from server-returned query summaries, not self-reported estimates. This section shows the engineer how much evidence backs the summary: how many queries ran, how broad a scope they covered, how many events were in the matched population.
@@ -250,13 +256,6 @@ Finding 7: No ingest_drop, spool_full, or backpressure events on srv-fileshare01
   Sources contributing: srv-fileshare01
   Time window of evidence: 2026-04-22 00:00 to 2026-04-23 14:00 UTC
   Note: Source data is complete for the relevant window. Evidence is not affected by ingest gaps.
-
-ANOMALY SIGNALS USED
-- anomaly_max_score=88 with rule_state_expectation detector flagged Finding 1's vss_writers state
-  change as anomalous (writer in FAILED state when baseline is Idle). This signal supported
-  finding-discovery efficiency by pointing the investigation at vss_writers early. Anomaly fields
-  are internal investigation tools, not standalone problem alerts - this Finding is surfaced
-  because the engineer asked about backups, not because the anomaly fired.
 
 WHAT WAS EXAMINED
 - Backing queries: 4

@@ -100,8 +100,9 @@ OBSERVED CONDITIONS
   Time window of evidence: [start] to [end]
   [Optional Note: brief context, observation-grounded, no speculation]
 
-ANOMALY SIGNALS USED (only if applicable)
-[brief list, with explicit framing as internal investigation tools, not user-visible problem alerts]
+ANOMALY SIGNALS USED (only if applicable; normally absent)
+[brief list, with explicit framing as internal investigation tools, not user-visible problem alerts.
+ `anomaly_max_score` / `anomaly_max_score_confidence` are designed and not emitted anywhere in the product today, so this section is normally absent.]
 
 WHAT WAS EXAMINED
 - Backing queries: <N>
@@ -259,6 +260,7 @@ Six fields carry a normalized value plus an opaque `_hash` companion, and togeth
 
 **How to use it:**
 - **Group** (`query_grouped_aggregation(group_field=<field or its _hash>)`) to find dominant or anomalous groups, densest first. Group by `pattern_hash` for the most-repeated normalized events; by `service` or `subsource` to localize the noisy component.
+- **Cross-tab when the PAIRING is the question.** `group_fields=["<a>", "<b>"]` groups by 2-3 fields at once, instead of `group_field`. "Which reason, on which machines" is `["reason", "instance"]`; "what changed, on what" is `["config_change_type", "target_name"]`. Two single-field passes tell you the busiest reason and the busiest host separately, which is not the same answer: one reason concentrated on one host and the same volume spread across forty hosts look identical until you group on the pair. Reach for it whenever a fleet question has two nouns in it.
 - **Dedup and track stability.** A `_hash` is a stable identity - the same hash means the same normalized value or pattern, across events and across time.
 - **Drill** with `query_logs(lql='pattern_hash = "<h>"')` or `refine_query_result(filter_lql=...)` to read the actual events behind a hash.
 - **Correlate across windows for first-occurrence detection.** A `pattern_hash` present in the incident window but absent from a healthy baseline window signals new behavior - a primary RCA signal. Run `query_grouped_aggregation` twice, once per window, and compare the two hash populations (the v1 substitute for the fast-follow `query_period_diff` tool). **A source-pack release recomputes pattern identity for the sources it curates**, so a baseline window on one side of a pack deploy and an incident window on the other compare nothing: every hash reads as new. When the two windows straddle a release, pick a baseline inside the same pack era and say which era you used.
@@ -314,7 +316,7 @@ The v1 catalog is these eleven tools:
 | `list_scope_ladder` | billed discovery | Discover app/service/subsource structure (not LQL-filtered). Narrow with `agent_ids` / `source` / `field_match`. For filtered counts within an LQL slice, use `query_grouped_aggregation`. |
 | `describe_pattern` | billed* | Full pattern text, stats, fleet spread, and example messages for one or more `pattern_hash` values. There is no per-pattern sample count to set: counts are chosen server-side for diversity, and examples come back for roughly your first 25 hashes by list order, so list the highest-interest ones first. *Examples require `mcp:query`; stats-only works on `mcp:observe`. Required before citing teaser patterns. |
 | `list_fields` | lightweight | Field catalog for building NEW queries - only if standard/known fields don't surface enough. Not a first-pass tool. |
-| `query_grouped_aggregation` | backing scan | Group every matching event by one `group_field`; top values by hit count. The workhorse for "what's happening" within an LQL filter - run it BEFORE raw logs. |
+| `query_grouped_aggregation` | backing scan | Group every matching event by one `group_field`, or by 2-3 fields with `group_fields` for a cross-tab. Top values by hit count. The workhorse for "what's happening" within an LQL filter - run it BEFORE raw logs. |
 | `query_logs` | backing scan | Retrieve raw chronological events. Last resort, over an already-narrowed window/filter. No `limit`: you get one server-sized page, `summary` carries the matched total, and further pages come from `refine_query_result` on the returned `query_id`. |
 | `refine_query_result` | lightweight | Relational engine over a cached `query_id` (filter/group/aggregate/having/order/select/page). Use freely; touches the cache, not the source. |
 | `get_query_metadata` | lightweight* | Cache/field introspection over a `query_id`. Default = bookkeeping only (fast). *`top_n`/`field_match` deep field discovery is a full catalog scan of the source - use deliberately. |
