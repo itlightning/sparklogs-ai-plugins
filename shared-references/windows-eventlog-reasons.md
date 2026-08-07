@@ -148,6 +148,8 @@ This module is shipped and curated, and it has its own generated reference set r
 rows here: 50 curated surfaces with a field schema, closed vocabularies, an expected-pattern
 decision procedure and worked query recipes.
 
+Scope a query to this channel with `subsource = "win.eventlog.security"`.
+
 Route to it through `generated-reference-router.md`, which sends you to one artifact under
 `generated/win.eventlog.security/` by the shape of the question you are holding. Start at that
 module's `README.md` if you are not sure which one you want.

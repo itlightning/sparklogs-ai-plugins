@@ -106,16 +106,40 @@ rank against each other honestly.
 Severity is also an integer, 1 through 24, and the two forms are the same fact. **`critical+` means
 severity >= 20.**
 
+### One severity, three spellings
+
+The same rung shows up under three different spellings depending on where you are reading it. This
+table is the bridge; everything else about severity in this doc set points here.
+
+| Where you see it | Form | Example |
+|---|---|---|
+| Prose you write, and LQL filters | lowercase primary name | `severity in (error, critical)` |
+| Returned values and histogram keys | UPPERCASE band name | `ERROR`, `CRITICAL`, and `WARN2` / `WARN3` for rungs between the named ones |
+| Numeric filters and `severity_level` | integer 1-24 | `min_severity: 17` |
+
+The bands, which are the same on every tool:
+
+| Integer | Band |
+|---|---|
+| 13-15 | warning |
+| 16 | minor |
+| 17 | error |
+| 18 | serious |
+| 19 | severe |
+| 20 | critical |
+| 21-24 | fatal-class (fatal, alert, panic, emergency) |
+
+So `cnt_warn_error` is 13-19 and `cnt_critical_plus` is >= 20. A histogram key of `FATAL` covers
+21-24, not just 21.
+
+**Quote returned values verbatim, write primaries in your own voice.** A histogram key is a datum:
+paraphrasing `WARN3` as "warning" breaks the link between your finding and the row. Both fit in one
+sentence: `severity WARN3 (minor)`.
+
 **Use the primary names.** Write `serious`, `minor`, `severe`. Do not write `error2`, `error4`,
 `warn4` or the other OTel short forms in prose, filters or findings; they exist only as ingest
 aliases that normalize third-party logs onto this ladder, and they are worth naming only when you are
 explaining that normalization to someone.
-
-**Returned values are data; your prose is yours.** Server responses may render an intermediate rung
-under a short form such as `WARN2` or `WARN3`. When you quote a returned value, quote it VERBATIM: it
-is the datum, and paraphrasing it breaks the link between your finding and the row it came from. When
-you write in your own voice, use the primary name for that rung. Both appear in one sentence
-naturally: `severity WARN3 (minor)`.
 
 **Critical+ is a fetch-first contract.** Any non-zero critical+ count in scope means: fetch those
 events before proceeding, whatever the ticket was about. Producers admit `Critical` only for facts an

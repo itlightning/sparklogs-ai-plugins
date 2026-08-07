@@ -33,8 +33,16 @@ Two shapes deserve their own line because they are the ones people get wrong:
 ## How to get to a module
 
 1. Resolve the source. A ticket names a machine and a symptom; a query result names a `subsource`.
-   The `subsource` IS the module id: an event carrying `subsource = win.eventlog.security` is
-   described by `generated/win.eventlog.security/`.
+   The `subsource` IS the module id, and it works in both directions. Given an event carrying
+   `subsource = win.eventlog.security`, the module is `generated/win.eventlog.security/`. Given a
+   module you want to query, the module id IS the LQL scoping predicate:
+
+   ```
+   subsource = "win.eventlog.security"
+   ```
+
+   That is the canonical way to scope a query to one channel. Reach for `list_scope_ladder` to
+   discover which subsources a client HAS, not to look up one you already know.
 2. Open that module's `README.md`. It is the module index and it is short.
 3. Open the one artifact the table above points at.
 

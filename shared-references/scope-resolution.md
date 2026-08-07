@@ -158,7 +158,7 @@ Each row is one **(collector, origin)** pair in the window:
 | `source` | Origin host label |
 | `event_count`, `bytes_ingested` | Volume in the window |
 | `cnt_interesting`, `distinct_interesting` | Triage: how much is going on here |
-| `cnt_warn_error` | Severity 13-19: warning, minor, error, serious, severe |
+| `cnt_warn_error` | Severity 13-19 (see the severity mapping in `category-classes.md`) |
 | `cnt_critical_plus` | Severity >= 20: critical, fatal and above. Rare, and fetch-first whatever the ticket was about |
 | `first_event_at`, `last_event_at` | Exact window bounds for this pair |
 
@@ -179,11 +179,13 @@ The tool response includes a hint when the teaser is present.
 
 Cross-reference **`resolve_scope` verdicts** with **`list_sources` presence** before deep queries.
 
+**Two planes.** `verdict` describes the AGENT SERVICE plane (is the agent checking in on its control channel). Event flow describes the COLLECTOR plane (did data reach us). They can legitimately disagree, and a verdict of `offline` beside events arriving minutes ago is a shape you should expect rather than a puzzle. Never resolve a disagreement by silently believing one plane.
+
 | Situation | Action |
 |---|---|
-| Collector **`stuck`** or **`offline`**, and no (or negligible) events in the window for that `agent_id` | **HALT.** Absence of logs is a finding about the collector, not proof the endpoint is healthy. Tell the engineer the agent appears stuck/offline and telemetry may be missing for that reason. |
+| Collector **`stuck`** or **`offline`**, and no (or negligible) events in the window for that `agent_id` | **HALT.** Absence of logs is a finding about the collector, not proof the endpoint is healthy. Tell the engineer the agent appears stuck or offline and telemetry may be missing for that reason. |
 | Collector **`running`** (or ingest key **`active`**), but no events for the expected `source` in the window | HALT and ask: wrong source name, wrong window, or origin labeled differently? Surface similar `source` values from the response. |
-| Events present despite **`offline`** / **`idle`** verdict | Data in the window is still valid evidence; note the collector state in WHAT WAS NOT CHECKED (telemetry may stop after `last_event_at`). |
+| Events present despite an **`offline`** / **`idle`** verdict | **Normal, not a contradiction.** The data is valid evidence for what arrived. Record the disagreement in WHAT WAS NOT CHECKED as a disagreement ("agent service reported offline while events continued to arrive; the service-plane state was not established"), and do not downgrade the data for it. |
 | Relay / key ingest: one `agent_id`, many `source` values | Expected. Scope with `agent_id` for the collector and `source` for the origin host. |
 
 Do not filter `list_sources` by "reporting now" when the engineer asked about a past incident.
