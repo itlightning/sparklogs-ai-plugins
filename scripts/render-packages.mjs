@@ -16,6 +16,10 @@ const HOST_LABELS = {
   cursor: 'Cursor',
   generic: 'generic Agent Skills hosts',
 };
+// Build inputs that must never ride into a shipped package. validate-rendered.mjs asserts the same
+// list, so an addition here without one there fails the build rather than shipping quietly.
+const MAINTAINER_ONLY = new Set(['SYNC-MANIFEST.json']);
+
 const BRAND_ASSETS = ['logo.svg', 'logo.png', 'icon.svg', 'icon-256.png', 'icon-512.png'];
 const SEMVER = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/;
 
@@ -76,14 +80,15 @@ async function copyFile(src, dst) {
   await fs.chmod(dst, 0o644);
 }
 
-async function copyDirMaterialized(src, dst) {
+async function copyDirMaterialized(src, dst, skip = new Set()) {
   await fs.mkdir(dst, { recursive: true });
   const entries = await fs.readdir(src, { withFileTypes: true });
   for (const entry of entries.sort((a, b) => a.name.localeCompare(b.name))) {
+    if (skip.has(entry.name)) continue;
     const from = path.join(src, entry.name);
     const to = path.join(dst, entry.name);
     const stat = await fs.stat(from);
-    if (stat.isDirectory()) await copyDirMaterialized(from, to);
+    if (stat.isDirectory()) await copyDirMaterialized(from, to, skip);
     else await copyFile(from, to);
   }
 }
@@ -156,7 +161,7 @@ function buildClaudeMarketplace(metadata) {
   };
 }
 
-/** Cursor: metadata.description (not top-level), owner required, source without ./ — see Cursor plugins reference */
+/** Cursor: metadata.description (not top-level), owner required, source without ./: see Cursor plugins reference */
 function buildCursorMarketplace(metadata) {
   const owner = { name: metadata.author.name };
   if (metadata.author.email) owner.email = metadata.author.email;
@@ -216,12 +221,12 @@ function repositoryRootUrl(metadata) {
   return String(metadata.repository ?? '').replace(/\.git\/?$/, '').replace(/\/$/, '');
 }
 
-/** README inside each built plugin package — not the repo root README (avoids broken links). */
+/** README inside each built plugin package: not the repo root README (avoids broken links). */
 function pluginPackageReadme(host, metadata) {
   const label = HOST_LABELS[host] ?? host;
   const repo = repositoryRootUrl(metadata);
   const display = metadata.hosts?.[host]?.displayName ?? metadata.displayName;
-  return `# ${display} — ${label} bundle
+  return `# ${display}: ${label} bundle
 
 This directory is the **built SparkLogs AI plugin** for **${label}**, shipped from the SparkLogs plugin repository.
 
@@ -255,6 +260,11 @@ async function renderHost(host, out, metadata, version) {
   await copyDirMaterialized(path.join(ROOT, '.rulesync', 'skills'), path.join(base, 'skills'));
   await copyDirMaterialized(path.join(ROOT, '.rulesync', 'commands'), path.join(base, 'commands'));
   await copyDirMaterialized(path.join(ROOT, '.rulesync', 'subagents'), path.join(base, 'agents'));
+  // Skills cite generated artifacts as `generated/<module>/<file>.md`. Carrying the tree into the
+  // package keeps that one path string true both inside an installed plugin and in a source checkout.
+  // The sync manifest stays behind: it records which upstream checkout the reference set came from,
+  // which is maintainer provenance rather than anything a reader of the package can act on.
+  await copyDirMaterialized(path.join(ROOT, 'generated'), path.join(base, 'generated'), MAINTAINER_ONLY);
   if (host === 'cursor' || host === 'generic') {
     await copyDirMaterialized(path.join(ROOT, '.rulesync', 'rules'), path.join(base, 'rules'));
   }

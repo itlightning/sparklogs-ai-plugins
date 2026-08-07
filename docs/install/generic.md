@@ -10,12 +10,12 @@ On the repository **`dist`** branch, the neutral package lives at:
 
 It includes:
 
-- `skills/` — Agent Skills (`SKILL.md` files)
-- `commands/` — slash-command definitions
-- `agents/` — subagent definitions
-- `rules/` — guidance rules (same rule set as the Cursor package)
-- `assets/` — brand assets
-- `mcp.json` — SparkLogs MCP server URL and `Authorization: Bearer ${SPARKLOGS_API_TOKEN}` header template
+- `skills/`: Agent Skills (`SKILL.md` files)
+- `commands/`: slash-command definitions
+- `agents/`: subagent definitions
+- `rules/`: guidance rules (same rule set as the Cursor package)
+- `assets/`: brand assets
+- `mcp.json`: SparkLogs MCP server URL and `Authorization: Bearer ${SPARKLOGS_API_TOKEN}` header template
 
 There is no separate marketplace manifest for generic; clone or browse **`dist`** and point your tooling at that folder (or copy it into your host’s expected layout).
 

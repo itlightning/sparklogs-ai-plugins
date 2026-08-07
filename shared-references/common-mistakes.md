@@ -177,11 +177,21 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` or `low`.
 
 ## Methodology mistakes (efficiency / correctness)
 
+### Reading returned rows as the whole population
+
+**Symptom.** A query comes back with N rows. You count them, or you read the earliest and latest row as the data's start and end, and report from that.
+
+**Why it's wrong.** Responses are capped: a wide fieldset or a big match returns ONE PAGE, and the page looks exactly like a complete short answer. The envelope already tells you otherwise: the summary carries the matched TOTAL, and `last_event_at` carries when data actually stops.
+
+**The failure this produces.** An investigation read the first page of a capped result, saw its oldest rows dated four days back, and reported that both monitored systems had been dead for four days. Both were healthy and reporting; the later pages were simply never fetched. The contradicting total was in the same response, unread.
+
+**Recovery.** Before any claim about how much, how many, or how long: read the matched total, read `last_event_at`, and page with `refine_query_result` if you need rows the first page did not carry. If the total is larger than what you received, say which you are quoting.
+
 ### Reaching for `query_logs` first
 
 **Symptom.** First MCP call (after `resolve_scope` and `list_sources`) is `query_logs` for a broad raw retrieval.
 
-**Why it's wrong.** Aggregation first. `query_logs` is the *last resort*, not the first. Aggregation returns a dense, denominated answer instead of a pile of raw rows, and improves correctness in published observability-MCP retrospectives.
+**Why it's wrong.** Aggregation first. `query_logs` is the *last resort*, not the first. Aggregation returns a dense, denominated answer instead of a pile of raw rows: you learn what the population looks like before you spend the window reading a slice of it.
 
 **Recovery.** First substantive call should usually be `query_grouped_aggregation` (group by the field the question is about). Use `query_logs` only when aggregation has narrowed to a specific small set whose raw text matters.
 
@@ -207,13 +217,13 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` or `low`.
 
 **Why it's wrong.** Source might have been emitting `ingest_drop` / `spool_full` / `backpressure` events during the window, in which case "no evidence" might just mean "data was incomplete."
 
-**Recovery.** Before any "no evidence found" conclusion, run a quick check: `query_logs(lql='source = "<X>" AND event_kind = SLAAgentOp AND subsource in (ingest_drop, spool_full, backpressure)', start=..., end=...)`. If drops occurred, qualify the Finding's confidence and surface in WHAT WAS NOT CHECKED. **Caveat today: `event_kind` / `SLAAgentOp` are deep fields the Managed Agent doesn't emit yet, so this check returns empty on every source regardless of true ingest health.** Treat an empty result as inconclusive, not "no drops," and fall back to `list_sources` event-count trends as the current completeness signal.
+**Recovery.** Before any "no evidence found" conclusion, run `query_logs(lql='source = "<X>" AND sparklogs.kind = agent_op', start=..., end=...)`. Those rows are stamped when an investigator must distrust other data on that host. If any fired, qualify the Finding's confidence and surface it in WHAT WAS NOT CHECKED. An EMPTY result is inconclusive rather than reassuring: a healthy agent, an agent that is not reporting, and a topic disabled for that agent's rollout ring all look identical from here. Cross-check `list_sources` event-count trends and say which case you could not rule out.
 
 ### Reading an empty deep-field query as a clean bill of health
 
-**Symptom.** You filter on `event_kind`, `SLAAgentOp`, `anomaly_max_score`, `anomaly_categories`, or any `state.*` field, get zero rows back, and conclude the system is healthy or the check passed.
+**Symptom.** You filter on a curated field (`sparklogs.reason`, a module-prefixed field) or on a retired name (`event_kind`, `SLAAgentOp`, `event_summary`, `state.*`), get zero rows back, and conclude the system is healthy or the check passed.
 
-**Why it's wrong.** These are DESIGNED fields in the schema, but itl-agent has zero production emission of them today. Every query filtering on them returns empty on every source, whether or not a problem exists. Empty means "not emitted yet," never "no problem found."
+**Why it's wrong.** These are DESIGNED fields in the schema, but the SparkLogs Managed Agent has zero production emission of them today. Every query filtering on them returns empty on every source, whether or not a problem exists. Empty means "not emitted yet," never "no problem found."
 
 **Recovery.** Fall back to shallow-triage fields that ARE emitted today: `message`, `severity`, `source`, `app`, `subsource`, `pattern` / `pattern_hash`, timestamps. Use `query_grouped_aggregation` on `severity` or `pattern` for volume/anomaly triage instead of the deep fields. State explicitly in the Finding or WHAT WAS NOT CHECKED that the deep-field check came back empty because the telemetry isn't emitted yet, not because nothing is wrong.
 
@@ -245,7 +255,7 @@ These don't exist in LQL. Use `:`/`*`/`?`, `:`/`/regex/`, `<field>!`/`NOT <field
 
 ### Wildcard JSON paths
 
-`state.services.*.status = STOPPED` does NOT work. Use `event_summary.auto_start_not_running!` or top-level anomaly fields, or direct keyed lookup when key is known.
+`x.services.*.status = STOPPED` does NOT work: type resolution needs an exact path. Use a promoted field, the message, or a direct keyed lookup when the key is known.
 
 ### Square brackets for value lists
 
@@ -265,7 +275,7 @@ Don't keep retrying with slightly different broken expressions. If the LQL parse
 
 ### Skipping required sections
 
-Every summary MUST have: EXECUTIVE SUMMARY (at top), SCOPE CHECKED, OBSERVED CONDITIONS, WHAT WAS NOT CHECKED (which lives inside SCOPE CHECKED), WHAT WAS EXAMINED, AUDIT TRAIL, POSSIBLE NEXT DIRECTIONS (with the explore-or-analyze invitation). ANOMALY SIGNALS USED is required only if you used anomaly fields.
+Every summary MUST have: EXECUTIVE SUMMARY (at top), SCOPE CHECKED, OBSERVED CONDITIONS, WHAT WAS NOT CHECKED (which lives inside SCOPE CHECKED), WHAT WAS EXAMINED, AUDIT TRAIL, POSSIBLE NEXT DIRECTIONS (with the explore-or-analyze invitation). ANOMALY SIGNALS USED is required only if you used anomaly fields, which nothing emits today, so it is normally absent.
 
 ### Making the POSSIBLE NEXT DIRECTIONS section longer than 3 sentences
 

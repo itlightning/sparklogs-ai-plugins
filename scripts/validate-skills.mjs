@@ -10,7 +10,10 @@ const ROOT = process.cwd();
 const PORTABLE = /^[a-z0-9][a-z0-9-]*[a-z0-9]$/;
 const REQUIRED_ASSETS = ['logo.svg', 'logo.png', 'icon.svg', 'icon-256.png', 'icon-512.png'];
 const SHARED_REFERENCES = [
+  'category-classes.md',
   'common-mistakes.md',
+  'device-state-fields.md',
+  'generated-reference-router.md',
   'lql-reference.md',
   'mcp-tool-decision-tree.md',
   'msp-tool-registry.md',
@@ -18,8 +21,49 @@ const SHARED_REFERENCES = [
   'pattern-catalog.md',
   'scope-ladder.md',
   'scope-resolution.md',
+  'service-taxonomy.md',
   'subagent-definitions.md',
+  'windows-eventlog-reasons.md',
   'writing-voice.md',
+];
+
+// Pinned snapshot of `service_vocabulary` from the SparkLogs source-library registry
+// (registry.yaml). The registry is the authority and is additive-only; this list is the
+// sync point for a standalone checkout of this repo. Adding a registry value requires
+// adding it here AND as a row in shared-references/service-taxonomy.md in the same change;
+// validateServiceTaxonomy() fails until both agree.
+const REGISTRY_SERVICE_VALUES = [
+  'storage',
+  'patching',
+  'auth',
+  'security_audit',
+  'networking',
+  'vpn',
+  'file_sharing',
+  'file_sync',
+  'printing',
+  'backup',
+  'os_stability',
+  'app_stability',
+  'hardware',
+  'performance',
+  'user_profiles',
+  'remote_access',
+  'rmm',
+  'endpoint_protection',
+  'device_management',
+  'directory_services',
+  'certificates',
+  'virtualization',
+  'clustering',
+  'database',
+  'web',
+  'email',
+  'time_sync',
+  'licensing',
+  'telephony',
+  'scheduled_tasks',
+  'inventory',
 ];
 
 async function exists(file) {
@@ -90,6 +134,28 @@ async function validateReferences() {
   }
 }
 
+async function validateServiceTaxonomy() {
+  const file = path.join(ROOT, 'shared-references', 'service-taxonomy.md');
+  const text = await fs.readFile(file, 'utf8');
+  const rows = new Set();
+  for (const line of text.split('\n')) {
+    const match = line.match(/^\| `([a-z0-9_]+)` \|/);
+    if (match) rows.add(match[1]);
+  }
+  const expected = new Set(REGISTRY_SERVICE_VALUES);
+  if (expected.size !== REGISTRY_SERVICE_VALUES.length) {
+    throw new Error('REGISTRY_SERVICE_VALUES contains duplicates');
+  }
+  const missing = REGISTRY_SERVICE_VALUES.filter((value) => !rows.has(value));
+  if (missing.length) {
+    throw new Error(`service-taxonomy.md lacks rows for registry values: ${missing.join(', ')}`);
+  }
+  const unknown = [...rows].filter((value) => !expected.has(value));
+  if (unknown.length) {
+    throw new Error(`service-taxonomy.md has rows outside the registry vocabulary: ${unknown.join(', ')}`);
+  }
+}
+
 async function validateAssets() {
   for (const asset of REQUIRED_ASSETS) {
     if (!await exists(path.join(ROOT, 'assets', asset))) throw new Error(`Missing required asset: assets/${asset}`);
@@ -99,5 +165,6 @@ async function validateAssets() {
 await validateSkills();
 await validatePackage();
 await validateReferences();
+await validateServiceTaxonomy();
 await validateAssets();
 console.log('Source validation passed');

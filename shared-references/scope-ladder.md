@@ -14,7 +14,7 @@ This is the primary shallow-triage RCA lever available today: lean on it hard.
 
 **Degrade gracefully.** If a `group_field` on `service` (or another conditional field) returns a single empty or null group, that source simply does not carry `service`. Fall back to `pattern_hash`. Do not read "no groups" (or one empty group) as a Finding; it means the field is not populated for this source.
 
-**This differs from the deep RCA fields.** `state.*`, `event_kind`, and `anomaly_*` are designed but not yet emitted by the Managed Agent (see the field-availability rule in SKILL.md Section 8). The scope ladder is available today: `pattern_hash` on every source, the other five when data carries them.
+**The ladder is universal where curated fields are not.** `pattern_hash` is computed on every source; the other five are computed whenever the source's data carries that base field. Curated and module fields are per-source and per-surface (see the field-availability rule in SKILL.md Section 8), so an empty result there says less than it looks like it does.
 
 ---
 
@@ -43,7 +43,8 @@ Climb the ladder to localize a problem: group coarse to find the noisy component
 
 **`list_scope_ladder`** (cheap discovery, not LQL-filtered):
 - Runs a cheap discovery scan for app / service / subsource structure in org scope and time window.
-- Per-row triage: `event_count`, `cnt_interesting`, `cnt_severe`, `distinct_interesting`, `first_event_at`, `last_event_at`.
+- Per-row triage: `event_count`, `cnt_interesting`, `cnt_warn_error` (severity 13-19), `cnt_critical_plus` (severity >= 20), `distinct_interesting`, `first_event_at`, `last_event_at`.
+- Critical+ fetch-first: a non-zero `cnt_critical_plus` in any row in scope means fetch those events before proceeding, whatever the investigation topic (`category-classes.md`, Query notes).
 - Narrow with `agent_ids` (collector UUIDs), `source` substring, or `field_match` over dimension names.
 - Summary may include `top_interesting_patterns` teaser; call **`describe_pattern`** before citing any teaser pattern.
 
@@ -103,7 +104,7 @@ When a row's inline value is blank, resolve it from `lookups`. Never show a raw 
 1. `list_scope_ladder` or `query_grouped_aggregation(group_field="service", ...)` over the fleet or source: which component is noisiest.
 2. `query_grouped_aggregation(group_field="pattern", lql='service = "<noisy service>"', ...)`: which pattern within that component dominates.
 3. Compare against a healthy baseline window: is the top pattern new, or normal volume?
-4. `describe_pattern` on the surviving `pattern_hash`, then `query_logs(lql='pattern_hash = "<h>"', ...)` for event-level evidence.
+4. `describe_pattern(pattern_hashes=["<h>"])` on the surviving hash, then `query_logs(lql='pattern_hash = "<h>"', ...)` for event-level evidence.
 
 Skip rungs when the symptom already points at a specific field.
 Fall back to `pattern_hash` alone whenever a conditional field is not populated for the source in scope.

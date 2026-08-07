@@ -25,7 +25,11 @@ jobs:
         run: corepack enable
       - name: Install dependencies
         run: yarn install --immutable --check-cache
+      # Fork PRs only. The trailer's job is provenance for contributions we do not
+      # already hold the rights to, which is exactly the fork case; requiring it on
+      # branches pushed to this repository adds friction without adding a record.
       - name: DCO check
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository
         run: |
           set -euo pipefail
           if [ "${{ github.event_name }}" = "pull_request" ]; then
