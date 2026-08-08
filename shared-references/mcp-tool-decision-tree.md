@@ -106,7 +106,7 @@ list_sources(
 **Use cases:**
 - **Scope discovery:** confirm expected collector/source pairs have events; cross-check `verdict` (stuck/offline halt rules in `scope-resolution.md`).
 - **Fleet enumeration:** list collector/origin pairs in the window.
-- **Triage:** `cnt_interesting` and the failure-side band counts (`cnt_warning` through `cnt_critical_plus`) before deep queries. The bands, and the name / integer / histogram-key spellings of each rung, are mapped in `category-classes.md`.
+- **Triage:** `cnt_interesting` and the failure-side band counts (`cnt_warning` through `cnt_critical_plus`) before deep queries. The nine bands, and the four spellings a severity shows up under, are mapped in `category-classes.md`.
 - **Critical+ fetch-first:** any non-zero `cnt_critical_plus` (severity >= 20) in scope means fetch
   those events before proceeding, whatever the investigation topic (`category-classes.md`, Query
   notes).

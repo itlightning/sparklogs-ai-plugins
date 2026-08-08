@@ -88,7 +88,7 @@ read it, so the word in your output is "reason".
 SparkLogs has one severity ladder, shared across every source, so a curated pack and a raw vendor log
 rank against each other honestly.
 
-| Band | Means |
+| Rung | Means |
 |---|---|
 | `Trace` / `Debug` | retained chatter and down-capped forensic records |
 | `Verbose` | extra diagnostic detail above Debug, below everyday Info |
@@ -106,33 +106,38 @@ rank against each other honestly.
 Severity is also an integer, 1 through 24, and the two forms are the same fact. **`critical+` means
 severity >= 20.**
 
-### One severity, three spellings
+### One severity, four spellings
 
-The same rung shows up under three different spellings depending on where you are reading it. This
-table is the bridge; everything else about severity in this doc set points here.
+The same fact shows up under four spellings depending on where you are reading it. This table is the
+bridge; everything else about severity in this doc set points here.
 
 | Where you see it | Form | Example |
 |---|---|---|
-| Prose you write, and LQL filters | lowercase primary name | `severity in (error, critical)` |
-| Returned values and histogram keys | UPPERCASE band name | `ERROR`, `CRITICAL`, and `WARN2` / `WARN3` for rungs between the named ones |
+| Prose you write, and LQL filters | lowercase rung name | `severity in (error, critical)` |
+| The `severity` cell on a returned row | UPPERCASE rung name | `ERROR`, `CRITICAL`, and `WARN2` / `WARN3` for rungs between the named ones |
 | Numeric filters and `severity_level` | integer 1-24 | `min_severity: 17` |
+| Anything that COUNTS events: the `cnt_<band>` columns and `summary.severity_histogram` | lowercase band name, one of nine | `critical_plus`, `info_or_notice` |
 
-Every tool that counts events reports those integers as the same nine `cnt_<band>` columns. This
-sentence is the definition; the tools repeat it verbatim so there is only ever one spelling to trust:
+**A cell and a digest speak different vocabularies on purpose.** A row's `severity` reports ONE
+observation, so it names the exact rung, down to `WARN3`. A histogram breaks down a POPULATION, so it
+speaks the nine bands and nothing finer: `critical_plus`, never `CRITICAL`. Peak severity is not lost
+to the coarser grain; it stays exact on `max_severity`.
+
+The nine bands are defined by one sentence, which the tools repeat verbatim so there is only ever one
+spelling to trust:
 
 Severity bands are the same on every tool here: cnt_debug_or_below (severity 6 and below), cnt_verbose (7-8), cnt_info_or_notice (9-12), cnt_warning (13-15), cnt_minor (16), cnt_error (17), cnt_serious (18), cnt_severe (19), cnt_critical_plus (20 and above). Listings of what is wrong carry the failure side only (cnt_warning and above); tools that count all traffic carry every band.
 
-Two consequences worth stating.
-The failure-side subset is five columns, `cnt_warning` through `cnt_critical_plus`, and a listing
+`summary.severity_histogram` is an ORDERED list of `{band, count}` over those bands, worst-last,
+carrying only the bands that occurred: a band missing from it is a band that response never saw.
+The failure-side subset is the five columns `cnt_warning` through `cnt_critical_plus`, and a listing
 that carries them is not hiding the quiet traffic: it never counted it.
-And `cnt_critical_plus` absorbs the whole fatal class, so a histogram key of `CRITICAL` covers 20 and
-above rather than 20 alone.
 
-**Quote returned values verbatim, write primaries in your own voice.** A histogram key is a datum:
-paraphrasing `WARN3` as "warning" breaks the link between your finding and the row. Both fit in one
-sentence: `severity WARN3 (minor)`.
+**Quote returned values verbatim, write rung names in your own voice.** A returned severity is a
+datum: paraphrasing `WARN3` as "warning" breaks the link between your finding and the row. Both fit
+in one sentence: `severity WARN3 (minor)`.
 
-**Use the primary names.** Write `serious`, `minor`, `severe`. Do not write `error2`, `error4`,
+**Use the rung names.** Write `serious`, `minor`, `severe`. Do not write `error2`, `error4`,
 `warn4` or the other OTel short forms in prose, filters or findings; they exist only as ingest
 aliases that normalize third-party logs onto this ladder, and they are worth naming only when you are
 explaining that normalization to someone.
