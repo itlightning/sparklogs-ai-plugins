@@ -365,8 +365,20 @@ refine_query_result(query_id="<qid>",
 `order_by` accepts a group column or an aggregate alias; `dir` is `asc` or `desc`. Group on any
 column the response's schema block lists: the standard ones (`severity`, `source`, `subsource`,
 `app`, `service`, `pattern`, `t`) and the dotted custom paths beside them (`sparklogs.reason`).
-Time bucketing is not currently usable: state a time question as a narrower window plus a count
-instead.
+
+**Time bucketing** groups a datetime column into fixed buckets, so one cached slice answers when
+something happened without a second backing scan:
+
+```
+refine_query_result(query_id="<qid>",
+  group_by=[{"time_bucket": {"col": "t", "bucket_usec": 3600000000}, "as": "hour"}],
+  aggregate=[{"fn": "count", "col": "*", "as": "hits"}],
+  order_by=[{"col": "hour", "dir": "asc"}],
+  external_investigation_id="<id>")
+```
+
+`bucket_usec` is microseconds (1h = 3600000000, 5m = 300000000). `col` defaults to the event
+timestamp. Ascending order reads as a series; a run of low counts is where the stream thinned.
 
 **Common patterns:**
 - After a broad raw scan, filter per-subsource to drill into specific categories.

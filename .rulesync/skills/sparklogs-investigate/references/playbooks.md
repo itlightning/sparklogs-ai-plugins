@@ -186,8 +186,10 @@ the process talks to.
    ```
    query_logs(org_ids=[...], start=..., end=..., lql='pattern_hash = "<h>"',
               external_investigation_id="<id>")
-   refine_query_result(query_id="<qid>", group_by=[{"col": "t", "bucket": "1h"}],
+   refine_query_result(query_id="<qid>",
+                       group_by=[{"time_bucket": {"col": "t", "bucket_usec": 3600000000}, "as": "hour"}],
                        aggregate=[{"fn": "count", "col": "*", "as": "hits"}],
+                       order_by=[{"col": "hour", "dir": "asc"}],
                        external_investigation_id="<id>")
    ```
 
