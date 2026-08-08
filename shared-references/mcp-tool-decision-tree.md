@@ -16,7 +16,7 @@ Spend from the top down:
 
 - **Tier 1, lightweight scoping:** `resolve_scope`, `list_fields`. Fix `org_ids` and fleet directory (agents, ingest keys, verdicts). Do this before backing scans.
 - **Tier 1b, billed discovery:** `list_sources`, `query_scope_activity`, `describe_pattern` (stats). Confirm data in window, enumerate structure, read pattern detail. See `scope-resolution.md` and `scope-ladder.md`.
-- **Tier 2, grouped aggregation:** `query_event_counts_by_severity`. Groups every matching event by one field, returns top values by hit count. The workhorse for "what's happening" - it tells you where to point `query_logs`. Group by a scope-ladder field (`service`, `app`, `subsource`, `category`, `pattern`, or a `_hash`) to localize before drilling - see `scope-ladder.md`.
+- **Tier 2, counts by severity:** `query_event_counts_by_severity`. Counts matching events by severity, optionally bucketed over time and/or grouped by field values. The workhorse for "what's happening" and the only tool that answers "when" - it tells you where and when to point `query_logs`. Group by a scope-ladder field (`service`, `app`, `subsource`, `category`, `pattern`, or a `_hash`) to localize before drilling - see `scope-ladder.md`.
 - **Tier 3, raw events (last resort):** `query_logs`, only after Tiers 1-2 narrowed the window and filter. Then `refine_query_result` (lightweight) over that cached slice - do NOT re-scan.
 
 `refine_query_result` and the default `get_query_metadata` are lightweight - they run against the cache. Backing scans (`query_logs`, `query_event_counts_by_severity`, and the opt-in `get_query_metadata` deep discovery) touch the underlying source and take meaningfully longer.
@@ -191,7 +191,7 @@ describe_pattern(
   include_examples: true,            # default true; false for stats only. There is no per-pattern sample count to set
   external_investigation_id: "..."
 )
--> pattern text, stats, fleet spread; diverse example messages with recurrence `count`/`seen_at`. Example COUNTS are chosen server-side for diversity, and examples are returned for roughly your first 25 patterns by list order, so list the highest-interest hashes first. Examples need `mcp:query`; without it the response is stats-only, never an error.
+-> pattern text; stats (`event_count`, `cnt_interesting`, one count per failure-side severity band, first/last seen, affected collectors and sources); diverse example messages with recurrence `count`/`seen_at`. The summary's `severity_bands` is an ORDERED array of `{band, count}` carrying only the bands that occurred, so a band missing from it is a band this pattern never reached. Example COUNTS are chosen server-side for diversity, and examples are returned for roughly your first 25 patterns by list order, so list the highest-interest hashes first. Examples need `mcp:query`; without it the response is stats-only, never an error.
 ```
 
 **Examples are server-chosen, diverse, and truthful.** You do not pick counts: the server returns a text-diverse set of example messages per pattern (not just the most recent), sized to fit the response. List your highest-interest `pattern_hashes` FIRST: examples cover roughly the first 25 by list order; the rest get stats only (the scope line says so). Each example carries `count`, `[first, last]`, and (when it recurred 3+ times) `seen_at`: times this exact message recurred, identical except embedded timestamps.
@@ -221,7 +221,8 @@ list_fields(
 
 ### `query_event_counts_by_severity`
 
-The workhorse for "what's happening" questions. Groups every matching event by ONE field and returns the top values by hit count.
+Count of matching events by severity, optionally bucketed over time and/or grouped by field values.
+The workhorse for "what's happening" questions, and the only tool that answers "when".
 
 ```
 query_event_counts_by_severity(
@@ -230,20 +231,43 @@ query_event_counts_by_severity(
   end: "...",
   include_sub_orgs: true,
   group_by: ["pattern" | "source" | "service" | "app" | "subsource" | "category" | "<field>_hash" | "<custom.field>"],   # one field ranks its values; 2-3 cross-tab. Omit to count the whole population
+  bucket: "30s" | "5m" | "1h" | "6h" | "1d",   # optional; a TIME SERIES instead of a flat ranking. At most one group_by field with it
   lql: "...",                      # optional LQL filter applied before grouping
-  limit: 50,                       # max distinct groups returned, by hit count (default 50)
+  limit: 50,                       # max distinct groups returned, by event count (default 50, hard cap 10000)
   external_investigation_id: "..."
 )
--> rows: {<group_by>, hits, max_severity}   # dense TSV
+-> rows: {<group_by values and/or bucket>, event_count, one cnt_<band> per band present}   # dense TSV
 ```
 
-**Sampled counts:** on very large populations the server may compute hits from a partial sample; the response then carries `summary.sampled` + `sample_pct` and its scope line says so. Cite such counts as approximate (small ones are rough); narrow the window or filter for exact figures. Same marker applies to `query_logs` grounding totals.
+**Severity is never separable from volume here.** Every row carries `event_count` plus the band counts,
+in the flat ranking and in the series alike, so "how much" and "how bad" arrive together. A band is a
+column only when it occurred somewhere in the result: a zero is an observed zero, and a missing column
+is a band this result never saw. See `category-classes.md` for the nine bands.
+
+**`bucket` answers WHEN, before you pull raw events.** Did this stream stop, when did the storm start,
+is the rate rising. Add one `group_by` field for one series per value: `bucket="1h"` with
+`group_by=["source"]` shows which host stopped reporting and at what hour, which a flat ranking cannot
+show at all. Two things to read carefully. The series is DENSE, so an empty bucket comes back as an
+explicit zero and a gap is a run of zeros rather than rows you have to notice are missing. And it
+always covers the whole window: when the window holds more buckets than one response carries, the
+server widens the bucket and `summary.scope` states both widths, so read the width you got rather
+than the width you asked for.
+
+**Sampled counts:** on very large populations the server may compute counts from a partial sample; the response then carries `summary.sampled` + `sample_pct` and its scope line says so. Cite such counts as approximate (small ones are rough); narrow the window or filter for exact figures. Same marker applies to `query_logs` grounding totals.
 
 **Use cases:**
 - "What patterns appeared most?" -> `group_by=["pattern"]`.
 - "Which sources show this?" -> filter on a `pattern_hash` in `lql`, `group_by=["source"]`.
 - "Which component is noisiest?" -> `group_by=["service"]` or `["subsource"]`, then narrow with a second call - see the scope ladder (`scope-ladder.md`).
+- "When did it start, and did it stop?" -> `bucket="1h"`, optionally with one `group_by` field.
 - "Which reason, on which machines?" -> `group_by` with two fields (reason by instance, config-change type by target). One call answers what two single-field passes only hint at, because the pairing is what carries the shape.
+
+**A cross-tab counts a smaller population than you asked for.** With one `group_by` field a catch-all
+row holds everything past `limit`, so `total_count` is the whole matched population. With two or three
+there is no catch-all, and any event where one of the grouped fields is ABSENT is excluded outright,
+with no row to mark it: `sparklogs.instance` is null on a host-scoped reason, so those events vanish
+from a reason-by-instance cross-tab. Read `summary.scope` for how many combinations came back, and
+group on the field alone when you need the null side.
 
 **Grouped output is not a refinable cache.** Calling `refine_query_result` on its `query_id` returns expired. Read grouped results directly. If a grouped result is truncated, follow its hint (narrow the `lql`/window and re-run). To then pull raw events for an interesting group, run `query_logs` with that group's value in `lql` (use the `*_hash` verbatim for the six hash fields).
 

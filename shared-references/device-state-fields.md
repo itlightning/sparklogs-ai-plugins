@@ -41,7 +41,9 @@ rows nobody has decided about yet, which loses evidence exactly when something n
 `kinds` filter is a narrowing, not a guarantee, and a row with an unfamiliar `kind` is a real row.
 
 **`reasons`** filters to named conditions. **`group_by_reason`** returns the fleet shape of a reason
-("17 hosts have this") instead of a row per device.
+("17 hosts have this") instead of a row per device: one aggregate row per (kind, reason) carrying
+`affected_agents`, `episode_count`, `event_count`, `max_severity` and one count per failure-side
+severity band, computed over every matching row rather than over the capped listing.
 
 **Silent devices** come back as a separate envelope row, `row_kind=silent_device`. That list is
 CAPPED so a fleet-wide outage cannot push condition rows out of the response, and it can truncate.
