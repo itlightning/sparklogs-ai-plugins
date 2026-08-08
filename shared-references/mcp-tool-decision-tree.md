@@ -319,7 +319,7 @@ An in-cache relational engine over a `query_logs` result. Meaningfully faster th
 refine_query_result(
   query_id: "...",                 # from a prior query_logs result
   filter_lql: "...",               # WHERE over the cached table's ROW columns
-  group_by: [ {"col": "severity"} ],          # LIST OF OBJECTS; present => aggregation, absent => row slice
+  group_by: [ "severity" ],                   # bare column names, or objects for a bucket/alias; present => aggregation, absent => row slice
   aggregate: [ {"fn": "count", "col": "*", "as": "hits"} ],   # fn in count/count_distinct/sum/avg/min/max/stddev/p50/p90/p95/p99
   having_lql: "...",               # HAVING over POST-GROUP columns (group + aggregate aliases)
   order_by: [ {"col": "hits", "dir": "desc"} ],   # LIST OF OBJECTS; col may be a group column or an aggregate alias
@@ -344,28 +344,29 @@ refine_query_result(
 
 **Cache expiry:** a cold cache (roughly a day old) regenerates automatically under the SAME `query_id` when you refine it (the header's cache status reflects it). Grouped results remain non-refinable (re-run the grouped call). If the server reports the cache cannot be restored, re-issue the original backing query.
 
-**`group_by` and `order_by` items are OBJECTS, not bare column names.** Passing a string is the most
-common way to lose a turn here. Two worked shapes:
+**`group_by` takes bare column names; `order_by` items are OBJECTS.** A `group_by` term becomes an
+object only when it carries a time bucket or an alias. Two worked shapes:
 
 ```
 # distribution over a cached slice
 refine_query_result(query_id="<qid>",
-  group_by=[{"col": "severity"}],
+  group_by=["severity"],
   aggregate=[{"fn": "count", "col": "*", "as": "hits"}],
   external_investigation_id="<id>")
 
 # same, densest first
 refine_query_result(query_id="<qid>",
-  group_by=[{"col": "source"}],
+  group_by=["source"],
   aggregate=[{"fn": "count", "col": "*", "as": "hits"}],
   order_by=[{"col": "hits", "dir": "desc"}],
   external_investigation_id="<id>")
 ```
 
-`order_by` accepts a group column or an aggregate alias; `dir` is `asc` or `desc`. Group on the
-STANDARD columns (`severity`, `source`, `subsource`, `app`, `service`, `pattern`, `t`); grouping on
-a custom field is not reliable today. Time bucketing is not currently usable: state a time question
-as a narrower window plus a count instead.
+`order_by` accepts a group column or an aggregate alias; `dir` is `asc` or `desc`. Group on any
+column the response's schema block lists: the standard ones (`severity`, `source`, `subsource`,
+`app`, `service`, `pattern`, `t`) and the dotted custom paths beside them (`sparklogs.reason`).
+Time bucketing is not currently usable: state a time question as a narrower window plus a count
+instead.
 
 **Common patterns:**
 - After a broad raw scan, filter per-subsource to drill into specific categories.
