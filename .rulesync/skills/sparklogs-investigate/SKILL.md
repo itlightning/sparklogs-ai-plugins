@@ -337,7 +337,7 @@ The catalog is these eleven tools:
 | `query_device_health` | billed discovery | Latest curated device state: monitor rows for conditions, inventory rows for what is on the box, plus silent devices. `start`/`end` are REQUIRED. Supporting honesty check, not the entry point - reach for it when you are about to conclude something from an absence. See `references/device-state-fields.md`. |
 | `server_info` | lightweight | Server name, version, region, transport and the authenticated workspace id. Takes NO parameters, including no `external_investigation_id`. Confirm which region and workspace you are on before citing anything. |
 
-Three differential tools do not exist (`query_period_diff`, `compare_populations`, `cluster_event_contexts`). Instead use two `query_event_counts_by_severity` runs over two windows for period diff, or grouped aggregation over distinct `lql` populations for compare.
+Three differential tools do not exist (`query_period_diff`, `compare_populations`, `cluster_event_contexts`). Instead use two `query_event_counts_by_severity` runs over two windows for period diff, or one run per distinct `lql` population for compare.
 
 **Always pass `external_investigation_id`** on every scoped or data call - it is REQUIRED, not optional. The one exception is `server_info`, which takes NO parameters and REJECTS an id. It is a friendly, human-meaningful correlation handle you supply, 8-200 chars free text (e.g. `investigate-ticket-1234-disk-errors`), not a generated hash. Pick one distinctive value at investigation start and reuse it for the entire session - reusing the same id RESUMES that investigation (ops append to the same audit trail); a genuinely new investigation needs a fresh, distinctive value (embed a ticket/incident id or a nonce). Don't reuse a generic string like `diskcheck` across unrelated incidents - they'd merge into one investigation. Out-of-bounds values (too short/long) return a user-visible validation error from the tool - read it and fix the id.
 
@@ -509,7 +509,7 @@ The full list of common mistakes, anti-patterns, and recovery is in `references/
 When the situation calls for it, read the appropriate reference file. Don't try to hold all of this in your context all the time:
 
 - `references/output-template.md` - full output template with every field defined, plus right-vs-wrong examples.
-- `references/scope-ladder.md` - the six grouping fields and their `_hash` companions (incl. `source`/`source_hash`), availability, `query_scope_activity` vs grouped aggregation, and RCA usage shapes.
+- `references/scope-ladder.md` - the six grouping fields and their `_hash` companions (incl. `source`/`source_hash`), availability, `query_scope_activity` vs `query_event_counts_by_severity`, and RCA usage shapes.
 - `references/category-classes.md` - what NOTABLE / ELEVATED / RECOVERED mean in `category` (temporal shape, not importance), **open monitor ≠ problem**, the lifecycle pair convention, how "interesting" counts fold them in, and the critical+ fetch-first contract.
 - `references/service-taxonomy.md` - the controlled `service` ticket-class vocabulary (cross-vendor pivot values), the audit-adjacent demarcation list (why `security_audit` is not the whole audit surface), and boundary rules.
 - `references/windows-eventlog-reasons.md` - per-module reason rows for the Windows Event Log classic channels (Setup / System / Application): reason meanings, services, severity posture, cross-witness reason pairs, and the change-analysis recipe.

@@ -49,10 +49,10 @@ Climb the ladder to localize a problem: group coarse to find the noisy component
 - Summary may include `top_interesting_patterns` teaser; call **`describe_pattern`** before citing any teaser pattern.
 
 **`query_event_counts_by_severity`** (billed, LQL-filtered measure):
-- Groups events matching an **`lql`** filter by the `group_by` fields.
-- Use when you already have a hypothesis slice (severity, time sub-range, `pattern_hash`, `agent_id`, etc.) and need counts or ranking within that slice.
+- Counts events matching an **`lql`** filter, by severity, optionally over the `group_by` fields and/or `bucket` time buckets.
+- Use when you already have a hypothesis slice (severity, time sub-range, `pattern_hash`, `agent_id`, etc.) and need counts, ranking or a time series within that slice.
 
-Rule of thumb: ladder tool = "what app/service/subsource combinations exist here?"; grouped aggregation = "within this filtered population, which values dominate?"
+Rule of thumb: `query_scope_activity` = "what app/service/subsource combinations exist here?"; `query_event_counts_by_severity` = "within this filtered population, which values dominate, how bad are they, and when?"
 
 ---
 

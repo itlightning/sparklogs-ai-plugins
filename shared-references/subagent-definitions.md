@@ -82,7 +82,7 @@ with a contract attached: it means fetch-first, whatever the ticket was about.
 **Model tier:** fast, lightweight tier.
 
 **Inputs:**
-- The `query_id` and `query_url` of the grouped aggregation result.
+- The `query_id` and `query_url` of the `query_event_counts_by_severity` result.
 - Top N parameter (default 10).
 
 **Output schema:**

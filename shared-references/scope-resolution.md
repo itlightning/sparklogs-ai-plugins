@@ -223,7 +223,7 @@ Two different tools answer "what exists" vs "how much in this slice":
 - **`query_scope_activity`** (cheap discovery scan): discover app / service / subsource structure in the org and window. Optional narrowing via `agent_ids`, `source` substring, or `field_match`. Not LQL-filtered. See `scope-ladder.md`.
 - **`query_event_counts_by_severity`** (billed backing scan): count and rank within an **LQL-filtered** population (severity, time sub-slice, `pattern_hash`, etc.).
 
-Use the ladder tool to see what dimensions exist; use grouped aggregation to measure within a hypothesis-specific filter.
+Use `query_scope_activity` to see what dimensions exist; use `query_event_counts_by_severity` to measure within a hypothesis-specific filter.
 
 ---
 

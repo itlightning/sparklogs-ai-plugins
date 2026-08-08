@@ -132,7 +132,7 @@ query_scope_activity(
 -> rows: agent_id, source, app, service, subsource, triage columns, first/last_event_at
 ```
 
-See `scope-ladder.md` for ladder vs grouped-aggregation guidance.
+See `scope-ladder.md` for when to reach for this instead of `query_event_counts_by_severity`.
 
 ---
 
