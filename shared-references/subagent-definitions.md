@@ -77,7 +77,7 @@ with a contract attached: it means fetch-first, whatever the ticket was about.
 
 ## Subagent: `sparklogs-pattern-enumerator`
 
-**Purpose.** Given a `query_grouped_aggregation` result with many groups, summarize the top N pattern_hashes with their meanings (looking up pattern text via a `query_logs` message projection filtered to the `pattern_hash` if needed) and produce a structured enumeration the orchestrator can use as Findings input.
+**Purpose.** Given a `query_event_counts_by_severity` result with many groups, summarize the top N pattern_hashes with their meanings (looking up pattern text via a `query_logs` message projection filtered to the `pattern_hash` if needed) and produce a structured enumeration the orchestrator can use as Findings input.
 
 **Model tier:** fast, lightweight tier.
 
@@ -95,7 +95,7 @@ top_patterns:
     catalog_match: <pattern_catalog.md entry name or null>
 ```
 
-**Delegation heuristic:** when `query_grouped_aggregation` returns 50+ groups and you need the top N enumerated with meanings.
+**Delegation heuristic:** when `query_event_counts_by_severity` returns 50+ groups and you need the top N enumerated with meanings.
 
 ---
 

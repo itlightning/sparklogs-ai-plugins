@@ -134,7 +134,7 @@ POSSIBLE NEXT DIRECTIONS
 
 **Every factual claim cites a `query_url`.** This is non-negotiable.
 
-When you call any data-access MCP tool (`query_logs`, `query_grouped_aggregation`, `refine_query_result`, `get_query_metadata`), the response's header line carries both `query_id` and `query_url`. You embed that `query_url` in the **Evidence** field of every Finding that derives from that query.
+When you call any data-access MCP tool (`query_logs`, `query_event_counts_by_severity`, `refine_query_result`, `get_query_metadata`), the response's header line carries both `query_id` and `query_url`. You embed that `query_url` in the **Evidence** field of every Finding that derives from that query.
 
 **What the URL actually resolves to.** It is a SparkLogs explore link scoped to the ORG AND TIME WINDOW the query ran over, not a replay of your exact filtered result. The engineer lands where the evidence lives and can see it; they do not land on your cached rows. Copy it verbatim and do not modify it.
 
@@ -223,7 +223,7 @@ The engineer's per-investigation window is short. Work efficiently and precisely
 
 2. **Follow the query tiers, lightest first.** There are three tiers; spend from the top down:
    - **Tier 1 - lightweight scoping:** `resolve_scope` (org/agent directory), `list_sources` (per-source counts in the window), `list_fields` (field catalog). Use these to fix `org_ids`, confirm the source has data, and learn the vocabulary BEFORE any backing scan.
-   - **Tier 2 - grouped aggregation:** `query_grouped_aggregation` groups every matching event by one field (`pattern_hash`, `source`, `severity`, a custom field) and returns top values by hit count. This is the workhorse for "what's happening" - it answers in a dense summary what raw retrieval would take many more rows to reveal, and it tells you WHERE to point `query_logs`.
+   - **Tier 2 - grouped aggregation:** `query_event_counts_by_severity` groups every matching event by one field (`pattern_hash`, `source`, `severity`, a custom field) and returns top values by hit count. This is the workhorse for "what's happening" - it answers in a dense summary what raw retrieval would take many more rows to reveal, and it tells you WHERE to point `query_logs`.
    - **Tier 3 - raw events (last resort):** `query_logs` only AFTER the tiers above have narrowed the window and filter. Pull one broad-enough slice over the narrowed scope, then refine it (item 4). **Reaching for `query_logs` first is the top methodology failure.**
 
 3. **Read the message first.** On curated sources the message IS the payload: it names the thing, its subject, the reading against its threshold, the phase in words, and the age with an honest basis. Triage from that one line. Reach for promoted fields (`sparklogs.*` and the module-prefixed fields listed per source in the generated reference set) when you need to filter or group; reach for the full retained payload only when you need ground truth the message did not carry. Use `return_field_list` to project only what you need.
@@ -249,7 +249,7 @@ Do not invent field names. `event_kind`, `SLAAgentOp`, `SLASnapshot`, `event_sum
 When a query on a curated or module field comes back empty:
 1. Do not conclude the system is healthy or that the check passed.
 2. Check whether that source populates the field at all before reading anything into it.
-3. Fall back to universal signals: severity distribution, message and pattern counts via `query_grouped_aggregation`, volume trends.
+3. Fall back to universal signals: severity distribution, message and pattern counts via `query_event_counts_by_severity`, volume trends.
 4. Say so explicitly in the Finding or WHAT WAS NOT CHECKED.
 
 The full per-tool decision tree is in `references/mcp-tool-decision-tree.md`. The full per-investigation-type playbook outlines are in `references/playbooks.md`.
@@ -267,11 +267,11 @@ Six fields carry a normalized value plus an opaque `_hash` companion, and togeth
 **Treat every `_hash` as opaque.** Never parse it, never infer meaning from its characters, never length-validate it. `pattern_hash` may carry a short readable prefix followed by an opaque tail; the other five (`subsource_hash`, `category_hash`, `service_hash`, `app_hash`, `source_hash`) are bare opaque tokens. All six are drill-down handles - values you pass back into a filter, not strings you interpret.
 
 **How to use it:**
-- **Group** (`query_grouped_aggregation(group_field=<field or its _hash>)`) to find dominant or anomalous groups, densest first. Group by `pattern_hash` for the most-repeated normalized events; by `service` or `subsource` to localize the noisy component.
+- **Group** (`query_event_counts_by_severity(group_field=<field or its _hash>)`) to find dominant or anomalous groups, densest first. Group by `pattern_hash` for the most-repeated normalized events; by `service` or `subsource` to localize the noisy component.
 - **Cross-tab when the PAIRING is the question.** `group_fields=["<a>", "<b>"]` groups by 2-3 fields at once, instead of `group_field`. "Which reason, on which machines" is `["reason", "instance"]`; "what changed, on what" is `["config_change_type", "target_name"]`. Two single-field passes tell you the busiest reason and the busiest host separately, which is not the same answer: one reason concentrated on one host and the same volume spread across forty hosts look identical until you group on the pair. Reach for it whenever a fleet question has two nouns in it.
 - **Dedup and track stability.** A `_hash` is a stable identity - the same hash means the same normalized value or pattern, across events and across time.
 - **Drill** with `query_logs(lql='pattern_hash = "<h>"')` or `refine_query_result(filter_lql=...)` to read the actual events behind a hash.
-- **Correlate across windows for first-occurrence detection.** A `pattern_hash` present in the incident window but absent from a healthy baseline window signals new behavior - a primary RCA signal. Run `query_grouped_aggregation` twice, once per window, and compare the two hash populations (the v1 substitute for the fast-follow `query_period_diff` tool). **A source-pack release recomputes pattern identity for the sources it curates**, so a baseline window on one side of a pack deploy and an incident window on the other compare nothing: every hash reads as new. When the two windows straddle a release, pick a baseline inside the same pack era and say which era you used.
+- **Correlate across windows for first-occurrence detection.** A `pattern_hash` present in the incident window but absent from a healthy baseline window signals new behavior - a primary RCA signal. Run `query_event_counts_by_severity` twice, once per window, and compare the two hash populations (the v1 substitute for the fast-follow `query_period_diff` tool). **A source-pack release recomputes pattern identity for the sources it curates**, so a baseline window on one side of a pack deploy and an incident window on the other compare nothing: every hash reads as new. When the two windows straddle a release, pick a baseline inside the same pack era and say which era you used.
 - **Resolve, don't display.** The response envelope's `lookups` table (Section 11) maps frequent hashes to their values. Resolve a `_hash` to its value before it reaches a Finding; use the hash itself only as a drill-down filter value.
 
 Full detail and a worked localize-then-land shape: `references/scope-ladder.md`. The controlled `service` vocabulary (the cross-vendor ticket-class values worth pivoting on, e.g. `backup`, `storage`, `security_audit`) is in `references/service-taxonomy.md`.
@@ -327,23 +327,23 @@ The catalog is these eleven tools:
 |---|---|---|
 | `resolve_scope` | lightweight | Always first - turn natural-language scope into `org_ids` (orgs, managed agents, ingest keys). Ranked `match_kind` on org names and agent name/`reported_hostname`. `include_agents` = agents and ingest keys (default true). |
 | `list_sources` | billed discovery | Confirm collector/origin pairs have data in the window (`start`/`end` required). Triage columns, `collector_kind`, optional `top_interesting_patterns` teaser. |
-| `list_scope_ladder` | billed discovery | Discover app/service/subsource structure (not LQL-filtered). Narrow with `agent_ids` / `source` / `field_match`. For filtered counts within an LQL slice, use `query_grouped_aggregation`. |
+| `query_scope_activity` | billed discovery | Discover app/service/subsource structure (not LQL-filtered). Narrow with `agent_ids` / `source` / `field_match`. For filtered counts within an LQL slice, use `query_event_counts_by_severity`. |
 | `describe_pattern` | billed* | Full pattern text, stats, fleet spread, and diverse example messages (with recurrence `count`/`seen_at`). The parameter is **`pattern_hashes`, a LIST**, even for one hash. There is no per-pattern sample count to set: counts are chosen server-side for diversity, and examples come back for roughly your first 25 hashes by list order, so list the highest-interest ones first. *Examples require `mcp:query`; stats-only works on `mcp:observe` (the call degrades, never errors). Required before citing teaser patterns. |
 | `list_fields` | lightweight | Field catalog for building NEW queries - only if standard/known fields don't surface enough. Not a first-pass tool. |
-| `query_grouped_aggregation` | backing scan | Group every matching event by one `group_field`, or by 2-3 fields with `group_fields` for a cross-tab. Top values by hit count. The workhorse for "what's happening" within an LQL filter - run it BEFORE raw logs. |
+| `query_event_counts_by_severity` | backing scan | Group every matching event by one `group_field`, or by 2-3 fields with `group_fields` for a cross-tab. Top values by hit count. The workhorse for "what's happening" within an LQL filter - run it BEFORE raw logs. |
 | `query_logs` | backing scan | Retrieve raw chronological events. Last resort, over an already-narrowed window/filter. No `limit`: you get one server-sized page, `summary` carries the matched total, and further pages come from `refine_query_result` on the returned `query_id`. |
 | `refine_query_result` | lightweight | Relational engine over a cached `query_logs` result (filter/group/aggregate/having/order/select/page). Use freely; touches the cache, not the source. Responses keep the same `query_id`; refine that id again for other views. |
 | `get_query_metadata` | lightweight* | Cache/field introspection over a `query_id`. Default = bookkeeping only (fast). *`top_n`/`field_match` deep field discovery is a full catalog scan of the source - use deliberately. |
-| `list_device_health` | billed discovery | Latest curated device state: monitor rows for conditions, inventory rows for what is on the box, plus silent devices. `start`/`end` are REQUIRED. Supporting honesty check, not the entry point - reach for it when you are about to conclude something from an absence. See `references/device-state-fields.md`. |
+| `query_device_health` | billed discovery | Latest curated device state: monitor rows for conditions, inventory rows for what is on the box, plus silent devices. `start`/`end` are REQUIRED. Supporting honesty check, not the entry point - reach for it when you are about to conclude something from an absence. See `references/device-state-fields.md`. |
 | `server_info` | lightweight | Server name, version, region, transport and the authenticated workspace id. Takes NO parameters, including no `external_investigation_id`. Confirm which region and workspace you are on before citing anything. |
 
-Three differential tools do not exist (`query_period_diff`, `compare_populations`, `cluster_event_contexts`). Instead use two `query_grouped_aggregation` runs over two windows for period diff, or grouped aggregation over distinct `lql` populations for compare.
+Three differential tools do not exist (`query_period_diff`, `compare_populations`, `cluster_event_contexts`). Instead use two `query_event_counts_by_severity` runs over two windows for period diff, or grouped aggregation over distinct `lql` populations for compare.
 
 **Always pass `external_investigation_id`** on every scoped or data call - it is REQUIRED, not optional. The one exception is `server_info`, which takes NO parameters and REJECTS an id. It is a friendly, human-meaningful correlation handle you supply, 8-200 chars free text (e.g. `investigate-ticket-1234-disk-errors`), not a generated hash. Pick one distinctive value at investigation start and reuse it for the entire session - reusing the same id RESUMES that investigation (ops append to the same audit trail); a genuinely new investigation needs a fresh, distinctive value (embed a ticket/incident id or a nonce). Don't reuse a generic string like `diskcheck` across unrelated incidents - they'd merge into one investigation. Out-of-bounds values (too short/long) return a user-visible validation error from the tool - read it and fix the id.
 
 **Always pass `org_ids`** explicitly (derived from `resolve_scope`). Empty = all-orgs is strongly discouraged.
 
-**Query shape.** Backing scans (`query_logs`, `query_grouped_aggregation`) touch the underlying source and take meaningfully longer than the lightweight tools and `refine_query_result`. Plan for 1-4 backing queries; refine many times within each.
+**Query shape.** Backing scans (`query_logs`, `query_event_counts_by_severity`) touch the underlying source and take meaningfully longer than the lightweight tools and `refine_query_result`. Plan for 1-4 backing queries; refine many times within each.
 
 ### Reading the response envelope
 
@@ -364,7 +364,7 @@ Every data-tool response is ONE text block, not JSON you parse as a whole:
 
 ### Grouped results are not refinable
 
-`query_grouped_aggregation` output is NOT a refinable cache - calling `refine_query_result` on it returns expired. Read grouped results directly. If a grouped result is truncated, follow its hint (narrow the filter or window and re-run the grouped call). `refine_query_result` applies ONLY to `query_logs` slices; a refine response keeps the same `query_id`, so run every further refine against that same id.
+`query_event_counts_by_severity` output is NOT a refinable cache - calling `refine_query_result` on it returns expired. Read grouped results directly. If a grouped result is truncated, follow its hint (narrow the filter or window and re-run the grouped call). `refine_query_result` applies ONLY to `query_logs` slices; a refine response keeps the same `query_id`, so run every further refine against that same id.
 
 Detailed per-tool usage with examples is in `references/mcp-tool-decision-tree.md`.
 
@@ -372,7 +372,7 @@ Detailed per-tool usage with examples is in `references/mcp-tool-decision-tree.m
 
 ## Section 12. LQL basics - the syntax you use most
 
-LQL (Lightning Query Language) is the filter language used by every LQL parameter: `lql` (on `query_logs` / `query_grouped_aggregation`), and `filter_lql` / `having_lql` (on `refine_query_result`).
+LQL (Lightning Query Language) is the filter language used by every LQL parameter: `lql` (on `query_logs` / `query_event_counts_by_severity`), and `filter_lql` / `having_lql` (on `refine_query_result`).
 
 **Operators:** `:` contains, `!:` doesn't contain, `=` exact match, `!=` exact non-match, `>=` `>` `<` `<=` numeric, `<field>!` non-null, `<field> between X and Y`, `<field> in (a, b, c)`, `<field> not in (a, b, c)`. Boolean: `AND` `OR` `NOT`. Implicit AND between adjacent expressions. Patterns: `*` `?` directly in unquoted terms (NOT `%` or `_`). Regex: `/regex/` slash-delimited (re2 syntax).
 
@@ -509,11 +509,11 @@ The full list of common mistakes, anti-patterns, and recovery is in `references/
 When the situation calls for it, read the appropriate reference file. Don't try to hold all of this in your context all the time:
 
 - `references/output-template.md` - full output template with every field defined, plus right-vs-wrong examples.
-- `references/scope-ladder.md` - the six grouping fields and their `_hash` companions (incl. `source`/`source_hash`), availability, `list_scope_ladder` vs grouped aggregation, and RCA usage shapes.
+- `references/scope-ladder.md` - the six grouping fields and their `_hash` companions (incl. `source`/`source_hash`), availability, `query_scope_activity` vs grouped aggregation, and RCA usage shapes.
 - `references/category-classes.md` - what NOTABLE / ELEVATED / RECOVERED mean in `category` (temporal shape, not importance), **open monitor ≠ problem**, the lifecycle pair convention, how "interesting" counts fold them in, and the critical+ fetch-first contract.
 - `references/service-taxonomy.md` - the controlled `service` ticket-class vocabulary (cross-vendor pivot values), the audit-adjacent demarcation list (why `security_audit` is not the whole audit surface), and boundary rules.
 - `references/windows-eventlog-reasons.md` - per-module reason rows for the Windows Event Log classic channels (Setup / System / Application): reason meanings, services, severity posture, cross-witness reason pairs, and the change-analysis recipe.
-- `references/device-state-fields.md` - device and agent state: the `list_device_health` surface, the column names, and the honesty fields that decide what you may say about a duration or a clear time.
+- `references/device-state-fields.md` - device and agent state: the `query_device_health` surface, the column names, and the honesty fields that decide what you may say about a duration or a clear time.
 - `references/generated-reference-router.md` - how to reach the per-source generated reference set (fields, vocabularies, patterns, recipes) by question shape.
 - `references/scope-resolution.md` - detailed scope-resolution and source-discovery sequence.
 - `references/lql-reference.md` - complete LQL syntax reference with examples and common mistakes.

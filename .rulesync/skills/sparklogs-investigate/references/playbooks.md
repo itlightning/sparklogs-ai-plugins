@@ -11,10 +11,10 @@ adapt it to what the engineer actually asked.
 
 **Two evidence surfaces, and picking the wrong one wastes the window.**
 
-- **`list_device_health`** answers "what is the state of this box": open conditions, what is
+- **`query_device_health`** answers "what is the state of this box": open conditions, what is
   installed and mounted, and which devices reported nothing. It returns the LATEST row per
   condition, not a timeline.
-- **`query_logs` / `query_grouped_aggregation`** answer "what happened, and when": the event stream,
+- **`query_logs` / `query_event_counts_by_severity`** answer "what happened, and when": the event stream,
   including everything the curated packs shaped out of the Windows channels.
 
 State gives you the standing condition; the log stream gives you the sequence. Most playbooks below
@@ -26,7 +26,7 @@ text. Each section says which, under Evidence today. Where it says the evidence 
 belongs in WHAT WAS NOT CHECKED, not in a confident Finding.
 
 **Three tools do not exist**, and reaching for them wastes a turn. For a period diff, run
-`query_grouped_aggregation` twice over adjacent windows and compare. For a population compare, run
+`query_event_counts_by_severity` twice over adjacent windows and compare. For a population compare, run
 it once per population with a different `lql`. For clustering, narrow `query_logs` to the pattern
 then `refine_query_result` with `group_by` over the surrounding fields.
 
@@ -56,7 +56,7 @@ server-side job state.
 2. Standing conditions on the box, including what is installed.
 
    ```
-   list_device_health(org_ids=[...], start=..., end=..., fieldset="rca",
+   query_device_health(org_ids=[...], start=..., end=..., fieldset="rca",
                       external_investigation_id="<id>")
    ```
 
@@ -68,7 +68,7 @@ server-side job state.
 3. What the log stream says in the failure window.
 
    ```
-   query_grouped_aggregation(org_ids=[...], start=..., end=...,
+   query_event_counts_by_severity(org_ids=[...], start=..., end=...,
      lql='source = "<host>" AND severity >= 17',
      group_field="pattern", external_investigation_id="<id>")
    ```
@@ -93,7 +93,7 @@ server-side job state.
 6. If the failure repeats across the client, group by host to size it.
 
    ```
-   query_grouped_aggregation(org_ids=[...], start=..., end=...,
+   query_event_counts_by_severity(org_ids=[...], start=..., end=...,
      lql='pattern_hash = "<h>"', group_field="source", external_investigation_id="<id>")
    ```
 
@@ -119,7 +119,7 @@ the PDC, directory sync, the network path between user and domain controller.
 3. Sign-in shape for the affected account.
 
    ```
-   query_grouped_aggregation(org_ids=[...], start=..., end=...,
+   query_event_counts_by_severity(org_ids=[...], start=..., end=...,
      lql='source = "<host>" AND sparklogs.actor.name = "<account>"',
      group_fields=["reason", "win.eventlog.security.logon_type_name"],
      external_investigation_id="<id>")
@@ -139,7 +139,7 @@ the PDC, directory sync, the network path between user and domain controller.
 
    `win.eventlog.security.status_meaning` carries the cause without opening a body.
 
-5. Standing conditions on the workstation, as the honesty check: `list_device_health`. A device that
+5. Standing conditions on the workstation, as the honesty check: `query_device_health`. A device that
    went silent during the complaint window changes what you can conclude.
 6. If several users on one site are slow and others are not, group by `source` over the same filter
    to establish whether it is site-wide.
@@ -165,7 +165,7 @@ the process talks to.
 2. Current resource conditions.
 
    ```
-   list_device_health(org_ids=[...], start=..., end=..., fieldset="rca",
+   query_device_health(org_ids=[...], start=..., end=..., fieldset="rca",
                       external_investigation_id="<id>")
    ```
 
@@ -176,7 +176,7 @@ the process talks to.
 3. Crash and hang trail over the long window.
 
    ```
-   query_grouped_aggregation(org_ids=[...], start=..., end=...,
+   query_event_counts_by_severity(org_ids=[...], start=..., end=...,
      lql='source = "<host>" AND app: winlog/Application AND severity >= 17',
      group_field="pattern", external_investigation_id="<id>")
    ```
@@ -221,7 +221,7 @@ withdrawal.
 2. Servicing reasons in the window, worst first.
 
    ```
-   query_grouped_aggregation(org_ids=[...], start=..., end=...,
+   query_event_counts_by_severity(org_ids=[...], start=..., end=...,
      lql='source = "<host>" AND service = patching',
      group_field="reason", external_investigation_id="<id>")
    ```
@@ -239,7 +239,7 @@ withdrawal.
    more useful read when a patch window went badly across a client.
 
    ```
-   query_grouped_aggregation(org_ids=[...], start=..., end=...,
+   query_event_counts_by_severity(org_ids=[...], start=..., end=...,
      lql='service = patching AND severity >= 17',
      group_fields=["reason", "source"], external_investigation_id="<id>")
    ```
@@ -268,7 +268,7 @@ fields, while a `near_cap` reason is a level claim only. Read the adjective.
 1. Scope, then go straight to state; this is the category where state answers the question.
 
    ```
-   list_device_health(org_ids=[...], start=..., end=..., fieldset="rca",
+   query_device_health(org_ids=[...], start=..., end=..., fieldset="rca",
                       external_investigation_id="<id>")
    ```
 
@@ -278,7 +278,7 @@ fields, while a `near_cap` reason is a level claim only. Read the adjective.
 2. Fleet shape, if more than one machine is affected.
 
    ```
-   list_device_health(org_ids=[...], start=..., end=..., group_by_reason=true,
+   query_device_health(org_ids=[...], start=..., end=..., group_by_reason=true,
                       external_investigation_id="<id>")
    ```
 
@@ -288,7 +288,7 @@ fields, while a `near_cap` reason is a level claim only. Read the adjective.
 3. Storage errors in the log stream, when the volume is filling because something is failing.
 
    ```
-   query_grouped_aggregation(org_ids=[...], start=..., end=...,
+   query_event_counts_by_severity(org_ids=[...], start=..., end=...,
      lql='source = "<host>" AND service = storage', group_field="reason",
      external_investigation_id="<id>")
    ```
@@ -312,7 +312,7 @@ vendor, hardware change by hand.
 2. What changed before the reboot.
 
    ```
-   query_grouped_aggregation(org_ids=[...], start=..., end=...,
+   query_event_counts_by_severity(org_ids=[...], start=..., end=...,
      lql='source = "<host>" AND sparklogs.kind = config_change',
      group_fields=["config_change_type", "config_change_target"],
      external_investigation_id="<id>")
@@ -342,14 +342,14 @@ fabric.
 2. Storage reasons and their severity, worst first.
 
    ```
-   query_grouped_aggregation(org_ids=[...], start=..., end=...,
+   query_event_counts_by_severity(org_ids=[...], start=..., end=...,
      lql='source = "<host>" AND service = storage', group_field="reason",
      external_investigation_id="<id>")
    ```
 
 3. Any critical+ row in scope is fetch-first, whatever the ticket said. Pull those events before
    continuing.
-4. Standing storage conditions from `list_device_health`, and whether the device kept reporting
+4. Standing storage conditions from `query_device_health`, and whether the device kept reporting
    through the degradation window.
 
 ---
@@ -368,12 +368,12 @@ controllers, anything running on a DC without the agent.
 **Call sequence.**
 
 1. Scope every domain controller the client has, not just the one named.
-2. Confirm which are reporting at all: `list_sources`, then `list_device_health` for silence. A DC
+2. Confirm which are reporting at all: `list_sources`, then `query_device_health` for silence. A DC
    that reported nothing is the finding, and it is not a claim that the DC is down.
 3. Authentication failures by cause and by DC.
 
    ```
-   query_grouped_aggregation(org_ids=[...], start=..., end=...,
+   query_event_counts_by_severity(org_ids=[...], start=..., end=...,
      lql='sparklogs.reason in (kerberos_ticket_failed, kerberos_preauth_failed, ntlm_validation_failed)',
      group_fields=["source", "win.eventlog.security.status_meaning"],
      external_investigation_id="<id>")
@@ -405,7 +405,7 @@ holding its own copy of the certificate, federation metadata.
 2. Certificate-related reasons in a window wide enough to include the renewal attempt.
 
    ```
-   query_grouped_aggregation(org_ids=[...], start=..., end=...,
+   query_event_counts_by_severity(org_ids=[...], start=..., end=...,
      lql='source = "<host>" AND service = certificates', group_field="reason",
      external_investigation_id="<id>")
    ```
@@ -445,7 +445,7 @@ agent, the network path.
 3. Device-health silence, as the second half of that read.
 
    ```
-   list_device_health(org_ids=[...], start=..., end=..., external_investigation_id="<id>")
+   query_device_health(org_ids=[...], start=..., end=..., external_investigation_id="<id>")
    ```
 
    A device in the `row_kind=silent_device` list reported no state rows. That is an exact counted
@@ -469,9 +469,9 @@ agent, the network path.
 ## When the symptom does not fit a category
 
 1. Scope and confirm the source has data in the window.
-2. `list_device_health` for standing conditions and silence: it is the cheapest read of "what is
+2. `query_device_health` for standing conditions and silence: it is the cheapest read of "what is
    wrong with this box right now".
-3. `query_grouped_aggregation` on `reason`, then on `pattern`, over a light severity filter. Two
+3. `query_event_counts_by_severity` on `reason`, then on `pattern`, over a light severity filter. Two
    groupings tell you what the box is complaining about before you read a single raw event.
 4. Compare against a quiet baseline window with a second grouped run to find what is NEW.
 5. Only then `query_logs`, narrowed to what the groupings pointed at.

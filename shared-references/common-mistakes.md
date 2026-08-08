@@ -193,7 +193,7 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` or `low`.
 
 **Why it's wrong.** Aggregation first. `query_logs` is the *last resort*, not the first. Aggregation returns a dense, denominated answer instead of a pile of raw rows: you learn what the population looks like before you spend the window reading a slice of it.
 
-**Recovery.** First substantive call should usually be `query_grouped_aggregation` (group by the field the question is about). Use `query_logs` only when aggregation has narrowed to a specific small set whose raw text matters.
+**Recovery.** First substantive call should usually be `query_event_counts_by_severity` (group by the field the question is about). Use `query_logs` only when aggregation has narrowed to a specific small set whose raw text matters.
 
 ### Reading Level 3 by default
 
@@ -205,7 +205,7 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` or `low`.
 
 ### Re-running queries instead of refining cached results
 
-**Symptom.** You issue a fresh `query_logs` or `query_grouped_aggregation` when you already had a relevant cached query.
+**Symptom.** You issue a fresh `query_logs` or `query_event_counts_by_severity` when you already had a relevant cached query.
 
 **Why it's wrong.** Backing queries do meaningfully more work than `refine_query_result`, which runs against the cache. The cache lasts a long time; reuse it.
 
@@ -225,7 +225,7 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` or `low`.
 
 **Why it's wrong.** These are DESIGNED fields in the schema, but the SparkLogs Managed Agent has zero production emission of them today. Every query filtering on them returns empty on every source, whether or not a problem exists. Empty means "not emitted yet," never "no problem found."
 
-**Recovery.** Fall back to shallow-triage fields that ARE emitted today: `message`, `severity`, `source`, `app`, `subsource`, `pattern` / `pattern_hash`, timestamps. Use `query_grouped_aggregation` on `severity` or `pattern` for volume/anomaly triage instead of the deep fields. State explicitly in the Finding or WHAT WAS NOT CHECKED that the deep-field check came back empty because the telemetry isn't emitted yet, not because nothing is wrong.
+**Recovery.** Fall back to shallow-triage fields that ARE emitted today: `message`, `severity`, `source`, `app`, `subsource`, `pattern` / `pattern_hash`, timestamps. Use `query_event_counts_by_severity` on `severity` or `pattern` for volume/anomaly triage instead of the deep fields. State explicitly in the Finding or WHAT WAS NOT CHECKED that the deep-field check came back empty because the telemetry isn't emitted yet, not because nothing is wrong.
 
 ### Failing to check that the source has data in the investigation window
 

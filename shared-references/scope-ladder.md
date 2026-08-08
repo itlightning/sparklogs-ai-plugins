@@ -41,14 +41,14 @@ Climb the ladder to localize a problem: group coarse to find the noisy component
 
 ## Discover structure vs measure within a filter
 
-**`list_scope_ladder`** (cheap discovery, not LQL-filtered):
+**`query_scope_activity`** (cheap discovery, not LQL-filtered):
 - Runs a cheap discovery scan for app / service / subsource structure in org scope and time window.
 - Per-row triage: `event_count`, `cnt_interesting`, `cnt_warn_error` (severity 13-19), `cnt_critical_plus` (severity >= 20), `distinct_interesting`, `first_event_at`, `last_event_at`.
 - Critical+ fetch-first: a non-zero `cnt_critical_plus` in any row in scope means fetch those events before proceeding, whatever the investigation topic (`category-classes.md`, Query notes).
 - Narrow with `agent_ids` (collector UUIDs), `source` substring, or `field_match` over dimension names.
 - Summary may include `top_interesting_patterns` teaser; call **`describe_pattern`** before citing any teaser pattern.
 
-**`query_grouped_aggregation`** (billed, LQL-filtered measure):
+**`query_event_counts_by_severity`** (billed, LQL-filtered measure):
 - Groups events matching an **`lql`** filter by one `group_field`.
 - Use when you already have a hypothesis slice (severity, time sub-range, `pattern_hash`, `agent_id`, etc.) and need counts or ranking within that slice.
 
@@ -60,7 +60,7 @@ Rule of thumb: ladder tool = "what app/service/subsource combinations exist here
 
 **DISCOVER - enumerate structure before heavy scans.**
 ```
-list_scope_ladder(
+query_scope_activity(
   org_ids: [...],
   start: "...",
   end: "...",
@@ -71,7 +71,7 @@ list_scope_ladder(
 
 **GROUP - find dominant or anomalous groups (filtered measure).**
 ```
-query_grouped_aggregation(group_field=<field or its _hash>, lql='...', ...)
+query_event_counts_by_severity(group_field=<field or its _hash>, lql='...', ...)
 ```
 Group by `pattern_hash` for the most-repeated normalized events; by `service` or `subsource` to localize the noisy component.
 
@@ -91,7 +91,7 @@ describe_pattern(pattern_hashes=["<h>"], start="...", end="...", ...)
 Required after any `top_interesting_patterns` teaser row before the pattern appears in a Finding.
 
 **CORRELATE ACROSS WINDOWS - first-occurrence detection.**
-A `pattern_hash` present in the incident window but absent from a healthy baseline window signals new behavior. Run `query_grouped_aggregation` twice, once per window, and compare hash populations (v1 substitute for the fast-follow `query_period_diff` tool; see `mcp-tool-decision-tree.md`).
+A `pattern_hash` present in the incident window but absent from a healthy baseline window signals new behavior. Run `query_event_counts_by_severity` twice, once per window, and compare hash populations (v1 substitute for the fast-follow `query_period_diff` tool; see `mcp-tool-decision-tree.md`).
 
 **RESOLVE - read the value, not the hash.**
 The response envelope header carries a hash-dictionary `lookups` table mapping frequent hashes to their values.
@@ -101,8 +101,8 @@ When a row's inline value is blank, resolve it from `lookups`. Never show a raw 
 
 ## Worked shape: localize then land
 
-1. `list_scope_ladder` or `query_grouped_aggregation(group_field="service", ...)` over the fleet or source: which component is noisiest.
-2. `query_grouped_aggregation(group_field="pattern", lql='service = "<noisy service>"', ...)`: which pattern within that component dominates.
+1. `query_scope_activity` or `query_event_counts_by_severity(group_field="service", ...)` over the fleet or source: which component is noisiest.
+2. `query_event_counts_by_severity(group_field="pattern", lql='service = "<noisy service>"', ...)`: which pattern within that component dominates.
 3. Compare against a healthy baseline window: is the top pattern new, or normal volume?
 4. `describe_pattern(pattern_hashes=["<h>"])` on the surviving hash, then `query_logs(lql='pattern_hash = "<h>"', ...)` for event-level evidence.
 

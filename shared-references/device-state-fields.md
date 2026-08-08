@@ -16,7 +16,7 @@ Ask it before writing "nothing was found" or "the problem started at". Do not op
 with a device-health sweep, and do not report device health as the finding unless the ticket was
 about the agent.
 
-## `list_device_health`
+## `query_device_health`
 
 Returns the latest curated state per device: monitor rows for conditions, inventory rows for what is
 on the box.

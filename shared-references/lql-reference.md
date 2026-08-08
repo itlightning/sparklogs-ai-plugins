@@ -1,6 +1,6 @@
 # LQL Reference - for the SparkLogs Investigator skill
 
-The complete, verified syntax of Lightning Query Language (LQL) - the filter language used by every LQL parameter on the SparkLogs MCP tools: `lql` (on `query_logs` / `query_grouped_aggregation`), and `filter_lql` / `having_lql` (on `refine_query_result`). Read this file when composing any non-trivial LQL.
+The complete, verified syntax of Lightning Query Language (LQL) - the filter language used by every LQL parameter on the SparkLogs MCP tools: `lql` (on `query_logs` / `query_event_counts_by_severity`), and `filter_lql` / `having_lql` (on `refine_query_result`). Read this file when composing any non-trivial LQL.
 
 An empty or omitted `lql` matches everything in the tool's `start`/`end` window and `org_ids` scope - useful as a starting point before narrowing.
 
@@ -254,7 +254,7 @@ any: "credit card"                       <- search all fields for "credit card"
 
 - **No JOIN** across event rows. LQL is a row predicate.
 - **No subqueries** in filter expressions.
-- **No COUNT or other aggregations in filter expressions.** `query_grouped_aggregation` always returns hit counts plus `max_severity` per group; there is no aggregation list to pass it. Named aggregates (`{fn, col, as}`) live on `refine_query_result`, over a cached result.
+- **No COUNT or other aggregations in filter expressions.** `query_event_counts_by_severity` always returns hit counts plus `max_severity` per group; there is no aggregation list to pass it. Named aggregates (`{fn, col, as}`) live on `refine_query_result`, over a cached result.
 - **No wildcard JSON paths** (per above).
 - **No `LIKE`, `MATCHES`, `IS NULL`, `CONTAINS_ANY`, `CONTAINS_ALL`** keywords.
 

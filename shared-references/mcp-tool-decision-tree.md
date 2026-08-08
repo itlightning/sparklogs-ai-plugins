@@ -2,7 +2,7 @@
 
 Per-tool detailed usage with parameter notes, decision tree for which tool to use when, and worked-example call sequences.
 
-The tool surface is these **eleven** tools: `resolve_scope`, `list_sources`, `list_scope_ladder`, `list_device_health`, `describe_pattern`, `list_fields`, `query_grouped_aggregation`, `query_logs`, `refine_query_result`, `get_query_metadata`, `server_info`. Three differential tools (`query_period_diff`, `compare_populations`, `cluster_event_contexts`) are fast-follow; see the bottom of this file for v1 equivalents.
+The tool surface is these **eleven** tools: `resolve_scope`, `list_sources`, `query_scope_activity`, `query_device_health`, `describe_pattern`, `list_fields`, `query_event_counts_by_severity`, `query_logs`, `refine_query_result`, `get_query_metadata`, `server_info`. Three differential tools (`query_period_diff`, `compare_populations`, `cluster_event_contexts`) are fast-follow; see the bottom of this file for v1 equivalents.
 
 **Every scoped or data tool takes `external_investigation_id`** (REQUIRED on all of them except
 `server_info`, which takes NO parameters at all and REJECTS an id; a friendly, human-meaningful correlation handle you supply, 8-200 chars free text, e.g. `investigate-ticket-1234-disk-errors` - not a generated hash. Reusing the same value RESUMES that investigation; use a fresh, distinctive value to start a new one; tagged on every call).
@@ -15,29 +15,29 @@ The tool surface is these **eleven** tools: `resolve_scope`, `list_sources`, `li
 Spend from the top down:
 
 - **Tier 1, lightweight scoping:** `resolve_scope`, `list_fields`. Fix `org_ids` and fleet directory (agents, ingest keys, verdicts). Do this before backing scans.
-- **Tier 1b, billed discovery:** `list_sources`, `list_scope_ladder`, `describe_pattern` (stats). Confirm data in window, enumerate structure, read pattern detail. See `scope-resolution.md` and `scope-ladder.md`.
-- **Tier 2, grouped aggregation:** `query_grouped_aggregation`. Groups every matching event by one field, returns top values by hit count. The workhorse for "what's happening" - it tells you where to point `query_logs`. Group by a scope-ladder field (`service`, `app`, `subsource`, `category`, `pattern`, or a `_hash`) to localize before drilling - see `scope-ladder.md`.
+- **Tier 1b, billed discovery:** `list_sources`, `query_scope_activity`, `describe_pattern` (stats). Confirm data in window, enumerate structure, read pattern detail. See `scope-resolution.md` and `scope-ladder.md`.
+- **Tier 2, grouped aggregation:** `query_event_counts_by_severity`. Groups every matching event by one field, returns top values by hit count. The workhorse for "what's happening" - it tells you where to point `query_logs`. Group by a scope-ladder field (`service`, `app`, `subsource`, `category`, `pattern`, or a `_hash`) to localize before drilling - see `scope-ladder.md`.
 - **Tier 3, raw events (last resort):** `query_logs`, only after Tiers 1-2 narrowed the window and filter. Then `refine_query_result` (lightweight) over that cached slice - do NOT re-scan.
 
-`refine_query_result` and the default `get_query_metadata` are lightweight - they run against the cache. Backing scans (`query_logs`, `query_grouped_aggregation`, and the opt-in `get_query_metadata` deep discovery) touch the underlying source and take meaningfully longer.
+`refine_query_result` and the default `get_query_metadata` are lightweight - they run against the cache. Backing scans (`query_logs`, `query_event_counts_by_severity`, and the opt-in `get_query_metadata` deep discovery) touch the underlying source and take meaningfully longer.
 
 ---
 
 ## Reach for this when
 
 One trigger per tool. If your question is not on this list, it is almost always a
-`query_grouped_aggregation` question.
+`query_event_counts_by_severity` question.
 
 | Tool | Reach for it when |
 |---|---|
 | `resolve_scope` | You have a name (client, host, ticket) and need an `org_id`. Always first. |
 | `list_sources` | Before concluding anything from an absence: did this source send data in THIS window? |
-| `list_device_health` | You need standing condition, what is installed or mounted, or which devices reported nothing. State, not sequence. |
-| `query_grouped_aggregation` | "What is going on here", at any altitude. The default tool. Group by `reason` or `pattern`; use `group_fields` when the question has two nouns in it. |
+| `query_device_health` | You need standing condition, what is installed or mounted, or which devices reported nothing. State, not sequence. |
+| `query_event_counts_by_severity` | "What is going on here", at any altitude. The default tool. Group by `reason` or `pattern`; use `group_fields` when the question has two nouns in it. |
 | `query_logs` | The grouping pointed somewhere specific and you now need the actual events. Last resort, over a narrowed filter. |
 | `refine_query_result` | You already pulled a slice and want a different view of it. Free; never re-scans the source. |
 | `describe_pattern` | You are about to cite a pattern and need its text and spread. Pass `pattern_hashes` (a list). Required before citing any teaser pattern. |
-| `list_scope_ladder` | You do not know what this client HAS: which apps, services and subsources exist at all. Orientation on an unfamiliar estate. |
+| `query_scope_activity` | You do not know what this client HAS: which apps, services and subsources exist at all. Orientation on an unfamiliar estate. |
 | `get_query_metadata` | A cached result behaved oddly and you need its schema, filter or cache status. |
 | `list_fields` | Rarely. See below. |
 | `server_info` | A call failed and you need to know whether region, transport or auth is the problem. |
@@ -45,7 +45,7 @@ One trigger per tool. If your question is not on this list, it is almost always 
 **Two honest demotions.** Both tools below exist and work; neither is where you should start.
 
 - **`list_fields` is usually the wrong way to learn a source's vocabulary.** It returns a field
-  catalog, which is a list of names with no sense of what matters. `query_grouped_aggregation` on
+  catalog, which is a list of names with no sense of what matters. `query_event_counts_by_severity` on
   `reason` or `pattern` tells you what the source is actually SAYING, ranked by volume, in one call
   that also advances the investigation. Reach for `list_fields` when you need a field that the data
   you have already seen did not surface, which is a real but narrow case.
@@ -113,12 +113,12 @@ list_sources(
 
 ---
 
-### `list_scope_ladder`
+### `query_scope_activity`
 
-Discover app / service / subsource structure via cheap discovery scan. **Not LQL-filtered** (cheap steering). For counts within an LQL slice, use `query_grouped_aggregation`.
+Discover app / service / subsource structure via cheap discovery scan. **Not LQL-filtered** (cheap steering). For counts within an LQL slice, use `query_event_counts_by_severity`.
 
 ```
-list_scope_ladder(
+query_scope_activity(
   org_ids: ["..."],
   start: "...",
   end: "...",
@@ -136,14 +136,14 @@ See `scope-ladder.md` for ladder vs grouped-aggregation guidance.
 
 ---
 
-### `list_device_health`
+### `query_device_health`
 
 Latest curated device state: monitor rows for conditions, inventory rows for what is on the box.
 **Supporting evidence, not the entry point.** Reach for it when you are about to conclude something
 from an absence and need to know whether the agent was observing.
 
 ```
-list_device_health(
+query_device_health(
   org_ids: ["..."],
   start: "...",                             # REQUIRED
   end: "...",                               # REQUIRED, exclusive
@@ -219,12 +219,12 @@ list_fields(
 
 ---
 
-### `query_grouped_aggregation`
+### `query_event_counts_by_severity`
 
 The workhorse for "what's happening" questions. Groups every matching event by ONE field and returns the top values by hit count.
 
 ```
-query_grouped_aggregation(
+query_event_counts_by_severity(
   org_ids: ["..."],
   start: "...",
   end: "...",
@@ -394,7 +394,7 @@ the pass-the-id-everywhere rule: there is no scope and no query to correlate.
 ```
 1. resolve_scope(<source description>)
 2. list_sources with the investigation's start/end, filtered to source - confirm data in window
-3. query_grouped_aggregation group_field pattern (or severity) - what's happening
+3. query_event_counts_by_severity group_field pattern (or severity) - what's happening
 4. query_logs over the narrowed window/filter - primary cache
 5. Multiple refine_query_result per subsource / field of interest
 6. query_logs ingest-health check (subsource in ingest_drop/spool_full/backpressure)
@@ -406,7 +406,7 @@ the pass-the-id-everywhere rule: there is no scope and no query to correlate.
 
 ```
 1. resolve_scope(<msp / org scope>)
-2. query_grouped_aggregation with lql filtering to the pattern_hash, group_field source
+2. query_event_counts_by_severity with lql filtering to the pattern_hash, group_field source
 3. Optional: query_logs + refine for first/last seen per source
 4. get_query_metadata
 5. system condition summary output (concise - this is a quick-pivot pattern)
@@ -417,8 +417,8 @@ the pass-the-id-everywhere rule: there is no scope and no query to correlate.
 ```
 1. resolve_scope
 2. list_sources
-3. query_grouped_aggregation group_field pattern over window A (e.g. incident window)
-4. query_grouped_aggregation group_field pattern over window B (e.g. prior baseline)
+3. query_event_counts_by_severity group_field pattern over window A (e.g. incident window)
+4. query_event_counts_by_severity group_field pattern over window B (e.g. prior baseline)
 5. Compare the two grouped results - new / disappeared / accelerated patterns
 6. query_logs over the changed pattern if you need to see actual events
 7. get_query_metadata
@@ -433,7 +433,7 @@ the pass-the-id-everywhere rule: there is no scope and no query to correlate.
 
 **Skipping `list_sources`.** Source might not have data in the investigation's window. Always confirm with `list_sources` scoped to the investigation's `start`/`end`.
 
-**Refining a grouped result.** `query_grouped_aggregation` output is not refinable; it returns expired. Read it directly or pull raw events with `query_logs`.
+**Refining a grouped result.** `query_event_counts_by_severity` output is not refinable; it returns expired. Read it directly or pull raw events with `query_logs`.
 
 **Re-scanning instead of refining.** After ONE broad `query_logs` slice, use `refine_query_result` for other views - it's a cache lookup, not a fresh scan.
 
@@ -447,6 +447,6 @@ the pass-the-id-everywhere rule: there is no scope and no query to correlate.
 
 If you find yourself reaching for one of these, use the substitute:
 
-- **`query_period_diff`** ("what changed between two windows") -> run `query_grouped_aggregation` over each window (group_field `pattern`) and compare the two grouped results.
-- **`compare_populations`** ("what's different about broken vs working") -> run `query_grouped_aggregation` over each population separately (via distinct `lql`) and compare.
+- **`query_period_diff`** ("what changed between two windows") -> run `query_event_counts_by_severity` over each window (group_field `pattern`) and compare the two grouped results.
+- **`compare_populations`** ("what's different about broken vs working") -> run `query_event_counts_by_severity` over each population separately (via distinct `lql`) and compare.
 - **`cluster_event_contexts`** ("distinct contexts around these events") -> `query_logs` narrowed to the pattern, then `refine_query_result` group_by to cluster.

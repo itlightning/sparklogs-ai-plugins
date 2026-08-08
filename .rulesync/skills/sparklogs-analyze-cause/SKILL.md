@@ -19,7 +19,7 @@ Your output is a clearly-labeled set of candidate hypotheses, each anchored on p
 When the engineer invokes you with `/sparklogs-analyze-cause [external_investigation_id]`, you:
 
 1. Recover the prior investigation's system condition summary from the local investigation-state document (which holds the findings + the per-query `query_id`/`query_url` list). Inspect any specific cached query with `get_query_metadata(query_id=...)` if you need its schema or cache status.
-2. Optionally make additional MCP calls where the analysis needs evidence the prior summary does not carry. Section 5 gives the trigger per tool; the common three are a fleet pivot on `source`, a cross-tab on `group_fields` to characterize the affected population, and `list_device_health` to check the agent was observing.
+2. Optionally make additional MCP calls where the analysis needs evidence the prior summary does not carry. Section 5 gives the trigger per tool; the common three are a fleet pivot on `source`, a cross-tab on `group_fields` to characterize the affected population, and `query_device_health` to check the agent was observing.
 3. Generate candidate cause hypotheses anchored on the prior findings.
 4. For each hypothesis: state the hypothesis, cite which prior findings support it, give a confidence band, specify what would confirm it, what would refute it, and whether off-endpoint checks are needed.
 5. Identify alternative framings of the symptom.
@@ -136,9 +136,9 @@ The full hypothesis-generation guidance is in `references/hypothesis-generation.
 Sometimes the prior investigation's evidence is enough. Other times one cheap check moves a hypothesis materially. One trigger per tool, same discipline as the investigate skill's decision tree:
 
 **Make additional MCP calls when:**
-- **Is this one host or the fleet?** `query_grouped_aggregation(group_field="source")` over the filter that produced the Finding, or over a scope-ladder field (`service`, `app`, `subsource`, `category`) to test whether the affected hosts share a component.
+- **Is this one host or the fleet?** `query_event_counts_by_severity(group_field="source")` over the filter that produced the Finding, or over a scope-ladder field (`service`, `app`, `subsource`, `category`) to test whether the affected hosts share a component.
 - **What is DIFFERENT about the affected population?** This is the cross-tab question, and it is the one most often answered badly. `group_fields=["<a>", "<b>"]` groups by 2-3 fields at once: `["reason", "source"]` separates one reason concentrated on one host from the same volume spread across forty, which two single-field runs cannot distinguish. `["config_change_type", "config_change_target"]` answers "what changed, on what". Reach for it whenever the hypothesis names two things. Contrasting two single-field runs (one per population) still works where the populations need different `lql`; `compare_populations` is fast-follow and not in the surface.
-- **What is standing on the box right now?** `list_device_health` for open conditions, what is installed, and whether the device reported at all. A hypothesis that assumes the agent was watching should be checked against the honesty fields before it is offered.
+- **What is standing on the box right now?** `query_device_health` for open conditions, what is installed, and whether the device reported at all. A hypothesis that assumes the agent was watching should be checked against the honesty fields before it is offered.
 - A hypothesis needs a pattern's text or spread before it can be cited: `describe_pattern`.
 - A hypothesis depends on a narrow time-window check the prior investigation did not include.
 
