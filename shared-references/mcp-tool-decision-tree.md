@@ -248,12 +248,14 @@ is a band this result never saw. See `category-classes.md` for the nine bands.
 is the rate rising. Add one `group_by` field for one series per value: `bucket="1h"` with
 `group_by=["source"]` shows which host stopped reporting and at what hour, which a flat ranking cannot
 show at all. Two things to read carefully. The series is DENSE, so an empty bucket comes back as an
-explicit zero and a gap is a run of zeros rather than rows you have to notice are missing. And it
+explicit zero and a gap is a run of zeros rather than rows you have to notice are missing - until the
+scan is sampled, where a count too small to tell from none renders as `<N`, zeros included, and
+`summary.scope` says the series cannot be read for gaps below that bound. And it
 always covers the whole window: when the window holds more buckets than one response carries, the
 server widens the bucket and `summary.scope` states both widths, so read the width you got rather
 than the width you asked for.
 
-**Sampled counts:** on very large populations the server may compute counts from a partial sample; the response then carries `summary.sampled` + `sample_pct` and its scope line says so. Cite such counts as approximate (small ones are rough); narrow the window or filter for exact figures. Same marker applies to `query_logs` grounding totals.
+**Sampled counts:** a scan too large to read in full is sampled rather than refused, and `summary.scope` then states a DETECTION FLOOR once for the whole response. Below it a cell reads `<N`, meaning fewer than about N events rather than NONE. At or above it a cell is an integer rounded to the significant digits its sample supports: an estimate, never an exact figure. The cell tells you which one you are reading, so quote it as it came. Narrow the window or filter for exact counts. Same treatment on `query_logs` grounding totals.
 
 **Use cases:**
 - "What patterns appeared most?" -> `group_by=["pattern"]`.
