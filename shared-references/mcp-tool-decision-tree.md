@@ -97,7 +97,7 @@ list_sources(
   include_top_interesting_patterns: true,   # default true; summary teaser ~8 patterns
   external_investigation_id: "..."
 )
--> rows: agent_id, collector_kind, name, verdict, source, event_count, cnt_interesting, cnt_warn_error, cnt_critical_plus, distinct_interesting, bytes_ingested, first/last_event_at
+-> rows: agent_id, collector_kind, name, verdict, source, event_count, cnt_interesting, one cnt_<band> per failure-side severity band, distinct_interesting, bytes_ingested, first/last_event_at
 -> summary may include top_interesting_patterns; call describe_pattern before citing
 ```
 
@@ -106,10 +106,10 @@ list_sources(
 **Use cases:**
 - **Scope discovery:** confirm expected collector/source pairs have events; cross-check `verdict` (stuck/offline halt rules in `scope-resolution.md`).
 - **Fleet enumeration:** list collector/origin pairs in the window.
-- **Triage:** `cnt_interesting` and `cnt_warn_error` (severity 13-19) before deep queries. The name, integer and histogram-key spellings of each rung are mapped in `category-classes.md`.
+- **Triage:** `cnt_interesting` and the failure-side band counts (`cnt_warning` through `cnt_critical_plus`) before deep queries. The bands, and the name / integer / histogram-key spellings of each rung, are mapped in `category-classes.md`.
 - **Critical+ fetch-first:** any non-zero `cnt_critical_plus` (severity >= 20) in scope means fetch
   those events before proceeding, whatever the investigation topic (`category-classes.md`, Query
-  notes). Where the count is not surfaced on a row, group by `severity`.
+  notes).
 
 ---
 

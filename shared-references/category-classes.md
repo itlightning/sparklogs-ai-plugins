@@ -117,20 +117,16 @@ table is the bridge; everything else about severity in this doc set points here.
 | Returned values and histogram keys | UPPERCASE band name | `ERROR`, `CRITICAL`, and `WARN2` / `WARN3` for rungs between the named ones |
 | Numeric filters and `severity_level` | integer 1-24 | `min_severity: 17` |
 
-The bands, which are the same on every tool:
+Every tool that counts events reports those integers as the same nine `cnt_<band>` columns. This
+sentence is the definition; the tools repeat it verbatim so there is only ever one spelling to trust:
 
-| Integer | Band |
-|---|---|
-| 13-15 | warning |
-| 16 | minor |
-| 17 | error |
-| 18 | serious |
-| 19 | severe |
-| 20 | critical |
-| 21-24 | fatal-class (fatal, alert, panic, emergency) |
+Severity bands are the same on every tool here: cnt_debug_or_below (severity 6 and below), cnt_verbose (7-8), cnt_info_or_notice (9-12), cnt_warning (13-15), cnt_minor (16), cnt_error (17), cnt_serious (18), cnt_severe (19), cnt_critical_plus (20 and above). Listings of what is wrong carry the failure side only (cnt_warning and above); tools that count all traffic carry every band.
 
-So `cnt_warn_error` is 13-19 and `cnt_critical_plus` is >= 20. A histogram key of `FATAL` covers
-21-24, not just 21.
+Two consequences worth stating.
+The failure-side subset is five columns, `cnt_warning` through `cnt_critical_plus`, and a listing
+that carries them is not hiding the quiet traffic: it never counted it.
+And `cnt_critical_plus` absorbs the whole fatal class, so a histogram key of `CRITICAL` covers 20 and
+above rather than 20 alone.
 
 **Quote returned values verbatim, write primaries in your own voice.** A histogram key is a datum:
 paraphrasing `WARN3` as "warning" breaks the link between your finding and the row. Both fit in one

@@ -303,9 +303,9 @@ list_sources(
 )
 ```
 
-Each row is a **(collector `agent_id`, origin `source`)** pair with triage columns (`cnt_interesting`, `cnt_warn_error` for severity 13-19, `cnt_critical_plus` for severity >= 20, `distinct_interesting`) and optional summary **`top_interesting_patterns`** teaser. Call **`describe_pattern`** before citing any teaser pattern.
+Each row is a **(collector `agent_id`, origin `source`)** pair with triage columns (`cnt_interesting`, one count per failure-side severity band from `cnt_warning` to `cnt_critical_plus`, `distinct_interesting`) and optional summary **`top_interesting_patterns`** teaser. Call **`describe_pattern`** before citing any teaser pattern.
 
-**Critical+ fetch-first rule:** any non-zero critical+ count in scope (severity >= critical; the dedicated `cnt_critical_plus` triage column where surfaced, else a grouped aggregation on `severity`) means fetch those events before proceeding, regardless of the investigation topic. Critical+ admissions are rare, always-surface facts (confirmed integrity loss or compromise) and auto-elevate into daily fleet reporting; never leave one unread in a Finding's scope. The Info..Error bands carry no fetch-first mandate - weigh them normally. See `references/category-classes.md`, Query notes.
+**Critical+ fetch-first rule:** any non-zero `cnt_critical_plus` in scope (severity 20 and above) means fetch those events before proceeding, regardless of the investigation topic. Critical+ admissions are rare, always-surface facts (confirmed integrity loss or compromise) and auto-elevate into daily fleet reporting; never leave one unread in a Finding's scope. The Info..Error bands carry no fetch-first mandate - weigh them normally. See `references/category-classes.md`, Query notes.
 
 **The verdict and the event stream describe DIFFERENT planes, and they can legitimately disagree.** `verdict` describes the AGENT SERVICE plane: whether the agent is checking in on its own control channel. Event flow describes the COLLECTOR plane: whether data reached us. A machine whose agent service looks `offline` while events arrive minutes later is a normal and common shape, not a contradiction to resolve by picking one.
 
