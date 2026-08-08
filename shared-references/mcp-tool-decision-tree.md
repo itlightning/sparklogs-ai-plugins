@@ -320,7 +320,7 @@ refine_query_result(
   query_id: "...",                 # from a prior query_logs result
   filter_lql: "...",               # WHERE over the cached table's ROW columns
   group_by: [ "severity" ],                   # bare column names, or objects for a bucket/alias; present => aggregation, absent => row slice
-  aggregate: [ {"fn": "count", "col": "*", "as": "hits"} ],   # fn in count/count_distinct/sum/avg/min/max/stddev/p50/p90/p95/p99
+  aggregate: [ {"fn": "count", "col": "*", "as": "hits"} ],   # fn in count/count_distinct/sum/avg/min/max/stddev/p50/p90/p95/p99; `col: "*"` works with count only, every other fn needs a real column
   having_lql: "...",               # HAVING over POST-GROUP columns (group + aggregate aliases)
   order_by: [ {"col": "hits", "dir": "desc"} ],   # LIST OF OBJECTS; col may be a group column or an aggregate alias
   select: [...],                   # row-mode projection
