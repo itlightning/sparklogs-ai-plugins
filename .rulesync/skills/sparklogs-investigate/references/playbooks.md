@@ -70,7 +70,7 @@ server-side job state.
    ```
    query_event_counts_by_severity(org_ids=[...], start=..., end=...,
      lql='source = "<host>" AND severity >= 17',
-     group_field="pattern", external_investigation_id="<id>")
+     group_by=["pattern"], external_investigation_id="<id>")
    ```
 
 4. Read the dominant patterns before citing any of them.
@@ -94,7 +94,7 @@ server-side job state.
 
    ```
    query_event_counts_by_severity(org_ids=[...], start=..., end=...,
-     lql='pattern_hash = "<h>"', group_field="source", external_investigation_id="<id>")
+     lql='pattern_hash = "<h>"', group_by=["source"], external_investigation_id="<id>")
    ```
 
 ---
@@ -121,7 +121,7 @@ the PDC, directory sync, the network path between user and domain controller.
    ```
    query_event_counts_by_severity(org_ids=[...], start=..., end=...,
      lql='source = "<host>" AND sparklogs.actor.name = "<account>"',
-     group_fields=["reason", "win.eventlog.security.logon_type_name"],
+     group_by=["reason", "win.eventlog.security.logon_type_name"],
      external_investigation_id="<id>")
    ```
 
@@ -178,7 +178,7 @@ the process talks to.
    ```
    query_event_counts_by_severity(org_ids=[...], start=..., end=...,
      lql='source = "<host>" AND app: winlog/Application AND severity >= 17',
-     group_field="pattern", external_investigation_id="<id>")
+     group_by=["pattern"], external_investigation_id="<id>")
    ```
 
 4. If one application dominates, get its shape over time.
@@ -223,7 +223,7 @@ withdrawal.
    ```
    query_event_counts_by_severity(org_ids=[...], start=..., end=...,
      lql='source = "<host>" AND service = patching',
-     group_field="reason", external_investigation_id="<id>")
+     group_by=["reason"], external_investigation_id="<id>")
    ```
 
 3. The failing install itself, in sequence.
@@ -234,14 +234,14 @@ withdrawal.
      external_investigation_id="<id>")
    ```
 
-4. Fleet shape. "Is it just us" is one noun and takes `group_field="source"` over a pinned reason.
+4. Fleet shape. "Is it just us" is one noun and takes `group_by=["source"]` over a pinned reason.
    "Which patching failures, on which machines" is two nouns and takes the cross-tab, which is the
    more useful read when a patch window went badly across a client.
 
    ```
    query_event_counts_by_severity(org_ids=[...], start=..., end=...,
      lql='service = patching AND severity >= 17',
-     group_fields=["reason", "source"], external_investigation_id="<id>")
+     group_by=["reason", "source"], external_investigation_id="<id>")
    ```
 
    One reason across every host is a bad KB; many reasons on one host is a broken machine. A pair of
@@ -282,14 +282,14 @@ fields, while a `near_cap` reason is a level claim only. Read the adjective.
                       external_investigation_id="<id>")
    ```
 
-   Grouped mode takes no `fieldset` and no `fields`: it returns fixed per-reason columns over the
+   Grouped mode takes no `fieldset` and no `add_fields`: it returns fixed per-reason columns over the
    whole matched set, which is also the only way to get an exact fleet-wide condition total.
 
 3. Storage errors in the log stream, when the volume is filling because something is failing.
 
    ```
    query_event_counts_by_severity(org_ids=[...], start=..., end=...,
-     lql='source = "<host>" AND service = storage', group_field="reason",
+     lql='source = "<host>" AND service = storage', group_by=["reason"],
      external_investigation_id="<id>")
    ```
 
@@ -314,7 +314,7 @@ vendor, hardware change by hand.
    ```
    query_event_counts_by_severity(org_ids=[...], start=..., end=...,
      lql='source = "<host>" AND sparklogs.kind = config_change',
-     group_fields=["config_change_type", "config_change_target"],
+     group_by=["config_change_type", "config_change_target"],
      external_investigation_id="<id>")
    ```
 
@@ -343,7 +343,7 @@ fabric.
 
    ```
    query_event_counts_by_severity(org_ids=[...], start=..., end=...,
-     lql='source = "<host>" AND service = storage', group_field="reason",
+     lql='source = "<host>" AND service = storage', group_by=["reason"],
      external_investigation_id="<id>")
    ```
 
@@ -375,7 +375,7 @@ controllers, anything running on a DC without the agent.
    ```
    query_event_counts_by_severity(org_ids=[...], start=..., end=...,
      lql='sparklogs.reason in (kerberos_ticket_failed, kerberos_preauth_failed, ntlm_validation_failed)',
-     group_fields=["source", "win.eventlog.security.status_meaning"],
+     group_by=["source", "win.eventlog.security.status_meaning"],
      external_investigation_id="<id>")
    ```
 
@@ -406,7 +406,7 @@ holding its own copy of the certificate, federation metadata.
 
    ```
    query_event_counts_by_severity(org_ids=[...], start=..., end=...,
-     lql='source = "<host>" AND service = certificates', group_field="reason",
+     lql='source = "<host>" AND service = certificates', group_by=["reason"],
      external_investigation_id="<id>")
    ```
 

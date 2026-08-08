@@ -197,11 +197,11 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` or `low`.
 
 ### Reading Level 3 by default
 
-**Symptom.** Your `return_field_list` includes `state.<category>` or `anomalies` on every call.
+**Symptom.** Your `select` includes `state.<category>` or `anomalies` on every call.
 
 **Why it's wrong.** Level 3 returns far more data than Level 1 or 2. Default should be Level 1 (triage) -> Level 2 (assess) -> Level 3 only when ground truth is needed.
 
-**Recovery.** Always set `return_field_list` explicitly. Use the level-recipes from `mcp-tool-decision-tree.md`. Field-length caps are SERVER-ENFORCED - there is no client override. If a capped field is truncating data you need, narrow the query (tighter `lql`, fewer subsources) or project a smaller field set with `return_field_list` / `select`, then page or refine to reach the specific rows.
+**Recovery.** Always set `select` explicitly. Use the level-recipes from `mcp-tool-decision-tree.md`. Field-length caps are SERVER-ENFORCED - there is no client override. If a capped field is truncating data you need, narrow the query (tighter `lql`, fewer subsources) or project a smaller field set with `select`, then page or refine to reach the specific rows.
 
 ### Re-running queries instead of refining cached results
 

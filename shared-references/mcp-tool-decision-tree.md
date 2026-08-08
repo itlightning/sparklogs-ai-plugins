@@ -33,7 +33,7 @@ One trigger per tool. If your question is not on this list, it is almost always 
 | `resolve_scope` | You have a name (client, host, ticket) and need an `org_id`. Always first. |
 | `list_sources` | Before concluding anything from an absence: did this source send data in THIS window? |
 | `query_device_health` | You need standing condition, what is installed or mounted, or which devices reported nothing. State, not sequence. |
-| `query_event_counts_by_severity` | "What is going on here", at any altitude. The default tool. Group by `reason` or `pattern`; use `group_fields` when the question has two nouns in it. |
+| `query_event_counts_by_severity` | "What is going on here", at any altitude. The default tool. `group_by=["reason"]` or `["pattern"]`; pass two fields when the question has two nouns in it. |
 | `query_logs` | The grouping pointed somewhere specific and you now need the actual events. Last resort, over a narrowed filter. |
 | `refine_query_result` | You already pulled a slice and want a different view of it. Free; never re-scans the source. |
 | `describe_pattern` | You are about to cite a pattern and need its text and spread. Pass `pattern_hashes` (a list). Required before citing any teaser pattern. |
@@ -150,7 +150,7 @@ query_device_health(
   include_sub_orgs: true,                   # default true
   agent_ids: ["..."],                       # optional collector UUIDs
   fieldset: "rca" | "fleet" | "minimal",    # rca is the default
-  fields: ["..."],                          # optional; ADDS to the fieldset, never replaces it
+  add_fields: ["..."],                      # optional; ADDS to the fieldset, never replaces it
   kinds: ["inventory", "monitor"],          # default; agent_op and delta are opt-in
   reasons: ["..."],                         # optional, filter to named conditions
   min_severity: 13,                         # optional integer floor on the ladder
@@ -167,8 +167,8 @@ query_device_health(
   class at all, and they are the ground truth an RCA needs. `CONTEXT` is the absence of a class, not
   a filterable value.
 - **Fleet shape of a condition:** `group_by_reason: true`. **Grouped mode takes no `fieldset` and no
-  `fields`:** it returns fixed per-reason columns, not device rows, so there is no projection to
-  choose. Passing `fields` alongside it is an error; passing `fieldset` does nothing. Pick the
+  `add_fields`:** it returns fixed per-reason columns, not device rows, so there is no projection to
+  choose. Passing `add_fields` alongside it is an error; passing `fieldset` does nothing. Pick the
   fieldset only on the row-mode call.
 
 **Read before using:** `device-state-fields.md` for the column names, the honesty fields, and what
@@ -229,23 +229,21 @@ query_event_counts_by_severity(
   start: "...",
   end: "...",
   include_sub_orgs: true,
-  group_field: "pattern" | "source" | "severity" | "service" | "app" | "subsource" | "category" | "<field>_hash" | "<custom.field>",   # a single field
-  group_fields: ["...", "..."],    # 2-3 fields for a cross-tab; use INSTEAD of group_field, not with it
+  group_by: ["pattern" | "source" | "service" | "app" | "subsource" | "category" | "<field>_hash" | "<custom.field>"],   # one field ranks its values; 2-3 cross-tab. Omit to count the whole population
   lql: "...",                      # optional LQL filter applied before grouping
   limit: 50,                       # max distinct groups returned, by hit count (default 50)
   external_investigation_id: "..."
 )
--> rows: {<group_field>, hits, max_severity}   # dense TSV
+-> rows: {<group_by>, hits, max_severity}   # dense TSV
 ```
 
 **Sampled counts:** on very large populations the server may compute hits from a partial sample; the response then carries `summary.sampled` + `sample_pct` and its scope line says so. Cite such counts as approximate (small ones are rough); narrow the window or filter for exact figures. Same marker applies to `query_logs` grounding totals.
 
 **Use cases:**
-- "What patterns appeared most?" -> group_field `pattern`.
-- "Which sources show this?" -> filter on a `pattern_hash` in `lql`, group_field `source`.
-- "Severity distribution" -> group_field `severity`.
-- "Which component is noisiest?" -> group_field `service` or `subsource`, then narrow with a second call - see the scope ladder (`scope-ladder.md`).
-- "Which reason, on which machines?" -> `group_fields` with two fields (reason by instance, config-change type by target). One call answers what two single-field passes only hint at, because the pairing is what carries the shape.
+- "What patterns appeared most?" -> `group_by=["pattern"]`.
+- "Which sources show this?" -> filter on a `pattern_hash` in `lql`, `group_by=["source"]`.
+- "Which component is noisiest?" -> `group_by=["service"]` or `["subsource"]`, then narrow with a second call - see the scope ladder (`scope-ladder.md`).
+- "Which reason, on which machines?" -> `group_by` with two fields (reason by instance, config-change type by target). One call answers what two single-field passes only hint at, because the pairing is what carries the shape.
 
 **Grouped output is not a refinable cache.** Calling `refine_query_result` on its `query_id` returns expired. Read grouped results directly. If a grouped result is truncated, follow its hint (narrow the `lql`/window and re-run). To then pull raw events for an interesting group, run `query_logs` with that group's value in `lql` (use the `*_hash` verbatim for the six hash fields).
 
@@ -262,7 +260,7 @@ query_logs(
   end: "...",
   include_sub_orgs: true,
   lql: "...",                      # optional LQL filter; omit to match all in scope
-  return_field_list: [...],        # projection; response-only, cache keeps full width. Set explicitly.
+  select: [...],                   # REPLACES the projection; response-only, cache keeps full width. Set explicitly.
   external_investigation_id: "..."
 )
 -> header (query_id, query_url, summary, schema, lookups, page) + one page of events (JSONL)
@@ -274,14 +272,14 @@ query_logs(
 
 **Use cases:**
 - Last-resort raw event retrieval AFTER aggregation narrowed to a specific small set.
-- Level-3 ground-truth reads with an explicit `return_field_list`.
+- Level-3 ground-truth reads with an explicit `select`.
 - "Show me events with this filter" when aggregation isn't useful (e.g. one specific event you want to see in detail).
 
 **Then refine, don't re-query.** Pull ONE broad-enough slice; use `refine_query_result` for every other view of it. To page a partial result, follow the response's `page.next`.
 
 **Common mistakes:**
 - Reaching for this first. Aggregation first.
-- Omitting `return_field_list` (returns the standard set; usually too much).
+- Omitting `select` (returns the standard set; usually too much).
 - Reading Level 3 by default.
 - Forgetting `external_investigation_id`.
 
@@ -394,7 +392,7 @@ the pass-the-id-everywhere rule: there is no scope and no query to correlate.
 ```
 1. resolve_scope(<source description>)
 2. list_sources with the investigation's start/end, filtered to source - confirm data in window
-3. query_event_counts_by_severity group_field pattern (or severity) - what's happening
+3. query_event_counts_by_severity group_by=["pattern"] - what's happening, by severity
 4. query_logs over the narrowed window/filter - primary cache
 5. Multiple refine_query_result per subsource / field of interest
 6. query_logs ingest-health check (subsource in ingest_drop/spool_full/backpressure)
@@ -406,7 +404,7 @@ the pass-the-id-everywhere rule: there is no scope and no query to correlate.
 
 ```
 1. resolve_scope(<msp / org scope>)
-2. query_event_counts_by_severity with lql filtering to the pattern_hash, group_field source
+2. query_event_counts_by_severity with lql filtering to the pattern_hash, group_by=["source"]
 3. Optional: query_logs + refine for first/last seen per source
 4. get_query_metadata
 5. system condition summary output (concise - this is a quick-pivot pattern)
@@ -417,8 +415,8 @@ the pass-the-id-everywhere rule: there is no scope and no query to correlate.
 ```
 1. resolve_scope
 2. list_sources
-3. query_event_counts_by_severity group_field pattern over window A (e.g. incident window)
-4. query_event_counts_by_severity group_field pattern over window B (e.g. prior baseline)
+3. query_event_counts_by_severity group_by=["pattern"] over window A (e.g. incident window)
+4. query_event_counts_by_severity group_by=["pattern"] over window B (e.g. prior baseline)
 5. Compare the two grouped results - new / disappeared / accelerated patterns
 6. query_logs over the changed pattern if you need to see actual events
 7. get_query_metadata
@@ -447,6 +445,6 @@ the pass-the-id-everywhere rule: there is no scope and no query to correlate.
 
 If you find yourself reaching for one of these, use the substitute:
 
-- **`query_period_diff`** ("what changed between two windows") -> run `query_event_counts_by_severity` over each window (group_field `pattern`) and compare the two grouped results.
+- **`query_period_diff`** ("what changed between two windows") -> run `query_event_counts_by_severity` over each window (`group_by=["pattern"]`) and compare the two grouped results.
 - **`compare_populations`** ("what's different about broken vs working") -> run `query_event_counts_by_severity` over each population separately (via distinct `lql`) and compare.
 - **`cluster_event_contexts`** ("distinct contexts around these events") -> `query_logs` narrowed to the pattern, then `refine_query_result` group_by to cluster.

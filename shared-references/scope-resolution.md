@@ -200,7 +200,7 @@ After scope resolution, prefer **`agent_id`** filters for collector-backed inves
 query_event_counts_by_severity(
   org_ids: [...],
   lql: 'agent_id = "<uuid from resolve_scope or list_sources>"',
-  group_field: "pattern",
+  group_by: ["pattern"],
   ...
 )
 ```

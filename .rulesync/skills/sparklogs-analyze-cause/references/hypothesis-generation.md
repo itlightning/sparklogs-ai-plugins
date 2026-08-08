@@ -143,7 +143,7 @@ Write the hypothesis statement as a direct, specific claim, not a hedge. "Disk s
 Sometimes the prior investigation's findings are sufficient for analysis without further data gathering. Other times, a quick additional check substantially strengthens or weakens a hypothesis.
 
 **Make additional MCP calls when:**
-- A fleet pivot would discriminate between "single-source hypothesis" and "fleet-wide hypothesis." `query_event_counts_by_severity` group_field `source` on the relevant pattern.
+- A fleet pivot would discriminate between "single-source hypothesis" and "fleet-wide hypothesis." `query_event_counts_by_severity` with `group_by=["source"]` on the relevant pattern.
 - A population contrast would discriminate between "affected sources have factor X" and "factor X is irrelevant." In v1, run `query_event_counts_by_severity` over each population separately and compare; use prior Findings to define the populations. (`compare_populations` is a fast-follow tool.)
 - A specific time-window check the prior investigation didn't cover would confirm/refute a hypothesis with a single targeted call.
 

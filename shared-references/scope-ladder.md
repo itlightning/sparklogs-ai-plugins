@@ -12,7 +12,7 @@ This is the primary shallow-triage RCA lever available today: lean on it hard.
 
 **`source`, `service`, `app`, `subsource`, `category` (and their hashes) are conditional.** Present when the source's data carries the base field. The hash is computed only when the base field is detected. Not every source carries every field.
 
-**Degrade gracefully.** If a `group_field` on `service` (or another conditional field) returns a single empty or null group, that source simply does not carry `service`. Fall back to `pattern_hash`. Do not read "no groups" (or one empty group) as a Finding; it means the field is not populated for this source.
+**Degrade gracefully.** If grouping on `service` (or another conditional field) returns a single empty or null group, that source simply does not carry `service`. Fall back to `pattern_hash`. Do not read "no groups" (or one empty group) as a Finding; it means the field is not populated for this source.
 
 **The ladder is universal where curated fields are not.** `pattern_hash` is computed on every source; the other five are computed whenever the source's data carries that base field. Curated and module fields are per-source and per-surface (see the field-availability rule in SKILL.md Section 8), so an empty result there says less than it looks like it does.
 
@@ -49,7 +49,7 @@ Climb the ladder to localize a problem: group coarse to find the noisy component
 - Summary may include `top_interesting_patterns` teaser; call **`describe_pattern`** before citing any teaser pattern.
 
 **`query_event_counts_by_severity`** (billed, LQL-filtered measure):
-- Groups events matching an **`lql`** filter by one `group_field`.
+- Groups events matching an **`lql`** filter by the `group_by` fields.
 - Use when you already have a hypothesis slice (severity, time sub-range, `pattern_hash`, `agent_id`, etc.) and need counts or ranking within that slice.
 
 Rule of thumb: ladder tool = "what app/service/subsource combinations exist here?"; grouped aggregation = "within this filtered population, which values dominate?"
@@ -71,7 +71,7 @@ query_scope_activity(
 
 **GROUP - find dominant or anomalous groups (filtered measure).**
 ```
-query_event_counts_by_severity(group_field=<field or its _hash>, lql='...', ...)
+query_event_counts_by_severity(group_by=["<field or its _hash>"], lql='...', ...)
 ```
 Group by `pattern_hash` for the most-repeated normalized events; by `service` or `subsource` to localize the noisy component.
 
@@ -101,8 +101,8 @@ When a row's inline value is blank, resolve it from `lookups`. Never show a raw 
 
 ## Worked shape: localize then land
 
-1. `query_scope_activity` or `query_event_counts_by_severity(group_field="service", ...)` over the fleet or source: which component is noisiest.
-2. `query_event_counts_by_severity(group_field="pattern", lql='service = "<noisy service>"', ...)`: which pattern within that component dominates.
+1. `query_scope_activity` or `query_event_counts_by_severity(group_by=["service"], ...)` over the fleet or source: which component is noisiest.
+2. `query_event_counts_by_severity(group_by=["pattern"], lql='service = "<noisy service>"', ...)`: which pattern within that component dominates.
 3. Compare against a healthy baseline window: is the top pattern new, or normal volume?
 4. `describe_pattern(pattern_hashes=["<h>"])` on the surviving hash, then `query_logs(lql='pattern_hash = "<h>"', ...)` for event-level evidence.
 
