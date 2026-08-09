@@ -362,6 +362,8 @@ Every data-tool response is ONE text block, not JSON you parse as a whole:
 
 **Schema descriptor + deeper field discovery.** The header `schema` lists the standard fields plus the top custom fields by fill-rate FOR THIS PAGE. When it carries `more_fields`, that points at `get_query_metadata`. `get_query_metadata`'s default call is lightweight (bookkeeping only); its `top_n` / `field_match` deep discovery is a full catalog scan of the source - reach for it only when the inline schema genuinely isn't enough.
 
+**Fields with no values.** `schema.fields_with_no_values` names the fields you asked for that no row on the page carried. This is a normal outcome, not an error and not a Finding: field names are an OPEN namespace, so a name exists once some event emits it, and an empty column means this workspace has emitted nothing under that name in this window. It says nothing about the health of the fleet, so it does not belong in an investigation summary. Two useful responses: re-check the spelling against `schema.custom` or `list_fields` if you expected values, or accept that the window has none and carry on with the fields that do.
+
 ### Grouped results are not refinable
 
 `query_event_counts_by_severity` output is NOT a refinable cache - calling `refine_query_result` on it returns expired. Read grouped results directly. If a grouped result is truncated, follow its hint (narrow the filter or window and re-run the grouped call). `refine_query_result` applies ONLY to `query_logs` slices; a refine response keeps the same `query_id`, so run every further refine against that same id.
@@ -439,7 +441,7 @@ Suggest `/sparklogs-analyze-cause <external_investigation_id>` (the separate cau
 
 **Row-ceiling exceeded on backing query:** narrow `lql` (tighter time range, restricted `org_ids`, add `severity`/`anomaly_max_score` predicates) or split into multiple queries. Then refine the cached slice rather than re-scanning.
 
-**Field name you requested doesn't exist:** it will not appear in the response schema descriptor. Don't ignore - surface in your summary AND re-issue with corrected fields (use `list_fields` or the response schema to find the real name). Reference `references/lql-reference.md` for canonical field-name patterns.
+**Field name you requested returned nothing:** not an error, and not handled here - the response names it under `schema.fields_with_no_values` and Section 11 says what to do with it. Re-issue with a corrected name only when you expected values; `references/lql-reference.md` has the canonical field-name patterns.
 
 **Partial page (`page.next` present, or a trailing hint line):** the page hit a limit. Follow `page.next` for the next page via `refine_query_result(offset=...)`, or narrow the filter for fewer rows.
 

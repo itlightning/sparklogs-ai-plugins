@@ -374,7 +374,7 @@ t between 2026-04-23T03:00:00Z and 2026-04-23T04:00:00Z
 7. **Quoting unquoted terms unnecessarily.** `severity = "error"` works but `severity = error` is fine and more readable.
 8. **Forgetting parentheses around OR with implicit AND.** `severity = error OR anomaly_max_score >= 60 source = "x"` parses unexpectedly. Use parentheses: `(severity = error OR anomaly_max_score >= 60) AND source = "x"`.
 9. **Mixing `&&` / `||` with `AND` / `OR` in the same expression.** Both work but consistency reads better.
-10. **Hallucinating field names.** When uncertain about a field name, check the response schema descriptor - a field you requested that doesn't resolve won't appear there. Use canonical field names from `mcp-tool-decision-tree.md`, `list_fields` discovery, or `get_query_metadata` field discovery over a cached query.
+10. **Hallucinating field names.** A name nothing has emitted is not refused; it reads as empty, and the response lists it under `schema.fields_with_no_values`. That is a normal outcome rather than an error, so treat it as a prompt to check the spelling, not as something to report. Use canonical field names from `mcp-tool-decision-tree.md`, `list_fields` discovery, or `get_query_metadata` field discovery over a cached query.
 
 ---
 
@@ -389,4 +389,3 @@ Common error messages and what they mean:
 - `'IS' is not a recognized operator` -> use `field!` or `NOT field!`.
 - `expected '(' at position N` -> value list needs parens, not brackets.
 - `unknown field 'state.services.*.status'` -> wildcard paths not supported; see workarounds above.
-- `field 'state.foo.bar' has no observed type` -> field doesn't exist in any cached row; it also won't appear in the response schema descriptor.
