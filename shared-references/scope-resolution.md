@@ -95,9 +95,10 @@ Example:
 
 ### Step 8: Read health verdicts on agent rows
 
-Managed agent rows include a server-computed **`verdict`**: `running`, `offline`, `stuck`, `stopped`, `unregistered`, `unmanaged`, plus raw fields (`status`, `last_seen_at`, `stuck_reason`, versions, OS, `reported_hostname`, RMM name, description) when present.
+Managed agent rows include a server-computed **`verdict`**: `running`, `offline`, `stuck`, `stopped`, `unregistered`, `unmanaged`, plus raw fields (`status`, `last_ingest_at`, `last_heartbeat_at`, `stuck_reason`, versions, OS, `reported_hostname`, RMM name, description) when present.
+`last_ingest_at` is when log data last arrived and `last_heartbeat_at` is when the agent last checked in; an agent counts as in contact on the newer of the two, since it can beat while shipping nothing and ship while its heartbeat is wedged.
 
-Ingest-key rows are slimmer: `verdict` is freshness only (`active`, `idle`, `never` from `last_seen_at`).
+Ingest-key rows are slimmer: `verdict` is freshness only (`active`, `idle`, `never` from `last_ingest_at`). An ingest key is a credential with no installed agent, so it carries no heartbeat stamp.
 Ingest keys do not heartbeat; do not apply running/stuck/offline vocabulary to them.
 
 Use verdicts in the cross-check below; do not treat a silent source as healthy when its collector is stuck or offline.

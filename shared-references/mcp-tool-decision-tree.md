@@ -71,7 +71,7 @@ resolve_scope(
   psa_client_id: "...",          # optional EXACT match; same
   external_investigation_id: "..."
 )
--> rows: kind org | agent | ingest_key; match_kind when query set; agent rows include verdict, reported_hostname, last_seen_at, versions, OS, etc.
+-> rows: kind org | agent | ingest_key; match_kind when query set; agent rows include verdict, reported_hostname, last_ingest_at, last_heartbeat_at, versions, OS, etc.
 ```
 
 **Decision logic:**
