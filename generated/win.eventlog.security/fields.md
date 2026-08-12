@@ -26,7 +26,7 @@ The rendered `key=value` tail exists to be READ, not re-parsed: its values are n
 
 ## Reconstruction guarantee
 
-50 curated surface(s) drop the vendor body text below the synthesized first line.
+66 curated surface(s) drop the vendor body text below the synthesized first line.
 That is never data loss: the provider payload is retained at rest, so a dropped body can be reconstructed from it.
 What the body said is derivable; what it cost to ship it repeatedly is not.
 
@@ -48,6 +48,7 @@ Stored flat under the `win.eventlog.security.` prefix.
 | `win.eventlog.security.status` | string | Failure code as logged, downcased hex: NTSTATUS on 4625/4776/4777, Kerberos result code on 4768/4769/4770/4771. The raw code is the classify key and the provider fidelity; the portable error code carries the normalized value and its number space. |
 | `win.eventlog.security.substatus` | string | Detailed NTSTATUS on 4625 (usually the real cause; 0x0 means the Status field carries it). |
 | `win.eventlog.security.status_meaning` | string | Bounded meaning token decoded from the status code (NTSTATUS and SSPI causes on 4625/4776/4777, Kerberos result codes on 4768/4769/4770/4771). Also rendered as a bare inline token on those arms, so the cause forms part of the pattern instead of variabilizing away. An undecoded code leaves this unset; a meaning is never invented. |
+| `win.eventlog.security.psdirect_handshake` | string | Hyper-V PowerShell Direct legacy handshake constant on 4625, read back as ASCII. The emitting integration service fuses byte pairs of the constant into single UTF-16 code units, so the provider records it as unreadable mojibake in the domain field; this is the same bytes in the encoding they were written in. Set only on the handshake arm, and only when every character reverses cleanly, so a value that does not fit the pattern leaves this unset rather than shipping a partial reading. |
 | `win.eventlog.security.kerberos_target` | string | Service principal the Kerberos request named (ServiceName, casefolded) on 4768/4769/4770/4771: which service a ticket was asked for, and the kerberoast target join on 4769. |
 | `win.eventlog.security.ticket_encryption_type` | string | Kerberos ticket encryption type (hex enum) on every ticket row of 4768/4769/4770 that states one; 0x17 RC4-HMAC and 0x18 RC4-HMAC-EXP are the downgrade pair the RC4 arm labels. |
 | `win.eventlog.security.etype_meaning` | string | Decoded encryption-type token (rc4_hmac, rc4_hmac_exp): the meaning behind ticket_encryption_type. Only the RC4 pair decodes, so every other encryption type leaves this unset and the raw enum answers instead. |
@@ -64,8 +65,8 @@ Stored flat under the `win.eventlog.security.` prefix.
 | `win.eventlog.security.object_type` | string | Kind of object whose auditing settings changed on 4907 (ObjectType: File, Key, and the other object-server types), verbatim from the provider. |
 | `win.eventlog.security.object_value_name` | string | Registry value name that was created/modified/deleted (4657 ObjectValueName). Old/new DATA are not promoted (credential hazard). |
 | `win.eventlog.security.operation_meaning` | string | Registry operation on 4657 decoded from the message-catalog reference (value_created, value_modified, value_deleted): distinguishes a new value from a rewritten or removed one. |
-| `win.eventlog.security.previous_time` | string | System clock value before a 4616 time change, ISO-8601 UTC, decoded from the numeric epoch-microsecond PreviousTime payload value (the rendered template strings carry bidi control characters; the numeric source is clean). A non-numeric payload value leaves this unset. |
-| `win.eventlog.security.new_time` | string | System clock value after a 4616 time change, ISO-8601 UTC, decoded from the numeric epoch-microsecond NewTime payload value. A non-numeric payload value leaves this unset. |
+| `win.eventlog.security.previous_time` | string | System clock value before a 4616 time change, ISO-8601 UTC with microsecond precision, read from the PreviousTime payload value in either the ISO-8601 string form the provider writes or an epoch-microsecond integer (the rendered template strings carry bidi control characters; the named payload field is clean). A value in neither form leaves this unset. |
+| `win.eventlog.security.new_time` | string | System clock value after a 4616 time change, ISO-8601 UTC with microsecond precision, read from the NewTime payload value in either the ISO-8601 string form the provider writes or an epoch-microsecond integer. A value in neither form leaves this unset. |
 | `win.eventlog.security.insecure_boot_flags` | string | Comma-joined boot-chain weaknesses found true on 4826 (TestSigning, KernelDebug, DisableIntegrityChecks): which setting makes the boot chain accept unsigned or debugger-attached kernel code. |
 | `win.eventlog.security.rule_name` | string | Firewall rule display name from the MPSSVC rule-change family. |
 | `win.eventlog.security.rule_id` | string | Firewall rule id from the MPSSVC rule-change family (stable across renames). |
@@ -79,11 +80,13 @@ Stored flat under the `win.eventlog.security.` prefix.
 | `win.eventlog.security.nps_reason_meaning` | string | Decoded meaning of the NPS reason code on 6273/6274/6279: the same value the inline cause token renders, so the token maps one to one onto a queryable field. Unset when the code does not decode. |
 | `win.eventlog.security.nps_policy` | string | Network policy that matched the NPS request (NetworkPolicyName on 6273/6274): the pivot a RADIUS ticket needs, since a denial reads differently depending on which policy decided it. |
 | `win.eventlog.security.publisher_id` | string | Provider whose event the logging service failed to process (Eventlog 1108): which audit source is silently losing records. |
+| `win.eventlog.security.pua_count` | int | Number of entries in the per-user audit policy table built at boot (4902 PuaCount). Zero means this host has no per-user audit policy at all; any other value means auditing is aimed at named principals. |
+| `win.eventlog.security.dropped_count` | int | Number of audit records the event log transport discarded before they reached the log (Eventlog 1101). Zero means nothing was lost. Read from the message tail on the known template, and left unset on any other template. |
 
 ## Portable families
 
-Cross-source families: the same path means the same thing on every source that populates it, so a query written against one channel transfers.
-Prefer these over the module fields for anything that spans sources.
+Cross-feed families: the same path means the same thing on every data feed that populates it, so a query written against one channel transfers.
+Prefer these over the per-feed fields for anything that spans feeds.
 
 | LQL path | Family means |
 |---|---|
@@ -133,6 +136,8 @@ Each key names one field; that field is where the value is queried.
 | `running_as_domain` | `sparklogs.running_as.domain` |
 | `target` | `sparklogs.target.name` |
 | `target_domain` | `sparklogs.target.domain` |
+| `old_name` | `win.eventlog.security.old_target_user` |
+| `new_name` | `win.eventlog.security.new_target_user` |
 | `member` | `sparklogs.member.name` |
 | `session` | `sparklogs.actor.session` |
 | `error_code` | `sparklogs.error.code` |
@@ -142,6 +147,8 @@ Each key names one field; that field is where the value is queried.
 | `nps_policy` | `win.eventlog.security.nps_policy` |
 | `insecure_boot_flags` | `win.eventlog.security.insecure_boot_flags` |
 | `operation_meaning` | `win.eventlog.security.operation_meaning` |
+| `pua_count` | `win.eventlog.security.pua_count` |
+| `dropped_count` | `win.eventlog.security.dropped_count` |
 | `object_name` | `win.eventlog.security.object_name` |
 | `previous_time` | `win.eventlog.security.previous_time` |
 | `new_time` | `win.eventlog.security.new_time` |
@@ -165,14 +172,17 @@ A surface that promotes nothing says so: an empty row is a stated fact, not an o
 
 | Surface | Event ids | Fields set |
 |---|---|---|
-| `account_changed` / `account_attr` | 4722, 4723, 4724, 4725, 4738, 4742, 4781 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.config_change.action` `sparklogs.config_change.type` `sparklogs.target.domain` `sparklogs.target.id` `sparklogs.target.name` `sparklogs.target.type` `win.eventlog.security.new_target_user` `win.eventlog.security.old_target_user` |
-| `account_changed` / `password_reset_failed` | 4722, 4723, 4724, 4725, 4738, 4742, 4781 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.config_change.action` `sparklogs.config_change.type` `sparklogs.target.domain` `sparklogs.target.id` `sparklogs.target.name` `sparklogs.target.type` `win.eventlog.security.new_target_user` `win.eventlog.security.old_target_user` |
-| `account_changed` / `password_reset_success` | 4722, 4723, 4724, 4725, 4738, 4742, 4781 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.config_change.action` `sparklogs.config_change.type` `sparklogs.target.domain` `sparklogs.target.id` `sparklogs.target.name` `sparklogs.target.type` `win.eventlog.security.new_target_user` `win.eventlog.security.old_target_user` |
-| `account_changed` / `self_password_fail` | 4722, 4723, 4724, 4725, 4738, 4742, 4781 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.config_change.action` `sparklogs.config_change.type` `sparklogs.target.domain` `sparklogs.target.id` `sparklogs.target.name` `sparklogs.target.type` `win.eventlog.security.new_target_user` `win.eventlog.security.old_target_user` |
-| `account_created` / `default` | 4720, 4741 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.config_change.action` `sparklogs.config_change.type` `sparklogs.target.domain` `sparklogs.target.id` `sparklogs.target.name` `sparklogs.target.type` |
-| `account_deleted` / `default` | 4726, 4743 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.config_change.action` `sparklogs.config_change.type` `sparklogs.target.domain` `sparklogs.target.id` `sparklogs.target.name` `sparklogs.target.type` |
+| `account_changed` / `default` | 4738, 4742 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.config_change.action` `sparklogs.config_change.type` `sparklogs.target.domain` `sparklogs.target.id` `sparklogs.target.kind` `sparklogs.target.name` `sparklogs.target.type` |
+| `account_created` / `default` | 4720, 4741 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.config_change.action` `sparklogs.config_change.type` `sparklogs.target.domain` `sparklogs.target.id` `sparklogs.target.kind` `sparklogs.target.name` `sparklogs.target.type` |
+| `account_deleted` / `default` | 4726, 4743 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.config_change.action` `sparklogs.config_change.type` `sparklogs.target.domain` `sparklogs.target.id` `sparklogs.target.kind` `sparklogs.target.name` `sparklogs.target.type` |
+| `account_disabled` / `default` | 4725 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.config_change.action` `sparklogs.config_change.type` `sparklogs.target.domain` `sparklogs.target.id` `sparklogs.target.kind` `sparklogs.target.name` `sparklogs.target.type` |
+| `account_enabled` / `default` | 4722 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.config_change.action` `sparklogs.config_change.type` `sparklogs.target.domain` `sparklogs.target.id` `sparklogs.target.kind` `sparklogs.target.name` `sparklogs.target.type` |
 | `account_locked_out` / `default` | 4740 | `sparklogs.origin.host` `sparklogs.target.domain` `sparklogs.target.id` `sparklogs.target.name` `sparklogs.target.type` `win.eventlog.security.caller_computer` |
+| `account_password_change_failed` / `default` | 4723 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.target.domain` `sparklogs.target.id` `sparklogs.target.kind` `sparklogs.target.name` `sparklogs.target.type` |
+| `account_password_reset` / `default` | 4724 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.config_change.action` `sparklogs.config_change.type` `sparklogs.target.domain` `sparklogs.target.id` `sparklogs.target.kind` `sparklogs.target.name` `sparklogs.target.type` |
+| `account_password_reset_failed` / `default` | 4724 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.target.domain` `sparklogs.target.id` `sparklogs.target.kind` `sparklogs.target.name` `sparklogs.target.type` |
 | `anonymous_remote_logon` / `default` | 4624 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.kind` `sparklogs.actor.name` `sparklogs.actor.session` `sparklogs.actor.type` `sparklogs.origin.host` `sparklogs.origin.ip` `sparklogs.origin.port` `sparklogs.running_as.domain` `sparklogs.running_as.id` `sparklogs.running_as.kind` `sparklogs.running_as.name` `sparklogs.running_as.type` `win.eventlog.security.auth_package` `win.eventlog.security.elevated` `win.eventlog.security.lm_package` `win.eventlog.security.logon_guid` `win.eventlog.security.logon_type` `win.eventlog.security.logon_type_name` `win.eventlog.security.workstation` |
+| `audit_events_dropped` / `default` | 1101 | `win.eventlog.security.dropped_count` |
 | `audit_log_cleared` / `default` | 1102 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` |
 | `audit_log_full` / `default` | 1104 | **fields: none** |
 | `audit_pipeline_error` / `default` | 1108 | `win.eventlog.security.publisher_id` |
@@ -182,8 +192,10 @@ A surface that promotes nothing says so: an empty row is a stated fact, not an o
 | `ca_tamper` / `evidence_tamper` | 4882, 4885, 4890, 4896 | **fields: none** |
 | `crypto_selftest_failed` / `default` | 6418 | `sparklogs.process.name` `sparklogs.process.path` |
 | `directory_object_changed` / `default` | 5136, 5137, 5138, 5139, 5141 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.config_change.action` `sparklogs.config_change.type` `win.eventlog.security.attribute_name` `win.eventlog.security.object_dn` |
+| `domain_policy_changed` / `default` | 4739 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.config_change.action` `sparklogs.config_change.target` `sparklogs.config_change.type` |
 | `dsrm_password_changed` / `failed` | 4794 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.config_change.action` `sparklogs.config_change.type` `sparklogs.origin.host` `win.eventlog.security.workstation` |
 | `dsrm_password_changed` / `success` | 4794 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.config_change.action` `sparklogs.config_change.type` `sparklogs.origin.host` `win.eventlog.security.workstation` |
+| `event_logging_stopped` / `default` | 1100 | **fields: none** |
 | `explicit_credential_use` / `default` | 4648 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.kind` `sparklogs.actor.name` `sparklogs.actor.session` `sparklogs.actor.type` `sparklogs.destination.host` `sparklogs.process.id` `sparklogs.process.name` `sparklogs.process.path` `sparklogs.target.domain` `sparklogs.target.name` `sparklogs.target.type` `win.eventlog.security.target_server` |
 | `firewall_rule_changed` / `default` | 4946, 4947, 4948, 4950, 4954, 4956, 4957 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.config_change.action` `sparklogs.config_change.target` `sparklogs.config_change.type` `win.eventlog.security.rule_id` `win.eventlog.security.rule_name` |
 | `firewall_service_stopped` / `default` | 5025, 5034 | **fields: none** |
@@ -206,6 +218,8 @@ A surface that promotes nothing says so: an empty row is a stated fact, not an o
 | `nps_lockout` / `default` | 6279 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.origin.host` `sparklogs.origin.ip` `win.eventlog.security.nps_reason_code` `win.eventlog.security.nps_reason_meaning` |
 | `nps_request_discarded` / `default` | 6274 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.origin.host` `sparklogs.origin.ip` `win.eventlog.security.nps_policy` `win.eventlog.security.nps_reason_code` `win.eventlog.security.nps_reason_meaning` |
 | `ntlm_validation_failed` / `default` | 4776, 4777 | `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.error.code` `sparklogs.error.code_space` `sparklogs.origin.host` `win.eventlog.security.status` `win.eventlog.security.status_meaning` `win.eventlog.security.workstation` |
+| `principal_renamed` / `default` | 4781 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.config_change.action` `sparklogs.config_change.type` `sparklogs.target.domain` `sparklogs.target.id` `sparklogs.target.kind` `sparklogs.target.name` `sparklogs.target.type` `win.eventlog.security.new_target_user` `win.eventlog.security.old_target_user` |
+| `psdirect_handshake_probe` / `default` | 4625 | `sparklogs.error.code` `sparklogs.error.code_space` `sparklogs.origin.host` `sparklogs.origin.ip` `sparklogs.origin.port` `sparklogs.process.id` `sparklogs.process.name` `sparklogs.process.path` `sparklogs.running_as.domain` `sparklogs.running_as.id` `sparklogs.running_as.kind` `sparklogs.running_as.name` `sparklogs.running_as.type` `win.eventlog.security.auth_package` `win.eventlog.security.lm_package` `win.eventlog.security.logon_type` `win.eventlog.security.logon_type_name` `win.eventlog.security.psdirect_handshake` `win.eventlog.security.status` `win.eventlog.security.status_meaning` `win.eventlog.security.substatus` `win.eventlog.security.workstation` |
 | `registry_value_changed` / `default` | 4657 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.config_change.action` `sparklogs.config_change.target` `sparklogs.config_change.type` `sparklogs.process.name` `sparklogs.process.path` `win.eventlog.security.object_name` `win.eventlog.security.object_value_name` `win.eventlog.security.operation_meaning` |
 | `replay_attack_detected` / `default` | 4649 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` |
 | `scheduled_task_changed` / `content_mutate` | 4698, 4699, 4701, 4702 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.config_change.action` `sparklogs.config_change.target` `sparklogs.config_change.type` `win.eventlog.security.task_name` |
@@ -223,6 +237,7 @@ A surface that promotes nothing says so: an empty row is a stated fact, not an o
 | `boot_configuration_loaded` | 4826 | **fields: none** |
 | `credman_credentials_read` | 5379, 5381, 5382 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` |
 | `crypto_operation` | 5061 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` |
+| `fips_selftest_passed` | 6417 | `sparklogs.process.id` `sparklogs.process.name` `sparklogs.process.path` |
 | `firewall_driver_started` | 5033 | **fields: none** |
 | `firewall_service_started` | 5024 | **fields: none** |
 | `group_membership_enumerated` | 4799 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.process.id` `sparklogs.process.name` `sparklogs.process.path` `sparklogs.target.domain` `sparklogs.target.id` `sparklogs.target.kind` `sparklogs.target.name` `sparklogs.target.type` |
@@ -231,7 +246,9 @@ A surface that promotes nothing says so: an empty row is a stated fact, not an o
 | `non_account_sign_out` | 4647 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.kind` `sparklogs.actor.name` `sparklogs.actor.session` `sparklogs.actor.type` |
 | `ntlm_credentials_validated` | 4776 | `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.origin.host` `win.eventlog.security.workstation` |
 | `object_audit_settings_changed` | 4907 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.process.id` `sparklogs.process.name` `sparklogs.process.path` `win.eventlog.security.object_name` `win.eventlog.security.object_type` |
+| `per_user_audit_policy_table_created` | 4902 | `win.eventlog.security.pua_count` |
 | `platform_privileges_assigned` | 4672 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.kind` `sparklogs.actor.name` `sparklogs.actor.session` `sparklogs.actor.type` `win.eventlog.security.privileges` |
+| `primary_token_assigned` | 4696 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.process.id` |
 | `privileges_assigned_unclaimed_principal` | 4672 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.kind` `sparklogs.actor.name` `sparklogs.actor.session` `sparklogs.actor.type` `win.eventlog.security.privileges` |
 | `process_created` | 4688 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.session` `sparklogs.actor.type` `sparklogs.process.id` `sparklogs.process.name` `sparklogs.process.path` `win.eventlog.security.new_process_id` `win.eventlog.security.parent_process_name` `win.eventlog.security.token_elevation` |
 | `routine_token_refresh` | 4648 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.kind` `sparklogs.actor.name` `sparklogs.actor.session` `sparklogs.actor.type` `sparklogs.destination.host` `sparklogs.target.domain` `sparklogs.target.name` `sparklogs.target.type` `win.eventlog.security.target_server` |
@@ -254,6 +271,7 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `ca_request_failed` / `default`
 - `ca_tamper` / `admin_config`
 - `ca_tamper` / `evidence_tamper`
+- `event_logging_stopped` / `default`
 - `firewall_service_stopped` / `default`
 - `audit_subsystem_started`
 - `boot_configuration_loaded`
@@ -263,12 +281,19 @@ A predicate over them uses the reason, the class, or the retained payload; there
 ### Surfaces with no `win.eventlog.security.` field
 
 These populate portable families only.
-Looking for a module-namespaced field on one of them finds nothing, and that is the design rather than a gap: the value has a cross-source home instead.
+Looking for a feed-namespaced field on one of them finds nothing, and that is the design rather than a gap: the value has a cross-feed home instead.
 
+- `account_changed` / `default`
 - `account_created` / `default`
 - `account_deleted` / `default`
+- `account_disabled` / `default`
+- `account_enabled` / `default`
+- `account_password_change_failed` / `default`
+- `account_password_reset` / `default`
+- `account_password_reset_failed` / `default`
 - `audit_log_cleared` / `default`
 - `crypto_selftest_failed` / `default`
+- `domain_policy_changed` / `default`
 - `group_member_added` / `default`
 - `group_member_removed` / `default`
 - `group_membership_changed` / `default`
@@ -281,9 +306,11 @@ Looking for a module-namespaced field on one of them finds nothing, and that is 
 - `anonymous_sign_out`
 - `credman_credentials_read`
 - `crypto_operation`
+- `fips_selftest_passed`
 - `group_membership_enumerated`
 - `key_file_operation`
 - `key_migration_operation`
 - `non_account_sign_out`
+- `primary_token_assigned`
 - `user_group_membership_enumerated`
 - `user_signed_out`
