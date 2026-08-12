@@ -100,6 +100,9 @@ async function validatePackage(host) {
   const url = new URL(mcp.mcpServers.sparklogs.url);
   if (url.protocol !== 'https:') throw new Error(`${host} MCP URL must be HTTPS`);
   if (!ALLOWED_MCP_HOSTS.has(url.hostname)) throw new Error(`${host} MCP host is not allowlisted: ${url.hostname}`);
+  // The architecture REQUIRES the /mcp path: mcpproxy forwards the path as-is to query-api,
+  // which serves MCP only at /mcp. A bare host connects and then 404s on every call.
+  if (url.pathname !== '/mcp') throw new Error(`${host} MCP URL must end in /mcp, got path ${url.pathname || '(none)'}`);
   if (host !== 'generic') {
     const manifestFile = host === 'claude' ? '.claude-plugin/plugin.json' : host === 'cursor' ? '.cursor-plugin/plugin.json' : '.codex-plugin/plugin.json';
     const manifest = await readJson(path.join(base, manifestFile));
