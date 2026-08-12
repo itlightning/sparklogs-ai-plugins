@@ -432,8 +432,9 @@ agent, the network path.
 
 **Call sequence.**
 
-1. Scope. Read `verdict` on the agent row from `resolve_scope`, and treat it as one input, not the
-   answer.
+1. Scope. Read `online_status` and `agent_status` on the agent row from `resolve_scope`, and treat
+   them as two separate inputs, not the answer. `offline` means no signal reached SparkLogs, never
+   that the machine is down; the customer's RMM is the authority on that.
 2. Is the endpoint reporting to SparkLogs in the window?
 
    ```

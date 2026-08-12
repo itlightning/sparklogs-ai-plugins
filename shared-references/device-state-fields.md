@@ -98,7 +98,13 @@ and severity as a `severity` name plus a `severity_level` integer.
 
 ## The honesty fields, and what they forbid
 
-These exist because a confident timeline built on an unobserved gap is worse than no timeline.
+These exist because a confident timeline built on an unobserved stretch is worse than no timeline.
+
+**The `_gap_s` columns are observation blind spots, not missed events.** They say the agent was not
+looking at this condition for a stretch inside an episode. Missed events are a different thing: a
+feed reporting a skip window over events the collection engine could not provide. Do not describe
+either one as the other, and do not carry the word "gap" out of these column names into report
+prose.
 
 **`episode_age_basis` has three values, and two of them are not onsets.**
 
@@ -115,8 +121,8 @@ spot. Never date a cause to a clamped clear. Say "cleared at or before <ts>, exa
 **`episode_max_observation_gap_s`** is the longest stretch the agent was blind during the episode. An
 ABSENT value is not a claim that there was no gap.
 
-**`window_partial`** means the window was only partly observed. Do not change a verdict on a partial
-window. It is the one honesty field with no `episode_` prefix, because it describes one row's
+**`window_partial`** means the window was only partly observed. Do not change a conclusion on a
+partial window. It is the one honesty field with no `episode_` prefix, because it describes one row's
 measurement window rather than the episode's crossing lifecycle: do not look for
 `episode_window_partial`, and do not read a partial row as a partially observed episode.
 
@@ -158,6 +164,12 @@ collector never started. Those are indistinguishable from here today.
 Report silence as "no state data in this window, cause not established", never as "the device is
 healthy" and never as "the agent is down". If silence matters to the conclusion, say so in what was
 not checked.
+
+**None of this is a completeness answer.** Device state says what conditions a device reported. How
+far its data is complete is `agent_complete_through` on the `resolve_scope` agent row, with the
+advisories beside it: the floor across the device's active data feeds, from the feeds' own reports.
+Row counts, first and last timestamps, and the silent-device list never establish interior coverage,
+and a device absent from every list is `unknown` rather than healthy.
 
 ## Portable field families on events
 

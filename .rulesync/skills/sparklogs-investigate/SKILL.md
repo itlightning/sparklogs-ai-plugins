@@ -205,6 +205,8 @@ The section lists what is *not* checked because it's outside what SparkLogs coll
 
 The complete per-investigation-type list is in `references/off-endpoint-causes.md`. Read that file when investigating any specific symptom and customize the WHAT WAS NOT CHECKED section to the actual investigation scope.
 
+**Name the checks you declined, and why.** A health call you deliberately did not make belongs here in one line ("the agent's collection state was not established; this finding rests on the events that arrived"). Explicit restraint reads as rigor; an unexplained silence reads as an oversight.
+
 **The section is investigation-specific, not boilerplate.** If you're investigating a single source, list what wasn't checked for *that source*. If on-endpoint evidence is sufficient and off-endpoint causes are not implicated, the section can be brief: "The off-endpoint causes typically associated with this kind of investigation were considered but the on-endpoint evidence is sufficient to characterize the observed conditions - see Findings."
 
 ---
@@ -230,11 +232,12 @@ The engineer's per-investigation window is short. Work efficiently and precisely
 
 4. **Refine the cached slice; don't re-query.** After ONE broad `query_logs` slice, prefer `refine_query_result` over issuing another backing query. Refine runs a relational engine over the CACHED result table, faster than a fresh scan because it never re-touches the source: `filter_lql` (WHERE over row columns), `group_by` + `aggregate` ({fn,col,as}; fn in count/count_distinct/sum/avg/min/max/stddev/p50/p90/p95/p99), `having_lql` (over post-group columns), `order_by`, `select` (projection), `limit`/`offset`. Queue one broad slice, then refine many times. To page a partial result, follow the response's structured `page.next` (it hands you the exact `refine_query_result` call + `offset`).
 
-5. **Always check whether the agent was observing before any "no evidence" conclusion.** Two checks, and neither one is conclusive on its own.
-   - Agent self-observability rows: `query_logs(lql='source = "<X>" AND sparklogs.kind = agent_op', ...)`. These are stamped when an investigator must distrust or re-interpret other device data on that host: telemetry lost, suppressed, truncated, or shaped by stale config.
-   - Volume: `list_sources` event counts in the window against the source's typical volume. A sudden drop is the coarse completeness signal.
+5. **Always check whether the agent was observing before any "no evidence" conclusion.** Three reads, and none of them is conclusive on its own.
+   - `agent_complete_through` and `advisories` on the `resolve_scope` agent row. This is the ONLY completeness answer: it comes from the feeds' own reports.
+   - Agent self-observability rows: `query_logs(lql='source = "<X>" AND sparklogs.kind = agent_op', ...)`. These are stamped when an investigator must distrust or re-interpret other device data on that host: telemetry not collected, suppressed, truncated, or shaped by stale config.
+   - Volume: `list_sources` event counts against the source's typical volume. A drop is a prompt to look, never a coverage measurement. Counts and first/last bounds cannot establish what happened in the middle of a window.
 
-   An empty `agent_op` result is INCONCLUSIVE, not "no drops": the same emptiness is produced by a healthy agent, by an agent that is not reporting at all, and by a topic that is not enabled for that agent's rollout ring. Say which one you could and could not rule out in WHAT WAS NOT CHECKED. Device-state honesty fields (`references/device-state-fields.md`) are the supporting read here.
+   An empty `agent_op` result is INCONCLUSIVE, not "nothing was skipped": the same emptiness is produced by a healthy agent, by an agent that is not reporting at all, and by a topic that is not enabled for that agent's rollout ring. Say which one you could and could not rule out in WHAT WAS NOT CHECKED. Device-state honesty fields (`references/device-state-fields.md`) are the supporting read here.
 
 6. **Always confirm the source has data in the investigation window.** See Section 10 below for scope discovery.
 
@@ -288,7 +291,7 @@ Before any deep investigation, resolve the scope (which org / sources / time win
 2. **Host-first:** when the engineer names a host/device, pass it as `query`; the server matches `name` and `reported_hostname` across authorized orgs.
 3. Otherwise try org or customer name via `query`. Matching is ranked by **`match_kind`** (`exact` > `prefix` > `word` > `substring`). There are no numeric confidence scores.
 4. Single row with `match_kind` **`exact`**: proceed. Multiple rows at the same best tier, or a sole weak (`prefix`/`word`/`substring`) match: **ask the engineer. Don't guess.**
-5. Read **`verdict`** on agent rows (`running`, `offline`, `stuck`, …) and ingest-key freshness (`active`, `idle`, `never`). `include_agents` (default true) returns managed agents **and** ingest keys.
+5. Read the state readings on agent rows: **`online_status`** (`online` / `offline` / `never_seen`) beside **`agent_status`** (`running`, `stopped`, `system_shutdown`, `upgrading`, `uninstalled`), the collection group (`collection_status` with `collection_reasons`, `collection_feeds`, `collection_observed_at`), **`advisories`**, and **`agent_complete_through`**. Ingest-key rows carry `last_data_at` freshness only. `include_agents` (default true) returns agents **and** ingest keys. Filter devices with `device_classes` / `device_roles` rather than guessing from hostnames.
 6. Default `include_sub_orgs: true` on org-scoped calls. Scope may expand mid-investigation; keep the same `external_investigation_id`.
 
 **Source discovery - confirm sources have trustworthy data in the window.** Use `list_sources` with the investigation's `start`/`end`; do NOT infer scope from recent heartbeat alone.
@@ -303,19 +306,38 @@ list_sources(
 )
 ```
 
-Each row is a **(collector `agent_id`, origin `source`)** pair with triage columns (`cnt_interesting`, one count per failure-side severity band from `cnt_warning` to `cnt_critical_plus`, `distinct_interesting`) and optional summary **`top_interesting_patterns`** teaser. Call **`describe_pattern`** before citing any teaser pattern.
+Each row is a **(sender `agent_id`, origin `source`)** pair with `sent_via` (`agent` / `ingest_key` / `unresolved`), triage columns (`cnt_interesting`, one count per failure-side severity band from `cnt_warning` to `cnt_critical_plus`, `distinct_interesting`) and optional summary **`top_interesting_patterns`** teaser. Call **`describe_pattern`** before citing any teaser pattern.
 
 **Critical+ fetch-first rule:** any non-zero `cnt_critical_plus` in scope (severity 20 and above) means fetch those events before proceeding, regardless of the investigation topic. Critical+ admissions are rare, always-surface facts (confirmed integrity loss or compromise) and auto-elevate into daily fleet reporting; never leave one unread in a Finding's scope. The Info..Error bands carry no fetch-first mandate - weigh them normally. See `references/category-classes.md`, Query notes.
 
-**The verdict and the event stream describe DIFFERENT planes, and they can legitimately disagree.** `verdict` describes the AGENT SERVICE plane: whether the agent is checking in on its own control channel. Event flow describes the COLLECTOR plane: whether data reached us. A machine whose agent service looks `offline` while events arrive minutes later is a normal and common shape, not a contradiction to resolve by picking one.
+**The agent-side readings and the event stream describe DIFFERENT things, and they can legitimately disagree.** `online_status` says whether any signal reached SparkLogs; the events say what actually arrived. A machine reading `offline` while events arrive minutes later is a normal and common shape, not a contradiction to resolve by picking one.
 
-- **Trust the event stream for what ARRIVED.** Data in the window is evidence regardless of the verdict.
-- **Treat the verdict as an open question, not a conclusion.** A disagreement goes in WHAT WAS NOT CHECKED, named as a disagreement.
-- **Never silently pick a plane.** Reporting "the agent is offline so we have no data" while data is in front of you, or "data is flowing so the agent is fine", are the two failure modes.
+- **Trust the event stream for what ARRIVED.** Data in the window is evidence whatever the agent row says.
+- **Treat the disagreement as an open question, not a conclusion.** It goes in WHAT WAS NOT CHECKED, named as a disagreement.
+- **Never silently pick a side.** Reporting "the agent is offline so we have no data" while data is in front of you, or "data is flowing so the agent is fine", are the two failure modes.
+- **Report observations, never machine state.** Say no telemetry arrived from the device for the reported silence, never that the device is down. The customer's RMM is the authority on whether a machine is up; SparkLogs complements it and must not contradict it.
 
-Halt in one case only: the verdict says `stuck` or `offline` AND there are no events for that `agent_id` in the window. Then absence is a finding about the collector, not proof the endpoint is healthy. If the expected source has no events while the verdict is healthy, ask the engineer: wrong name, wrong window, or origin labeled differently.
+Halt in one case only: `online_status` is `offline` or a `stuck_reason` is present, AND there are no events for that `agent_id` in the window. Then absence is a finding about collection, not proof the endpoint is healthy. If the expected source has no events while the agent is reporting normally, ask the engineer: wrong name, wrong window, or origin labeled differently.
 
-**Collector-first LQL:** filter with `agent_id = "<uuid>"` for everything a collector shipped; use `source` for origin-host pivots. See `references/scope-resolution.md`.
+**Sender-first LQL:** filter with `agent_id = "<uuid>"` for everything one sender shipped; use `source` for origin-host pivots. "Collector" means one thing only: the log-shipping process the agent supervises on the device. See `references/scope-resolution.md`.
+
+### Completeness: `agent_complete_through`, and the restraint it asks for
+
+`agent_complete_through` is the instant up to which an agent's data is COMPLETE in SparkLogs: the floor across its active data feeds, so one lagging feed sets the whole value. `"unknown"` means no claim is possible. It is NEVER a fault and never means there is no data; ingest-key rows are always `"unknown"` because a key makes no completeness claim. When a feed lags, an advisory explains it and carries the SCOPE: it names the blocking feed and counts the rest ("the other N active feeds are current and unaffected"). Read that scope before qualifying a finding.
+
+**The green case is one sentence.** `agent_complete_through` at the end of your window with no advisories: say "data is complete through <instant>" once and move on.
+
+**Three hard rules.**
+
+1. **Event volume and first/last event bounds NEVER establish interior coverage.** Only a feed's own report does. Never write "no gaps", "continuous coverage" or "the data is complete" from `event_count`, `first_event_at` and `last_event_at`.
+2. **An ongoing-issue investigation needs NO completeness statement.** Recurring failures and live RCA rest on the events themselves. Where completeness is not material, one sentence saying so is the correct amount.
+3. **Absence of a feed report is never evidence about the data.** An ingest-key stream makes no completeness claim, a feed that has not reported is `unknown` rather than healthy, and absence of events is not evidence of absence.
+
+**Say what you are NOT doing, and why.** Naming a declined check is a strength, not an omission: "the agent's collection state was not established, so this finding rests on the events that arrived" is worth more than a health paragraph the question never needed. Label stream liveness as what it is: data arriving now is not a completeness guarantee for the window you are reasoning about.
+
+**Advisories are the server's judgment.** Use them rather than inventing triage, so every SparkLogs surface tells the engineer the same thing. Empty means nothing to note.
+
+**Missed events, when a feed reports them.** Collection sometimes has to skip over events because the underlying collection engine (in v1 the Windows event log itself) could not provide them. Call these **missed events** or **skipped events**, bounded by a **skip window**; never "gap", "data loss" or "lost". State what happened and its bounds, then stop: the events may still exist in the device's local Windows event log, SparkLogs does not re-collect them, and no surface may offer recovery. A skip is a notice, never an incident and never the machine's or operator's fault. An ABSENT skips entry means the source type does not detect skips, never that none occurred. Skips are orthogonal to health: a current, advancing feed can carry a skip window. Detail in `references/scope-resolution.md`.
 
 ---
 
@@ -325,8 +347,8 @@ The catalog is these eleven tools:
 
 | Tool | Tier | Use when |
 |---|---|---|
-| `resolve_scope` | lightweight | Always first - turn natural-language scope into `org_ids` (orgs, managed agents, ingest keys). Ranked `match_kind` on org names and agent name/`reported_hostname`. `include_agents` = agents and ingest keys (default true). |
-| `list_sources` | billed discovery | Confirm collector/origin pairs have data in the window (`start`/`end` required). Triage columns, `collector_kind`, optional `top_interesting_patterns` teaser. |
+| `resolve_scope` | lightweight | Always first - turn natural-language scope into `org_ids` (orgs, agents, ingest keys). Ranked `match_kind` on org names and agent name/`reported_hostname`; exact `rmm_client_id` / `psa_client_id` lookup for automated workflows; `device_classes` / `device_roles` filters. Carries the agent state readings, `advisories` and `agent_complete_through`. `include_agents` = agents and ingest keys (default true). |
+| `list_sources` | billed discovery | Confirm sender/origin pairs have data in the window (`start`/`end` required). Triage columns, `sent_via`, optional `top_interesting_patterns` teaser. Counts what arrived; never a coverage claim. |
 | `query_scope_activity` | billed discovery | Discover app/service/subsource structure (not LQL-filtered). Narrow with `agent_ids` / `source` / `field_match`. For filtered counts within an LQL slice, use `query_event_counts_by_severity`. |
 | `describe_pattern` | billed* | Full pattern text, stats, fleet spread, and diverse example messages (with recurrence `count`/`seen_at`). The parameter is **`pattern_hashes`, a LIST**, even for one hash. There is no per-pattern sample count to set: counts are chosen server-side for diversity, and examples come back for roughly your first 25 hashes by list order, so list the highest-interest ones first. *Examples require `mcp:query`; stats-only works on `mcp:observe` (the call degrades, never errors). Required before citing teaser patterns. |
 | `list_fields` | lightweight | Field catalog for building NEW queries - only if standard/known fields don't surface enough. Not a first-pass tool. |
@@ -445,7 +467,7 @@ Suggest `/sparklogs-analyze-cause <external_investigation_id>` (the separate cau
 
 **Partial page (`page.next` present, or a trailing hint line):** the page hit a limit. Follow `page.next` for the next page via `refine_query_result(offset=...)`, or narrow the filter for fewer rows.
 
-**Source has been emitting `sparklogs.kind = agent_op` rows during your window:** your evidence is incomplete. Read what they say was lost, suppressed or truncated, flag it explicitly in WHAT WAS NOT CHECKED, and qualify the findings that depended on the affected window. An EMPTY `agent_op` result is inconclusive rather than reassuring - see Section 8, item 5.
+**Source has been emitting `sparklogs.kind = agent_op` rows during your window:** your evidence is incomplete. Read what they say was not collected, suppressed or truncated, flag it explicitly in WHAT WAS NOT CHECKED, and qualify the findings that depended on the affected window. An EMPTY `agent_op` result is inconclusive rather than reassuring - see Section 8, item 5.
 
 **`external_investigation_id` validation error:** the id is out of bounds (must be 8-200 chars, free text). Read the tool's error message and fix the id - don't retry with the same value. Pick something human-meaningful (embed a ticket/incident id).
 
@@ -460,7 +482,7 @@ Investigations that run forever are bad investigations. Heuristics:
 - **Found enough for the summary:** you have 3-7 cited findings, the WHAT WAS NOT CHECKED section is honestly populated, and the executive summary writes itself in 2-3 paragraphs. Produce the summary.
 - **Hit the ~15 tool-call mark without converging:** stop and produce an interim summary. State explicitly: "Investigation has examined N findings without converging on a coherent picture; here's what was found and the next investigative directions worth taking." Don't spend another 15 tool calls if the first 15 didn't yield clarity.
 - **Backing-query ceiling exceeded:** if your local investigation-state document shows backing queries >20, pause and assess. (Most investigations need fewer; the higher ceiling exists so you can be thorough when the symptom legitimately requires it. Backing queries are the meaningful unit to track - keep the running count yourself as you issue them.)
-- **Source not reporting:** if `list_sources` shows the source has not emitted telemetry in the relevant window, stop after a brief summary acknowledging the data gap.
+- **Source not reporting:** if `list_sources` shows the source sent no telemetry in the relevant window, stop after a brief summary saying no data arrived and that the cause was not established.
 
 ---
 
@@ -490,7 +512,7 @@ Subagent definitions and host-specific notes are in `references/subagent-definit
 
 ## Section 17. Common mistakes to avoid
 
-The full list of common mistakes, anti-patterns, and recovery is in `references/common-mistakes.md`. Top 11:
+The full list of common mistakes, anti-patterns, and recovery is in `references/common-mistakes.md`. Top 13:
 
 1. **Producing cause analysis in this skill.** Find yourself writing "this suggests" or "the likely cause is" - STOP. That belongs in `/sparklogs-analyze-cause`. Move it to the POSSIBLE NEXT DIRECTIONS section (1-4 sentences) and refer the engineer to that skill.
 2. **Citing without `query_url`.** Every Finding's Evidence field has a `query_url` from the actual MCP tool response. If it doesn't, you're confabulating.
@@ -503,6 +525,8 @@ The full list of common mistakes, anti-patterns, and recovery is in `references/
 9. **Confidence inflation.** "high" is for direct, corroborated, recent evidence. "insufficient_evidence" is a valid finding - use it.
 10. **Concluding "no problem" instead of "no evidence found in <scope>."** The first claim is wrong; the second is honest and useful.
 11. **Reading an empty result on a field the source does not carry as a clean bill of health.** Curated and module fields are per-source and per-surface; empty may mean "this source never writes that", not "no problem". Check what the source carries, fall back to universal fields, and say so (Section 8).
+12. **Claiming coverage from counts.** Volume and first/last event bounds never establish what happened in the middle of a window. Completeness is `agent_complete_through` and the feed reports behind it, or it is not claimed.
+13. **Writing a completeness section the question did not need.** On an ongoing issue, one sentence saying completeness is not material is the whole obligation.
 
 ---
 
@@ -550,7 +574,9 @@ After every investigation, mentally check:
 - Did I list what wasn't checked, specifically (not generically)?
 - Did I avoid producing cause analysis here (or bound it to 1-4 sentences in POSSIBLE NEXT DIRECTIONS with the explicit framing)?
 - Did I use aggregation-first methodology, or did I reach for `query_logs` too early?
-- Did I check ingest health before concluding "no evidence"?
+- Did I check whether the agent was collecting before concluding "no evidence"?
+- Did every completeness statement come from `agent_complete_through` and the feed reports, never from counts or first/last bounds?
+- Did I keep completeness to its material minimum, and name the checks I declined rather than padding around them?
 - If a query came back empty on a field this source may not carry, did I say so rather than calling it "no problem"?
 - If I stated a duration or a clear time, did I read `episode_age_basis` and `episode_clear_time_basis` first?
 

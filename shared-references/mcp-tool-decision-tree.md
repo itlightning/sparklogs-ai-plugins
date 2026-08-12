@@ -2,6 +2,8 @@
 
 Per-tool detailed usage with parameter notes, decision tree for which tool to use when, and worked-example call sequences.
 
+The MCP server instructions define every term used here, in learning order. This file adds per-tool mechanics on top of them rather than restating them.
+
 The tool surface is these **eleven** tools: `resolve_scope`, `list_sources`, `query_scope_activity`, `query_device_health`, `describe_pattern`, `list_fields`, `query_event_counts_by_severity`, `query_logs`, `refine_query_result`, `get_query_metadata`, `server_info`. Three differential tools (`query_period_diff`, `compare_populations`, `cluster_event_contexts`) are fast-follow; see the bottom of this file for v1 equivalents.
 
 **Every scoped or data tool takes `external_investigation_id`** (REQUIRED on all of them except
@@ -14,7 +16,7 @@ The tool surface is these **eleven** tools: `resolve_scope`, `list_sources`, `qu
 
 Spend from the top down:
 
-- **Tier 1, lightweight scoping:** `resolve_scope`, `list_fields`. Fix `org_ids` and fleet directory (agents, ingest keys, verdicts). Do this before backing scans.
+- **Tier 1, lightweight scoping:** `resolve_scope`, `list_fields`. Fix `org_ids` and the fleet directory (orgs, agents, ingest keys, and the agent state readings). Do this before backing scans.
 - **Tier 1b, billed discovery:** `list_sources`, `query_scope_activity`, `describe_pattern` (stats). Confirm data in window, enumerate structure, read pattern detail. See `scope-resolution.md` and `scope-ladder.md`.
 - **Tier 2, counts by severity:** `query_event_counts_by_severity`. Counts matching events by severity, optionally bucketed over time and/or grouped by field values. The workhorse for "what's happening" and the only tool that answers "when" - it tells you where and when to point `query_logs`. Group by a scope-ladder field (`service`, `app`, `subsource`, `category`, `pattern`, or a `_hash`) to localize before drilling - see `scope-ladder.md`.
 - **Tier 3, raw events (last resort):** `query_logs`, only after Tiers 1-2 narrowed the window and filter. Then `refine_query_result` (lightweight) over that cached slice - do NOT re-scan.
@@ -59,19 +61,23 @@ One trigger per tool. If your question is not on this list, it is almost always 
 
 ### `resolve_scope`
 
-Always first. Turn natural-language scope into `org_ids`, and enumerate orgs, managed agents, and ingest keys in scope.
+Always first. Turn natural-language scope into `org_ids`, and enumerate orgs, SparkLogs Agents, and ingest keys in scope.
 
 ```
 resolve_scope(
   query: "Acme Dental" | "srv-fileshare01",   # optional; ranked match on org names and agent name/reported_hostname (exact/prefix/word/substring). Omit to list everything in scope.
   org_ids: ["..."],              # optional; omit for all orgs the token can access
-  include_agents: true,          # default true; includes managed agents AND ingest keys
+  include_agents: true,          # default true; includes agents AND ingest keys
   include_sub_orgs: true,        # default true; expand each org to its sub-org subtree
   rmm_client_id: "...",          # optional EXACT match; the correct path for automated per-ticket scoping
   psa_client_id: "...",          # optional EXACT match; same
+  device_classes: ["..."],       # optional; filter devices by reported class rather than guessing from hostnames
+  device_roles: ["..."],         # optional; same, by reported role
   external_investigation_id: "..."
 )
--> rows: kind org | agent | ingest_key; match_kind when query set; agent rows include verdict, reported_hostname, last_ingest_at, last_heartbeat_at, versions, OS, etc.
+-> rows: kind org | agent | ingest_key; match_kind when query set; agent rows include online_status, agent_status,
+   stuck_reason, the collection group (collection_status, collection_reasons, collection_feeds, collection_observed_at),
+   advisories, agent_complete_through, last_data_at, last_heartbeat_at, reported_hostname, versions, OS
 ```
 
 **Decision logic:**
@@ -80,13 +86,17 @@ resolve_scope(
 - Sole match at `prefix`/`word`/`substring`: confirm before proceeding.
 - Zero matches: surface closest candidates.
 
+**Read the state readings as SUPPORTING context, never as a work queue.** `online_status` and `agent_status` are two separate readings and are never merged into one statement; `offline` means no signal was received, not that the machine is down. The collection group is what the device last reported, kept and dated even when the device is offline. `agent_complete_through` and `advisories` say how far the data can be trusted. Field-by-field detail and the halt rules are in `scope-resolution.md`.
+
+**`device_classes` / `device_roles` beat hostname guessing.** A workstation named `srv-laptop` is how a hostname guess puts the wrong device in a server answer. Both vocabularies are open; an unfamiliar value is the device's own word for itself, and a device with no reported class matches no `device_classes` filter.
+
 **Common mistake:** skipping this and assuming scope from wording. Engineers use ambiguous short names; resolve.
 
 ---
 
 ### `list_sources`
 
-Per **(collector `agent_id`, origin `source`)** activity in the investigation window. Billed backing scan.
+Per **(sender `agent_id`, origin `source`)** activity in the investigation window. Billed backing scan.
 
 ```
 list_sources(
@@ -97,15 +107,17 @@ list_sources(
   include_top_interesting_patterns: true,   # default true; summary teaser ~8 patterns
   external_investigation_id: "..."
 )
--> rows: agent_id, collector_kind, name, verdict, source, event_count, cnt_interesting, one cnt_<band> per failure-side severity band, distinct_interesting, bytes_ingested, first/last_event_at
+-> rows: agent_id, sent_via, name, online_status, source, event_count, cnt_interesting, one cnt_<band> per failure-side severity band, distinct_interesting, bytes_ingested, first/last_event_at
 -> summary may include top_interesting_patterns; call describe_pattern before citing
 ```
 
 **Use the investigation's actual window.** Do NOT infer scope from recent heartbeat alone.
 
+**These columns count events; they never establish coverage.** `event_count` with `first_event_at` and `last_event_at` is consistent with any amount of missing middle, so no row here supports "no gaps" or "continuous coverage". Completeness comes from `agent_complete_through` on `resolve_scope` and the feed reports behind it, or it is not claimed. `sent_via: ingest_key` makes no completeness claim at all.
+
 **Use cases:**
-- **Scope discovery:** confirm expected collector/source pairs have events; cross-check `verdict` (stuck/offline halt rules in `scope-resolution.md`).
-- **Fleet enumeration:** list collector/origin pairs in the window.
+- **Scope discovery:** confirm expected sender/source pairs have events; cross-check the agent row's state readings (halt rules in `scope-resolution.md`).
+- **Fleet enumeration:** list sender/origin pairs in the window.
 - **Triage:** `cnt_interesting` and the failure-side band counts (`cnt_warning` through `cnt_critical_plus`) before deep queries. The nine bands, and the four spellings a severity shows up under, are mapped in `category-classes.md`.
 - **Critical+ fetch-first:** any non-zero `cnt_critical_plus` (severity >= 20) in scope means fetch
   those events before proceeding, whatever the investigation topic (`category-classes.md`, Query
@@ -122,7 +134,7 @@ query_scope_activity(
   org_ids: ["..."],
   start: "...",
   end: "...",
-  agent_ids: ["..."],              # optional collector UUIDs
+  agent_ids: ["..."],              # optional sender UUIDs
   source: "hostname-substring",    # optional
   field_match: {mode, pattern},    # optional name grep over ladder dims
   include_sub_orgs: true,          # default true
@@ -148,7 +160,7 @@ query_device_health(
   start: "...",                             # REQUIRED
   end: "...",                               # REQUIRED, exclusive
   include_sub_orgs: true,                   # default true
-  agent_ids: ["..."],                       # optional collector UUIDs
+  agent_ids: ["..."],                       # optional sender UUIDs
   fieldset: "rca" | "fleet" | "minimal",    # rca is the default
   add_fields: ["..."],                      # optional; ADDS to the fieldset, never replaces it
   kinds: ["inventory", "monitor"],          # default; agent_op and delta are opt-in
@@ -175,6 +187,10 @@ query_device_health(
 you may and may not say about a duration or a clear time. Two traps live there: the silent-device
 list can TRUNCATE while the response summary stays honest, and silence is not evidence of health.
 
+**This tool does not answer completeness.** Device state says what conditions the device reported;
+how far its data is complete is `agent_complete_through` and the advisories beside it on
+`resolve_scope`.
+
 ---
 
 ### `describe_pattern`
@@ -191,7 +207,7 @@ describe_pattern(
   include_examples: true,            # default true; false for stats only. There is no per-pattern sample count to set
   external_investigation_id: "..."
 )
--> pattern text; stats (`event_count`, `cnt_interesting`, one count per failure-side severity band, first/last seen, affected collectors and sources); diverse example messages with recurrence `count`/`seen_at`. The summary's `severity_bands` is an ORDERED array of `{band, count}` carrying only the bands that occurred, so a band missing from it is a band this pattern never reached. Example COUNTS are chosen server-side for diversity, and examples are returned for roughly your first 25 patterns by list order, so list the highest-interest hashes first. Examples need `mcp:query`; without it the response is stats-only, never an error.
+-> pattern text; stats (`event_count`, `cnt_interesting`, one count per failure-side severity band, first/last seen, affected senders and sources); diverse example messages with recurrence `count`/`seen_at`. The summary's `severity_bands` is an ORDERED array of `{band, count}` carrying only the bands that occurred, so a band missing from it is a band this pattern never reached. Example COUNTS are chosen server-side for diversity, and examples are returned for roughly your first 25 patterns by list order, so list the highest-interest hashes first. Examples need `mcp:query`; without it the response is stats-only, never an error.
 ```
 
 **Examples are server-chosen, diverse, and truthful.** You do not pick counts: the server returns a text-diverse set of example messages per pattern (not just the most recent), sized to fit the response. List your highest-interest `pattern_hashes` FIRST: examples cover roughly the first 25 by list order; the rest get stats only (the scope line says so). Each example carries `count`, `[first, last]`, and (when it recurred 3+ times) `seen_at`: times this exact message recurred, identical except embedded timestamps.
@@ -248,9 +264,11 @@ is a band this result never saw. See `category-classes.md` for the nine bands.
 is the rate rising. Add one `group_by` field for one series per value: `bucket="1h"` with
 `group_by=["source"]` shows which host stopped reporting and at what hour, which a flat ranking cannot
 show at all. Two things to read carefully. The series is DENSE, so an empty bucket comes back as an
-explicit zero and a gap is a run of zeros rather than rows you have to notice are missing - until the
-scan is sampled, where a count too small to tell from none renders as `<N`, zeros included, and
-`summary.scope` says the series cannot be read for gaps below that bound. And it
+explicit zero and a quiet stretch is a run of zeros rather than rows you have to notice are missing -
+until the scan is sampled, where a count too small to tell from none renders as `<N`, zeros included,
+and `summary.scope` says the series cannot be read for quiet stretches below that bound. A run of
+zeros is a statement about what ARRIVED, never a completeness claim: it does not distinguish a quiet
+machine from one that stopped collecting, and only the agent's own feed reports do. And it
 always covers the whole window: when the window holds more buckets than one response carries, the
 server widens the bucket and `summary.scope` states both widths, so read the width you got rather
 than the width you asked for.
@@ -473,6 +491,8 @@ the pass-the-id-everywhere rule: there is no scope and no query to correlate.
 **Refining a grouped result.** `query_event_counts_by_severity` output is not refinable; it returns expired. Read it directly or pull raw events with `query_logs`.
 
 **Re-scanning instead of refining.** After ONE broad `query_logs` slice, use `refine_query_result` for other views - it's a cache lookup, not a fresh scan.
+
+**Reading coverage out of counts.** No count, bucket series, or first/last event bound establishes what happened in the middle of a window. `agent_complete_through` and the feed reports behind it are the only completeness answer; without them the honest statement is that completeness was not established.
 
 **Showing a `*_hash` id to a human.** Resolve it via the header `lookups` first. Use the hash verbatim only as a drill-down filter value.
 

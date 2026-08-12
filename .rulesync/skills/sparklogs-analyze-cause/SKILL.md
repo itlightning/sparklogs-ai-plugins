@@ -85,7 +85,7 @@ ALTERNATIVE FRAMINGS
 [If the symptom could mean something different than the obvious interpretation, enumerate.]
 
 WHAT IS UNCERTAIN
-[Explicit enumeration of weak evidence and gaps in reasoning.]
+[Explicit enumeration of weak evidence and weak links in the reasoning.]
 
 RECOMMENDED NEXT STEPS (suggested, not prescribed)
 [Concrete things the engineer could do to confirm or refute the top hypothesis.]
@@ -127,6 +127,14 @@ The investigation skill produced facts. Your job is to convert facts into candid
 
 7. **State each hypothesis directly.** "Disk signature collision on Harddisk2" beats "it is possible there may be a disk issue." The Confidence field and the WORKING THEORIES intro already carry the "candidate, not proven" caveat - the hypothesis statement itself should be a direct, specific claim.
 
+**What the evidence cannot carry.** Three hard rules, because a hypothesis built on any of them is confidently wrong:
+
+1. **Event volume and first/last event bounds NEVER establish interior coverage.** Only a data feed's own report does. No hypothesis may rest on "the data was continuous" or "there were no gaps" inferred from `event_count` and endpoints, and no hypothesis may rest on a quiet stretch being real rather than uncollected.
+2. **Completeness is usually not material.** An ongoing issue (recurring failures, a live RCA) needs no completeness statement at all. When it is not material, one sentence saying so is the correct amount, and it belongs in WHAT IS UNCERTAIN rather than in a hypothesis.
+3. **Absence of a feed report is never evidence about the data.** An ingest-key stream makes no completeness claim, a feed that has not reported is `unknown` rather than healthy, and absence of events is not evidence of absence. "The agent missed the events" is a hypothesis only when a feed actually reported missed events, with a skip window to cite.
+
+**State the check you are declining.** Naming a discriminator you deliberately did not run, and why, is part of the analysis: it tells the engineer which door is still open. Treat `advisories` as the server's judgment rather than raw material for triage you invent.
+
 The full hypothesis-generation guidance is in `references/hypothesis-generation.md`.
 
 ---
@@ -139,6 +147,7 @@ Sometimes the prior investigation's evidence is enough. Other times one cheap ch
 - **Is this one host or the fleet?** `query_event_counts_by_severity(group_by=["source"])` over the filter that produced the Finding, or over a scope-ladder field (`service`, `app`, `subsource`, `category`) to test whether the affected hosts share a component.
 - **What is DIFFERENT about the affected population?** This is the cross-tab question, and it is the one most often answered badly. `group_by=["<a>", "<b>"]` groups by 2-3 fields at once: `["reason", "source"]` separates one reason concentrated on one host from the same volume spread across forty, which two single-field runs cannot distinguish. `["config_change_type", "config_change_target"]` answers "what changed, on what". Reach for it whenever the hypothesis names two things. Contrasting two single-field runs (one per population) still works where the populations need different `lql`; `compare_populations` is fast-follow and not in the surface.
 - **What is standing on the box right now?** `query_device_health` for open conditions, what is installed, and whether the device reported at all. A hypothesis that assumes the agent was watching should be checked against the honesty fields before it is offered.
+- **Does the hypothesis depend on the data being complete?** Then read `agent_complete_through` and `advisories` on the `resolve_scope` agent row, which is the only place completeness is answered. Most hypotheses do not depend on it: a recurring failure is carried by the events themselves, and one sentence saying completeness is not material is the correct amount.
 - A hypothesis needs a pattern's text or spread before it can be cited: `describe_pattern`.
 - A hypothesis depends on a narrow time-window check the prior investigation did not include.
 
@@ -199,6 +208,8 @@ After every analysis, mentally check:
 - Are confidence bands honest? Would the engineer be surprised by any of them?
 - Did I name what I'm most uncertain about explicitly, not minimize it?
 - Did I avoid prescribing action? RECOMMENDED NEXT STEPS framed as "things you could do" rather than "do this"?
+- Does any hypothesis rest on coverage inferred from counts or endpoints, or on the absence of a feed report? Both are disallowed.
+- If completeness was not material, did I say so in one sentence instead of building a section around it?
 
 If any answer is "no," fix the analysis before delivering it.
 

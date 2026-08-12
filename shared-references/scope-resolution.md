@@ -1,20 +1,26 @@
 # Scope Resolution and Source Discovery
 
 The first step of any investigation.
-Resolve which org, collectors, sources, and time window the investigation covers, then confirm those sources have trustworthy data in that window.
-Done well, this prevents wrong scope, wrong source, wrong time window, and silent gaps from stuck or offline collectors.
+Resolve which org, senders, sources, and time window the investigation covers, then confirm those sources have trustworthy data in that window.
+Done well, this prevents wrong scope, wrong source, wrong time window, and silence read as health when an agent was not collecting.
+
+The MCP server instructions define every term used here, in learning order. This file adds the investigation discipline over them rather than restating them.
 
 ---
 
-## Vocabulary: collector vs origin
+## Vocabulary: sender vs origin
 
 Every log event carries two distinct identity fields:
 
-- **`agent_id`** (collector): the UUID of the credential that shipped the event. Managed agents, legacy unmanaged agents, and ingest keys each have one. Filter with `agent_id = "<uuid>"` in LQL when you mean "everything this collector sent," regardless of how the origin host is labeled.
-- **`source`** (origin): the hostname or device label the event is about. On-host managed collection, collector and origin usually match. Relay, syslog, and key-ingested data can diverge: one collector, many origins, or origin labels that do not match the collector name.
+- **`agent_id`** (sender): the UUID of the SparkLogs Agent or ingest key that shipped the event. Filter with `agent_id = "<uuid>"` in LQL when you mean "everything this sender shipped," regardless of how the origin host is labeled.
+- **`source`** (origin): the hostname or device label the event is about. Under on-host agent collection, sender and origin usually match. Relay, syslog, and key-ingested data can diverge: one sender, many origins, or origin labels that do not match the sender name.
 
-**Public row kinds from `resolve_scope`:** `org`, `agent` (managed agent only), `ingest_key` (API ingest credential; never call it an agent in reports).
-Ingest keys participate in name matching and appear when `include_agents` is true (default). That parameter means "include agents and ingest keys," not managed agents alone.
+**"Collector" means one thing only:** the log-shipping process on the device that the agent supervises. It is not a synonym for the sender and not a synonym for the agent.
+
+**Public row kinds from `resolve_scope`:** `org`, `agent` (a registered SparkLogs Agent), `ingest_key` (API ingest credential; never call it an agent in reports).
+Ingest keys participate in name matching and appear when `include_agents` is true (default). That parameter means "include agents and ingest keys," not agents alone.
+
+**Correlation ids.** Org and agent rows carry `rmm_client_id` and `psa_client_id`, read live. In an automated workflow (per-ticket automation), pass one: it is an EXACT lookup that returns the single org holding that id, or nothing, and never falls back to name matching. An absent correlation id means the org holds no such id.
 
 ---
 
@@ -93,15 +99,25 @@ If the only match is `prefix`, `word`, or `substring` (not `exact`), **confirm w
 Example:
 > "The closest match for 'Acme' is Acme Dental (acme-dental). Is that the right organization?"
 
-### Step 8: Read health verdicts on agent rows
+### Step 8: Read the state readings on agent rows
 
-Managed agent rows include a server-computed **`verdict`**: `running`, `offline`, `stuck`, `stopped`, `unregistered`, `unmanaged`, plus raw fields (`status`, `last_ingest_at`, `last_heartbeat_at`, `stuck_reason`, versions, OS, `reported_hostname`, RMM name, description) when present.
-`last_ingest_at` is when log data last arrived and `last_heartbeat_at` is when the agent last checked in; an agent counts as in contact on the newer of the two, since it can beat while shipping nothing and ship while its heartbeat is wedged.
+Agent rows carry two SEPARATE readings plus a collection group. Never merge them into one statement: a powered-off machine can be offline with a healthy last-reported collection state.
 
-Ingest-key rows are slimmer: `verdict` is freshness only (`active`, `idle`, `never` from `last_ingest_at`). An ingest key is a credential with no installed agent, so it carries no heartbeat stamp.
-Ingest keys do not heartbeat; do not apply running/stuck/offline vocabulary to them.
+- **`online_status`** (`online` / `offline` / `never_seen`) is derived at read time from the two arrival stamps, on the newer of them: **`last_data_at`** (when log data last arrived, so legitimately old on a quiet, healthy machine) and **`last_heartbeat_at`** (when the agent last checked in, about every five minutes). `offline` means NO SIGNAL RECEIVED. It never means the machine crashed, was powered off, or lost its agent.
+- **`agent_status`** (`running`, `stopped`, `system_shutdown`, `upgrading`, `uninstalled`) is what the agent last SAID, announced through a best-effort signal on the way down that a crash, power cut or dead network never sends. `running` beside `offline` means only that no signal arrived; the stamps, not the status, are the authority for offline.
+- **`stuck_reason`** says why an enrolled agent is not collecting (`pack_missing`, `pack_requires_newer_agent`, `collector_down`, `collector_flapping`, `config_apply_stuck`, `feeds_inactive`). Render an unfamiliar value as the raw string.
+- **The collection group** is what the device last reported about its own log gathering, rolled up across its data feeds: `collection_status` (`healthy`, `behind`, `onboarding`, `degraded`, `unknown`) with `collection_reasons` (each glossed), `collection_feeds` (counts) and `collection_observed_at`. `unknown` and absent are UNKNOWN, never healthy. On an offline device the group is LAST REPORTED, from before contact ended: keep it, say when it is from, never blank it.
+- **`agent_complete_through`** is the instant up to which this agent's data is complete. See the completeness section below.
+- **`advisories`** are hints about what would improve data collection, not demands: an MSP who already knows a laptop is off needs no action. Empty means nothing to note.
+- A device with no sign of life on any stamp for 14 days is annotated **inactive since a date**. It is never hidden and carries no advisories. Leave it out of today's triage unless the question is about it.
 
-Use verdicts in the cross-check below; do not treat a silent source as healthy when its collector is stuck or offline.
+**Advisories are the server's judgment.** Use them rather than inventing triage, so every SparkLogs surface tells the engineer the same thing. An empty set means nothing to note, not an invitation to go looking.
+
+Ingest-key rows are slimmer. A key is a credential with no installed agent, so it has no heartbeat, no data feeds and no collection group; read `last_data_at` for freshness and stop there. Absence of feed information on an ingest-key stream is a difference in KIND, not a defect: a key tells you what arrived, an agent also tells you what is supposed to arrive. Do not apply running/stuck/offline vocabulary to a key.
+
+Filter devices with **`device_classes`** and **`device_roles`** rather than guessing from hostnames: a workstation named `srv-laptop` is how a hostname guess puts the wrong device in a server answer. Both vocabularies are open, so treat an unfamiliar value as the device's own word for itself, and a device with no reported class matches no `device_classes` filter.
+
+Use these readings in the cross-check below; do not treat a silent source as healthy when the agent row says it was not collecting.
 
 ### Step 9: Sub-org expansion
 
@@ -149,13 +165,13 @@ list_sources(
 
 ### Per-row fields (shipped)
 
-Each row is one **(collector, origin)** pair in the window:
+Each row is one **(sender, source)** pair in the window:
 
 | Field | Role |
 |---|---|
-| `agent_id` | Collector UUID (LQL filter handle) |
-| `collector_kind` | `agent`, `ingest_key`, or `unresolved` (UUID in events but not visible in this token's fleet directory) |
-| `name`, `verdict` | Present when the collector resolves; empty for `unresolved` |
+| `agent_id` | Sender UUID (LQL filter handle) |
+| `sent_via` | How the stream was authorized to ingest: `agent`, `ingest_key`, or `unresolved` (UUID in events but not visible in this token's fleet directory). A key is how a stream arrived, never what collected it |
+| `name`, `online_status` | Present when the sender resolves; empty for `unresolved` |
 | `source` | Origin host label |
 | `event_count`, `bytes_ingested` | Volume in the window |
 | `cnt_interesting`, `distinct_interesting` | Triage: how much is going on here |
@@ -171,31 +187,59 @@ The tool response includes a hint when the teaser is present.
 
 - **Relevant `(agent_id, source)` row with events in the window** -> proceed.
 - **Row present but sparse** (`event_count` very low, or `cnt_interesting` near zero while you expected signal) -> proceed but flag in WHAT WAS NOT CHECKED: limited telemetry may make findings incomplete.
-- **No row for the expected source in the window** -> cross-check verdict (next section) before concluding "no problem."
-- **`collector_kind: unresolved`** -> the UUID appears in authorized event data but is not in the fleet directory for this token. Treat as out-of-scope or deleted collector; do not invent a name.
+- **No row for the expected source in the window** -> cross-check the agent row's readings (next section) before concluding "no problem."
+- **`sent_via: unresolved`** -> the UUID appears in authorized event data but is not in the fleet directory for this token. Treat as out-of-scope or deleted; do not invent a name.
 
 ---
 
-## Health verdict cross-check (halt rules)
+## Completeness: what `agent_complete_through` says
 
-Cross-reference **`resolve_scope` verdicts** with **`list_sources` presence** before deep queries.
+`agent_complete_through` is the instant up to which this agent's data is COMPLETE in SparkLogs. It is the floor (earliest) across the agent's active data feeds, so one lagging feed sets the whole value.
 
-**Two planes.** `verdict` describes the AGENT SERVICE plane (is the agent checking in on its control channel). Event flow describes the COLLECTOR plane (did data reach us). They can legitimately disagree, and a verdict of `offline` beside events arriving minutes ago is a shape you should expect rather than a puzzle. Never resolve a disagreement by silently believing one plane.
+`"unknown"` means no claim is possible. It is NEVER a fault, and it never means there is no data. Ingest-key rows are always `"unknown"`, because a key makes no completeness claim at all.
+
+When a feed is behind, stuck or blocked, an advisory explains the lag and carries the SCOPE: it names the blocking feed and counts the rest ("the other N active feeds are current and unaffected"). Read that scope before you qualify a finding, because a lagging feed says nothing about the feeds beside it.
+
+**The green case is one sentence.** When `agent_complete_through` reaches the end of your window and advisories are empty, say so once ("data is complete through <instant>") and move on. A healthy answer does not earn a completeness section.
+
+**Three rules models get wrong. They are hard rules.**
+
+1. **Event volume and first/last event bounds NEVER establish interior coverage.** Only a feed's own report does. A count and two endpoints are consistent with any amount of missing middle, so never write "no gaps", "continuous coverage" or "the data is complete" from `event_count`, `first_event_at` and `last_event_at`.
+2. **An ongoing-issue investigation needs NO completeness statement.** Recurring failures and live RCA are carried by the events in front of you. When completeness is not material to the question, one sentence saying so is the correct amount.
+3. **Absence of a feed report is never evidence about the data.** An ingest-key stream makes no completeness claim, a feed that has not reported is `unknown` rather than healthy, and absence of events is not evidence of absence.
+
+---
+
+## Missed events
+
+Collection sometimes has to skip over events because the underlying collection engine could not provide them; in v1 that engine is the Windows event log itself. Call this **missed events** or **skipped events**, bounded by a **skip window**. It is a limitation of collection, never a fault of the machine or the operator, and the tone is measured: a skip is a notice, not an incident.
+
+- State what happened and its bounds, then stop. The events may still exist in the device's local Windows event log; SparkLogs does not re-collect them, so never offer or imply recovery.
+- The cause slug decides whether a count is exact. `skip_record` is exactly one event. `+1s` through `+30m` are an unknown count inside a window whose width the slug names. `future_only` is everything from the last event sent up to the new subscription. Render an unfamiliar slug verbatim and state the window bounds.
+- **An ABSENT skips entry means the source type does not detect skips at all**, never that none occurred. Today only Windows event log feeds detect them.
+- **Skips are orthogonal to feed health.** A current, advancing feed can carry a skip window. Freshness never disproves a skip, and a skip never means the feed is unhealthy now.
+- Never write "gap", "data loss" or "lost" for this. A delayed feed is `behind` or `stuck`, which is a different thing from skipped.
+
+---
+
+## State cross-check (halt rules)
+
+Cross-reference the agent row's readings with **`list_sources` presence** before deep queries. They describe different things and can legitimately disagree; never resolve a disagreement by silently believing one side.
 
 | Situation | Action |
 |---|---|
-| Collector **`stuck`** or **`offline`**, and no (or negligible) events in the window for that `agent_id` | **HALT.** Absence of logs is a finding about the collector, not proof the endpoint is healthy. Tell the engineer the agent appears stuck or offline and telemetry may be missing for that reason. |
-| Collector **`running`** (or ingest key **`active`**), but no events for the expected `source` in the window | HALT and ask: wrong source name, wrong window, or origin labeled differently? Surface similar `source` values from the response. |
-| Events present despite an **`offline`** / **`idle`** verdict | **Normal, not a contradiction.** The data is valid evidence for what arrived. Record the disagreement in WHAT WAS NOT CHECKED as a disagreement ("agent service reported offline while events continued to arrive; the service-plane state was not established"), and do not downgrade the data for it. |
-| Relay / key ingest: one `agent_id`, many `source` values | Expected. Scope with `agent_id` for the collector and `source` for the origin host. |
+| `stuck_reason` present or `online_status: offline`, and no (or negligible) events in the window for that sender | **HALT.** Absence of logs is a finding about collection, not proof the endpoint is healthy. Tell the engineer no telemetry arrived, and what the agent row says about why it might not have. |
+| The agent is reporting normally (or an ingest key is fresh), but no events for the expected `source` in the window | HALT and ask: wrong source name, wrong window, or origin labeled differently? Surface similar `source` values from the response. |
+| Events present while `online_status` is `offline` | **Normal, not a contradiction.** The data is valid evidence for what arrived. Record the disagreement in WHAT WAS NOT CHECKED as a disagreement ("no agent signal was received during the window while events continued to arrive; the agent-side state was not established"), and do not downgrade the data for it. |
+| Relay / key ingest: one `agent_id`, many `source` values | Expected. Scope with `agent_id` for the sender and `source` for the origin host. |
 
 Do not filter `list_sources` by "reporting now" when the engineer asked about a past incident.
 
 ---
 
-## Collector-first LQL scoping
+## Sender-first LQL scoping
 
-After scope resolution, prefer **`agent_id`** filters for collector-backed investigation:
+After scope resolution, prefer **`agent_id`** filters when the question is about everything one sender shipped:
 
 ```
 query_event_counts_by_severity(
@@ -206,7 +250,7 @@ query_event_counts_by_severity(
 )
 ```
 
-Use **`source = "hostname"`** when the question is about the origin host label, or combine both when you need on-host events from one managed collector:
+Use **`source = "hostname"`** when the question is about the origin host label, or combine both when you need on-host events from one agent:
 
 ```
 lql: 'agent_id = "<uuid>" AND source = "<hostname>"'
@@ -249,7 +293,7 @@ If timezone is unclear, **ask**; do not assume.
 
 **Filtering by recent heartbeat for historical work.** Use `list_sources` with the investigation window, not "is it online now?"
 
-**Conflating collector and origin.** Relay and ingest-key paths need both `agent_id` and `source` in vocabulary and LQL.
+**Conflating sender and origin.** Relay and ingest-key paths need both `agent_id` and `source` in vocabulary and LQL.
 
 **Citing teaser patterns without `describe_pattern`.** Teaser previews are not evidence-grade pattern text.
 
@@ -259,4 +303,8 @@ If timezone is unclear, **ask**; do not assume.
 
 **Not flagging sparse data.** A source with a handful of events is in scope but may not support strong findings. Say so in WHAT WAS NOT CHECKED.
 
-**Treating stuck/offline silence as a clean bill of health.** Cross-check verdict before "no evidence found."
+**Treating silence from a stuck or offline agent as a clean bill of health.** Cross-check the agent row's readings before "no evidence found."
+
+**Claiming coverage from counts.** `event_count` with `first_event_at` and `last_event_at` says nothing about the middle of the window. Completeness comes from `agent_complete_through` and the feed reports behind it, or it is not claimed.
+
+**Writing a completeness paragraph nobody asked for.** On an ongoing-issue investigation, one sentence saying completeness is not material is the correct amount.
