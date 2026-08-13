@@ -101,10 +101,10 @@ Example:
 
 ### Step 8: Read the state readings on agent rows
 
-Agent rows carry two SEPARATE readings plus a collection group. Never merge them into one statement: a powered-off machine can be offline with a healthy last-reported collection state.
+Agent rows carry two SEPARATE readings plus a collection group: is the agent there (`agent_status`), and is it collecting (`collection_status`). Never merge them into one statement: a powered-off machine can be offline with a healthy last-reported collection state.
 
-- **`online_status`** (`online` / `offline` / `never_seen`) is derived at read time from the two arrival stamps, on the newer of them: **`last_data_at`** (when log data last arrived, so legitimately old on a quiet, healthy machine) and **`last_heartbeat_at`** (when the agent last checked in, about every five minutes). `offline` means NO SIGNAL RECEIVED. It never means the machine crashed, was powered off, or lost its agent.
-- **`agent_status`** (`running`, `stopped`, `system_shutdown`, `upgrading`, `uninstalled`) is what the agent last SAID, announced through a best-effort signal on the way down that a crash, power cut or dead network never sends. `running` beside `offline` means only that no signal arrived; the stamps, not the status, are the authority for offline.
+- **`agent_status`** is where the device stands, derived at read time, and each value is a whole answer: `online`, `offline`, `never_seen` (enrolled, nothing ever arrived), `stopped`, `system_shutdown`, `uninstalled`, `upgrading_overdue` (an update that has not come back), `deleted`. `offline` means NO SIGNAL RECEIVED and the cause is unknown. It never means the machine crashed, was powered off, or lost its agent; a device that announced it was stopping reads as what it announced instead.
+- **The arrival stamps** behind that reading: **`last_data_at`** (when log data last arrived, so legitimately old on a quiet, healthy machine) and **`last_heartbeat_at`** (when the agent last checked in, about every five minutes). The reading keys on the newer of them.
 - **`stuck_reason`** says why an enrolled agent is not collecting (`pack_missing`, `pack_requires_newer_agent`, `collector_down`, `collector_flapping`, `config_apply_stuck`, `feeds_inactive`). Render an unfamiliar value as the raw string.
 - **The collection group** is what the device last reported about its own log gathering, rolled up across its data feeds: `collection_status` (`healthy`, `behind`, `onboarding`, `degraded`, `unknown`) with `collection_reasons` (each glossed), `collection_feeds` (counts) and `collection_observed_at`. `unknown` and absent are UNKNOWN, never healthy. On an offline device the group is LAST REPORTED, from before contact ended: keep it, say when it is from, never blank it.
 - **`agent_complete_through`** is the instant up to which this agent's data is complete. See the completeness section below.
@@ -171,7 +171,7 @@ Each row is one **(sender, source)** pair in the window:
 |---|---|
 | `agent_id` | Sender UUID (LQL filter handle) |
 | `sent_via` | How the stream was authorized to ingest: `agent`, `ingest_key`, or `unresolved` (UUID in events but not visible in this token's fleet directory). A key is how a stream arrived, never what collected it |
-| `name`, `online_status` | Present when the sender resolves; empty for `unresolved` |
+| `name`, `agent_status` | Present when the sender resolves; empty for `unresolved` |
 | `source` | Origin host label |
 | `event_count`, `bytes_ingested` | Volume in the window |
 | `cnt_interesting`, `distinct_interesting` | Triage: how much is going on here |
@@ -228,9 +228,9 @@ Cross-reference the agent row's readings with **`list_sources` presence** before
 
 | Situation | Action |
 |---|---|
-| `stuck_reason` present or `online_status: offline`, and no (or negligible) events in the window for that sender | **HALT.** Absence of logs is a finding about collection, not proof the endpoint is healthy. Tell the engineer no telemetry arrived, and what the agent row says about why it might not have. |
+| `stuck_reason` present or `agent_status: offline`, and no (or negligible) events in the window for that sender | **HALT.** Absence of logs is a finding about collection, not proof the endpoint is healthy. Tell the engineer no telemetry arrived, and what the agent row says about why it might not have. |
 | The agent is reporting normally (or an ingest key is fresh), but no events for the expected `source` in the window | HALT and ask: wrong source name, wrong window, or origin labeled differently? Surface similar `source` values from the response. |
-| Events present while `online_status` is `offline` | **Normal, not a contradiction.** The data is valid evidence for what arrived. Record the disagreement in WHAT WAS NOT CHECKED as a disagreement ("no agent signal was received during the window while events continued to arrive; the agent-side state was not established"), and do not downgrade the data for it. |
+| Events present while `agent_status` is `offline` | **Normal, not a contradiction.** The data is valid evidence for what arrived. Record the disagreement in WHAT WAS NOT CHECKED as a disagreement ("no agent signal was received during the window while events continued to arrive; the agent-side state was not established"), and do not downgrade the data for it. |
 | Relay / key ingest: one `agent_id`, many `source` values | Expected. Scope with `agent_id` for the sender and `source` for the origin host. |
 
 Do not filter `list_sources` by "reporting now" when the engineer asked about a past incident.

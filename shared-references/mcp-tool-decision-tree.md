@@ -75,7 +75,7 @@ resolve_scope(
   device_roles: ["..."],         # optional; same, by reported role
   external_investigation_id: "..."
 )
--> rows: kind org | agent | ingest_key; match_kind when query set; agent rows include online_status, agent_status,
+-> rows: kind org | agent | ingest_key; match_kind when query set; agent rows include agent_status,
    stuck_reason, the collection group (collection_status, collection_reasons, collection_feeds, collection_observed_at),
    advisories, agent_complete_through, last_data_at, last_heartbeat_at, reported_hostname, versions, OS
 ```
@@ -86,7 +86,7 @@ resolve_scope(
 - Sole match at `prefix`/`word`/`substring`: confirm before proceeding.
 - Zero matches: surface closest candidates.
 
-**Read the state readings as SUPPORTING context, never as a work queue.** `online_status` and `agent_status` are two separate readings and are never merged into one statement; `offline` means no signal was received, not that the machine is down. The collection group is what the device last reported, kept and dated even when the device is offline. `agent_complete_through` and `advisories` say how far the data can be trusted. Field-by-field detail and the halt rules are in `scope-resolution.md`.
+**Read the state readings as SUPPORTING context, never as a work queue.** `agent_status` (is the agent there) and `collection_status` (is it collecting) are two separate readings and are never merged into one statement; `offline` means no signal was received, cause unknown, not that the machine is down. The collection group is what the device last reported, kept and dated even when the device is offline. `agent_complete_through` and `advisories` say how far the data can be trusted. Field-by-field detail and the halt rules are in `scope-resolution.md`.
 
 **`device_classes` / `device_roles` beat hostname guessing.** A workstation named `srv-laptop` is how a hostname guess puts the wrong device in a server answer. Both vocabularies are open; an unfamiliar value is the device's own word for itself, and a device with no reported class matches no `device_classes` filter.
 
@@ -107,7 +107,7 @@ list_sources(
   include_top_interesting_patterns: true,   # default true; summary teaser ~8 patterns
   external_investigation_id: "..."
 )
--> rows: agent_id, sent_via, name, online_status, source, event_count, cnt_interesting, one cnt_<band> per failure-side severity band, distinct_interesting, bytes_ingested, first/last_event_at
+-> rows: agent_id, sent_via, name, agent_status, source, event_count, cnt_interesting, one cnt_<band> per failure-side severity band, distinct_interesting, bytes_ingested, first/last_event_at
 -> summary may include top_interesting_patterns; call describe_pattern before citing
 ```
 

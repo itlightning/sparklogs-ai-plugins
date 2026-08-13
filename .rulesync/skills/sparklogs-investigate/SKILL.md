@@ -291,7 +291,7 @@ Before any deep investigation, resolve the scope (which org / sources / time win
 2. **Host-first:** when the engineer names a host/device, pass it as `query`; the server matches `name` and `reported_hostname` across authorized orgs.
 3. Otherwise try org or customer name via `query`. Matching is ranked by **`match_kind`** (`exact` > `prefix` > `word` > `substring`). There are no numeric confidence scores.
 4. Single row with `match_kind` **`exact`**: proceed. Multiple rows at the same best tier, or a sole weak (`prefix`/`word`/`substring`) match: **ask the engineer. Don't guess.**
-5. Read the state readings on agent rows: **`online_status`** (`online` / `offline` / `never_seen`) beside **`agent_status`** (`running`, `stopped`, `system_shutdown`, `upgrading`, `uninstalled`), the collection group (`collection_status` with `collection_reasons`, `collection_feeds`, `collection_observed_at`), **`advisories`**, and **`agent_complete_through`**. Ingest-key rows carry `last_data_at` freshness only. `include_agents` (default true) returns agents **and** ingest keys. Filter devices with `device_classes` / `device_roles` rather than guessing from hostnames.
+5. Read the state readings on agent rows: **`agent_status`** (`online`, `offline`, `never_seen`, `stopped`, `system_shutdown`, `uninstalled`, `upgrading_overdue`, `deleted`) beside the collection group (`collection_status` with `collection_reasons`, `collection_feeds`, `collection_observed_at`), **`advisories`**, and **`agent_complete_through`**. Ingest-key rows carry `last_data_at` freshness only. `include_agents` (default true) returns agents **and** ingest keys. Filter devices with `device_classes` / `device_roles` rather than guessing from hostnames.
 6. Default `include_sub_orgs: true` on org-scoped calls. Scope may expand mid-investigation; keep the same `external_investigation_id`.
 
 **Source discovery - confirm sources have trustworthy data in the window.** Use `list_sources` with the investigation's `start`/`end`; do NOT infer scope from recent heartbeat alone.
@@ -310,14 +310,14 @@ Each row is a **(sender `agent_id`, origin `source`)** pair with `sent_via` (`ag
 
 **Critical+ fetch-first rule:** any non-zero `cnt_critical_plus` in scope (severity 20 and above) means fetch those events before proceeding, regardless of the investigation topic. Critical+ admissions are rare, always-surface facts (confirmed integrity loss or compromise) and auto-elevate into daily fleet reporting; never leave one unread in a Finding's scope. The Info..Error bands carry no fetch-first mandate - weigh them normally. See `references/category-classes.md`, Query notes.
 
-**The agent-side readings and the event stream describe DIFFERENT things, and they can legitimately disagree.** `online_status` says whether any signal reached SparkLogs; the events say what actually arrived. A machine reading `offline` while events arrive minutes later is a normal and common shape, not a contradiction to resolve by picking one.
+**The agent-side readings and the event stream describe DIFFERENT things, and they can legitimately disagree.** `agent_status` says where the device stands, `offline` meaning no signal reached SparkLogs and the cause unknown; the events say what actually arrived. A machine reading `offline` while events arrive minutes later is a normal and common shape, not a contradiction to resolve by picking one.
 
 - **Trust the event stream for what ARRIVED.** Data in the window is evidence whatever the agent row says.
 - **Treat the disagreement as an open question, not a conclusion.** It goes in WHAT WAS NOT CHECKED, named as a disagreement.
 - **Never silently pick a side.** Reporting "the agent is offline so we have no data" while data is in front of you, or "data is flowing so the agent is fine", are the two failure modes.
 - **Report observations, never machine state.** Say no telemetry arrived from the device for the reported silence, never that the device is down. The customer's RMM is the authority on whether a machine is up; SparkLogs complements it and must not contradict it.
 
-Halt in one case only: `online_status` is `offline` or a `stuck_reason` is present, AND there are no events for that `agent_id` in the window. Then absence is a finding about collection, not proof the endpoint is healthy. If the expected source has no events while the agent is reporting normally, ask the engineer: wrong name, wrong window, or origin labeled differently.
+Halt in one case only: `agent_status` is `offline` or a `stuck_reason` is present, AND there are no events for that `agent_id` in the window. Then absence is a finding about collection, not proof the endpoint is healthy. If the expected source has no events while the agent is reporting normally, ask the engineer: wrong name, wrong window, or origin labeled differently.
 
 **Sender-first LQL:** filter with `agent_id = "<uuid>"` for everything one sender shipped; use `source` for origin-host pivots. "Collector" means one thing only: the log-shipping process the agent supervises on the device. See `references/scope-resolution.md`.
 
