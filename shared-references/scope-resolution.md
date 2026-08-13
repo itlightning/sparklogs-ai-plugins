@@ -103,15 +103,13 @@ Example:
 
 Agent rows carry two SEPARATE readings plus a collection group: is the agent there (`agent_status`), and is it collecting (`collection_status`). Never merge them into one statement: a powered-off machine can be offline with a healthy last-reported collection state.
 
-- **`agent_status`** is where the device stands, derived at read time, and each value is a whole answer: `online`, `offline`, `never_seen` (enrolled, nothing ever arrived), `stopped`, `system_shutdown`, `uninstalled`, `upgrading_overdue` (an update that has not come back), `deleted`. `offline` means NO SIGNAL RECEIVED and the cause is unknown. It never means the machine crashed, was powered off, or lost its agent; a device that announced it was stopping reads as what it announced instead.
-- **The arrival stamps** behind that reading: **`last_data_at`** (when log data last arrived, so legitimately old on a quiet, healthy machine) and **`last_heartbeat_at`** (when the agent last checked in, about every five minutes). The reading keys on the newer of them.
+- **`agent_status`** is where the device stands, and each value is a whole answer: `online`, `offline`, `never_seen` (enrolled, nothing ever arrived), `stopped`, `system_shutdown`, `uninstalled`, `upgrading_overdue` (an update that has not come back), `deleted`. `offline` means NO SIGNAL RECEIVED and the cause is unknown; a device that announced it was stopping reads as what it announced instead.
+- **The arrival stamps** behind that reading: **`last_data_at`** (when log data last arrived, so legitimately old on a quiet, healthy machine) and **`last_heartbeat_at`** (when the agent last checked in, about every five minutes).
 - **`stuck_reason`** says why an enrolled agent is not collecting (`pack_missing`, `pack_requires_newer_agent`, `collector_down`, `collector_flapping`, `config_apply_stuck`, `feeds_inactive`). Render an unfamiliar value as the raw string.
 - **The collection group** is what the device last reported about its own log gathering, rolled up across its data feeds: `collection_status` (`healthy`, `behind`, `onboarding`, `degraded`, `unknown`) with `collection_reasons` (each glossed), `collection_feeds` (counts) and `collection_observed_at`. `unknown` and absent are UNKNOWN, never healthy. On an offline device the group is LAST REPORTED, from before contact ended: keep it, say when it is from, never blank it.
 - **`agent_complete_through`** is the instant up to which this agent's data is complete. See the completeness section below.
-- **`advisories`** are hints about what would improve data collection, not demands: an MSP who already knows a laptop is off needs no action. Empty means nothing to note.
-- A device with no sign of life on any stamp for 14 days is annotated **inactive since a date**. It is never hidden and carries no advisories. Leave it out of today's triage unless the question is about it.
-
-**Advisories are the server's judgment.** Use them rather than inventing triage, so every SparkLogs surface tells the engineer the same thing. An empty set means nothing to note, not an invitation to go looking.
+- **`advisories`** are hints about what would improve data collection, not demands. Use them rather than inventing triage, so every SparkLogs surface tells the engineer the same thing. Empty means nothing to note.
+- A device with no sign of life on any stamp for 14 days is annotated **inactive since a date**. Leave it out of today's triage unless the question is about it.
 
 Ingest-key rows are slimmer. A key is a credential with no installed agent, so it has no heartbeat, no data feeds and no collection group; read `last_data_at` for freshness and stop there. Absence of feed information on an ingest-key stream is a difference in KIND, not a defect: a key tells you what arrived, an agent also tells you what is supposed to arrive. Do not apply running/stuck/offline vocabulary to a key.
 
@@ -198,9 +196,9 @@ The tool response includes a hint when the teaser is present.
 
 `"unknown"` means no claim is possible. It is NEVER a fault, and it never means there is no data. Ingest-key rows are always `"unknown"`, because a key makes no completeness claim at all.
 
-When a feed is behind, stuck or blocked, an advisory explains the lag and carries the SCOPE: it names the blocking feed and counts the rest ("the other N active feeds are current and unaffected"). Read that scope before you qualify a finding, because a lagging feed says nothing about the feeds beside it.
+When a feed is behind, stuck or blocked, an advisory explains the lag and carries the SCOPE: it names the blocking feed and counts the rest ("the other N active feeds are current and unaffected"). Read that scope before you qualify a finding.
 
-**The green case is one sentence.** When `agent_complete_through` reaches the end of your window and advisories are empty, say so once ("data is complete through <instant>") and move on. A healthy answer does not earn a completeness section.
+**The green case is one sentence.** When `agent_complete_through` reaches the end of your window and advisories are empty, say so once ("data is complete through <instant>") and move on.
 
 **Three rules models get wrong. They are hard rules.**
 

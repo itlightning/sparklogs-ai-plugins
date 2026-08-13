@@ -310,7 +310,7 @@ Each row is a **(sender `agent_id`, origin `source`)** pair with `sent_via` (`ag
 
 **Critical+ fetch-first rule:** any non-zero `cnt_critical_plus` in scope (severity 20 and above) means fetch those events before proceeding, regardless of the investigation topic. Critical+ admissions are rare, always-surface facts (confirmed integrity loss or compromise) and auto-elevate into daily fleet reporting; never leave one unread in a Finding's scope. The Info..Error bands carry no fetch-first mandate - weigh them normally. See `references/category-classes.md`, Query notes.
 
-**The agent-side readings and the event stream describe DIFFERENT things, and they can legitimately disagree.** `agent_status` says where the device stands, `offline` meaning no signal reached SparkLogs and the cause unknown; the events say what actually arrived. A machine reading `offline` while events arrive minutes later is a normal and common shape, not a contradiction to resolve by picking one.
+**The agent-side readings and the event stream describe DIFFERENT things, and they can legitimately disagree.** `agent_status` says where the device stands, `offline` meaning no signal reached SparkLogs and the cause unknown; the events say what actually arrived. A machine reading `offline` while events arrive minutes later is a normal and common shape.
 
 - **Trust the event stream for what ARRIVED.** Data in the window is evidence whatever the agent row says.
 - **Treat the disagreement as an open question, not a conclusion.** It goes in WHAT WAS NOT CHECKED, named as a disagreement.
@@ -333,11 +333,11 @@ Halt in one case only: `agent_status` is `offline` or a `stuck_reason` is presen
 2. **An ongoing-issue investigation needs NO completeness statement.** Recurring failures and live RCA rest on the events themselves. Where completeness is not material, one sentence saying so is the correct amount.
 3. **Absence of a feed report is never evidence about the data.** An ingest-key stream makes no completeness claim, a feed that has not reported is `unknown` rather than healthy, and absence of events is not evidence of absence.
 
-**Say what you are NOT doing, and why.** Naming a declined check is a strength, not an omission: "the agent's collection state was not established, so this finding rests on the events that arrived" is worth more than a health paragraph the question never needed. Label stream liveness as what it is: data arriving now is not a completeness guarantee for the window you are reasoning about.
+Label stream liveness as what it is: data arriving now is not a completeness guarantee for the window you are reasoning about.
 
 **Advisories are the server's judgment.** Use them rather than inventing triage, so every SparkLogs surface tells the engineer the same thing. Empty means nothing to note.
 
-**Missed events, when a feed reports them.** Collection sometimes has to skip over events because the underlying collection engine (in v1 the Windows event log itself) could not provide them. Call these **missed events** or **skipped events**, bounded by a **skip window**; never "gap", "data loss" or "lost". State what happened and its bounds, then stop: the events may still exist in the device's local Windows event log, SparkLogs does not re-collect them, and no surface may offer recovery. A skip is a notice, never an incident and never the machine's or operator's fault. An ABSENT skips entry means the source type does not detect skips, never that none occurred. Skips are orthogonal to health: a current, advancing feed can carry a skip window. Detail in `references/scope-resolution.md`.
+**Missed events, when a feed reports them.** Collection sometimes has to skip over events because the underlying collection engine (in v1 the Windows event log itself) could not provide them. Call these **missed events** or **skipped events**, bounded by a **skip window**; never "gap", "data loss" or "lost". State what happened and its bounds, then stop: the events may still exist in the device's local Windows event log, SparkLogs does not re-collect them, so do not offer recovery. A skip is a notice, never an incident and never the machine's or operator's fault. An ABSENT skips entry means the source type does not detect skips, never that none occurred. Skips are orthogonal to health: a current, advancing feed can carry a skip window. Detail in `references/scope-resolution.md`.
 
 ---
 

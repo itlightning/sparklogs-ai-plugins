@@ -17,18 +17,12 @@ adapt it to what the engineer actually asked.
 - **`query_logs` / `query_event_counts_by_severity`** answer "what happened, and when": the event stream,
   including everything the curated packs shaped out of the Windows channels.
 
-State gives you the standing condition; the log stream gives you the sequence. Most playbooks below
-need both, in that order, because the state read tells you where to point the log query.
+Most playbooks below need both, in that order: the state read tells you where to point the log query.
 
 **Evidence depth varies by category, and saying so is part of the job.** Some categories run on
 curated reasons with promoted fields; others still come down to reading a vendor channel's message
 text. Each section says which, under Evidence today. Where it says the evidence is thin, that
 belongs in WHAT WAS NOT CHECKED, not in a confident Finding.
-
-**Three tools do not exist**, and reaching for them wastes a turn. For a period diff, run
-`query_event_counts_by_severity` twice over adjacent windows and compare. For a population compare, run
-it once per population with a different `lql`. For clustering, narrow `query_logs` to the pattern
-then `refine_query_result` with `group_by` over the surrounding fields.
 
 ---
 
