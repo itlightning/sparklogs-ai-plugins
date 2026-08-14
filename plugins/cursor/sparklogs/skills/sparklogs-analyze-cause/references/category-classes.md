@@ -88,7 +88,7 @@ read it, so the word in your output is "reason".
 SparkLogs has one severity ladder, shared across every source, so a curated pack and a raw vendor log
 rank against each other honestly.
 
-| Band | Means |
+| Rung | Means |
 |---|---|
 | `Trace` / `Debug` | retained chatter and down-capped forensic records |
 | `Verbose` | extra diagnostic detail above Debug, below everyday Info |
@@ -106,37 +106,38 @@ rank against each other honestly.
 Severity is also an integer, 1 through 24, and the two forms are the same fact. **`critical+` means
 severity >= 20.**
 
-### One severity, three spellings
+### One severity, four spellings
 
-The same rung shows up under three different spellings depending on where you are reading it. This
-table is the bridge; everything else about severity in this doc set points here.
+The same fact shows up under four spellings depending on where you are reading it. This table is the
+bridge; everything else about severity in this doc set points here.
 
 | Where you see it | Form | Example |
 |---|---|---|
-| Prose you write, and LQL filters | lowercase primary name | `severity in (error, critical)` |
-| Returned values and histogram keys | UPPERCASE band name | `ERROR`, `CRITICAL`, and `WARN2` / `WARN3` for rungs between the named ones |
+| Prose you write, and LQL filters | lowercase rung name | `severity in (error, critical)` |
+| The `severity` cell on a returned row | UPPERCASE rung name | `ERROR`, `CRITICAL`, and `WARN2` / `WARN3` for rungs between the named ones |
 | Numeric filters and `severity_level` | integer 1-24 | `min_severity: 17` |
+| Anything that COUNTS events: the `cnt_<band>` columns and `summary.severity_histogram` | lowercase band name, one of nine | `critical_plus`, `info_or_notice` |
 
-The bands, which are the same on every tool:
+**A cell and a digest speak different vocabularies on purpose.** A row's `severity` reports ONE
+observation, so it names the exact rung, down to `WARN3`. A histogram breaks down a POPULATION, so it
+speaks the nine bands and nothing finer: `critical_plus`, never `CRITICAL`. Peak severity is not lost
+to the coarser grain; it stays exact on `max_severity`.
 
-| Integer | Band |
-|---|---|
-| 13-15 | warning |
-| 16 | minor |
-| 17 | error |
-| 18 | serious |
-| 19 | severe |
-| 20 | critical |
-| 21-24 | fatal-class (fatal, alert, panic, emergency) |
+The nine bands are defined by one sentence, which the tools repeat verbatim so there is only ever one
+spelling to trust:
 
-So `cnt_warn_error` is 13-19 and `cnt_critical_plus` is >= 20. A histogram key of `FATAL` covers
-21-24, not just 21.
+Severity bands are the same on every tool here: cnt_debug_or_below (severity 6 and below), cnt_verbose (7-8), cnt_info_or_notice (9-12), cnt_warning (13-15), cnt_minor (16), cnt_error (17), cnt_serious (18), cnt_severe (19), cnt_critical_plus (20 and above). Listings of what is wrong carry the failure side only (cnt_warning and above); tools that count all traffic carry every band.
 
-**Quote returned values verbatim, write primaries in your own voice.** A histogram key is a datum:
-paraphrasing `WARN3` as "warning" breaks the link between your finding and the row. Both fit in one
-sentence: `severity WARN3 (minor)`.
+`summary.severity_histogram` is an ORDERED list of `{band, count}` over those bands, worst-last,
+carrying only the bands that occurred: a band missing from it is a band that response never saw.
+The failure-side subset is the five columns `cnt_warning` through `cnt_critical_plus`, and a listing
+that carries them is not hiding the quiet traffic: it never counted it.
 
-**Use the primary names.** Write `serious`, `minor`, `severe`. Do not write `error2`, `error4`,
+**Quote returned values verbatim, write rung names in your own voice.** A returned severity is a
+datum: paraphrasing `WARN3` as "warning" breaks the link between your finding and the row. Both fit
+in one sentence: `severity WARN3 (minor)`.
+
+**Use the rung names.** Write `serious`, `minor`, `severe`. Do not write `error2`, `error4`,
 `warn4` or the other OTel short forms in prose, filters or findings; they exist only as ingest
 aliases that normalize third-party logs onto this ladder, and they are worth naming only when you are
 explaining that normalization to someone.

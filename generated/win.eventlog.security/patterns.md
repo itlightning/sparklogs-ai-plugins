@@ -29,12 +29,77 @@ Its rendered text cannot survive pattern derivation, so a string that appears to
 
 An unexpected pattern is one of three things, in falling order of likelihood: a curated surface this catalog does not list, a vocabulary that gained a value, or a token rendered from something that is not a closed vocabulary at all. The third is the one that matters.
 
-This module has 50 curated surface(s) and a legal-pattern language of 24303 strings.
+This module has 66 curated surface(s) and a legal-pattern language of 24391 strings.
 That number is why this file is a procedure and not a list.
 
 ## Surfaces
 
 `(absent)` is legal in every slot and is not listed per row.
+
+### `account_changed` / `default`
+
+**Renders:** `account_changed: NOTABLE: account attributes changed`
+
+**Event ids:** 4738, 4742
+
+| # | Slot | Legal values |
+|---|---|---|
+| 1 | `target_kind` | `by_account` `by_machine` `by_system` `by_service` `by_local_service` `by_network_service` `by_anonymous` `by_group` |
+
+Legal pattern count for this surface: 9 (every slot independently present or absent).
+Most of those cannot physically occur; the count is a bound on the language, not a prediction.
+
+### `account_created` / `default`
+
+**Renders:** `account_created: NOTABLE: account created`
+
+**Event ids:** 4720, 4741
+
+| # | Slot | Legal values |
+|---|---|---|
+| 1 | `target_kind` | `by_account` `by_machine` `by_system` `by_service` `by_local_service` `by_network_service` `by_anonymous` `by_group` |
+
+Legal pattern count for this surface: 9 (every slot independently present or absent).
+Most of those cannot physically occur; the count is a bound on the language, not a prediction.
+
+### `account_deleted` / `default`
+
+**Renders:** `account_deleted: NOTABLE: account deleted`
+
+**Event ids:** 4726, 4743
+
+| # | Slot | Legal values |
+|---|---|---|
+| 1 | `target_kind` | `by_account` `by_machine` `by_system` `by_service` `by_local_service` `by_network_service` `by_anonymous` `by_group` |
+
+Legal pattern count for this surface: 9 (every slot independently present or absent).
+Most of those cannot physically occur; the count is a bound on the language, not a prediction.
+
+### `account_disabled` / `default`
+
+**Renders:** `account_disabled: NOTABLE: account disabled`
+
+**Event ids:** 4725
+
+| # | Slot | Legal values |
+|---|---|---|
+| 1 | `target_kind` | `by_account` `by_machine` `by_system` `by_service` `by_local_service` `by_network_service` `by_anonymous` `by_group` |
+
+Legal pattern count for this surface: 9 (every slot independently present or absent).
+Most of those cannot physically occur; the count is a bound on the language, not a prediction.
+
+### `account_enabled` / `default`
+
+**Renders:** `account_enabled: NOTABLE: account enabled`
+
+**Event ids:** 4722
+
+| # | Slot | Legal values |
+|---|---|---|
+| 1 | `target_kind` | `by_account` `by_machine` `by_system` `by_service` `by_local_service` `by_network_service` `by_anonymous` `by_group` |
+
+Legal pattern count for this surface: 9 (every slot independently present or absent).
+Most of those cannot physically occur; the count is a bound on the language, not a prediction.
 
 ### `account_locked_out` / `default`
 
@@ -43,6 +108,45 @@ That number is why this file is a procedure and not a list.
 **Event ids:** 4740
 
 **Slots:** none. This surface renders exactly one pattern.
+
+### `account_password_change_failed` / `default`
+
+**Renders:** `account_password_change_failed: NOTABLE: self-service password change failed`
+
+**Event ids:** 4723
+
+| # | Slot | Legal values |
+|---|---|---|
+| 1 | `target_kind` | `by_account` `by_machine` `by_system` `by_service` `by_local_service` `by_network_service` `by_anonymous` `by_group` |
+
+Legal pattern count for this surface: 9 (every slot independently present or absent).
+Most of those cannot physically occur; the count is a bound on the language, not a prediction.
+
+### `account_password_reset` / `default`
+
+**Renders:** `account_password_reset: NOTABLE: account password reset by another principal`
+
+**Event ids:** 4724
+
+| # | Slot | Legal values |
+|---|---|---|
+| 1 | `target_kind` | `by_account` `by_machine` `by_system` `by_service` `by_local_service` `by_network_service` `by_anonymous` `by_group` |
+
+Legal pattern count for this surface: 9 (every slot independently present or absent).
+Most of those cannot physically occur; the count is a bound on the language, not a prediction.
+
+### `account_password_reset_failed` / `default`
+
+**Renders:** `account_password_reset_failed: NOTABLE: account password reset attempt failed`
+
+**Event ids:** 4724
+
+| # | Slot | Legal values |
+|---|---|---|
+| 1 | `target_kind` | `by_account` `by_machine` `by_system` `by_service` `by_local_service` `by_network_service` `by_anonymous` `by_group` |
+
+Legal pattern count for this surface: 9 (every slot independently present or absent).
+Most of those cannot physically occur; the count is a bound on the language, not a prediction.
 
 ### `anonymous_remote_logon` / `default`
 
@@ -61,6 +165,30 @@ That number is why this file is a procedure and not a list.
 
 Legal pattern count for this surface: 1170 (every slot independently present or absent).
 Most of those cannot physically occur; the count is a bound on the language, not a prediction.
+
+### `audit_events_dropped` / `default`
+
+**Renders:** `audit_events_dropped: NOTABLE: audit events dropped by the event log transport`
+
+**Event ids:** 1101
+
+**Slots:** none. This surface renders exactly one pattern.
+
+### `domain_policy_changed` / `default`
+
+**Renders:** `domain_policy_changed: NOTABLE: domain account policy changed`
+
+**Event ids:** 4739
+
+**Slots:** none. This surface renders exactly one pattern.
+
+### `event_logging_stopped` / `default`
+
+**Renders:** `event_logging_stopped: event logging service stopped`
+
+**Event ids:** 1100
+
+**Slots:** none. This surface renders exactly one pattern.
 
 ### `explicit_credential_use` / `default`
 
@@ -302,6 +430,27 @@ Most of those cannot physically occur; the count is a bound on the language, not
 Legal pattern count for this surface: 26 (every slot independently present or absent).
 Most of those cannot physically occur; the count is a bound on the language, not a prediction.
 
+### `principal_renamed` / `default`
+
+**Renders:** `principal_renamed: NOTABLE: security principal renamed`
+
+**Event ids:** 4781
+
+| # | Slot | Legal values |
+|---|---|---|
+| 1 | `target_kind` | `by_account` `by_machine` `by_system` `by_service` `by_local_service` `by_network_service` `by_anonymous` `by_group` |
+
+Legal pattern count for this surface: 9 (every slot independently present or absent).
+Most of those cannot physically occur; the count is a bound on the language, not a prediction.
+
+### `psdirect_handshake_probe` / `default`
+
+**Renders:** `psdirect_handshake_probe: BENIGN: Hyper-V PowerShell Direct handshake, not a sign-in`
+
+**Event ids:** 4625
+
+**Slots:** none. This surface renders exactly one pattern.
+
 ### `system_time_changed` / `other_caller`
 
 **When:** Any other process/subject changing the clock
@@ -410,6 +559,16 @@ Most of those cannot physically occur; the count is a bound on the language, not
 
 **Slots:** none. This surface renders exactly one pattern.
 
+### `fips_selftest_passed`
+
+**When:** 6417, the FIPS mode cryptographic selftests succeeded
+
+**Renders:** `FIPS mode crypto selftests passed`
+
+**Event ids:** 6417
+
+**Slots:** none. This surface renders exactly one pattern.
+
 ### `firewall_driver_started`
 
 **When:** 5033 the Windows Firewall driver started
@@ -495,6 +654,16 @@ Most of those cannot physically occur; the count is a bound on the language, not
 
 **Slots:** none. This surface renders exactly one pattern.
 
+### `per_user_audit_policy_table_created`
+
+**When:** 4902, the per-user audit policy table the system builds at boot
+
+**Renders:** `per-user audit policy table created`
+
+**Event ids:** 4902
+
+**Slots:** none. This surface renders exactly one pattern.
+
 ### `platform_privileges_assigned`
 
 **When:** 4672 whose privileged principal is a platform, service or machine identity
@@ -509,6 +678,16 @@ Most of those cannot physically occur; the count is a bound on the language, not
 
 Legal pattern count for this surface: 9 (every slot independently present or absent).
 Most of those cannot physically occur; the count is a bound on the language, not a prediction.
+
+### `primary_token_assigned`
+
+**When:** 4696, a primary token assigned to a process
+
+**Renders:** `primary token assigned to a process`
+
+**Event ids:** 4696
+
+**Slots:** none. This surface renders exactly one pattern.
 
 ### `privileges_assigned_unclaimed_principal`
 

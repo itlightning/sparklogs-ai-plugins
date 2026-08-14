@@ -191,7 +191,7 @@ RECOMMENDED NEXT STEPS (suggested, not prescribed)
    Hypothesis #3 (target-related).
 2. If Hypothesis #1 is the working theory: testing rollback on one staging source would
    provide a strong signal.
-3. Running `query_grouped_aggregation` to compare installed_products across the 7 affected
+3. Running `query_event_counts_by_severity` to compare installed_products across the 7 affected
    sources vs unaffected fleet sources could surface non-KB factors.
 
 WHAT WAS EXAMINED

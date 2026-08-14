@@ -41,7 +41,7 @@ Two shapes deserve their own line because they are the ones people get wrong:
    subsource = "win.eventlog.security"
    ```
 
-   That is the canonical way to scope a query to one channel. Reach for `list_scope_ladder` to
+   That is the canonical way to scope a query to one channel. Reach for `query_scope_activity` to
    discover which subsources a client HAS, not to look up one you already know.
 2. Open that module's `README.md`. It is the module index and it is short.
 3. Open the one artifact the table above points at.

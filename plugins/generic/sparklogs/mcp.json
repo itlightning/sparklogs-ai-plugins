@@ -4,7 +4,7 @@
       "headers": {
         "Authorization": "Bearer ${SPARKLOGS_API_TOKEN}"
       },
-      "url": "https://mcp.sparklogs.app"
+      "url": "https://mcp.sparklogs.app/mcp"
     }
   }
 }

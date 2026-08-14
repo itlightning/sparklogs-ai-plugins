@@ -76,7 +76,7 @@ A friendly, human-meaningful correlation handle you supply - free text, 8-200 ch
 The cap is the point. An engineer reads this to decide whether to open the Findings; a summary that reproduces them has replaced the decision with a second read.
 
 **Right (factual synthesis):**
-"The investigation surfaced a VSS writer failure on srv-fileshare01 at 03:14 UTC concurrent with a Veeam error and a recent KB5034441 install (Findings 1, 2, 4). The same pattern appeared on 7 other fleet sources (Finding 6). The cluster analysis (Finding 5) shows the error happens in multiple contexts, with the most common involving SCM service activity preceding the failure. No ingest gaps during the relevant window (Finding 7), so the evidence is complete on the on-endpoint side."
+"The investigation surfaced a VSS writer failure on srv-fileshare01 at 03:14 UTC concurrent with a Veeam error and a recent KB5034441 install (Findings 1, 2, 4). The same pattern appeared on 7 other fleet sources (Finding 6). The cluster analysis (Finding 5) shows the error happens in multiple contexts, with the most common involving SCM service activity preceding the failure. The agent reported its data complete through the end of the window with no advisories (Finding 7)."
 
 **Wrong (speculation):**
 "This is clearly caused by the KB5034441 update breaking VSS interaction with Veeam - the timing and fleet-wide pattern make this the obvious root cause."
@@ -117,7 +117,7 @@ Format: `<subject> was <state> at <time>`, or `<event class> occurred N times in
 - "VSS writer SqlServerWriter was in FAILED state at 2026-04-23 03:14:32 UTC."
 - "Pattern_hash h7Vjf2Xk9a appeared 1247 times in last 24h on srv-fileshare01; absent in prior 24h."
 - "system_health.os_volume_free_pct was 8% at 2026-04-23 14:00 UTC (severity: error per workspace bands)."
-- "No ingest_drop / spool_full / backpressure events emitted by srv-fileshare01 during the investigation window."
+- "srv-fileshare01 reported agent_complete_through 2026-04-23 14:00 UTC with no advisories."
 
 **Wrong (speculation in this skill - move to cause-analysis skill or POSSIBLE NEXT DIRECTIONS):**
 - "The cause is likely the recent KB5034441 install."
@@ -192,8 +192,8 @@ wasn't present in the prior 24 hours (Finding 3), and the same pattern affected 
 in the fleet during the same window (Finding 6). KB5034441 was installed approximately 30 minutes
 before the failure (Finding 4); temporal proximity is observed but causality is not asserted.
 Cluster analysis (Finding 5) shows the error happens in multiple distinct contexts, with the most
-common involving SCM service activity preceding the failure. The on-endpoint evidence is complete
-(Finding 7 confirms no ingest gaps).
+common involving SCM service activity preceding the failure. The agent reported its data complete
+through the end of the window (Finding 7).
 
 SCOPE CHECKED
 - Source(s): srv-fileshare01
@@ -254,12 +254,12 @@ Finding 6: Same Veeam error pattern fired on 7 other sources in this MSP fleet d
                         srv-web01, srv-print01
   Time window of evidence: 2026-04-22 00:00 to 2026-04-23 14:00 UTC
 
-Finding 7: No ingest_drop, spool_full, or backpressure events on srv-fileshare01 during window
+Finding 7: srv-fileshare01 reported agent_complete_through 2026-04-23 14:00 UTC, advisories empty
   Evidence: <query_url as returned> (query_id: qH6l1p5n2k7t3m8r)
   Confidence: high
   Sources contributing: srv-fileshare01
   Time window of evidence: 2026-04-22 00:00 to 2026-04-23 14:00 UTC
-  Note: Source data is complete for the relevant window. Evidence is not affected by ingest gaps.
+  Note: The agent's own feed reports carry this. Event counts and first/last bounds do not.
 
 WHAT WAS EXAMINED
 - Backing queries: 4
@@ -294,9 +294,9 @@ external_investigation_id: investigate-srv-fileshare02-slow-share
 EXECUTIVE SUMMARY
 The on-endpoint perf and event data for srv-fileshare02 in the user-reported window shows no signs
 of resource saturation, SMB-server-side errors, or AV-induced spikes (Findings 1-3). The source's
-data is complete (Finding 4). However, the user reported slowness - the absence of server-side
-evidence does not mean the user is wrong; it suggests the slowness may have a cause outside this
-server's visibility. Common causes outside scope (see WHAT WAS NOT CHECKED) include client-side
+agent reported its data complete through the window (Finding 4). However, the user reported
+slowness - the absence of server-side evidence does not mean the user is wrong; it suggests the
+slowness may have a cause outside this server's visibility. Common causes outside scope (see WHAT WAS NOT CHECKED) include client-side
 issues, network path issues, and per-workstation AV scanning each opened file.
 
 SCOPE CHECKED
@@ -334,7 +334,7 @@ Finding 3: Defender real-time scanning was active but with no scan-related event
   Sources contributing: srv-fileshare02
   Time window of evidence: 2026-04-23 06:00 to 14:30 UTC
 
-Finding 4: No ingest_drop / spool_full / backpressure events on srv-fileshare02 during window
+Finding 4: srv-fileshare02 reported agent_complete_through 2026-04-23 14:30 UTC, advisories empty
   Evidence: <query_url as returned> (query_id: qY1k9p2m7n4t3r6c)
   Confidence: high
 

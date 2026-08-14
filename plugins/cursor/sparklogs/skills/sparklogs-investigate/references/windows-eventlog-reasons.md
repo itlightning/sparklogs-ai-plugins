@@ -77,7 +77,7 @@ fact witnessed from the event channel and from CBS.log, one fleet reason-pivot.
 
 Module notes:
 
-- `patch_install_failed` (WindowsUpdateClient/20) is frozen but DORMANT: no rule fires; Windows
+- `patch_install_failed` (WindowsUpdateClient/20) is frozen but INERT: no rule fires; Windows
   Update System-channel copies stay CONTEXT at native severity.
 - Heavy CONTEXT severity shaping exists on this channel (chatter capped Debug, documented
   severity-lying ids capped Info). A quiet severity distribution is shaped, not empty; pivot on

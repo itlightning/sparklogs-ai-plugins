@@ -76,6 +76,7 @@ OCSF nests entities under the event actor. Anchors below name the object path, n
 | `win.eventlog.security.status` | `status_code` |
 | `win.eventlog.security.substatus` | `status_detail` |
 | `win.eventlog.security.status_meaning` | `status_detail` |
+| `win.eventlog.security.psdirect_handshake` |  |
 | `win.eventlog.security.kerberos_target` | `service.name` |
 | `win.eventlog.security.ticket_encryption_type` |  |
 | `win.eventlog.security.etype_meaning` |  |
@@ -107,3 +108,5 @@ OCSF nests entities under the event actor. Anchors below name the object path, n
 | `win.eventlog.security.nps_reason_meaning` | `status_detail` |
 | `win.eventlog.security.nps_policy` | `policy.name` |
 | `win.eventlog.security.publisher_id` | `metadata.product.name` |
+| `win.eventlog.security.pua_count` |  |
+| `win.eventlog.security.dropped_count` |  |

@@ -20,7 +20,7 @@
     "email": "help@itlightning.com"
   },
   "mcp": {
-    "url": "https://mcp.sparklogs.app",
+    "url": "https://mcp.sparklogs.app/mcp",
     "authType": "apiToken",
     "allowedHosts": [
       "mcp.sparklogs.app",

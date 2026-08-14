@@ -115,6 +115,19 @@ What sort of principal acted. Wider than the portable `kind` vocabulary, which c
 - `by_anonymous`
 - `by_group`
 
+### `target_kind`
+
+What sort of principal was ACTED UPON, on the account-administration lines. Same value space as subject_kind and a separate slot on purpose: subject_kind states who acted, and one name meaning the acting principal on some lines and the object of the action on others would make every reading of it depend on which line it came from. The headline on these lines names the ACTION, so this token is where the principal is described: a group renamed, a computer account created and an ordinary account disabled are three patterns rather than one. A principal the ladder cannot read renders no token, so a gap in the reading shows as an absent token rather than as a wrong one.
+
+- `by_account`
+- `by_machine`
+- `by_system`
+- `by_service`
+- `by_local_service`
+- `by_network_service`
+- `by_anonymous`
+- `by_group`
+
 ### `auth_package`
 
 Which authentication package answered. Only the curated packages render; any other package leaves the slot absent and stays queryable through the module auth_package field. auth_negoextender is the Entra negotiate-extension package (NegoExtender), the one cloud-joined endpoints authenticate through.
@@ -155,7 +168,7 @@ Which system logon right a policy change granted or removed, decoded from the Se
 
 ## Portable vocabularies this module uses
 
-Library-wide closed sets, so the same token means the same thing on every source.
+Library-wide closed sets, so the same token means the same thing on every data feed.
 
 ### `sparklogs.actor.kind`
 

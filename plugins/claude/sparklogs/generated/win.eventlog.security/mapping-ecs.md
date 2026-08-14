@@ -76,6 +76,7 @@ ECS is field-per-concept and flat-dotted. Its identity fields collapse the initi
 | `win.eventlog.security.status` |  |
 | `win.eventlog.security.substatus` |  |
 | `win.eventlog.security.status_meaning` | `event.reason` |
+| `win.eventlog.security.psdirect_handshake` |  |
 | `win.eventlog.security.kerberos_target` | `service.name` |
 | `win.eventlog.security.ticket_encryption_type` |  |
 | `win.eventlog.security.etype_meaning` |  |
@@ -107,3 +108,5 @@ ECS is field-per-concept and flat-dotted. Its identity fields collapse the initi
 | `win.eventlog.security.nps_reason_meaning` | `event.reason` |
 | `win.eventlog.security.nps_policy` | `rule.name` |
 | `win.eventlog.security.publisher_id` | `event.provider` |
+| `win.eventlog.security.pua_count` |  |
+| `win.eventlog.security.dropped_count` |  |
