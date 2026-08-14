@@ -193,23 +193,47 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` or `low`.
 
 **Why it's wrong.** Aggregation first. `query_logs` is the *last resort*, not the first. Aggregation returns a dense, denominated answer instead of a pile of raw rows: you learn what the population looks like before you spend the window reading a slice of it.
 
-**Recovery.** First substantive call should usually be `query_grouped_aggregation` (group by the field the question is about). Use `query_logs` only when aggregation has narrowed to a specific small set whose raw text matters.
+**Recovery.** First substantive call should usually be `query_event_counts_by_severity` (group by the field the question is about). Use `query_logs` only when aggregation has narrowed to a specific small set whose raw text matters.
 
 ### Reading Level 3 by default
 
-**Symptom.** Your `return_field_list` includes `state.<category>` or `anomalies` on every call.
+**Symptom.** Your `select` includes `state.<category>` or `anomalies` on every call.
 
 **Why it's wrong.** Level 3 returns far more data than Level 1 or 2. Default should be Level 1 (triage) -> Level 2 (assess) -> Level 3 only when ground truth is needed.
 
-**Recovery.** Always set `return_field_list` explicitly. Use the level-recipes from `mcp-tool-decision-tree.md`. Field-length caps are SERVER-ENFORCED - there is no client override. If a capped field is truncating data you need, narrow the query (tighter `lql`, fewer subsources) or project a smaller field set with `return_field_list` / `select`, then page or refine to reach the specific rows.
+**Recovery.** Always set `select` explicitly. Use the level-recipes from `mcp-tool-decision-tree.md`. Field-length caps are SERVER-ENFORCED - there is no client override. If a capped field is truncating data you need, narrow the query (tighter `lql`, fewer subsources) or project a smaller field set with `select`, then page or refine to reach the specific rows.
 
 ### Re-running queries instead of refining cached results
 
-**Symptom.** You issue a fresh `query_logs` or `query_grouped_aggregation` when you already had a relevant cached query.
+**Symptom.** You issue a fresh `query_logs` or `query_event_counts_by_severity` when you already had a relevant cached query.
 
 **Why it's wrong.** Backing queries do meaningfully more work than `refine_query_result`, which runs against the cache. The cache lasts a long time; reuse it.
 
 **Recovery.** Before issuing a fresh backing query, check if an existing `query_id` (from earlier in this investigation) covers the universe you need. If yes, refine.
+
+### Claiming coverage from counts and endpoints
+
+**Symptom.** You read `event_count`, `first_event_at` and `last_event_at` (or a dense bucket series) and write "no gaps", "continuous coverage", "the data is complete", or "the source was reporting throughout".
+
+**Why it's wrong.** Those columns count what ARRIVED. They are consistent with any amount of missing middle, so they cannot establish interior coverage at all. Only a data feed's own report can, and it reaches you as `agent_complete_through` with the advisories beside it on the `resolve_scope` agent row.
+
+**Recovery.** Read `agent_complete_through`. If it reaches the end of your window and advisories are empty, one sentence: "data is complete through <instant>". If it is `"unknown"`, say completeness could not be established, which is a statement about the claim, never a fault and never a claim that data is missing. Then stop; a healthy answer does not earn a section.
+
+### Writing a completeness statement the question did not need
+
+**Symptom.** An investigation into a recurring failure, or a live RCA on something happening now, carries a paragraph about data completeness, feed health, or agent state that no finding depends on.
+
+**Why it's wrong.** The events in front of you carry an ongoing issue on their own. Completeness prose that changes no conclusion pushes the finding down the page and reads as padding.
+
+**Recovery.** Ask whether any finding would change if completeness were worse than assumed. If not, one sentence saying completeness is not material to this question is the whole obligation. Say what you are NOT checking and why: an explicitly declined health call reads as rigor, an unexplained silence reads as an oversight.
+
+### Reading the absence of a feed report as evidence
+
+**Symptom.** No feed reported, no advisory appeared, or the stream came in on an ingest key, and you treat that quiet as reassurance: "no problems reported", "the feeds were healthy", "no missed events".
+
+**Why it's wrong.** An ingest-key stream makes no completeness claim at all, so its silence carries nothing. A feed that has not reported is `unknown`, never healthy. An absent skips entry means the source type does not detect skips, not that none occurred. Absence of events is not evidence of absence.
+
+**Recovery.** Name the absence as an absence: "the feed made no report for this window, so completeness is unknown". Put it in WHAT WAS NOT CHECKED rather than in a Finding, and never upgrade it to a health statement.
 
 ### Failing to check ingest health before "no evidence" conclusions
 
@@ -217,7 +241,7 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` or `low`.
 
 **Why it's wrong.** Source might have been emitting `ingest_drop` / `spool_full` / `backpressure` events during the window, in which case "no evidence" might just mean "data was incomplete."
 
-**Recovery.** Before any "no evidence found" conclusion, run `query_logs(lql='source = "<X>" AND sparklogs.kind = agent_op', start=..., end=...)`. Those rows are stamped when an investigator must distrust other data on that host. If any fired, qualify the Finding's confidence and surface it in WHAT WAS NOT CHECKED. An EMPTY result is inconclusive rather than reassuring: a healthy agent, an agent that is not reporting, and a topic disabled for that agent's rollout ring all look identical from here. Cross-check `list_sources` event-count trends and say which case you could not rule out.
+**Recovery.** Before any "no evidence found" conclusion, read `agent_complete_through` and `advisories` on the agent row, then run `query_logs(lql='source = "<X>" AND sparklogs.kind = agent_op', start=..., end=...)`. Those rows are stamped when an investigator must distrust other data on that host. If any fired, qualify the Finding's confidence and surface it in WHAT WAS NOT CHECKED. An EMPTY result is inconclusive rather than reassuring: a healthy agent, an agent that is not reporting, and a topic disabled for that agent's rollout ring all look identical from here. `list_sources` event-count trends are a prompt to look, never a coverage measurement. Say which case you could not rule out.
 
 ### Reading an empty deep-field query as a clean bill of health
 
@@ -225,7 +249,7 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` or `low`.
 
 **Why it's wrong.** These are DESIGNED fields in the schema, but the SparkLogs Managed Agent has zero production emission of them today. Every query filtering on them returns empty on every source, whether or not a problem exists. Empty means "not emitted yet," never "no problem found."
 
-**Recovery.** Fall back to shallow-triage fields that ARE emitted today: `message`, `severity`, `source`, `app`, `subsource`, `pattern` / `pattern_hash`, timestamps. Use `query_grouped_aggregation` on `severity` or `pattern` for volume/anomaly triage instead of the deep fields. State explicitly in the Finding or WHAT WAS NOT CHECKED that the deep-field check came back empty because the telemetry isn't emitted yet, not because nothing is wrong.
+**Recovery.** Fall back to shallow-triage fields that ARE emitted today: `message`, `severity`, `source`, `app`, `subsource`, `pattern` / `pattern_hash`, timestamps. Use `query_event_counts_by_severity` on `severity` or `pattern` for volume/anomaly triage instead of the deep fields. State explicitly in the Finding or WHAT WAS NOT CHECKED that the deep-field check came back empty because the telemetry isn't emitted yet, not because nothing is wrong.
 
 ### Failing to check that the source has data in the investigation window
 

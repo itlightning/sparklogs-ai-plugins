@@ -1,7 +1,7 @@
 {
   "mcpServers": {
     "sparklogs": {
-      "url": "https://mcp.sparklogs.app",
+      "url": "https://mcp.sparklogs.app/mcp",
       "headers": {
         "Authorization": "Bearer ${SPARKLOGS_API_TOKEN}"
       }
