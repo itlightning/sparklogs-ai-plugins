@@ -95,6 +95,13 @@ GENERATED markers. An unknown path under `src/`, or a maintainer file (`yarn.loc
 `SYNC-MANIFEST.json`, `scripts/`) in dist output, fails validation. Size caps live in
 `scripts/dist-layout.mjs`. Planted negatives for those guards run in `scripts/lint-src-layout.mjs`.
 
+`assertBalancedMarkers` (`scripts/skill-indexes.mjs`) rejects any `.md` under `src/` with an
+unmatched, mismatched, or nested `BEGIN GENERATED`/`END GENERATED` pair; it runs in
+`lint-src-layout.mjs` over every source file and again in `shipMarkdown` at render time. Rendered
+frontmatter is also parsed with `js-yaml` in `validate-rendered.mjs`: a value that is not a safe
+plain YAML scalar (e.g. a description containing `: `) must be quoted by `formatFrontmatter`, or the
+gate fails naming the host and file.
+
 ## Versioning
 
 All hosts share one product version. Source files do not contain a release version. The release workflow derives `VERSION` from a human-created tag such as `v1.2.3`.

@@ -33,6 +33,8 @@ It does not duplicate playbooks.
 
 Leaf `index:` is the table cell. Optional `aliases:` add extra rows with the same path. Table prose lives on the leaf.
 
+The feed table's row order is curated investigation salience, not alphabetical: set by `MODULES` in `scripts/generated-references.config.mjs`. Its `What` cell comes from the `FEED_WHAT` map in the same file, keyed by feed id so it survives reordering.
+
 ## Themes to data feeds
 
 | Theme file | Feeds | Notes |

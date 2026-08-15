@@ -23,18 +23,44 @@ export const ROUTER_END = '<!-- END GENERATED INVENTORY -->';
 
 // Every module carried into this repo. A module directory in the library that is not listed
 // here is not synced; a module listed here that the library does not produce is a sync failure.
+// Order is curated investigation salience (highest-signal feeds first); the sync logic does not
+// depend on it.
 export const MODULES = [
-  'sparklogs.agent.log',
-  'sparklogs.agent.state',
-  'sparklogs.agent.vector',
-  'win.defender.eventlog',
-  'win.eventlog.application',
   'win.eventlog.security',
-  'win.eventlog.setup',
   'win.eventlog.system',
+  'win.eventlog.application',
+  'win.eventlog.setup',
   'win.servicing.cbs',
   'win.servicing.dism',
+  'win.defender.eventlog',
+  'sparklogs.agent.state',
+  'sparklogs.agent.vector',
+  'sparklogs.agent.log',
 ];
+
+// Curated one-line "what" cell for the feed index table (renderFeedsTable). Keyed by module id
+// so the table row survives reordering MODULES above.
+export const FEED_WHAT = {
+  'win.eventlog.security': 'Security auditing: logons, account and policy changes, actors',
+  'win.eventlog.system': 'System channel: services, drivers, kernel, VSS, storage',
+  'win.eventlog.application': 'Application channel: app crashes, hangs, vendor app events',
+  'win.eventlog.setup': 'Windows Update results per update',
+  'win.servicing.cbs': 'CBS servicing internals: component store, packages',
+  'win.servicing.dism': 'DISM operations and image health',
+  'win.defender.eventlog': 'Defender: threats, protection state',
+  'sparklogs.agent.state': 'Device health and state snapshots: CPU, RAM, disk, installed software, monitors',
+  'sparklogs.agent.vector': 'Collector debug only: data collector internals',
+  'sparklogs.agent.log': 'Collector debug only: agent supervisor log',
+};
+
+// A declared-but-absent or present-but-undeclared row here is a defect the moment it happens,
+// not something to catch on next read: check both directions at load, before anything renders.
+{
+  const missing = MODULES.filter((id) => !FEED_WHAT[id]);
+  if (missing.length) throw new Error(`FEED_WHAT missing a what for: ${missing.join(', ')}`);
+  const extra = Object.keys(FEED_WHAT).filter((id) => !MODULES.includes(id));
+  if (extra.length) throw new Error(`FEED_WHAT has entries not in MODULES: ${extra.join(', ')}`);
+}
 
 // Floor every feed must carry. Optional artifacts ride when the library emits them.
 export const PUBLIC_ARTIFACTS = [

@@ -8,7 +8,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import yaml from 'js-yaml';
 import { THEME_FILES } from './dist-layout.mjs';
-import { MODULES } from './generated-references.config.mjs';
+import { FEED_WHAT, MODULES } from './generated-references.config.mjs';
 
 export const INDEX_KINDS = ['playbooks', 'themes', 'feeds'];
 export const SHIP_FRONTMATTER_KEYS = new Set([
@@ -233,8 +233,8 @@ export function renderThemesTable(themes) {
 }
 
 export function renderFeedsTable(modules = MODULES) {
-  const rows = ['| Feed | Path |', '|---|---|'];
-  for (const id of modules) rows.push(`| \`${id}\` | \`feeds/${id}/\` |`);
+  const rows = ['| Feed | What | Path |', '|---|---|---|'];
+  for (const id of modules) rows.push(`| \`${id}\` | ${mdCell(FEED_WHAT[id])} | \`feeds/${id}/\` |`);
   return rows.join('\n');
 }
 

@@ -72,18 +72,18 @@ You may open the matching playbook as a query recipe. Do not emit the investigat
 **Data feeds** (`subsource` = directory name). Open `feeds/<id>/README.md`, then the artifact you need (`fields.md`, `enums.md`, `reasons.md`). Search `reasons.md` for the `##` heading that matches the reason slug. Do not read the whole file.
 
 <!-- BEGIN GENERATED INDEX:feeds -->
-| Feed | Path |
-|---|---|
-| `sparklogs.agent.log` | `feeds/sparklogs.agent.log/` |
-| `sparklogs.agent.state` | `feeds/sparklogs.agent.state/` |
-| `sparklogs.agent.vector` | `feeds/sparklogs.agent.vector/` |
-| `win.defender.eventlog` | `feeds/win.defender.eventlog/` |
-| `win.eventlog.application` | `feeds/win.eventlog.application/` |
-| `win.eventlog.security` | `feeds/win.eventlog.security/` |
-| `win.eventlog.setup` | `feeds/win.eventlog.setup/` |
-| `win.eventlog.system` | `feeds/win.eventlog.system/` |
-| `win.servicing.cbs` | `feeds/win.servicing.cbs/` |
-| `win.servicing.dism` | `feeds/win.servicing.dism/` |
+| Feed | What | Path |
+|---|---|---|
+| `win.eventlog.security` | Security auditing: logons, account and policy changes, actors | `feeds/win.eventlog.security/` |
+| `win.eventlog.system` | System channel: services, drivers, kernel, VSS, storage | `feeds/win.eventlog.system/` |
+| `win.eventlog.application` | Application channel: app crashes, hangs, vendor app events | `feeds/win.eventlog.application/` |
+| `win.eventlog.setup` | Windows Update results per update | `feeds/win.eventlog.setup/` |
+| `win.servicing.cbs` | CBS servicing internals: component store, packages | `feeds/win.servicing.cbs/` |
+| `win.servicing.dism` | DISM operations and image health | `feeds/win.servicing.dism/` |
+| `win.defender.eventlog` | Defender: threats, protection state | `feeds/win.defender.eventlog/` |
+| `sparklogs.agent.state` | Device health and state snapshots: CPU, RAM, disk, installed software, monitors | `feeds/sparklogs.agent.state/` |
+| `sparklogs.agent.vector` | Collector debug only: data collector internals | `feeds/sparklogs.agent.vector/` |
+| `sparklogs.agent.log` | Collector debug only: agent supervisor log | `feeds/sparklogs.agent.log/` |
 <!-- END GENERATED INDEX:feeds -->
 
 ## Written investigation
