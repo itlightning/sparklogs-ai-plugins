@@ -1,13 +1,9 @@
 * @klondikedragon
-/.rulesync/ @klondikedragon
-/shared-references/ @klondikedragon
-/metadata/ @klondikedragon
+/src/ @klondikedragon
 /scripts/ @klondikedragon
-/assets/ @klondikedragon
 /.github/ @klondikedragon
 /package.json @klondikedragon
 /yarn.lock @klondikedragon
-/rulesync.jsonc @klondikedragon
 /README.md @klondikedragon
 /SECURITY.md @klondikedragon
 /CONTRIBUTING.md @klondikedragon

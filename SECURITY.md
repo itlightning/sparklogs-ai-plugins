@@ -12,7 +12,7 @@ Configure API tokens through the host's supported secret/config mechanism. Never
 
 ## Build Supply Chain
 
-Node and Yarn are pinned; direct dependencies are exact; `yarn.lock` is committed; CI uses `yarn install --immutable --check-cache`; dependency lifecycle scripts are disabled by default; `rulesync` is pinned; third-party GitHub Actions are pinned to full commit SHAs.
+Node and Yarn are pinned; direct dependencies are exact; `yarn.lock` is committed; CI uses `yarn install --immutable --check-cache`; dependency lifecycle scripts are disabled by default; third-party GitHub Actions are pinned to full commit SHAs.
 
 The release workflow uses a single job with `contents: write`. Residual risk: a compromised build dependency could push generated content to `dist` or publish a malicious release. This is mitigated by pinning, immutable installs, disabled lifecycle scripts, CODEOWNERS review, and the small dependency surface.
 
