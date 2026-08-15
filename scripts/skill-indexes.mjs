@@ -6,6 +6,7 @@
 
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import yaml from 'js-yaml';
 import { THEME_FILES } from './dist-layout.mjs';
 import { MODULES } from './generated-references.config.mjs';
 
@@ -115,11 +116,30 @@ function unquote(value) {
   return trimmed;
 }
 
+const YAML_INDICATOR_CHARS = new Set(['-', '?', ':', ',', '[', ']', '{', '}', '#', '&', '*', '!', '|', '>', "'", '"', '%', '@', '`']);
+
+// A plain YAML scalar cannot start with an indicator character or whitespace, end with
+// whitespace, be empty, contain ": " (mapping separator) or " #" (comment start), or end
+// with ":" (mapping key). Anything outside that is quoted so the parsed value round-trips.
+function isSafePlainScalar(value) {
+  if (value === '') return false;
+  if (/\s$/.test(value)) return false;
+  const first = value[0];
+  if (YAML_INDICATOR_CHARS.has(first) || /\s/.test(first)) return false;
+  if (value.includes(': ') || value.includes(' #') || value.endsWith(':')) return false;
+  return true;
+}
+
+function formatFrontmatterValue(value) {
+  const text = String(value);
+  return isSafePlainScalar(text) ? text : JSON.stringify(text);
+}
+
 export function formatFrontmatter(data) {
   const keys = [...SHIP_FRONTMATTER_KEYS].filter((key) => data[key] != null && data[key] !== '');
   if (keys.length === 0) return '';
   const lines = ['---'];
-  for (const key of keys) lines.push(`${key}: ${data[key]}`);
+  for (const key of keys) lines.push(`${key}: ${formatFrontmatterValue(data[key])}`);
   lines.push('---', '');
   return `${lines.join('\n')}`;
 }
@@ -355,4 +375,18 @@ description: Interprets clusters.
   const agentShipped = shipMarkdown(agent, 'agent.md');
   if (!agentShipped.includes('model: haiku')) throw new Error('shipMarkdown dropped model');
   if (agentShipped.includes('index:')) throw new Error('shipMarkdown kept authoring key on agent');
+
+  const colonDescription = 'Cited investigation: gather logs into a summary';
+  const unsafeSkill = `---
+name: sparklogs-ask
+description: ${colonDescription}
+---
+
+# Title
+`;
+  const unsafeShipped = shipMarkdown(unsafeSkill, 'SKILL.md');
+  const parsedFrontmatter = yaml.load(unsafeShipped.slice(4, unsafeShipped.indexOf('\n---\n', 4)));
+  if (parsedFrontmatter.description !== colonDescription) {
+    throw new Error('formatFrontmatter did not round-trip a description containing ": "');
+  }
 }

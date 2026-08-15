@@ -2,6 +2,7 @@
 // See LICENSE.
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import yaml from 'js-yaml';
 import { assertRepoRoot } from './assert-repo-root.mjs';
 import {
   ASSETS_DIR,
@@ -161,6 +162,7 @@ async function validatePackage(host) {
 async function validateShippedMarkdown(host, base) {
   const markerHits = [];
   const authoringHits = [];
+  const yamlHits = [];
   await walk(base, async (file, stat) => {
     if (!stat.isFile() || !file.endsWith('.md')) return;
     const relative = path.relative(base, file).split(path.sep).join('/');
@@ -170,12 +172,31 @@ async function validateShippedMarkdown(host, base) {
     for (const key of Object.keys(data)) {
       if (AUTHORING_FRONTMATTER_KEYS.has(key)) authoringHits.push(`${relative} key ${key}`);
     }
+    if (text.startsWith('---\n')) {
+      const end = text.indexOf('\n---\n', 4);
+      if (end >= 0) {
+        const raw = text.slice(4, end);
+        let parsed;
+        try {
+          parsed = yaml.load(raw);
+        } catch (error) {
+          yamlHits.push(`${host}:${relative}: ${error.message}`);
+          return;
+        }
+        if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
+          yamlHits.push(`${host}:${relative}: frontmatter is not a plain object`);
+        }
+      }
+    }
   });
   if (markerHits.length) {
     throw new Error(`${host} shipped GENERATED markers:\n  ${markerHits.join('\n  ')}`);
   }
   if (authoringHits.length) {
     throw new Error(`${host} shipped authoring frontmatter:\n  ${authoringHits.join('\n  ')}`);
+  }
+  if (yamlHits.length) {
+    throw new Error(`frontmatter fails strict YAML parse:\n  ${yamlHits.join('\n  ')}`);
   }
   for (const skill of ['sparklogs-ask', 'sparklogs-investigate', 'sparklogs-analyze-cause']) {
     const text = await fs.readFile(path.join(base, 'skills', skill, 'SKILL.md'), 'utf8');
