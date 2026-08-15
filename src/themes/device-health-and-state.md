@@ -10,4 +10,4 @@ Until `query_device_state` exists, inventory and snapshot fieldsets on `query_de
 
 **Honesty (supporting).** `agent_complete_through` and collection liveness decide what you may say about a gap. Open monitor ≠ problem (`guides/category-classes.md`). Duration and clear time: `guides/device-state-fields.md` (`episode_age_basis`, `episode_clear_time_basis`).
 
-**Pivots.** Disk filling: monitor reasons on this feed, then logs only if you need a timeline. Backup VSS: writer inventory here is not proof the backup product failed (`playbooks/backup-failure.md` on a full investigation).
+**Pivots.** Disk filling: monitor reasons on this feed, then logs only if you need a timeline. Named backup product: this theme for what is installed; writer-failed is not the job verdict. Full walk: `playbooks/backup-failure.md`.

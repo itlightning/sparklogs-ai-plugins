@@ -38,6 +38,7 @@ Host vs org vs sender (`agent_id`) vs origin (`source`): `guides/scope-resolutio
 ## Which tool
 
 - "What is on the box / CPU / RAM / disk / installed / open condition" → `query_device_health` (`fieldset=rca` for one host).
+- Named backup product (Veeam, Datto, Axcient, Acronis, MSP360, Cove, Slide) → `query_device_health` first (what is installed). Do not search Application `reasons.md` for the vendor. Then counts if you still need a timeline. Offer `/sparklogs-investigate` (ticket-shaped).
 - "What happened / how many / when" → `query_event_counts_by_severity` or `query_scope_activity` first; `query_logs` only for a narrow slice.
 - Collector debug only → `sparklogs.agent.vector` / `sparklogs.agent.log`. Not the headline for device health.
 
@@ -54,6 +55,7 @@ Full tool notes: `guides/mcp-tool-decision-tree.md` only if the pick is unclear.
 | Defender | `themes/endpoint-protection.md` |
 | App / System crashes and services | `themes/windows-operational-events.md` |
 | CPU, RAM, disk, installed software, monitors | `themes/device-health-and-state.md` |
+| Named backup product (Veeam etc.) | `themes/device-health-and-state.md` (installed products). Not operational events. |
 
 **Data feeds** (`subsource` = directory name). Open `feeds/<id>/README.md`, then **one** artifact (`fields.md`, `enums.md`, `reasons.md`). Search `reasons.md` for the `##` heading that matches the reason slug. Do not read the whole file.
 
