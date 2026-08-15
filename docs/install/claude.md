@@ -27,11 +27,13 @@ SparkLogs AI Agent runs in both Claude Code (terminal) and Claude Desktop.
 
    Restart your shell and Claude Code.
 
-4. Try it:
+4. Try it. Ask a question about a monitored host, or:
 
 ```
-   /sparklogs-investigate <scope>
+   /sparklogs-ask <question>
 ```
+
+   Use `/sparklogs-investigate <scope>` only when you want a full cited report.
 
 ## Claude Desktop (future)
 
@@ -46,7 +48,7 @@ SparkLogs AI Agent runs in both Claude Code (terminal) and Claude Desktop.
 4. Find **sparklogs** in the marketplace listing and click **Install**.
 5. Set `SPARKLOGS_API_TOKEN` environment variable and then re-launch
    Claude Desktop.
-6. Start a new conversation and try `/sparklogs-investigate`.
+6. Start a new conversation and ask a question about a monitored host, or try `/sparklogs-ask`.
 
 > Looking for SparkLogs in **Customize → Plugins → Browse plugins**?
 > 

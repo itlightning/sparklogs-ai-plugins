@@ -12,8 +12,9 @@ Do not open a second file at the same elevation unless the first file says to.
 
 | Elevation | File | When |
 |---|---|---|
-| 0 | `skills/sparklogs-investigate/SKILL.md` | Always. Job, trust, output shape, three index tables. |
-| 1a | `playbooks/<slug>.md` | Ticket matches a canned symptom. |
+| 0-ask | `skills/sparklogs-ask/SKILL.md` | Default. Simple question about the data. Scope, call budget, brevity. No template. |
+| 0-investigate | `skills/sparklogs-investigate/SKILL.md` | User asked for a full investigation or accepted the offer. Job, trust, output template, three index tables. |
+| 1a | `playbooks/<slug>.md` | Ticket matches a canned symptom (investigate path). |
 | 1b | `themes/<slug>.md` | Domain (feeds that join) without a canned playbook, or the playbook pointed here. |
 | 2 | `feeds/<id>/<artifact>.md` | After a `subsource` or theme pointer. README, then **one** artifact. |
 | 3 | `guides/<name>.md` | Stuck on LQL, tools, class/severity, mistakes, honesty. |
@@ -22,9 +23,11 @@ Do not open a second file at the same elevation unless the first file says to.
 It points at themes, feeds, and guides.
 It does not duplicate playbooks.
 
-## SKILL.md index tables (always-on)
+Ask SKILL.md may open one theme or one feed artifact. It does not walk playbooks.
 
-1. Symptom to `playbooks/<slug>.md`
+## SKILL.md index tables (always-on on investigate; ask carries theme + feed)
+
+1. Symptom to `playbooks/<slug>.md` (investigate only)
 2. Topic to `themes/<slug>.md`
 3. Feed id (`subsource`) to `feeds/<id>/`
 

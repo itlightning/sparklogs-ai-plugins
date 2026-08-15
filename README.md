@@ -2,9 +2,10 @@
 
 SparkLogs helps managed service providers investigate client issues with evidence instead of guesswork. This repository packages the SparkLogs AI skills, commands, subagents, and MCP configuration for Claude Code and Cowork, Cursor, and Codex.
 
-The plugin gives your AI assistant a SparkLogs investigation workflow:
+The plugin gives your AI assistant a SparkLogs workflow:
 
-- `/sparklogs-investigate` gathers evidence from SparkLogs telemetry and produces a factual system condition summary with citations.
+- Chat with ops data (`sparklogs-ask`): a short answer to a simple question. Default door.
+- `/sparklogs-investigate` gathers evidence and produces a factual system condition summary with citations. Opt-in, not the first step for a quick question.
 - `/sparklogs-analyze-cause` is an explicit second step that turns prior findings into candidate hypotheses with confirm/refute steps.
 - `/sparklogs-summary` re-renders an existing investigation summary for ticket updates or customer communication.
 - `/sparklogs-explain` explains the evidence behind a specific claim or finding.
