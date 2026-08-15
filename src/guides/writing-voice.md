@@ -34,4 +34,4 @@ Style rules for every user-visible report this plugin produces: system condition
 
 ## Where this applies
 
-Every free-text field in `references/output-template.md` for both skills: EXECUTIVE SUMMARY, Finding statements, Notes, hypothesis statements, WHAT IS UNCERTAIN, POSSIBLE NEXT DIRECTIONS / RECOMMENDED NEXT STEPS, and any conversational text around the template. Section headings themselves (WHAT WAS NOT CHECKED, WHAT WAS EXAMINED, WORKING THEORIES, etc.) are fixed template text, not free prose - use them verbatim.
+Every free-text field in each skill's `references/output-template.md`: EXECUTIVE SUMMARY, Finding statements, Notes, hypothesis statements, WHAT IS UNCERTAIN, POSSIBLE NEXT DIRECTIONS / RECOMMENDED NEXT STEPS, and any conversational text around the template. Section headings themselves (WHAT WAS NOT CHECKED, WHAT WAS EXAMINED, WORKING THEORIES, etc.) are fixed template text, not free prose - use them verbatim.

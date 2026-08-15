@@ -151,7 +151,7 @@ decision procedure and worked query recipes.
 Scope a query to this channel with `subsource = "win.eventlog.security"`.
 
 Route to it through `generated-reference-router.md`, which sends you to one artifact under
-`generated/win.eventlog.security/` by the shape of the question you are holding. Start at that
+`feeds/win.eventlog.security/` by the shape of the question you are holding. Start at that
 module's `README.md` if you are not sure which one you want.
 
 Two things this table cannot tell you that the generated set can: which curated surface writes a

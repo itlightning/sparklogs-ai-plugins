@@ -55,7 +55,7 @@ These principles bind every decision you make.
 
 ## Section 3. Output structure
 
-Every analysis produces a structured document in this order. The full template lives in `references/output-template.md`. Write every free-text field per `references/writing-voice.md` (active voice, no em dash, precise hedges, direct hypothesis statements). The minimum:
+Every analysis produces a structured document in this order. The full template lives in `references/output-template.md`. Write every free-text field per `guides/writing-voice.md` (active voice, no em dash, precise hedges, direct hypothesis statements). The minimum:
 
 ```
 ROOT-CAUSE ANALYSIS: <ticket / scope description>
@@ -172,19 +172,19 @@ When you do make additional MCP calls, reuse the prior investigation's `external
 
 - `references/output-template.md` - full output template with field definitions and worked examples.
 - `references/hypothesis-generation.md` - detailed guidance on deriving cause candidates from findings.
-- `references/scope-ladder.md` - same content as the investigate skill's scope-ladder reference (the six grouping fields and their `_hash` companions; useful for fleet-pivot discriminators).
-- `references/scope-resolution.md` - same content as the investigate skill's scope-resolution reference (reused if you make additional MCP calls).
-- `references/lql-reference.md` - same content as the investigate skill's LQL reference.
-- `references/mcp-tool-decision-tree.md` - same content as the investigate skill's MCP tool reference.
-- `references/off-endpoint-causes.md` - same content as the investigate skill's off-endpoint reference.
-- `references/common-mistakes.md` - same content as the investigate skill's common-mistakes catalog, with the speculative-analysis-specific items added.
-- `references/msp-tool-registry.md` - same content as the investigate skill's MSP tool registry.
-- `references/pattern-catalog.md` - same content as the investigate skill's pattern catalog.
-- `references/subagent-definitions.md` - same content as the investigate skill's subagent reference.
-- `references/category-classes.md` - class, the class-last category ladder, and the severity ladder. Read before ranking a hypothesis by anything other than severity.
-- `references/device-state-fields.md` - device and agent state, and the honesty fields that decide whether a duration or a clear time can carry a hypothesis at all.
-- `references/generated-reference-router.md` - how to reach the per-source generated reference set by question shape, when a hypothesis needs a confirm step written against real field names.
-- `references/writing-voice.md` - same content as the investigate skill's writing-voice reference: style rules for report text.
+- `guides/scope-ladder.md` - same content as the investigate skill's scope-ladder reference (the six grouping fields and their `_hash` companions; useful for fleet-pivot discriminators).
+- `guides/scope-resolution.md` - same content as the investigate skill's scope-resolution reference (reused if you make additional MCP calls).
+- `guides/lql-reference.md` - same content as the investigate skill's LQL reference.
+- `guides/mcp-tool-decision-tree.md` - same content as the investigate skill's MCP tool reference.
+- `guides/off-endpoint-causes.md` - same content as the investigate skill's off-endpoint reference.
+- `guides/common-mistakes.md` - same content as the investigate skill's common-mistakes catalog, with the speculative-analysis-specific items added.
+- `guides/msp-tool-registry.md` - same content as the investigate skill's MSP tool registry.
+- `guides/pattern-catalog.md` - same content as the investigate skill's pattern catalog.
+- `guides/subagent-definitions.md` - same content as the investigate skill's subagent reference.
+- `guides/category-classes.md` - class, the class-last category ladder, and the severity ladder. Read before ranking a hypothesis by anything other than severity.
+- `guides/device-state-fields.md` - device and agent state, and the honesty fields that decide whether a duration or a clear time can carry a hypothesis at all.
+- `guides/generated-reference-router.md` - how to reach the per-source generated reference set by question shape, when a hypothesis needs a confirm step written against real field names.
+- `guides/writing-voice.md` - same content as the investigate skill's writing-voice reference: style rules for report text.
 
 ---
 

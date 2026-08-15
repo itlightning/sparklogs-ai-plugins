@@ -1,7 +1,7 @@
 # Generated reference router
 
 Per-source reference content generated from the SparkLogs source library lives under
-`generated/<module>/`, relative to the plugin package root (or the repository root in a source
+`feeds/<module>/`, relative to the plugin package root (or the repository root in a source
 checkout).
 It is regenerated from the pack that shapes the data, so it describes what a source actually
 writes rather than what someone remembered it writing.
@@ -34,7 +34,7 @@ Two shapes deserve their own line because they are the ones people get wrong:
 
 1. Resolve the source. A ticket names a machine and a symptom; a query result names a `subsource`.
    The `subsource` IS the module id, and it works in both directions. Given an event carrying
-   `subsource = win.eventlog.security`, the module is `generated/win.eventlog.security/`. Given a
+   `subsource = win.eventlog.security`, the module is `feeds/win.eventlog.security/`. Given a
    module you want to query, the module id IS the LQL scoping predicate:
 
    ```
@@ -75,12 +75,12 @@ say in your findings that you were reading uncurated text.
 
 ### `win.eventlog.security`
 
-- `generated/win.eventlog.security/README.md`: module index: what each artifact answers and the order to read them in
-- `generated/win.eventlog.security/fields.md`: what exists at rest, which surface writes it, and the raw fallback when nothing does
-- `generated/win.eventlog.security/enums.md`: the closed token vocabularies that are safe to group by
-- `generated/win.eventlog.security/patterns.md`: the decision procedure for whether a rendered pattern is expected, unexpected, or uncurated
-- `generated/win.eventlog.security/recipes.md`: worked pivots, each resolving against the field schema
-- `generated/win.eventlog.security/mapping-ecs.md`: ECS anchors for a query written against another taxonomy
-- `generated/win.eventlog.security/mapping-ocsf.md`: OCSF anchors for a query written against another taxonomy
+- `feeds/win.eventlog.security/README.md`: module index: what each artifact answers and the order to read them in
+- `feeds/win.eventlog.security/fields.md`: what exists at rest, which surface writes it, and the raw fallback when nothing does
+- `feeds/win.eventlog.security/enums.md`: the closed token vocabularies that are safe to group by
+- `feeds/win.eventlog.security/patterns.md`: the decision procedure for whether a rendered pattern is expected, unexpected, or uncurated
+- `feeds/win.eventlog.security/recipes.md`: worked pivots, each resolving against the field schema
+- `feeds/win.eventlog.security/mapping-ecs.md`: ECS anchors for a query written against another taxonomy
+- `feeds/win.eventlog.security/mapping-ocsf.md`: OCSF anchors for a query written against another taxonomy
 
 <!-- END GENERATED INVENTORY -->
