@@ -1,6 +1,6 @@
 ---
 name: sparklogs-analyze-cause
-description: Derives candidate cause hypotheses from the findings of a prior SparkLogs investigation, with explicit confirm/refute steps for each hypothesis. Use only when an engineer deliberately invokes /sparklogs-analyze-cause after a prior investigation summary.
+description: From a prior SparkLogs investigation summary, derive candidate cause hypotheses with confirm/refute steps and confidence. Use when the engineer wants cause analysis after findings exist.
 ---
 
 

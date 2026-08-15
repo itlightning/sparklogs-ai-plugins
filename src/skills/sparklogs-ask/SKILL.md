@@ -1,6 +1,6 @@
 ---
 name: sparklogs-ask
-description: Answers a simple question about SparkLogs ops data with a few MCP calls. Use when an engineer asks a count, whether something is happening, status of a host, disk or CPU or patch state, or otherwise chats with telemetry. Do not run a full investigation unless they ask. Keep answers short and precise.
+description: Query SparkLogs logs and device health/state over time to answer what happened on a host or across a fleet. Counts, timelines, disk, CPU, patches, Defender, Windows events, installed software, collection health. Short precise answer from a few MCP calls.
 ---
 
 # SparkLogs Ask

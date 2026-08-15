@@ -1,6 +1,6 @@
 ---
 name: sparklogs-investigate
-description: Produces a structured cited system condition summary for an MSP ticket or a requested full investigation. Use only when the engineer asks to investigate, troubleshoot a ticket, write a full report, or accepts an offer to run a full investigation. Do not use for a simple question about the data; that is sparklogs-ask.
+description: Cited SparkLogs investigation: gather logs and device health/state into a structured system-condition summary with query URLs, confidence, and what was not checked. Use when the engineer needs a thorough ticket write-up or a full investigation report.
 ---
 
 

@@ -4,7 +4,7 @@
   "marketplace": {
     "name": "sparklogs-ai-plugins"
   },
-  "description": "Chat with SparkLogs ops data, then optionally run a cited full investigation.",
+  "description": "Query and analyze SparkLogs: system and application logs plus device health and state over time, one host or the fleet.",
   "categories": [
     "observability",
     "incident-response",
