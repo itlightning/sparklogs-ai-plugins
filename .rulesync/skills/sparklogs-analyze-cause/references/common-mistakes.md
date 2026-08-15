@@ -1,1 +1,0 @@
-../../../../shared-references/common-mistakes.md

@@ -1,1 +1,0 @@
-../../../../shared-references/msp-tool-registry.md
