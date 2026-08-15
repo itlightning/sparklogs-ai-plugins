@@ -1,6 +1,6 @@
 ---
 name: sparklogs-investigate
-description: Investigates IT issues on SparkLogs-monitored endpoints by gathering evidence and producing a structured factual summary of observed system conditions. Use when an engineer asks to investigate, troubleshoot, or look into any endpoint, server, workstation, client issue, ticket, alert, or what happened question. Produces cited factual findings; cause analysis is offered as a separate opt-in step.
+description: Produces a structured cited system condition summary for an MSP ticket or a requested full investigation. Use only when the engineer asks to investigate, troubleshoot a ticket, write a full report, or accepts an offer to run a full investigation. Do not use for a simple question about the data; that is sparklogs-ask.
 ---
 
 
@@ -65,11 +65,59 @@ These principles bind every decision you make. The principles matter; you don't 
 
 ## Section 3. The two-step investigation pattern
 
-**This skill (default):** System condition summary. Factual, evidence-anchored, with citations and confidence bands. Output template: `references/output-template.md`.
+**This skill (opt-in full investigation):** System condition summary. Factual, evidence-anchored, with citations and confidence bands. Output template: `references/output-template.md`. Not the default for a simple question; that is `sparklogs-ask`.
 
 **Separate /sparklogs-analyze-cause skill (opt-in):** Candidate cause hypotheses derived from this skill's summary, each with confirm/refute steps. The engineer must explicitly invoke `/sparklogs-analyze-cause <external_investigation_id>` to receive cause-analysis output. You do NOT produce cause-analysis output from this skill.
 
 You may include in your output a brief **POSSIBLE NEXT DIRECTIONS** section at the end that suggests what the engineer might want to explore next - either more facts to dig into, or running `/sparklogs-analyze-cause` to derive candidate hypotheses from the findings. This invitation is bounded (1-4 sentences); it does not constitute cause analysis.
+
+---
+
+## Section 3b. Where to look next (one file)
+
+Load **one** playbook or **one** theme, then at most one feed artifact. Do not open every playbook.
+
+### Symptom → playbook
+
+| Symptom | File |
+|---|---|
+| Backup job failed | `playbooks/backup-failure.md` |
+| Slow logon | `playbooks/slow-logon.md` |
+| Memory or handle leak | `playbooks/memory-or-handle-leak.md` |
+| Windows Update / patch failure | `playbooks/windows-update-failure.md` |
+| Disk full or filling | `playbooks/disk-full-or-filling.md` |
+| BitLocker recovery | `playbooks/bitlocker-recovery.md` |
+| RAID / array degraded | `playbooks/raid-or-storage-degraded.md` |
+| Directory replication | `playbooks/directory-replication-failure.md` |
+| Certificate expiry | `playbooks/certificate-expiry.md` |
+| RMM connectivity | `playbooks/rmm-connectivity.md` |
+
+### Topic → theme
+
+| Topic | File |
+|---|---|
+| Patches / CBS / DISM / Setup | `themes/windows-updates-and-patching.md` |
+| Who changed what (Security) | `themes/windows-security-and-audit.md` |
+| Defender | `themes/endpoint-protection.md` |
+| App / System crashes and services | `themes/windows-operational-events.md` |
+| CPU, RAM, disk, installed software, monitors | `themes/device-health-and-state.md` |
+
+### Feed id → lookup
+
+`subsource` is the directory name. Open `feeds/<id>/README.md`, then **one** of fields / enums / reasons (Security also recipes / patterns / mappings). Search `reasons.md` for the `##` heading that matches the reason slug; do not read the whole file.
+
+| Feed | Path |
+|---|---|
+| `win.eventlog.security` | `feeds/win.eventlog.security/` |
+| `win.eventlog.system` | `feeds/win.eventlog.system/` |
+| `win.eventlog.application` | `feeds/win.eventlog.application/` |
+| `win.eventlog.setup` | `feeds/win.eventlog.setup/` |
+| `win.servicing.cbs` | `feeds/win.servicing.cbs/` |
+| `win.servicing.dism` | `feeds/win.servicing.dism/` |
+| `win.defender.eventlog` | `feeds/win.defender.eventlog/` |
+| `sparklogs.agent.state` | `feeds/sparklogs.agent.state/` |
+| `sparklogs.agent.vector` | `feeds/sparklogs.agent.vector/` |
+| `sparklogs.agent.log` | `feeds/sparklogs.agent.log/` |
 
 ---
 
@@ -538,13 +586,14 @@ When the situation calls for it, read the appropriate reference file. Don't try 
 - `guides/scope-ladder.md` - the six grouping fields and their `_hash` companions (incl. `source`/`source_hash`), availability, `query_scope_activity` vs `query_event_counts_by_severity`, and RCA usage shapes.
 - `guides/category-classes.md` - what NOTABLE / ELEVATED / RECOVERED mean in `category` (temporal shape, not importance), **open monitor ≠ problem**, the lifecycle pair convention, how "interesting" counts fold them in, and the critical+ fetch-first contract.
 - `guides/service-taxonomy.md` - the controlled `service` ticket-class vocabulary (cross-vendor pivot values), the audit-adjacent demarcation list (why `security_audit` is not the whole audit surface), and boundary rules.
-- `guides/windows-eventlog-reasons.md` - per-module reason rows for the Windows Event Log classic channels (Setup / System / Application): reason meanings, services, severity posture, cross-witness reason pairs, and the change-analysis recipe.
+- `playbooks/backup-failure.md` (and siblings in the Section 3b table) - one symptom walk. Do not load all playbooks.
+- `themes/windows-security-and-audit.md` - change analysis; other themes in Section 3b.
+- `feeds/<id>/` - generated lookup (fields, enums, reasons). Router: Section 3b feed table.
 - `guides/device-state-fields.md` - device and agent state: the `query_device_health` surface, the column names, and the honesty fields that decide what you may say about a duration or a clear time.
 - `guides/generated-reference-router.md` - how to reach the per-source generated reference set (fields, vocabularies, patterns, recipes) by question shape.
 - `guides/scope-resolution.md` - detailed scope-resolution and source-discovery sequence.
 - `guides/lql-reference.md` - complete LQL syntax reference with examples and common mistakes.
 - `guides/mcp-tool-decision-tree.md` - per-tool detailed usage, all parameters, decision tree for which tool to use when.
-- `playbooks/playbooks.md` - investigation playbooks for common symptom categories (full walks for VSS backup failure, memory/handle leak, RMM connectivity; sketches for the rest).
 - `guides/off-endpoint-causes.md` - per-investigation-type lists of what's not checked and why.
 - `guides/common-mistakes.md` - anti-pattern catalog with examples and recoveries.
 - `guides/msp-tool-registry.md` - common MSP tools with category/log-location/source-field mappings.
@@ -558,7 +607,8 @@ When the situation calls for it, read the appropriate reference file. Don't try 
 
 The plugin exposes these slash commands; you may be invoked by any of them:
 
-- `/sparklogs-investigate <ticket / scope description>` - Standard entry point. You produce a system condition summary.
+- `/sparklogs-ask <question>` - Default chat with ops data. Not this skill.
+- `/sparklogs-investigate <ticket / scope description>` - This skill. System condition summary.
 - `/sparklogs-summary <external_investigation_id>` - Re-render the system condition summary for an existing investigation, incorporating everything found so far.
 - `/sparklogs-explain <claim or finding>` - Engineer asks you to explain your reasoning for a specific claim. Walk through what evidence supports it (cited `query_url`s) and what would refute it. Honest about limits.
 - `/sparklogs-analyze-cause <external_investigation_id>` - **NOT YOU.** This invokes the separate cause-analysis skill.

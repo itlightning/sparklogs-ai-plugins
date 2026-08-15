@@ -2,19 +2,17 @@
 
 ## Where this fits
 
-Your primary questions are a client's issue and a client's fleet: "this ticket says backups fail on
-this machine", "which endpoints across this client are showing this", "did anything change here
-before it broke". Those run through scope resolution, grouped aggregation, and a drill into raw
-events.
+**Chat / device questions** (`sparklogs-ask`): this is the **headline**. CPU, RAM, disk, installed
+software, open monitors, "what is on this box" start at `query_device_health`. Collector feeds
+(`sparklogs.agent.vector`, `sparklogs.agent.log`) are not that answer.
 
-Device and agent health is a SUPPORTING check, not the headline. Its job is one question, asked at
-the point where you are about to conclude something from an absence:
+**Full investigation** (`sparklogs-investigate`): for a log or ticket walk, device health is usually
+**supporting honesty**: was the agent observing during the window? Do not open that walk with a
+device-health sweep unless the ticket is about the box itself (disk filling, installed software, a
+standing monitor).
 
-> Was the agent observing this device during the window I am reasoning about?
-
-Ask it before writing "nothing was found" or "the problem started at". Do not open an investigation
-with a device-health sweep, and do not report device health as the finding unless the ticket was
-about the agent.
+Other ticket shapes (backup failed, who changed what) still run through scope, aggregation, and
+events. Ask device health before writing "nothing was found" or "the problem started at".
 
 ## `query_device_health`
 

@@ -184,6 +184,7 @@ When you do make additional MCP calls, reuse the prior investigation's `external
 - `guides/category-classes.md` - class, the class-last category ladder, and the severity ladder. Read before ranking a hypothesis by anything other than severity.
 - `guides/device-state-fields.md` - device and agent state, and the honesty fields that decide whether a duration or a clear time can carry a hypothesis at all.
 - `guides/generated-reference-router.md` - how to reach the per-source generated reference set by question shape, when a hypothesis needs a confirm step written against real field names.
+- `themes/` and `feeds/` - confirm-step field names and change-analysis. Index tables in `skills/sparklogs-investigate/SKILL.md` Section 3b. Open one file. Do not load playbooks.
 - `guides/writing-voice.md` - same content as the investigate skill's writing-voice reference: style rules for report text.
 
 ---
@@ -193,6 +194,7 @@ When you do make additional MCP calls, reuse the prior investigation's `external
 The plugin exposes:
 
 - `/sparklogs-analyze-cause <external_investigation_id>` - Standard entry point. You produce candidate cause hypotheses.
+- `/sparklogs-ask <question>` - **NOT YOU.** Default chat with ops data. No hypotheses.
 - `/sparklogs-investigate <ticket / scope description>` - **NOT YOU.** This invokes the investigation skill that produces the system condition summary you analyze.
 - `/sparklogs-summary <external_investigation_id>` - **NOT YOU.** This re-displays the prior investigation summary.
 - `/sparklogs-explain <claim or finding>` - **NOT YOU.** Engineer asks the investigation skill to explain a specific Finding.

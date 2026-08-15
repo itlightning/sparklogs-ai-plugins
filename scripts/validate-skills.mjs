@@ -4,6 +4,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { assertRepoRoot } from './assert-repo-root.mjs';
 import { ASSETS_DIR, METADATA_FILE } from './dist-layout.mjs';
+import { MODULES } from './generated-references.config.mjs';
 
 assertRepoRoot(import.meta);
 
@@ -24,7 +25,6 @@ const SHARED_REFERENCES = [
   'scope-resolution.md',
   'service-taxonomy.md',
   'subagent-definitions.md',
-  'windows-eventlog-reasons.md',
   'writing-voice.md',
 ];
 const SKILL_LOCAL_REFERENCES = new Set(['output-template.md', 'hypothesis-generation.md']);
@@ -163,6 +163,30 @@ async function validateServiceTaxonomy() {
   }
 }
 
+async function validateSkillIndexes() {
+  const themesDir = path.join(ROOT, 'src', 'themes');
+  const themeFiles = (await fs.readdir(themesDir))
+    .filter((name) => name.endsWith('.md'))
+    .sort();
+  const skills = ['sparklogs-ask', 'sparklogs-investigate'];
+  for (const skill of skills) {
+    const file = path.join(ROOT, 'src', 'skills', skill, 'SKILL.md');
+    const text = await fs.readFile(file, 'utf8');
+    for (const module of MODULES) {
+      const needle = `feeds/${module}/`;
+      if (!text.includes(needle)) {
+        throw new Error(`${skill} SKILL.md must cite ${needle}`);
+      }
+    }
+    for (const theme of themeFiles) {
+      const needle = `themes/${theme}`;
+      if (!text.includes(needle)) {
+        throw new Error(`${skill} SKILL.md must cite ${needle}`);
+      }
+    }
+  }
+}
+
 async function validateAssets() {
   for (const asset of REQUIRED_ASSETS) {
     if (!await exists(path.join(ROOT, ASSETS_DIR, asset))) {
@@ -179,6 +203,7 @@ await validateSkills();
 await validatePackage();
 await validateGuides();
 await validateServiceTaxonomy();
+await validateSkillIndexes();
 await validateAssets();
 await validateMetadata();
 console.log('Source validation passed');

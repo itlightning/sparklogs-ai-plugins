@@ -4,7 +4,7 @@
   "marketplace": {
     "name": "sparklogs-ai-plugins"
   },
-  "description": "Investigate IT and MSP client issues with SparkLogs telemetry, evidence-cited summaries, and root-cause analysis.",
+  "description": "Chat with SparkLogs ops data, then optionally run a cited full investigation.",
   "categories": [
     "observability",
     "incident-response",

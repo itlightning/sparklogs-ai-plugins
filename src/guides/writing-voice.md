@@ -1,6 +1,6 @@
 # Writing Voice
 
-Style rules for every user-visible report this plugin produces: system condition summaries (`/sparklogs-investigate`) and cause analyses (`/sparklogs-analyze-cause`). Consistency here is what makes SparkLogs output read as engineered, not generated.
+Style rules for every user-visible SparkLogs answer: chat (`/sparklogs-ask`), system condition summaries (`/sparklogs-investigate`), and cause analyses (`/sparklogs-analyze-cause`). Consistency here is what makes SparkLogs output read as engineered, not generated.
 
 ---
 
@@ -13,7 +13,8 @@ Style rules for every user-visible report this plugin produces: system condition
 - **State findings and hypotheses directly.** "Disk signature collision on Harddisk2," not "it is possible there may be a disk issue." Hedge the Confidence field, not the sentence.
 - **Precise hedges.** Use "not proven," "not checked," "low confidence," or "insufficient evidence" - not vague filler like "may be," "could potentially," or "it's possible that."
 - **No stock assistant openers, filler transitions, or buzzwords.** Skip "I'd be happy to," "Let's dive in," "Additionally," "It's worth noting," "leverage," "robust," "seamless."
-- **The template is the deliverable.** Any chat before or after the rendered template should be at most one sentence.
+- **Ask skill: answer first, then stop.** No template. No session recap. No "three things to remember."
+- **Investigate / analyze-cause: the template is the deliverable.** Any chat before or after the rendered template should be at most one sentence.
 
 ---
 
@@ -34,4 +35,6 @@ Style rules for every user-visible report this plugin produces: system condition
 
 ## Where this applies
 
-Every free-text field in each skill's `references/output-template.md`: EXECUTIVE SUMMARY, Finding statements, Notes, hypothesis statements, WHAT IS UNCERTAIN, POSSIBLE NEXT DIRECTIONS / RECOMMENDED NEXT STEPS, and any conversational text around the template. Section headings themselves (WHAT WAS NOT CHECKED, WHAT WAS EXAMINED, WORKING THEORIES, etc.) are fixed template text, not free prose - use them verbatim.
+Chat answers (`sparklogs-ask`): the whole reply is free text under these rules.
+
+Investigate and analyze-cause: every free-text field in each skill's `references/output-template.md` (EXECUTIVE SUMMARY, Finding statements, Notes, hypothesis statements, WHAT IS UNCERTAIN, POSSIBLE NEXT DIRECTIONS / RECOMMENDED NEXT STEPS, and any conversational text around the template). Section headings themselves (WHAT WAS NOT CHECKED, WHAT WAS EXAMINED, WORKING THEORIES, etc.) are fixed template text, not free prose: use them verbatim.
