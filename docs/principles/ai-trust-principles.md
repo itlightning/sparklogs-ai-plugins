@@ -25,7 +25,7 @@ Every investigation names the data sources and time ranges checked, plus relevan
 <a id="Trust-HumanInTheLoop"></a>
 ## 5. Keep Humans In The Loop
 
-The plugin is read-only. Consequential actions such as restarts, patches, configuration changes, and ticket closure belong to the engineer.
+The engineer remains the decision-maker. Suggesting causes and next steps is expected.
 
 <a id="Trust-MSPCustomization"></a>
 ## 6. Support MSP Customization

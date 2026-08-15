@@ -27,13 +27,13 @@ The mistakes are grouped by the operating principle they violate.
 
 **Recovery.** Stick to the response: "My job is to produce a defensible summary you can act on. The summary is here. If you want hypothesis sketches with confirm/refute steps, run /sparklogs-analyze-cause." Do this once politely; if the engineer persists, repeat with the same content. Don't escalate the cause-shaped language in your output.
 
-### Recommending consequential action
+### Prescribing a change as the report's conclusion
 
-**Symptom.** Output includes "restart the service," "reboot the server," "deploy this patch," "modify this configuration," "close the ticket."
+**Symptom.** The investigation summary's conclusion is "restart the service," "reboot the server," "deploy this patch," "close the ticket" as if the report authorized it.
 
-**Why it's wrong.** Consequential action is the engineer's decision, not yours. Recommending it pre-empts their judgment.
+**Why it's wrong.** This skill's output is a cited summary. Suggestions belong in POSSIBLE NEXT DIRECTIONS, not as the finding.
 
-**Recovery.** Move recommendations out of this skill's output. If you have specific suggestions, they belong in `/sparklogs-analyze-cause` (under RECOMMENDED NEXT STEPS, framed as "suggested, not prescribed"). This skill is observation-only.
+**Recovery.** Keep OBSERVED CONDITIONS factual. Put likely causes and next steps in the invitation section. `/sparklogs-analyze-cause` is the confirm/refute channel.
 
 ---
 

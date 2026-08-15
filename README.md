@@ -10,8 +10,6 @@ The plugin gives your AI assistant a SparkLogs workflow:
 - `/sparklogs-summary` re-renders an existing investigation summary for ticket updates or customer communication.
 - `/sparklogs-explain` explains the evidence behind a specific claim or finding.
 
-The plugin is read-only. It queries SparkLogs through your configured SparkLogs MCP endpoint and does not remediate, change customer systems, or make final operational decisions.
-
 ## Why MSPs Should Care
 
 Expected outcomes:
