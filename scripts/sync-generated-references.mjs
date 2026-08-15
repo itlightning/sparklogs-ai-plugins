@@ -32,6 +32,7 @@ import {
   LIBRARY_GENERATED_SUBPATH,
   MANIFEST_FILE,
   MODULES,
+  OPTIONAL_ARTIFACTS,
   PUBLIC_ARTIFACTS,
   ROUTER_BEGIN,
   ROUTER_END,
@@ -75,19 +76,21 @@ async function readModule(libDir, module) {
   const src = path.join(libDir, LIBRARY_GENERATED_SUBPATH, module);
   if (!await exists(src)) throw new Error(`Source library has no generated artifacts for module ${module}: ${src}`);
   const present = (await fs.readdir(src)).filter((name) => name.endsWith('.md')).sort();
-  const known = new Set([...PUBLIC_ARTIFACTS, ...INTERNAL_ARTIFACTS]);
+  const known = new Set([...PUBLIC_ARTIFACTS, ...OPTIONAL_ARTIFACTS, ...INTERNAL_ARTIFACTS]);
   const unknown = present.filter((name) => !known.has(name));
   if (unknown.length > 0) {
     throw new Error(
       `Source library produced artifacts this repo has not ruled on for ${module}: ${unknown.join(', ')}. `
-      + 'Add each to PUBLIC_ARTIFACTS or INTERNAL_ARTIFACTS in scripts/generated-references.config.mjs.',
+      + 'Add each to PUBLIC_ARTIFACTS, OPTIONAL_ARTIFACTS, or INTERNAL_ARTIFACTS in scripts/generated-references.config.mjs.',
     );
   }
   const missing = PUBLIC_ARTIFACTS.filter((name) => !present.includes(name));
   if (missing.length > 0) throw new Error(`Source library is missing expected artifacts for ${module}: ${missing.join(', ')}`);
   const files = new Map();
-  for (const name of PUBLIC_ARTIFACTS) {
-    files.set(name, await fs.readFile(path.join(src, name), 'utf8'));
+  for (const name of [...PUBLIC_ARTIFACTS, ...OPTIONAL_ARTIFACTS]) {
+    if (present.includes(name)) {
+      files.set(name, await fs.readFile(path.join(src, name), 'utf8'));
+    }
   }
   return files;
 }
