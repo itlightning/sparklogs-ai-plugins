@@ -4,6 +4,6 @@ SparkLogs is the query and analysis layer for what happened on a system and what
 
 **Default: `sparklogs-ask`.** The user wants to understand an event, a count, a timeline, or device health/state (disk, CPU, patches, Defender, Windows events, installed software, collection). Attach `sparklogs-ask`. Chat may go deep.
 
-**Full investigation (`sparklogs-investigate`).** The user needs a thorough cited system-condition summary for a ticket or a written investigation report. Then use `/sparklogs-investigate`.
+**On request: `/sparklogs-investigate`.** The user needs a thorough cited system-condition summary for a ticket or a written investigation report.
 
-Use `/sparklogs-analyze-cause` when they want candidate cause hypotheses after a factual summary exists. Use `/sparklogs-summary` to refresh an existing report and `/sparklogs-explain` to walk a specific finding back to evidence.
+`/sparklogs-analyze-cause` gives candidate cause hypotheses, only after a factual summary exists. `/sparklogs-summary` refreshes an existing report; `/sparklogs-explain` walks a specific finding back to its evidence.

@@ -14,26 +14,23 @@ No output template. No WHAT WAS NOT CHECKED catalog. You may go as deep as the q
 
 ## How to answer
 
-- Answer first. Then stop talking, not mid-query.
-- Precise hedges: "not in this window", "not checked", "insufficient evidence".
-- Active voice. No em dash.
+Answer first, then stop talking, never mid-query. Hedge precisely: "not in this window", "not checked", "insufficient evidence". Suggest likely causes and practical next steps when the evidence supports them.
+
 - Empty is not healthy. A field this feed does not write is not "no problem".
-- Do not treat VSS writer-failed as proof the backup product failed.
 - Completeness claims need `agent_complete_through` / feed reports, never first/last event bounds.
 - Cite a `query_url` on factual claims.
-- Suggest likely causes and practical next steps when the evidence supports them.
-- If org/host/window is not obvious, `resolve_scope`. If several matches, ask. Do not guess.
+- If org/host/window is not obvious, `resolve_scope`. On several matches, ask. Do not guess.
 - Prefer `query_device_health` or counts over `query_logs`. Prefer `refine_query_result` on a cached slice over a new scan.
 - Every data-access call needs `external_investigation_id`. Reuse one id for this question.
 
 ## Which tool
 
 - "What is on the box / CPU / RAM / disk / installed / open condition" → `query_device_health` (`fieldset=rca` for one host).
-- Named backup product (Veeam, Datto, Axcient, Acronis, MSP360, Cove, Slide) → `query_device_health` first (what is installed). Do not search Application `reasons.md` for the vendor. Then counts if you still need a timeline.
+- Named backup product (Veeam, Datto, Axcient, Acronis, MSP360, Cove, Slide) → `query_device_health` first for what is installed, then counts for a timeline. The vendor's own channel carries the job verdict; a failed VSS writer is a symptom, not that verdict. Do not hunt the vendor in Application `reasons.md`.
 - "What happened / how many / when" → `query_event_counts_by_severity` or `query_scope_activity` first; `query_logs` only for a narrow slice.
 - Collector debug only → `sparklogs.agent.vector` / `sparklogs.agent.log`. Not the headline for device health.
 
-Load a guide when you are stuck on that topic (`guides/scope-resolution.md`, `guides/mcp-tool-decision-tree.md`, LQL, honesty). Do not dump the folder.
+Load a guide when you are stuck on that topic (`guides/scope-resolution.md`, `guides/mcp-tool-decision-tree.md`, `guides/lql-reference.md`, `guides/common-mistakes.md`). Do not dump the folder.
 
 ## Where to look
 
@@ -88,6 +85,6 @@ You may open the matching playbook as a query recipe. Do not emit the investigat
 
 ## Written investigation
 
-Offer `/sparklogs-investigate` when they want a cited ticket write-up or a full investigation report. Name the matching playbook in that offer when the table fits.
+Name the matching playbook when you offer `/sparklogs-investigate` and the table fits.
 
 Cause hypotheses: `/sparklogs-analyze-cause` only after an investigation summary exists.
