@@ -14,14 +14,13 @@
     "build:generic": "node scripts/render-packages.mjs --out build/dist --host generic",
     "sync-generated": "node scripts/sync-generated-references.mjs",
     "validate:generated": "node scripts/lint-generated-references.mjs && node scripts/sync-generated-references.mjs --check",
-    "validate": "node scripts/validate-skills.mjs && yarn run validate:generated && yarn run build && node scripts/validate-rendered.mjs build/dist && node scripts/render-packages.mjs --out build/repro-a && node scripts/render-packages.mjs --out build/repro-b && diff -qr build/repro-a build/repro-b",
+    "validate": "node scripts/lint-src-layout.mjs && node scripts/validate-skills.mjs && yarn run validate:generated && yarn run build && node scripts/validate-rendered.mjs build/dist && node scripts/render-packages.mjs --out build/repro-a && node scripts/render-packages.mjs --out build/repro-b && diff -qr build/repro-a build/repro-b",
     "validate:rendered": "node scripts/validate-rendered.mjs build/dist",
     "validate:cursor": "node scripts/validate-cursor-plugin.mjs build/dist",
     "smoke": "node scripts/smoke-test-packages.mjs build/dist",
     "clean": "node scripts/clean.mjs",
     "fullrebuild": "yarn run clean && yarn run validate && yarn run build && yarn run validate:rendered && yarn run validate:cursor && yarn run smoke",
-    "compare-dist": "node scripts/compare-dist-branch.mjs",
-    "rulesync": "yarn dlx rulesync"
+    "compare-dist": "node scripts/compare-dist-branch.mjs"
   },
   "resolutions": {
     "ip-address": "10.1.1",

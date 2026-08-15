@@ -3,21 +3,27 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { assertRepoRoot } from './assert-repo-root.mjs';
+import {
+  ASSETS_DIR,
+  BRAND_ASSETS,
+  HOSTS,
+  MAX_DIST_BYTES,
+  MAX_PACKAGE_BYTES,
+  METADATA_FILE,
+  classifyPackageRel,
+  forbiddenDistNames,
+  oversize,
+  unexpectedDistPaths,
+} from './dist-layout.mjs';
 
 assertRepoRoot(import.meta);
 
 const ROOT = process.cwd();
 const DIST = path.resolve(ROOT, process.argv[2] ?? 'build/dist');
 const LICENSE = await fs.readFile(path.join(ROOT, 'LICENSE'));
-const BRAND_ASSETS = ['logo.svg', 'logo.png', 'icon.svg', 'icon-256.png', 'icon-512.png'];
-const HOSTS = ['claude', 'cursor', 'codex', 'generic'];
 const ALLOWED_EXTS = new Set(['.md', '.json', '.svg', '.png']);
 const ALLOWED_NAMES = new Set(['README.md', 'LICENSE', '.mcp.json', 'mcp.json']);
-// Build inputs that must never appear inside a shipped package. This is a FILE-INVENTORY
-// assertion, deliberately separate from the content checks: the manifest leaked into four packages
-// while every content lens passed, because none of them looked at what files were present.
 const MAINTAINER_ONLY = ['SYNC-MANIFEST.json'];
-
 const ALLOWED_MCP_HOSTS = new Set(['mcp.sparklogs.app', 'us.mcp.sparklogs.app', 'eu.mcp.sparklogs.app']);
 const SEMVER = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/;
 
@@ -44,8 +50,16 @@ async function walk(dir, callback) {
   }
 }
 
+async function collectRelFiles(dir) {
+  const files = [];
+  await walk(dir, async (file, stat) => {
+    if (stat.isFile()) files.push(path.relative(dir, file).split(path.sep).join('/'));
+  });
+  return files;
+}
+
 async function validateMarketplace() {
-  const meta = await readJson(path.join(ROOT, 'metadata', 'plugin.json'));
+  const meta = await readJson(path.join(ROOT, METADATA_FILE));
 
   const claude = await readJson(path.join(DIST, '.claude-plugin', 'marketplace.json'));
   if (claude.$schema !== 'https://anthropic.com/claude-code/marketplace.schema.json') {
@@ -73,35 +87,65 @@ async function validateMarketplace() {
   if ('version' in codex.plugins[0]) throw new Error('Codex marketplace entry must not duplicate plugin version');
 }
 
+async function validateDistTree() {
+  const files = await collectRelFiles(DIST);
+  const unexpected = unexpectedDistPaths(files);
+  if (unexpected.length > 0) {
+    throw new Error(`dist contains paths outside the IN-list:\n  ${unexpected.join('\n  ')}`);
+  }
+  const forbidden = forbiddenDistNames(files);
+  if (forbidden.length > 0) {
+    throw new Error(`dist contains maintainer files:\n  ${forbidden.join('\n  ')}`);
+  }
+  let total = 0;
+  for (const rel of files) {
+    total += (await fs.stat(path.join(DIST, rel))).size;
+  }
+  if (oversize(total, MAX_DIST_BYTES)) {
+    throw new Error(`dist is ${total} bytes (cap ${MAX_DIST_BYTES})`);
+  }
+}
+
 async function validatePackage(host) {
   const base = path.join(DIST, 'plugins', host, 'sparklogs');
   if (!await exists(base)) throw new Error(`Missing package ${base}`);
+  let packageBytes = 0;
   await walk(base, async (file, stat) => {
-    const relative = path.relative(base, file);
+    const relative = path.relative(base, file).split(path.sep).join('/');
     if (stat.isSymbolicLink()) throw new Error(`Rendered package contains symlink: ${relative}`);
     if (stat.isFile() && (stat.mode & 0o111)) throw new Error(`Rendered package contains executable file: ${relative}`);
     if (stat.isFile()) {
+      packageBytes += stat.size;
       const ext = path.extname(file);
       const name = path.basename(file);
       if (MAINTAINER_ONLY.includes(name)) {
-        throw new Error(`${host} package ships a maintainer-only build input: ${relative}. It records where content came from, which no reader of the package can act on.`);
+        throw new Error(`${host} package ships a maintainer-only build input: ${relative}`);
       }
+      const classified = classifyPackageRel(relative);
+      if (!classified.ok) throw new Error(`${host}: ${classified.reason}`);
       if (!ALLOWED_NAMES.has(name) && !ALLOWED_EXTS.has(ext)) throw new Error(`Unexpected rendered file type: ${relative}`);
     }
   });
+  if (oversize(packageBytes, MAX_PACKAGE_BYTES)) {
+    throw new Error(`${host} package is ${packageBytes} bytes (cap ${MAX_PACKAGE_BYTES})`);
+  }
   const license = await fs.readFile(path.join(base, 'LICENSE'));
   if (!license.equals(LICENSE)) throw new Error(`${host} LICENSE differs from repo root LICENSE`);
   for (const asset of BRAND_ASSETS) {
-    if (!await exists(path.join(ROOT, 'assets', asset))) throw new Error(`Missing source asset assets/${asset}`);
+    if (!await exists(path.join(ROOT, ASSETS_DIR, asset))) throw new Error(`Missing source asset ${ASSETS_DIR}/${asset}`);
     if (!await exists(path.join(base, 'assets', asset))) throw new Error(`${host} missing rendered asset ${asset}`);
+  }
+  if (!await exists(path.join(base, 'feeds', 'win.eventlog.security', 'README.md'))) {
+    throw new Error(`${host} missing feeds/win.eventlog.security/README.md`);
+  }
+  if (await exists(path.join(base, 'generated'))) {
+    throw new Error(`${host} still ships generated/; use feeds/`);
   }
   const mcpFile = host === 'cursor' || host === 'generic' ? 'mcp.json' : '.mcp.json';
   const mcp = await readJson(path.join(base, mcpFile));
   const url = new URL(mcp.mcpServers.sparklogs.url);
   if (url.protocol !== 'https:') throw new Error(`${host} MCP URL must be HTTPS`);
   if (!ALLOWED_MCP_HOSTS.has(url.hostname)) throw new Error(`${host} MCP host is not allowlisted: ${url.hostname}`);
-  // The architecture REQUIRES the /mcp path: mcpproxy forwards the path as-is to query-api,
-  // which serves MCP only at /mcp. A bare host connects and then 404s on every call.
   if (url.pathname !== '/mcp') throw new Error(`${host} MCP URL must end in /mcp, got path ${url.pathname || '(none)'}`);
   if (host !== 'generic') {
     const manifestFile = host === 'claude' ? '.claude-plugin/plugin.json' : host === 'cursor' ? '.cursor-plugin/plugin.json' : '.codex-plugin/plugin.json';
@@ -113,5 +157,6 @@ async function validatePackage(host) {
 
 if (!await exists(DIST)) throw new Error(`Rendered directory does not exist: ${DIST}`);
 await validateMarketplace();
+await validateDistTree();
 for (const host of HOSTS) await validatePackage(host);
 console.log('Rendered validation passed');

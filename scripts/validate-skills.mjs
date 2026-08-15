@@ -3,6 +3,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { assertRepoRoot } from './assert-repo-root.mjs';
+import { ASSETS_DIR, METADATA_FILE } from './dist-layout.mjs';
 
 assertRepoRoot(import.meta);
 
@@ -26,11 +27,12 @@ const SHARED_REFERENCES = [
   'windows-eventlog-reasons.md',
   'writing-voice.md',
 ];
+const SKILL_LOCAL_REFERENCES = new Set(['output-template.md', 'hypothesis-generation.md']);
 
 // Pinned snapshot of `service_vocabulary` from the SparkLogs source-library registry
 // (registry.yaml). The registry is the authority and is additive-only; this list is the
 // sync point for a standalone checkout of this repo. Adding a registry value requires
-// adding it here AND as a row in shared-references/service-taxonomy.md in the same change;
+// adding it here AND as a row in src/guides/service-taxonomy.md in the same change;
 // validateServiceTaxonomy() fails until both agree.
 const REGISTRY_SERVICE_VALUES = [
   'storage',
@@ -88,7 +90,7 @@ function parseFrontmatter(text, file) {
 }
 
 async function validateSkills() {
-  const dir = path.join(ROOT, '.rulesync', 'skills');
+  const dir = path.join(ROOT, 'src', 'skills');
   const entries = await fs.readdir(dir, { withFileTypes: true });
   for (const entry of entries) {
     if (!entry.isDirectory()) continue;
@@ -111,31 +113,36 @@ async function validatePackage() {
   for (const snippet of ['nodeLinker: node-modules', 'yarnPath: .yarn/releases/yarn-4.10.3.cjs', 'enableScripts: false']) {
     if (!yarnrc.includes(snippet)) throw new Error(`.yarnrc.yml missing ${snippet}`);
   }
+  if (pkg.scripts?.rulesync) throw new Error('package.json must not keep a rulesync script');
 }
 
-async function validateReferences() {
-  const dir = path.join(ROOT, '.rulesync', 'skills');
+async function validateGuides() {
+  for (const reference of SHARED_REFERENCES) {
+    const file = path.join(ROOT, 'src', 'guides', reference);
+    if (!await exists(file)) throw new Error(`Missing guide: src/guides/${reference}`);
+    const stat = await fs.lstat(file);
+    if (stat.isSymbolicLink()) throw new Error(`src/guides/${reference} must be a real file, not a symlink`);
+  }
+  const dir = path.join(ROOT, 'src', 'skills');
   const skills = await fs.readdir(dir, { withFileTypes: true });
   for (const skill of skills) {
     if (!skill.isDirectory()) continue;
     const referencesDir = path.join(dir, skill.name, 'references');
-    for (const reference of SHARED_REFERENCES) {
-      const link = path.join(referencesDir, reference);
-      const stat = await fs.lstat(link);
-      if (!stat.isSymbolicLink()) {
-        throw new Error(`${path.relative(ROOT, link)} must be a symlink to shared-references/${reference}`);
+    if (!await exists(referencesDir)) continue;
+    const names = await fs.readdir(referencesDir);
+    for (const name of names) {
+      if (SHARED_REFERENCES.includes(name)) {
+        throw new Error(`${path.relative(ROOT, path.join(referencesDir, name))} duplicates a guide; cite guides/${name}`);
       }
-      const target = await fs.realpath(link);
-      const expected = await fs.realpath(path.join(ROOT, 'shared-references', reference));
-      if (target !== expected) {
-        throw new Error(`${path.relative(ROOT, link)} points to ${target}, expected ${expected}`);
+      if (!SKILL_LOCAL_REFERENCES.has(name)) {
+        throw new Error(`${path.relative(ROOT, path.join(referencesDir, name))} is not a skill-local reference`);
       }
     }
   }
 }
 
 async function validateServiceTaxonomy() {
-  const file = path.join(ROOT, 'shared-references', 'service-taxonomy.md');
+  const file = path.join(ROOT, 'src', 'guides', 'service-taxonomy.md');
   const text = await fs.readFile(file, 'utf8');
   const rows = new Set();
   for (const line of text.split('\n')) {
@@ -158,13 +165,20 @@ async function validateServiceTaxonomy() {
 
 async function validateAssets() {
   for (const asset of REQUIRED_ASSETS) {
-    if (!await exists(path.join(ROOT, 'assets', asset))) throw new Error(`Missing required asset: assets/${asset}`);
+    if (!await exists(path.join(ROOT, ASSETS_DIR, asset))) {
+      throw new Error(`Missing required asset: ${ASSETS_DIR}/${asset}`);
+    }
   }
+}
+
+async function validateMetadata() {
+  if (!await exists(path.join(ROOT, METADATA_FILE))) throw new Error(`Missing ${METADATA_FILE}`);
 }
 
 await validateSkills();
 await validatePackage();
-await validateReferences();
+await validateGuides();
 await validateServiceTaxonomy();
 await validateAssets();
+await validateMetadata();
 console.log('Source validation passed');

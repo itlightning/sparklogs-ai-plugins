@@ -5,11 +5,19 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { assertRepoRoot } from './assert-repo-root.mjs';
 import { resolveGeneratedPath, safeRmGenerated } from './safe-rm-generated.mjs';
+import {
+  ASSETS_DIR,
+  BRAND_ASSETS,
+  DOCS_URL_PLACEHOLDER,
+  HOSTS,
+  METADATA_FILE,
+  THEME_FILES,
+  classifySrcPath,
+} from './dist-layout.mjs';
 
 assertRepoRoot(import.meta);
 
 const ROOT = process.cwd();
-const HOSTS = ['claude', 'cursor', 'codex', 'generic'];
 const HOST_LABELS = {
   claude: 'Claude',
   codex: 'Codex',
@@ -19,8 +27,6 @@ const HOST_LABELS = {
 // Build inputs that must never ride into a shipped package. validate-rendered.mjs asserts the same
 // list, so an addition here without one there fails the build rather than shipping quietly.
 const MAINTAINER_ONLY = new Set(['SYNC-MANIFEST.json']);
-
-const BRAND_ASSETS = ['logo.svg', 'logo.png', 'icon.svg', 'icon-256.png', 'icon-512.png'];
 const SEMVER = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/;
 
 function parseArgs(argv) {
@@ -93,26 +99,29 @@ async function copyDirMaterialized(src, dst, skip = new Set()) {
   }
 }
 
-async function copyDirPreserve(src, dst, outAbs) {
-  await fs.mkdir(dst, { recursive: true });
-  const entries = await fs.readdir(src, { withFileTypes: true });
-  for (const entry of entries.sort((a, b) => a.name.localeCompare(b.name))) {
-    if (['.git', 'node_modules', 'build', '.plugin-build'].includes(entry.name)) continue;
-    const from = path.join(src, entry.name);
-    const to = path.join(dst, entry.name);
-    if (path.resolve(from).startsWith(outAbs)) continue;
-    if (entry.isDirectory()) {
-      await copyDirPreserve(from, to, outAbs);
-    } else if (entry.isSymbolicLink()) {
-      await fs.symlink(await fs.readlink(from), to);
-    } else if (entry.name === 'install-state.gz' && path.basename(path.dirname(from)) === '.yarn') {
-      continue;
-    } else if (path.basename(path.dirname(from)) === 'cache' && path.basename(path.dirname(path.dirname(from))) === '.yarn') {
-      continue;
-    } else {
-      await copyFile(from, to);
+async function walkSrcFiles() {
+  const acc = [];
+  async function walk(dir, relPrefix) {
+    const entries = await fs.readdir(dir, { withFileTypes: true });
+    for (const entry of entries.sort((a, b) => a.name.localeCompare(b.name))) {
+      const rel = `${relPrefix}/${entry.name}`;
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) await walk(full, rel);
+      else acc.push(rel.replaceAll('\\', '/'));
     }
   }
+  await walk(path.join(ROOT, 'src'), 'src');
+  return acc;
+}
+
+async function assertSrcInList() {
+  const files = await walkSrcFiles();
+  const bad = [];
+  for (const rel of files) {
+    const verdict = classifySrcPath(rel);
+    if (!verdict.ok) bad.push(verdict.reason);
+  }
+  if (bad.length > 0) throw new Error(`src/ IN-list failed:\n  ${bad.join('\n  ')}`);
 }
 
 function marketplaceId(metadata) {
@@ -217,26 +226,28 @@ function mcpConfig(metadata) {
   };
 }
 
-function repositoryRootUrl(metadata) {
-  return String(metadata.repository ?? '').replace(/\.git\/?$/, '').replace(/\/$/, '');
+function distRootReadme() {
+  return `# SparkLogs AI plugin
+
+This tree is the installable SparkLogs AI plugin: skills, themes, data-feed lookups, playbooks, and guides, plus host marketplace wrappers.
+
+The plugin is read-only. It queries SparkLogs through MCP and does not remediate.
+
+Product docs: ${DOCS_URL_PLACEHOLDER}
+
+Do not edit this branch. Changes go to the \`source\` branch of this repository.
+`;
 }
 
-/** README inside each built plugin package: not the repo root README (avoids broken links). */
 function pluginPackageReadme(host, metadata) {
   const label = HOST_LABELS[host] ?? host;
-  const repo = repositoryRootUrl(metadata);
   const display = metadata.hosts?.[host]?.displayName ?? metadata.displayName;
-  return `# ${display}: ${label} bundle
+  return `# ${display} (${label})
 
-This directory is the **built SparkLogs AI plugin** for **${label}**, shipped from the SparkLogs plugin repository.
+Investigation skills for SparkLogs MCP. Read-only: query, do not remediate.
 
-If you have a **full clone** of the repository, these paths are relative to this folder (\`plugins/${host}/${metadata.name}/\`):
-
-- [Install (${label})](../../../docs/install/${host}.md)
-- [Repository overview](../../../README.md)
-- [Contributing](../../../CONTRIBUTING.md)
-
-*(If you only have this plugin folder: open **${repo}** in the browser and open the same paths from the repository root.)*`;
+Product docs: ${DOCS_URL_PLACEHOLDER}
+`;
 }
 
 async function writePluginReadme(base, host, metadata) {
@@ -247,9 +258,22 @@ async function writePluginReadme(base, host, metadata) {
 
 async function copyAssets(base) {
   for (const asset of BRAND_ASSETS) {
-    const src = path.join(ROOT, 'assets', asset);
-    if (!await exists(src)) throw new Error(`Missing required brand asset: assets/${asset}`);
+    const src = path.join(ROOT, ASSETS_DIR, asset);
+    if (!await exists(src)) throw new Error(`Missing required brand asset: ${ASSETS_DIR}/${asset}`);
     await copyFile(src, path.join(base, 'assets', asset));
+  }
+}
+
+async function copyPublishedTrees(base, host) {
+  await copyDirMaterialized(path.join(ROOT, 'src', 'skills'), path.join(base, 'skills'));
+  await copyDirMaterialized(path.join(ROOT, 'src', 'commands'), path.join(base, 'commands'));
+  await copyDirMaterialized(path.join(ROOT, 'src', 'agents'), path.join(base, 'agents'));
+  await copyDirMaterialized(path.join(ROOT, 'src', 'guides'), path.join(base, 'guides'));
+  await copyDirMaterialized(path.join(ROOT, 'src', 'feeds'), path.join(base, 'feeds'), MAINTAINER_ONLY);
+  await copyDirMaterialized(path.join(ROOT, 'src', 'playbooks'), path.join(base, 'playbooks'));
+  await copyDirMaterialized(path.join(ROOT, 'src', 'themes'), path.join(base, 'themes'));
+  if (host === 'cursor' || host === 'generic') {
+    await copyDirMaterialized(path.join(ROOT, 'src', 'rules'), path.join(base, 'rules'));
   }
 }
 
@@ -257,17 +281,7 @@ async function renderHost(host, out, metadata, version) {
   const base = path.join(out, 'plugins', host, metadata.name);
   await safeRmGenerated(base);
   await fs.mkdir(base, { recursive: true });
-  await copyDirMaterialized(path.join(ROOT, '.rulesync', 'skills'), path.join(base, 'skills'));
-  await copyDirMaterialized(path.join(ROOT, '.rulesync', 'commands'), path.join(base, 'commands'));
-  await copyDirMaterialized(path.join(ROOT, '.rulesync', 'subagents'), path.join(base, 'agents'));
-  // Skills cite generated artifacts as `generated/<module>/<file>.md`. Carrying the tree into the
-  // package keeps that one path string true both inside an installed plugin and in a source checkout.
-  // The sync manifest stays behind: it records which upstream checkout the reference set came from,
-  // which is maintainer provenance rather than anything a reader of the package can act on.
-  await copyDirMaterialized(path.join(ROOT, 'generated'), path.join(base, 'generated'), MAINTAINER_ONLY);
-  if (host === 'cursor' || host === 'generic') {
-    await copyDirMaterialized(path.join(ROOT, '.rulesync', 'rules'), path.join(base, 'rules'));
-  }
+  await copyPublishedTrees(base, host);
   await copyAssets(base);
   await writePluginReadme(base, host, metadata);
   await copyFile(path.join(ROOT, 'LICENSE'), path.join(base, 'LICENSE'));
@@ -300,29 +314,22 @@ async function main() {
   }
   const hosts = args.host === 'all' ? HOSTS : [args.host];
   for (const host of hosts) if (!HOSTS.includes(host)) throw new Error(`Unsupported host: ${host}`);
-  const metadata = JSON.parse(await fs.readFile(path.join(ROOT, 'metadata', 'plugin.json'), 'utf8'));
-  if (metadata.version) throw new Error('metadata/plugin.json must not contain a version field');
+  const metadata = JSON.parse(await fs.readFile(path.join(ROOT, METADATA_FILE), 'utf8'));
+  if (metadata.version) throw new Error(`${METADATA_FILE} must not contain a version field`);
+  await assertSrcInList();
+  for (const theme of THEME_FILES) {
+    if (!await exists(path.join(ROOT, 'src', 'themes', theme))) {
+      throw new Error(`Missing theme stub: src/themes/${theme}`);
+    }
+  }
   await safeRmGenerated(out);
   await fs.mkdir(out, { recursive: true });
-  await copyDirPreserve(ROOT, out, `${out}${path.sep}`);
+  await fs.writeFile(path.join(out, 'README.md'), distRootReadme(), 'utf8');
+  await fs.chmod(path.join(out, 'README.md'), 0o644);
   for (const host of hosts) await renderHost(host, out, metadata, version);
   if (args.host === 'all' || ['claude', 'cursor', 'codex'].includes(args.host)) {
     await renderMarketplaces(out, metadata);
   }
-  const sourceRef = gitValue(['rev-parse', '--abbrev-ref', 'HEAD'], 'unknown');
-  const sourceSha = gitValue(['rev-parse', 'HEAD'], 'unknown');
-  await writeJson(path.join(out, 'dist-manifest.json'), {
-    generatedAt: process.env.SOURCE_DATE_EPOCH ?? 'local-build',
-    generator: 'scripts/render-packages.mjs',
-    plugin: metadata.name,
-    sourceRef,
-    sourceSha,
-    version,
-  });
-  await fs.writeFile(
-    path.join(out, 'DIST.md'),
-    `# Generated Distribution\n\nGenerated from ${sourceRef} at ${sourceSha}.\n\nVersion: ${version}\n\nDo not edit this branch by hand. All PRs target source.\n`,
-  );
 }
 
 main().catch((error) => {

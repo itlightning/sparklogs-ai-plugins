@@ -15,9 +15,9 @@
 export const SOURCE_LIBRARY_DIR_ENV = 'SPARKLOGS_SOURCE_LIBRARY_DIR';
 export const DEFAULT_SOURCE_LIBRARY_DIR = '../sparklogs-source-library';
 export const LIBRARY_GENERATED_SUBPATH = 'docs/generated-public';
-export const GENERATED_DIR = 'generated';
-export const MANIFEST_FILE = 'generated/SYNC-MANIFEST.json';
-export const ROUTER_FILE = 'shared-references/generated-reference-router.md';
+export const GENERATED_DIR = 'src/feeds';
+export const MANIFEST_FILE = 'scripts/generated-SYNC-MANIFEST.json';
+export const ROUTER_FILE = 'src/guides/generated-reference-router.md';
 export const ROUTER_BEGIN = '<!-- BEGIN GENERATED INVENTORY -->';
 export const ROUTER_END = '<!-- END GENERATED INVENTORY -->';
 

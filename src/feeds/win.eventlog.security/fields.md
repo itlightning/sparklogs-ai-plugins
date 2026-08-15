@@ -191,7 +191,9 @@ A surface that promotes nothing says so: an empty row is a stated fact, not an o
 | `ca_tamper` / `admin_config` | 4882, 4885, 4890, 4896 | **fields: none** |
 | `ca_tamper` / `evidence_tamper` | 4882, 4885, 4890, 4896 | **fields: none** |
 | `crypto_selftest_failed` / `default` | 6418 | `sparklogs.process.name` `sparklogs.process.path` |
+| `directory_object_access_denied` / `default` | 4662 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` |
 | `directory_object_changed` / `default` | 5136, 5137, 5138, 5139, 5141 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.config_change.action` `sparklogs.config_change.type` `win.eventlog.security.attribute_name` `win.eventlog.security.object_dn` |
+| `directory_replication_access` / `default` | 4662 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` |
 | `domain_policy_changed` / `default` | 4739 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.config_change.action` `sparklogs.config_change.target` `sparklogs.config_change.type` |
 | `dsrm_password_changed` / `failed` | 4794 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.config_change.action` `sparklogs.config_change.type` `sparklogs.origin.host` `win.eventlog.security.workstation` |
 | `dsrm_password_changed` / `success` | 4794 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.config_change.action` `sparklogs.config_change.type` `sparklogs.origin.host` `win.eventlog.security.workstation` |
@@ -293,6 +295,8 @@ Looking for a feed-namespaced field on one of them finds nothing, and that is th
 - `account_password_reset_failed` / `default`
 - `audit_log_cleared` / `default`
 - `crypto_selftest_failed` / `default`
+- `directory_object_access_denied` / `default`
+- `directory_replication_access` / `default`
 - `domain_policy_changed` / `default`
 - `group_member_added` / `default`
 - `group_member_removed` / `default`
