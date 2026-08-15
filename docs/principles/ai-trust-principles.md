@@ -35,7 +35,7 @@ MSP environments differ. Skill content and investigation depth can evolve with F
 <a id="Trust-Auditability"></a>
 ## 7. Make Work Auditable
 
-Investigations reuse an `investigation_request_id`, cite query URLs, and preserve enough context for a technician or service manager to review what happened.
+Investigations reuse an `external_investigation_id`, cite query URLs, and preserve enough context for a technician or service manager to review what happened.
 
 <a id="Trust-IncrementalTrust"></a>
 ## 8. Earn Trust Incrementally

@@ -26,7 +26,7 @@ Answer first, then stop talking, never mid-query. Hedge precisely: "not in this 
 ## Which tool
 
 - "What is on the box / CPU / RAM / disk / installed / open condition" → `query_device_health` (`fieldset=rca` for one host).
-- Named backup product (Veeam, Datto, Axcient, Acronis, MSP360, Cove, Slide) → `query_device_health` first for what is installed, then counts for a timeline. The vendor's own channel carries the job verdict; a failed VSS writer is a symptom, not that verdict. Do not hunt the vendor in Application `reasons.md`.
+- Named backup product (Veeam, Datto, Axcient, Acronis, MSP360, Cove, Slide) → `query_device_health` first for what is installed, then counts for a timeline. Vendor channels are collected, queryable; events carry the job verdict, not VSS. Application `reasons.md` skips vendor products; query events directly.
 - "What happened / how many / when" → `query_event_counts_by_severity` or `query_scope_activity` first; `query_logs` only for a narrow slice.
 - Collector debug only → `sparklogs.agent.vector` / `sparklogs.agent.log`. Not the headline for device health.
 

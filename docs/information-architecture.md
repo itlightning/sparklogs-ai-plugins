@@ -47,6 +47,8 @@ The feed table's row order is curated investigation salience, not alphabetical: 
 
 Cross-cutting stays in `guides/`: class/severity, service taxonomy, LQL, MCP tools, honesty, mistakes, voice, scope-resolution, off-endpoint.
 
+`rules/` ships only in the cursor and generic packages (host condition in `scripts/render-packages.mjs`). Claude and Codex hosts route on skill descriptions alone.
+
 ## Floor vs full generated lookup
 
 Every active data feed gets a floor under `feeds/<id>/`: `README.md`, `fields.md`, `enums.md`, and one `reasons.md` when the feed has reasons.
