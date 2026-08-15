@@ -1,3 +1,7 @@
+---
+index: Directory replication
+---
+
 # Directory replication failure
 
 **Trigger.** "Domain controllers are out of sync", or authentication behaves differently per site.

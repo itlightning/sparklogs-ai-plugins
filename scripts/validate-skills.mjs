@@ -4,7 +4,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { assertRepoRoot } from './assert-repo-root.mjs';
 import { ASSETS_DIR, METADATA_FILE } from './dist-layout.mjs';
-import { MODULES } from './generated-references.config.mjs';
+import { INDEX_KINDS, checkIndexFiles, listSkillIndexTargets, loadIndexCatalog, parseFrontmatter } from './skill-indexes.mjs';
 
 assertRepoRoot(import.meta);
 
@@ -77,28 +77,23 @@ async function exists(file) {
   }
 }
 
-function parseFrontmatter(text, file) {
-  if (!text.startsWith('---\n')) throw new Error(`${file} missing YAML frontmatter`);
-  const end = text.indexOf('\n---\n', 4);
-  if (end < 0) throw new Error(`${file} missing closing frontmatter delimiter`);
-  const data = {};
-  for (const line of text.slice(4, end).split('\n')) {
-    const match = line.match(/^([A-Za-z0-9_-]+):\s*(.*)$/);
-    if (match) data[match[1]] = match[2].trim();
-  }
-  return data;
-}
-
 async function validateSkills() {
   const dir = path.join(ROOT, 'src', 'skills');
   const entries = await fs.readdir(dir, { withFileTypes: true });
   for (const entry of entries) {
     if (!entry.isDirectory()) continue;
     const file = path.join(dir, entry.name, 'SKILL.md');
-    const data = parseFrontmatter(await fs.readFile(file, 'utf8'), file);
+    const { data } = parseFrontmatter(await fs.readFile(file, 'utf8'), file);
     if (!PORTABLE.test(data.name ?? '')) throw new Error(`${file} has non-portable name: ${data.name}`);
     if (data.name !== entry.name) throw new Error(`${file} name must match directory ${entry.name}`);
     if (!data.description || data.description.length < 40) throw new Error(`${file} description is too short`);
+    const indexes = data.indexes ?? [];
+    if (!Array.isArray(indexes) || indexes.length === 0) {
+      throw new Error(`${file} needs indexes: frontmatter listing generated tables`);
+    }
+    for (const kind of indexes) {
+      if (!INDEX_KINDS.includes(kind)) throw new Error(`${file} unknown indexes entry: ${kind}`);
+    }
   }
 }
 
@@ -164,24 +159,32 @@ async function validateServiceTaxonomy() {
 }
 
 async function validateSkillIndexes() {
-  const themesDir = path.join(ROOT, 'src', 'themes');
-  const themeFiles = (await fs.readdir(themesDir))
-    .filter((name) => name.endsWith('.md'))
-    .sort();
-  const skills = ['sparklogs-ask', 'sparklogs-investigate'];
-  for (const skill of skills) {
-    const file = path.join(ROOT, 'src', 'skills', skill, 'SKILL.md');
-    const text = await fs.readFile(file, 'utf8');
-    for (const module of MODULES) {
-      const needle = `feeds/${module}/`;
-      if (!text.includes(needle)) {
-        throw new Error(`${skill} SKILL.md must cite ${needle}`);
+  await checkIndexFiles(ROOT);
+  const catalog = await loadIndexCatalog(ROOT);
+  const targets = await listSkillIndexTargets(ROOT);
+  for (const target of targets) {
+    const text = await fs.readFile(target.file, 'utf8');
+    for (const kind of target.indexes) {
+      if (kind === 'feeds') {
+        for (const id of catalog.modules) {
+          if (!text.includes(`feeds/${id}/`)) {
+            throw new Error(`${path.relative(ROOT, target.file)} missing feeds/${id}/`);
+          }
+        }
       }
-    }
-    for (const theme of themeFiles) {
-      const needle = `themes/${theme}`;
-      if (!text.includes(needle)) {
-        throw new Error(`${skill} SKILL.md must cite ${needle}`);
+      if (kind === 'themes') {
+        for (const theme of catalog.themes) {
+          if (!text.includes(theme.path)) {
+            throw new Error(`${path.relative(ROOT, target.file)} missing ${theme.path}`);
+          }
+        }
+      }
+      if (kind === 'playbooks') {
+        for (const playbook of catalog.playbooks) {
+          if (!text.includes(playbook.path)) {
+            throw new Error(`${path.relative(ROOT, target.file)} missing ${playbook.path}`);
+          }
+        }
       }
     }
   }

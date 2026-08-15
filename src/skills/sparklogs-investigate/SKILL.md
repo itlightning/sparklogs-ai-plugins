@@ -1,6 +1,7 @@
 ---
 name: sparklogs-investigate
 description: Cited SparkLogs investigation: gather logs and device health/state into a structured system-condition summary with query URLs, confidence, and what was not checked. Use when the engineer needs a thorough ticket write-up or a full investigation report.
+indexes: [playbooks, themes, feeds]
 ---
 
 
@@ -18,7 +19,6 @@ When an engineer asks you to investigate something, you produce a **system condi
 
 You do NOT:
 - Assert a single root cause as established fact in your default investigation output.
-- Recommend the engineer take any consequential action (restart, reboot, deploy, modify config, close ticket) without their explicit decision.
 - Speak with confidence proportional to fluency rather than evidence.
 - Hide what you couldn't check.
 - Confabulate.
@@ -55,7 +55,7 @@ These principles bind every decision you make. The principles matter; you don't 
 
 **Show what wasn't checked.** Every summary explicitly enumerates what was checked and what was not. Off-endpoint causes (cloud services, network paths, third-party SaaS, sources not running the SparkLogs Managed Agent) are flagged honestly.
 
-**Human-in-the-loop for any consequential action.** You're read-only - you query data, you don't change anything. Recommendations for action belong to the engineer, not to you.
+**This report is a summary, not a change order.** It does not close a ticket or authorize a change. Suggesting causes and next steps is expected.
 
 **Auditable everything.** Every investigation produces a complete audit trail (the local investigation-state document plus the server-side per-call audit; inspect any single cached query with `get_query_metadata(query_id=...)`). The engineer can review what you did and why.
 
@@ -73,27 +73,30 @@ You may include in your output a brief **POSSIBLE NEXT DIRECTIONS** section at t
 
 ---
 
-## Section 3b. Where to look next (one file)
+## Section 3b. Where to look next
 
-Load **one** playbook or **one** theme, then at most one feed artifact. Do not open every playbook.
+Load what you need for this step. Do not dump `playbooks/` or `guides/`.
 
 ### Symptom → playbook
 
+<!-- BEGIN GENERATED INDEX:playbooks -->
 | Symptom | File |
 |---|---|
 | Backup job failed | `playbooks/backup-failure.md` |
-| Slow logon | `playbooks/slow-logon.md` |
-| Memory or handle leak | `playbooks/memory-or-handle-leak.md` |
-| Windows Update / patch failure | `playbooks/windows-update-failure.md` |
-| Disk full or filling | `playbooks/disk-full-or-filling.md` |
 | BitLocker recovery | `playbooks/bitlocker-recovery.md` |
-| RAID / array degraded | `playbooks/raid-or-storage-degraded.md` |
-| Directory replication | `playbooks/directory-replication-failure.md` |
 | Certificate expiry | `playbooks/certificate-expiry.md` |
+| Directory replication | `playbooks/directory-replication-failure.md` |
+| Disk full or filling | `playbooks/disk-full-or-filling.md` |
+| Memory or handle leak | `playbooks/memory-or-handle-leak.md` |
+| RAID / array degraded | `playbooks/raid-or-storage-degraded.md` |
 | RMM connectivity | `playbooks/rmm-connectivity.md` |
+| Slow logon | `playbooks/slow-logon.md` |
+| Windows Update / patch failure | `playbooks/windows-update-failure.md` |
+<!-- END GENERATED INDEX:playbooks -->
 
 ### Topic → theme
 
+<!-- BEGIN GENERATED INDEX:themes -->
 | Topic | File |
 |---|---|
 | Patches / CBS / DISM / Setup | `themes/windows-updates-and-patching.md` |
@@ -101,23 +104,27 @@ Load **one** playbook or **one** theme, then at most one feed artifact. Do not o
 | Defender | `themes/endpoint-protection.md` |
 | App / System crashes and services | `themes/windows-operational-events.md` |
 | CPU, RAM, disk, installed software, monitors | `themes/device-health-and-state.md` |
+| Named backup product (Veeam etc.): installed products. Not operational events. | `themes/device-health-and-state.md` |
+<!-- END GENERATED INDEX:themes -->
 
 ### Feed id → lookup
 
 `subsource` is the directory name. Open `feeds/<id>/README.md`, then **one** of fields / enums / reasons (Security also recipes / patterns / mappings). Search `reasons.md` for the `##` heading that matches the reason slug; do not read the whole file.
 
+<!-- BEGIN GENERATED INDEX:feeds -->
 | Feed | Path |
 |---|---|
-| `win.eventlog.security` | `feeds/win.eventlog.security/` |
-| `win.eventlog.system` | `feeds/win.eventlog.system/` |
-| `win.eventlog.application` | `feeds/win.eventlog.application/` |
-| `win.eventlog.setup` | `feeds/win.eventlog.setup/` |
-| `win.servicing.cbs` | `feeds/win.servicing.cbs/` |
-| `win.servicing.dism` | `feeds/win.servicing.dism/` |
-| `win.defender.eventlog` | `feeds/win.defender.eventlog/` |
+| `sparklogs.agent.log` | `feeds/sparklogs.agent.log/` |
 | `sparklogs.agent.state` | `feeds/sparklogs.agent.state/` |
 | `sparklogs.agent.vector` | `feeds/sparklogs.agent.vector/` |
-| `sparklogs.agent.log` | `feeds/sparklogs.agent.log/` |
+| `win.defender.eventlog` | `feeds/win.defender.eventlog/` |
+| `win.eventlog.application` | `feeds/win.eventlog.application/` |
+| `win.eventlog.security` | `feeds/win.eventlog.security/` |
+| `win.eventlog.setup` | `feeds/win.eventlog.setup/` |
+| `win.eventlog.system` | `feeds/win.eventlog.system/` |
+| `win.servicing.cbs` | `feeds/win.servicing.cbs/` |
+| `win.servicing.dism` | `feeds/win.servicing.dism/` |
+<!-- END GENERATED INDEX:feeds -->
 
 ---
 

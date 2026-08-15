@@ -1,3 +1,7 @@
+---
+index: Memory or handle leak
+---
+
 # Memory or handle leak
 
 **Trigger.** "Machine slows over days, recovers on reboot", or an app repeatedly exhausts memory.

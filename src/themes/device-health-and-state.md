@@ -1,3 +1,10 @@
+---
+index: CPU, RAM, disk, installed software, monitors
+aliases:
+  - label: Named backup product (Veeam etc.)
+    note: installed products. Not operational events.
+---
+
 # Device health and state
 
 What is on the box and what is holding or changing: CPU, RAM, disk, installed software, monitors, episodes, deltas.

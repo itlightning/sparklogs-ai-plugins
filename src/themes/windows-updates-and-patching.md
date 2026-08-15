@@ -1,3 +1,7 @@
+---
+index: Patches / CBS / DISM / Setup
+---
+
 # Windows updates and patching
 
 Join these data feeds when the ticket is patches that did not land, or landed and then failed.

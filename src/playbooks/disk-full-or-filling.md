@@ -1,3 +1,7 @@
+---
+index: Disk full or filling
+---
+
 # Disk full or filling fast
 
 **Trigger.** A volume crosses 90% or fills; users hit "no space" errors.

@@ -1,3 +1,7 @@
+---
+index: Defender
+---
+
 # Endpoint protection
 
 **Data feed:** `win.defender.eventlog`. Open `feeds/win.defender.eventlog/README.md`, then one artifact (`reasons.md` for threat / protection-disabled slugs).

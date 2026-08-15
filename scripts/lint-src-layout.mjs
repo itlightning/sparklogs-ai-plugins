@@ -11,6 +11,7 @@ import {
   proveLayoutGuards,
 } from './dist-layout.mjs';
 import { MODULES } from './generated-references.config.mjs';
+import { proveShipMarkdown } from './skill-indexes.mjs';
 
 assertRepoRoot(import.meta);
 
@@ -60,4 +61,6 @@ async function lintSrc() {
 
 proveLayoutGuards();
 console.log('layout guards: planted negatives all fired');
+proveShipMarkdown();
+console.log('shipMarkdown guards: planted negatives all fired');
 await lintSrc();

@@ -1,3 +1,7 @@
+---
+index: RMM connectivity
+---
+
 # RMM connectivity
 
 **Trigger.** "Endpoint shows offline in the RMM but the user says it is working."

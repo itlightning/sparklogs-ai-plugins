@@ -8,12 +8,13 @@ import { resolveGeneratedPath, safeRmGenerated } from './safe-rm-generated.mjs';
 import {
   ASSETS_DIR,
   BRAND_ASSETS,
-  DOCS_URL_PLACEHOLDER,
+  DOCS_URL,
   HOSTS,
   METADATA_FILE,
   THEME_FILES,
   classifySrcPath,
 } from './dist-layout.mjs';
+import { shipMarkdown } from './skill-indexes.mjs';
 
 assertRepoRoot(import.meta);
 
@@ -86,6 +87,13 @@ async function copyFile(src, dst) {
   await fs.chmod(dst, 0o644);
 }
 
+async function copyMarkdownShipped(src, dst) {
+  await fs.mkdir(path.dirname(dst), { recursive: true });
+  const shipped = shipMarkdown(await fs.readFile(src, 'utf8'), src);
+  await fs.writeFile(dst, shipped);
+  await fs.chmod(dst, 0o644);
+}
+
 async function copyDirMaterialized(src, dst, skip = new Set()) {
   await fs.mkdir(dst, { recursive: true });
   const entries = await fs.readdir(src, { withFileTypes: true });
@@ -95,6 +103,7 @@ async function copyDirMaterialized(src, dst, skip = new Set()) {
     const to = path.join(dst, entry.name);
     const stat = await fs.stat(from);
     if (stat.isDirectory()) await copyDirMaterialized(from, to, skip);
+    else if (entry.name.endsWith('.md')) await copyMarkdownShipped(from, to);
     else await copyFile(from, to);
   }
 }
@@ -231,9 +240,7 @@ function distRootReadme() {
 
 This tree is the installable SparkLogs AI plugin: skills, themes, data-feed lookups, playbooks, and guides, plus host marketplace wrappers.
 
-The plugin is read-only. It queries SparkLogs through MCP and does not remediate.
-
-Product docs: ${DOCS_URL_PLACEHOLDER}
+Product docs: ${DOCS_URL}
 
 Do not edit this branch. Changes go to the \`source\` branch of this repository.
 `;
@@ -244,9 +251,9 @@ function pluginPackageReadme(host, metadata) {
   const display = metadata.hosts?.[host]?.displayName ?? metadata.displayName;
   return `# ${display} (${label})
 
-Investigation skills for SparkLogs MCP. Read-only: query, do not remediate.
+Investigation skills for SparkLogs MCP.
 
-Product docs: ${DOCS_URL_PLACEHOLDER}
+Product docs: ${DOCS_URL}
 `;
 }
 

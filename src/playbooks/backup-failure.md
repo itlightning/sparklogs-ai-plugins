@@ -1,3 +1,7 @@
+---
+index: Backup job failed
+---
+
 # Backup failure
 
 **Trigger.** "Veeam, Datto, Axcient, Acronis, MSP360, Cove or Slide reports backup failed on

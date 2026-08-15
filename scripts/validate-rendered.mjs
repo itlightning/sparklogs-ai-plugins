@@ -15,6 +15,8 @@ import {
   oversize,
   unexpectedDistPaths,
 } from './dist-layout.mjs';
+import { MODULES } from './generated-references.config.mjs';
+import { AUTHORING_FRONTMATTER_KEYS, parseFrontmatter } from './skill-indexes.mjs';
 
 assertRepoRoot(import.meta);
 
@@ -152,6 +154,43 @@ async function validatePackage(host) {
     const manifest = await readJson(path.join(base, manifestFile));
     if (manifest.name !== 'sparklogs') throw new Error(`${host} manifest name must be sparklogs`);
     if (!SEMVER.test(manifest.version)) throw new Error(`${host} manifest version is invalid`);
+  }
+  await validateShippedMarkdown(host, base);
+}
+
+async function validateShippedMarkdown(host, base) {
+  const markerHits = [];
+  const authoringHits = [];
+  await walk(base, async (file, stat) => {
+    if (!stat.isFile() || !file.endsWith('.md')) return;
+    const relative = path.relative(base, file).split(path.sep).join('/');
+    const text = await fs.readFile(file, 'utf8');
+    if (/BEGIN GENERATED|END GENERATED/.test(text)) markerHits.push(relative);
+    const { data } = parseFrontmatter(text, `${host}:${relative}`);
+    for (const key of Object.keys(data)) {
+      if (AUTHORING_FRONTMATTER_KEYS.has(key)) authoringHits.push(`${relative} key ${key}`);
+    }
+  });
+  if (markerHits.length) {
+    throw new Error(`${host} shipped GENERATED markers:\n  ${markerHits.join('\n  ')}`);
+  }
+  if (authoringHits.length) {
+    throw new Error(`${host} shipped authoring frontmatter:\n  ${authoringHits.join('\n  ')}`);
+  }
+  for (const skill of ['sparklogs-ask', 'sparklogs-investigate', 'sparklogs-analyze-cause']) {
+    const text = await fs.readFile(path.join(base, 'skills', skill, 'SKILL.md'), 'utf8');
+    for (const id of MODULES) {
+      if (!text.includes(`feeds/${id}/`)) {
+        throw new Error(`${host} ${skill} missing generated feed ${id}`);
+      }
+    }
+    if (skill === 'sparklogs-analyze-cause') {
+      if (text.includes('playbooks/backup-failure.md')) {
+        throw new Error(`${host} ${skill} should not carry the playbook table`);
+      }
+    } else if (!text.includes('playbooks/backup-failure.md')) {
+      throw new Error(`${host} ${skill} missing generated playbook table`);
+    }
   }
 }
 

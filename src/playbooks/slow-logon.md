@@ -1,3 +1,7 @@
+---
+index: Slow logon
+---
+
 # Slow logon
 
 **Trigger.** "User reports logon takes <duration> since <when>."

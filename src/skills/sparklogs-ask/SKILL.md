@@ -1,53 +1,64 @@
 ---
 name: sparklogs-ask
-description: Query SparkLogs logs and device health/state over time to answer what happened on a host or across a fleet. Counts, timelines, disk, CPU, patches, Defender, Windows events, installed software, collection health. Short precise answer from a few MCP calls.
+description: Query SparkLogs logs and device health/state over time to answer what happened on a host or across a fleet. Counts, timelines, disk, CPU, patches, Windows events, other system and application log events, installed software, collection health. Conversational answers from SparkLogs telemetry.
+indexes: [playbooks, themes, feeds]
 ---
 
 # SparkLogs Ask
 
-Answer this question from SparkLogs telemetry. Stop when you can.
+Answer this question from SparkLogs telemetry. This is a conversation with the data, not an investigation report.
 
-You are not writing an investigation report. No output template. No WHAT WAS NOT CHECKED catalog. No playbook walk.
+No output template. No WHAT WAS NOT CHECKED catalog. You may go as deep as the question needs. Follow-up queries are expected.
 
-## Brevity (non-negotiable)
+`/sparklogs-investigate` is the written pass: a cited system-condition summary they can put on a ticket. Offer it when they want that artifact. Do not switch to it just because the chat went deep.
 
-- Answer first. One short block. Then stop.
-- No recap of the session. No "three things to remember." No empathy padding. No historical commentary.
-- Precise hedges only: "not in this window", "not checked", "insufficient evidence". Not "it could potentially".
+## How to answer
+
+- Answer first. Then stop talking, not mid-query.
+- Precise hedges: "not in this window", "not checked", "insufficient evidence".
 - Active voice. No em dash.
-
-## Call budget
-
-1. `resolve_scope` if org/host/window is not already obvious from this turn.
-2. Then **at most three** data-access calls (`query_device_health`, counts, `query_logs`, `list_sources`, or one describe). Prefer counts or device health over `query_logs`.
-3. If you cannot answer inside that budget, stop. Say what you know. Offer `/sparklogs-investigate` in one sentence. Do not keep querying.
-
-Every data-access call needs `external_investigation_id`. Reuse one id for this question.
-
-## Honesty (keep)
-
 - Empty is not healthy. A field this feed does not write is not "no problem".
 - Do not treat VSS writer-failed as proof the backup product failed.
 - Completeness claims need `agent_complete_through` / feed reports, never first/last event bounds.
-- Cite a `query_url` on factual claims. One link is enough.
-
-## Scope
-
-Host vs org vs sender (`agent_id`) vs origin (`source`): `guides/scope-resolution.md` if the match is ambiguous. Do not load it for a single exact host name.
+- Cite a `query_url` on factual claims.
+- Suggest likely causes and practical next steps when the evidence supports them.
+- If org/host/window is not obvious, `resolve_scope`. If several matches, ask. Do not guess.
+- Prefer `query_device_health` or counts over `query_logs`. Prefer `refine_query_result` on a cached slice over a new scan.
+- Every data-access call needs `external_investigation_id`. Reuse one id for this question.
 
 ## Which tool
 
 - "What is on the box / CPU / RAM / disk / installed / open condition" → `query_device_health` (`fieldset=rca` for one host).
-- Named backup product (Veeam, Datto, Axcient, Acronis, MSP360, Cove, Slide) → `query_device_health` first (what is installed). Do not search Application `reasons.md` for the vendor. Then counts if you still need a timeline. Offer `/sparklogs-investigate` (ticket-shaped).
+- Named backup product (Veeam, Datto, Axcient, Acronis, MSP360, Cove, Slide) → `query_device_health` first (what is installed). Do not search Application `reasons.md` for the vendor. Then counts if you still need a timeline.
 - "What happened / how many / when" → `query_event_counts_by_severity` or `query_scope_activity` first; `query_logs` only for a narrow slice.
 - Collector debug only → `sparklogs.agent.vector` / `sparklogs.agent.log`. Not the headline for device health.
 
-Full tool notes: `guides/mcp-tool-decision-tree.md` only if the pick is unclear.
+Load a guide when you are stuck on that topic (`guides/scope-resolution.md`, `guides/mcp-tool-decision-tree.md`, LQL, honesty). Do not dump the folder.
 
-## Where to look (open one)
+## Where to look
+
+You may open the matching playbook as a query recipe. Do not emit the investigation report from it.
+
+**Playbooks** (symptom recipes):
+
+<!-- BEGIN GENERATED INDEX:playbooks -->
+| Symptom | File |
+|---|---|
+| Backup job failed | `playbooks/backup-failure.md` |
+| BitLocker recovery | `playbooks/bitlocker-recovery.md` |
+| Certificate expiry | `playbooks/certificate-expiry.md` |
+| Directory replication | `playbooks/directory-replication-failure.md` |
+| Disk full or filling | `playbooks/disk-full-or-filling.md` |
+| Memory or handle leak | `playbooks/memory-or-handle-leak.md` |
+| RAID / array degraded | `playbooks/raid-or-storage-degraded.md` |
+| RMM connectivity | `playbooks/rmm-connectivity.md` |
+| Slow logon | `playbooks/slow-logon.md` |
+| Windows Update / patch failure | `playbooks/windows-update-failure.md` |
+<!-- END GENERATED INDEX:playbooks -->
 
 **Themes** (domain, feeds that join):
 
+<!-- BEGIN GENERATED INDEX:themes -->
 | Topic | File |
 |---|---|
 | Patches / CBS / DISM / Setup | `themes/windows-updates-and-patching.md` |
@@ -55,30 +66,28 @@ Full tool notes: `guides/mcp-tool-decision-tree.md` only if the pick is unclear.
 | Defender | `themes/endpoint-protection.md` |
 | App / System crashes and services | `themes/windows-operational-events.md` |
 | CPU, RAM, disk, installed software, monitors | `themes/device-health-and-state.md` |
-| Named backup product (Veeam etc.) | `themes/device-health-and-state.md` (installed products). Not operational events. |
+| Named backup product (Veeam etc.): installed products. Not operational events. | `themes/device-health-and-state.md` |
+<!-- END GENERATED INDEX:themes -->
 
-**Data feeds** (`subsource` = directory name). Open `feeds/<id>/README.md`, then **one** artifact (`fields.md`, `enums.md`, `reasons.md`). Search `reasons.md` for the `##` heading that matches the reason slug. Do not read the whole file.
+**Data feeds** (`subsource` = directory name). Open `feeds/<id>/README.md`, then the artifact you need (`fields.md`, `enums.md`, `reasons.md`). Search `reasons.md` for the `##` heading that matches the reason slug. Do not read the whole file.
 
+<!-- BEGIN GENERATED INDEX:feeds -->
 | Feed | Path |
 |---|---|
-| `win.eventlog.security` | `feeds/win.eventlog.security/` |
-| `win.eventlog.system` | `feeds/win.eventlog.system/` |
-| `win.eventlog.application` | `feeds/win.eventlog.application/` |
-| `win.eventlog.setup` | `feeds/win.eventlog.setup/` |
-| `win.servicing.cbs` | `feeds/win.servicing.cbs/` |
-| `win.servicing.dism` | `feeds/win.servicing.dism/` |
-| `win.defender.eventlog` | `feeds/win.defender.eventlog/` |
+| `sparklogs.agent.log` | `feeds/sparklogs.agent.log/` |
 | `sparklogs.agent.state` | `feeds/sparklogs.agent.state/` |
 | `sparklogs.agent.vector` | `feeds/sparklogs.agent.vector/` |
-| `sparklogs.agent.log` | `feeds/sparklogs.agent.log/` |
+| `win.defender.eventlog` | `feeds/win.defender.eventlog/` |
+| `win.eventlog.application` | `feeds/win.eventlog.application/` |
+| `win.eventlog.security` | `feeds/win.eventlog.security/` |
+| `win.eventlog.setup` | `feeds/win.eventlog.setup/` |
+| `win.eventlog.system` | `feeds/win.eventlog.system/` |
+| `win.servicing.cbs` | `feeds/win.servicing.cbs/` |
+| `win.servicing.dism` | `feeds/win.servicing.dism/` |
+<!-- END GENERATED INDEX:feeds -->
 
-## When to offer a full investigation
+## Written investigation
 
-One sentence, and only if:
-
-- the user is describing a ticket / outage / "figure out why", or
-- the call budget is exhausted.
-
-`/sparklogs-investigate` produces a cited system condition summary. Do not start it unless they ask or accept.
+Offer `/sparklogs-investigate` when they want a cited ticket write-up or a full investigation report. Name the matching playbook in that offer when the table fits.
 
 Cause hypotheses: `/sparklogs-analyze-cause` only after an investigation summary exists.

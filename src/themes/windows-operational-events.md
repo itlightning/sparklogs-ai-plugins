@@ -1,3 +1,7 @@
+---
+index: App / System crashes and services
+---
+
 # Windows operational events (application and system)
 
 Application and System channels: service crashes, unexpected shutdowns, disk and driver faults that are not patching and not Security.

@@ -1,3 +1,7 @@
+---
+index: Certificate expiry
+---
+
 # Certificate expiry
 
 **Trigger.** "Service X broke and the certificate looks expired", or a renewal did not happen.

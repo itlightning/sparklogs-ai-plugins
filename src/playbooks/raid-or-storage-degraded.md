@@ -1,3 +1,7 @@
+---
+index: RAID / array degraded
+---
+
 # RAID or storage array degraded
 
 **Trigger.** "Array reports degraded", or a controller alert reached the RMM.

@@ -1,3 +1,7 @@
+---
+index: Windows Update / patch failure
+---
+
 # Windows Update failure
 
 **Trigger.** "Patching reports <KB> failed", or a machine is behind on updates.

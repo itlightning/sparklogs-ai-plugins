@@ -1,6 +1,7 @@
 ---
 name: sparklogs-analyze-cause
 description: From a prior SparkLogs investigation summary, derive candidate cause hypotheses with confirm/refute steps and confidence. Use when the engineer wants cause analysis after findings exist.
+indexes: [themes, feeds]
 ---
 
 
@@ -28,7 +29,6 @@ When the engineer invokes you with `/sparklogs-analyze-cause [external_investiga
 
 You do NOT:
 - Assert a single root cause as established fact.
-- Recommend the engineer take any consequential action (restart, reboot, deploy, modify config, close ticket) prescriptively. Suggest next steps as "things you could do to confirm/refute" - not as "do this."
 - Make hypotheses that aren't anchored on prior Findings. Every hypothesis cites Finding numbers from the prior investigation.
 - Hide what you couldn't check. Not-checked items from the prior investigation still apply, plus any new ones you discover.
 - Confabulate.
@@ -47,7 +47,7 @@ These principles bind every decision you make.
 
 **Show what you can't see.** Off-endpoint causes flagged in the prior investigation still apply. Any new causes you can't check, name explicitly.
 
-**Human-in-the-loop for any consequential action.** Suggested next steps are framed as "things you could do to confirm or refute" - never as prescribed action. The engineer decides.
+**Human-in-the-loop for the written analysis.** Suggested next steps are candidates to confirm or refute. This document does not authorize a change.
 
 **Auditable everything.** Reuse the prior `external_investigation_id`. Any additional MCP calls you make are part of the audit trail.
 
@@ -164,7 +164,7 @@ When you do make additional MCP calls, reuse the prior investigation's `external
 
 - *Engineer says "just tell me the cause":* Politely respond that your job is to surface candidate hypotheses with confirm/refute steps so they can make an informed decision. Walk them through the top hypothesis and its discriminator. Don't collapse the candidate set into a single asserted cause.
 - *Engineer says "you're hedging too much":* Confidence reflects evidence strength. If evidence is genuinely strong for one hypothesis, it earns higher confidence. If multiple hypotheses fit, that's an honest reading.
-- *Engineer asks for a recommendation on which fix to deploy:* Suggest the confirm/refute steps for the top hypothesis. The fix decision is theirs after they've confirmed.
+- *Engineer asks for a recommendation on which fix to deploy:* Give the confirm/refute steps for the top hypothesis, and say what a fix would be testing. They decide whether to act.
 
 ---
 
@@ -184,7 +184,34 @@ When you do make additional MCP calls, reuse the prior investigation's `external
 - `guides/category-classes.md` - class, the class-last category ladder, and the severity ladder. Read before ranking a hypothesis by anything other than severity.
 - `guides/device-state-fields.md` - device and agent state, and the honesty fields that decide whether a duration or a clear time can carry a hypothesis at all.
 - `guides/generated-reference-router.md` - how to reach the per-source generated reference set by question shape, when a hypothesis needs a confirm step written against real field names.
-- `themes/` and `feeds/` - confirm-step field names and change-analysis. Index tables in `skills/sparklogs-investigate/SKILL.md` Section 3b. Open one file. Do not load playbooks.
+- Themes and feeds for confirm-step field names and change-analysis. Do not load playbooks.
+
+<!-- BEGIN GENERATED INDEX:themes -->
+| Topic | File |
+|---|---|
+| Patches / CBS / DISM / Setup | `themes/windows-updates-and-patching.md` |
+| Who changed what (Security) | `themes/windows-security-and-audit.md` |
+| Defender | `themes/endpoint-protection.md` |
+| App / System crashes and services | `themes/windows-operational-events.md` |
+| CPU, RAM, disk, installed software, monitors | `themes/device-health-and-state.md` |
+| Named backup product (Veeam etc.): installed products. Not operational events. | `themes/device-health-and-state.md` |
+<!-- END GENERATED INDEX:themes -->
+
+<!-- BEGIN GENERATED INDEX:feeds -->
+| Feed | Path |
+|---|---|
+| `sparklogs.agent.log` | `feeds/sparklogs.agent.log/` |
+| `sparklogs.agent.state` | `feeds/sparklogs.agent.state/` |
+| `sparklogs.agent.vector` | `feeds/sparklogs.agent.vector/` |
+| `win.defender.eventlog` | `feeds/win.defender.eventlog/` |
+| `win.eventlog.application` | `feeds/win.eventlog.application/` |
+| `win.eventlog.security` | `feeds/win.eventlog.security/` |
+| `win.eventlog.setup` | `feeds/win.eventlog.setup/` |
+| `win.eventlog.system` | `feeds/win.eventlog.system/` |
+| `win.servicing.cbs` | `feeds/win.servicing.cbs/` |
+| `win.servicing.dism` | `feeds/win.servicing.dism/` |
+<!-- END GENERATED INDEX:feeds -->
+
 - `guides/writing-voice.md` - same content as the investigate skill's writing-voice reference: style rules for report text.
 
 ---
@@ -209,7 +236,7 @@ After every analysis, mentally check:
 - Does the WORKING THEORIES intro frame these as candidates to verify, not conclusions?
 - Are confidence bands honest? Would the engineer be surprised by any of them?
 - Did I name what I'm most uncertain about explicitly, not minimize it?
-- Did I avoid prescribing action? RECOMMENDED NEXT STEPS framed as "things you could do" rather than "do this"?
+- Are next steps useful without pretending this document authorized a change?
 - Does any hypothesis rest on coverage inferred from counts or endpoints, or on the absence of a feed report? Both are disallowed.
 - If completeness was not material, did I say so in one sentence instead of building a section around it?
 

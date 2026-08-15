@@ -1,3 +1,7 @@
+---
+index: BitLocker recovery
+---
+
 # BitLocker recovery prompt
 
 **Trigger.** "Machine booted to a BitLocker recovery key prompt."
