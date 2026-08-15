@@ -21,7 +21,8 @@ export const SHIP_FRONTMATTER_KEYS = new Set([
   'model',
 ]);
 export const AUTHORING_FRONTMATTER_KEYS = new Set(['index', 'aliases', 'indexes']);
-export const GENERATED_BLOCK_RE = /<!-- BEGIN GENERATED [A-Za-z0-9:_-]+ -->\n?([\s\S]*?)<!-- END GENERATED [A-Za-z0-9:_-]+ -->\n?/g;
+export const GENERATED_BLOCK_RE = /<!-- BEGIN GENERATED ([A-Za-z0-9:_-]+) -->\n?([\s\S]*?)<!-- END GENERATED \1 -->\n?/g;
+const MARKER_TAG_RE = /<!-- (BEGIN|END) GENERATED ([A-Za-z0-9:_-]+) -->/g;
 
 export function indexBegin(kind) {
   return `<!-- BEGIN GENERATED INDEX:${kind} -->`;
@@ -145,10 +146,40 @@ export function formatFrontmatter(data) {
 }
 
 export function unwrapGeneratedBlocks(text) {
-  return text.replace(GENERATED_BLOCK_RE, (_, inner) => `${inner.replace(/^\n+|\n+$/g, '')}\n`);
+  return text.replace(GENERATED_BLOCK_RE, (_, name, inner) => `${inner.replace(/^\n+|\n+$/g, '')}\n`);
+}
+
+// GENERATED_BLOCK_RE unwraps only well-formed BEGIN/END pairs, so a missing or misnamed END
+// does not throw there: it either leaves the BEGIN marker in place (caught by the shipped-marker
+// check) or, when a later unrelated END shares no name constraint, silently swallows everything
+// between them. This walks every marker tag in document order and enforces strict, non-nested
+// BEGIN/END alternation with matching names before anything is unwrapped.
+export function assertBalancedMarkers(text, file) {
+  const stack = [];
+  for (const match of text.matchAll(MARKER_TAG_RE)) {
+    const [, kind, name] = match;
+    if (kind === 'BEGIN') {
+      if (stack.length > 0) {
+        throw new Error(`${file} has nested GENERATED marker ${name} inside ${stack[stack.length - 1]}`);
+      }
+      stack.push(name);
+    } else {
+      if (stack.length === 0) {
+        throw new Error(`${file} has a stray END GENERATED ${name} with no open BEGIN`);
+      }
+      const open = stack.pop();
+      if (open !== name) {
+        throw new Error(`${file} has END GENERATED ${name} that does not match open BEGIN GENERATED ${open}`);
+      }
+    }
+  }
+  if (stack.length > 0) {
+    throw new Error(`${file} has unclosed GENERATED marker ${stack[stack.length - 1]}`);
+  }
 }
 
 export function shipMarkdown(text, file = 'markdown') {
+  assertBalancedMarkers(text, file);
   const { data, body } = parseFrontmatter(text, file);
   const shipped = {};
   for (const key of SHIP_FRONTMATTER_KEYS) {
@@ -389,4 +420,48 @@ description: ${colonDescription}
   if (parsedFrontmatter.description !== colonDescription) {
     throw new Error('formatFrontmatter did not round-trip a description containing ": "');
   }
+}
+
+function expectThrow(fn, label) {
+  try {
+    fn();
+  } catch {
+    return;
+  }
+  throw new Error(`assertBalancedMarkers did not reject: ${label}`);
+}
+
+export function proveBalancedMarkers() {
+  expectThrow(
+    () => assertBalancedMarkers('<!-- BEGIN GENERATED A -->\nbody\n', 'missing-end.md'),
+    'missing END',
+  );
+  expectThrow(
+    () => assertBalancedMarkers(
+      '<!-- BEGIN GENERATED X -->\nbody\n<!-- END GENERATED Y -->\n',
+      'mismatched-name.md',
+    ),
+    'BEGIN X followed by END Y',
+  );
+  expectThrow(
+    () => assertBalancedMarkers(
+      '<!-- BEGIN GENERATED A -->\n<!-- BEGIN GENERATED B -->\nbody\n<!-- END GENERATED B -->\n<!-- END GENERATED A -->\n',
+      'nested.md',
+    ),
+    'nested BEGIN',
+  );
+  expectThrow(
+    () => assertBalancedMarkers('<!-- END GENERATED A -->\n', 'stray-end.md'),
+    'stray END',
+  );
+  // The old regex (no backreference) matched BEGIN A ... up to the NEXT END of any name, so a
+  // missing END A silently swallowed everything through END B, including B's own markers, into
+  // A's content. The fix must throw here rather than strip.
+  expectThrow(
+    () => assertBalancedMarkers(
+      '<!-- BEGIN GENERATED A -->\nfirst\n<!-- BEGIN GENERATED B -->\nsecond\n<!-- END GENERATED B -->\n',
+      'silent-swallow.md',
+    ),
+    'BEGIN A with no END A, later BEGIN B + END B',
+  );
 }

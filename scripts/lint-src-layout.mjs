@@ -11,7 +11,7 @@ import {
   proveLayoutGuards,
 } from './dist-layout.mjs';
 import { MODULES } from './generated-references.config.mjs';
-import { proveShipMarkdown } from './skill-indexes.mjs';
+import { assertBalancedMarkers, proveBalancedMarkers, proveShipMarkdown } from './skill-indexes.mjs';
 
 assertRepoRoot(import.meta);
 
@@ -40,6 +40,13 @@ async function lintSrc() {
     if (oversize(stat.size, MAX_SRC_FILE_BYTES)) {
       failures.push(`${file.rel} is ${stat.size} bytes (cap ${MAX_SRC_FILE_BYTES})`);
     }
+    if (file.rel.endsWith('.md')) {
+      try {
+        assertBalancedMarkers(await fs.readFile(file.full, 'utf8'), file.rel);
+      } catch (error) {
+        failures.push(error.message);
+      }
+    }
   }
   let feedNames = [];
   try {
@@ -63,4 +70,6 @@ proveLayoutGuards();
 console.log('layout guards: planted negatives all fired');
 proveShipMarkdown();
 console.log('shipMarkdown guards: planted negatives all fired');
+proveBalancedMarkers();
+console.log('balanced-marker guards: planted negatives all fired');
 await lintSrc();
