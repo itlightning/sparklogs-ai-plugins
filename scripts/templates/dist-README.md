@@ -1,17 +1,19 @@
 # SparkLogs AI Plugin
 
-Give your AI agent real evidence from your Windows fleet: logs, device health, and system state, one host or all of them.
+Give your AI assistant or AI agent real evidence from your fleet: logs, device health, and system state, one host or all of them.
 
 ## What is SparkLogs
 
-SparkLogs is [IT fleet intelligence]({{docs_url}}) for MSPs and IT teams: it collects and understands the logs and health signals from every Windows endpoint in your fleet, so problems can be investigated with evidence instead of guesswork. This plugin connects your AI assistant to that intelligence.
+SparkLogs is [IT fleet intelligence]({{docs_url}}) for MSPs and IT teams: it collects and understands the logs and health signals from across your IT fleet, so problems can be investigated with evidence instead of guesswork. This plugin connects your AI assistant to that intelligence.
 
-## What your AI agent can do with it
+Data comes from Windows systems across your fleet through the [SparkLogs Agent](https://sparklogs.com/docs/agents). You can also send it with any [popular open source log shippers](https://sparklogs.com/docs/ingest) such as [OpenTelemetry](https://sparklogs.com/docs/ingest/tools/opentelemetry-collector), [Vector](https://sparklogs.com/docs/ingest/tools/vector), or [Fluent Bit](https://sparklogs.com/docs/ingest/tools/fluentbit), which forward [syslog](https://sparklogs.com/docs/ingest/data-sources/syslog) and other sources.
+
+## What your AI assistant can do with it
 
 - Investigate one device end to end: what changed, what failed, and what it means, with every claim tied to the events behind it. See [skills/sparklogs-investigate](plugins/claude/sparklogs/skills/sparklogs-investigate/SKILL.md).
 - Triage the whole fleet: what needs attention today, what is new this week, and who else is affected.
 - Follow guided steps for common MSP situations such as backup failures, patch failures, slow logon, and degraded storage. See [playbooks](plugins/claude/sparklogs/playbooks/playbooks.md).
-- Read per-feed reference knowledge so answers cite what an event actually means instead of guessing from an event ID. See [feeds](plugins/claude/sparklogs/feeds).
+- Read per-feed reference knowledge for Windows Event Log, servicing, and Defender data, so answers cite what an event actually means instead of guessing from an event ID. See [feeds](plugins/claude/sparklogs/feeds).
 - Write ticket-ready summaries, and explain any single finding back to the evidence it came from. See [commands](plugins/claude/sparklogs/commands).
 
 ## Try asking
