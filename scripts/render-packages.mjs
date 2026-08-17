@@ -29,6 +29,11 @@ const HOST_LABELS = {
 // list, so an addition here without one there fails the build rather than shipping quietly.
 const MAINTAINER_ONLY = new Set(['SYNC-MANIFEST.json']);
 const SEMVER = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/;
+const DIST_README_TEMPLATE_REL = 'scripts/templates/dist-README.md';
+const DIST_README_TEMPLATE = path.join(ROOT, DIST_README_TEMPLATE_REL);
+// Only a release passes --version (the tag drives it). A plain local build has no release identity,
+// so the README says so with a constant: a date or sha here would break the byte-identity rebuild check.
+const UNRELEASED_README_VERSION = 'development build';
 
 function parseArgs(argv) {
   const args = { out: 'build/dist', host: 'all', version: null };
@@ -235,15 +240,14 @@ function mcpConfig(metadata) {
   };
 }
 
-function distRootReadme() {
-  return `# SparkLogs AI plugin
-
-This tree is the installable SparkLogs AI plugin: skills, themes, data-feed lookups, playbooks, and guides, plus host marketplace wrappers.
-
-Product docs: ${DOCS_URL}
-
-Do not edit this branch. Changes go to the \`source\` branch of this repository.
-`;
+// Landing page of the published tree. Kept as markdown so it can be edited and reviewed as prose;
+// the renderer only fills placeholders. Unfilled placeholders fail the build rather than ship.
+async function distRootReadme(version) {
+  const template = await fs.readFile(DIST_README_TEMPLATE, 'utf8');
+  const text = template.replaceAll('{{version}}', version).replaceAll('{{docs_url}}', DOCS_URL);
+  const leftover = text.match(/\{\{[a-z_]+\}\}/);
+  if (leftover) throw new Error(`Unfilled placeholder in ${DIST_README_TEMPLATE_REL}: ${leftover[0]}`);
+  return text;
 }
 
 function pluginPackageReadme(host, metadata) {
@@ -331,7 +335,8 @@ async function main() {
   }
   await safeRmGenerated(out);
   await fs.mkdir(out, { recursive: true });
-  await fs.writeFile(path.join(out, 'README.md'), distRootReadme(), 'utf8');
+  const readme = await distRootReadme(args.version ?? UNRELEASED_README_VERSION);
+  await fs.writeFile(path.join(out, 'README.md'), readme, 'utf8');
   await fs.chmod(path.join(out, 'README.md'), 0o644);
   for (const host of hosts) await renderHost(host, out, metadata, version);
   if (args.host === 'all' || ['claude', 'cursor', 'codex'].includes(args.host)) {
