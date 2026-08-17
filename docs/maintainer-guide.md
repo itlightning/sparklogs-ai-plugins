@@ -89,8 +89,10 @@ A subdirectory under `src/feeds/` that is not in `MODULES` fails `--check` and i
 via `safeRmFeedModule` (that helper only accepts `src/feeds/<feed-id>`).
 
 Published content lives under `src/`. The renderer copies only that tree plus host wrappers and one
-README. Index tables in SKILL.md and `playbooks.md` are stitched from leaf `index:` YAML
-(`yarn stitch-indexes`; `--check` is in `yarn validate`). Dist strips authoring frontmatter and
+README. That dist root README is authored at `scripts/templates/dist-README.md`; the renderer fills
+`{{version}}` (the release version, or `development build` without `--version`) and `{{docs_url}}`,
+and fails on any placeholder it does not know. Index tables in SKILL.md and `playbooks.md` are
+stitched from leaf `index:` YAML (`yarn stitch-indexes`; `--check` is in `yarn validate`). Dist strips authoring frontmatter and
 GENERATED markers. An unknown path under `src/`, or a maintainer file (`yarn.lock`, `package.json`,
 `SYNC-MANIFEST.json`, `scripts/`) in dist output, fails validation. Size caps live in
 `scripts/dist-layout.mjs`. Planted negatives for those guards run in `scripts/lint-src-layout.mjs`.
