@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "description": "Investigate IT and MSP client issues with SparkLogs telemetry, evidence-cited summaries, and root-cause analysis."
+    "description": "Query and analyze SparkLogs: system and application logs plus device health and state over time, one host or the fleet."
   },
   "name": "sparklogs-ai-plugins",
   "owner": {
@@ -14,7 +14,7 @@
         "name": "IT Lightning, LLC"
       },
       "category": "observability",
-      "description": "Investigate IT and MSP client issues with SparkLogs telemetry, evidence-cited summaries, and root-cause analysis.",
+      "description": "Query and analyze SparkLogs: system and application logs plus device health and state over time, one host or the fleet.",
       "homepage": "https://sparklogs.com/",
       "keywords": [
         "observability",

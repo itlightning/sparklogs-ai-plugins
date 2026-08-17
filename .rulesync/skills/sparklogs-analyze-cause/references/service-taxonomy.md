@@ -1,1 +1,0 @@
-../../../../shared-references/service-taxonomy.md

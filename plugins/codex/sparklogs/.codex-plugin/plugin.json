@@ -9,11 +9,11 @@
     "rca",
     "msp"
   ],
-  "description": "Investigate IT and MSP client issues with SparkLogs telemetry, evidence-cited summaries, and root-cause analysis.",
+  "description": "Query and analyze SparkLogs: system and application logs plus device health and state over time, one host or the fleet.",
   "displayName": "SparkLogs",
   "homepage": "https://sparklogs.com/",
   "license": "Apache-2.0",
   "name": "sparklogs",
   "repository": "https://github.com/itlightning/sparklogs-ai-plugins",
-  "version": "1.3.0"
+  "version": "1.4.0"
 }

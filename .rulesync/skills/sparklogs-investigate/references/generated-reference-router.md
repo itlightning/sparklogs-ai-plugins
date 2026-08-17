@@ -1,1 +1,0 @@
-../../../../shared-references/generated-reference-router.md

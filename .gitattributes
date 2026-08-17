@@ -1,5 +1,0 @@
-# Normalize all text to LF for cross-platform consistency and build
-# reproducibility (the validate script diffs two fresh builds byte-for-byte).
-* text=auto eol=lf
-
-*.png binary

@@ -1,11 +1,6 @@
-# SparkLogs: generic Agent Skills hosts bundle
+# SparkLogs (generic Agent Skills hosts)
 
-This directory is the **built SparkLogs AI plugin** for **generic Agent Skills hosts**, shipped from the SparkLogs plugin repository.
+Investigation skills for SparkLogs MCP.
 
-If you have a **full clone** of the repository, these paths are relative to this folder (`plugins/generic/sparklogs/`):
+Product docs: https://sparklogs.com/docs/it-fleet-intelligence
 
-- [Install (generic Agent Skills hosts)](../../../docs/install/generic.md)
-- [Repository overview](../../../README.md)
-- [Contributing](../../../CONTRIBUTING.md)
-
-*(If you only have this plugin folder: open **https://github.com/itlightning/sparklogs-ai-plugins** in the browser and open the same paths from the repository root.)*

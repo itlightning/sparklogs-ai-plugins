@@ -1,7 +1,9 @@
 # When To Use SparkLogs
 
-Use the SparkLogs skills and commands when the user asks to investigate, troubleshoot, summarize, explain, or analyze an IT or technical issue involving logs, endpoints, servers, workstations, backup jobs, RMM connectivity, Windows events, customer tickets, or managed-service-provider operations.
+SparkLogs is the query and analysis layer for what happened on a system and what that device is: system and application logs plus health and state snapshots over time, one host or the fleet.
 
-Prefer `/sparklogs-investigate` for the first pass. Use `/sparklogs-analyze-cause` only when the engineer deliberately asks for candidate cause hypotheses after a factual summary exists. Use `/sparklogs-summary` to refresh an existing investigation report and `/sparklogs-explain` to explain the evidence behind a specific finding.
+**Default: `sparklogs-ask`.** The user wants to understand an event, a count, a timeline, or device health/state (disk, CPU, patches, Defender, Windows events, installed software, collection). Attach `sparklogs-ask`. Chat may go deep.
 
-Do not use SparkLogs skills for remediation, configuration changes, ticket closure, or any action that mutates customer systems.
+**On request: `/sparklogs-investigate`.** The user needs a thorough cited system-condition summary for a ticket or a written investigation report.
+
+`/sparklogs-analyze-cause` gives candidate cause hypotheses, only after a factual summary exists. `/sparklogs-summary` refreshes an existing report; `/sparklogs-explain` walks a specific finding back to its evidence.
