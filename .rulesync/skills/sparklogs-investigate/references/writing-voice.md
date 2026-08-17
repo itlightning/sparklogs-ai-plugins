@@ -1,1 +1,0 @@
-../../../../shared-references/writing-voice.md

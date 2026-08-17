@@ -2,6 +2,7 @@
 // See LICENSE.
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { FEED_ID } from './dist-layout.mjs';
 
 const DEFAULT_ALLOWED_ROOTS = ['build', '.plugin-build'];
 
@@ -46,6 +47,23 @@ async function assertNoSymlinkInExistingPath(target, root) {
 export async function safeRmGenerated(target, options = {}) {
   const root = options.root ?? process.cwd();
   const resolvedTarget = resolveGeneratedPath(target, options);
+  await assertNoSymlinkInExistingPath(resolvedTarget, root);
+  await fs.rm(resolvedTarget, { recursive: true, force: true });
+}
+
+// Wipe one feed directory under src/feeds/<id> only. Never src/, never src/feeds/.
+export async function safeRmFeedModule(moduleId, options = {}) {
+  if (!FEED_ID.test(moduleId)) {
+    throw new Error(`Refusing to remove feed with invalid id: ${moduleId}`);
+  }
+  const root = options.root ?? process.cwd();
+  const resolvedRoot = path.resolve(root);
+  const resolvedTarget = path.resolve(resolvedRoot, 'src', 'feeds', moduleId);
+  const relative = path.relative(resolvedRoot, resolvedTarget);
+  const parts = relative.split(path.sep);
+  if (parts.length !== 3 || parts[0] !== 'src' || parts[1] !== 'feeds' || parts[2] !== moduleId) {
+    throw new Error(`Refusing to remove non-feed path: ${relative}`);
+  }
   await assertNoSymlinkInExistingPath(resolvedTarget, root);
   await fs.rm(resolvedTarget, { recursive: true, force: true });
 }

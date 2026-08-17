@@ -20,9 +20,11 @@ yarn run smoke
 
 Use `yarn run <script>` consistently. This project is Yarn-only.
 
-## Symlinks
+## Layout
 
-Shared references live in `shared-references/` and are symlinked into `.rulesync/skills/<skill>/references/`. The renderer materializes those symlinks in generated packages. Windows contributors may need Developer Mode and Git symlink support enabled.
+Published plugin content lives under `src/` (`skills/`, `commands/`, `agents/`, `themes/`, `feeds/`, `playbooks/`, `guides/`, `assets/`, `metadata/`).
+Skill-local templates stay in `src/skills/<skill>/references/`.
+Shared guides are real files in `src/guides/`, cited as package-root `guides/...`.
 
 ## DCO Sign-Off
 
@@ -42,7 +44,7 @@ You retain any copyright you hold in your contribution, but you grant the projec
 
 ## Security Review Checklist
 
-For any PR touching `.rulesync/`, `shared-references/`, `metadata/`, `scripts/`, `assets/`, install docs, or MCP configs:
+For any PR touching `src/`, `scripts/`, install docs, or MCP configs:
 
 - Read every changed line of agent instructions or tooling guidance.
 - Verify the change matches a real MSP RCA workflow.

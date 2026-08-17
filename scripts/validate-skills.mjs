@@ -3,6 +3,8 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { assertRepoRoot } from './assert-repo-root.mjs';
+import { ASSETS_DIR, METADATA_FILE } from './dist-layout.mjs';
+import { INDEX_KINDS, checkIndexFiles, listSkillIndexTargets, loadIndexCatalog, parseFrontmatter } from './skill-indexes.mjs';
 
 assertRepoRoot(import.meta);
 
@@ -23,14 +25,14 @@ const SHARED_REFERENCES = [
   'scope-resolution.md',
   'service-taxonomy.md',
   'subagent-definitions.md',
-  'windows-eventlog-reasons.md',
   'writing-voice.md',
 ];
+const SKILL_LOCAL_REFERENCES = new Set(['output-template.md', 'hypothesis-generation.md']);
 
 // Pinned snapshot of `service_vocabulary` from the SparkLogs source-library registry
 // (registry.yaml). The registry is the authority and is additive-only; this list is the
 // sync point for a standalone checkout of this repo. Adding a registry value requires
-// adding it here AND as a row in shared-references/service-taxonomy.md in the same change;
+// adding it here AND as a row in src/guides/service-taxonomy.md in the same change;
 // validateServiceTaxonomy() fails until both agree.
 const REGISTRY_SERVICE_VALUES = [
   'storage',
@@ -75,28 +77,23 @@ async function exists(file) {
   }
 }
 
-function parseFrontmatter(text, file) {
-  if (!text.startsWith('---\n')) throw new Error(`${file} missing YAML frontmatter`);
-  const end = text.indexOf('\n---\n', 4);
-  if (end < 0) throw new Error(`${file} missing closing frontmatter delimiter`);
-  const data = {};
-  for (const line of text.slice(4, end).split('\n')) {
-    const match = line.match(/^([A-Za-z0-9_-]+):\s*(.*)$/);
-    if (match) data[match[1]] = match[2].trim();
-  }
-  return data;
-}
-
 async function validateSkills() {
-  const dir = path.join(ROOT, '.rulesync', 'skills');
+  const dir = path.join(ROOT, 'src', 'skills');
   const entries = await fs.readdir(dir, { withFileTypes: true });
   for (const entry of entries) {
     if (!entry.isDirectory()) continue;
     const file = path.join(dir, entry.name, 'SKILL.md');
-    const data = parseFrontmatter(await fs.readFile(file, 'utf8'), file);
+    const { data } = parseFrontmatter(await fs.readFile(file, 'utf8'), file);
     if (!PORTABLE.test(data.name ?? '')) throw new Error(`${file} has non-portable name: ${data.name}`);
     if (data.name !== entry.name) throw new Error(`${file} name must match directory ${entry.name}`);
     if (!data.description || data.description.length < 40) throw new Error(`${file} description is too short`);
+    const indexes = data.indexes ?? [];
+    if (!Array.isArray(indexes) || indexes.length === 0) {
+      throw new Error(`${file} needs indexes: frontmatter listing generated tables`);
+    }
+    for (const kind of indexes) {
+      if (!INDEX_KINDS.includes(kind)) throw new Error(`${file} unknown indexes entry: ${kind}`);
+    }
   }
 }
 
@@ -111,31 +108,36 @@ async function validatePackage() {
   for (const snippet of ['nodeLinker: node-modules', 'yarnPath: .yarn/releases/yarn-4.10.3.cjs', 'enableScripts: false']) {
     if (!yarnrc.includes(snippet)) throw new Error(`.yarnrc.yml missing ${snippet}`);
   }
+  if (pkg.scripts?.rulesync) throw new Error('package.json must not keep a rulesync script');
 }
 
-async function validateReferences() {
-  const dir = path.join(ROOT, '.rulesync', 'skills');
+async function validateGuides() {
+  for (const reference of SHARED_REFERENCES) {
+    const file = path.join(ROOT, 'src', 'guides', reference);
+    if (!await exists(file)) throw new Error(`Missing guide: src/guides/${reference}`);
+    const stat = await fs.lstat(file);
+    if (stat.isSymbolicLink()) throw new Error(`src/guides/${reference} must be a real file, not a symlink`);
+  }
+  const dir = path.join(ROOT, 'src', 'skills');
   const skills = await fs.readdir(dir, { withFileTypes: true });
   for (const skill of skills) {
     if (!skill.isDirectory()) continue;
     const referencesDir = path.join(dir, skill.name, 'references');
-    for (const reference of SHARED_REFERENCES) {
-      const link = path.join(referencesDir, reference);
-      const stat = await fs.lstat(link);
-      if (!stat.isSymbolicLink()) {
-        throw new Error(`${path.relative(ROOT, link)} must be a symlink to shared-references/${reference}`);
+    if (!await exists(referencesDir)) continue;
+    const names = await fs.readdir(referencesDir);
+    for (const name of names) {
+      if (SHARED_REFERENCES.includes(name)) {
+        throw new Error(`${path.relative(ROOT, path.join(referencesDir, name))} duplicates a guide; cite guides/${name}`);
       }
-      const target = await fs.realpath(link);
-      const expected = await fs.realpath(path.join(ROOT, 'shared-references', reference));
-      if (target !== expected) {
-        throw new Error(`${path.relative(ROOT, link)} points to ${target}, expected ${expected}`);
+      if (!SKILL_LOCAL_REFERENCES.has(name)) {
+        throw new Error(`${path.relative(ROOT, path.join(referencesDir, name))} is not a skill-local reference`);
       }
     }
   }
 }
 
 async function validateServiceTaxonomy() {
-  const file = path.join(ROOT, 'shared-references', 'service-taxonomy.md');
+  const file = path.join(ROOT, 'src', 'guides', 'service-taxonomy.md');
   const text = await fs.readFile(file, 'utf8');
   const rows = new Set();
   for (const line of text.split('\n')) {
@@ -156,15 +158,55 @@ async function validateServiceTaxonomy() {
   }
 }
 
+async function validateSkillIndexes() {
+  await checkIndexFiles(ROOT);
+  const catalog = await loadIndexCatalog(ROOT);
+  const targets = await listSkillIndexTargets(ROOT);
+  for (const target of targets) {
+    const text = await fs.readFile(target.file, 'utf8');
+    for (const kind of target.indexes) {
+      if (kind === 'feeds') {
+        for (const id of catalog.modules) {
+          if (!text.includes(`feeds/${id}/`)) {
+            throw new Error(`${path.relative(ROOT, target.file)} missing feeds/${id}/`);
+          }
+        }
+      }
+      if (kind === 'themes') {
+        for (const theme of catalog.themes) {
+          if (!text.includes(theme.path)) {
+            throw new Error(`${path.relative(ROOT, target.file)} missing ${theme.path}`);
+          }
+        }
+      }
+      if (kind === 'playbooks') {
+        for (const playbook of catalog.playbooks) {
+          if (!text.includes(playbook.path)) {
+            throw new Error(`${path.relative(ROOT, target.file)} missing ${playbook.path}`);
+          }
+        }
+      }
+    }
+  }
+}
+
 async function validateAssets() {
   for (const asset of REQUIRED_ASSETS) {
-    if (!await exists(path.join(ROOT, 'assets', asset))) throw new Error(`Missing required asset: assets/${asset}`);
+    if (!await exists(path.join(ROOT, ASSETS_DIR, asset))) {
+      throw new Error(`Missing required asset: ${ASSETS_DIR}/${asset}`);
+    }
   }
+}
+
+async function validateMetadata() {
+  if (!await exists(path.join(ROOT, METADATA_FILE))) throw new Error(`Missing ${METADATA_FILE}`);
 }
 
 await validateSkills();
 await validatePackage();
-await validateReferences();
+await validateGuides();
 await validateServiceTaxonomy();
+await validateSkillIndexes();
 await validateAssets();
+await validateMetadata();
 console.log('Source validation passed');

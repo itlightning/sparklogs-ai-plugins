@@ -14,4 +14,4 @@
 
 ## Security-sensitive changes
 
-If this PR touches `.rulesync/`, `shared-references/`, `metadata/`, `scripts/`, `assets/`, install docs, or MCP configs, confirm you followed the [security review checklist in CONTRIBUTING.md](../CONTRIBUTING.md).
+If this PR touches `src/`, `scripts/`, install docs, or MCP configs, confirm you followed the [security review checklist in CONTRIBUTING.md](../CONTRIBUTING.md).

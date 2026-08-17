@@ -15,21 +15,61 @@
 export const SOURCE_LIBRARY_DIR_ENV = 'SPARKLOGS_SOURCE_LIBRARY_DIR';
 export const DEFAULT_SOURCE_LIBRARY_DIR = '../sparklogs-source-library';
 export const LIBRARY_GENERATED_SUBPATH = 'docs/generated-public';
-export const GENERATED_DIR = 'generated';
-export const MANIFEST_FILE = 'generated/SYNC-MANIFEST.json';
-export const ROUTER_FILE = 'shared-references/generated-reference-router.md';
+export const GENERATED_DIR = 'src/feeds';
+export const MANIFEST_FILE = 'scripts/generated-SYNC-MANIFEST.json';
+export const ROUTER_FILE = 'src/guides/generated-reference-router.md';
 export const ROUTER_BEGIN = '<!-- BEGIN GENERATED INVENTORY -->';
 export const ROUTER_END = '<!-- END GENERATED INVENTORY -->';
 
 // Every module carried into this repo. A module directory in the library that is not listed
 // here is not synced; a module listed here that the library does not produce is a sync failure.
-export const MODULES = ['win.eventlog.security'];
+// Order is curated investigation salience (highest-signal feeds first); the sync logic does not
+// depend on it.
+export const MODULES = [
+  'win.eventlog.security',
+  'win.eventlog.system',
+  'win.eventlog.application',
+  'win.eventlog.setup',
+  'win.servicing.cbs',
+  'win.servicing.dism',
+  'win.defender.eventlog',
+  'sparklogs.agent.state',
+  'sparklogs.agent.vector',
+  'sparklogs.agent.log',
+];
 
-// Artifacts carried outward, in the order a first-time reader should meet them.
+// Curated one-line "what" cell for the feed index table (renderFeedsTable). Keyed by module id
+// so the table row survives reordering MODULES above.
+export const FEED_WHAT = {
+  'win.eventlog.security': 'Security auditing: logons, account and policy changes, actors',
+  'win.eventlog.system': 'System channel: services, drivers, kernel, VSS, storage',
+  'win.eventlog.application': 'Application channel: app crashes, hangs, vendor app events',
+  'win.eventlog.setup': 'Windows Update results per update',
+  'win.servicing.cbs': 'CBS servicing internals: component store, packages',
+  'win.servicing.dism': 'DISM operations and image health',
+  'win.defender.eventlog': 'Defender: threats, protection state',
+  'sparklogs.agent.state': 'Device health and state snapshots: CPU, RAM, disk, installed software, monitors',
+  'sparklogs.agent.vector': 'Collector debug only: data collector internals',
+  'sparklogs.agent.log': 'Collector debug only: agent supervisor log',
+};
+
+// A declared-but-absent or present-but-undeclared row here is a defect the moment it happens,
+// not something to catch on next read: check both directions at load, before anything renders.
+{
+  const missing = MODULES.filter((id) => !FEED_WHAT[id]);
+  if (missing.length) throw new Error(`FEED_WHAT missing a what for: ${missing.join(', ')}`);
+  const extra = Object.keys(FEED_WHAT).filter((id) => !MODULES.includes(id));
+  if (extra.length) throw new Error(`FEED_WHAT has entries not in MODULES: ${extra.join(', ')}`);
+}
+
+// Floor every feed must carry. Optional artifacts ride when the library emits them.
 export const PUBLIC_ARTIFACTS = [
   'README.md',
   'fields.md',
   'enums.md',
+];
+export const OPTIONAL_ARTIFACTS = [
+  'reasons.md',
   'patterns.md',
   'recipes.md',
   'mapping-ecs.md',
@@ -43,9 +83,10 @@ export const INTERNAL_ARTIFACTS = [];
 
 // One-line reader summary per artifact, used to build the router inventory block.
 export const ARTIFACT_SUMMARY = {
-  'README.md': 'module index: what each artifact answers and the order to read them in',
+  'README.md': 'feed index: what each artifact answers and the order to read them in',
   'fields.md': 'what exists at rest, which surface writes it, and the raw fallback when nothing does',
   'enums.md': 'the closed token vocabularies that are safe to group by',
+  'reasons.md': 'what each reason slug means (public summary, severity, impact)',
   'patterns.md': 'the decision procedure for whether a rendered pattern is expected, unexpected, or uncurated',
   'recipes.md': 'worked pivots, each resolving against the field schema',
   'mapping-ecs.md': 'ECS anchors for a query written against another taxonomy',

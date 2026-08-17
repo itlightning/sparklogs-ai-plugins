@@ -13,6 +13,7 @@ const checks = [
   '.cursor-plugin/marketplace.json',
   '.agents/plugins/marketplace.json',
   'plugins/claude/sparklogs/skills/sparklogs-investigate/SKILL.md',
+  'plugins/claude/sparklogs/skills/sparklogs-ask/SKILL.md',
   'plugins/cursor/sparklogs/rules/when-to-use-sparklogs.md',
   'plugins/codex/sparklogs/.codex-plugin/plugin.json',
   'plugins/generic/sparklogs/skills/sparklogs-analyze-cause/SKILL.md',

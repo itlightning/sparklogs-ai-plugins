@@ -27,6 +27,7 @@ import {
   HEAD_CAVEAT,
   KNOWN_DEFECTS,
   MODULES,
+  OPTIONAL_ARTIFACTS,
   PUBLIC_ARTIFACTS,
 } from './generated-references.config.mjs';
 
@@ -199,7 +200,8 @@ async function scanGenerated() {
         throw new Error(`Missing synced artifact ${path.relative(ROOT, path.join(dir, artifact))}. Run: yarn sync-generated`);
       }
     }
-    const stray = present.filter((name) => !PUBLIC_ARTIFACTS.includes(name));
+    const allowed = new Set([...PUBLIC_ARTIFACTS, ...OPTIONAL_ARTIFACTS]);
+    const stray = present.filter((name) => !allowed.has(name));
     if (stray.length > 0) {
       throw new Error(
         `${path.relative(ROOT, dir)} holds files the sync does not produce: ${stray.join(', ')}. `

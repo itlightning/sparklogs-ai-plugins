@@ -24,6 +24,6 @@ There is no separate marketplace manifest for generic; clone or browse **`dist`*
 1. Open the **`dist`** branch of `itlightning/sparklogs-ai-plugins` (default branch on GitHub).
 2. Use `plugins/generic/sparklogs/` as the plugin root, or copy that directory where your host expects skills/commands.
 3. Register **SparkLogs MCP** using your host’s MCP configuration. The generated `mcp.json` expects a **`SPARKLOGS_API_TOKEN`** value when your environment or host substitutes variables into the config (some hosts use different names, so align with your product's docs).
-4. Invoke `/sparklogs-investigate` and related commands according to your host’s command interface.
+4. Ask a question about a monitored host (chat / `sparklogs-ask`). Invoke `/sparklogs-investigate` only for a full cited report.
 
 Exact wiring (paths, reload behavior, secret stores) depends on the agent product; treat this package as the portable **content** bundle plus MCP metadata.

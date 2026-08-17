@@ -8,14 +8,17 @@
 - Seeing `dist` "behind" `source` in commit count is normal; the histories are separate.
 
 Contributor-facing branch guidance is in [CONTRIBUTING.md](../CONTRIBUTING.md).
+Consumer load order (elevations, themes, floor vs full) is in [information-architecture.md](information-architecture.md).
 
-## Generated Reference Set (`generated/`)
+## Generated feed lookups (`src/feeds/`)
 
-`generated/<module>/` holds the AI reference set for each source module: field schema, closed
-vocabularies, the expected-pattern decision procedure, worked query recipes, and external-taxonomy
-anchors. The content is authored nowhere in this repo. It is produced by the SparkLogs source
-library (`tools/gen-ai-schema.py`) and synced here as a checked-in build input, so a plugin
-package carries the reference set offline and a contributor can read it without a second checkout.
+`src/feeds/<id>/` holds the AI lookup set for each data feed: field schema, closed
+vocabularies, and (when present) reasons.
+Security also carries the expected-pattern decision procedure, worked query recipes, and external-taxonomy
+anchors.
+The content is authored nowhere in this repo.
+It is produced by the SparkLogs source
+library (`tools/gen-ai-schema.py`) and synced here as a checked-in build input.
 
 The library renders two trees and owns the split. `docs/generated/` keeps the verification and
 sourcing detail its own authors work against; `docs/generated-public/` is the reader-facing render,
@@ -32,8 +35,9 @@ The environment variable is optional when the checkout sits beside this repo. A 
 but unusable is a hard failure rather than a fallback: a drift guard that quietly reads a different
 checkout reports green about the wrong tree.
 
-`generated/SYNC-MANIFEST.json` records the library branch and commit the current content came from,
-plus every projection rule that ran. Do not hand-edit anything under `generated/`: an edit is
+`scripts/generated-SYNC-MANIFEST.json` records the library branch and commit the current content came from.
+It does not ship on `dist`.
+Do not hand-edit anything under `src/feeds/`: an edit is
 reverted by the next sync and fails the drift check in the meantime.
 
 `yarn validate:generated` runs the gates and then the drift check. **They are enforced in different
@@ -80,6 +84,23 @@ level.
 `INTERNAL_ARTIFACTS` is empty: upstream already withholds what stays internal. The list is kept
 because the sync fails on any artifact appearing in neither it nor `PUBLIC_ARTIFACTS`, so nothing
 new arrives unnoticed in either direction.
+
+A subdirectory under `src/feeds/` that is not in `MODULES` fails `--check` and is deleted on sync
+via `safeRmFeedModule` (that helper only accepts `src/feeds/<feed-id>`).
+
+Published content lives under `src/`. The renderer copies only that tree plus host wrappers and one
+README. Index tables in SKILL.md and `playbooks.md` are stitched from leaf `index:` YAML
+(`yarn stitch-indexes`; `--check` is in `yarn validate`). Dist strips authoring frontmatter and
+GENERATED markers. An unknown path under `src/`, or a maintainer file (`yarn.lock`, `package.json`,
+`SYNC-MANIFEST.json`, `scripts/`) in dist output, fails validation. Size caps live in
+`scripts/dist-layout.mjs`. Planted negatives for those guards run in `scripts/lint-src-layout.mjs`.
+
+`assertBalancedMarkers` (`scripts/skill-indexes.mjs`) rejects any `.md` under `src/` with an
+unmatched, mismatched, or nested `BEGIN GENERATED`/`END GENERATED` pair; it runs in
+`lint-src-layout.mjs` over every source file and again in `shipMarkdown` at render time. Rendered
+frontmatter is also parsed with `js-yaml` in `validate-rendered.mjs`: a value that is not a safe
+plain YAML scalar (e.g. a description containing `: `) must be quoted by `formatFrontmatter`, or the
+gate fails naming the host and file.
 
 ## Versioning
 
@@ -134,7 +155,7 @@ Release CI runs **`yarn run compare-dist`** automatically. Maintainers can still
 **Do not** pair `fullrebuild` or a render on a checked-out `dist` branch with `compare-dist` when validating an official release:
 
 - `fullrebuild` stamps dev versions into `plugin.json` (real content diff).
-- Rendering on `dist` records provenance for the publish commit (`dist` @ `<publish-sha>`), while CI renders from the **tag checkout** on `source` (`HEAD` @ `<tagged-source-sha>`). Plugin content may match, but `DIST.md` and `dist-manifest.json` will differ.
+- Rendering on `dist` records provenance for the publish commit (`dist` @ `<publish-sha>`), while CI renders from the **tag checkout** on `source` (`HEAD` @ `<tagged-source-sha>`). Plugin content may match, but host `plugin.json` version stamps can still differ if you rendered with a dev version.
 
 To mirror the reproducibility job for tag `v1.2.3`:
 
