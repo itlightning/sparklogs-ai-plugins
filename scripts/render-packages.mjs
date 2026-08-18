@@ -266,13 +266,14 @@ function cursorManifest(metadata, version) {
 
 /**
  * Codex plugin manifest: components are path pointers, display metadata sits under interface.
- * No mcpServers pointer. The package ships no MCP config, and a pointer at a file that is not there
- * is worse than no pointer; the README's ~/.codex/config.toml entry is the configured path.
+ * `mcpServers` is a path to the bundled config, not an inline object, and Codex requires the `./`
+ * prefix and a target inside the plugin root.
  */
 function codexManifest(metadata, version) {
   return {
     ...commonManifest(metadata, version),
     skills: './skills/',
+    mcpServers: './.mcp.json',
     interface: {
       displayName: metadata.hosts?.codex?.displayName ?? metadata.displayName,
       category: pluginCategory(metadata),
@@ -374,13 +375,24 @@ function buildCodexMarketplace(metadata) {
  * Cursor nor the spec expands shell environment variables in a header; Cursor resolves
  * ${SPARKLOGS_API_TOKEN} from the manifest's `variables` block, and the generic package ships the
  * placeholder for the reader to replace by hand (its README says so, by key name).
+ *
+ * Codex is the exception, so it gets its own entry. It reads the token through
+ * `bearer_token_env_var`, which takes the environment variable's NAME and is read from the
+ * environment at connect time. A `${...}` header would ship to the server as those literal
+ * characters, so Codex carries no headers at all and no placeholder to substitute.
  */
 function mcpConfig(metadata, host) {
-  const entry = {
-    type: host === 'generic' ? 'streamable-http' : 'http',
-    url: metadata.mcp.url,
-    headers: { Authorization: `Bearer \${${metadata.mcp.tokenVariable}}` },
-  };
+  const entry = host === 'codex'
+    ? {
+      type: 'http',
+      url: metadata.mcp.url,
+      bearer_token_env_var: metadata.mcp.tokenVariable,
+    }
+    : {
+      type: host === 'generic' ? 'streamable-http' : 'http',
+      url: metadata.mcp.url,
+      headers: { Authorization: `Bearer \${${metadata.mcp.tokenVariable}}` },
+    };
   const config = { mcpServers: { sparklogs: entry } };
   if (host === 'generic') config.$schema = AGENT_PLUGINS_MCP_SCHEMA;
   return config;

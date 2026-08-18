@@ -49,14 +49,14 @@ export const HOST_LAYOUT = {
     manifest: '.cursor-plugin/plugin.json',
     mcpFile: 'mcp.json',
   },
-  // Codex ships no MCP config. The install guide's ~/.codex/config.toml entry is the verified path,
-  // and it creates a server named sparklogs; a bundled .mcp.json would either collide with that entry
-  // or sit inert, and nothing has confirmed which. Ship one instruction, not two that can disagree.
+  // Codex reads a bundled .mcp.json through the same server config type as ~/.codex/config.toml, so
+  // the entry takes url and bearer_token_env_var rather than an interpolated header. A config.toml
+  // entry of the same name outranks the plugin's, so the install guide offers it only as a fallback.
   codex: {
     trees: [],
     commands: false,
     manifest: '.codex-plugin/plugin.json',
-    mcpFile: null,
+    mcpFile: '.mcp.json',
   },
   generic: {
     trees: [],
