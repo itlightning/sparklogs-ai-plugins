@@ -12,7 +12,12 @@ Codex documents skills, MCP servers, and hooks as the components a plugin bundle
 
 ## Install
 
-Add this repository as a plugin marketplace source from the default `dist` branch. Codex reads `.agents/plugins/marketplace.json` at the repository root and installs `sparklogs` from `./plugins/codex/sparklogs`.
+```
+codex plugin marketplace add itlightning/sparklogs-ai-plugins
+codex plugin add sparklogs@sparklogs-ai-plugins
+```
+
+Codex fetches the default `dist` branch, reads `.agents/plugins/marketplace.json` at the repository root, and installs `sparklogs` from `./plugins/codex/sparklogs`. A local path works in place of the repository when you are testing an unreleased build.
 
 Installing the plugin brings the MCP server with it. Nothing to add to `~/.codex/config.toml`.
 

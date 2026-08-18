@@ -28,27 +28,35 @@ What new failures are happening this week that we have not seen before?
 ## Quick start
 
 1. Get a SparkLogs workspace at [sparklogs.app](https://sparklogs.app). The free plan is enough to try this.
-2. In Claude Code, add this marketplace:
+2. Add this repository as a plugin marketplace and install `sparklogs`.
+
+   In Claude, then run `/reload-plugins` (or restart Claude Code):
 
    ```
    /plugin marketplace add itlightning/sparklogs-ai-plugins
-   ```
-
-3. Install the plugin, then run `/reload-plugins` or restart Claude Code:
-
-   ```
    /plugin install sparklogs@sparklogs-ai-plugins
    ```
 
-4. Set your SparkLogs MCP token in your shell profile and restart your shell:
+   In Codex:
+
+   ```
+   codex plugin marketplace add itlightning/sparklogs-ai-plugins
+   codex plugin add sparklogs@sparklogs-ai-plugins
+   ```
+
+   In Cursor, add `itlightning/sparklogs-ai-plugins` as a marketplace source from Cursor's plugin flow, then install the `sparklogs` plugin.
+
+3. Set your SparkLogs MCP token in your shell profile and restart your shell:
 
    ```
    export SPARKLOGS_API_TOKEN="your-token-here"
    ```
 
-5. Ask one of the prompts above.
+   Cursor reads the token from a plugin variable rather than your shell, so follow the [Cursor guide](docs/install/cursor.md) there.
 
-Claude Desktop, Cursor, Codex, and other Agent Skills hosts have their own steps: see the [install guides](docs/install).
+4. Ask one of the prompts above.
+
+Claude Desktop, other Agent Skills hosts, and Copilot Studio have their own steps: see the [install guides](docs/install).
 
 Full product documentation: [{{docs_url}}]({{docs_url}}).
 
