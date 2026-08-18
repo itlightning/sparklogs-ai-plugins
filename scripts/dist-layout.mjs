@@ -28,12 +28,56 @@ export const BRAND_ASSETS = ['logo.svg', 'logo.png', 'icon.svg', 'icon-256.png',
 
 export const HOSTS = ['claude', 'cursor', 'codex', 'generic'];
 
+export const AGENT_PLUGINS_PLUGIN_SCHEMA = 'https://agent-plugins.org/schemas/1.0.0/plugin.schema.json';
+export const AGENT_PLUGINS_MCP_SCHEMA = 'https://agent-plugins.org/schemas/1.0.0/mcp.schema.json';
+
+// What each host package actually contains, and where its two config files go.
+// `trees` excludes skills/ (always rendered) and the corpus, which Claude carries at the package
+// root and every other host carries inside each skill's references/ subtree.
+// Codex documents skills, MCP servers and hooks as the bundled component kinds: no commands, no
+// rules, no subagents. Generic follows Agent Plugins v1, which defines skills and mcp.json only.
+export const HOST_LAYOUT = {
+  claude: {
+    trees: ['agents', 'guides', 'playbooks', 'themes', 'feeds'],
+    commands: true,
+    manifest: '.claude-plugin/plugin.json',
+    mcpFile: '.mcp.json',
+  },
+  cursor: {
+    trees: ['agents', 'rules'],
+    commands: true,
+    manifest: '.cursor-plugin/plugin.json',
+    mcpFile: 'mcp.json',
+  },
+  codex: {
+    trees: [],
+    commands: false,
+    manifest: '.codex-plugin/plugin.json',
+    mcpFile: '.mcp.json',
+  },
+  generic: {
+    trees: [],
+    commands: false,
+    manifest: 'plugin.json',
+    mcpFile: 'mcp.json',
+  },
+};
+
+// The published branch is the repository's default branch, so its root has to answer the questions a
+// visitor arrives with: what is this, how do I install it, how do I contribute, where do I report a
+// vulnerability. These ride to the dist root verbatim.
+export const DIST_ROOT_FILES = ['LICENSE', 'NOTICE', 'CONTRIBUTING.md', 'AGENTS.md', 'SECURITY.md'];
+export const DIST_ROOT_DOCS = ['docs'];
+
 export const FEED_ID = /^[a-z][a-z0-9]*(?:\.[a-z][a-z0-9]*)*$/;
 
 // SKILL.md is ~59 KiB today. A dump that is not an index should fail before it ships.
 export const MAX_SRC_FILE_BYTES = 128 * 1024;
-export const MAX_DIST_BYTES = 8 * 1024 * 1024;
-export const MAX_PACKAGE_BYTES = 2 * 1024 * 1024;
+// Hosts other than Claude carry a copy of the reference corpus inside every skill, so a package is
+// roughly the corpus times the skill count. The caps are sized for that plus room to grow, and are
+// still small enough that an accidental tree (node_modules, a build dir) trips them.
+export const MAX_DIST_BYTES = 12 * 1024 * 1024;
+export const MAX_PACKAGE_BYTES = 3 * 1024 * 1024;
 
 export const DOCS_URL = 'https://sparklogs.com/docs/it-fleet-intelligence';
 
@@ -67,13 +111,15 @@ export function classifySrcPath(relativePosix) {
 }
 
 export function unexpectedDistPaths(relativePosixPaths) {
+  const rootFiles = new Set(['README.md', ...DIST_ROOT_FILES]);
   const unexpected = [];
   for (const rel of relativePosixPaths) {
-    if (rel === 'README.md') continue;
+    if (rootFiles.has(rel)) continue;
     if (rel === '.claude-plugin/marketplace.json') continue;
     if (rel === '.cursor-plugin/marketplace.json') continue;
     if (rel === '.agents/plugins/marketplace.json') continue;
     if (rel.startsWith('plugins/')) continue;
+    if (DIST_ROOT_DOCS.some((dir) => rel.startsWith(`${dir}/`))) continue;
     unexpected.push(rel);
   }
   return unexpected;
@@ -86,7 +132,11 @@ export function forbiddenDistNames(relativePosixPaths) {
     if (base === 'yarn.lock' || base === 'package.json' || base === 'SYNC-MANIFEST.json') {
       hits.push(rel);
     }
-    if (rel.startsWith('scripts/') || rel.startsWith('docs/') || rel.startsWith('src/')) {
+    if (rel.startsWith('scripts/') || rel.startsWith('src/')) {
+      hits.push(rel);
+    }
+    // docs/ is a published landing-page tree at the dist root only; a package must never carry it.
+    if (rel.startsWith('plugins/') && rel.includes('/docs/')) {
       hits.push(rel);
     }
   }
@@ -98,7 +148,7 @@ export function extraFeedDirs(dirNames, modules) {
   return dirNames.filter((name) => !allowed.has(name));
 }
 
-const PACKAGE_TOP_FILES = new Set(['README.md', 'LICENSE', 'mcp.json', '.mcp.json']);
+const PACKAGE_TOP_FILES = new Set(['README.md', 'LICENSE', 'mcp.json', '.mcp.json', 'plugin.json']);
 const PACKAGE_TOP_DIRS = new Set([
   'skills', 'commands', 'agents', 'rules', 'themes', 'feeds',
   'playbooks', 'guides', 'assets',
@@ -123,13 +173,25 @@ export function proveLayoutGuards() {
   if (srcBad.ok) throw new Error('IN-list guard did not reject src/oops.md');
   const srcOk = classifySrcPath('src/guides/lql-reference.md');
   if (!srcOk.ok) throw new Error('IN-list guard rejected a legal guide');
-  const distBad = unexpectedDistPaths(['yarn.lock', 'README.md', 'plugins/claude/sparklogs/LICENSE']);
+  const distBad = unexpectedDistPaths([
+    'yarn.lock', 'README.md', 'LICENSE', 'SECURITY.md', 'docs/install/claude.md',
+    'plugins/claude/sparklogs/LICENSE',
+  ]);
   if (!distBad.includes('yarn.lock') || distBad.length !== 1) {
     throw new Error(`dist unexpected-path guard misfired: ${distBad.join(',')}`);
   }
-  const forbid = forbiddenDistNames(['plugins/claude/sparklogs/yarn.lock', 'README.md']);
+  const forbid = forbiddenDistNames([
+    'plugins/claude/sparklogs/yarn.lock', 'README.md', 'docs/install/claude.md',
+    'plugins/claude/sparklogs/docs/leak.md',
+  ]);
   if (!forbid.includes('plugins/claude/sparklogs/yarn.lock')) {
     throw new Error('forbidden-name guard missed yarn.lock inside a package');
+  }
+  if (forbid.includes('docs/install/claude.md')) {
+    throw new Error('forbidden-name guard rejected the published root docs tree');
+  }
+  if (!forbid.includes('plugins/claude/sparklogs/docs/leak.md')) {
+    throw new Error('forbidden-name guard missed docs/ inside a package');
   }
   const orphans = extraFeedDirs(['win.eventlog.security', 'old-module'], ['win.eventlog.security']);
   if (orphans.length !== 1 || orphans[0] !== 'old-module') {

@@ -11,6 +11,7 @@ import {
   proveLayoutGuards,
 } from './dist-layout.mjs';
 import { MODULES } from './generated-references.config.mjs';
+import { proveHostTransforms } from './host-transforms.mjs';
 import { assertBalancedMarkers, proveBalancedMarkers, proveShipMarkdown } from './skill-indexes.mjs';
 
 assertRepoRoot(import.meta);
@@ -72,4 +73,6 @@ proveShipMarkdown();
 console.log('shipMarkdown guards: planted negatives all fired');
 proveBalancedMarkers();
 console.log('balanced-marker guards: planted negatives all fired');
+proveHostTransforms();
+console.log('host transforms: every rewrite case round-trips');
 await lintSrc();

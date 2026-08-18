@@ -22,6 +22,9 @@
   "mcp": {
     "url": "https://mcp.sparklogs.app/mcp",
     "authType": "apiToken",
+    "tokenVariable": "SPARKLOGS_API_TOKEN",
+    "tokenTitle": "SparkLogs API token",
+    "tokenDescription": "Workspace-scoped SparkLogs API token from the SparkLogs app (sparklogs.app).",
     "allowedHosts": [
       "mcp.sparklogs.app",
       "us.mcp.sparklogs.app",

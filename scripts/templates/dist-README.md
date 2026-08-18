@@ -48,7 +48,7 @@ What new failures are happening this week that we have not seen before?
 
 5. Ask one of the prompts above.
 
-Claude Desktop, Cursor, Codex, and other Agent Skills hosts have their own steps: see the [install guides](https://github.com/itlightning/sparklogs-ai-plugins/tree/source/docs/install).
+Claude Desktop, Cursor, Codex, and other Agent Skills hosts have their own steps: see the [install guides](docs/install).
 
 Full product documentation: [{{docs_url}}]({{docs_url}}).
 
@@ -63,11 +63,11 @@ The plugin is mostly readable markdown. Browse it here before you install:
 - [Themes](plugins/claude/sparklogs/themes): patching, security and audit, endpoint protection, operational events, device health.
 - [Subagents](plugins/claude/sparklogs/agents): pattern enumeration, clustering, and log summarization helpers.
 
-Those links point at the Claude package. The same content ships in every host package under `plugins/<host>/sparklogs/`.
+Those links point at the Claude package. Every host package under `plugins/<host>/sparklogs/` carries the same skills and the same reference corpus; commands, subagents, and rules ship only where the host documents them. The Claude package keeps the corpus at the package root, and the other packages keep a copy inside each skill so a skill folder is self-contained.
 
 ## Contributing
 
-Contributions are welcome. Read [CONTRIBUTING.md](https://github.com/itlightning/sparklogs-ai-plugins/blob/source/CONTRIBUTING.md) to get started.
+Contributions are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) to get started.
 
 This branch is generated from the `source` branch, so pull requests land on `source`.
 
@@ -75,8 +75,8 @@ This branch is generated from the `source` branch, so pull requests land on `sou
 
 Version: {{version}}
 
-License: Apache-2.0, see [LICENSE](https://github.com/itlightning/sparklogs-ai-plugins/blob/source/LICENSE).
+License: Apache-2.0, see [LICENSE](LICENSE).
 
-Security: report suspected vulnerabilities per [SECURITY.md](https://github.com/itlightning/sparklogs-ai-plugins/blob/source/SECURITY.md).
+Security: report suspected vulnerabilities per [SECURITY.md](SECURITY.md).
 
 Support: reach us on [Discord](https://discord.gg/Yu8F8w8tDw), or use the Help Center in the SparkLogs app to request help.
