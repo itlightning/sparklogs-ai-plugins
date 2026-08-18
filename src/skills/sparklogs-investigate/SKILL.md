@@ -574,6 +574,7 @@ Read a reference when the situation calls for it. Do not hold them all in contex
 
 ---
 
+<!-- BEGIN HOSTVARIANT:commands -->
 ## Section 19. Slash commands
 
 The plugin exposes these slash commands; you may be invoked by any of them:
@@ -583,6 +584,17 @@ The plugin exposes these slash commands; you may be invoked by any of them:
 - `/sparklogs:summary <external_investigation_id>` - Re-render the system condition summary for an existing investigation, incorporating everything found so far.
 - `/sparklogs:explain <claim or finding>` - Engineer asks you to explain your reasoning for a specific claim. Walk through what evidence supports it (cited `query_url`s) and what would refute it. Honest about limits.
 - `/sparklogs:analyze-cause <external_investigation_id>` - **NOT YOU.** This invokes the separate cause-analysis skill.
+<!-- ELSE HOSTVARIANT:commands -->
+## Section 19. Related workflows
+
+Three SparkLogs skills divide this work. You may be routed to any of them by what the engineer asks for; there is nothing to type.
+
+- `sparklogs-ask` - Default chat with ops data. Not this skill.
+- `sparklogs-investigate` - This skill. System condition summary.
+- `sparklogs-analyze-cause` - **NOT YOU.** The separate cause-analysis workflow, and only after a factual summary exists.
+
+Two follow-up requests stay inside this skill. Re-rendering: the engineer names an existing `external_investigation_id` and wants the system condition summary produced again, incorporating everything found since. Explaining: the engineer names one claim and wants your reasoning for it, so walk through the evidence that supports it (cited `query_url`s) and what would refute it, honest about limits.
+<!-- END HOSTVARIANT:commands -->
 
 ---
 

@@ -212,6 +212,7 @@ Themes and feeds carry confirm-step field names and change analysis. Do not load
 
 ---
 
+<!-- BEGIN HOSTVARIANT:commands -->
 ## Section 8. Slash commands
 
 The plugin exposes:
@@ -221,6 +222,13 @@ The plugin exposes:
 - `/sparklogs:investigate <ticket / scope description>` - **NOT YOU.** This invokes the investigation skill that produces the system condition summary you analyze.
 - `/sparklogs:summary <external_investigation_id>` - **NOT YOU.** This re-displays the prior investigation summary.
 - `/sparklogs:explain <claim or finding>` - **NOT YOU.** Engineer asks the investigation skill to explain a specific Finding.
+<!-- ELSE HOSTVARIANT:commands -->
+## Section 8. Related workflows
+
+- `sparklogs-analyze-cause` - This skill, entered with an `external_investigation_id`. You produce candidate cause hypotheses.
+- `sparklogs-ask` - **NOT YOU.** Default chat with ops data. No hypotheses.
+- `sparklogs-investigate` - **NOT YOU.** The workflow that produces the system condition summary you analyze. It also owns re-displaying a prior summary and explaining a specific Finding.
+<!-- END HOSTVARIANT:commands -->
 
 ---
 
