@@ -289,7 +289,7 @@ function genericManifest(metadata, version) {
   };
 }
 
-/** Claude (Code and Cowork): top-level description, ./ source paths, Anthropic $schema */
+/** Claude: top-level description, ./ source paths, Anthropic $schema */
 function buildClaudeMarketplace(metadata) {
   const owner = { name: metadata.author.name };
   if (metadata.author.email) owner.email = metadata.author.email;

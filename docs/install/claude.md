@@ -1,6 +1,6 @@
 # Install SparkLogs in Claude
 
-SparkLogs AI Agent runs in both Claude Code (terminal) and Claude Desktop.
+The SparkLogs plugin installs from this repository's marketplace, in Claude Code (terminal) and in Claude Desktop.
 
 ## Claude Code
 

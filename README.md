@@ -1,6 +1,6 @@
 # SparkLogs AI Plugins
 
-SparkLogs is the query and analysis layer for system and application logs plus device health and state over time, one host or the fleet. This repository packages the SparkLogs AI skills, commands, subagents, and MCP configuration for Claude Code and Cowork, Cursor, and Codex.
+SparkLogs is the query and analysis layer for system and application logs plus device health and state over time, one host or the fleet. This repository packages the SparkLogs AI skills, commands, subagents, and MCP configuration for Claude, Codex, and Cursor.
 
 The plugin gives your AI assistant a SparkLogs workflow:
 
@@ -24,7 +24,7 @@ Expected outcomes:
 
 ## Supported Hosts
 
-Claude Code (and Cowork) and Cursor are the recommended Foundry hosts. Codex is supported via repo/local marketplace installation while public directory flows mature. An Agent Plugins v1 package is generated under `plugins/generic/sparklogs/` on `dist` for hosts that follow that standard.
+SparkLogs plugins are available for Claude, Codex, and Cursor. All three install from this repository's marketplace. An Agent Plugins v1 package is generated under `plugins/generic/sparklogs/` on `dist` for hosts that follow that standard.
 
 Each package carries only what its host documents:
 
@@ -37,7 +37,7 @@ Each package carries only what its host documents:
 
 Codex documents skills, MCP servers, and hooks as the components a plugin bundles, and Agent Plugins v1 defines skills and `mcp.json`. Commands, rules, and subagents are host-specific formats, so they ship only where the host reads them.
 
-The Codex package bundles its MCP server, so installing the plugin configures the server too; export `SPARKLOGS_API_TOKEN` and Codex reads it by name. A `[mcp_servers.sparklogs]` entry in `~/.codex/config.toml` is the fallback for using the server without the plugin, and it outranks the plugin's entry, so configure one or the other.
+The Codex package bundles its MCP server, so installing the plugin configures the server too; export `SPARKLOGS_API_TOKEN` and Codex reads it by name. A `[mcp_servers.sparklogs]` entry in `~/.codex/config.toml` is how you run the server without the plugin, and it outranks the plugin's entry, so configure one or the other.
 
 ## Install And Update
 

@@ -30,7 +30,7 @@ The engineer remains the decision-maker. Suggesting causes and next steps is exp
 <a id="Trust-MSPCustomization"></a>
 ## 6. Support MSP Customization
 
-MSP environments differ. Skill content and investigation depth can evolve with Foundry partner feedback.
+MSP environments differ. Skill content and investigation depth can evolve with partner feedback.
 
 <a id="Trust-Auditability"></a>
 ## 7. Make Work Auditable

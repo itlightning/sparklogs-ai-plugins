@@ -13,7 +13,7 @@ This repository must not contain:
 - SparkLogs backend source code, infrastructure code, private schemas, or internal deployment details.
 - Customer transcripts, customer logs, support tickets, evaluation traces, or golden datasets.
 - Internal design-doc cross-reference maps copied verbatim from private docs.
-- Internal SLOs, pricing strategy, roadmap detail, unreleased feature commitments, or partner-sensitive Foundry notes.
+- Internal SLOs, pricing strategy, roadmap detail, unreleased feature commitments, or partner-sensitive program notes.
 - Secrets, tokens, credentials, private URLs, or screenshots containing customer data.
 - Third-party copyrighted content unless attribution and license requirements are reviewed and added to `NOTICE`.
 
