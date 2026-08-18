@@ -88,6 +88,7 @@ async function validateMarketplace() {
 
   const codex = await readJson(path.join(DIST, '.agents', 'plugins', 'marketplace.json'));
   if (!codex.name) throw new Error('Codex marketplace missing name');
+  if (!codex.owner?.name) throw new Error('Codex marketplace missing owner.name');
   if (codex.plugins[0].source.source !== 'local') throw new Error('Codex marketplace source must name a documented source kind');
   if (codex.plugins[0].source.path !== './plugins/codex/sparklogs') throw new Error('Codex marketplace source.path incorrect');
   if ('version' in codex.plugins[0]) throw new Error('Codex marketplace entry must not duplicate plugin version');
@@ -161,14 +162,24 @@ async function validatePackage(host) {
       throw new Error(`${host} package ${shipped ? 'is missing' : 'must not ship'} ${tree}/`);
     }
   }
-  const mcp = await readJson(path.join(base, layout.mcpFile));
-  const server = mcp.mcpServers.sparklogs;
-  if (!server.type) throw new Error(`${host} MCP entry has no transport type`);
-  const url = new URL(server.url);
-  if (url.protocol !== 'https:') throw new Error(`${host} MCP URL must be HTTPS`);
-  if (!ALLOWED_MCP_HOSTS.has(url.hostname)) throw new Error(`${host} MCP host is not allowlisted: ${url.hostname}`);
-  if (url.pathname !== '/mcp') throw new Error(`${host} MCP URL must end in /mcp, got path ${url.pathname || '(none)'}`);
+  let server = null;
+  if (layout.mcpFile) {
+    const mcp = await readJson(path.join(base, layout.mcpFile));
+    server = mcp.mcpServers.sparklogs;
+    if (!server.type) throw new Error(`${host} MCP entry has no transport type`);
+    const url = new URL(server.url);
+    if (url.protocol !== 'https:') throw new Error(`${host} MCP URL must be HTTPS`);
+    if (!ALLOWED_MCP_HOSTS.has(url.hostname)) throw new Error(`${host} MCP host is not allowlisted: ${url.hostname}`);
+    if (url.pathname !== '/mcp') throw new Error(`${host} MCP URL must end in /mcp, got path ${url.pathname || '(none)'}`);
+  } else {
+    for (const name of ['mcp.json', '.mcp.json']) {
+      if (await exists(path.join(base, name))) throw new Error(`${host} ships ${name} but declares no MCP config`);
+    }
+  }
   const manifest = await readJson(path.join(base, layout.manifest));
+  if (!layout.mcpFile && manifest.mcpServers) {
+    throw new Error(`${host} manifest points at an MCP config the package does not ship`);
+  }
   if (manifest.name !== 'sparklogs') throw new Error(`${host} manifest name must be sparklogs`);
   if (!SEMVER.test(manifest.version)) throw new Error(`${host} manifest version is invalid`);
   if (host === 'cursor') {
@@ -190,7 +201,7 @@ async function validateShippedMarkdown(host, base) {
     if (!stat.isFile() || !file.endsWith('.md')) return;
     const relative = path.relative(base, file).split(path.sep).join('/');
     const text = await fs.readFile(file, 'utf8');
-    if (/BEGIN GENERATED|END GENERATED/.test(text)) markerHits.push(relative);
+    if (/BEGIN GENERATED|END GENERATED|HOSTVARIANT/.test(text)) markerHits.push(relative);
     const { data } = parseFrontmatter(text, `${host}:${relative}`);
     for (const key of Object.keys(data)) {
       if (AUTHORING_FRONTMATTER_KEYS.has(key)) authoringHits.push(`${relative} key ${key}`);

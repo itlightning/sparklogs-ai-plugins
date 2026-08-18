@@ -16,7 +16,13 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import yaml from 'js-yaml';
 import { assertRepoRoot } from './assert-repo-root.mjs';
-import { HOSTS, HOST_LAYOUT, METADATA_FILE } from './dist-layout.mjs';
+import {
+  DIST_ROOT_DOCS,
+  DIST_ROOT_FILES,
+  HOSTS,
+  HOST_LAYOUT,
+  METADATA_FILE,
+} from './dist-layout.mjs';
 import { CLAUDE_ROOT_TOKEN, CORPUS_TOPS, isPlaceholderRef } from './host-transforms.mjs';
 
 assertRepoRoot(import.meta);
@@ -24,10 +30,12 @@ assertRepoRoot(import.meta);
 const ROOT = process.cwd();
 const DIST = path.resolve(ROOT, process.argv[2] ?? 'build/dist');
 
-// Same shape as the render-time citation matcher, widened to accept the forms the render produces:
-// a ${CLAUDE_PLUGIN_ROOT} anchor, a run of ../, or a references/ hop.
+// Same shape as the render-time citation matcher, widened twice over: to accept the forms the render
+// produces (a ${CLAUDE_PLUGIN_ROOT} anchor, a run of ../, a references/ hop), and to accept the forms
+// the render CANNOT produce (./ and src/ prefixes). The second group is the point: a prefixed citation
+// is invisible to the rewriter, so if one reaches a package it must be resolved here or it ships dead.
 const SHIPPED_REF_RE = new RegExp(
-  '(?<![\\w./$-])(?:\\$\\{CLAUDE_PLUGIN_ROOT\\}/|(?:\\.\\./)+|references/)?'
+  '(?<![\\w./$-])(?:\\$\\{CLAUDE_PLUGIN_ROOT\\}/|(?:\\.{1,2}/)+|src/|references/)?'
   + `(?:${CORPUS_TOPS.join('|')})/[A-Za-z0-9<][A-Za-z0-9._/<>-]*?(?:\\.md|/)(?![\\w-])`,
   'g',
 );
@@ -129,6 +137,52 @@ async function checkCorpusRefsResolve() {
   return checked;
 }
 
+// A package is host-specific, so its prose must be too. Each rule names the host property that makes
+// the text true; anywhere else the same sentence is a promise the installed plugin cannot keep.
+// Scope is package markdown only. The dist root is cross-host by design and describes every variant.
+const HOST_PROSE_RULES = [
+  {
+    what: 'Claude command syntax',
+    pattern: /\/sparklogs:[a-z][a-z-]*/g,
+    allowed: (host) => host === 'claude',
+  },
+  {
+    what: 'Cursor command invocation',
+    pattern: /(?<!\w)\/sparklogs-(?:ask|investigate|analyze-cause|summary|explain)\b/g,
+    allowed: (host) => host === 'cursor',
+  },
+  {
+    what: 'a slash-command claim',
+    pattern: /slash[ -]commands?/gi,
+    allowed: (host) => HOST_LAYOUT[host].commands,
+  },
+  {
+    what: 'a commands/ path',
+    pattern: /(?<![\w./-])commands\//g,
+    allowed: (host) => HOST_LAYOUT[host].commands,
+  },
+];
+
+/** M2. Host-specific prose may only ship to the host it is true for. */
+async function checkHostProse() {
+  for (const host of HOSTS) {
+    const base = pkgBase(host);
+    if (!await exists(base)) continue;
+    for (const file of await walkFiles(base)) {
+      if (!file.endsWith('.md')) continue;
+      const rel = path.relative(base, file).split(path.sep).join('/');
+      const text = await fs.readFile(file, 'utf8');
+      for (const rule of HOST_PROSE_RULES) {
+        if (rule.allowed(host)) continue;
+        const hits = [...text.matchAll(rule.pattern)].map((match) => match[0]);
+        if (hits.length > 0) {
+          fail(`${host}/${rel}: ships ${rule.what} (${[...new Set(hits)].sort().join(', ')}), which is not true for this host`);
+        }
+      }
+    }
+  }
+}
+
 /** d. A command file named after the plugin installs under a doubled prefix. */
 async function checkCommandNames() {
   const metadata = JSON.parse(await fs.readFile(path.join(ROOT, METADATA_FILE), 'utf8'));
@@ -200,6 +254,32 @@ async function checkReadmeLinks() {
   }
 }
 
+/**
+ * M7. The dist root is the repository's landing page, so its relative links have to resolve THERE.
+ * A doc written for a checkout can link at files the published tree does not carry; either the link
+ * is rewritten or the doc stays on `source`.
+ */
+async function checkDistRootLinks() {
+  const roots = [
+    ...['README.md', ...DIST_ROOT_FILES].map((name) => path.join(DIST, name)),
+    ...(await Promise.all(DIST_ROOT_DOCS.map(async (dir) => (
+      await exists(path.join(DIST, dir)) ? walkFiles(path.join(DIST, dir)) : []
+    )))).flat(),
+  ];
+  for (const file of roots) {
+    if (!file.endsWith('.md') || !await exists(file)) continue;
+    const rel = path.relative(DIST, file).split(path.sep).join('/');
+    const text = await fs.readFile(file, 'utf8');
+    for (const match of text.matchAll(/\]\((?!https?:|mailto:|#)([^)\s]+)\)/g)) {
+      const target = match[1].split('#')[0];
+      if (!target) continue;
+      if (!await exists(path.resolve(path.dirname(file), target))) {
+        fail(`${rel} links to ${target}, which the published tree does not contain`);
+      }
+    }
+  }
+}
+
 /** g. The host's own validator, when the CLI is installed. */
 function checkClaudeCli() {
   const probe = spawnSync('claude', ['--version'], { encoding: 'utf8' });
@@ -220,9 +300,11 @@ if (!await exists(DIST)) throw new Error(`Rendered directory does not exist: ${D
 await checkMcpTransport();
 await checkNoMustacheArgs();
 const refCount = await checkCorpusRefsResolve();
+await checkHostProse();
 await checkCommandNames();
 await checkCursorRules();
 await checkReadmeLinks();
+await checkDistRootLinks();
 checkClaudeCli();
 
 if (failures.length > 0) {

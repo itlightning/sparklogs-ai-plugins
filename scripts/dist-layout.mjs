@@ -49,11 +49,14 @@ export const HOST_LAYOUT = {
     manifest: '.cursor-plugin/plugin.json',
     mcpFile: 'mcp.json',
   },
+  // Codex ships no MCP config. The install guide's ~/.codex/config.toml entry is the verified path,
+  // and it creates a server named sparklogs; a bundled .mcp.json would either collide with that entry
+  // or sit inert, and nothing has confirmed which. Ship one instruction, not two that can disagree.
   codex: {
     trees: [],
     commands: false,
     manifest: '.codex-plugin/plugin.json',
-    mcpFile: '.mcp.json',
+    mcpFile: null,
   },
   generic: {
     trees: [],
@@ -66,8 +69,16 @@ export const HOST_LAYOUT = {
 // The published branch is the repository's default branch, so its root has to answer the questions a
 // visitor arrives with: what is this, how do I install it, how do I contribute, where do I report a
 // vulnerability. These ride to the dist root verbatim.
-export const DIST_ROOT_FILES = ['LICENSE', 'NOTICE', 'CONTRIBUTING.md', 'AGENTS.md', 'SECURITY.md'];
+export const DIST_ROOT_FILES = ['LICENSE', 'NOTICE', 'CONTRIBUTING.md', 'AGENTS.md', 'SECURITY.md', 'CHANGELOG.md'];
 export const DIST_ROOT_DOCS = ['docs'];
+
+// Authoring and maintainer docs stay on `source`. They address someone with the repo checked out and
+// link to files (`.github/workflows`, `CODEOWNERS`) and a branch context that the published tree does
+// not have, so publishing them would ship dead links and claims that are false where they landed.
+export const DIST_ROOT_DOCS_EXCLUDE = new Set([
+  'docs/information-architecture.md',
+  'docs/maintainer-guide.md',
+]);
 
 export const FEED_ID = /^[a-z][a-z0-9]*(?:\.[a-z][a-z0-9]*)*$/;
 

@@ -5,10 +5,11 @@ Investigation skills for SparkLogs MCP.
 ## What is in this package
 
 - `skills/`: `sparklogs-ask`, `sparklogs-investigate`, `sparklogs-analyze-cause`. Each skill carries the reference corpus it cites under its own references directory.
-- `.mcp.json`: the SparkLogs MCP server. See the note below before relying on it.
 - `.codex-plugin/plugin.json`: the plugin manifest.
 
-Codex documents skills, MCP servers, and hooks as the components a plugin bundles. It does not document repo-shipped slash commands or subagents, so this package ships neither. Ask for a workflow by name instead: "use sparklogs-investigate on ...".
+The package ships no MCP config. Configure the server yourself, once, per the section below; the skills are useless without it.
+
+Codex documents skills, MCP servers, and hooks as the components a plugin bundles. It does not document repo-shipped commands or subagents, so this package ships neither. Ask for a workflow by name instead: "use sparklogs-investigate on ...".
 
 ## Install
 
@@ -16,7 +17,7 @@ Add this repository as a plugin marketplace source from the default `dist` branc
 
 ## Token
 
-Configure the MCP server in `~/.codex/config.toml`. This is the supported path:
+Configure the MCP server in `~/.codex/config.toml`. This is the supported path, and the only one this package relies on:
 
 ```toml
 [mcp_servers.sparklogs]
@@ -29,8 +30,6 @@ bearer_token_env_var = "{{token_var}}"
 ```
 export {{token_var}}="your-token-here"
 ```
-
-The `.mcp.json` bundled with this plugin is an experimental convenience: verify on install that Codex picked the server up, and fall back to the `config.toml` entry above if it did not.
 
 Get the token from the SparkLogs app at [sparklogs.app](https://sparklogs.app).
 

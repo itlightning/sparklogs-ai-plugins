@@ -11,6 +11,7 @@ import {
   ASSETS_DIR,
   BRAND_ASSETS,
   DIST_ROOT_DOCS,
+  DIST_ROOT_DOCS_EXCLUDE,
   DIST_ROOT_FILES,
   DOCS_URL,
   HOSTS,
@@ -21,6 +22,7 @@ import {
 } from './dist-layout.mjs';
 import {
   CORPUS_TOPS,
+  applyHostVariants,
   rewriteArgumentsForCursor,
   rewriteCommandsAsSkillNames,
   rewriteCommandsForCursor,
@@ -117,6 +119,7 @@ async function writeText(file, text) {
 // path inside the rendered package, which is what the corpus rewrite measures against.
 function renderMarkdownText(text, srcLabel, host, pkgRel) {
   let out = shipMarkdown(text, srcLabel);
+  out = applyHostVariants(out, { commands: HOST_LAYOUT[host].commands }, srcLabel);
   out = host === 'claude' ? rewriteCorpusForClaude(out) : rewriteCorpusInSkill(out, pkgRel);
   if (host === 'cursor') out = rewriteCommandsForCursor(out);
   else if (host !== 'claude') out = rewriteCommandsAsSkillNames(out);
@@ -159,6 +162,7 @@ async function renderTreeVerbatim(srcDir, out, relDir) {
   for (const entry of entries.sort((a, b) => a.name.localeCompare(b.name))) {
     const from = path.join(srcDir, entry.name);
     const rel = `${relDir}/${entry.name}`;
+    if (DIST_ROOT_DOCS_EXCLUDE.has(rel)) continue;
     if (entry.isDirectory()) await renderTreeVerbatim(from, out, rel);
     else await copyFile(from, path.join(out, rel));
   }
@@ -228,9 +232,12 @@ function commonManifest(metadata, version) {
   };
 }
 
-/** Claude plugin manifest: the documented field set, no icon field, no display metadata. */
+/** Claude plugin manifest: the documented field set. There is no icon field in it. */
 function claudeManifest(metadata, version) {
-  return commonManifest(metadata, version);
+  return {
+    ...commonManifest(metadata, version),
+    displayName: metadata.hosts?.claude?.displayName ?? metadata.displayName,
+  };
 }
 
 /**
@@ -257,12 +264,15 @@ function cursorManifest(metadata, version) {
   };
 }
 
-/** Codex plugin manifest: components are path pointers, display metadata sits under interface. */
+/**
+ * Codex plugin manifest: components are path pointers, display metadata sits under interface.
+ * No mcpServers pointer. The package ships no MCP config, and a pointer at a file that is not there
+ * is worse than no pointer; the README's ~/.codex/config.toml entry is the configured path.
+ */
 function codexManifest(metadata, version) {
   return {
     ...commonManifest(metadata, version),
     skills: './skills/',
-    mcpServers: './.mcp.json',
     interface: {
       displayName: metadata.hosts?.codex?.displayName ?? metadata.displayName,
       category: pluginCategory(metadata),
@@ -335,8 +345,11 @@ function buildCursorMarketplace(metadata) {
  * the local form keeps the reference branch-agnostic and survives forks.
  */
 function buildCodexMarketplace(metadata) {
+  const owner = { name: metadata.author.name };
+  if (metadata.author.email) owner.email = metadata.author.email;
   return {
     name: marketplaceId(metadata),
+    owner,
     interface: {
       displayName: metadata.hosts?.codex?.displayName ?? metadata.displayName,
     },
@@ -444,7 +457,7 @@ async function renderHost(host, out, metadata, version) {
   await writeText(path.join(base, 'README.md'), await pluginPackageReadme(host, metadata));
   await copyFile(path.join(ROOT, 'LICENSE'), path.join(base, 'LICENSE'));
   await writeJson(path.join(base, layout.manifest), HOST_MANIFEST_BUILDERS[host](metadata, version));
-  await writeJson(path.join(base, layout.mcpFile), mcpConfig(metadata, host));
+  if (layout.mcpFile) await writeJson(path.join(base, layout.mcpFile), mcpConfig(metadata, host));
 }
 
 async function renderMarketplaces(out, metadata) {

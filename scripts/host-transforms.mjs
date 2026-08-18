@@ -32,6 +32,40 @@ export function isPlaceholderRef(ref) {
   return ref.includes('<');
 }
 
+// One canonical citation shape in source: package-root relative, no leading ./ or ../ and no src/.
+// Any other shape slips past the citation matcher's left boundary, so it is never rewritten for a
+// host and never resolved by the packaging gate: it ships dead and green. Refuse it at the source.
+export const NONCANONICAL_REF_RE = new RegExp(
+  `(?<![\\w$-])(?:\\.{1,2}/|src/)+(?:${CORPUS_TOPS.join('|')})/[A-Za-z0-9<][A-Za-z0-9._/<>-]*?(?:\\.md|/)(?![\\w-])`,
+  'g',
+);
+
+export function listNoncanonicalRefs(text) {
+  return [...text.matchAll(NONCANONICAL_REF_RE)].map((match) => match[0]);
+}
+
+// Some source prose is only true on hosts that ship commands. Both truths live in src, side by side,
+// and the renderer keeps the arm that matches the host. Anything else drifts: a single body cannot
+// describe an invocation that exists on two hosts and not on the other two.
+const HOST_VARIANT_KEYS = new Set(['commands']);
+const HOST_VARIANT_RE = /<!-- BEGIN HOSTVARIANT:([a-z]+) -->\n([\s\S]*?)<!-- ELSE HOSTVARIANT:\1 -->\n([\s\S]*?)<!-- END HOSTVARIANT:\1 -->\n?/g;
+const HOST_VARIANT_TAG_RE = /<!-- (?:BEGIN|ELSE|END) HOSTVARIANT:([a-z]+) -->/g;
+
+export function applyHostVariants(text, capabilities, file = 'markdown') {
+  for (const [, key] of text.matchAll(HOST_VARIANT_TAG_RE)) {
+    if (!HOST_VARIANT_KEYS.has(key)) throw new Error(`${file} has unknown host variant key: ${key}`);
+  }
+  const tagCount = [...text.matchAll(HOST_VARIANT_TAG_RE)].length;
+  const blocks = [...text.matchAll(HOST_VARIANT_RE)];
+  if (tagCount !== blocks.length * 3) {
+    throw new Error(`${file} has an unbalanced HOSTVARIANT block`);
+  }
+  return text.replace(HOST_VARIANT_RE, (_, key, whenTrue, whenFalse) => {
+    const arm = capabilities[key] ? whenTrue : whenFalse;
+    return `${arm.replace(/\n+$/, '')}\n`;
+  });
+}
+
 const COMMAND_RE = /\/sparklogs:([a-z][a-z-]*)/g;
 
 export const CLAUDE_ROOT_TOKEN = '${CLAUDE_PLUGIN_ROOT}';
@@ -159,5 +193,32 @@ export function proveHostTransforms() {
   );
   if (isPlaceholderRef('guides/a.md') || !isPlaceholderRef('feeds/<id>/')) {
     throw new Error('placeholder detection misfired');
+  }
+  // A prefixed citation is invisible to the rewriter, which is exactly why it must be refused.
+  expectEqual(
+    rewriteCorpusForClaude('See `./guides/lql-reference.md` and `src/feeds/win.x/`.'),
+    'See `./guides/lql-reference.md` and `src/feeds/win.x/`.',
+    'prefixed citations are outside the rewriter',
+  );
+  expectEqual(
+    listNoncanonicalRefs('a `./guides/a.md` b `../themes/b.md` c `src/feeds/win.x/` d `guides/ok.md`').join(','),
+    './guides/a.md,../themes/b.md,src/feeds/win.x/',
+    'noncanonical citation detection',
+  );
+  const variant = '<!-- BEGIN HOSTVARIANT:commands -->\nslash form\n<!-- ELSE HOSTVARIANT:commands -->\nskill form\n<!-- END HOSTVARIANT:commands -->\n';
+  expectEqual(applyHostVariants(variant, { commands: true }, 'v.md'), 'slash form\n', 'variant true arm');
+  expectEqual(applyHostVariants(variant, { commands: false }, 'v.md'), 'skill form\n', 'variant false arm');
+  for (const [broken, label] of [
+    ['<!-- BEGIN HOSTVARIANT:commands -->\nx\n', 'missing ELSE and END'],
+    ['<!-- BEGIN HOSTVARIANT:commands -->\nx\n<!-- END HOSTVARIANT:commands -->\n', 'missing ELSE'],
+    ['<!-- BEGIN HOSTVARIANT:nope -->\nx\n<!-- ELSE HOSTVARIANT:nope -->\ny\n<!-- END HOSTVARIANT:nope -->\n', 'unknown key'],
+  ]) {
+    let threw = false;
+    try {
+      applyHostVariants(broken, { commands: true }, 'v.md');
+    } catch {
+      threw = true;
+    }
+    if (!threw) throw new Error(`applyHostVariants did not reject: ${label}`);
   }
 }
