@@ -12,7 +12,7 @@ The Codex package ships **skills only**. Codex documents skills, MCP servers, an
 
 ## Configure the MCP server
 
-This is the supported path, and the one to use if anything else does not work. Add to `~/.codex/config.toml`:
+The package deliberately ships no MCP config: whether Codex reads a plugin-bundled `.mcp.json`, and how such an entry would interact with the one below, is unverified, and two configurations naming the same server can only disagree. Configure it once here. Add to `~/.codex/config.toml`:
 
 ```toml
 [mcp_servers.sparklogs]
@@ -25,7 +25,5 @@ bearer_token_env_var = "SPARKLOGS_API_TOKEN"
 ```
 export SPARKLOGS_API_TOKEN="your-token-here"
 ```
-
-The `.mcp.json` bundled inside the plugin package is experimental: verify on install that Codex picked the server up, and use the `config.toml` entry above if it did not.
 
 If official self-serve Codex Plugin Directory publishing becomes generally available, this guide will be updated.

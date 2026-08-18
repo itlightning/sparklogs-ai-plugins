@@ -28,14 +28,16 @@ Claude Code (and Cowork) and Cursor are the recommended Foundry hosts. Codex is 
 
 Each package carries only what its host documents:
 
-| Package | Skills | Commands | Subagents | Rules | Reference corpus |
-|---|---|---|---|---|---|
-| `plugins/claude/sparklogs` | yes | yes | yes | no | at the package root, cited through `${CLAUDE_PLUGIN_ROOT}` |
-| `plugins/cursor/sparklogs` | yes | yes | yes | yes | inside each skill's `references/` |
-| `plugins/codex/sparklogs` | yes | no | no | no | inside each skill's `references/` |
-| `plugins/generic/sparklogs` | yes | no | no | no | inside each skill's `references/` |
+| Package | Skills | Commands | Subagents | Rules | MCP config | Reference corpus |
+|---|---|---|---|---|---|---|
+| `plugins/claude/sparklogs` | yes | yes | yes | no | `.mcp.json` | at the package root, cited through `${CLAUDE_PLUGIN_ROOT}` |
+| `plugins/cursor/sparklogs` | yes | yes | yes | yes | `mcp.json` | inside each skill's `references/` |
+| `plugins/codex/sparklogs` | yes | no | no | no | none, configure `~/.codex/config.toml` | inside each skill's `references/` |
+| `plugins/generic/sparklogs` | yes | no | no | no | `mcp.json` | inside each skill's `references/` |
 
 Codex documents skills, MCP servers, and hooks as the components a plugin bundles, and Agent Plugins v1 defines skills and `mcp.json`. Commands, rules, and subagents are host-specific formats, so they ship only where the host reads them.
+
+The Codex package deliberately ships no MCP config: whether a plugin-bundled one is read, and how it would interact with the `~/.codex/config.toml` entry the install guide tells you to create, is unverified. Two configurations naming the same server can only disagree, so there is one.
 
 ## Install And Update
 

@@ -15,7 +15,9 @@ For MVP, compatibility is verified manually during release testing. This file wi
 ## Unconfirmed On A Real Install
 
 - Cursor: setting a plugin variable as an individual (non-team) user. The team-admin dashboard path is documented; the self-serve path is not. The manual `~/.cursor/mcp.json` route in the Cursor install guide is the fallback.
-- Codex: whether a plugin-bundled `.mcp.json` is picked up. The `~/.codex/config.toml` entry in the Codex install guide is the supported path and the fallback.
+- Cursor: the command invocation names. Cursor documents a `name` frontmatter field on command files but not the resulting invocation string, so `/sparklogs-ask` and its siblings are inferred from that field, not confirmed. Asking in chat works regardless; the skills carry the workflow.
+- Cursor: whether command bodies receive the invocation's free text. Cursor documents no argument placeholder, so command bodies are written to read correctly either way.
+- Codex: whether a plugin-bundled `.mcp.json` is read at all, and how it would interact with a `~/.codex/config.toml` entry naming the same server. The Codex package therefore ships no MCP config; the `config.toml` entry in the Codex install guide is the only configured path.
 
 ## Known Deferred Areas
 
