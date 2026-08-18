@@ -38,18 +38,20 @@ The SparkLogs plugin installs from this repository's marketplace, in Claude Code
    The other commands are `/sparklogs:analyze-cause`, `/sparklogs:summary`, and
    `/sparklogs:explain`.
 
-## Claude Desktop (future)
+## Claude Desktop
 
-1. Open the **Customize** panel from the left sidebar.
-2. To the right of `Personal plugins` click the **+** button.
-3. Choose **Add custom marketplace** and enter:
+1. Open the **Directory** from the sidebar and pick **Plugins**.
+2. Click the **+** button (Add marketplace) and choose **Add from a repository**.
+3. Enter the repository and click **Sync**:
 
 ```
    itlightning/sparklogs-ai-plugins
 ```
 
+   Leave **Sync automatically** on to pick up plugin updates whenever this repository publishes a new release.
+
 4. Find **sparklogs** in the marketplace listing and click **Install**.
-5. Set `SPARKLOGS_API_TOKEN` environment variable and then re-launch
+5. Set the `SPARKLOGS_API_TOKEN` environment variable and then re-launch
    Claude Desktop.
 6. Start a new conversation and ask a question about a monitored host, or try `/sparklogs:ask`.
 
