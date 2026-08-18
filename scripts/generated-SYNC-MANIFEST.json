@@ -3,7 +3,7 @@
   "source": {
     "repository": "sparklogs-source-library",
     "branch": "reorg-plugin",
-    "commit": "9237fcc65c732b0624a1441b5f648d25d706fac8",
+    "commit": "4b9fb8d631fe9e6464942d2b192054a45846dca2",
     "generatedSubpath": "docs/generated-public"
   },
   "consumption": {
