@@ -4,6 +4,8 @@ Unpublished authoring doc on the `source` branch.
 Installed packages do not include this file.
 Consumer paths below are package-root (`themes/`, `feeds/`, `playbooks/`, `guides/`).
 In this checkout they live under `src/` with the same names.
+Source markdown always cites the corpus in that package-root dialect; the renderer rewrites each citation per host (`scripts/host-transforms.mjs`).
+Claude anchors on `${CLAUDE_PLUGIN_ROOT}`; every other host gets a copy of the corpus inside each skill's `references/` and a citation relative to the citing file.
 
 Index tables in SKILL.md and `playbooks.md` are generated from leaf YAML (`index:`, optional `aliases:`) by `yarn stitch-indexes`.
 Authoring frontmatter is stripped on dist. GENERATED markers do not ship.
@@ -47,7 +49,7 @@ The feed table's row order is curated investigation salience, not alphabetical: 
 
 Cross-cutting stays in `guides/`: class/severity, service taxonomy, LQL, MCP tools, honesty, mistakes, voice, scope-resolution, off-endpoint.
 
-`rules/` ships only in the cursor and generic packages (host condition in `scripts/render-packages.mjs`). Claude and Codex hosts route on skill descriptions alone.
+`rules/` ships only in the cursor package (`HOST_LAYOUT` in `scripts/dist-layout.mjs`). Claude, Codex, and generic hosts route on skill descriptions alone.
 
 ## Floor vs full generated lookup
 
@@ -70,5 +72,7 @@ Synced verbatim from the source-library public tree into `src/feeds/`.
 ## Dist
 
 `dist` is `src/` plus host marketplace wrappers plus one README (what this is, sparklogs.com docs URL).
-No `yarn.lock`, no `package.json`, no `scripts/`, no maintainer docs, no sync manifest.
+The dist root also carries the repository landing-page files (`LICENSE`, `NOTICE`, `CONTRIBUTING.md`, `AGENTS.md`, `SECURITY.md`, `docs/`), because `dist` is the default branch a visitor arrives on.
+Each host package carries only the component kinds its host documents: `HOST_LAYOUT` in `scripts/dist-layout.mjs` is the table.
+No `yarn.lock`, no `package.json`, no `scripts/`, no sync manifest, and no `docs/` inside a package.
 No authoring frontmatter. No GENERATED markers.

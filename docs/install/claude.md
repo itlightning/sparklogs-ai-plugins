@@ -30,10 +30,13 @@ SparkLogs AI Agent runs in both Claude Code (terminal) and Claude Desktop.
 4. Try it. Ask a question about a monitored host, or:
 
 ```
-   /sparklogs-ask <question>
+   /sparklogs:ask <question>
 ```
 
-   Use `/sparklogs-investigate <scope>` only when you want a full cited report.
+   Use `/sparklogs:investigate <scope>` only when you want a full cited report.
+
+   The other commands are `/sparklogs:analyze-cause`, `/sparklogs:summary`, and
+   `/sparklogs:explain`.
 
 ## Claude Desktop (future)
 
@@ -48,7 +51,7 @@ SparkLogs AI Agent runs in both Claude Code (terminal) and Claude Desktop.
 4. Find **sparklogs** in the marketplace listing and click **Install**.
 5. Set `SPARKLOGS_API_TOKEN` environment variable and then re-launch
    Claude Desktop.
-6. Start a new conversation and ask a question about a monitored host, or try `/sparklogs-ask`.
+6. Start a new conversation and ask a question about a monitored host, or try `/sparklogs:ask`.
 
 > Looking for SparkLogs in **Customize → Plugins → Browse plugins**?
 > 
@@ -58,8 +61,15 @@ SparkLogs AI Agent runs in both Claude Code (terminal) and Claude Desktop.
 
 The plugin package lives at `plugins/claude/sparklogs/` on the
 `dist` branch (the repo's default branch) and contains skills,
-commands, subagents, `.mcp.json`, and plugin metadata. The marketplace
+commands, subagents, the reference corpus (`guides/`, `playbooks/`,
+`themes/`, `feeds/`), `.mcp.json`, and plugin metadata. The marketplace
 manifest is at `.claude-plugin/marketplace.json` on the same branch.
+
+`.mcp.json` declares `"type": "http"`. Claude drops an MCP server entry
+that has a `url` and no `type`, so that field is not optional.
+Skill, command, and subagent markdown cites the corpus through
+`${CLAUDE_PLUGIN_ROOT}`, which Claude expands to the installed plugin
+directory.
 
 # Security
 

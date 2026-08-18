@@ -5,10 +5,12 @@ SparkLogs is the query and analysis layer for system and application logs plus d
 The plugin gives your AI assistant a SparkLogs workflow:
 
 - `sparklogs-ask`: answer what happened, or what the device/fleet looks like, from logs and health/state. Default door.
-- `/sparklogs-investigate` gathers evidence into a cited system-condition summary.
-- `/sparklogs-analyze-cause` is an explicit second step that turns prior findings into candidate hypotheses with confirm/refute steps.
-- `/sparklogs-summary` re-renders an existing investigation summary for ticket updates or customer communication.
-- `/sparklogs-explain` explains the evidence behind a specific claim or finding.
+- `sparklogs-investigate` gathers evidence into a cited system-condition summary.
+- `sparklogs-analyze-cause` is an explicit second step that turns prior findings into candidate hypotheses with confirm/refute steps.
+- A `summary` command re-renders an existing investigation summary for ticket updates or customer communication.
+- An `explain` command walks the evidence behind a specific claim or finding.
+
+Command invocation differs by host, so each package renders its own form: Claude namespaces plugin commands as `/sparklogs:ask`, `/sparklogs:investigate`, `/sparklogs:analyze-cause`, `/sparklogs:summary`, `/sparklogs:explain`; Cursor invokes the same set as `/sparklogs-ask` and so on. Codex and the generic Agent Plugins package ship skills only, so you name the workflow instead of typing a command.
 
 ## Why MSPs Should Care
 
@@ -22,7 +24,18 @@ Expected outcomes:
 
 ## Supported Hosts
 
-Claude Code (and Cowork) and Cursor are the recommended Foundry hosts. Codex is supported via repo/local marketplace installation while public directory flows mature. A neutral Agent Skills package is generated under `plugins/generic/sparklogs/` on `dist` for hosts that can import skills from a folder.
+Claude Code (and Cowork) and Cursor are the recommended Foundry hosts. Codex is supported via repo/local marketplace installation while public directory flows mature. An Agent Plugins v1 package is generated under `plugins/generic/sparklogs/` on `dist` for hosts that follow that standard.
+
+Each package carries only what its host documents:
+
+| Package | Skills | Commands | Subagents | Rules | Reference corpus |
+|---|---|---|---|---|---|
+| `plugins/claude/sparklogs` | yes | yes | yes | no | at the package root, cited through `${CLAUDE_PLUGIN_ROOT}` |
+| `plugins/cursor/sparklogs` | yes | yes | yes | yes | inside each skill's `references/` |
+| `plugins/codex/sparklogs` | yes | no | no | no | inside each skill's `references/` |
+| `plugins/generic/sparklogs` | yes | no | no | no | inside each skill's `references/` |
+
+Codex documents skills, MCP servers, and hooks as the components a plugin bundles, and Agent Plugins v1 defines skills and `mcp.json`. Commands, rules, and subagents are host-specific formats, so they ship only where the host reads them.
 
 ## Install And Update
 
