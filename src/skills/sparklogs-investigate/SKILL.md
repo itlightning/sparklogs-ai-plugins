@@ -587,7 +587,7 @@ The plugin exposes these slash commands; you may be invoked by any of them:
 <!-- ELSE HOSTVARIANT:commands -->
 ## Section 19. Related workflows
 
-Three SparkLogs skills divide this work. You may be routed to any of them by what the engineer asks for, or invoked directly through the host's own skill syntax (Codex exposes them as `$sparklogs:sparklogs-ask` and siblings).
+Three SparkLogs skills divide this work. You may be routed to any of them by what the engineer asks for; there is nothing to type.
 
 - `sparklogs-ask` - Default chat with ops data. Not this skill.
 - `sparklogs-investigate` - This skill. System condition summary.
