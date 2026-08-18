@@ -10,7 +10,7 @@ The plugin gives your AI assistant a SparkLogs workflow:
 - A `summary` command re-renders an existing investigation summary for ticket updates or customer communication.
 - An `explain` command walks the evidence behind a specific claim or finding.
 
-Command invocation differs by host, so each package renders its own form: Claude namespaces plugin commands as `/sparklogs:ask`, `/sparklogs:investigate`, `/sparklogs:analyze-cause`, `/sparklogs:summary`, `/sparklogs:explain`; Cursor invokes the same set as `/sparklogs-ask` and so on. Codex and the generic Agent Plugins package ship skills only, so you name the workflow instead of typing a command.
+Command invocation differs by host, so each package renders its own form: Claude namespaces plugin commands as `/sparklogs:ask`, `/sparklogs:investigate`, `/sparklogs:analyze-cause`, `/sparklogs:summary`, `/sparklogs:explain`; Cursor invokes the same set as `/sparklogs-ask` and so on. Codex and the generic Agent Plugins package ship no commands, so you name the workflow instead of typing one.
 
 ## Why MSPs Should Care
 
@@ -32,12 +32,12 @@ Each package carries only what its host documents:
 |---|---|---|---|---|---|---|
 | `plugins/claude/sparklogs` | yes | yes | yes | no | `.mcp.json` | at the package root, cited through `${CLAUDE_PLUGIN_ROOT}` |
 | `plugins/cursor/sparklogs` | yes | yes | yes | yes | `mcp.json` | inside each skill's `references/` |
-| `plugins/codex/sparklogs` | yes | no | no | no | none, configure `~/.codex/config.toml` | inside each skill's `references/` |
+| `plugins/codex/sparklogs` | yes | no | no | no | `.mcp.json` | inside each skill's `references/` |
 | `plugins/generic/sparklogs` | yes | no | no | no | `mcp.json` | inside each skill's `references/` |
 
 Codex documents skills, MCP servers, and hooks as the components a plugin bundles, and Agent Plugins v1 defines skills and `mcp.json`. Commands, rules, and subagents are host-specific formats, so they ship only where the host reads them.
 
-The Codex package deliberately ships no MCP config: whether a plugin-bundled one is read, and how it would interact with the `~/.codex/config.toml` entry the install guide tells you to create, is unverified. Two configurations naming the same server can only disagree, so there is one.
+The Codex package bundles its MCP server, so installing the plugin configures the server too; export `SPARKLOGS_API_TOKEN` and Codex reads it by name. A `[mcp_servers.sparklogs]` entry in `~/.codex/config.toml` is the fallback for using the server without the plugin, and it outranks the plugin's entry, so configure one or the other.
 
 ## Install And Update
 

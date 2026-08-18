@@ -4,7 +4,7 @@
 
 - Claude: supported for Git-backed marketplace/plugin installation for Claude Code and Claude Cowork.
 - Cursor: supported for Git-backed marketplace/plugin installation.
-- Codex: supported for repo/local marketplace installation via `.agents/plugins/marketplace.json` while official public directory publishing matures. Skills only: Codex does not document repo-shipped slash commands or subagents.
+- Codex: supported for repo/local marketplace installation via `.agents/plugins/marketplace.json` while official public directory publishing matures. Skills and a bundled MCP server: Codex does not document repo-shipped slash commands or subagents.
 - Copilot Studio: MCP setup guide only.
 - VS Code/GitHub Copilot: Agent Plugins v1 output only; full plugin packaging deferred.
 
@@ -17,7 +17,7 @@ For MVP, compatibility is verified manually during release testing. This file wi
 - Cursor: setting a plugin variable as an individual (non-team) user. The team-admin dashboard path is documented; the self-serve path is not. The manual `~/.cursor/mcp.json` route in the Cursor install guide is the fallback.
 - Cursor: the command invocation names. Cursor documents a `name` frontmatter field on command files but not the resulting invocation string, so `/sparklogs-ask` and its siblings are inferred from that field, not confirmed. Asking in chat works regardless; the skills carry the workflow.
 - Cursor: whether command bodies receive the invocation's free text. Cursor documents no argument placeholder, so command bodies are written to read correctly either way.
-- Codex: whether a plugin-bundled `.mcp.json` is read at all, and how it would interact with a `~/.codex/config.toml` entry naming the same server. The Codex package therefore ships no MCP config; the `config.toml` entry in the Codex install guide is the only configured path.
+- Codex: the bundled `.mcp.json` has not yet been exercised on a real install. Its shape is grounded in the Codex source rather than inferred: `codex-rs/codex-mcp/src/plugin_config.rs` deserializes each entry of a plugin's `.mcp.json` into the same `McpServerConfig` type that `~/.codex/config.toml` uses, so `url` and `bearer_token_env_var` are accepted, and `codex-rs/codex-mcp/src/catalog.rs` ranks a `config.toml` server above a plugin-provided one of the same name. OpenAI's own `openai/plugins` repository ships the same shape in `plugins/github/.mcp.json`. One real install should still confirm the server connects.
 
 ## Known Deferred Areas
 

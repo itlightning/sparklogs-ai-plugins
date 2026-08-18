@@ -16,15 +16,15 @@ Dates are release dates; the `Unreleased` section accumulates until a tag is cut
   Codex documents skills, MCP servers, and hooks as the components a plugin bundles, and Agent Plugins v1 defines skills and `mcp.json`.
   Ask for a workflow by name (`sparklogs-investigate`) instead of typing a command.
   The Claude and Cursor packages are unaffected.
-- **The Codex package ships no MCP config file.**
-  Configure the server once in `~/.codex/config.toml` per the Codex install guide.
-  Whether Codex reads a plugin-bundled MCP config, and how it would interact with a `config.toml` entry naming the same server, is unverified.
-
 ### Fixed
 
 - **MCP server entries now declare a transport.**
   Claude silently drops an entry that has a `url` and no `type`, so the MCP server never connected.
   Claude, Cursor, and Codex use `http`; the generic package uses `streamable-http` per Agent Plugins v1.
+- **The Codex MCP entry authenticates the way Codex actually reads a token.**
+  It sets `bearer_token_env_var` to `SPARKLOGS_API_TOKEN`, the environment variable's name.
+  Codex expands no `${...}` placeholder in a header, so the header form every other host uses would have shipped those literal characters to the server.
+  Installing the Codex plugin now configures the server; `[mcp_servers.sparklogs]` in `~/.codex/config.toml` becomes the fallback for using the server without the plugin, and it outranks the plugin's entry, so configure one or the other.
 - **Reference citations resolve at their destination.**
   Skill, subagent, and command markdown cited the guides, playbooks, themes, and feed references by package-root path, which resolved from nowhere once installed.
   The Claude package now anchors those citations on `${CLAUDE_PLUGIN_ROOT}`; every other package carries the corpus inside each skill and cites it relatively, so a skill folder is self-contained.
@@ -42,5 +42,5 @@ Dates are release dates; the `Unreleased` section accumulates until a tag is cut
 - `/sparklogs:analyze-cause` exists as a command.
   The cause-analysis skill was documented as a command everywhere but had no command file behind it.
 - Packaging gates in CI.
-  They check that every MCP entry declares a transport, that no unexpanded argument placeholder survives, that every reference resolves from its own directory, that host-specific prose is confined to the host it is true for, that no command file repeats the plugin name, that Cursor rules carry frontmatter, that README and landing-page links resolve, and that `claude plugin validate` passes when the CLI is available.
+  They check that every MCP entry declares a transport, that the Codex entry names its token variable and that the Codex manifest points at the file that carries it, that no unexpanded argument placeholder survives, that every reference resolves from its own directory, that host-specific prose is confined to the host it is true for, that no command file repeats the plugin name, that Cursor rules carry frontmatter, that README and landing-page links resolve, and that `claude plugin validate` passes when the CLI is available.
 - The published branch root now carries `LICENSE`, `NOTICE`, `CONTRIBUTING.md`, `AGENTS.md`, `SECURITY.md`, this changelog, and the install docs, so the default branch reads as a repository landing page.

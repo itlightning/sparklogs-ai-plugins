@@ -2,7 +2,7 @@
 
 Codex plugin publishing is still evolving. For MVP, use repo/local marketplace installation from the generated `dist` branch.
 
-The Codex package ships **skills only**. Codex documents skills, MCP servers, and lifecycle hooks as the components a plugin bundles; it does not document repo-shipped slash commands or subagents, and its custom-prompt mechanism is a per-user `~/.codex/prompts` directory that a repository cannot populate. So there is nothing to type as `/sparklogs-...` here. Name the workflow instead: "use sparklogs-investigate on SRV-FILE01 this week".
+The Codex package ships **skills and the MCP server**, and no commands. Codex documents skills, MCP servers, and lifecycle hooks as the components a plugin bundles; it does not document repo-shipped slash commands or subagents, and its custom-prompt mechanism is a per-user `~/.codex/prompts` directory that a repository cannot populate. So there is nothing to type as `/sparklogs-...` here. Name the workflow instead: "use sparklogs-investigate on SRV-FILE01 this week".
 
 ## Install the plugin
 
@@ -10,9 +10,21 @@ The Codex package ships **skills only**. Codex documents skills, MCP servers, an
 2. Codex reads `.agents/plugins/marketplace.json` at the repository root.
 3. Install the `sparklogs` plugin, whose source path is `./plugins/codex/sparklogs`.
 
-## Configure the MCP server
+## Set your token
 
-The package deliberately ships no MCP config: whether Codex reads a plugin-bundled `.mcp.json`, and how such an entry would interact with the one below, is unverified, and two configurations naming the same server can only disagree. Configure it once here. Add to `~/.codex/config.toml`:
+The plugin bundles the SparkLogs MCP server, so installing it configures the server too. The server reads your token from the `SPARKLOGS_API_TOKEN` environment variable. Export it in your shell profile and restart your shell:
+
+```
+export SPARKLOGS_API_TOKEN="your-token-here"
+```
+
+Codex reads the variable by **name** at connect time, so the token itself never enters a config file.
+
+Get the token from the SparkLogs app at [sparklogs.app](https://sparklogs.app).
+
+## Fallback: the MCP server without the plugin
+
+To use the SparkLogs MCP server on its own, without installing the plugin, add it to `~/.codex/config.toml`:
 
 ```toml
 [mcp_servers.sparklogs]
@@ -20,10 +32,8 @@ url = "https://mcp.sparklogs.app/mcp"
 bearer_token_env_var = "SPARKLOGS_API_TOKEN"
 ```
 
-`bearer_token_env_var` takes the **name** of an environment variable, not the token and not an interpolation. Export the token in your shell profile and restart your shell:
+Do not configure both. This entry and the plugin's bundled `.mcp.json` both define a server named `sparklogs`. Codex resolves the collision in favor of `config.toml`, so the plugin's entry would be silently shadowed rather than duplicated. If you installed the plugin, leave `[mcp_servers.sparklogs]` out of your `config.toml`.
 
-```
-export SPARKLOGS_API_TOKEN="your-token-here"
-```
+You can still tune the bundled server without editing the plugin. Codex reads per-plugin policy from `config.toml` under `plugins.<plugin>.mcp_servers.sparklogs`, which is where an `enabled` or tool-approval override belongs.
 
 If official self-serve Codex Plugin Directory publishing becomes generally available, this guide will be updated.
