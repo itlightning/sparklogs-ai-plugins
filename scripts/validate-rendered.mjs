@@ -8,6 +8,7 @@ import {
   ASSETS_DIR,
   BRAND_ASSETS,
   HOSTS,
+  HOST_LAYOUT,
   MAX_DIST_BYTES,
   MAX_PACKAGE_BYTES,
   METADATA_FILE,
@@ -86,7 +87,10 @@ async function validateMarketplace() {
   if ('version' in cursor.plugins[0]) throw new Error('Cursor marketplace entry must not duplicate plugin version');
 
   const codex = await readJson(path.join(DIST, '.agents', 'plugins', 'marketplace.json'));
-  if (codex.plugins[0].source.path !== 'plugins/codex/sparklogs') throw new Error('Codex marketplace source.path incorrect');
+  if (!codex.name) throw new Error('Codex marketplace missing name');
+  if (!codex.owner?.name) throw new Error('Codex marketplace missing owner.name');
+  if (codex.plugins[0].source.source !== 'local') throw new Error('Codex marketplace source must name a documented source kind');
+  if (codex.plugins[0].source.path !== './plugins/codex/sparklogs') throw new Error('Codex marketplace source.path incorrect');
   if ('version' in codex.plugins[0]) throw new Error('Codex marketplace entry must not duplicate plugin version');
 }
 
@@ -138,23 +142,67 @@ async function validatePackage(host) {
     if (!await exists(path.join(ROOT, ASSETS_DIR, asset))) throw new Error(`Missing source asset ${ASSETS_DIR}/${asset}`);
     if (!await exists(path.join(base, 'assets', asset))) throw new Error(`${host} missing rendered asset ${asset}`);
   }
-  if (!await exists(path.join(base, 'feeds', 'win.eventlog.security', 'README.md'))) {
-    throw new Error(`${host} missing feeds/win.eventlog.security/README.md`);
+  // Claude cites the corpus from the package root; every other host carries it inside each skill.
+  const feedProbe = host === 'claude'
+    ? path.join(base, 'feeds', 'win.eventlog.security', 'README.md')
+    : path.join(base, 'skills', 'sparklogs-ask', 'references', 'feeds', 'win.eventlog.security', 'README.md');
+  if (!await exists(feedProbe)) {
+    throw new Error(`${host} missing ${path.relative(base, feedProbe)}`);
   }
   if (await exists(path.join(base, 'generated'))) {
     throw new Error(`${host} still ships generated/; use feeds/`);
   }
-  const mcpFile = host === 'cursor' || host === 'generic' ? 'mcp.json' : '.mcp.json';
-  const mcp = await readJson(path.join(base, mcpFile));
-  const url = new URL(mcp.mcpServers.sparklogs.url);
-  if (url.protocol !== 'https:') throw new Error(`${host} MCP URL must be HTTPS`);
-  if (!ALLOWED_MCP_HOSTS.has(url.hostname)) throw new Error(`${host} MCP host is not allowlisted: ${url.hostname}`);
-  if (url.pathname !== '/mcp') throw new Error(`${host} MCP URL must end in /mcp, got path ${url.pathname || '(none)'}`);
-  if (host !== 'generic') {
-    const manifestFile = host === 'claude' ? '.claude-plugin/plugin.json' : host === 'cursor' ? '.cursor-plugin/plugin.json' : '.codex-plugin/plugin.json';
-    const manifest = await readJson(path.join(base, manifestFile));
-    if (manifest.name !== 'sparklogs') throw new Error(`${host} manifest name must be sparklogs`);
-    if (!SEMVER.test(manifest.version)) throw new Error(`${host} manifest version is invalid`);
+  const layout = HOST_LAYOUT[host];
+  for (const [tree, shipped] of [
+    ['commands', layout.commands],
+    ['rules', layout.trees.includes('rules')],
+    ['agents', layout.trees.includes('agents')],
+  ]) {
+    if (await exists(path.join(base, tree)) !== shipped) {
+      throw new Error(`${host} package ${shipped ? 'is missing' : 'must not ship'} ${tree}/`);
+    }
+  }
+  let server = null;
+  if (layout.mcpFile) {
+    const mcp = await readJson(path.join(base, layout.mcpFile));
+    server = mcp.mcpServers.sparklogs;
+    if (!server.type) throw new Error(`${host} MCP entry has no transport type`);
+    const url = new URL(server.url);
+    if (url.protocol !== 'https:') throw new Error(`${host} MCP URL must be HTTPS`);
+    if (!ALLOWED_MCP_HOSTS.has(url.hostname)) throw new Error(`${host} MCP host is not allowlisted: ${url.hostname}`);
+    if (url.pathname !== '/mcp') throw new Error(`${host} MCP URL must end in /mcp, got path ${url.pathname || '(none)'}`);
+  } else {
+    for (const name of ['mcp.json', '.mcp.json']) {
+      if (await exists(path.join(base, name))) throw new Error(`${host} ships ${name} but declares no MCP config`);
+    }
+  }
+  const manifest = await readJson(path.join(base, layout.manifest));
+  if (!layout.mcpFile && manifest.mcpServers) {
+    throw new Error(`${host} manifest points at an MCP config the package does not ship`);
+  }
+  if (host === 'codex') {
+    // Codex resolves the token from the environment by variable NAME. A header carrying a
+    // ${...} placeholder would reach the server as those literal characters, so the entry
+    // must authenticate the one way Codex actually implements.
+    const token = (await readJson(path.join(ROOT, METADATA_FILE))).mcp.tokenVariable;
+    if (server.bearer_token_env_var !== token) {
+      throw new Error(`Codex MCP entry must set bearer_token_env_var to ${token}`);
+    }
+    if (server.headers) throw new Error('Codex MCP entry must not carry headers; Codex expands no placeholder');
+    // The manifest pointer is what makes Codex read the file at all.
+    if (manifest.mcpServers !== `./${layout.mcpFile}`) {
+      throw new Error(`Codex manifest must point mcpServers at ./${layout.mcpFile}`);
+    }
+  }
+  if (manifest.name !== 'sparklogs') throw new Error(`${host} manifest name must be sparklogs`);
+  if (!SEMVER.test(manifest.version)) throw new Error(`${host} manifest version is invalid`);
+  if (host === 'cursor') {
+    // Cursor resolves the mcp.json header placeholder only from a declared plugin variable.
+    const token = server.headers.Authorization.match(/\$\{([A-Z0-9_]+)\}/)?.[1];
+    if (!token) throw new Error('Cursor MCP header does not reference a variable');
+    if (!manifest.variables?.properties?.[token]) {
+      throw new Error(`Cursor manifest does not declare variable ${token}`);
+    }
   }
   await validateShippedMarkdown(host, base);
 }
@@ -167,7 +215,7 @@ async function validateShippedMarkdown(host, base) {
     if (!stat.isFile() || !file.endsWith('.md')) return;
     const relative = path.relative(base, file).split(path.sep).join('/');
     const text = await fs.readFile(file, 'utf8');
-    if (/BEGIN GENERATED|END GENERATED/.test(text)) markerHits.push(relative);
+    if (/BEGIN GENERATED|END GENERATED|HOSTVARIANT/.test(text)) markerHits.push(relative);
     const { data } = parseFrontmatter(text, `${host}:${relative}`);
     for (const key of Object.keys(data)) {
       if (AUTHORING_FRONTMATTER_KEYS.has(key)) authoringHits.push(`${relative} key ${key}`);

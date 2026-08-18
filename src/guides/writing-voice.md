@@ -1,6 +1,6 @@
 # Writing Voice
 
-Style rules for every user-visible SparkLogs answer: chat (`/sparklogs-ask`), system condition summaries (`/sparklogs-investigate`), and cause analyses (`/sparklogs-analyze-cause`). Consistency here is what makes SparkLogs output read as engineered, not generated.
+Style rules for every user-visible SparkLogs answer: chat (`/sparklogs:ask`), system condition summaries (`/sparklogs:investigate`), and cause analyses (`/sparklogs:analyze-cause`). Consistency here is what makes SparkLogs output read as engineered, not generated.
 
 ---
 
@@ -37,4 +37,4 @@ Style rules for every user-visible SparkLogs answer: chat (`/sparklogs-ask`), sy
 
 Chat answers (`sparklogs-ask`): the whole reply is free text under these rules.
 
-Investigate and analyze-cause: every free-text field in each skill's `references/output-template.md` (EXECUTIVE SUMMARY, Finding statements, Notes, hypothesis statements, WHAT IS UNCERTAIN, POSSIBLE NEXT DIRECTIONS / RECOMMENDED NEXT STEPS, and any conversational text around the template). Section headings themselves (WHAT WAS NOT CHECKED, WHAT WAS EXAMINED, WORKING THEORIES, etc.) are fixed template text, not free prose: use them verbatim.
+Investigate and analyze-cause: every free-text field in that skill's own output template (EXECUTIVE SUMMARY, Finding statements, Notes, hypothesis statements, WHAT IS UNCERTAIN, POSSIBLE NEXT DIRECTIONS / RECOMMENDED NEXT STEPS, and any conversational text around the template). Section headings themselves (WHAT WAS NOT CHECKED, WHAT WAS EXAMINED, WORKING THEORIES, etc.) are fixed template text, not free prose: use them verbatim.

@@ -16,7 +16,12 @@ const checks = [
   'plugins/claude/sparklogs/skills/sparklogs-ask/SKILL.md',
   'plugins/cursor/sparklogs/rules/when-to-use-sparklogs.md',
   'plugins/codex/sparklogs/.codex-plugin/plugin.json',
+  'plugins/codex/sparklogs/skills/sparklogs-ask/references/guides/lql-reference.md',
+  'plugins/generic/sparklogs/plugin.json',
   'plugins/generic/sparklogs/skills/sparklogs-analyze-cause/SKILL.md',
+  'CONTRIBUTING.md',
+  'SECURITY.md',
+  'docs/install/claude.md',
 ];
 
 for (const check of checks) await fs.access(path.join(DIST, check));

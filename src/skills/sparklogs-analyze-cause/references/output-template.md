@@ -16,7 +16,7 @@ Verify with the confirm/refute steps and use judgment before acting.
 
 INPUT
 The prior investigation's system condition summary
-(referenced by external_investigation_id <id>, accessible via /sparklogs-summary <id>).
+(referenced by external_investigation_id <id>, accessible via /sparklogs:summary <id>).
 
 CANDIDATE HYPOTHESES (ranked by evidence support)
 
@@ -61,7 +61,7 @@ Reused from the prior investigation. Do not generate a new one - this analysis e
 Required at the top of every analysis, right after the title. Plain, calm framing: these are ranked explanations that fit the evidence, not established conclusions. Verbatim wording suggested above. Every hypothesis still needs the confirm/refute steps below; the intro sets expectations once instead of repeating a warning per hypothesis.
 
 ### INPUT
-Reference to the prior investigation summary. The engineer can re-display it via `/sparklogs-summary <id>`.
+Reference to the prior investigation summary. The engineer can re-display it via `/sparklogs:summary <id>`.
 
 ### Hypothesis statement
 A plain-language statement of the candidate cause. State it directly and specifically - the Confidence field and the WORKING THEORIES intro already carry the "candidate, not proven" framing, so the statement itself shouldn't hedge.
@@ -138,7 +138,7 @@ Verify with the confirm/refute steps and use judgment before acting.
 INPUT
 The prior investigation's system condition summary
 (referenced by external_investigation_id investigate-ticket-4781-veeam-backup, accessible via
- /sparklogs-summary investigate-ticket-4781-veeam-backup).
+ /sparklogs:summary investigate-ticket-4781-veeam-backup).
 
 CANDIDATE HYPOTHESES
 

@@ -27,11 +27,11 @@ You DO:
 - Gather evidence aggregation-first (Section 8), leaning on the scope ladder (`service`/`app`/`subsource`/`category`/`pattern` and their `_hash` companions) as the primary shallow-triage lever (Section 9).
 - Cite every claim with a `query_url`, band its confidence honestly, and enumerate what was not checked (Sections 5, 6, 7).
 - Read an empty result as a claim about the query, never as a clean bill of health: know which fields the source actually carries (Section 8).
-- Offer the separate **/sparklogs-analyze-cause** skill at the end if the engineer wants candidate cause hypotheses; do not perform cause analysis here beyond that invitation.
+- Offer the separate **/sparklogs:analyze-cause** skill at the end if the engineer wants candidate cause hypotheses; do not perform cause analysis here beyond that invitation.
 
 **This goal framing is non-negotiable.** A confidently-wrong root-cause conclusion damages trust in a way that takes a long time to recover. A defensible factual summary builds trust on every investigation.
 
-**Under pressure** ("just tell me the answer", "you're being too cautious, what do YOU think it is", "show what the AI can do"), the response is the same every time: your job is a defensible summary they can act on. Offer the summary, and offer `/sparklogs-analyze-cause` for candidate hypotheses with confirm/refute steps. Do not produce cause analysis in this skill's output.
+**Under pressure** ("just tell me the answer", "you're being too cautious, what do YOU think it is", "show what the AI can do"), the response is the same every time: your job is a defensible summary they can act on. Offer the summary, and offer `/sparklogs:analyze-cause` for candidate hypotheses with confirm/refute steps. Do not produce cause analysis in this skill's output.
 
 ---
 
@@ -59,7 +59,7 @@ These principles bind every decision you make. The principles matter; you don't 
 
 **This skill (opt-in full investigation):** System condition summary. Factual, evidence-anchored, with citations and confidence bands. Output template: `references/output-template.md`. Not the default for a simple question; that is `sparklogs-ask`.
 
-**Separate /sparklogs-analyze-cause skill (opt-in):** Candidate cause hypotheses derived from this skill's summary, each with confirm/refute steps. The engineer must explicitly invoke `/sparklogs-analyze-cause <external_investigation_id>` to receive cause-analysis output. You do NOT produce cause-analysis output from this skill; the POSSIBLE NEXT DIRECTIONS section carries the invitation instead.
+**Separate /sparklogs:analyze-cause skill (opt-in):** Candidate cause hypotheses derived from this skill's summary, each with confirm/refute steps. The engineer must explicitly invoke `/sparklogs:analyze-cause <external_investigation_id>` to receive cause-analysis output. You do NOT produce cause-analysis output from this skill; the POSSIBLE NEXT DIRECTIONS section carries the invitation instead.
 
 ---
 
@@ -164,7 +164,7 @@ AUDIT TRAIL
 POSSIBLE NEXT DIRECTIONS
 [1-4 sentences suggesting where investigation could go next, ending with the invitation:]
 "Would you like to (1) explore additional facts in any of these areas, or
- (2) run /sparklogs-analyze-cause <external_investigation_id> to derive candidate cause hypotheses from these findings?"
+ (2) run /sparklogs:analyze-cause <external_investigation_id> to derive candidate cause hypotheses from these findings?"
 ```
 
 **Critical structural properties:**
@@ -470,9 +470,9 @@ Investigations are usually conversations. Follow-up questions ("look at X furthe
 
 **When the engineer asks to explore further:** take their direction (subsource, time window, source) and run the relevant queries, building on existing caches. Add what is new to the running summary; don't re-issue findings they already saw.
 
-**When the engineer asks "what about X" where X is a specific finding:** that is `/sparklogs-explain`. Walk through what evidence supports the finding, what would refute it, and what you couldn't check.
+**When the engineer asks "what about X" where X is a specific finding:** that is `/sparklogs:explain`. Walk through what evidence supports the finding, what would refute it, and what you couldn't check.
 
-**When the engineer wants to dig into causes:** suggest `/sparklogs-analyze-cause <external_investigation_id>`. You don't perform that analysis here.
+**When the engineer wants to dig into causes:** suggest `/sparklogs:analyze-cause <external_investigation_id>`. You don't perform that analysis here.
 
 ---
 
@@ -533,7 +533,7 @@ Bulk extractive summarization suits the fastest lightweight model tier your host
 
 The full list of common mistakes, anti-patterns, and recovery is in `guides/common-mistakes.md`. Top 13:
 
-1. **Producing cause analysis in this skill.** Find yourself writing "this suggests" or "the likely cause is" - STOP. That belongs in `/sparklogs-analyze-cause`. Move it to the POSSIBLE NEXT DIRECTIONS section (1-4 sentences) and refer the engineer to that skill.
+1. **Producing cause analysis in this skill.** Find yourself writing "this suggests" or "the likely cause is" - STOP. That belongs in `/sparklogs:analyze-cause`. Move it to the POSSIBLE NEXT DIRECTIONS section (1-4 sentences) and refer the engineer to that skill.
 2. **Citing without `query_url`.** Every Finding's Evidence field has a `query_url` from the actual MCP tool response. If it doesn't, you're confabulating.
 3. **Using LQL operators that don't exist.** `MATCHES`, `LIKE`, `IS NULL`, `CONTAINS_ANY`, wildcard JSON paths - none of these are LQL.
 4. **Reaching for `query_logs` first.** Aggregation before retrieval.
@@ -574,15 +574,27 @@ Read a reference when the situation calls for it. Do not hold them all in contex
 
 ---
 
+<!-- BEGIN HOSTVARIANT:commands -->
 ## Section 19. Slash commands
 
 The plugin exposes these slash commands; you may be invoked by any of them:
 
-- `/sparklogs-ask <question>` - Default chat with ops data. Not this skill.
-- `/sparklogs-investigate <ticket / scope description>` - This skill. System condition summary.
-- `/sparklogs-summary <external_investigation_id>` - Re-render the system condition summary for an existing investigation, incorporating everything found so far.
-- `/sparklogs-explain <claim or finding>` - Engineer asks you to explain your reasoning for a specific claim. Walk through what evidence supports it (cited `query_url`s) and what would refute it. Honest about limits.
-- `/sparklogs-analyze-cause <external_investigation_id>` - **NOT YOU.** This invokes the separate cause-analysis skill.
+- `/sparklogs:ask <question>` - Default chat with ops data. Not this skill.
+- `/sparklogs:investigate <ticket / scope description>` - This skill. System condition summary.
+- `/sparklogs:summary <external_investigation_id>` - Re-render the system condition summary for an existing investigation, incorporating everything found so far.
+- `/sparklogs:explain <claim or finding>` - Engineer asks you to explain your reasoning for a specific claim. Walk through what evidence supports it (cited `query_url`s) and what would refute it. Honest about limits.
+- `/sparklogs:analyze-cause <external_investigation_id>` - **NOT YOU.** This invokes the separate cause-analysis skill.
+<!-- ELSE HOSTVARIANT:commands -->
+## Section 19. Related workflows
+
+Three SparkLogs skills divide this work. You may be routed to any of them by what the engineer asks for; there is nothing to type.
+
+- `sparklogs-ask` - Default chat with ops data. Not this skill.
+- `sparklogs-investigate` - This skill. System condition summary.
+- `sparklogs-analyze-cause` - **NOT YOU.** The separate cause-analysis workflow, and only after a factual summary exists.
+
+Two follow-up requests stay inside this skill. Re-rendering: the engineer names an existing `external_investigation_id` and wants the system condition summary produced again, incorporating everything found since. Explaining: the engineer names one claim and wants your reasoning for it, so walk through the evidence that supports it (cited `query_url`s) and what would refute it, honest about limits.
+<!-- END HOSTVARIANT:commands -->
 
 ---
 

@@ -6,15 +6,30 @@ import path from 'node:path';
 import { assertRepoRoot } from './assert-repo-root.mjs';
 import { resolveGeneratedPath, safeRmGenerated } from './safe-rm-generated.mjs';
 import {
+  AGENT_PLUGINS_MCP_SCHEMA,
+  AGENT_PLUGINS_PLUGIN_SCHEMA,
   ASSETS_DIR,
   BRAND_ASSETS,
+  DIST_ROOT_DOCS,
+  DIST_ROOT_DOCS_EXCLUDE,
+  DIST_ROOT_FILES,
   DOCS_URL,
   HOSTS,
+  HOST_LAYOUT,
   METADATA_FILE,
   THEME_FILES,
   classifySrcPath,
 } from './dist-layout.mjs';
-import { shipMarkdown } from './skill-indexes.mjs';
+import {
+  CORPUS_TOPS,
+  applyHostVariants,
+  rewriteArgumentsForCursor,
+  rewriteCommandsAsSkillNames,
+  rewriteCommandsForCursor,
+  rewriteCorpusForClaude,
+  rewriteCorpusRelative,
+} from './host-transforms.mjs';
+import { formatFrontmatter, parseFrontmatter, shipMarkdown } from './skill-indexes.mjs';
 
 assertRepoRoot(import.meta);
 
@@ -23,7 +38,7 @@ const HOST_LABELS = {
   claude: 'Claude',
   codex: 'Codex',
   cursor: 'Cursor',
-  generic: 'generic Agent Skills hosts',
+  generic: 'generic Agent Plugins hosts',
 };
 // Build inputs that must never ride into a shipped package. validate-rendered.mjs asserts the same
 // list, so an addition here without one there fails the build rather than shipping quietly.
@@ -61,6 +76,7 @@ function stable(value) {
 async function writeJson(file, value) {
   await fs.mkdir(path.dirname(file), { recursive: true });
   await fs.writeFile(file, `${JSON.stringify(stable(value), null, 2)}\n`);
+  await fs.chmod(file, 0o644);
 }
 
 async function exists(file) {
@@ -92,24 +108,81 @@ async function copyFile(src, dst) {
   await fs.chmod(dst, 0o644);
 }
 
-async function copyMarkdownShipped(src, dst) {
-  await fs.mkdir(path.dirname(dst), { recursive: true });
-  const shipped = shipMarkdown(await fs.readFile(src, 'utf8'), src);
-  await fs.writeFile(dst, shipped);
-  await fs.chmod(dst, 0o644);
+async function writeText(file, text) {
+  await fs.mkdir(path.dirname(file), { recursive: true });
+  await fs.writeFile(file, text, 'utf8');
+  await fs.chmod(file, 0o644);
 }
 
-async function copyDirMaterialized(src, dst, skip = new Set()) {
-  await fs.mkdir(dst, { recursive: true });
-  const entries = await fs.readdir(src, { withFileTypes: true });
+// One markdown pipeline for every shipped file: strip authoring frontmatter and GENERATED markers,
+// then apply the host dialect for corpus citations and command invocations. pkgRel is the file's
+// path inside the rendered package, which is what the corpus rewrite measures against.
+function renderMarkdownText(text, srcLabel, host, pkgRel) {
+  let out = shipMarkdown(text, srcLabel);
+  out = applyHostVariants(out, { commands: HOST_LAYOUT[host].commands }, srcLabel);
+  out = host === 'claude' ? rewriteCorpusForClaude(out) : rewriteCorpusInSkill(out, pkgRel);
+  if (host === 'cursor') out = rewriteCommandsForCursor(out);
+  else if (host !== 'claude') out = rewriteCommandsAsSkillNames(out);
+  if (host === 'cursor' && pkgRel.startsWith('commands/')) out = rewriteArgumentsForCursor(out);
+  return out;
+}
+
+// Hosts other than Claude hand a skill only its own directory, so the corpus is materialized under
+// skills/<skill>/references/ and citations resolve from wherever the citing file landed.
+function rewriteCorpusInSkill(text, pkgRel) {
+  const match = pkgRel.match(/^skills\/([^/]+)\//);
+  if (!match) return text;
+  return rewriteCorpusRelative(text, path.posix.dirname(pkgRel), `skills/${match[1]}/references`);
+}
+
+// Commands are the one tree whose frontmatter differs by host: Claude reads description and
+// argument-hint and namespaces the file name, Cursor reads name and description and has no
+// documented argument placeholder. Hosts that ship no commands never reach here.
+async function renderCommands(base, host) {
+  const dir = path.join(ROOT, 'src', 'commands');
+  const names = (await fs.readdir(dir)).filter((name) => name.endsWith('.md')).sort();
+  for (const name of names) {
+    const from = path.join(dir, name);
+    const pkgRel = `commands/${name}`;
+    const raw = await fs.readFile(from, 'utf8');
+    const { data } = parseFrontmatter(raw, from);
+    if (!data.description) throw new Error(`${from} needs a description`);
+    const stem = name.replace(/\.md$/, '');
+    const shipped = host === 'cursor'
+      ? { name: `sparklogs-${stem}`, description: data.description }
+      : { description: data.description, 'argument-hint': data['argument-hint'] };
+    const body = renderMarkdownText(raw, from, host, pkgRel);
+    const withoutHead = parseFrontmatter(body, from).body.replace(/^\n+/, '');
+    await writeText(path.join(base, pkgRel), `${formatFrontmatter(shipped)}\n${withoutHead}`);
+  }
+}
+
+async function renderTreeVerbatim(srcDir, out, relDir) {
+  const entries = await fs.readdir(srcDir, { withFileTypes: true });
+  for (const entry of entries.sort((a, b) => a.name.localeCompare(b.name))) {
+    const from = path.join(srcDir, entry.name);
+    const rel = `${relDir}/${entry.name}`;
+    if (DIST_ROOT_DOCS_EXCLUDE.has(rel)) continue;
+    if (entry.isDirectory()) await renderTreeVerbatim(from, out, rel);
+    else await copyFile(from, path.join(out, rel));
+  }
+}
+
+async function renderTree(srcDir, base, pkgDir, host, skip = new Set()) {
+  const entries = await fs.readdir(srcDir, { withFileTypes: true });
+  await fs.mkdir(path.join(base, pkgDir), { recursive: true });
   for (const entry of entries.sort((a, b) => a.name.localeCompare(b.name))) {
     if (skip.has(entry.name)) continue;
-    const from = path.join(src, entry.name);
-    const to = path.join(dst, entry.name);
-    const stat = await fs.stat(from);
-    if (stat.isDirectory()) await copyDirMaterialized(from, to, skip);
-    else if (entry.name.endsWith('.md')) await copyMarkdownShipped(from, to);
-    else await copyFile(from, to);
+    const from = path.join(srcDir, entry.name);
+    const pkgRel = pkgDir ? `${pkgDir}/${entry.name}` : entry.name;
+    const to = path.join(base, pkgRel);
+    if ((await fs.stat(from)).isDirectory()) {
+      await renderTree(from, base, pkgRel, host, skip);
+    } else if (entry.name.endsWith('.md')) {
+      await writeText(to, renderMarkdownText(await fs.readFile(from, 'utf8'), from, host, pkgRel));
+    } else {
+      await copyFile(from, to);
+    }
   }
 }
 
@@ -146,13 +219,12 @@ function pluginCategory(metadata) {
   return metadata.categories?.[0] ?? 'productivity';
 }
 
-function manifest(metadata, host, version) {
+function commonManifest(metadata, version) {
   return {
     author: metadata.author,
-    categories: metadata.hosts?.[host]?.categories ?? metadata.categories,
-    description: metadata.hosts?.[host]?.description ?? metadata.description,
-    displayName: metadata.hosts?.[host]?.displayName ?? metadata.displayName,
+    description: metadata.description,
     homepage: metadata.homepage,
+    keywords: [...metadata.categories],
     license: metadata.license,
     name: metadata.name,
     repository: metadata.repository,
@@ -160,7 +232,64 @@ function manifest(metadata, host, version) {
   };
 }
 
-/** Claude (Code and Cowork): top-level description, ./ source paths, Anthropic $schema */
+/** Claude plugin manifest: the documented field set. There is no icon field in it. */
+function claudeManifest(metadata, version) {
+  return {
+    ...commonManifest(metadata, version),
+    displayName: metadata.hosts?.claude?.displayName ?? metadata.displayName,
+  };
+}
+
+/**
+ * Cursor plugin manifest. `variables` is a JSON-Schema object; the plugin's own mcp.json resolves
+ * bare ${SPARKLOGS_API_TOKEN} from it, and only from it, so an undeclared variable ships an
+ * unauthenticated MCP entry.
+ */
+function cursorManifest(metadata, version) {
+  const token = metadata.mcp.tokenVariable;
+  return {
+    ...commonManifest(metadata, version),
+    logo: 'assets/logo.svg',
+    variables: {
+      type: 'object',
+      properties: {
+        [token]: {
+          type: 'string',
+          title: metadata.mcp.tokenTitle,
+          description: metadata.mcp.tokenDescription,
+        },
+      },
+      required: [token],
+    },
+  };
+}
+
+/**
+ * Codex plugin manifest: components are path pointers, display metadata sits under interface.
+ * `mcpServers` is a path to the bundled config, not an inline object, and Codex requires the `./`
+ * prefix and a target inside the plugin root.
+ */
+function codexManifest(metadata, version) {
+  return {
+    ...commonManifest(metadata, version),
+    skills: './skills/',
+    mcpServers: './.mcp.json',
+    interface: {
+      displayName: metadata.hosts?.codex?.displayName ?? metadata.displayName,
+      category: pluginCategory(metadata),
+    },
+  };
+}
+
+/** Agent Plugins v1: $schema plus name are the whole contract; mcp.json is found by convention. */
+function genericManifest(metadata, version) {
+  return {
+    $schema: AGENT_PLUGINS_PLUGIN_SCHEMA,
+    ...commonManifest(metadata, version),
+  };
+}
+
+/** Claude: top-level description, ./ source paths, Anthropic $schema */
 function buildClaudeMarketplace(metadata) {
   const owner = { name: metadata.author.name };
   if (metadata.author.email) owner.email = metadata.author.email;
@@ -211,9 +340,20 @@ function buildCursorMarketplace(metadata) {
   };
 }
 
-/** OpenAI Codex agents: plugins[].source.path (no ./) */
+/**
+ * Codex marketplace. The documented source forms are a `local` path inside the marketplace repo and
+ * a `git-subdir` pointer at another repo. This manifest ships on the same branch it points at, so
+ * the local form keeps the reference branch-agnostic and survives forks.
+ */
 function buildCodexMarketplace(metadata) {
+  const owner = { name: metadata.author.name };
+  if (metadata.author.email) owner.email = metadata.author.email;
   return {
+    name: marketplaceId(metadata),
+    owner,
+    interface: {
+      displayName: metadata.hosts?.codex?.displayName ?? metadata.displayName,
+    },
     plugins: [
       {
         author: metadata.author,
@@ -223,21 +363,39 @@ function buildCodexMarketplace(metadata) {
         license: metadata.license,
         name: metadata.name,
         repository: metadata.repository,
-        source: { path: 'plugins/codex/sparklogs' },
+        source: { source: 'local', path: './plugins/codex/sparklogs' },
       },
     ],
   };
 }
 
-function mcpConfig(metadata) {
-  return {
-    mcpServers: {
-      sparklogs: {
-        headers: { Authorization: 'Bearer ${SPARKLOGS_API_TOKEN}' },
-        url: metadata.mcp.url,
-      },
-    },
-  };
+/**
+ * MCP server entry. Every host needs an explicit transport: Claude drops a url entry that omits
+ * `type`, and the Agent Plugins schema names the same transport `streamable-http`. Neither Claude,
+ * Cursor nor the spec expands shell environment variables in a header; Cursor resolves
+ * ${SPARKLOGS_API_TOKEN} from the manifest's `variables` block, and the generic package ships the
+ * placeholder for the reader to replace by hand (its README says so, by key name).
+ *
+ * Codex is the exception, so it gets its own entry. It reads the token through
+ * `bearer_token_env_var`, which takes the environment variable's NAME and is read from the
+ * environment at connect time. A `${...}` header would ship to the server as those literal
+ * characters, so Codex carries no headers at all and no placeholder to substitute.
+ */
+function mcpConfig(metadata, host) {
+  const entry = host === 'codex'
+    ? {
+      type: 'http',
+      url: metadata.mcp.url,
+      bearer_token_env_var: metadata.mcp.tokenVariable,
+    }
+    : {
+      type: host === 'generic' ? 'streamable-http' : 'http',
+      url: metadata.mcp.url,
+      headers: { Authorization: `Bearer \${${metadata.mcp.tokenVariable}}` },
+    };
+  const config = { mcpServers: { sparklogs: entry } };
+  if (host === 'generic') config.$schema = AGENT_PLUGINS_MCP_SCHEMA;
+  return config;
 }
 
 // Landing page of the published tree. Kept as markdown so it can be edited and reviewed as prose;
@@ -250,21 +408,20 @@ async function distRootReadme(version) {
   return text;
 }
 
-function pluginPackageReadme(host, metadata) {
-  const label = HOST_LABELS[host] ?? host;
-  const display = metadata.hosts?.[host]?.displayName ?? metadata.displayName;
-  return `# ${display} (${label})
-
-Investigation skills for SparkLogs MCP.
-
-Product docs: ${DOCS_URL}
-`;
-}
-
-async function writePluginReadme(base, host, metadata) {
-  const file = path.join(base, 'README.md');
-  await fs.writeFile(file, `${pluginPackageReadme(host, metadata)}\n`, 'utf8');
-  await fs.chmod(file, 0o644);
+async function pluginPackageReadme(host, metadata) {
+  const file = path.join(ROOT, 'scripts', 'templates', `package-README-${host}.md`);
+  const template = await fs.readFile(file, 'utf8');
+  const text = template
+    .replaceAll('{{display_name}}', metadata.hosts?.[host]?.displayName ?? metadata.displayName)
+    .replaceAll('{{host_label}}', HOST_LABELS[host] ?? host)
+    .replaceAll('{{docs_url}}', DOCS_URL)
+    .replaceAll('{{mcp_url}}', metadata.mcp.url)
+    .replaceAll('{{token_var}}', metadata.mcp.tokenVariable)
+    .replaceAll('{{token_ref}}', `\${${metadata.mcp.tokenVariable}}`)
+    .replaceAll('{{repo_url}}', metadata.repository);
+  const leftover = text.match(/\{\{[a-z_]+\}\}/);
+  if (leftover) throw new Error(`Unfilled placeholder in package-README-${host}.md: ${leftover[0]}`);
+  return text;
 }
 
 async function copyAssets(base) {
@@ -275,39 +432,44 @@ async function copyAssets(base) {
   }
 }
 
-async function copyPublishedTrees(base, host) {
-  await copyDirMaterialized(path.join(ROOT, 'src', 'skills'), path.join(base, 'skills'));
-  await copyDirMaterialized(path.join(ROOT, 'src', 'commands'), path.join(base, 'commands'));
-  await copyDirMaterialized(path.join(ROOT, 'src', 'agents'), path.join(base, 'agents'));
-  await copyDirMaterialized(path.join(ROOT, 'src', 'guides'), path.join(base, 'guides'));
-  await copyDirMaterialized(path.join(ROOT, 'src', 'feeds'), path.join(base, 'feeds'), MAINTAINER_ONLY);
-  await copyDirMaterialized(path.join(ROOT, 'src', 'playbooks'), path.join(base, 'playbooks'));
-  await copyDirMaterialized(path.join(ROOT, 'src', 'themes'), path.join(base, 'themes'));
-  if (host === 'cursor' || host === 'generic') {
-    await copyDirMaterialized(path.join(ROOT, 'src', 'rules'), path.join(base, 'rules'));
+async function renderSkills(base, host) {
+  const skillsDir = path.join(ROOT, 'src', 'skills');
+  await renderTree(skillsDir, base, 'skills', host);
+  if (host === 'claude') return;
+  // Corpus lives inside each skill for hosts that load a skill directory in isolation. Copies, not
+  // links: the rendered-package validator rejects symlinks, and several hosts refuse to follow them.
+  const skills = (await fs.readdir(skillsDir, { withFileTypes: true }))
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
+    .sort();
+  for (const skill of skills) {
+    for (const top of CORPUS_TOPS) {
+      await renderTree(
+        path.join(ROOT, 'src', top),
+        base,
+        `skills/${skill}/references/${top}`,
+        host,
+        MAINTAINER_ONLY,
+      );
+    }
   }
 }
 
 async function renderHost(host, out, metadata, version) {
+  const layout = HOST_LAYOUT[host];
   const base = path.join(out, 'plugins', host, metadata.name);
   await safeRmGenerated(base);
   await fs.mkdir(base, { recursive: true });
-  await copyPublishedTrees(base, host);
-  await copyAssets(base);
-  await writePluginReadme(base, host, metadata);
-  await copyFile(path.join(ROOT, 'LICENSE'), path.join(base, 'LICENSE'));
-  if (host === 'claude') {
-    await writeJson(path.join(base, '.claude-plugin', 'plugin.json'), manifest(metadata, host, version));
-    await writeJson(path.join(base, '.mcp.json'), mcpConfig(metadata));
-  } else if (host === 'cursor') {
-    await writeJson(path.join(base, '.cursor-plugin', 'plugin.json'), manifest(metadata, host, version));
-    await writeJson(path.join(base, 'mcp.json'), mcpConfig(metadata));
-  } else if (host === 'codex') {
-    await writeJson(path.join(base, '.codex-plugin', 'plugin.json'), manifest(metadata, host, version));
-    await writeJson(path.join(base, '.mcp.json'), mcpConfig(metadata));
-  } else {
-    await writeJson(path.join(base, 'mcp.json'), mcpConfig(metadata));
+  await renderSkills(base, host);
+  for (const top of layout.trees) {
+    await renderTree(path.join(ROOT, 'src', top), base, top, host, MAINTAINER_ONLY);
   }
+  if (layout.commands) await renderCommands(base, host);
+  await copyAssets(base);
+  await writeText(path.join(base, 'README.md'), await pluginPackageReadme(host, metadata));
+  await copyFile(path.join(ROOT, 'LICENSE'), path.join(base, 'LICENSE'));
+  await writeJson(path.join(base, layout.manifest), HOST_MANIFEST_BUILDERS[host](metadata, version));
+  if (layout.mcpFile) await writeJson(path.join(base, layout.mcpFile), mcpConfig(metadata, host));
 }
 
 async function renderMarketplaces(out, metadata) {
@@ -315,6 +477,24 @@ async function renderMarketplaces(out, metadata) {
   await writeJson(path.join(out, '.cursor-plugin', 'marketplace.json'), buildCursorMarketplace(metadata));
   await writeJson(path.join(out, '.agents', 'plugins', 'marketplace.json'), buildCodexMarketplace(metadata));
 }
+
+// The published branch is also the repository's landing page, so the files a reader expects at a repo
+// root have to exist there. They are copied verbatim; nothing here is host-specific.
+async function copyDistRootDocs(out) {
+  for (const file of DIST_ROOT_FILES) {
+    await copyFile(path.join(ROOT, file), path.join(out, file));
+  }
+  for (const dir of DIST_ROOT_DOCS) {
+    await renderTreeVerbatim(path.join(ROOT, dir), out, dir);
+  }
+}
+
+const HOST_MANIFEST_BUILDERS = {
+  claude: claudeManifest,
+  cursor: cursorManifest,
+  codex: codexManifest,
+  generic: genericManifest,
+};
 
 async function main() {
   const args = parseArgs(process.argv);
@@ -336,8 +516,8 @@ async function main() {
   await safeRmGenerated(out);
   await fs.mkdir(out, { recursive: true });
   const readme = await distRootReadme(args.version ?? UNRELEASED_README_VERSION);
-  await fs.writeFile(path.join(out, 'README.md'), readme, 'utf8');
-  await fs.chmod(path.join(out, 'README.md'), 0o644);
+  await writeText(path.join(out, 'README.md'), readme);
+  await copyDistRootDocs(out);
   for (const host of hosts) await renderHost(host, out, metadata, version);
   if (args.host === 'all' || ['claude', 'cursor', 'codex'].includes(args.host)) {
     await renderMarketplaces(out, metadata);

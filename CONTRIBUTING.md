@@ -22,7 +22,7 @@ Use `yarn run <script>` consistently. This project is Yarn-only.
 
 ## Layout
 
-Published plugin content lives under `src/` (`skills/`, `commands/`, `agents/`, `themes/`, `feeds/`, `playbooks/`, `guides/`, `assets/`, `metadata/`).
+Published plugin content lives under `src/` (`skills/`, `commands/`, `agents/`, `rules/`, `themes/`, `feeds/`, `playbooks/`, `guides/`, `assets/`, `metadata/`).
 Skill-local templates stay in `src/skills/<skill>/references/`.
 Shared guides are real files in `src/guides/`, cited as package-root `guides/...`.
 

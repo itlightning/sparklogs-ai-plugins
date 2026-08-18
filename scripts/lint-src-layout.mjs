@@ -11,6 +11,7 @@ import {
   proveLayoutGuards,
 } from './dist-layout.mjs';
 import { MODULES } from './generated-references.config.mjs';
+import { listNoncanonicalRefs, proveHostTransforms } from './host-transforms.mjs';
 import { assertBalancedMarkers, proveBalancedMarkers, proveShipMarkdown } from './skill-indexes.mjs';
 
 assertRepoRoot(import.meta);
@@ -41,10 +42,14 @@ async function lintSrc() {
       failures.push(`${file.rel} is ${stat.size} bytes (cap ${MAX_SRC_FILE_BYTES})`);
     }
     if (file.rel.endsWith('.md')) {
+      const text = await fs.readFile(file.full, 'utf8');
       try {
-        assertBalancedMarkers(await fs.readFile(file.full, 'utf8'), file.rel);
+        assertBalancedMarkers(text, file.rel);
       } catch (error) {
         failures.push(error.message);
+      }
+      for (const ref of listNoncanonicalRefs(text)) {
+        failures.push(`${file.rel} cites ${ref}; use the package-root form (no leading ./, ../ or src/)`);
       }
     }
   }
@@ -72,4 +77,6 @@ proveShipMarkdown();
 console.log('shipMarkdown guards: planted negatives all fired');
 proveBalancedMarkers();
 console.log('balanced-marker guards: planted negatives all fired');
+proveHostTransforms();
+console.log('host transforms: every rewrite case round-trips');
 await lintSrc();

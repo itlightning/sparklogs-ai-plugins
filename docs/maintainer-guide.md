@@ -104,6 +104,38 @@ frontmatter is also parsed with `js-yaml` in `validate-rendered.mjs`: a value th
 plain YAML scalar (e.g. a description containing `: `) must be quoted by `formatFrontmatter`, or the
 gate fails naming the host and file.
 
+## Packaging gates (`scripts/validate-packaging.mjs`)
+
+Runs in `yarn validate` and again after the versioned render in the release job. It asks whether an
+installed package would work, not whether it rendered: every MCP entry with a `url` declares a
+`type`; no unexpanded mustache argument placeholder survives; every corpus citation resolves from the directory of the file that
+makes it; host-specific prose (`/sparklogs:` syntax, slash-command claims, `commands/` paths, Cursor
+invocation names) appears only in packages whose host has that component per `HOST_LAYOUT`; no
+command file repeats the plugin name; Cursor rules carry frontmatter; package READMEs and every
+landing-page link resolve inside the published tree.
+
+Host dialects are produced by `scripts/host-transforms.mjs`, not hand-written into `src/`. Source
+cites the corpus in one canonical package-root shape, and `lint-src-layout.mjs` refuses a `./`, `../`
+or `src/` prefixed citation, because those shapes are invisible to both the rewriter and the
+resolution gate: they would ship dead while the build stayed green. Prose that is only true on hosts
+with commands lives in a `HOSTVARIANT:commands` block with both arms written out; the renderer keeps
+the matching one, and `validate-rendered.mjs` fails if a marker reaches a package.
+
+### Guards that only run on a workstation
+
+Two checks are best-effort and skip silently in a clean CI container. Neither is a substitute for
+running them locally before tagging:
+
+- **`claude plugin validate`** on the rendered Claude package. Skips with a printed notice when the
+  `claude` CLI is not on `PATH`, which is the normal case in CI. Run it locally, and load the package
+  once with `claude --plugin-dir <rendered claude package> plugin details sparklogs` to confirm the
+  component inventory and that the MCP server is counted.
+- **The generated-feed drift check** (`sync-generated-references.mjs --check`) compares `src/feeds/`
+  against a sibling `sparklogs-source-library` checkout, found via `SPARKLOGS_SOURCE_LIBRARY_DIR` or
+  `../sparklogs-source-library`. Without that checkout there is nothing to compare against. The
+  recorded commit in `scripts/generated-SYNC-MANIFEST.json` is only as current as the last maintainer
+  who had the sibling repo checked out.
+
 ## Versioning
 
 All hosts share one product version. Source files do not contain a release version. The release workflow derives `VERSION` from a human-created tag such as `v1.2.3`.
@@ -111,8 +143,9 @@ All hosts share one product version. Source files do not contain a release versi
 ## Release Process
 
 1. Merge reviewed changes into `source`.
-2. Run the [local release dry run](#local-release-dry-run-before-tagging) on `source`.
-3. Create and push a SemVer tag from `source`:
+2. Write the user-facing release notes in the GitHub release when tagging; the repository keeps no changelog file.
+3. Run the [local release dry run](#local-release-dry-run-before-tagging) on `source`.
+4. Create and push a SemVer tag from `source`:
 
 ```bash
 git checkout source
@@ -121,11 +154,11 @@ git tag v1.2.3
 git push origin v1.2.3
 ```
 
-4. The release workflow (workflow file from the **tagged `source` commit** on tag-push) verifies the tag is reachable from `origin/source`, renders packages, FF-commits the tree onto `dist`, creates zip assets, publishes `SHA256SUMS`, and creates a GitHub Release.
-5. CI then verifies:
+5. The release workflow (workflow file from the **tagged `source` commit** on tag-push) verifies the tag is reachable from `origin/source`, renders packages, FF-commits the tree onto `dist`, creates zip assets, publishes `SHA256SUMS`, and creates a GitHub Release.
+6. CI then verifies:
    - **Same job:** `compare-dist` of the job's `build/dist` vs freshly fetched `origin/dist` (push matches render).
    - **Follow-on job:** re-render from the tag and `compare-dist` again (reproducibility).
-6. After both jobs succeed:
+7. After both jobs succeed:
    - On the GitHub Release, confirm four host zips (`sparklogs-claude`, `sparklogs-cursor`, `sparklogs-codex`, `sparklogs-generic`) and `SHA256SUMS` (four lines matching the zips).
    - Optionally smoke-test marketplace install on Claude Code, Cursor, or Codex.
 

@@ -2,7 +2,7 @@
 
 Report suspected vulnerabilities to `security@itlightning.com`.
 
-During the Foundry MVP, only the latest released version is supported. If a security issue affects a prior release, IT Lightning will publish a patched release and advisory.
+Only the latest released version is supported. If a security issue affects a prior release, IT Lightning will publish a patched release and advisory.
 
 ## Data Flow
 
