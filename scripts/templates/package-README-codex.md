@@ -8,7 +8,7 @@ Investigation skills for SparkLogs MCP.
 - `.codex-plugin/plugin.json`: the plugin manifest.
 - `.mcp.json`: the SparkLogs MCP server, named `sparklogs`.
 
-Codex documents skills, MCP servers, and hooks as the components a plugin bundles. It does not document repo-shipped commands or subagents, so this package ships neither. Ask for a workflow by name instead: "use sparklogs-investigate on ...".
+Codex exposes each skill as `$plugin:skill`: `$sparklogs:sparklogs-ask`, `$sparklogs:sparklogs-investigate`, `$sparklogs:sparklogs-analyze-cause`. Asking in plain language works too: "use sparklogs-investigate on ...".
 
 ## Install
 

@@ -1,6 +1,6 @@
 # Install SparkLogs In Codex
 
-The Codex package ships **skills and the MCP server**, and no commands. Codex documents skills, MCP servers, and lifecycle hooks as the components a plugin bundles; it does not document repo-shipped slash commands or subagents, and its custom-prompt mechanism is a per-user `~/.codex/prompts` directory that a repository cannot populate. So there is nothing to type as `/sparklogs-...` here. Name the workflow instead: "use sparklogs-investigate on SRV-FILE01 this week".
+The Codex package ships **skills and the MCP server**. Codex exposes each installed skill as `$plugin:skill`, so the SparkLogs workflows are invoked as `$sparklogs:sparklogs-ask`, `$sparklogs:sparklogs-investigate`, and `$sparklogs:sparklogs-analyze-cause`. Asking in plain language works too: "use sparklogs-investigate on SRV-FILE01 this week".
 
 ## Install
 
@@ -33,8 +33,8 @@ The Codex package ships **skills and the MCP server**, and no commands. Codex do
 
    Get the token from the SparkLogs app at [sparklogs.app](https://sparklogs.app).
 
-4. Try it. Ask a question about a monitored host, or name a workflow:
-   "use sparklogs-investigate on SRV-FILE01 this week".
+4. Try it. Ask a question about a monitored host, or invoke a workflow directly:
+   `$sparklogs:sparklogs-investigate` (or in plain language: "use sparklogs-investigate on SRV-FILE01 this week").
 
 Refresh the marketplace snapshot later with `codex plugin marketplace upgrade`.
 
