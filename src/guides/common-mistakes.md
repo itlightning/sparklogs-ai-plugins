@@ -12,7 +12,7 @@ The mistakes are grouped by the operating principle they violate.
 
 **Symptom.** You catch yourself writing "the cause is...", "this suggests that...", "the likely root cause is...", "this is clearly...", "the obvious explanation is...", or any similar phrase in the OBSERVED CONDITIONS or EXECUTIVE SUMMARY sections.
 
-**Why it's wrong.** This skill produces facts. Cause analysis happens in `/sparklogs-analyze-cause` (a separate skill) where it's clearly labeled and the engineer opted in. Mixing them collapses the trust boundary that protects the engineer from confidently-wrong conclusions.
+**Why it's wrong.** This skill produces facts. Cause analysis happens in `/sparklogs:analyze-cause` (a separate skill) where it's clearly labeled and the engineer opted in. Mixing them collapses the trust boundary that protects the engineer from confidently-wrong conclusions.
 
 **Recovery.** Before producing the summary:
 1. Read every Finding's main statement. If it asserts a *cause*, restate it as an *observation*. ("The cause is high CPU" -> "Process X was at 92% CPU in Finding 4.")
@@ -25,7 +25,7 @@ The mistakes are grouped by the operating principle they violate.
 
 **Why it's wrong.** The trust posture is what makes SparkLogs durably valuable. Eroding it under pressure is short-term gain, long-term loss.
 
-**Recovery.** Stick to the response: "My job is to produce a defensible summary you can act on. The summary is here. If you want hypothesis sketches with confirm/refute steps, run /sparklogs-analyze-cause." Do this once politely; if the engineer persists, repeat with the same content. Don't escalate the cause-shaped language in your output.
+**Recovery.** Stick to the response: "My job is to produce a defensible summary you can act on. The summary is here. If you want hypothesis sketches with confirm/refute steps, run /sparklogs:analyze-cause." Do this once politely; if the engineer persists, repeat with the same content. Don't escalate the cause-shaped language in your output.
 
 ### Prescribing a change as the report's conclusion
 
@@ -33,7 +33,7 @@ The mistakes are grouped by the operating principle they violate.
 
 **Why it's wrong.** This skill's output is a cited summary. Suggestions belong in POSSIBLE NEXT DIRECTIONS, not as the finding.
 
-**Recovery.** Keep OBSERVED CONDITIONS factual. Put likely causes and next steps in the invitation section. `/sparklogs-analyze-cause` is the confirm/refute channel.
+**Recovery.** Keep OBSERVED CONDITIONS factual. Put likely causes and next steps in the invitation section. `/sparklogs:analyze-cause` is the confirm/refute channel.
 
 ---
 
@@ -303,7 +303,7 @@ Every summary MUST have: EXECUTIVE SUMMARY (at top), SCOPE CHECKED, OBSERVED CON
 
 ### Making the POSSIBLE NEXT DIRECTIONS section longer than 3 sentences
 
-The section is bounded. If it expands, it's becoming cause analysis. Trim and refer to `/sparklogs-analyze-cause`.
+The section is bounded. If it expands, it's becoming cause analysis. Trim and refer to `/sparklogs:analyze-cause`.
 
 ### Generic Findings
 

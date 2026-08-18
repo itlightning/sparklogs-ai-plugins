@@ -14,6 +14,9 @@ export const INDEX_KINDS = ['playbooks', 'themes', 'feeds'];
 export const SHIP_FRONTMATTER_KEYS = new Set([
   'name',
   'description',
+  'argument-hint',
+  'alwaysApply',
+  'globs',
   'license',
   'compatibility',
   'metadata',

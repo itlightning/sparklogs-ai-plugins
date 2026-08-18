@@ -10,7 +10,7 @@ Answer this question from SparkLogs telemetry. This is a conversation with the d
 
 No output template. No WHAT WAS NOT CHECKED catalog. You may go as deep as the question needs. Follow-up queries are expected.
 
-`/sparklogs-investigate` is the written pass: a cited system-condition summary they can put on a ticket. Offer it when they want that artifact. Do not switch to it just because the chat went deep.
+`/sparklogs:investigate` is the written pass: a cited system-condition summary they can put on a ticket. Offer it when they want that artifact. Do not switch to it just because the chat went deep.
 
 ## How to answer
 
@@ -85,6 +85,6 @@ You may open the matching playbook as a query recipe. Do not emit the investigat
 
 ## Written investigation
 
-Name the matching playbook when you offer `/sparklogs-investigate` and the table fits.
+Name the matching playbook when you offer `/sparklogs:investigate` and the table fits.
 
-Cause hypotheses: `/sparklogs-analyze-cause` only after an investigation summary exists.
+Cause hypotheses: `/sparklogs:analyze-cause` only after an investigation summary exists.
