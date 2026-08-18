@@ -143,7 +143,7 @@ All hosts share one product version. Source files do not contain a release versi
 ## Release Process
 
 1. Merge reviewed changes into `source`.
-2. Move the `Unreleased` section of `CHANGELOG.md` under the version heading being cut, dated, and open a fresh `Unreleased`. The changelog rides to the `dist` root, so this is what a visitor reads.
+2. Write the user-facing release notes in the GitHub release when tagging; the repository keeps no changelog file.
 3. Run the [local release dry run](#local-release-dry-run-before-tagging) on `source`.
 4. Create and push a SemVer tag from `source`:
 

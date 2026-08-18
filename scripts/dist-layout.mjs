@@ -69,7 +69,7 @@ export const HOST_LAYOUT = {
 // The published branch is the repository's default branch, so its root has to answer the questions a
 // visitor arrives with: what is this, how do I install it, how do I contribute, where do I report a
 // vulnerability. These ride to the dist root verbatim.
-export const DIST_ROOT_FILES = ['LICENSE', 'NOTICE', 'CONTRIBUTING.md', 'AGENTS.md', 'SECURITY.md', 'CHANGELOG.md'];
+export const DIST_ROOT_FILES = ['LICENSE', 'NOTICE', 'CONTRIBUTING.md', 'AGENTS.md', 'SECURITY.md'];
 export const DIST_ROOT_DOCS = ['docs'];
 
 // Authoring and maintainer docs stay on `source`. They address someone with the repo checked out and
