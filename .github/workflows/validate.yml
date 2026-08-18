@@ -51,6 +51,8 @@ jobs:
         run: yarn run validate
       - name: Validate rendered packages
         run: yarn run validate:rendered
+      - name: Validate packaging
+        run: yarn run validate:packaging
       - name: Validate Cursor package
         run: yarn run validate:cursor
       - name: Smoke test packages

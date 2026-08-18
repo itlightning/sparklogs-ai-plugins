@@ -73,6 +73,7 @@ jobs:
           yarn run clean
           node scripts/render-packages.mjs --out build/dist --version "${{ steps.release_tag.outputs.version }}"
           yarn run validate:rendered
+          yarn run validate:packaging
           yarn run validate:cursor
           yarn run smoke
       - name: Package release assets
