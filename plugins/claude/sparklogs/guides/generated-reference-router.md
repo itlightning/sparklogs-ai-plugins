@@ -1,7 +1,7 @@
 # Generated reference router
 
 Per-source reference content generated from the SparkLogs source library lives under
-`feeds/<module>/`, relative to the plugin package root (or the repository root in a source
+`${CLAUDE_PLUGIN_ROOT}/feeds/<module>/`, relative to the plugin package root (or the repository root in a source
 checkout).
 It is regenerated from the pack that shapes the data, so it describes what a source actually
 writes rather than what someone remembered it writing.
@@ -34,7 +34,7 @@ Two shapes deserve their own line because they are the ones people get wrong:
 
 1. Resolve the source. A ticket names a machine and a symptom; a query result names a `subsource`.
    The `subsource` IS the module id, and it works in both directions. Given an event carrying
-   `subsource = win.eventlog.security`, the module is `feeds/win.eventlog.security/`. Given a
+   `subsource = win.eventlog.security`, the module is `${CLAUDE_PLUGIN_ROOT}/feeds/win.eventlog.security/`. Given a
    module you want to query, the module id IS the LQL scoping predicate:
 
    ```
@@ -73,74 +73,74 @@ say in your findings that you were reading uncurated text.
 
 ### `win.eventlog.security`
 
-- `feeds/win.eventlog.security/README.md`: feed index: what each artifact answers and the order to read them in
-- `feeds/win.eventlog.security/fields.md`: what exists at rest, which surface writes it, and the raw fallback when nothing does
-- `feeds/win.eventlog.security/enums.md`: the closed token vocabularies that are safe to group by
-- `feeds/win.eventlog.security/reasons.md`: what each reason slug means (public summary, severity, impact)
-- `feeds/win.eventlog.security/patterns.md`: the decision procedure for whether a rendered pattern is expected, unexpected, or uncurated
-- `feeds/win.eventlog.security/recipes.md`: worked pivots, each resolving against the field schema
-- `feeds/win.eventlog.security/mapping-ecs.md`: ECS anchors for a query written against another taxonomy
-- `feeds/win.eventlog.security/mapping-ocsf.md`: OCSF anchors for a query written against another taxonomy
+- `${CLAUDE_PLUGIN_ROOT}/feeds/win.eventlog.security/README.md`: feed index: what each artifact answers and the order to read them in
+- `${CLAUDE_PLUGIN_ROOT}/feeds/win.eventlog.security/fields.md`: what exists at rest, which surface writes it, and the raw fallback when nothing does
+- `${CLAUDE_PLUGIN_ROOT}/feeds/win.eventlog.security/enums.md`: the closed token vocabularies that are safe to group by
+- `${CLAUDE_PLUGIN_ROOT}/feeds/win.eventlog.security/reasons.md`: what each reason slug means (public summary, severity, impact)
+- `${CLAUDE_PLUGIN_ROOT}/feeds/win.eventlog.security/patterns.md`: the decision procedure for whether a rendered pattern is expected, unexpected, or uncurated
+- `${CLAUDE_PLUGIN_ROOT}/feeds/win.eventlog.security/recipes.md`: worked pivots, each resolving against the field schema
+- `${CLAUDE_PLUGIN_ROOT}/feeds/win.eventlog.security/mapping-ecs.md`: ECS anchors for a query written against another taxonomy
+- `${CLAUDE_PLUGIN_ROOT}/feeds/win.eventlog.security/mapping-ocsf.md`: OCSF anchors for a query written against another taxonomy
 
 ### `win.eventlog.system`
 
-- `feeds/win.eventlog.system/README.md`: feed index: what each artifact answers and the order to read them in
-- `feeds/win.eventlog.system/fields.md`: what exists at rest, which surface writes it, and the raw fallback when nothing does
-- `feeds/win.eventlog.system/enums.md`: the closed token vocabularies that are safe to group by
-- `feeds/win.eventlog.system/reasons.md`: what each reason slug means (public summary, severity, impact)
+- `${CLAUDE_PLUGIN_ROOT}/feeds/win.eventlog.system/README.md`: feed index: what each artifact answers and the order to read them in
+- `${CLAUDE_PLUGIN_ROOT}/feeds/win.eventlog.system/fields.md`: what exists at rest, which surface writes it, and the raw fallback when nothing does
+- `${CLAUDE_PLUGIN_ROOT}/feeds/win.eventlog.system/enums.md`: the closed token vocabularies that are safe to group by
+- `${CLAUDE_PLUGIN_ROOT}/feeds/win.eventlog.system/reasons.md`: what each reason slug means (public summary, severity, impact)
 
 ### `win.eventlog.application`
 
-- `feeds/win.eventlog.application/README.md`: feed index: what each artifact answers and the order to read them in
-- `feeds/win.eventlog.application/fields.md`: what exists at rest, which surface writes it, and the raw fallback when nothing does
-- `feeds/win.eventlog.application/enums.md`: the closed token vocabularies that are safe to group by
-- `feeds/win.eventlog.application/reasons.md`: what each reason slug means (public summary, severity, impact)
+- `${CLAUDE_PLUGIN_ROOT}/feeds/win.eventlog.application/README.md`: feed index: what each artifact answers and the order to read them in
+- `${CLAUDE_PLUGIN_ROOT}/feeds/win.eventlog.application/fields.md`: what exists at rest, which surface writes it, and the raw fallback when nothing does
+- `${CLAUDE_PLUGIN_ROOT}/feeds/win.eventlog.application/enums.md`: the closed token vocabularies that are safe to group by
+- `${CLAUDE_PLUGIN_ROOT}/feeds/win.eventlog.application/reasons.md`: what each reason slug means (public summary, severity, impact)
 
 ### `win.eventlog.setup`
 
-- `feeds/win.eventlog.setup/README.md`: feed index: what each artifact answers and the order to read them in
-- `feeds/win.eventlog.setup/fields.md`: what exists at rest, which surface writes it, and the raw fallback when nothing does
-- `feeds/win.eventlog.setup/enums.md`: the closed token vocabularies that are safe to group by
-- `feeds/win.eventlog.setup/reasons.md`: what each reason slug means (public summary, severity, impact)
+- `${CLAUDE_PLUGIN_ROOT}/feeds/win.eventlog.setup/README.md`: feed index: what each artifact answers and the order to read them in
+- `${CLAUDE_PLUGIN_ROOT}/feeds/win.eventlog.setup/fields.md`: what exists at rest, which surface writes it, and the raw fallback when nothing does
+- `${CLAUDE_PLUGIN_ROOT}/feeds/win.eventlog.setup/enums.md`: the closed token vocabularies that are safe to group by
+- `${CLAUDE_PLUGIN_ROOT}/feeds/win.eventlog.setup/reasons.md`: what each reason slug means (public summary, severity, impact)
 
 ### `win.servicing.cbs`
 
-- `feeds/win.servicing.cbs/README.md`: feed index: what each artifact answers and the order to read them in
-- `feeds/win.servicing.cbs/fields.md`: what exists at rest, which surface writes it, and the raw fallback when nothing does
-- `feeds/win.servicing.cbs/enums.md`: the closed token vocabularies that are safe to group by
-- `feeds/win.servicing.cbs/reasons.md`: what each reason slug means (public summary, severity, impact)
+- `${CLAUDE_PLUGIN_ROOT}/feeds/win.servicing.cbs/README.md`: feed index: what each artifact answers and the order to read them in
+- `${CLAUDE_PLUGIN_ROOT}/feeds/win.servicing.cbs/fields.md`: what exists at rest, which surface writes it, and the raw fallback when nothing does
+- `${CLAUDE_PLUGIN_ROOT}/feeds/win.servicing.cbs/enums.md`: the closed token vocabularies that are safe to group by
+- `${CLAUDE_PLUGIN_ROOT}/feeds/win.servicing.cbs/reasons.md`: what each reason slug means (public summary, severity, impact)
 
 ### `win.servicing.dism`
 
-- `feeds/win.servicing.dism/README.md`: feed index: what each artifact answers and the order to read them in
-- `feeds/win.servicing.dism/fields.md`: what exists at rest, which surface writes it, and the raw fallback when nothing does
-- `feeds/win.servicing.dism/enums.md`: the closed token vocabularies that are safe to group by
-- `feeds/win.servicing.dism/reasons.md`: what each reason slug means (public summary, severity, impact)
+- `${CLAUDE_PLUGIN_ROOT}/feeds/win.servicing.dism/README.md`: feed index: what each artifact answers and the order to read them in
+- `${CLAUDE_PLUGIN_ROOT}/feeds/win.servicing.dism/fields.md`: what exists at rest, which surface writes it, and the raw fallback when nothing does
+- `${CLAUDE_PLUGIN_ROOT}/feeds/win.servicing.dism/enums.md`: the closed token vocabularies that are safe to group by
+- `${CLAUDE_PLUGIN_ROOT}/feeds/win.servicing.dism/reasons.md`: what each reason slug means (public summary, severity, impact)
 
 ### `win.defender.eventlog`
 
-- `feeds/win.defender.eventlog/README.md`: feed index: what each artifact answers and the order to read them in
-- `feeds/win.defender.eventlog/fields.md`: what exists at rest, which surface writes it, and the raw fallback when nothing does
-- `feeds/win.defender.eventlog/enums.md`: the closed token vocabularies that are safe to group by
-- `feeds/win.defender.eventlog/reasons.md`: what each reason slug means (public summary, severity, impact)
+- `${CLAUDE_PLUGIN_ROOT}/feeds/win.defender.eventlog/README.md`: feed index: what each artifact answers and the order to read them in
+- `${CLAUDE_PLUGIN_ROOT}/feeds/win.defender.eventlog/fields.md`: what exists at rest, which surface writes it, and the raw fallback when nothing does
+- `${CLAUDE_PLUGIN_ROOT}/feeds/win.defender.eventlog/enums.md`: the closed token vocabularies that are safe to group by
+- `${CLAUDE_PLUGIN_ROOT}/feeds/win.defender.eventlog/reasons.md`: what each reason slug means (public summary, severity, impact)
 
 ### `sparklogs.agent.state`
 
-- `feeds/sparklogs.agent.state/README.md`: feed index: what each artifact answers and the order to read them in
-- `feeds/sparklogs.agent.state/fields.md`: what exists at rest, which surface writes it, and the raw fallback when nothing does
-- `feeds/sparklogs.agent.state/enums.md`: the closed token vocabularies that are safe to group by
-- `feeds/sparklogs.agent.state/reasons.md`: what each reason slug means (public summary, severity, impact)
+- `${CLAUDE_PLUGIN_ROOT}/feeds/sparklogs.agent.state/README.md`: feed index: what each artifact answers and the order to read them in
+- `${CLAUDE_PLUGIN_ROOT}/feeds/sparklogs.agent.state/fields.md`: what exists at rest, which surface writes it, and the raw fallback when nothing does
+- `${CLAUDE_PLUGIN_ROOT}/feeds/sparklogs.agent.state/enums.md`: the closed token vocabularies that are safe to group by
+- `${CLAUDE_PLUGIN_ROOT}/feeds/sparklogs.agent.state/reasons.md`: what each reason slug means (public summary, severity, impact)
 
 ### `sparklogs.agent.vector`
 
-- `feeds/sparklogs.agent.vector/README.md`: feed index: what each artifact answers and the order to read them in
-- `feeds/sparklogs.agent.vector/fields.md`: what exists at rest, which surface writes it, and the raw fallback when nothing does
-- `feeds/sparklogs.agent.vector/enums.md`: the closed token vocabularies that are safe to group by
-- `feeds/sparklogs.agent.vector/reasons.md`: what each reason slug means (public summary, severity, impact)
+- `${CLAUDE_PLUGIN_ROOT}/feeds/sparklogs.agent.vector/README.md`: feed index: what each artifact answers and the order to read them in
+- `${CLAUDE_PLUGIN_ROOT}/feeds/sparklogs.agent.vector/fields.md`: what exists at rest, which surface writes it, and the raw fallback when nothing does
+- `${CLAUDE_PLUGIN_ROOT}/feeds/sparklogs.agent.vector/enums.md`: the closed token vocabularies that are safe to group by
+- `${CLAUDE_PLUGIN_ROOT}/feeds/sparklogs.agent.vector/reasons.md`: what each reason slug means (public summary, severity, impact)
 
 ### `sparklogs.agent.log`
 
-- `feeds/sparklogs.agent.log/README.md`: feed index: what each artifact answers and the order to read them in
-- `feeds/sparklogs.agent.log/fields.md`: what exists at rest, which surface writes it, and the raw fallback when nothing does
-- `feeds/sparklogs.agent.log/enums.md`: the closed token vocabularies that are safe to group by
-- `feeds/sparklogs.agent.log/reasons.md`: what each reason slug means (public summary, severity, impact)
+- `${CLAUDE_PLUGIN_ROOT}/feeds/sparklogs.agent.log/README.md`: feed index: what each artifact answers and the order to read them in
+- `${CLAUDE_PLUGIN_ROOT}/feeds/sparklogs.agent.log/fields.md`: what exists at rest, which surface writes it, and the raw fallback when nothing does
+- `${CLAUDE_PLUGIN_ROOT}/feeds/sparklogs.agent.log/enums.md`: the closed token vocabularies that are safe to group by
+- `${CLAUDE_PLUGIN_ROOT}/feeds/sparklogs.agent.log/reasons.md`: what each reason slug means (public summary, severity, impact)

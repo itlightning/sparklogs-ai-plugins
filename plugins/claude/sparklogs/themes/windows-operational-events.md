@@ -7,10 +7,10 @@ Application and System channels: service crashes, unexpected shutdowns, disk and
 | `win.eventlog.system` | Disk, SCM, Kernel-Power, clustering, VSS volsnap, DCOM, WAS. |
 | `win.eventlog.application` | App crashes, MSI, IIS worker, GPU TDR sibling. |
 
-Open `feeds/<id>/reasons.md` and search the slug. Same slug on two channels is one fact (example: `iis_worker_crash` System WAS / Application IIS).
+Open `${CLAUDE_PLUGIN_ROOT}/feeds/<id>/reasons.md` and search the slug. Same slug on two channels is one fact (example: `iis_worker_crash` System WAS / Application IIS).
 
-**Pivots.** Service will not stay up: `service_crashed`, `service_start_failed`, `service_hang`. Disk filling is state (`themes/device-health-and-state.md`) plus these disk reasons if the stream shows IO faults.
+**Pivots.** Service will not stay up: `service_crashed`, `service_start_failed`, `service_hang`. Disk filling is state (`${CLAUDE_PLUGIN_ROOT}/themes/device-health-and-state.md`) plus these disk reasons if the stream shows IO faults.
 
-Patching: `themes/windows-updates-and-patching.md`. Who changed it: `themes/windows-security-and-audit.md`.
+Patching: `${CLAUDE_PLUGIN_ROOT}/themes/windows-updates-and-patching.md`. Who changed it: `${CLAUDE_PLUGIN_ROOT}/themes/windows-security-and-audit.md`.
 
-A named backup product job failed is not this theme. Installed products: `themes/device-health-and-state.md`. Full walk: `/sparklogs-investigate` and `playbooks/backup-failure.md`. VSS writer-failed is not proof the backup product failed.
+A named backup product job failed is not this theme. Installed products: `${CLAUDE_PLUGIN_ROOT}/themes/device-health-and-state.md`. Full walk: `/sparklogs:investigate` and `${CLAUDE_PLUGIN_ROOT}/playbooks/backup-failure.md`. VSS writer-failed is not proof the backup product failed.

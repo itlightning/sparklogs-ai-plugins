@@ -1,0 +1,19 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "author": {
+    "email": "help@itlightning.com",
+    "name": "IT Lightning, LLC"
+  },
+  "description": "Query and analyze SparkLogs: system and application logs plus device health and state over time, one host or the fleet.",
+  "homepage": "https://sparklogs.com/",
+  "keywords": [
+    "observability",
+    "incident-response",
+    "rca",
+    "msp"
+  ],
+  "license": "Apache-2.0",
+  "name": "sparklogs",
+  "repository": "https://github.com/itlightning/sparklogs-ai-plugins",
+  "version": "1.4.2"
+}

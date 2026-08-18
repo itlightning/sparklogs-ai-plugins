@@ -69,50 +69,50 @@ Load what you need for this step. Do not dump `playbooks/` or `guides/`.
 
 | Symptom | File |
 |---|---|
-| Backup job failed | `playbooks/backup-failure.md` |
-| BitLocker recovery | `playbooks/bitlocker-recovery.md` |
-| Certificate expiry | `playbooks/certificate-expiry.md` |
-| Directory replication | `playbooks/directory-replication-failure.md` |
-| Disk full or filling | `playbooks/disk-full-or-filling.md` |
-| Memory or handle leak | `playbooks/memory-or-handle-leak.md` |
-| RAID / array degraded | `playbooks/raid-or-storage-degraded.md` |
-| RMM connectivity | `playbooks/rmm-connectivity.md` |
-| Slow logon | `playbooks/slow-logon.md` |
-| Windows Update / patch failure | `playbooks/windows-update-failure.md` |
+| Backup job failed | `references/playbooks/backup-failure.md` |
+| BitLocker recovery | `references/playbooks/bitlocker-recovery.md` |
+| Certificate expiry | `references/playbooks/certificate-expiry.md` |
+| Directory replication | `references/playbooks/directory-replication-failure.md` |
+| Disk full or filling | `references/playbooks/disk-full-or-filling.md` |
+| Memory or handle leak | `references/playbooks/memory-or-handle-leak.md` |
+| RAID / array degraded | `references/playbooks/raid-or-storage-degraded.md` |
+| RMM connectivity | `references/playbooks/rmm-connectivity.md` |
+| Slow logon | `references/playbooks/slow-logon.md` |
+| Windows Update / patch failure | `references/playbooks/windows-update-failure.md` |
 
 ### Topic → theme
 
 | Topic | File |
 |---|---|
-| Patches / CBS / DISM / Setup | `themes/windows-updates-and-patching.md` |
-| Who changed what (Security) | `themes/windows-security-and-audit.md` |
-| Defender | `themes/endpoint-protection.md` |
-| App / System crashes and services | `themes/windows-operational-events.md` |
-| CPU, RAM, disk, installed software, monitors | `themes/device-health-and-state.md` |
-| Named backup product (Veeam etc.): installed products. Not operational events. | `themes/device-health-and-state.md` |
+| Patches / CBS / DISM / Setup | `references/themes/windows-updates-and-patching.md` |
+| Who changed what (Security) | `references/themes/windows-security-and-audit.md` |
+| Defender | `references/themes/endpoint-protection.md` |
+| App / System crashes and services | `references/themes/windows-operational-events.md` |
+| CPU, RAM, disk, installed software, monitors | `references/themes/device-health-and-state.md` |
+| Named backup product (Veeam etc.): installed products. Not operational events. | `references/themes/device-health-and-state.md` |
 
 ### Feed id → lookup
 
-`subsource` is the directory name. Open `feeds/<id>/README.md`, then **one** of fields / enums / reasons (Security also recipes / patterns / mappings). Search `reasons.md` for the `##` heading that matches the reason slug; do not read the whole file.
+`subsource` is the directory name. Open `references/feeds/<id>/README.md`, then **one** of fields / enums / reasons (Security also recipes / patterns / mappings). Search `reasons.md` for the `##` heading that matches the reason slug; do not read the whole file.
 
 | Feed | What | Path |
 |---|---|---|
-| `win.eventlog.security` | Security auditing: logons, account and policy changes, actors | `feeds/win.eventlog.security/` |
-| `win.eventlog.system` | System channel: services, drivers, kernel, VSS, storage | `feeds/win.eventlog.system/` |
-| `win.eventlog.application` | Application channel: app crashes, hangs, vendor app events | `feeds/win.eventlog.application/` |
-| `win.eventlog.setup` | Windows Update results per update | `feeds/win.eventlog.setup/` |
-| `win.servicing.cbs` | CBS servicing internals: component store, packages | `feeds/win.servicing.cbs/` |
-| `win.servicing.dism` | DISM operations and image health | `feeds/win.servicing.dism/` |
-| `win.defender.eventlog` | Defender: threats, protection state | `feeds/win.defender.eventlog/` |
-| `sparklogs.agent.state` | Device health and state snapshots: CPU, RAM, disk, installed software, monitors | `feeds/sparklogs.agent.state/` |
-| `sparklogs.agent.vector` | Collector debug only: data collector internals | `feeds/sparklogs.agent.vector/` |
-| `sparklogs.agent.log` | Collector debug only: agent supervisor log | `feeds/sparklogs.agent.log/` |
+| `win.eventlog.security` | Security auditing: logons, account and policy changes, actors | `references/feeds/win.eventlog.security/` |
+| `win.eventlog.system` | System channel: services, drivers, kernel, VSS, storage | `references/feeds/win.eventlog.system/` |
+| `win.eventlog.application` | Application channel: app crashes, hangs, vendor app events | `references/feeds/win.eventlog.application/` |
+| `win.eventlog.setup` | Windows Update results per update | `references/feeds/win.eventlog.setup/` |
+| `win.servicing.cbs` | CBS servicing internals: component store, packages | `references/feeds/win.servicing.cbs/` |
+| `win.servicing.dism` | DISM operations and image health | `references/feeds/win.servicing.dism/` |
+| `win.defender.eventlog` | Defender: threats, protection state | `references/feeds/win.defender.eventlog/` |
+| `sparklogs.agent.state` | Device health and state snapshots: CPU, RAM, disk, installed software, monitors | `references/feeds/sparklogs.agent.state/` |
+| `sparklogs.agent.vector` | Collector debug only: data collector internals | `references/feeds/sparklogs.agent.vector/` |
+| `sparklogs.agent.log` | Collector debug only: agent supervisor log | `references/feeds/sparklogs.agent.log/` |
 
 ---
 
 ## Section 4. Output structure - what every investigation produces
 
-Every investigation produces a structured document in this order. The full template lives in `references/output-template.md` with field definitions and worked examples. Write every free-text field per `guides/writing-voice.md`. The structure here is the minimum.
+Every investigation produces a structured document in this order. The full template lives in `references/output-template.md` with field definitions and worked examples. Write every free-text field per `references/guides/writing-voice.md`. The structure here is the minimum.
 
 ```
 INVESTIGATION SUMMARY - <ticket / scope description>
@@ -228,7 +228,7 @@ When the data is there but your uncertainty is high: `"Confidence: low - see Not
 
 The section lists what is *not* checked because it's outside what SparkLogs collects on the source(s) you investigated: cloud identity and MFA services on a logon issue, the RMM cloud and the network path to it on a connectivity issue, the backup target and the EDR cloud on a backup issue.
 
-The complete per-investigation-type list is in `guides/off-endpoint-causes.md`. Read that file when investigating any specific symptom and customize the WHAT WAS NOT CHECKED section to the actual investigation scope.
+The complete per-investigation-type list is in `references/guides/off-endpoint-causes.md`. Read that file when investigating any specific symptom and customize the WHAT WAS NOT CHECKED section to the actual investigation scope.
 
 **Name the checks you declined, and why.** A health call you deliberately did not make belongs here in one line ("the agent's collection state was not established; this finding rests on the events that arrived"). Explicit restraint reads as rigor; an unexplained silence reads as an oversight.
 
@@ -262,12 +262,12 @@ The complete per-investigation-type list is in `guides/off-endpoint-causes.md`. 
    - Agent self-observability rows: `query_logs(lql='source = "<X>" AND sparklogs.kind = agent_op', ...)`. These are stamped when an investigator must distrust or re-interpret other device data on that host: telemetry not collected, suppressed, truncated, or shaped by stale config.
    - Volume: `list_sources` event counts against the source's typical volume. A drop is a prompt to look, never a coverage measurement. Counts and first/last bounds cannot establish what happened in the middle of a window.
 
-   An empty `agent_op` result is INCONCLUSIVE, not "nothing was skipped": the same emptiness is produced by a healthy agent, by an agent that is not reporting at all, and by a topic that is not enabled for that agent's rollout ring. Say which one you could and could not rule out in WHAT WAS NOT CHECKED. Device-state honesty fields (`guides/device-state-fields.md`) are the supporting read here.
+   An empty `agent_op` result is INCONCLUSIVE, not "nothing was skipped": the same emptiness is produced by a healthy agent, by an agent that is not reporting at all, and by a topic that is not enabled for that agent's rollout ring. Say which one you could and could not rule out in WHAT WAS NOT CHECKED. Device-state honesty fields (`references/guides/device-state-fields.md`) are the supporting read here.
 
 **Field availability gating - an empty result is a claim about the query, never a clean bill of health.** Three tiers, and which one you are standing on decides what an empty result means.
 
 - **Universal fields:** `message`, `severity`, `source`, `app`, `subsource`, `category`, `pattern` / `pattern_hash`, `t`, org/agent scope. Present on every source.
-- **Curated fields:** `sparklogs.kind`, `sparklogs.class`, `sparklogs.reason`, `sparklogs.instance`, the episode and epoch families, and the portable identity families (`actor`, `running_as`, `target`, `member`, `process`, `origin`, `destination`, `error`). Present on events a source pack curated, and only on the surfaces that promote them. The per-source list of which surface writes what is generated: route through `guides/generated-reference-router.md`.
+- **Curated fields:** `sparklogs.kind`, `sparklogs.class`, `sparklogs.reason`, `sparklogs.instance`, the episode and epoch families, and the portable identity families (`actor`, `running_as`, `target`, `member`, `process`, `origin`, `destination`, `error`). Present on events a source pack curated, and only on the surfaces that promote them. The per-source list of which surface writes what is generated: route through `references/guides/generated-reference-router.md`.
 - **Module fields:** everything under a source's own prefix, for example `win.eventlog.security.status_meaning`. Per-source and per-surface, same routing.
 
 Do not invent field names. `event_kind`, `SLAAgentOp`, `SLASnapshot`, `event_summary` and `worst_severity` are RETIRED names from an older model and resolve to nothing. The morphology field is `sparklogs.kind` with values `inventory`, `monitor`, `delta`, `agent_op`, `config_change`.
@@ -278,7 +278,7 @@ When a query on a curated or module field comes back empty:
 3. Fall back to universal signals: severity distribution, message and pattern counts via `query_event_counts_by_severity`, volume trends.
 4. Say so explicitly in the Finding or WHAT WAS NOT CHECKED.
 
-The full per-tool decision tree is in `guides/mcp-tool-decision-tree.md`. The full per-investigation-type playbook outlines are in `playbooks/playbooks.md`.
+The full per-tool decision tree is in `references/guides/mcp-tool-decision-tree.md`. The full per-investigation-type playbook outlines are in `references/playbooks/playbooks.md`.
 
 ---
 
@@ -298,7 +298,7 @@ Six fields carry a normalized value plus an opaque `_hash` companion, and togeth
 - **Correlate across windows for first-occurrence detection.** A `pattern_hash` present in the incident window but absent from a healthy baseline window signals new behavior - a primary RCA signal. Run `query_event_counts_by_severity` twice, once per window, and compare the two hash populations (the v1 substitute for the fast-follow `query_period_diff` tool). **A source-pack release recomputes pattern identity for the sources it curates**, so a baseline window on one side of a pack deploy and an incident window on the other compare nothing: every hash reads as new. When the two windows straddle a release, pick a baseline inside the same pack era and say which era you used.
 - **Resolve, don't display.** Resolve a `_hash` through the envelope's `lookups` table (Section 11) before it reaches a Finding; use the hash itself only as a drill-down filter value.
 
-Full detail and a worked localize-then-land shape: `guides/scope-ladder.md`. The controlled `service` vocabulary (the cross-vendor ticket-class values worth pivoting on, e.g. `backup`, `storage`, `security_audit`) is in `guides/service-taxonomy.md`.
+Full detail and a worked localize-then-land shape: `references/guides/scope-ladder.md`. The controlled `service` vocabulary (the cross-vendor ticket-class values worth pivoting on, e.g. `backup`, `storage`, `security_audit`) is in `references/guides/service-taxonomy.md`.
 
 ---
 
@@ -306,7 +306,7 @@ Full detail and a worked localize-then-land shape: `guides/scope-ladder.md`. The
 
 Before any deep investigation, resolve the scope (which org / sources / time window) and confirm the source(s) have data in the investigation's time window.
 
-**Scope resolution sequence - see `guides/scope-resolution.md` for details.** In brief:
+**Scope resolution sequence - see `references/guides/scope-resolution.md` for details.** In brief:
 
 1. Parse the engineer's message for an explicit customer, org, or agent UUID. Pass UUIDs via `org_ids` when recognized; otherwise use `query`.
 2. **Host-first:** when the engineer names a host/device, pass it as `query`; the server matches `name` and `reported_hostname` across authorized orgs.
@@ -329,7 +329,7 @@ list_sources(
 
 Each row is a **(sender `agent_id`, origin `source`)** pair with `sent_via` (`agent` / `ingest_key` / `unresolved`), triage columns (`cnt_interesting`, one count per failure-side severity band from `cnt_warning` to `cnt_critical_plus`, `distinct_interesting`) and optional summary **`top_interesting_patterns`** teaser. Call **`describe_pattern`** before citing any teaser pattern.
 
-**Critical+ fetch-first rule:** any non-zero `cnt_critical_plus` in scope (severity 20 and above) means fetch those events before proceeding, regardless of the investigation topic. Critical+ admissions are rare, always-surface facts (confirmed integrity loss or compromise) and auto-elevate into daily fleet reporting; never leave one unread in a Finding's scope. The Info..Error bands carry no fetch-first mandate - weigh them normally. See `guides/category-classes.md`, Query notes.
+**Critical+ fetch-first rule:** any non-zero `cnt_critical_plus` in scope (severity 20 and above) means fetch those events before proceeding, regardless of the investigation topic. Critical+ admissions are rare, always-surface facts (confirmed integrity loss or compromise) and auto-elevate into daily fleet reporting; never leave one unread in a Finding's scope. The Info..Error bands carry no fetch-first mandate - weigh them normally. See `references/guides/category-classes.md`, Query notes.
 
 **The agent-side readings and the event stream describe DIFFERENT things, and they can legitimately disagree.** `agent_status` says where the device stands, `offline` meaning no signal reached SparkLogs and the cause unknown; the events say what actually arrived. A machine reading `offline` while events arrive minutes later is a normal and common shape.
 
@@ -340,7 +340,7 @@ Each row is a **(sender `agent_id`, origin `source`)** pair with `sent_via` (`ag
 
 Halt in one case only: `agent_status` is `offline` or a `stuck_reason` is present, AND there are no events for that `agent_id` in the window. Then absence is a finding about collection, not proof the endpoint is healthy. If the expected source has no events while the agent is reporting normally, ask the engineer: wrong name, wrong window, or origin labeled differently.
 
-**Sender-first LQL:** filter with `agent_id = "<uuid>"` for everything one sender shipped; use `source` for origin-host pivots. "Collector" means one thing only: the log-shipping process the agent supervises on the device. See `guides/scope-resolution.md`.
+**Sender-first LQL:** filter with `agent_id = "<uuid>"` for everything one sender shipped; use `source` for origin-host pivots. "Collector" means one thing only: the log-shipping process the agent supervises on the device. See `references/guides/scope-resolution.md`.
 
 ### Completeness: `agent_complete_through`, and the restraint it asks for
 
@@ -358,7 +358,7 @@ Label stream liveness as what it is: data arriving now is not a completeness gua
 
 **Advisories are the server's judgment.** Use them rather than inventing triage, so every SparkLogs surface tells the engineer the same thing. Empty means nothing to note.
 
-**Missed events, when a feed reports them.** Collection sometimes has to skip over events because the underlying collection engine (in v1 the Windows event log itself) could not provide them. Call these **missed events** or **skipped events**, bounded by a **skip window**; never "gap", "data loss" or "lost". State what happened and its bounds, then stop: the events may still exist in the device's local Windows event log, SparkLogs does not re-collect them, so do not offer recovery. A skip is a notice, never an incident and never the machine's or operator's fault. An ABSENT skips entry means the source type does not detect skips, never that none occurred. Skips are orthogonal to health: a current, advancing feed can carry a skip window. Detail in `guides/scope-resolution.md`.
+**Missed events, when a feed reports them.** Collection sometimes has to skip over events because the underlying collection engine (in v1 the Windows event log itself) could not provide them. Call these **missed events** or **skipped events**, bounded by a **skip window**; never "gap", "data loss" or "lost". State what happened and its bounds, then stop: the events may still exist in the device's local Windows event log, SparkLogs does not re-collect them, so do not offer recovery. A skip is a notice, never an incident and never the machine's or operator's fault. An ABSENT skips entry means the source type does not detect skips, never that none occurred. Skips are orthogonal to health: a current, advancing feed can carry a skip window. Detail in `references/guides/scope-resolution.md`.
 
 ---
 
@@ -377,7 +377,7 @@ The catalog is these eleven tools:
 | `query_logs` | backing scan | Retrieve raw chronological events. Last resort, over an already-narrowed window/filter. No `limit`: you get one server-sized page, `summary` carries the matched total, and further pages come from `refine_query_result` on the returned `query_id`. |
 | `refine_query_result` | lightweight | Relational engine over a cached `query_logs` result (filter/group/aggregate/having/order/select/page). Use freely; touches the cache, not the source. Responses keep the same `query_id`; refine that id again for other views. |
 | `get_query_metadata` | lightweight* | Cache/field introspection over a `query_id`. Default = bookkeeping only (fast). *`top_n`/`field_match` deep field discovery is a full catalog scan of the source - use deliberately. |
-| `query_device_health` | billed discovery | Latest curated device state: monitor rows for conditions, inventory rows for what is on the box, plus silent devices. `start`/`end` are REQUIRED. Supporting honesty check, not the entry point - reach for it when you are about to conclude something from an absence. See `guides/device-state-fields.md`. |
+| `query_device_health` | billed discovery | Latest curated device state: monitor rows for conditions, inventory rows for what is on the box, plus silent devices. `start`/`end` are REQUIRED. Supporting honesty check, not the entry point - reach for it when you are about to conclude something from an absence. See `references/guides/device-state-fields.md`. |
 | `server_info` | lightweight | Server name, version, region, transport and the authenticated workspace id. Takes NO parameters, including no `external_investigation_id`. Confirm which region and workspace you are on before citing anything. |
 
 Three differential tools do not exist (`query_period_diff`, `compare_populations`, `cluster_event_contexts`). Instead use two `query_event_counts_by_severity` runs over two windows for period diff, or one run per distinct `lql` population for compare.
@@ -411,7 +411,7 @@ Every data-tool response is ONE text block, not JSON you parse as a whole:
 
 `query_event_counts_by_severity` output is NOT a refinable cache - calling `refine_query_result` on it returns expired. Read grouped results directly. If a grouped result is truncated, follow its hint (narrow the filter or window and re-run the grouped call). `refine_query_result` applies ONLY to `query_logs` slices; a refine response keeps the same `query_id`, so run every further refine against that same id.
 
-Detailed per-tool usage with examples is in `guides/mcp-tool-decision-tree.md`.
+Detailed per-tool usage with examples is in `references/guides/mcp-tool-decision-tree.md`.
 
 ---
 
@@ -443,7 +443,7 @@ severity in (error, critical) OR (anomaly_max_score >= 60 AND anomaly_max_score_
 ```
 `anomaly_max_score` / `anomaly_max_score_confidence` are designed and not emitted anywhere in the product today, so this filter reduces to `severity in (error, critical)` on every source. That degraded form is a fine fallback; do not read the missing anomaly half as "no anomalies."
 
-The complete LQL reference with all operators, edge cases, and common mistakes is in `guides/lql-reference.md`.
+The complete LQL reference with all operators, edge cases, and common mistakes is in `references/guides/lql-reference.md`.
 
 ---
 
@@ -515,7 +515,7 @@ Re-read this file at the start of each new tool-use cycle, especially after cont
 
 **Delegate bulk analysis to subagents (where the host supports it).** If a step requires reading more than ~500 raw events whose content the final summary won't need, delegate to a subagent. The subagent reads in its own context, returns a structured summary (findings, timestamps, referenced `pattern_hash` values, `query_url`s), and you continue with that summary in your context.
 
-Bulk extractive summarization suits the fastest lightweight model tier your host offers; you stay on the more capable model for cross-correlating inference, hypothesis evaluation, and template assembly. Definitions and host-specific notes are in `guides/subagent-definitions.md`.
+Bulk extractive summarization suits the fastest lightweight model tier your host offers; you stay on the more capable model for cross-correlating inference, hypothesis evaluation, and template assembly. Definitions and host-specific notes are in `references/guides/subagent-definitions.md`.
 
 **The local investigation-state document is your history.** `get_query_metadata` inspects ONE cached query at a time (by `query_id`); it does NOT enumerate an investigation's history by `external_investigation_id`. After context compaction, re-read the local state document to re-orient, then `get_query_metadata(query_id=...)` on a specific cache if you need its schema or cache status.
 
@@ -523,7 +523,7 @@ Bulk extractive summarization suits the fastest lightweight model tier your host
 
 ## Section 17. Common mistakes to avoid
 
-The full list of common mistakes, anti-patterns, and recovery is in `guides/common-mistakes.md`. Top 13:
+The full list of common mistakes, anti-patterns, and recovery is in `references/guides/common-mistakes.md`. Top 13:
 
 1. **Producing cause analysis in this skill.** Find yourself writing "this suggests" or "the likely cause is" - STOP. That belongs in `/sparklogs-analyze-cause`. Move it to the POSSIBLE NEXT DIRECTIONS section (1-4 sentences) and refer the engineer to that skill.
 2. **Citing without `query_url`.** Every Finding's Evidence field has a `query_url` from the actual MCP tool response. If it doesn't, you're confabulating.
@@ -546,23 +546,23 @@ The full list of common mistakes, anti-patterns, and recovery is in `guides/comm
 Read a reference when the situation calls for it. Do not hold them all in context:
 
 - `references/output-template.md` - full output template with every field defined, plus right-vs-wrong examples.
-- `guides/scope-ladder.md` - the six grouping fields and their `_hash` companions (incl. `source`/`source_hash`), availability, `query_scope_activity` vs `query_event_counts_by_severity`, and RCA usage shapes.
-- `guides/category-classes.md` - what NOTABLE / ELEVATED / RECOVERED mean in `category` (temporal shape, not importance), **open monitor ≠ problem**, the lifecycle pair convention, how "interesting" counts fold them in, and the critical+ fetch-first contract.
-- `guides/service-taxonomy.md` - the controlled `service` ticket-class vocabulary (cross-vendor pivot values), the audit-adjacent demarcation list (why `security_audit` is not the whole audit surface), and boundary rules.
-- `playbooks/backup-failure.md` (and siblings in the Section 3b table) - one symptom walk. Do not load all playbooks.
-- `themes/windows-security-and-audit.md` - change analysis; other themes in Section 3b.
-- `feeds/<id>/` - generated lookup (fields, enums, reasons). Router: Section 3b feed table.
-- `guides/device-state-fields.md` - device and agent state: the `query_device_health` surface, the column names, and the honesty fields that decide what you may say about a duration or a clear time.
-- `guides/generated-reference-router.md` - how to reach the per-source generated reference set (fields, vocabularies, patterns, recipes) by question shape.
-- `guides/scope-resolution.md` - detailed scope-resolution and source-discovery sequence.
-- `guides/lql-reference.md` - complete LQL syntax reference with examples and common mistakes.
-- `guides/mcp-tool-decision-tree.md` - per-tool detailed usage, all parameters, decision tree for which tool to use when.
-- `guides/off-endpoint-causes.md` - per-investigation-type lists of what's not checked and why.
-- `guides/common-mistakes.md` - anti-pattern catalog with examples and recoveries.
-- `guides/msp-tool-registry.md` - common MSP tools with category/log-location/source-field mappings.
-- `guides/pattern-catalog.md` - high-signal `pattern_hash` patterns with likely meanings.
-- `guides/subagent-definitions.md` - pre-configured subagent definitions for bulk-summarization delegation.
-- `guides/writing-voice.md` - style rules for every free-text field you write.
+- `references/guides/scope-ladder.md` - the six grouping fields and their `_hash` companions (incl. `source`/`source_hash`), availability, `query_scope_activity` vs `query_event_counts_by_severity`, and RCA usage shapes.
+- `references/guides/category-classes.md` - what NOTABLE / ELEVATED / RECOVERED mean in `category` (temporal shape, not importance), **open monitor ≠ problem**, the lifecycle pair convention, how "interesting" counts fold them in, and the critical+ fetch-first contract.
+- `references/guides/service-taxonomy.md` - the controlled `service` ticket-class vocabulary (cross-vendor pivot values), the audit-adjacent demarcation list (why `security_audit` is not the whole audit surface), and boundary rules.
+- `references/playbooks/backup-failure.md` (and siblings in the Section 3b table) - one symptom walk. Do not load all playbooks.
+- `references/themes/windows-security-and-audit.md` - change analysis; other themes in Section 3b.
+- `references/feeds/<id>/` - generated lookup (fields, enums, reasons). Router: Section 3b feed table.
+- `references/guides/device-state-fields.md` - device and agent state: the `query_device_health` surface, the column names, and the honesty fields that decide what you may say about a duration or a clear time.
+- `references/guides/generated-reference-router.md` - how to reach the per-source generated reference set (fields, vocabularies, patterns, recipes) by question shape.
+- `references/guides/scope-resolution.md` - detailed scope-resolution and source-discovery sequence.
+- `references/guides/lql-reference.md` - complete LQL syntax reference with examples and common mistakes.
+- `references/guides/mcp-tool-decision-tree.md` - per-tool detailed usage, all parameters, decision tree for which tool to use when.
+- `references/guides/off-endpoint-causes.md` - per-investigation-type lists of what's not checked and why.
+- `references/guides/common-mistakes.md` - anti-pattern catalog with examples and recoveries.
+- `references/guides/msp-tool-registry.md` - common MSP tools with category/log-location/source-field mappings.
+- `references/guides/pattern-catalog.md` - high-signal `pattern_hash` patterns with likely meanings.
+- `references/guides/subagent-definitions.md` - pre-configured subagent definitions for bulk-summarization delegation.
+- `references/guides/writing-voice.md` - style rules for every free-text field you write.
 
 ---
 

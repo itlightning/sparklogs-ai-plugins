@@ -3,17 +3,22 @@
     "email": "help@itlightning.com",
     "name": "IT Lightning, LLC"
   },
-  "categories": [
+  "description": "Query and analyze SparkLogs: system and application logs plus device health and state over time, one host or the fleet.",
+  "homepage": "https://sparklogs.com/",
+  "interface": {
+    "category": "observability",
+    "displayName": "SparkLogs"
+  },
+  "keywords": [
     "observability",
     "incident-response",
     "rca",
     "msp"
   ],
-  "description": "Query and analyze SparkLogs: system and application logs plus device health and state over time, one host or the fleet.",
-  "displayName": "SparkLogs",
-  "homepage": "https://sparklogs.com/",
   "license": "Apache-2.0",
+  "mcpServers": "./.mcp.json",
   "name": "sparklogs",
   "repository": "https://github.com/itlightning/sparklogs-ai-plugins",
-  "version": "1.4.1"
+  "skills": "./skills/",
+  "version": "1.4.2"
 }

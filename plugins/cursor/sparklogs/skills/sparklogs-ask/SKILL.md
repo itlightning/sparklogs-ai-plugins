@@ -29,7 +29,7 @@ Answer first, then stop talking, never mid-query. Hedge precisely: "not in this 
 - "What happened / how many / when" → `query_event_counts_by_severity` or `query_scope_activity` first; `query_logs` only for a narrow slice.
 - Collector debug only → `sparklogs.agent.vector` / `sparklogs.agent.log`. Not the headline for device health.
 
-Load a guide when you are stuck on that topic (`guides/scope-resolution.md`, `guides/mcp-tool-decision-tree.md`, `guides/lql-reference.md`, `guides/common-mistakes.md`). Do not dump the folder.
+Load a guide when you are stuck on that topic (`references/guides/scope-resolution.md`, `references/guides/mcp-tool-decision-tree.md`, `references/guides/lql-reference.md`, `references/guides/common-mistakes.md`). Open the one you need, never the whole set.
 
 ## Where to look
 
@@ -39,42 +39,42 @@ You may open the matching playbook as a query recipe. Do not emit the investigat
 
 | Symptom | File |
 |---|---|
-| Backup job failed | `playbooks/backup-failure.md` |
-| BitLocker recovery | `playbooks/bitlocker-recovery.md` |
-| Certificate expiry | `playbooks/certificate-expiry.md` |
-| Directory replication | `playbooks/directory-replication-failure.md` |
-| Disk full or filling | `playbooks/disk-full-or-filling.md` |
-| Memory or handle leak | `playbooks/memory-or-handle-leak.md` |
-| RAID / array degraded | `playbooks/raid-or-storage-degraded.md` |
-| RMM connectivity | `playbooks/rmm-connectivity.md` |
-| Slow logon | `playbooks/slow-logon.md` |
-| Windows Update / patch failure | `playbooks/windows-update-failure.md` |
+| Backup job failed | `references/playbooks/backup-failure.md` |
+| BitLocker recovery | `references/playbooks/bitlocker-recovery.md` |
+| Certificate expiry | `references/playbooks/certificate-expiry.md` |
+| Directory replication | `references/playbooks/directory-replication-failure.md` |
+| Disk full or filling | `references/playbooks/disk-full-or-filling.md` |
+| Memory or handle leak | `references/playbooks/memory-or-handle-leak.md` |
+| RAID / array degraded | `references/playbooks/raid-or-storage-degraded.md` |
+| RMM connectivity | `references/playbooks/rmm-connectivity.md` |
+| Slow logon | `references/playbooks/slow-logon.md` |
+| Windows Update / patch failure | `references/playbooks/windows-update-failure.md` |
 
 **Themes** (domain, feeds that join):
 
 | Topic | File |
 |---|---|
-| Patches / CBS / DISM / Setup | `themes/windows-updates-and-patching.md` |
-| Who changed what (Security) | `themes/windows-security-and-audit.md` |
-| Defender | `themes/endpoint-protection.md` |
-| App / System crashes and services | `themes/windows-operational-events.md` |
-| CPU, RAM, disk, installed software, monitors | `themes/device-health-and-state.md` |
-| Named backup product (Veeam etc.): installed products. Not operational events. | `themes/device-health-and-state.md` |
+| Patches / CBS / DISM / Setup | `references/themes/windows-updates-and-patching.md` |
+| Who changed what (Security) | `references/themes/windows-security-and-audit.md` |
+| Defender | `references/themes/endpoint-protection.md` |
+| App / System crashes and services | `references/themes/windows-operational-events.md` |
+| CPU, RAM, disk, installed software, monitors | `references/themes/device-health-and-state.md` |
+| Named backup product (Veeam etc.): installed products. Not operational events. | `references/themes/device-health-and-state.md` |
 
-**Data feeds** (`subsource` = directory name). Open `feeds/<id>/README.md`, then the artifact you need (`fields.md`, `enums.md`, `reasons.md`). Search `reasons.md` for the `##` heading that matches the reason slug. Do not read the whole file.
+**Data feeds** (`subsource` = directory name). Open `references/feeds/<id>/README.md`, then the artifact you need (`fields.md`, `enums.md`, `reasons.md`). Search `reasons.md` for the `##` heading that matches the reason slug. Do not read the whole file.
 
 | Feed | What | Path |
 |---|---|---|
-| `win.eventlog.security` | Security auditing: logons, account and policy changes, actors | `feeds/win.eventlog.security/` |
-| `win.eventlog.system` | System channel: services, drivers, kernel, VSS, storage | `feeds/win.eventlog.system/` |
-| `win.eventlog.application` | Application channel: app crashes, hangs, vendor app events | `feeds/win.eventlog.application/` |
-| `win.eventlog.setup` | Windows Update results per update | `feeds/win.eventlog.setup/` |
-| `win.servicing.cbs` | CBS servicing internals: component store, packages | `feeds/win.servicing.cbs/` |
-| `win.servicing.dism` | DISM operations and image health | `feeds/win.servicing.dism/` |
-| `win.defender.eventlog` | Defender: threats, protection state | `feeds/win.defender.eventlog/` |
-| `sparklogs.agent.state` | Device health and state snapshots: CPU, RAM, disk, installed software, monitors | `feeds/sparklogs.agent.state/` |
-| `sparklogs.agent.vector` | Collector debug only: data collector internals | `feeds/sparklogs.agent.vector/` |
-| `sparklogs.agent.log` | Collector debug only: agent supervisor log | `feeds/sparklogs.agent.log/` |
+| `win.eventlog.security` | Security auditing: logons, account and policy changes, actors | `references/feeds/win.eventlog.security/` |
+| `win.eventlog.system` | System channel: services, drivers, kernel, VSS, storage | `references/feeds/win.eventlog.system/` |
+| `win.eventlog.application` | Application channel: app crashes, hangs, vendor app events | `references/feeds/win.eventlog.application/` |
+| `win.eventlog.setup` | Windows Update results per update | `references/feeds/win.eventlog.setup/` |
+| `win.servicing.cbs` | CBS servicing internals: component store, packages | `references/feeds/win.servicing.cbs/` |
+| `win.servicing.dism` | DISM operations and image health | `references/feeds/win.servicing.dism/` |
+| `win.defender.eventlog` | Defender: threats, protection state | `references/feeds/win.defender.eventlog/` |
+| `sparklogs.agent.state` | Device health and state snapshots: CPU, RAM, disk, installed software, monitors | `references/feeds/sparklogs.agent.state/` |
+| `sparklogs.agent.vector` | Collector debug only: data collector internals | `references/feeds/sparklogs.agent.vector/` |
+| `sparklogs.agent.log` | Collector debug only: agent supervisor log | `references/feeds/sparklogs.agent.log/` |
 
 ## Written investigation
 

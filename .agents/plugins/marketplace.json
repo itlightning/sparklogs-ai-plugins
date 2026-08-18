@@ -1,4 +1,12 @@
 {
+  "interface": {
+    "displayName": "SparkLogs"
+  },
+  "name": "sparklogs-ai-plugins",
+  "owner": {
+    "email": "help@itlightning.com",
+    "name": "IT Lightning, LLC"
+  },
   "plugins": [
     {
       "author": {
@@ -12,7 +20,8 @@
       "name": "sparklogs",
       "repository": "https://github.com/itlightning/sparklogs-ai-plugins",
       "source": {
-        "path": "plugins/codex/sparklogs"
+        "path": "./plugins/codex/sparklogs",
+        "source": "local"
       }
     }
   ]

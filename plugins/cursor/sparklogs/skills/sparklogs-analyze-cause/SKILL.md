@@ -53,7 +53,7 @@ These principles bind every decision you make.
 
 ## Section 3. Output structure
 
-Every analysis produces a structured document in this order. The full template lives in `references/output-template.md`. Write every free-text field per `guides/writing-voice.md`. The minimum:
+Every analysis produces a structured document in this order. The full template lives in `references/output-template.md`. Write every free-text field per `references/guides/writing-voice.md`. The minimum:
 
 ```
 ROOT-CAUSE ANALYSIS: <ticket / scope description>
@@ -173,36 +173,36 @@ Skill-local:
 
 The `guides/` set is shared with the investigate skill, word for word:
 
-- `guides/scope-ladder.md` - the six grouping fields and their `_hash` companions; the source of fleet-pivot discriminators.
-- `guides/category-classes.md` - class, the class-last category ladder, and the severity ladder. Read before ranking a hypothesis by anything other than severity.
-- `guides/device-state-fields.md` - device and agent state, and the honesty fields that decide whether a duration or a clear time can carry a hypothesis at all.
-- `guides/generated-reference-router.md` - how to reach the per-source generated reference set by question shape, when a confirm step needs real field names.
-- `guides/scope-resolution.md`, `guides/lql-reference.md`, `guides/mcp-tool-decision-tree.md` - reach for these when you make additional MCP calls.
-- `guides/off-endpoint-causes.md`, `guides/common-mistakes.md`, `guides/msp-tool-registry.md`, `guides/pattern-catalog.md`, `guides/subagent-definitions.md`, `guides/writing-voice.md`.
+- `references/guides/scope-ladder.md` - the six grouping fields and their `_hash` companions; the source of fleet-pivot discriminators.
+- `references/guides/category-classes.md` - class, the class-last category ladder, and the severity ladder. Read before ranking a hypothesis by anything other than severity.
+- `references/guides/device-state-fields.md` - device and agent state, and the honesty fields that decide whether a duration or a clear time can carry a hypothesis at all.
+- `references/guides/generated-reference-router.md` - how to reach the per-source generated reference set by question shape, when a confirm step needs real field names.
+- `references/guides/scope-resolution.md`, `references/guides/lql-reference.md`, `references/guides/mcp-tool-decision-tree.md` - reach for these when you make additional MCP calls.
+- `references/guides/off-endpoint-causes.md`, `references/guides/common-mistakes.md`, `references/guides/msp-tool-registry.md`, `references/guides/pattern-catalog.md`, `references/guides/subagent-definitions.md`, `references/guides/writing-voice.md`.
 
 Themes and feeds carry confirm-step field names and change analysis. Do not load playbooks.
 
 | Topic | File |
 |---|---|
-| Patches / CBS / DISM / Setup | `themes/windows-updates-and-patching.md` |
-| Who changed what (Security) | `themes/windows-security-and-audit.md` |
-| Defender | `themes/endpoint-protection.md` |
-| App / System crashes and services | `themes/windows-operational-events.md` |
-| CPU, RAM, disk, installed software, monitors | `themes/device-health-and-state.md` |
-| Named backup product (Veeam etc.): installed products. Not operational events. | `themes/device-health-and-state.md` |
+| Patches / CBS / DISM / Setup | `references/themes/windows-updates-and-patching.md` |
+| Who changed what (Security) | `references/themes/windows-security-and-audit.md` |
+| Defender | `references/themes/endpoint-protection.md` |
+| App / System crashes and services | `references/themes/windows-operational-events.md` |
+| CPU, RAM, disk, installed software, monitors | `references/themes/device-health-and-state.md` |
+| Named backup product (Veeam etc.): installed products. Not operational events. | `references/themes/device-health-and-state.md` |
 
 | Feed | What | Path |
 |---|---|---|
-| `win.eventlog.security` | Security auditing: logons, account and policy changes, actors | `feeds/win.eventlog.security/` |
-| `win.eventlog.system` | System channel: services, drivers, kernel, VSS, storage | `feeds/win.eventlog.system/` |
-| `win.eventlog.application` | Application channel: app crashes, hangs, vendor app events | `feeds/win.eventlog.application/` |
-| `win.eventlog.setup` | Windows Update results per update | `feeds/win.eventlog.setup/` |
-| `win.servicing.cbs` | CBS servicing internals: component store, packages | `feeds/win.servicing.cbs/` |
-| `win.servicing.dism` | DISM operations and image health | `feeds/win.servicing.dism/` |
-| `win.defender.eventlog` | Defender: threats, protection state | `feeds/win.defender.eventlog/` |
-| `sparklogs.agent.state` | Device health and state snapshots: CPU, RAM, disk, installed software, monitors | `feeds/sparklogs.agent.state/` |
-| `sparklogs.agent.vector` | Collector debug only: data collector internals | `feeds/sparklogs.agent.vector/` |
-| `sparklogs.agent.log` | Collector debug only: agent supervisor log | `feeds/sparklogs.agent.log/` |
+| `win.eventlog.security` | Security auditing: logons, account and policy changes, actors | `references/feeds/win.eventlog.security/` |
+| `win.eventlog.system` | System channel: services, drivers, kernel, VSS, storage | `references/feeds/win.eventlog.system/` |
+| `win.eventlog.application` | Application channel: app crashes, hangs, vendor app events | `references/feeds/win.eventlog.application/` |
+| `win.eventlog.setup` | Windows Update results per update | `references/feeds/win.eventlog.setup/` |
+| `win.servicing.cbs` | CBS servicing internals: component store, packages | `references/feeds/win.servicing.cbs/` |
+| `win.servicing.dism` | DISM operations and image health | `references/feeds/win.servicing.dism/` |
+| `win.defender.eventlog` | Defender: threats, protection state | `references/feeds/win.defender.eventlog/` |
+| `sparklogs.agent.state` | Device health and state snapshots: CPU, RAM, disk, installed software, monitors | `references/feeds/sparklogs.agent.state/` |
+| `sparklogs.agent.vector` | Collector debug only: data collector internals | `references/feeds/sparklogs.agent.vector/` |
+| `sparklogs.agent.log` | Collector debug only: agent supervisor log | `references/feeds/sparklogs.agent.log/` |
 
 ---
 
