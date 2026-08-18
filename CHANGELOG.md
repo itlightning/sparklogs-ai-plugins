@@ -5,12 +5,13 @@ Dates are release dates; the `Unreleased` section accumulates until a tag is cut
 
 ## Unreleased
 
-### Breaking
+### Changed
 
 - **Command names lost their duplicated prefix.**
   In Claude the commands are now `/sparklogs:ask`, `/sparklogs:investigate`, `/sparklogs:analyze-cause`, `/sparklogs:summary`, and `/sparklogs:explain`.
   They were previously `/sparklogs:sparklogs-ask` and so on, because each command file repeated the plugin name that Claude already prefixes.
   Cursor invocation names (`/sparklogs-ask` and siblings) are unchanged.
+  The old form was itself the defect: it never matched the documentation, which has always written the short names.
   Update any saved prompt, macro, or runbook that types the old form.
 - **Codex and the generic package no longer ship commands, rules, or subagents.**
   Codex documents skills, MCP servers, and hooks as the components a plugin bundles, and Agent Plugins v1 defines skills and `mcp.json`.
