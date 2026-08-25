@@ -82,6 +82,7 @@ Load what you need for this step. Do not dump `playbooks/` or `guides/`.
 | RMM connectivity | `playbooks/rmm-connectivity.md` |
 | Slow logon | `playbooks/slow-logon.md` |
 | Windows Update / patch failure | `playbooks/windows-update-failure.md` |
+| VSS / shadow copies / backup plumbing | `playbooks/windows-vss.md` |
 <!-- END GENERATED INDEX:playbooks -->
 
 ### Topic → theme

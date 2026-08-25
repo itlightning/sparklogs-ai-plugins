@@ -17,4 +17,8 @@ Open `feeds/<id>/reasons.md` and search the slug. Same slug on two channels is o
 
 Patching: `themes/windows-updates-and-patching.md`. Who changed it: `themes/windows-security-and-audit.md`.
 
-A named backup product job failed is not this theme. Installed products: `themes/device-health-and-state.md`. Full walk: `/sparklogs:investigate` and `playbooks/backup-failure.md`. VSS writer-failed is not proof the backup product failed.
+A named backup product job failed is not this theme.
+Installed products: `themes/device-health-and-state.md`.
+Job outcome: `playbooks/backup-failure.md`.
+VSS plumbing (writers, snapshots, shadow-copy rotation): `playbooks/windows-vss.md`.
+A VSS writer failure is not proof the backup product failed.

@@ -6,9 +6,12 @@ index: Backup job failed
 
 **Trigger.** "Veeam, Datto, Axcient, Acronis, MSP360, Cove or Slide reports backup failed on
 <source>."
+Writers, snapshots, or shadow-copy rotation with a job that looks fine: `playbooks/windows-vss.md`.
 
-**Evidence today.** Strong. Vendor backup channels carry their own errors, and the System channel
-carries the VSS and storage side. Cross-product conflicts show up in what is installed on the box.
+**Evidence today.** Strong.
+Vendor backup channels carry their own errors, and the System channel carries the VSS and storage side.
+Cross-product conflicts show up in what is installed on the box.
+VSS plumbing errors are not a job verdict; take outcome from the vendor events.
 
 **Off-endpoint** (per `off-endpoint-causes.md` HM1): backup target NAS or cloud, EDR cloud blocking
 VSS, bespoke vendor with no autodetect, credential vault, Hyper-V or VMware guest writers,

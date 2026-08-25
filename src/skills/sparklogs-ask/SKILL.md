@@ -51,6 +51,7 @@ You may open the matching playbook as a query recipe. Do not emit the investigat
 | RMM connectivity | `playbooks/rmm-connectivity.md` |
 | Slow logon | `playbooks/slow-logon.md` |
 | Windows Update / patch failure | `playbooks/windows-update-failure.md` |
+| VSS / shadow copies / backup plumbing | `playbooks/windows-vss.md` |
 <!-- END GENERATED INDEX:playbooks -->
 
 **Themes** (domain, feeds that join):

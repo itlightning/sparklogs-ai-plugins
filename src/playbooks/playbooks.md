@@ -16,6 +16,7 @@ Chat may open one matching file as a query recipe. The written report path walks
 | RMM connectivity | `playbooks/rmm-connectivity.md` |
 | Slow logon | `playbooks/slow-logon.md` |
 | Windows Update / patch failure | `playbooks/windows-update-failure.md` |
+| VSS / shadow copies / backup plumbing | `playbooks/windows-vss.md` |
 <!-- END GENERATED INDEX:playbooks -->
 
 If nothing matches, use a theme in that same SKILL.md table, then one feed artifact.
