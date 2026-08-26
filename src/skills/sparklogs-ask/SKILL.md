@@ -8,6 +8,8 @@ indexes: [playbooks, themes, feeds]
 
 Answer this question from SparkLogs telemetry. This is a conversation with the data, not an investigation report.
 
+**WEL** means Windows Event Log.
+
 No output template. No WHAT WAS NOT CHECKED catalog. You may go as deep as the question needs. Follow-up queries are expected.
 
 `/sparklogs:investigate` is the written pass: a cited system-condition summary they can put on a ticket. Offer it when they want that artifact. Do not switch to it just because the chat went deep.
@@ -36,7 +38,6 @@ Load a guide when you are stuck on that topic (`guides/scope-resolution.md`, `gu
 
 You may open the matching playbook for domain facts and starter LQL. Do not emit the investigation report from it.
 Playbooks are incomplete. Empty recipe LQL is not "nothing happened": widen by `subsource`, then that kind's explore ladder (`guides/stream-kinds.md`), then raw logs, before you say you cannot answer.
-Do not use `app` to scope Windows Event Log. Identity is `subsource`.
 
 **Playbooks** (symptom recipes):
 

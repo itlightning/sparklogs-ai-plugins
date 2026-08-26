@@ -5,7 +5,7 @@ Group **`winlog.event_id` / `reason` / `pattern`**.
 **`event_data.*` is expected** on this channel.
 
 One publisher is typical, so `provider_name` is not the split.
-`app` may be set (`windows_defender`). Still scope with `subsource` first so you do not depend on `app` fill rate.
+`app` is often `windows_defender` (`guides/app-vocabulary.md`).
 
 ## Explore
 

@@ -41,16 +41,16 @@ One trigger per tool. If your question is not on this list, it is almost always 
 | `describe_pattern` | You are about to cite a pattern and need its text and spread. Pass `pattern_hashes` (a list). Required before citing any teaser pattern. |
 | `query_scope_activity` | You do not know what this client HAS: which apps, services and subsources exist at all. Orientation on an unfamiliar estate. |
 | `get_query_metadata` | A cached result behaved oddly and you need its schema, filter or cache status. |
-| `list_fields` | Rarely. See below. |
+| `list_fields` | A field name you have not seen yet. Catalog, not the first grouping call. |
 | `server_info` | A call failed and you need to know whether region, transport or auth is the problem. |
 
 **Two honest demotions.** Both tools below exist and work; neither is where you should start.
 
-- **`list_fields` is usually the wrong way to learn a source's vocabulary.** It returns a field
-  catalog, which is a list of names with no sense of what matters. `query_event_counts_by_severity` on
-  `reason` or `pattern` tells you what the source is actually SAYING, ranked by volume, in one call
-  that also advances the investigation. Reach for `list_fields` when you need a field that the data
-  you have already seen did not surface, which is a real but narrow case.
+- **`list_fields` is a catalog, not the explore ladder.** It returns field names with fill counts.
+  `query_event_counts_by_severity` on `reason` or `pattern` tells you what the source is SAYING.
+  Reach for `list_fields` when you need a name the data you have already seen did not surface.
+  Discovery omits unstable process-id map paths (`sparklogs.data.processes.<pid>...`); service and
+  similar instance keys can remain. Device-state explore: `guides/stream-kinds/device-state.md`.
 - **`get_query_metadata`'s deep discovery (`top_n` / `field_match`) is a full catalog scan.** The
   inline response schema on every query already names the columns and their fill rates. Use the deep
   mode when that is genuinely not enough, not as a routine step.
@@ -218,7 +218,8 @@ describe_pattern(
 
 ### `list_fields`
 
-Field catalog over a source and window. **Rarely the right call.** A catalog of names does not tell you which fields carry the answer; a grouping on `reason` or `pattern` does, and it moves the investigation forward at the same time. Reach for this when you need a field the data you have already read did not surface. To inspect fields WITHIN a cached result, use `get_query_metadata`.
+Field catalog over a source and window. Use when you need a **name** the rows you already read did not surface.
+It does not rank what matters; grouping on `reason` or `pattern` does. Discovery omits unstable process-id map paths (`guides/stream-kinds/device-state.md`). To inspect fields WITHIN a cached result, use `get_query_metadata`.
 
 ```
 list_fields(
@@ -231,7 +232,7 @@ list_fields(
 -> rows: {field, type, event_count}
 ```
 
-**Common mistake:** running this as the first MCP call and filling context with field names that do not matter for this investigation.
+**Common mistake:** grouping or filtering on every catalog path instead of the stream-kind ladder.
 
 ---
 

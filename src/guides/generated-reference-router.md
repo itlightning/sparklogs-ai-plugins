@@ -21,6 +21,7 @@ the wrong one.
 | "I know this data as ECS or OCSF, what is it called here?" | `mapping-ecs.md` / `mapping-ocsf.md` | anchors from the external taxonomy onto these fields |
 | "What is on this box right now?" | none of the above | inventory rows from the MCP tools, not reference content |
 | "How do I explore this kind of stream?" | `guides/stream-kinds.md` | feed → kind → explore ladder. Not `fields.md` |
+| "What does this `app` token mean?" | `guides/app-vocabulary.md` | pack-minted product identity; empty is normal |
 
 Two shapes deserve their own line because they are the ones people get wrong:
 

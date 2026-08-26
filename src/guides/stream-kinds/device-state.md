@@ -3,8 +3,11 @@
 **Now:** `query_device_health` (`fieldset=rca` for one host). Columns: `guides/device-state-fields.md`.
 **History:** `query_logs` on `subsource = "sparklogs.agent.state"`. Group **`sparklogs.kind`**, **`sparklogs.topic`**, **`reason`**.
 
-No `provider_name`. Do not explore this feed like Windows Event Log.
-Generated `feeds/sparklogs.agent.state/fields.md` lists module promotions. The snapshot payload is wire `sparklogs.data.*` and will not enumerate every instance leaf.
+No `provider_name`. Do not explore this feed like WEL.
+Generated `feeds/sparklogs.agent.state/fields.md` lists module promotions. The snapshot payload is wire `sparklogs.data.*`.
+
+`list_fields` is a good catalog call. Discovery omits unstable process-id map paths (see Maps).
+Service names and similar stable instance keys remain. The catalog is not the explore ladder: still group `kind` / `topic` / `reason` first.
 
 ## Now vs history
 
@@ -27,8 +30,10 @@ LQL map wildcards over instance keys are **not shipped**. Do not invent `process
 
 ## Maps vs host
 
-Some topics store **one object per instance** under a map whose keys are instance identities (process, service, volume, writer, product).
-Those keys address a row in the snapshot. They are not a practical field list.
+Some topics store **one object per instance** under a map whose keys are instance identities.
+
+- **Processes:** keys are numeric PIDs (then create-time). Those paths churn every process start. Field discovery omits `sparklogs.data.processes.<pid>` and everything under it. LQL still accepts a known path.
+- **Services, volumes, writers, products:** instance keys are stable enough to appear in `list_fields`. Useful to discover a name; not a substitute for grouping `topic` / `reason` / MCP `instance`.
 
 Host-scoped topics put fields directly under `sparklogs.data.<topic>` (no per-instance map).
 

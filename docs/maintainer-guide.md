@@ -25,20 +25,27 @@ sourcing detail its own authors work against; `docs/generated-public/` is the re
 same filenames, no provenance artifact. **This repo consumes the public tree verbatim.** Nothing is
 transformed on the way through, which is what lets the drift check compare bytes.
 
-Refresh it from a sibling source-library checkout:
+Refresh from a sibling source-library checkout (clean tree required):
 
 ```bash
 SPARKLOGS_SOURCE_LIBRARY_DIR=../sparklogs-source-library yarn sync-generated
 ```
 
+That one command copies `docs/generated-public/` into `src/feeds/` **and** regenerates the `app` token table in `guides/app-vocabulary.md` from `registry.yaml` `app_vocabulary` (`public` strings only).
+
 The environment variable is optional when the checkout sits beside this repo. A path that is set
 but unusable is a hard failure rather than a fallback: a drift guard that quietly reads a different
 checkout reports green about the wrong tree.
 
+Run it after a source-library change that affects public AI feed files or `app_vocabulary`.
+Workstation discipline: CI will not catch a stale table by itself (see the drift table below).
+
+`yarn stitch-indexes` is a different command: it rebuilds SKILL / playbook index tables from **this** repo's leaf YAML, not from the library.
+
 `scripts/generated-SYNC-MANIFEST.json` records the library branch and commit the current content came from.
 It does not ship on `dist`.
-Do not hand-edit anything under `src/feeds/`: an edit is
-reverted by the next sync and fails the drift check in the meantime.
+Do not hand-edit anything under `src/feeds/` or the generated table in `src/guides/app-vocabulary.md`:
+an edit is reverted by the next sync and fails the drift check in the meantime.
 
 `yarn validate:generated` runs the gates and then the drift check. **They are enforced in different
 places, and the split is worth knowing:**

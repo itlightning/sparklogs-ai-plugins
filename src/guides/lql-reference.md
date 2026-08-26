@@ -308,10 +308,10 @@ sparklogs.kind = monitor                               <- a tracked condition
 sparklogs.kind = agent_op                              <- agent self-observability
 ```
 
-### WEL channel and publisher
+### Windows Event Log (WEL) channel and publisher
 
-Managed-agent Windows Event Log identity is **`subsource`**.
-`app` is a product token when present; it is usually empty on these streams. Do not use `app` to pick a channel.
+WEL identity is **`subsource`**.
+`app` is a product token when present (`guides/app-vocabulary.md`).
 Explore ladders: `guides/stream-kinds.md`.
 
 ```
@@ -377,7 +377,7 @@ t between 2026-04-23T03:00:00Z and 2026-04-23T04:00:00Z
 7. **Quoting unquoted terms unnecessarily.** `severity = "error"` works but `severity = error` is fine and more readable.
 8. **Forgetting parentheses around OR with implicit AND.** `severity = error OR anomaly_max_score >= 60 source = "x"` parses unexpectedly. Use parentheses: `(severity = error OR anomaly_max_score >= 60) AND source = "x"`.
 9. **Mixing `&&` / `||` with `AND` / `OR` in the same expression.** Both work but consistency reads better.
-10. **Hallucinating field names.** A name nothing has emitted is not refused; it reads as empty, and the response lists it under `schema.fields_with_no_values`. That is a normal outcome rather than an error, so treat it as a prompt to check the spelling, not as something to report. Use canonical field names from `mcp-tool-decision-tree.md`, `list_fields` discovery, or `get_query_metadata` over a cached query. Do not flatten `sparklogs.agent.state` JSON keys (`guides/stream-kinds/device-state.md`).
+10. **Hallucinating field names.** A name nothing has emitted is not refused; it reads as empty, and the response lists it under `schema.fields_with_no_values`. That is a normal outcome rather than an error, so treat it as a prompt to check the spelling, not as something to report. Use canonical field names from `mcp-tool-decision-tree.md`, `list_fields`, or `get_query_metadata` over a cached query. `list_fields` omits unstable process-id paths; it is still the catalog for names you have not seen (`guides/stream-kinds/device-state.md`).
 
 ---
 

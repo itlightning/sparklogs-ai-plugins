@@ -3,11 +3,15 @@
 How to explore a stream once you know its `subsource`: which field to group first, then what to drill.
 Open this index, then **one** kind file.
 
+**WEL** means Windows Event Log.
+
 Several feeds share a kind (Application and System are the same ladder).
 Kind is the explore shape, not a 1:1 map to `subsource`.
 
 `feeds/<id>/fields.md` answers a different question: which promoted fields that module writes.
-Envelope keys (`provider_name`, `winlog.event_id`, `filename`) often live only on the kind ladder.
+Envelope keys (`provider_name`, `winlog.event_id`, `origin`) often live only on the kind ladder.
+
+Product tokens on `app`: `guides/app-vocabulary.md`.
 
 ## Feed → kind
 
@@ -24,16 +28,20 @@ Envelope keys (`provider_name`, `winlog.event_id`, `filename`) often live only o
 | `sparklogs.agent.vector` | Collector debug | `guides/stream-kinds/collector-debug.md` |
 | `sparklogs.agent.log` | Collector debug | `guides/stream-kinds/collector-debug.md` |
 
-Unknown `subsource`: treat as uncurated text (`message` / `pattern` / `severity`). Do not invent an `app:` prefix.
+Unknown `subsource`: treat as uncurated text (`message` / `pattern` / `severity`).
 
-## Portable `sparklogs.*`
+## Portable fields
 
-Prefer these **when present**: `sparklogs.kind`, `sparklogs.topic`, `reason`, `class`, `sparklogs.episode.*`, Security `sparklogs.actor.*`.
-Most Windows Event Log rows do not carry them.
+Prefer these **when present**:
+
+- Under `sparklogs.*`: `sparklogs.kind`, `sparklogs.topic`, `sparklogs.episode.*`, Security `sparklogs.actor.*`
+- Top-level (same facts, usual LQL/`group_by` names): `reason`, `class`
+
+Most WEL rows do not carry them.
 Absence is a missing promotion, not a missing event.
 
 ## Device state vs events
 
-"What is on the box / open condition **now**" is `query_device_health`, not a JSON key dump.
+"What is on the box / open condition **now**" is `query_device_health`.
 History of the same feed is `query_logs` scoped to `subsource = "sparklogs.agent.state"`.
 MCP column names (`kind`, `instance`, `episode_replaced_id`) are not LQL paths. Wire LQL uses dotted `sparklogs.*`. Detail: `guides/device-state-fields.md`.

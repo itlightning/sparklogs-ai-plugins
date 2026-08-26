@@ -5,7 +5,7 @@ Ask may open one matching file for domain facts and starter LQL. Investigate may
 Neither path is exhausted by the file: playbooks are incomplete recipes, not a catalog of relevant events and not a closed query set.
 A playbook query that returns nothing (or too little) is a miss on that recipe, not proof the host is quiet and not permission to say the issue cannot be analyzed.
 Widen: what subsources this host actually emits (`query_scope_activity` / counts grouped by `subsource`), then the explore ladder for that stream kind (`guides/stream-kinds.md`), then raw `query_logs`.
-WEL classic: `provider_name` before `pattern`. File logs: no `provider_name`. Device state: not WEL; `query_device_health` for now, logs group `sparklogs.kind` / `topic` / `reason`.
+WEL classic: `provider_name` before `pattern`. File logs: `origin`. Device state: `query_device_health` for now, logs group `sparklogs.kind` / `topic` / `reason`.
 Curated `service` / `reason` filters miss uncurated native text and sibling providers; look there before you stop.
 Playbooks assume MCP fluency: LQL, field meaning, and claim strength, not tool walkthroughs.
 

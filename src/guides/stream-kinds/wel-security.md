@@ -4,7 +4,6 @@ Scope **`subsource = "win.eventlog.security"`**.
 Then **`sparklogs.actor.*`**, **`reason`**, **`winlog.event_id`**, then `pattern`.
 
 `provider_name` exists but this channel has few publishers. Grouping by it is a weak split.
-Do not use `app` to pick this channel.
 
 ## Explore
 
@@ -15,7 +14,7 @@ Do not use `app` to pick this channel.
 
 ## Payload
 
-Actor and reason are the portable `sparklogs.*` surface on this kind.
+Actor and reason are the portable `sparklogs.*` / top-level `reason` surface on this kind.
 Raw Security payload remains under provider paths in `fields.md`.
 
 ## Accuracy

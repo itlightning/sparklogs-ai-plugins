@@ -5,7 +5,7 @@ Scope `sparklogs.agent.vector` or `sparklogs.agent.log`.
 Use after device health and product feeds, not as the ticket headline.
 
 These feeds explain the collector, not the customer's disk, CPU, or Windows fault.
-`app` may be `sparklogs_agent`. Still scope with `subsource`.
+`app` is `sparklogs_agent` (`guides/app-vocabulary.md`).
 
 ## Explore
 

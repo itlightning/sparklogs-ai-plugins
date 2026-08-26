@@ -3,8 +3,6 @@
 Group **`provider_name`**, then `winlog.event_id` / `pattern` / `pattern_hash`, then `reason` when curated.
 Scope with **`subsource`** (`win.eventlog.application` or `win.eventlog.system`).
 
-On managed-agent Windows Event Log, `app` is usually empty.
-Do not use `app` to pick a channel. Channel identity is `subsource`.
 `origin` is set; one origin per channel is typical, so it is not the split.
 
 ## Explore

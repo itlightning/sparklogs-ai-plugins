@@ -47,7 +47,7 @@ The feed table's row order is curated investigation salience, not alphabetical: 
 | `themes/windows-operational-events.md` | `win.eventlog.system`, `win.eventlog.application` | |
 | `themes/device-health-and-state.md` | `sparklogs.agent.state`; `sparklogs.agent.vector` and `.log` only for collector debug | CPU/RAM/disk/installed software, monitors, episodes, deltas. |
 
-Cross-cutting stays in `guides/`: class/severity, service taxonomy, LQL, MCP tools, honesty, mistakes, voice, scope-resolution, off-endpoint, stream kinds (`guides/stream-kinds.md`).
+Cross-cutting stays in `guides/`: class/severity, service taxonomy, app vocabulary, LQL, MCP tools, honesty, mistakes, voice, scope-resolution, off-endpoint, stream kinds (`guides/stream-kinds.md`).
 Playbook *authoring* (not runtime): `docs/playbook-authoring.md`.
 
 `rules/` ships only in the cursor package (`HOST_LAYOUT` in `scripts/dist-layout.mjs`). Claude, Codex, and generic hosts route on skill descriptions alone.
@@ -64,7 +64,7 @@ Index table at the top, then `## \`slug\`` sections from `public.*` YAML only.
 ## Authored vs generated
 
 - **Authored:** how to investigate, how feeds join, honesty, MCP/LQL, playbook and theme bodies, skill prose.
-- **Generated tables:** SKILL.md / `playbooks.md` index blocks from leaf `index:` YAML.
+- **Generated tables:** SKILL.md / `playbooks.md` index blocks from leaf YAML (`yarn stitch-indexes`). `guides/app-vocabulary.md` from source-library `registry.yaml` (`yarn sync-generated`, same command as feeds).
 - **Generated feeds:** what this feed writes (fields, enums, reason list; Security also recipes/patterns/mappings).
 
 Synced verbatim from the source-library public tree into `src/feeds/`.

@@ -8,8 +8,9 @@
 // and the gates in lint-generated-references.mjs are a tripwire on upstream rather than a filter.
 //
 // Usage:
-//   node scripts/sync-generated-references.mjs           write src/feeds/ and the sync manifest
-//   node scripts/sync-generated-references.mjs --check   fail if src/feeds/ differs from a re-sync
+//   node scripts/sync-generated-references.mjs           write src/feeds/, router inventory,
+//                                                        and guides/app-vocabulary.md
+//   node scripts/sync-generated-references.mjs --check   fail if those differ from a re-sync
 //
 // The library checkout is located by SPARKLOGS_SOURCE_LIBRARY_DIR, falling back to the sibling
 // path. A path that is set but unusable is a hard failure rather than a fallback: a drift guard
@@ -39,6 +40,7 @@ import {
   ROUTER_FILE,
   SOURCE_LIBRARY_DIR_ENV,
 } from './generated-references.config.mjs';
+import { syncAppVocabulary } from './sync-app-vocabulary.mjs';
 
 assertRepoRoot(import.meta);
 
@@ -152,6 +154,7 @@ async function main() {
     if (CHECK) {
       console.log(`generated-references drift: SKIPPED, no source-library checkout at ${dir}`);
       console.log(`  set ${SOURCE_LIBRARY_DIR_ENV} to verify committed content against its source`);
+      await syncAppVocabulary({ check: true });
       return;
     }
     throw new Error(`No source-library checkout at ${dir}. Set ${SOURCE_LIBRARY_DIR_ENV}.`);
@@ -213,6 +216,7 @@ async function main() {
       throw new Error(`src/feeds/ differs from a re-sync of ${commit.sha}:\n  ${drifted.join('\n  ')}\nRun: yarn sync-generated`);
     }
     console.log(`generated-references drift: clean against ${commit.branch} ${commit.sha}`);
+    await syncAppVocabulary({ check: true });
     return;
   }
 
@@ -228,6 +232,7 @@ async function main() {
   await fs.writeFile(path.join(ROOT, MANIFEST_FILE), manifest, 'utf8');
   await fs.writeFile(router.file, router.body, 'utf8');
   console.log(`Synced ${MODULES.length} module(s) from ${commit.branch} ${commit.sha}`);
+  await syncAppVocabulary({ check: false });
 }
 
 main().catch((error) => {

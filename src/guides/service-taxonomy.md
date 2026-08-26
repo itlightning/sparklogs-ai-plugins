@@ -3,7 +3,7 @@
 `service` is the curated cross-source ticket-class taxonomy: the MSP ticket class an event or
 snapshot is **evidence for**. It is cross-OS and cross-vendor on purpose (Veeam, Acronis, and
 Windows Server Backup all emit `service = "backup"`), so fleet-wide analysis spans vendors.
-`app` is the complementary axis (product identity as users know it); a vendor spans services and a
+`app` is the complementary axis (product identity): `guides/app-vocabulary.md`. A vendor spans services and a
 service spans vendors; neither nests in the other.
 
 Values are snake_case and drawn from a closed, registry-gated vocabulary. The set is additive-only:
