@@ -48,6 +48,7 @@ The feed table's row order is curated investigation salience, not alphabetical: 
 | `themes/device-health-and-state.md` | `sparklogs.agent.state`; `sparklogs.agent.vector` and `.log` only for collector debug | CPU/RAM/disk/installed software, monitors, episodes, deltas. |
 
 Cross-cutting stays in `guides/`: class/severity, service taxonomy, LQL, MCP tools, honesty, mistakes, voice, scope-resolution, off-endpoint.
+Playbook *authoring* (not runtime): `docs/playbook-authoring.md`.
 
 `rules/` ships only in the cursor package (`HOST_LAYOUT` in `scripts/dist-layout.mjs`). Claude, Codex, and generic hosts route on skill descriptions alone.
 

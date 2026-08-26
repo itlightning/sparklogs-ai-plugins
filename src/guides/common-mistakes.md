@@ -251,6 +251,14 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` or `low`.
 
 **Recovery.** Fall back to shallow-triage fields that ARE emitted today: `message`, `severity`, `source`, `app`, `subsource`, `pattern` / `pattern_hash`, timestamps. Use `query_event_counts_by_severity` on `severity` or `pattern` for volume/anomaly triage instead of the deep fields. State explicitly in the Finding or WHAT WAS NOT CHECKED that the deep-field check came back empty because the telemetry isn't emitted yet, not because nothing is wrong.
 
+### Treating a playbook as the event catalog
+
+**Symptom.** You ran the LQL in `playbooks/<symptom>.md`, got little or nothing, and wrote that there are no relevant events, the host is quiet, or the issue cannot be analyzed.
+
+**Why it's wrong.** A playbook is an incomplete starting recipe for a common shape of that symptom. Its `service` / `reason` / id filters miss uncurated native text, sibling providers, and channels the file never named. Empty recipe LQL is a miss on the recipe, not proof the ticket has no telemetry.
+
+**Recovery.** Confirm the source has data in the window (`list_sources`). Then drop the recipe's extra predicates and group that host by `subsource`, then by `pattern` (and `reason` if it is populated). Open `feeds/<id>/` only after a subsource showed up. Pull a narrow raw slice of the dominant patterns. If you still cannot speak to the ticket, say which discovery steps you ran and put the rest in WHAT WAS NOT CHECKED. Do not stop at the playbook queries.
+
 ### Failing to check that the source has data in the investigation window
 
 **Symptom.** You investigate a source that has no Managed Agent telemetry in the investigation's time window. You spend many tool calls finding nothing.

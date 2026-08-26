@@ -1,7 +1,12 @@
 # Investigation playbooks
 
 Symptom discovery lives in `skills/sparklogs-investigate/SKILL.md` (index table).
-Chat may open one matching file as a query recipe. The written report path walks it.
+Ask may open one matching file for domain facts and starter LQL. Investigate may too.
+Neither path is exhausted by the file: playbooks are incomplete recipes, not a catalog of relevant events and not a closed query set.
+A playbook query that returns nothing (or too little) is a miss on that recipe, not proof the host is quiet and not permission to say the issue cannot be analyzed.
+Widen: what subsources this host actually emits (`query_scope_activity` / counts grouped by `subsource`), then by `pattern` / `reason` without the recipe's extra predicates, then raw `query_logs`.
+Curated `service` / `reason` filters miss uncurated native text and sibling providers; look there before you stop.
+Playbooks assume MCP fluency: LQL, field meaning, and claim strength, not tool walkthroughs.
 
 <!-- BEGIN GENERATED INDEX:playbooks -->
 | Symptom | File |

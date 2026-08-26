@@ -3,6 +3,7 @@
 This repository contains public SparkLogs AI plugin content. It must not receive private SparkLogs implementation details.
 
 Read `README.md`, `docs/public-scope.md`, `CONTRIBUTING.md`, and `docs/maintainer-guide.md` before editing.
+Before adding or rewriting `src/playbooks/*.md`, read `docs/playbook-authoring.md`.
 
 Rules:
 

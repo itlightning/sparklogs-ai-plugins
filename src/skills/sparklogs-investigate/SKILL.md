@@ -69,6 +69,10 @@ Load what you need for this step. Do not dump `playbooks/` or `guides/`.
 
 ### Symptom → playbook
 
+Incomplete recipes (claim limits, fields, starter LQL). Not the event catalog.
+Empty playbook LQL is a miss on the recipe: widen by `subsource` then `pattern`, then raw logs. Do not close with "cannot analyze" while that is untried.
+Detail: `playbooks/playbooks.md`.
+
 <!-- BEGIN GENERATED INDEX:playbooks -->
 | Symptom | File |
 |---|---|
@@ -532,7 +536,7 @@ Bulk extractive summarization suits the fastest lightweight model tier your host
 
 ## Section 17. Common mistakes to avoid
 
-The full list of common mistakes, anti-patterns, and recovery is in `guides/common-mistakes.md`. Top 13:
+The full list of common mistakes, anti-patterns, and recovery is in `guides/common-mistakes.md`. Top items:
 
 1. **Producing cause analysis in this skill.** Find yourself writing "this suggests" or "the likely cause is" - STOP. That belongs in `/sparklogs:analyze-cause`. Move it to the POSSIBLE NEXT DIRECTIONS section (1-4 sentences) and refer the engineer to that skill.
 2. **Citing without `query_url`.** Every Finding's Evidence field has a `query_url` from the actual MCP tool response. If it doesn't, you're confabulating.
@@ -545,8 +549,9 @@ The full list of common mistakes, anti-patterns, and recovery is in `guides/comm
 9. **Confidence inflation.** "high" is for direct, corroborated, recent evidence. "insufficient_evidence" is a valid finding - use it.
 10. **Concluding "no problem" instead of "no evidence found in <scope>."** The first claim is wrong; the second is honest and useful.
 11. **Reading an empty result on a field the source does not carry as a clean bill of health.** Curated and module fields are per-source and per-surface; empty may mean "this source never writes that", not "no problem". Check what the source carries, fall back to universal fields, and say so (Section 8).
-12. **Claiming coverage from counts.** Volume and first/last event bounds never establish what happened in the middle of a window. Completeness is `agent_complete_through` and the feed reports behind it, or it is not claimed.
-13. **Writing a completeness section the question did not need.** On an ongoing issue, one sentence saying completeness is not material is the whole obligation.
+12. **Stopping at playbook LQL.** Empty or thin recipe queries are a miss on the recipe. Widen by `subsource` then `pattern`, then raw logs, before "cannot analyze".
+13. **Claiming coverage from counts.** Volume and first/last event bounds never establish what happened in the middle of a window. Completeness is `agent_complete_through` and the feed reports behind it, or it is not claimed.
+14. **Writing a completeness section the question did not need.** On an ongoing issue, one sentence saying completeness is not material is the whole obligation.
 
 ---
 
@@ -558,7 +563,7 @@ Read a reference when the situation calls for it. Do not hold them all in contex
 - `guides/scope-ladder.md` - the six grouping fields and their `_hash` companions (incl. `source`/`source_hash`), availability, `query_scope_activity` vs `query_event_counts_by_severity`, and RCA usage shapes.
 - `guides/category-classes.md` - what NOTABLE / ELEVATED / RECOVERED mean in `category` (temporal shape, not importance), **open monitor ≠ problem**, the lifecycle pair convention, how "interesting" counts fold them in, and the critical+ fetch-first contract.
 - `guides/service-taxonomy.md` - the controlled `service` ticket-class vocabulary (cross-vendor pivot values), the audit-adjacent demarcation list (why `security_audit` is not the whole audit surface), and boundary rules.
-- `playbooks/backup-failure.md` (and siblings in the Section 3b table) - one symptom walk. Do not load all playbooks.
+- `playbooks/backup-failure.md` (and siblings in the Section 3b table) - incomplete starter for one symptom. Do not load all playbooks. Empty recipe LQL is not the end of the investigation.
 - `themes/windows-security-and-audit.md` - change analysis; other themes in Section 3b.
 - `feeds/<id>/` - generated lookup (fields, enums, reasons). Router: Section 3b feed table.
 - `guides/device-state-fields.md` - device and agent state: the `query_device_health` surface, the column names, and the honesty fields that decide what you may say about a duration or a clear time.

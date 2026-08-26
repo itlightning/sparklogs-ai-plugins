@@ -34,7 +34,8 @@ Load a guide when you are stuck on that topic (`guides/scope-resolution.md`, `gu
 
 ## Where to look
 
-You may open the matching playbook as a query recipe. Do not emit the investigation report from it.
+You may open the matching playbook for domain facts and starter LQL. Do not emit the investigation report from it.
+Playbooks are incomplete. Empty recipe LQL is not "nothing happened": widen by `subsource` then `pattern`, then raw logs, before you say you cannot answer.
 
 **Playbooks** (symptom recipes):
 
