@@ -14,6 +14,8 @@ This is the primary shallow-triage RCA lever available today: lean on it hard.
 
 **Degrade gracefully.** If grouping on `service` (or another conditional field) returns a single empty or null group, that source simply does not carry `service`. Fall back to `pattern_hash`. Do not read "no groups" (or one empty group) as a Finding; it means the field is not populated for this source.
 
+**`app` is not WEL identity.** On managed-agent Windows Event Log, `app` is usually empty. Scope with `subsource`. Do not use `app` to pick a channel. Explore ladders: `guides/stream-kinds.md`.
+
 **The ladder is universal where curated fields are not.** `pattern_hash` is computed on every source; the other five are computed whenever the source's data carries that base field. Curated and module fields are per-source and per-surface (see the field-availability rule in SKILL.md Section 8), so an empty result there says less than it looks like it does.
 
 ---

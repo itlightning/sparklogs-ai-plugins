@@ -257,7 +257,23 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` or `low`.
 
 **Why it's wrong.** A playbook is an incomplete starting recipe for a common shape of that symptom. Its `service` / `reason` / id filters miss uncurated native text, sibling providers, and channels the file never named. Empty recipe LQL is a miss on the recipe, not proof the ticket has no telemetry.
 
-**Recovery.** Confirm the source has data in the window (`list_sources`). Then drop the recipe's extra predicates and group that host by `subsource`, then by `pattern` (and `reason` if it is populated). Open `feeds/<id>/` only after a subsource showed up. Pull a narrow raw slice of the dominant patterns. If you still cannot speak to the ticket, say which discovery steps you ran and put the rest in WHAT WAS NOT CHECKED. Do not stop at the playbook queries.
+**Recovery.** Confirm the source has data in the window (`list_sources`). Then drop the recipe's extra predicates and group that host by `subsource`. Open the kind file in `guides/stream-kinds.md` for that `subsource` (WEL classic: `provider_name` before `pattern`; file log: no `provider_name`; device state: not WEL). Then group as that ladder says, including `reason` when populated. Open `feeds/<id>/` only after a subsource showed up. Pull a narrow raw slice of the dominant groups. If you still cannot speak to the ticket, say which discovery steps you ran and put the rest in WHAT WAS NOT CHECKED. Do not stop at the playbook queries.
+
+### Scoping WEL with `app` instead of `subsource`
+
+**Symptom.** LQL filters Windows Event Log on `app` and returns little or nothing, so you conclude the host has no events.
+
+**Why it's wrong.** Channel identity is `subsource` (`win.eventlog.application`, `win.eventlog.system`, …). On managed-agent WEL, `app` is usually empty. When `app` is set it is a product token (`windows_defender`, …), not a channel path.
+
+**Recovery.** Scope `subsource = "win.eventlog.application"` (or the matching channel). Explore per `guides/stream-kinds/wel-classic.md` (or the Security/Setup/Defender kind file). Empty `app` is still a WEL event.
+
+### Flattening device-state JSON keys as the field list
+
+**Symptom.** You `list_fields` or enumerate `sparklogs.data.*` leaves on `sparklogs.agent.state` and treat tens of thousands of paths as group-by fields.
+
+**Why it's wrong.** Instance maps (process, service, volume, and similar) put identity in JSON member names. That explosion is addressing, not a practical LQL surface. Map wildcards are not shipped.
+
+**Recovery.** Latest: `query_device_health`. History: group `sparklogs.kind`, `sparklogs.topic`, `reason`. Read `guides/stream-kinds/device-state.md`. Do not invent `processes.<id>.*` filters.
 
 ### Failing to check that the source has data in the investigation window
 

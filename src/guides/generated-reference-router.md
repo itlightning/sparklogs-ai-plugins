@@ -20,6 +20,7 @@ the wrong one.
 | "Is this pattern string something the pack meant to produce?" | `patterns.md` | a decision procedure: expected, unexpected, or uncurated |
 | "I know this data as ECS or OCSF, what is it called here?" | `mapping-ecs.md` / `mapping-ocsf.md` | anchors from the external taxonomy onto these fields |
 | "What is on this box right now?" | none of the above | inventory rows from the MCP tools, not reference content |
+| "How do I explore this kind of stream?" | `guides/stream-kinds.md` | feed → kind → explore ladder. Not `fields.md` |
 
 Two shapes deserve their own line because they are the ones people get wrong:
 
@@ -66,6 +67,8 @@ say in your findings that you were reading uncurated text.
 - **Not a substitute for reading the schema.** A recipe's field names and query shapes resolve, but
   its reasoning is prose: read it as reasoning, and confirm the shape against `fields.md` before a
   finding rests on it.
+- **Not the stream-kind explore ladder.** `fields.md` does not teach `provider_name` vs `filename` vs
+  device-state maps. That is `guides/stream-kinds.md`.
 
 ## Inventory
 

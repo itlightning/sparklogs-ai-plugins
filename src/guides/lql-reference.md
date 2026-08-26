@@ -36,8 +36,8 @@ correlation_id!         <- is-not-null
 Use pattern operators `*` and `?` directly in unquoted terms.
 
 ```
-app: winlog/*           <- right (matches any winlog channel)
-app LIKE "winlog/%"     <- WRONG (no LIKE; no % or _)
+subsource: win.eventlog.*     <- right (`:` plus `*`)
+subsource LIKE "win.eventlog/%"  <- WRONG (no LIKE; no % or _)
 ```
 
 ### No `MATCHES` (no separate regex keyword)
@@ -99,12 +99,12 @@ LQL does NOT support `state.services.*.status = STOPPED`. Type resolution requir
 **Workarounds:**
 - Filter on a promoted field instead. Curated sources promote the values worth querying to named paths (`sparklogs.*` and the module-prefixed fields); the generated per-source field schema lists them.
 - Use top-level anomaly fields (`anomaly_max_score`, `anomaly_categories`) once they are emitted; nothing in the product writes them today.
-- Use a direct keyed lookup when the key is known: `x.services.spooler.status = STOPPED` works fine.
+- Use a direct keyed lookup **only when the instance key is already known**. Do not discover instance maps via `list_fields` on `sparklogs.agent.state` (see `guides/stream-kinds/device-state.md`).
 
 ```
 x.services.*.status = STOPPED     <- WRONG (wildcard JSON paths not supported)
 sparklogs.reason = service_not_running   <- right (promoted field)
-x.services.spooler.status = STOPPED      <- right (direct key)
+x.services.spooler.status = STOPPED      <- right only if you already know that key
 ```
 
 ---
@@ -117,7 +117,7 @@ Pattern operators in unquoted terms:
 - Pattern operators only work on STRING-typed fields; on a numeric field they fail to compile ("invalid numeric value"). Coerce with the `#s` type suffix: `x.http.response.status#s not in (2??, 3??)`.
 
 ```
-app: winlog/Microsoft-Windows-*           <- any Microsoft-Windows winlog channel
+subsource: win.eventlog.*                 <- any WEL channel subsource
 process_name: msedge*                     <- anything starting with msedge
 http_status_code: ?00                     <- matches 100, 200, 300, ..., 900
 ```
@@ -308,12 +308,15 @@ sparklogs.kind = monitor                               <- a tracked condition
 sparklogs.kind = agent_op                              <- agent self-observability
 ```
 
-### Winlog channel pattern
+### WEL channel and publisher
+
+Managed-agent Windows Event Log identity is **`subsource`**.
+`app` is a product token when present; it is usually empty on these streams. Do not use `app` to pick a channel.
+Explore ladders: `guides/stream-kinds.md`.
 
 ```
-app: winlog/Microsoft-Windows-Backup/*                 <- any Backup channel
-app: winlog/VSS                                        <- exact channel
-app: winlog/Application AND winlog.event_id = 1000     <- Application channel event ID 1000
+subsource = "win.eventlog.application" AND winlog.event_id = 1000
+provider_name: Microsoft-Windows-Backup*
 ```
 
 ### Direct keyed lookup
@@ -365,7 +368,7 @@ t between 2026-04-23T03:00:00Z and 2026-04-23T04:00:00Z
 
 ## Common LQL mistakes (most-bitten-by-this-list)
 
-1. **`LIKE "winlog/%"` instead of `: winlog/*`.** SparkLogs is not SQL.
+1. **`LIKE "win.eventlog/%"` instead of a pattern with `*`.** SparkLogs is not SQL.
 2. **`MATCHES "regex"` instead of `: /regex/`.** Slash-delimited.
 3. **`IS NULL` / `IS NOT NULL` instead of `NOT field!` / `field!`.** Different syntax.
 4. **`CONTAINS "value"` for arrays instead of `field: value` or `field = value`.** Array fields use scalar operators directly.
@@ -374,7 +377,7 @@ t between 2026-04-23T03:00:00Z and 2026-04-23T04:00:00Z
 7. **Quoting unquoted terms unnecessarily.** `severity = "error"` works but `severity = error` is fine and more readable.
 8. **Forgetting parentheses around OR with implicit AND.** `severity = error OR anomaly_max_score >= 60 source = "x"` parses unexpectedly. Use parentheses: `(severity = error OR anomaly_max_score >= 60) AND source = "x"`.
 9. **Mixing `&&` / `||` with `AND` / `OR` in the same expression.** Both work but consistency reads better.
-10. **Hallucinating field names.** A name nothing has emitted is not refused; it reads as empty, and the response lists it under `schema.fields_with_no_values`. That is a normal outcome rather than an error, so treat it as a prompt to check the spelling, not as something to report. Use canonical field names from `mcp-tool-decision-tree.md`, `list_fields` discovery, or `get_query_metadata` field discovery over a cached query.
+10. **Hallucinating field names.** A name nothing has emitted is not refused; it reads as empty, and the response lists it under `schema.fields_with_no_values`. That is a normal outcome rather than an error, so treat it as a prompt to check the spelling, not as something to report. Use canonical field names from `mcp-tool-decision-tree.md`, `list_fields` discovery, or `get_query_metadata` over a cached query. Do not flatten `sparklogs.agent.state` JSON keys (`guides/stream-kinds/device-state.md`).
 
 ---
 

@@ -28,7 +28,7 @@ Keep this order. Drop a heading if it would be empty.
 1. YAML `index:` (and optional `aliases:`) for the generated symptom table.
 2. Trigger: the ticket sentence.
 3. Accuracy / claim strength: what this evidence can and cannot prove.
-4. Feeds and field schema: `subsource`, queryable dotted names, closed tokens. Point at `feeds/<id>/fields.md` and `reasons.md` instead of duplicating every reason.
+4. Feeds and field schema: `subsource`, queryable dotted names, closed tokens. Point at `feeds/<id>/fields.md` and `reasons.md` instead of duplicating every reason. Scope Windows Event Logs with `subsource`, never `app`. Point at `guides/stream-kinds.md` instead of restating an explore ladder.
 5. Domain reasoning: lifecycle, budgets, vocabularies that look alike but are not, axes that change the next action.
 6. Queries: precise LQL (and device-health columns when state is the answer). No `query_*()` wrappers, no `org_ids=[...]`, no `external_investigation_id`.
 7. Off-endpoint: what this surface never sees. Point at `guides/off-endpoint-causes.md` by honesty id when one exists.
@@ -49,6 +49,7 @@ Do not paste a full `query_device_health(...)` call.
 - Repeat MCP parameter grammar.
 - Infer job or product outcome from plumbing that does not carry it.
 - Dump a feed directory; one artifact per question (`guides/generated-reference-router.md`).
+- Copy a stream-kind ladder into every playbook; point at `guides/stream-kinds.md`.
 - Copy private design-doc maps, Layer labels, or unreleased pack internals. Field names and public Microsoft vocabulary are fine.
 
 ## Length

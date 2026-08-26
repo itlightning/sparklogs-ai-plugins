@@ -178,6 +178,7 @@ The `guides/` set is shared with the investigate skill, word for word:
 - `guides/scope-ladder.md` - the six grouping fields and their `_hash` companions; the source of fleet-pivot discriminators.
 - `guides/category-classes.md` - class, the class-last category ladder, and the severity ladder. Read before ranking a hypothesis by anything other than severity.
 - `guides/device-state-fields.md` - device and agent state, and the honesty fields that decide whether a duration or a clear time can carry a hypothesis at all.
+- `guides/stream-kinds.md` - how to explore a feed (WEL vs file log vs device-state maps). Not `fields.md`.
 - `guides/generated-reference-router.md` - how to reach the per-source generated reference set by question shape, when a confirm step needs real field names.
 - `guides/scope-resolution.md`, `guides/lql-reference.md`, `guides/mcp-tool-decision-tree.md` - reach for these when you make additional MCP calls.
 - `guides/off-endpoint-causes.md`, `guides/common-mistakes.md`, `guides/msp-tool-registry.md`, `guides/pattern-catalog.md`, `guides/subagent-definitions.md`, `guides/writing-voice.md`.

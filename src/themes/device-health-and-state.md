@@ -10,6 +10,7 @@ aliases:
 What is on the box and what is holding or changing: CPU, RAM, disk, installed software, monitors, episodes, deltas.
 
 **Primary data feed:** `sparklogs.agent.state`. Tool: `query_device_health` (kinds and fieldsets). Use this as the **headline** when the question is device state.
+Explore this feed as device state, not WEL: `guides/stream-kinds/device-state.md`.
 
 `sparklogs.agent.vector` and `sparklogs.agent.log` are collector-debug only. Use them when diagnosing SparkLogs collection, not as the answer to "is the disk filling."
 

@@ -30,12 +30,13 @@ Answer first, then stop talking, never mid-query. Hedge precisely: "not in this 
 - "What happened / how many / when" → `query_event_counts_by_severity` or `query_scope_activity` first; `query_logs` only for a narrow slice.
 - Collector debug only → `sparklogs.agent.vector` / `sparklogs.agent.log`. Not the headline for device health.
 
-Load a guide when you are stuck on that topic (`guides/scope-resolution.md`, `guides/mcp-tool-decision-tree.md`, `guides/lql-reference.md`, `guides/common-mistakes.md`). Open the one you need, never the whole set.
+Load a guide when you are stuck on that topic (`guides/scope-resolution.md`, `guides/mcp-tool-decision-tree.md`, `guides/lql-reference.md`, `guides/common-mistakes.md`, `guides/stream-kinds.md`). Open the one you need, never the whole set.
 
 ## Where to look
 
 You may open the matching playbook for domain facts and starter LQL. Do not emit the investigation report from it.
-Playbooks are incomplete. Empty recipe LQL is not "nothing happened": widen by `subsource` then `pattern`, then raw logs, before you say you cannot answer.
+Playbooks are incomplete. Empty recipe LQL is not "nothing happened": widen by `subsource`, then that kind's explore ladder (`guides/stream-kinds.md`), then raw logs, before you say you cannot answer.
+Do not use `app` to scope Windows Event Log. Identity is `subsource`.
 
 **Playbooks** (symptom recipes):
 
@@ -68,7 +69,7 @@ Playbooks are incomplete. Empty recipe LQL is not "nothing happened": widen by `
 | Named backup product (Veeam etc.): installed products. Not operational events. | `themes/device-health-and-state.md` |
 <!-- END GENERATED INDEX:themes -->
 
-**Data feeds** (`subsource` = directory name). Open `feeds/<id>/README.md`, then the artifact you need (`fields.md`, `enums.md`, `reasons.md`). Search `reasons.md` for the `##` heading that matches the reason slug. Do not read the whole file.
+**Data feeds** (`subsource` = directory name). Kind (how to explore): `guides/stream-kinds.md`. Then `feeds/<id>/README.md` and one artifact (`fields.md`, `enums.md`, `reasons.md`). Search `reasons.md` for the `##` heading that matches the reason slug. Do not read the whole file.
 
 <!-- BEGIN GENERATED INDEX:feeds -->
 | Feed | What | Path |

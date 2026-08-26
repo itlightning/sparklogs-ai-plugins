@@ -21,7 +21,7 @@ source = "<host>" AND severity >= 17
 
 Group by `pattern`.
 Cite a pattern only after reading it.
-Narrow Windows Backup with `app: winlog/Microsoft-Windows-Backup/*` on the cached slice.
+Narrow Windows Backup with `provider_name: Microsoft-Windows-Backup*` on the cached slice.
 
 Same pattern across the client:
 

@@ -5,6 +5,7 @@ index: Who changed what (Security)
 # Windows security and audit
 
 **Data feed:** `win.eventlog.security`. Open `feeds/win.eventlog.security/README.md`, then one artifact.
+Explore: `guides/stream-kinds/wel-security.md`.
 
 Defender is not this theme. Use `themes/endpoint-protection.md`.
 

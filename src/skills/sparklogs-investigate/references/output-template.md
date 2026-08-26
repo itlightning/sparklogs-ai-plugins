@@ -93,7 +93,7 @@ The `org_id`(s) the investigation was scoped to (from `resolve_scope`).
 Absolute UTC timestamps for the investigation's data window. Not relative ("last 24 hours") - bind to absolute timestamps so the summary remains interpretable when re-read days later.
 
 ### Data sources queried
-The subsources, channels, and helper outputs you actually queried during the investigation. Be specific; e.g., `state/services`, `state/vss_writers`, `state/volumes`, `state/system_health`, `winlog/Microsoft-Windows-Backup/Operational`, `winlog/VSS`. This list lets the engineer (and future investigations) understand the investigation's coverage.
+The subsources and helper outputs you actually queried. Be specific; e.g., `win.eventlog.application`, `win.eventlog.system`, `sparklogs.agent.state` (`query_device_health`), `win.defender.eventlog`.
 
 ### WHAT WAS NOT CHECKED
 Investigation-specific list of off-endpoint sources and conditions you couldn't check. Per-investigation-type reference: `guides/off-endpoint-causes.md`. Examples:
@@ -199,9 +199,7 @@ SCOPE CHECKED
 - Source(s): srv-fileshare01
 - Org(s): org_acme_dental
 - Time window: 2026-04-22 00:00 UTC to 2026-04-23 14:00 UTC
-- Data sources queried: state/services, state/vss_writers, state/volumes, state/installed_products,
-  state/system_health, winlog/Application, winlog/VSS, winlog/Microsoft-Windows-Backup/Operational,
-  agent_op/ingest_drop, agent_op/spool_full, agent_op/backpressure
+- Data sources queried: query_device_health; sparklogs.agent.state; win.eventlog.application; win.eventlog.system; sparklogs.kind=agent_op
 - WHAT WAS NOT CHECKED:
   - Backup target NAS-01 (does not run Managed Agent). Recommend checking NAS-01 health directly
     if the on-endpoint evidence below is insufficient.
@@ -303,9 +301,7 @@ SCOPE CHECKED
 - Source(s): srv-fileshare02
 - Org(s): org_acme_dental
 - Time window: 2026-04-23 06:00 UTC to 2026-04-23 14:30 UTC
-- Data sources queried: state/services, state/processes, state/perf_counters_curated,
-  state/network_connections, state/system_health, winlog/Microsoft-Windows-SMBServer/Operational,
-  winlog/Microsoft-Windows-Windows Defender/Operational, agent_op/ingest_drop
+- Data sources queried: query_device_health; sparklogs.agent.state; win.eventlog.system; win.defender.eventlog; sparklogs.kind=agent_op
 - WHAT WAS NOT CHECKED:
   - User workstations making SMB requests (only the file server is in scope).
   - Network path between user workstations and srv-fileshare02 (switches, APs, firewall).

@@ -70,7 +70,7 @@ Load what you need for this step. Do not dump `playbooks/` or `guides/`.
 ### Symptom → playbook
 
 Incomplete recipes (claim limits, fields, starter LQL). Not the event catalog.
-Empty playbook LQL is a miss on the recipe: widen by `subsource` then `pattern`, then raw logs. Do not close with "cannot analyze" while that is untried.
+Empty playbook LQL is a miss on the recipe: widen by `subsource`, then that kind's explore ladder (`guides/stream-kinds.md`), then raw logs. Do not close with "cannot analyze" while that is untried.
 Detail: `playbooks/playbooks.md`.
 
 <!-- BEGIN GENERATED INDEX:playbooks -->
@@ -104,7 +104,7 @@ Detail: `playbooks/playbooks.md`.
 
 ### Feed id → lookup
 
-`subsource` is the directory name. Open `feeds/<id>/README.md`, then **one** of fields / enums / reasons (Security also recipes / patterns / mappings). Search `reasons.md` for the `##` heading that matches the reason slug; do not read the whole file.
+`subsource` is the directory name. Kind (how to explore, including WEL `provider_name` vs device-state maps): `guides/stream-kinds.md`. Then `feeds/<id>/README.md`, then **one** of fields / enums / reasons (Security also recipes / patterns / mappings). Search `reasons.md` for the `##` heading that matches the reason slug; do not read the whole file.
 
 <!-- BEGIN GENERATED INDEX:feeds -->
 | Feed | What | Path |

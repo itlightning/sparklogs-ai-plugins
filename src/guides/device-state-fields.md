@@ -195,3 +195,4 @@ baseline-versus-incident comparison that straddles the boundary compares nothing
 baseline inside the window you are actually reasoning about.
 
 Per-source field detail is generated: see `generated-reference-router.md`.
+How to explore this feed vs WEL: `guides/stream-kinds/device-state.md`.

@@ -19,7 +19,7 @@ Use a longer window than a discrete fault (days).
 Crashes and hangs:
 
 ```
-source = "<host>" AND app: winlog/Application AND severity >= 17
+source = "<host>" AND subsource = "win.eventlog.application" AND severity >= 17
 ```
 
 Group by `pattern`.
