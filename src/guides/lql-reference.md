@@ -78,6 +78,30 @@ These rules apply to string fields such as `source` (LQL), `app` (LQL), `subsour
 
 Do not use `field:""` (matches every event) or `field!:""` (matches no events). Use `NOT field!` to test for a missing field. Use `field#s!` when you need to assert JSON type on a custom path.
 
+`field!=val` (LQL) on a scalar also matches when the field is missing.
+To require the field to be present and not equal to a value, write `field! AND field!=val` (LQL).
+
+### Array of objects (`[]()`)
+
+For an array of objects, `path[](expr)` (LQL) matches when at least one element satisfies `expr`.
+Names inside the parentheses are fields on that element, not on the event.
+`path[].leaf=val` (LQL) is the same as `path[](leaf=val)` (LQL).
+
+`path[]!` (LQL) matches when `path` is present and is an array, including an empty array.
+
+| Query | Missing field | Empty array | Has a matching element | Other elements only |
+|---|---|---|---|---|
+| `path[](pid=1)` (LQL) | no | no | yes | no |
+| `NOT path[](pid=1)` (LQL) | yes | yes | no | yes |
+| `path[]!` (LQL) | no | yes | yes | yes |
+| `path[]! AND NOT path[](pid=1)` (LQL) | no | yes | no | yes |
+
+Do not use `processes!` (LQL) for array presence when the named parent is not itself an array field.
+Use `path[]!` (LQL).
+
+Bare terms and `any:` (LQL) are not allowed inside `[]()`.
+Name a field on the element, for example `pid=1234` (LQL).
+
 ### No `CONTAINS` / `CONTAINS_ANY` / `CONTAINS_ALL` (array fields use scalar operators directly)
 
 For an array field like `anomaly_categories` (other):
@@ -378,6 +402,7 @@ t between 2026-04-23T03:00:00Z and 2026-04-23T04:00:00Z
 8. **Forgetting parentheses around OR with implicit AND.** `severity = error OR anomaly_max_score >= 60 source = "x"` parses unexpectedly. Use parentheses: `(severity = error OR anomaly_max_score >= 60) AND source = "x"`.
 9. **Mixing `&&` / `||` with `AND` / `OR` in the same expression.** Both work but consistency reads better.
 10. **Hallucinating field names.** A name nothing has emitted is not refused; it reads as empty, and the response lists it under `schema.fields_with_no_values` (col). That is a normal outcome rather than an error, so treat it as a prompt to check the spelling, not as something to report. Use canonical field names from `mcp-tool-decision-tree.md`, `list_fields` (tool), or `get_query_metadata` (tool) over a cached query. `list_fields` (tool) omits unstable process-id paths; it is still the catalog for names you have not seen (`guides/stream-kinds/device-state.md`).
+11. **Bare terms inside `[]()`.** Name a field on the element (`pid=1234` (LQL)). `processes!` (LQL) is not array presence; use `path[]!` (LQL).
 
 ---
 
