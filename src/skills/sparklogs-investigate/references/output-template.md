@@ -87,13 +87,13 @@ The right version is factual; the wrong version is cause analysis. Cause analysi
 Specific sources investigated (e.g., `srv-fileshare01`, `ws022.acme`). Not generic ("a server in Acme Dental") - name them.
 
 ### Org(s)
-The `org_id`(s) the investigation was scoped to (from `resolve_scope`).
+The `org_id`(s) the investigation was scoped to (from `resolve_scope` (tool)).
 
 ### Time window
 Absolute UTC timestamps for the investigation's data window. Not relative ("last 24 hours") - bind to absolute timestamps so the summary remains interpretable when re-read days later.
 
 ### Data sources queried
-The subsources and helper outputs you actually queried. Be specific; e.g., `win.eventlog.application`, `win.eventlog.system`, `sparklogs.agent.state` (`query_device_health`), `win.defender.eventlog`.
+The subsources and helper outputs you actually queried. Be specific; e.g., `win.eventlog.application` (value), `win.eventlog.system` (value), `sparklogs.agent.state` (value) (`query_device_health` (tool)), `win.defender.eventlog` (value).
 
 ### WHAT WAS NOT CHECKED
 Investigation-specific list of off-endpoint sources and conditions you couldn't check. Per-investigation-type reference: `guides/off-endpoint-causes.md`. Examples:
@@ -128,10 +128,10 @@ Format: `<subject> was <state> at <time>`, or `<event class> occurred N times in
 - "Backups are failing."
 
 ### Evidence
-One or more `query_url` values from the MCP tool responses that produced the evidence for this Finding. The engineer clicks these to verify in the SparkLogs cached-query explorer. **If you don't have a query_url, you don't have the evidence - don't make the claim.**
+One or more `query_url` (col) values from the MCP tool responses that produced the evidence for this Finding. The engineer clicks these to verify in the SparkLogs cached-query explorer. **If you don't have a query_url, you don't have the evidence - don't make the claim.**
 
 ### Confidence
-One of: `high`, `medium`, `low`, `insufficient_evidence`. See SKILL.md Section 6 for calibration guidance.
+One of: `high` (value), `medium` (value), `low` (value), `insufficient_evidence` (value). See SKILL.md Section 6 for calibration guidance.
 
 ### Sources contributing
 The specific source(s) whose data supports this finding. Important when the investigation spans multiple sources.
@@ -149,7 +149,7 @@ NOT:
 - "Note: recommend restarting the service" <- recommendation; not this skill's role
 
 ### Anomaly Signals Used
-Optional section, and **normally absent**: `anomaly_max_score` / `anomaly_max_score_confidence` are designed and not emitted anywhere in the product today, so the canonical context-reduction filter reduces to its `severity` half on every source. Omitting the section is the usual correct outcome, and the missing anomaly half is never "no anomalies."
+Optional section, and **normally absent**: `anomaly_max_score` / `anomaly_max_score_confidence` are designed and not emitted anywhere in the product today, so the canonical context-reduction filter reduces to its `severity` (LQL) half on every source. Omitting the section is the usual correct outcome, and the missing anomaly half is never "no anomalies."
 
 Include it only if you actually read an anomaly field and it carried a value. Then list briefly, with the required framing: anomalies are internal investigation tools, not standalone problem alerts. Never build a Finding on one: a citation for a signal no source emits is the confidently-wrong shape this template exists to prevent.
 
@@ -157,7 +157,7 @@ Include it only if you actually read an anomaly field and it carried a value. Th
 Track the running counts (backing queries, refinements, sources/orgs covered, matched population) in your local investigation-state document as you go. All figures here come from server-returned query summaries, not self-reported estimates. This section shows the engineer how much evidence backs the summary: how many queries ran, how broad a scope they covered, how many events were in the matched population.
 
 ### Audit Trail
-Provide the engineer with the means to inspect every query you ran: the `query_id` + `query_url` list from the local investigation-state document, with per-query detail via `get_query_metadata(query_id="<qid>")`. Every call is also tagged `external_investigation_id` in the server-side audit (a direct investigation-level URL is preferred once SparkLogs UX surfaces it).
+Provide the engineer with the means to inspect every query you ran: the `query_id` (arg) + `query_url` (col) list from the local investigation-state document, with per-query detail via `get_query_metadata(query_id="<qid>")`. Every call is also tagged `external_investigation_id` (arg) in the server-side audit (a direct investigation-level URL is preferred once SparkLogs UX surfaces it).
 
 ### POSSIBLE NEXT DIRECTIONS
 Bounded section at the end of the summary. 1-4 sentences max. Suggests where the investigation could go next - either more facts to dig into, or running `/sparklogs:analyze-cause` to derive candidate hypotheses. Always ends with the explicit invitation:

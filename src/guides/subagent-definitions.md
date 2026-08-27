@@ -25,12 +25,12 @@ For delegated bulk-summarization work, use **the fastest, most lightweight moder
 
 ## Subagent: `sparklogs-log-summarizer`
 
-**Purpose.** Read a large set of raw log events (typically Level-1 or Level-2 events from a `query_logs` cache) and return a structured summary the orchestrator can use without reading the raw events itself.
+**Purpose.** Read a large set of raw log events (typically Level-1 or Level-2 events from a `query_logs` (tool) cache) and return a structured summary the orchestrator can use without reading the raw events itself.
 
 **Model tier:** fast, lightweight tier per the platform you're running on.
 
 **Inputs the orchestrator passes:**
-- The `query_id` and `query_url` of a cached query.
+- The `query_id` (arg) and `query_url` (col) of a cached query.
 - A focusing question: "what unusual events happened in this set?", "which patterns dominate?", "are there any errors I should know about?"
 - An output schema: structured fields the subagent fills.
 
@@ -53,7 +53,7 @@ events_examined: <count>
 events_summarized: <count>
 ```
 
-**The `severity` field is a four-bucket summary, and it is lossy on purpose.** SparkLogs severity is
+**The `severity` (LQL) field is a four-bucket summary, and it is lossy on purpose.** SparkLogs severity is
 a twelve-rung ladder; this schema collapses it so an orchestrator can scan many findings at once. Map
 it this way, and keep the exact returned value in `summary` whenever the rung matters:
 
@@ -77,12 +77,12 @@ with a contract attached: it means fetch-first, whatever the ticket was about.
 
 ## Subagent: `sparklogs-pattern-enumerator`
 
-**Purpose.** Given a `query_event_counts_by_severity` result with many groups, summarize the top N pattern_hashes with their meanings (looking up pattern text via a `query_logs` message projection filtered to the `pattern_hash` if needed) and produce a structured enumeration the orchestrator can use as Findings input.
+**Purpose.** Given a `query_event_counts_by_severity` (tool) result with many groups, summarize the top N pattern_hashes with their meanings (looking up pattern text via a `query_logs` (tool) message projection filtered to the `pattern_hash` (LQL) if needed) and produce a structured enumeration the orchestrator can use as Findings input.
 
 **Model tier:** fast, lightweight tier.
 
 **Inputs:**
-- The `query_id` and `query_url` of the `query_event_counts_by_severity` result.
+- The `query_id` (arg) and `query_url` (col) of the `query_event_counts_by_severity` (tool) result.
 - Top N parameter (default 10).
 
 **Output schema:**
@@ -95,13 +95,13 @@ top_patterns:
     catalog_match: <pattern_catalog.md entry name or null>
 ```
 
-**Delegation heuristic:** when `query_event_counts_by_severity` returns 50+ groups and you need the top N enumerated with meanings.
+**Delegation heuristic:** when `query_event_counts_by_severity` (tool) returns 50+ groups and you need the top N enumerated with meanings.
 
 ---
 
 ## Subagent: `sparklogs-cluster-interpreter`
 
-**Not usable yet.** This subagent depends on `cluster_event_contexts`, which does not exist. Approximate clustering with a `query_logs` slice narrowed to the pattern plus `refine_query_result` group_by over the surrounding context fields.
+**Not usable yet.** This subagent depends on `cluster_event_contexts`, which does not exist. Approximate clustering with a `query_logs` (tool) slice narrowed to the pattern plus `refine_query_result` (tool) group_by over the surrounding context fields.
 
 **Purpose.** Given a `cluster_event_contexts` result with multiple distinct clusters, interpret each cluster's representative_surround and produce a structured human-readable description.
 

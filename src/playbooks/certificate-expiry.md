@@ -16,9 +16,9 @@ Window must include the renewal attempt.
 source = "<host>" AND service = certificates
 ```
 
-Group by `reason`.
+Group by `sparklogs.reason` (LQL).
 
-Dependent service symptom: group by `reason` over `service = <affected service>`.
+Dependent service symptom: group by `sparklogs.reason` (LQL) over `service = <affected service>`.
 Renewal automation is often a scheduled task: `sparklogs.reason = scheduled_task_changed` and task failures in the same window.
 
 **Off-endpoint** (HM9): public CA, ACME client elsewhere, load balancer or reverse proxy holding its own copy, federation metadata.

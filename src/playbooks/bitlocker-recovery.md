@@ -18,9 +18,9 @@ What changed before reboot:
 source = "<host>" AND sparklogs.kind = config_change
 ```
 
-Group by `config_change_type`, `config_change_target`.
+Group by `config_change_type` (col), `config_change_target` (col).
 
 Patching and firmware in the same window: servicing as in `playbooks/windows-update-failure.md`.
-Boot integrity on Security: `sparklogs.reason = insecure_boot_config`; flags in `win.eventlog.security.insecure_boot_flags`.
+Boot integrity on Security: `sparklogs.reason = insecure_boot_config`; flags in `win.eventlog.security.insecure_boot_flags` (LQL).
 
 **Off-endpoint** (HM6): key escrow in the directory or RMM, vendor firmware update, hardware change by hand.

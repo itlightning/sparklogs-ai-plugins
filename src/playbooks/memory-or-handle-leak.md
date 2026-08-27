@@ -9,7 +9,7 @@ index: Memory or handle leak
 **Accuracy.** There is no per-process working-set trajectory.
 You can establish the consequence trail: crashes, hangs, resource-exhaustion errors, and whether an open resource-pressure condition exists *now*.
 A leak trajectory is an inference from that, not a measurement.
-Read `reason` with `episode_age_basis`: `observed` means already true when the agent first looked ("for at least N days" is the strongest claim); `unknown_ongoing` means you may not render a duration.
+Read `sparklogs.reason` (LQL) with `episode_age_basis` (col): `observed` (value) means already true when the agent first looked ("for at least N days" is the strongest claim); `unknown_ongoing` (value) means you may not render a duration.
 Do not straddle a source-pack release when comparing pattern hashes; identity is recomputed at that boundary.
 
 **Queries.**
@@ -22,8 +22,8 @@ Crashes and hangs:
 source = "<host>" AND subsource = "win.eventlog.application" AND severity >= 17
 ```
 
-Group by `pattern`.
-A rising hourly count of one `pattern_hash` is a rising *crash rate*, not a leak.
+Group by `pattern` (LQL).
+A rising hourly count of one `pattern_hash` (LQL) is a rising *crash rate*, not a leak.
 
 **Findings.** Lead with the observed consequence.
 Put "no per-process memory trajectory" in WHAT WAS NOT CHECKED.

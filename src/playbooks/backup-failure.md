@@ -19,7 +19,7 @@ Vendor / Windows Backup errors in the failure window:
 source = "<host>" AND severity >= 17
 ```
 
-Group by `pattern`.
+Group by `pattern` (LQL).
 Cite a pattern only after reading it.
 Narrow Windows Backup with `provider_name: Microsoft-Windows-Backup*` on the cached slice.
 
@@ -29,6 +29,6 @@ Same pattern across the client:
 pattern_hash = "<h>"
 ```
 
-Group by `source`.
+Group by `source` (LQL).
 
 **Off-endpoint** (`guides/off-endpoint-causes.md` HM1): backup target NAS or cloud, EDR cloud blocking VSS, bespoke vendor with no autodetect, credential vault, Hyper-V or VMware guest writers, server-side job state.

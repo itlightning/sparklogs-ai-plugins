@@ -35,7 +35,7 @@ When the prior investigation surfaced "X happened concurrent with Y" Findings:
 When the prior investigation surfaced "this affects N sources" Findings:
 
 - **N = 1 (single source)** -> hypothesis space includes source-specific configuration, hardware, software state.
-- **N = small subset** -> hypothesis "shared factor among the subset." Discriminator: contrast `query_event_counts_by_severity` runs over the affected vs unaffected populations (in v1; `compare_populations` is a fast-follow tool). Group by a scope-ladder field (`service`, `app`, `subsource`, `category`) to test whether the subset shares a component.
+- **N = small subset** -> hypothesis "shared factor among the subset." Discriminator: contrast `query_event_counts_by_severity` (tool) runs over the affected vs unaffected populations (in v1; `compare_populations` is a fast-follow tool). Group by a scope-ladder field (`service` (LQL), `app` (LQL), `subsource` (LQL), `category` (LQL)) to test whether the subset shares a component.
 - **N = fleet-wide** -> hypothesis "environment-wide cause" - recent fleet-wide change (patch, GPO push, DNS change), or upstream service issue.
 
 ### Off-endpoint visibility patterns
@@ -43,7 +43,7 @@ When the prior investigation surfaced "this affects N sources" Findings:
 When the prior investigation flagged off-endpoint causes in WHAT WAS NOT CHECKED:
 
 - **Off-endpoint cause is plausible** -> include it as a hypothesis with `Off-endpoint check needed: yes` and explicit pointer to what to check.
-- **Off-endpoint cause is implausible given on-endpoint evidence** -> either omit or include at `low` confidence with explicit reasoning.
+- **Off-endpoint cause is implausible given on-endpoint evidence** -> either omit or include at `low` (value) confidence with explicit reasoning.
 
 ### Anomaly-signal patterns
 
@@ -60,18 +60,18 @@ When the prior investigation cited anomaly signals (with detector + baseline inf
 
 Hypothesis confidence should reflect evidence strength, not narrative fluency. Heuristics:
 
-**`high` confidence requires:**
+**`high` (value) confidence requires:**
 - Multiple prior Findings consistently support the hypothesis.
 - Few alternative explanations fit the evidence equally well.
 - No major unchecked off-endpoint factor that could be the actual cause.
 - The discriminator (confirm/refute step) is clear and actionable.
 
-**`medium` confidence is appropriate when:**
+**`medium` (value) confidence is appropriate when:**
 - Some prior Findings support, but corroboration is partial.
 - One or two alternative explanations could also fit.
 - Some uncertainty about whether the evidence is sufficient.
 
-**`low` confidence is appropriate when:**
+**`low` (value) confidence is appropriate when:**
 - Limited prior evidence (one weak Finding, or indirect Finding).
 - Multiple equally-plausible alternative explanations.
 - Significant uncertainty or off-endpoint factor that's not checked.
@@ -143,8 +143,8 @@ Write the hypothesis statement as a direct, specific claim, not a hedge. "Disk s
 Sometimes the prior investigation's findings are sufficient for analysis without further data gathering. Other times, a quick additional check substantially strengthens or weakens a hypothesis.
 
 **Make additional MCP calls when:**
-- A fleet pivot would discriminate between "single-source hypothesis" and "fleet-wide hypothesis." `query_event_counts_by_severity` with `group_by=["source"]` on the relevant pattern.
-- A population contrast would discriminate between "affected sources have factor X" and "factor X is irrelevant." In v1, run `query_event_counts_by_severity` over each population separately and compare; use prior Findings to define the populations. (`compare_populations` is a fast-follow tool.)
+- A fleet pivot would discriminate between "single-source hypothesis" and "fleet-wide hypothesis." `query_event_counts_by_severity` (tool) with `group_by=["source"]` on the relevant pattern.
+- A population contrast would discriminate between "affected sources have factor X" and "factor X is irrelevant." In v1, run `query_event_counts_by_severity` (tool) over each population separately and compare; use prior Findings to define the populations. (`compare_populations` is a fast-follow tool.)
 - A specific time-window check the prior investigation didn't cover would confirm/refute a hypothesis with a single targeted call.
 
 **Skip additional MCP calls when:**
@@ -153,6 +153,6 @@ Sometimes the prior investigation's findings are sufficient for analysis without
 - The check would significantly expand the investigation without proportional analytic benefit.
 
 When you do make additional calls:
-- Reuse the prior investigation's `external_investigation_id`.
-- Prefer cached refinements (`refine_query_result`) over fresh backing queries - they run against the cache, not the source.
-- Cite the resulting `query_url`s in the hypothesis's Evidence support if they support a specific hypothesis.
+- Reuse the prior investigation's `external_investigation_id` (arg).
+- Prefer cached refinements (`refine_query_result` (tool)) over fresh backing queries - they run against the cache, not the source.
+- Cite the resulting `query_url` (col)s in the hypothesis's Evidence support if they support a specific hypothesis.

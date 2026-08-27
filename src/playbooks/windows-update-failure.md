@@ -15,7 +15,7 @@ Pending reboot and component-store health are servicing *reasons* on the same pa
 source = "<host>" AND service = patching
 ```
 
-Group by `reason`, worst first.
+Group by `sparklogs.reason` (LQL), worst first.
 
 Failing install in sequence:
 

@@ -19,25 +19,25 @@ No output template. No WHAT WAS NOT CHECKED catalog. You may go as deep as the q
 Answer first, then stop talking, never mid-query. Hedge precisely: "not in this window", "not checked", "insufficient evidence". Suggest likely causes and practical next steps when the evidence supports them.
 
 - Empty is not healthy. A field this feed does not write is not "no problem".
-- Completeness claims need `agent_complete_through` / feed reports, never first/last event bounds.
-- Cite a `query_url` on factual claims.
-- If org/host/window is not obvious, `resolve_scope`. On several matches, ask. Do not guess.
-- Prefer `query_device_health` or counts over `query_logs`. Prefer `refine_query_result` on a cached slice over a new scan.
-- Every data-access call needs `external_investigation_id`. Pick a short id that names the topic and reuse it across follow-ups until the topic clearly changes.
+- Completeness claims need `agent_complete_through` (col) / feed reports, never first/last event bounds.
+- Cite a `query_url` (col) on factual claims.
+- If org/host/window is not obvious, `resolve_scope` (tool). On several matches, ask. Do not guess.
+- Prefer `query_device_health` (tool) or counts over `query_logs` (tool). Prefer `refine_query_result` (tool) on a cached slice over a new scan.
+- Every data-access call needs `external_investigation_id` (arg). Pick a short id that names the topic and reuse it across follow-ups until the topic clearly changes.
 
 ## Which tool
 
-- "What is on the box / CPU / RAM / disk / installed / open condition" → `query_device_health` (`fieldset=rca` for one host).
-- Named backup product (Veeam, Datto, Axcient, Acronis, MSP360, Cove, Slide) → `query_device_health` first for what is installed, then counts for a timeline. Vendor channels are collected, queryable; events carry the job verdict, not VSS. Application `reasons.md` skips vendor products; query events directly.
-- "What happened / how many / when" → `query_event_counts_by_severity` or `query_scope_activity` first; `query_logs` only for a narrow slice.
-- Collector debug only → `sparklogs.agent.vector` / `sparklogs.agent.log`. Not the headline for device health.
+- "What is on the box / CPU / RAM / disk / installed / open condition" → `query_device_health` (tool) (`fieldset=rca` for one host).
+- Named backup product (Veeam, Datto, Axcient, Acronis, MSP360, Cove, Slide) → `query_device_health` (tool) first for what is installed, then counts for a timeline. Vendor channels are collected, queryable; events carry the job verdict, not VSS. Application `reasons.md` skips vendor products; query events directly.
+- "What happened / how many / when" → `query_event_counts_by_severity` (tool) or `query_scope_activity` (tool) first; `query_logs` (tool) only for a narrow slice.
+- Collector debug only → `sparklogs.agent.vector` (value) / `sparklogs.agent.log` (value). Not the headline for device health.
 
 Load a guide when you are stuck on that topic (`guides/scope-resolution.md`, `guides/mcp-tool-decision-tree.md`, `guides/lql-reference.md`, `guides/common-mistakes.md`, `guides/stream-kinds.md`). Open the one you need, never the whole set.
 
 ## Where to look
 
 You may open the matching playbook for domain facts and starter LQL. Do not emit the investigation report from it.
-Playbooks are incomplete. Empty recipe LQL is not "nothing happened": widen by `subsource`, then that kind's explore ladder (`guides/stream-kinds.md`), then raw logs, before you say you cannot answer.
+Playbooks are incomplete. Empty recipe LQL is not "nothing happened": widen by `subsource` (LQL), then that kind's explore ladder (`guides/stream-kinds.md`), then raw logs, before you say you cannot answer.
 
 **Playbooks** (symptom recipes):
 
@@ -70,7 +70,7 @@ Playbooks are incomplete. Empty recipe LQL is not "nothing happened": widen by `
 | Named backup product (Veeam etc.): installed products. Not operational events. | `themes/device-health-and-state.md` |
 <!-- END GENERATED INDEX:themes -->
 
-**Data feeds** (`subsource` = directory name). Kind (how to explore): `guides/stream-kinds.md`. Then `feeds/<id>/README.md` and one artifact (`fields.md`, `enums.md`, `reasons.md`). Search `reasons.md` for the `##` heading that matches the reason slug. Do not read the whole file.
+**Data feeds** (`subsource` (LQL) = directory name). Kind (how to explore): `guides/stream-kinds.md`. Then `feeds/<id>/README.md` and one artifact (`fields.md`, `enums.md`, `reasons.md`). Search `reasons.md` for the `##` heading that matches the reason slug. Do not read the whole file.
 
 <!-- BEGIN GENERATED INDEX:feeds -->
 | Feed | What | Path |

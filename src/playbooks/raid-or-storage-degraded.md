@@ -16,7 +16,7 @@ Any critical+ row in scope is fetch-first, whatever the ticket said.
 source = "<host>" AND service = storage
 ```
 
-Group by `reason`, worst first.
+Group by `sparklogs.reason` (LQL), worst first.
 Standing storage conditions: device health, and whether the device kept reporting through the window.
 
 **Off-endpoint** (HM7): array management plane, out-of-band controller firmware, SAN fabric.

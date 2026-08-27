@@ -1,6 +1,6 @@
 # Pattern Catalog - high-signal patterns with likely meanings
 
-A short, curated catalog of `pattern_hash` patterns that recur across MSP environments and have well-understood meanings. Use this as a starting point when a `query_event_counts_by_severity` `group_by=["pattern"]` (or a `query_logs` message projection) surfaces a pattern you don't recognize - search the catalog for a match.
+A short, curated catalog of `pattern_hash` (LQL) patterns that recur across MSP environments and have well-understood meanings. Use this as a starting point when a `query_event_counts_by_severity` (tool) `group_by=["pattern"]` (or a `query_logs` (tool) message projection) surfaces a pattern you don't recognize - search the catalog for a match.
 
 The catalog covers ~25 commonly-seen patterns and is expanded over time as more patterns are observed.
 
@@ -8,7 +8,7 @@ The catalog covers ~25 commonly-seen patterns and is expanded over time as more 
 - This catalog is a starting reference, not a substitute for investigation. A pattern's "likely meaning" is a starting point, not a Finding-grade conclusion.
 - Each entry has a "vendor docs URL" for authoritative reference. When investigating, point the engineer at the docs URL.
 - Pattern text uses `<X>` placeholders for variable parts that AutoClassify normalizes.
-- Entries here are vendor TEXT shapes, so they survive pack releases. **Curated sources are different:** a source-pack release recomputes pattern identity for the sources it curates, so a `pattern_hash` captured before a release will not match the same event after it. Do not carry a saved curated hash across a release boundary, and do not compare a baseline window to an incident window that straddles one.
+- Entries here are vendor TEXT shapes, so they survive pack releases. **Curated sources are different:** a source-pack release recomputes pattern identity for the sources it curates, so a `pattern_hash` (LQL) captured before a release will not match the same event after it. Do not carry a saved curated hash across a release boundary, and do not compare a baseline window to an incident window that straddles one.
 
 ---
 
@@ -25,7 +25,7 @@ The catalog covers ~25 commonly-seen patterns and is expanded over time as more 
 - **Vendor docs:** docs.microsoft.com (search "VSS writers")
 
 ### `Backup completed for job <X>`
-- **Likely meaning:** Successful backup. Useful as a *disappeared* signal when comparing two `query_event_counts_by_severity` runs over adjacent windows - if this pattern stopped firing, backups stopped succeeding.
+- **Likely meaning:** Successful backup. Useful as a *disappeared* signal when comparing two `query_event_counts_by_severity` (tool) runs over adjacent windows - if this pattern stopped firing, backups stopped succeeding.
 - **HM:** HM1 (as absence)
 
 ### `VSS writer Microsoft Hyper-V VSS Writer is in state <X>`

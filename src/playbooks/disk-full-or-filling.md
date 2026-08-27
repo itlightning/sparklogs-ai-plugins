@@ -8,9 +8,9 @@ index: Disk full or filling
 
 **Accuracy.** State answers this category.
 Monitor reasons encode the *claim*: `os_volume_space_exhausting` is a projection to empty (projection fields present); a `near_cap` reason is a level claim only.
-Two volumes on one host share a reason; `instance` tells them apart.
+Two volumes on one host share a reason; `sparklogs.instance` (LQL) tells them apart.
 Display `coalesce(display_name, instance)`.
-Fleet totals: device-health grouped by reason (no `fieldset`); that is the exact condition count.
+Fleet totals: device-health grouped by reason (no `fieldset` (arg)); that is the exact condition count.
 
 **Queries.**
 
@@ -20,6 +20,6 @@ Storage errors when the volume is filling because something is failing:
 source = "<host>" AND service = storage
 ```
 
-Group by `reason`.
+Group by `sparklogs.reason` (LQL).
 
 **Off-endpoint** (HM5): mounted network shares, backup shadow locations, sync clients.

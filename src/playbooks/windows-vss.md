@@ -14,27 +14,27 @@ Do not recommend deleting shadow copies; restore-chain integrity belongs to the 
 
 ## Feeds
 
-`win.eventlog.application` (provider VSS) and `win.eventlog.system` (Volsnap).
+`win.eventlog.application` (value) (provider VSS) and `win.eventlog.system` (value) (Volsnap).
 Query both.
 `feeds/win.eventlog.application/{fields,reasons,enums}.md` and the System siblings.
-Group by `reason` first.
-`service = backup` is the family; `app` is left blank on OS VSS so the backup vendor can occupy it.
+Group by `sparklogs.reason` (LQL) first.
+`service = backup` is the family; `app` (LQL) is left blank on OS VSS so the backup vendor can occupy it.
 
 ## Field schema
 
 | Field | What it is |
 |---|---|
-| `sparklogs.result.code` / `code_name` | Result as logged; names are Microsoft constants (`VSS_E_*`, `ERROR_*`) when the pack knows the space |
-| `win.eventlog.application.vss_operation_call` | First Operation-stack line: the immediate API that failed |
-| `win.eventlog.application.vss_operation_intent` | Last Operation-stack line: what the call was for |
-| `win.eventlog.application.vss_writer` | Writer Name from Context, vendor casing |
-| `win.eventlog.application.vss_state` | Current State from Context: coordinator/requester *phase names* (`DoSnapshotSet`, `PrepareForBackup`, …). Not the `VSS_WS_*` writer-state enum |
-| `win.eventlog.application.vss_execution_context` | Role: Coordinator, Requestor, Writer, System Provider |
-| `win.eventlog.application.vss_snapshot_context` | Kind of copy (`VSS_CTX_BACKUP`, `VSS_CTX_CLIENT_ACCESSIBLE`, `VSS_CTX_APP_ROLLBACK`, …) |
-| `win.eventlog.application.vss_snapshot_attrs` | Modifier flags on that context (`VSS_VOLSNAP_ATTR_*`) |
-| `win.eventlog.application.vss_snapshot_set` | Snapshot Set GUID from Application 8231 |
-| `win.eventlog.application.vss_process_command_line` | Who asked for the copy (8231). Inventory of requesters, not a job verdict |
-| `win.eventlog.application.vss_routine` | API symbol on call-failure ids (8193, 12289, 12293) |
+| `sparklogs.result.code` (LQL) / `code_name` | Result as logged; names are Microsoft constants (`VSS_E_*`, `ERROR_*`) when the pack knows the space |
+| `win.eventlog.application.vss_operation_call` (LQL) | First Operation-stack line: the immediate API that failed |
+| `win.eventlog.application.vss_operation_intent` (LQL) | Last Operation-stack line: what the call was for |
+| `win.eventlog.application.vss_writer` (LQL) | Writer Name from Context, vendor casing |
+| `win.eventlog.application.vss_state` (LQL) | Current State from Context: coordinator/requester *phase names* (`DoSnapshotSet`, `PrepareForBackup`, …). Not the `VSS_WS_*` writer-state enum |
+| `win.eventlog.application.vss_execution_context` (LQL) | Role: Coordinator, Requestor, Writer, System Provider |
+| `win.eventlog.application.vss_snapshot_context` (LQL) | Kind of copy (`VSS_CTX_BACKUP`, `VSS_CTX_CLIENT_ACCESSIBLE`, `VSS_CTX_APP_ROLLBACK`, …) |
+| `win.eventlog.application.vss_snapshot_attrs` (LQL) | Modifier flags on that context (`VSS_VOLSNAP_ATTR_*`) |
+| `win.eventlog.application.vss_snapshot_set` (LQL) | Snapshot Set GUID from Application 8231 |
+| `win.eventlog.application.vss_process_command_line` (LQL) | Who asked for the copy (8231). Inventory of requesters, not a job verdict |
+| `win.eventlog.application.vss_routine` (LQL) | API symbol on call-failure ids (8193, 12289, 12293) |
 
 `VSS_CTX_CLIENT_ACCESSIBLE` is Previous Versions / Shadow Copies for Shared Folders, not backup copies.
 Absent writer is a real answer: many failures are coordinator-side.
@@ -59,7 +59,7 @@ Pin those hosts before reading an estate histogram as one story.
 source = "<host>" AND service = backup AND subsource in (win.eventlog.application, win.eventlog.system)
 ```
 
-Group by `reason`.
+Group by `sparklogs.reason` (LQL).
 
 Who is snapshotting (stays Info so default sweeps see it):
 
@@ -67,8 +67,8 @@ Who is snapshotting (stays Info so default sweeps see it):
 source = "<host>" AND subsource = win.eventlog.application AND winlog.event_id = 8231
 ```
 
-Group requesters by `win.eventlog.application.vss_process_command_line`.
-Group attempts by `win.eventlog.application.vss_snapshot_set`.
+Group requesters by `win.eventlog.application.vss_process_command_line` (LQL).
+Group attempts by `win.eventlog.application.vss_snapshot_set` (LQL).
 
 Writer × code:
 
@@ -76,7 +76,7 @@ Writer × code:
 source = "<host>" AND subsource = win.eventlog.application AND sparklogs.result.code!
 ```
 
-Group by `win.eventlog.application.vss_writer`, `sparklogs.result.code_name`.
+Group by `win.eventlog.application.vss_writer` (LQL), `sparklogs.result.code_name` (LQL).
 
 Intent:
 
@@ -84,7 +84,7 @@ Intent:
 source = "<host>" AND subsource = win.eventlog.application AND win.eventlog.application.vss_operation_intent!
 ```
 
-Group by `win.eventlog.application.vss_operation_intent`.
+Group by `win.eventlog.application.vss_operation_intent` (LQL).
 
 Volsnap reclamation (space 33, count 58, delete-pending 95):
 
@@ -92,7 +92,7 @@ Volsnap reclamation (space 33, count 58, delete-pending 95):
 source = "<host>" AND subsource = win.eventlog.system AND winlog.event_id in (33, 58, 95)
 ```
 
-Group by `winlog.event_id`.
+Group by `winlog.event_id` (LQL).
 Creation continuing with no 58 is accumulation in the *log stream*, not distance to the 512-copy cap.
 Used-% of shadow storage does not speak to that cap.
 The log stream does not carry the standing copy count.
@@ -103,7 +103,7 @@ Fleet Error+ (two nouns: which reason, which host):
 service = backup AND subsource in (win.eventlog.application, win.eventlog.system) AND severity >= 17
 ```
 
-Group by `reason`, `source`.
+Group by `sparklogs.reason` (LQL), `source` (LQL).
 
 Installed backup products: device-health inventory (`fieldset=rca`).
 Two products competing for snapshots shows there, not in VSS prose.

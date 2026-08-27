@@ -20,7 +20,7 @@ Authentication failures by cause and by DC:
 sparklogs.reason in (kerberos_ticket_failed, kerberos_preauth_failed, ntlm_validation_failed)
 ```
 
-Group by `source`, `win.eventlog.security.status_meaning`.
+Group by `source` (LQL), `win.eventlog.security.status_meaning` (LQL).
 `clock_skew` concentrated on one DC is a different story from `client_unknown` spread evenly.
 
 Directory object changes: `sparklogs.reason = directory_object_changed`.

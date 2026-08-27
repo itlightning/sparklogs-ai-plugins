@@ -79,9 +79,9 @@ A plain-language statement of the candidate cause. State it directly and specifi
 List which prior Finding numbers support this hypothesis. Without prior Findings backing it, you don't have evidence - the hypothesis isn't grounded. Drop the hypothesis or downgrade confidence.
 
 ### Confidence
-- **`high`** - Multiple prior Findings consistently support; few alternative explanations fit; no major unchecked off-endpoint factor.
-- **`medium`** - Some prior Findings support; one or two alternative explanations could also fit; some uncertainty.
-- **`low`** - Limited prior evidence; multiple equally-plausible alternative explanations; significant uncertainty or off-endpoint factor.
+- **`high` (value)** - Multiple prior Findings consistently support; few alternative explanations fit; no major unchecked off-endpoint factor.
+- **`medium` (value)** - Some prior Findings support; one or two alternative explanations could also fit; some uncertainty.
+- **`low` (value)** - Limited prior evidence; multiple equally-plausible alternative explanations; significant uncertainty or off-endpoint factor.
 
 Hypothesis confidence is *expected* to be lower on average than Finding confidence (which is factual). Don't overstate.
 
