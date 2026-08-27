@@ -14,6 +14,6 @@ console.log('identifier-tag guards: planted negatives all fired');
 
 const errors = await lintSrcTree(ROOT, { fixSafe: FIX });
 if (errors.length > 0) {
-  throw new Error(`identifier tags failed:\n  ${errors.join('\n  ')}\nFix tags or run: node scripts/lint-identifier-tags.mjs --fix-safe`);
+  throw new Error(`identifier tags failed:\n  ${errors.join('\n  ')}\nFix tags (membership in scripts/identifier-sot.yaml + library). --fix-safe only assigns when exactly one set matches.`);
 }
 console.log('identifier tags: clean');
