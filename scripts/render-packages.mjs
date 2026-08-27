@@ -30,6 +30,7 @@ import {
   rewriteCorpusRelative,
 } from './host-transforms.mjs';
 import { formatFrontmatter, parseFrontmatter, shipMarkdown } from './skill-indexes.mjs';
+import { stripAuthoringTags } from './identifier-tags.mjs';
 
 assertRepoRoot(import.meta);
 
@@ -119,6 +120,7 @@ async function writeText(file, text) {
 // path inside the rendered package, which is what the corpus rewrite measures against.
 function renderMarkdownText(text, srcLabel, host, pkgRel) {
   let out = shipMarkdown(text, srcLabel);
+  out = stripAuthoringTags(out);
   out = applyHostVariants(out, { commands: HOST_LAYOUT[host].commands }, srcLabel);
   out = host === 'claude' ? rewriteCorpusForClaude(out) : rewriteCorpusInSkill(out, pkgRel);
   if (host === 'cursor') out = rewriteCommandsForCursor(out);

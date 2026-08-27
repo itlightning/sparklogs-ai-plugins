@@ -42,6 +42,10 @@ Workstation discipline: CI will not catch a stale table by itself (see the drift
 
 `yarn stitch-indexes` is a different command: it rebuilds SKILL / playbook index tables from **this** repo's leaf YAML, not from the library.
 
+Identifier tags (`guides/names.md`): authored `src/` prose backticks that match `[a-z][a-z0-9_.]*` must carry `(arg)`, `(col)`, `(LQL)`, `(tool)`, or `(value)`. Render strips `(tool)` and `(value)`. Fenced LQL/JSON is exempt. `src/feeds/` and GENERATED blocks are skipped.
+
+Agents run `make precommit` (or `yarn precommit`) before commit. It is fail-closed without a usable sibling library checkout. CI `yarn validate` still SKIPPED-passes drift when the library is absent.
+
 `scripts/generated-SYNC-MANIFEST.json` records the library branch and commit the current content came from.
 It does not ship on `dist`.
 Do not hand-edit anything under `src/feeds/` or the generated table in `src/guides/app-vocabulary.md`:

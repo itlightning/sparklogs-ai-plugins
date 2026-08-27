@@ -18,8 +18,9 @@ Local commands:
 
 ```bash
 yarn install --immutable --check-cache
+make precommit
 yarn run validate
 yarn run build
-yarn run validate:rendered
-yarn run smoke
 ```
+
+`make precommit` (or `yarn precommit`) is the fast gate agents run before commit: layout, identifier tags, stitch check, and `sync-generated --check` against a sibling source-library checkout (fail-closed if missing or dirty). GitHub CI `yarn validate` still SKIPPED-passes the drift half when the library is absent.
