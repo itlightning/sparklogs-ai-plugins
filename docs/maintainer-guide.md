@@ -42,7 +42,7 @@ Workstation discipline: CI will not catch a stale table by itself (see the drift
 
 `yarn stitch-indexes` is a different command: it rebuilds SKILL / playbook index tables from **this** repo's leaf YAML, not from the library.
 
-Identifier tags (`guides/names.md`): authored `src/` prose backticks that match `[a-z][a-z0-9_.]*` must carry `(arg)`, `(col)`, `(LQL)`, `(tool)`, or `(value)`. Render strips `(tool)` and `(value)`. Fenced LQL/JSON is exempt. `src/feeds/` and GENERATED blocks are skipped.
+Identifier tags (`guides/names.md`): authored `src/` prose backticks that match `[a-z][a-z0-9_.]*` must carry `(arg)`, `(col)`, `(LQL)`, `(tool)`, `(value)`, or `(other)`. Render strips `(tool)`, `(value)`, and `(other)`. Membership is `scripts/identifier-sot.yaml` plus a sibling library harvest. Fenced LQL/JSON is exempt. `src/feeds/` and GENERATED blocks are skipped. `validate-rendered.mjs` scans shipped `.md`: leftover strip-tags fail; each host pack must still contain `(arg)`, `(col)`, and `(LQL)` (empty match is not a pass).
 
 Agents run `make precommit` (or `yarn precommit`) before commit. It is fail-closed without a usable sibling library checkout. CI `yarn validate` still SKIPPED-passes drift when the library is absent.
 

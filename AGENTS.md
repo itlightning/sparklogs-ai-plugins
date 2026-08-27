@@ -23,4 +23,4 @@ yarn run validate
 yarn run build
 ```
 
-`make precommit` (or `yarn precommit`) is the fast gate agents run before commit: layout, identifier tags, stitch check, and `sync-generated --check` against a sibling source-library checkout (fail-closed if missing or dirty). GitHub CI `yarn validate` still SKIPPED-passes the drift half when the library is absent.
+`make precommit` (or `yarn precommit`) is the fast gate agents run before commit: layout, identifier tags (membership against identifier-sot.yaml + sibling library), stitch check, and `sync-generated --check` (fail-closed if the library is missing or dirty). GitHub CI `yarn validate` still SKIPPED-passes the drift half when the library is absent. After render, `validate-rendered` forbids leftover `(tool)` / `(value)` / `(other)` and requires kept `(arg)` / `(col)` / `(LQL)` in each host pack.

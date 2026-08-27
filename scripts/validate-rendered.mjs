@@ -19,6 +19,12 @@ import {
 } from './dist-layout.mjs';
 import { MODULES } from './generated-references.config.mjs';
 import { AUTHORING_FRONTMATTER_KEYS, parseFrontmatter } from './skill-indexes.mjs';
+import {
+  KEEP_TAGS,
+  leftoverAuthoringTags,
+  keepTagKindsFound,
+  proveDistIdentifierScan,
+} from './identifier-tags.mjs';
 
 assertRepoRoot(import.meta);
 
@@ -211,10 +217,16 @@ async function validateShippedMarkdown(host, base) {
   const markerHits = [];
   const authoringHits = [];
   const yamlHits = [];
+  const leftoverHits = [];
+  const keepKinds = new Set();
   await walk(base, async (file, stat) => {
     if (!stat.isFile() || !file.endsWith('.md')) return;
     const relative = path.relative(base, file).split(path.sep).join('/');
     const text = await fs.readFile(file, 'utf8');
+    for (const hit of leftoverAuthoringTags(text)) {
+      leftoverHits.push(`${relative}: ${hit}`);
+    }
+    for (const kind of keepTagKindsFound(text)) keepKinds.add(kind);
     if (/BEGIN GENERATED|END GENERATED|HOSTVARIANT/.test(text)) markerHits.push(relative);
     const { data } = parseFrontmatter(text, `${host}:${relative}`);
     for (const key of Object.keys(data)) {
@@ -246,6 +258,14 @@ async function validateShippedMarkdown(host, base) {
   if (yamlHits.length) {
     throw new Error(`frontmatter fails strict YAML parse:\n  ${yamlHits.join('\n  ')}`);
   }
+  if (leftoverHits.length) {
+    throw new Error(`${host} leftover authoring tags on dist:\n  ${leftoverHits.join('\n  ')}`);
+  }
+  for (const need of KEEP_TAGS) {
+    if (!keepKinds.has(need)) {
+      throw new Error(`${host} missing kept identifier tag (${need}); empty scan is not a pass`);
+    }
+  }
   for (const skill of ['sparklogs-ask', 'sparklogs-investigate', 'sparklogs-analyze-cause']) {
     const text = await fs.readFile(path.join(base, 'skills', skill, 'SKILL.md'), 'utf8');
     for (const id of MODULES) {
@@ -264,6 +284,7 @@ async function validateShippedMarkdown(host, base) {
 }
 
 if (!await exists(DIST)) throw new Error(`Rendered directory does not exist: ${DIST}`);
+proveDistIdentifierScan();
 await validateMarketplace();
 await validateDistTree();
 for (const host of HOSTS) await validatePackage(host);
