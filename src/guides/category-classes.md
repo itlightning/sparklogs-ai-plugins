@@ -116,11 +116,11 @@ bridge; everything else about severity in this doc set points here.
 | Prose you write, and LQL filters | lowercase rung name | `severity in (error, critical)` |
 | The `severity` (LQL) cell on a returned row | UPPERCASE rung name | `ERROR`, `CRITICAL`, and `WARN2` / `WARN3` for rungs between the named ones |
 | Numeric filters and `severity_level` (col) | integer 1-24 | `min_severity: 17` |
-| Anything that COUNTS events: the `cnt_<band>` columns and `summary.severity_histogram` (col) | lowercase band name, one of nine | `critical_plus`, `info_or_notice` |
+| Anything that COUNTS events: the `cnt_<band>` columns and `summary.severity_histogram` (col) | lowercase band name, one of nine | `critical_plus` (value), `info_or_notice` (value) |
 
 **A cell and a digest speak different vocabularies on purpose.** A row's `severity` (LQL) reports ONE
 observation, so it names the exact rung, down to `WARN3`. A histogram breaks down a POPULATION, so it
-speaks the nine bands and nothing finer: `critical_plus`, never `CRITICAL`. Peak severity is not lost
+speaks the nine bands and nothing finer: `critical_plus` (value), never `CRITICAL`. Peak severity is not lost
 to the coarser grain; it stays exact on `max_severity` (col).
 
 The nine bands are defined by one sentence, which the tools repeat verbatim so there is only ever one
@@ -137,8 +137,8 @@ that carries them is not hiding the quiet traffic: it never counted it.
 datum: paraphrasing `WARN3` as "warning" breaks the link between your finding and the row. Both fit
 in one sentence: `severity WARN3 (minor)`.
 
-**Use the rung names.** Write `serious`, `minor`, `severe`. Do not write `error2`, `error4`,
-`warn4` or the other OTel short forms in prose, filters or findings; they exist only as ingest
+**Use the rung names.** Write `serious` (value), `minor` (value), `severe` (value). Do not write `error2` (value), `error4` (value),
+`warn4` (value) or the other OTel short forms in prose, filters or findings; they exist only as ingest
 aliases that normalize third-party logs onto this ladder, and they are worth naming only when you are
 explaining that normalization to someone.
 

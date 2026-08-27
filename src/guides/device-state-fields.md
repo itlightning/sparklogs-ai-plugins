@@ -40,7 +40,7 @@ rows nobody has decided about yet, which loses evidence exactly when something n
 
 **`reasons` (arg)** filters to named conditions. **`group_by_reason` (arg)** returns the fleet shape of a reason
 ("17 hosts have this") instead of a row per device: one aggregate row per (kind, reason) carrying
-`affected_agents`, `episode_count`, `event_count` (col), `max_severity` (col) and one count per failure-side
+`affected_agents` (col), `episode_count` (col), `event_count` (col), `max_severity` (col) and one count per failure-side
 severity band, computed over every matching row rather than over the capped listing.
 
 **Silent devices** come back as a separate envelope row, `row_kind=silent_device`. That list is
@@ -68,13 +68,13 @@ two surfaces.
 |---|---|
 | `kind` (col) | `inventory` (value) / `monitor` (value) / `delta` (value) / `agent_op` (value) / `config_change` (value) / `malformed` (value) |
 | `malformed_event` (col) | true when the row did not parse cleanly. **Read it beside `kind` (col), never instead of it:** a row can keep a valid `kind` (col) and still carry `malformed_event=true`, so filtering on `kind=malformed` alone misses those. Any row with either set is a row whose other fields you should not trust without looking |
-| `topic` (col) | the fine discriminator inside a kind (`disk_volumes`, …) |
+| `topic` (col) | the fine discriminator inside a kind (`disk_volumes` (value), …) |
 | `class` (col) | temporal shape (see `category-classes.md`) |
 | `reason` (col) | the stable identity of the condition |
 | `instance` (col) | the subject when the detector is multi-instance; null means host-scoped |
-| `display_name` | a friendlier name when it differs from `instance` (col); read `coalesce(display_name, instance)` |
+| `display_name` (col) | a friendlier name when it differs from `instance` (col); read `coalesce(display_name, instance)` |
 | `open_monitors_count` (col) | how many monitors are open. Not a problem count |
-| `window_partial` (col) | the measurement window was only partly observed. A ROW-level flag, deliberately NOT under the `episode_` prefix like the honesty fields around it: it describes this row's own measurement window, not the episode's whole span. There is no `episode_window_partial` |
+| `window_partial` (col) | the measurement window was only partly observed. A ROW-level flag, deliberately NOT under the `episode_` (other) prefix like the honesty fields around it: it describes this row's own measurement window, not the episode's whole span. There is no episode_window_partial |
 | `episode_id` (col) | identity of one continuous occurrence, never recycled |
 | `episode_replaced_id` (col) | the episode this one SUPERSEDES, when an episode was replaced |
 | `episode_occurrence` (col) | which occurrence of this reason on this subject |
@@ -84,7 +84,7 @@ two surfaces.
 | `episode_first_observed_ts` (col) / `episode_last_confirmed_ts` (col) / `episode_cleared_ts` (col) | the span |
 | `episode_age_basis` (col) / `episode_clear_time_basis` (col) | how far the span can be trusted (below) |
 | `episode_max_observation_gap_s` (col) / `episode_post_gap_s` (col) | blind spots inside the span |
-| `episode_recovery_attempts` (col) / `episode_recovering_total_s` | how unstable the episode has been |
+| `episode_recovery_attempts` (col) / `episode_recovering_total_s` (col) | how unstable the episode has been |
 | `episode_end_reason` (col) | why it terminated |
 | `epoch_id` (col) / `epoch_prev_id` (col) / `epoch_seq` (col) | the era a row belongs to; order inventory on `epoch_seq` (col) |
 | `inventory_part_number` (col) / `inventory_total_parts` (col) / `inventory_row_count` (col) | a split inventory |
@@ -120,9 +120,9 @@ spot. Never date a cause to a clamped clear. Say "cleared at or before <ts>, exa
 ABSENT value is not a claim that there was no gap.
 
 **`window_partial` (col)** means the window was only partly observed. Do not change a conclusion on a
-partial window. It is the one honesty field with no `episode_` prefix, because it describes one row's
+partial window. It is the one honesty field with no `episode_` (other) prefix, because it describes one row's
 measurement window rather than the episode's crossing lifecycle: do not look for
-`episode_window_partial`, and do not read a partial row as a partially observed episode.
+episode_window_partial, and do not read a partial row as a partially observed episode.
 
 **`episode_post_gap_s` (col)** on the first reading after an outage says this reading resumed after a blind
 spot. A post-gap sample is trusted to say a condition is no longer holding, never to say WHEN it

@@ -4,7 +4,7 @@ index: VSS / shadow copies / backup plumbing
 
 # Windows VSS
 
-**Trigger.** Writers failing, snapshots not created, shadow copies piling up, `vssadmin` looking wrong.
+**Trigger.** Writers failing, snapshots not created, shadow copies piling up, `vssadmin` (other) looking wrong.
 Job failed: `playbooks/backup-failure.md` first; this file is the plumbing under the product.
 
 **Accuracy.** VSS errors often coexist with a completed backup job.
@@ -24,7 +24,7 @@ Group by `sparklogs.reason` (LQL) first.
 
 | Field | What it is |
 |---|---|
-| `sparklogs.result.code` (LQL) / `code_name` | Result as logged; names are Microsoft constants (`VSS_E_*`, `ERROR_*`) when the pack knows the space |
+| `sparklogs.result.code` (LQL) / `code_name` (other) | Result as logged; names are Microsoft constants (`VSS_E_*`, `ERROR_*`) when the pack knows the space |
 | `win.eventlog.application.vss_operation_call` (LQL) | First Operation-stack line: the immediate API that failed |
 | `win.eventlog.application.vss_operation_intent` (LQL) | Last Operation-stack line: what the call was for |
 | `win.eventlog.application.vss_writer` (LQL) | Writer Name from Context, vendor casing |
@@ -40,7 +40,7 @@ Group by `sparklogs.reason` (LQL) first.
 Absent writer is a real answer: many failures are coordinator-side.
 
 Writer-state enum (`VSS_WS_WAITING_FOR_FREEZE`, `VSS_WS_FAILED_AT_THAW`, …) is what a requester reads via `GetWriterStatus`.
-Do not map `vss_state` onto that enum.
+Do not map `vss_state` (other) onto that enum.
 
 ## Shadow-copy lifecycle
 

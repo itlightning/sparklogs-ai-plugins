@@ -94,7 +94,7 @@ describe_pattern(pattern_hashes=["<h>"], start="...", end="...", ...)
 Required after any `top_interesting_patterns` (col) teaser row before the pattern appears in a Finding.
 
 **CORRELATE ACROSS WINDOWS - first-occurrence detection.**
-A `pattern_hash` (LQL) present in the incident window but absent from a healthy baseline window signals new behavior. Run `query_event_counts_by_severity` (tool) twice, once per window, and compare hash populations (v1 substitute for the fast-follow `query_period_diff` tool; see `mcp-tool-decision-tree.md`).
+A `pattern_hash` (LQL) present in the incident window but absent from a healthy baseline window signals new behavior. Run `query_event_counts_by_severity` (tool) twice, once per window, and compare hash populations (v1 substitute for the fast-follow `query_period_diff` (other) tool; see `mcp-tool-decision-tree.md`).
 
 **RESOLVE - read the value, not the hash.**
 The response envelope header carries a hash-dictionary `lookups` (col) table mapping frequent hashes to their values.

@@ -35,7 +35,7 @@ When the prior investigation surfaced "X happened concurrent with Y" Findings:
 When the prior investigation surfaced "this affects N sources" Findings:
 
 - **N = 1 (single source)** -> hypothesis space includes source-specific configuration, hardware, software state.
-- **N = small subset** -> hypothesis "shared factor among the subset." Discriminator: contrast `query_event_counts_by_severity` (tool) runs over the affected vs unaffected populations (in v1; `compare_populations` is a fast-follow tool). Group by a scope-ladder field (`service` (LQL), `app` (LQL), `subsource` (LQL), `category` (LQL)) to test whether the subset shares a component.
+- **N = small subset** -> hypothesis "shared factor among the subset." Discriminator: contrast `query_event_counts_by_severity` (tool) runs over the affected vs unaffected populations (in v1; `compare_populations` (other) is a fast-follow tool). Group by a scope-ladder field (`service` (LQL), `app` (LQL), `subsource` (LQL), `category` (LQL)) to test whether the subset shares a component.
 - **N = fleet-wide** -> hypothesis "environment-wide cause" - recent fleet-wide change (patch, GPO push, DNS change), or upstream service issue.
 
 ### Off-endpoint visibility patterns
@@ -49,9 +49,9 @@ When the prior investigation flagged off-endpoint causes in WHAT WAS NOT CHECKED
 
 When the prior investigation cited anomaly signals (with detector + baseline information):
 
-- **`rule_state_expectation` violation** -> hypothesis "the entity is in a state the rule says it shouldn't be." Strong signal even at low detector confidence.
-- **`value_distribution` outlier** -> hypothesis "the entity's value is unusual relative to its history." Less strong; could be a legitimate workload spike.
-- **`expected_change_missing`** -> hypothesis "something that should have happened didn't." e.g., "cert auto-renewal didn't fire at the expected time."
+- **`rule_state_expectation` (other) violation** -> hypothesis "the entity is in a state the rule says it shouldn't be." Strong signal even at low detector confidence.
+- **`value_distribution` (other) outlier** -> hypothesis "the entity's value is unusual relative to its history." Less strong; could be a legitimate workload spike.
+- **`expected_change_missing` (other)** -> hypothesis "something that should have happened didn't." e.g., "cert auto-renewal didn't fire at the expected time."
 - **Multiple anomalies on same snapshot with shared category** -> hypothesis "system-level event affecting multiple components simultaneously."
 
 ---
@@ -144,7 +144,7 @@ Sometimes the prior investigation's findings are sufficient for analysis without
 
 **Make additional MCP calls when:**
 - A fleet pivot would discriminate between "single-source hypothesis" and "fleet-wide hypothesis." `query_event_counts_by_severity` (tool) with `group_by=["source"]` on the relevant pattern.
-- A population contrast would discriminate between "affected sources have factor X" and "factor X is irrelevant." In v1, run `query_event_counts_by_severity` (tool) over each population separately and compare; use prior Findings to define the populations. (`compare_populations` is a fast-follow tool.)
+- A population contrast would discriminate between "affected sources have factor X" and "factor X is irrelevant." In v1, run `query_event_counts_by_severity` (tool) over each population separately and compare; use prior Findings to define the populations. (`compare_populations` (other) is a fast-follow tool.)
 - A specific time-window check the prior investigation didn't cover would confirm/refute a hypothesis with a single targeted call.
 
 **Skip additional MCP calls when:**

@@ -4,11 +4,11 @@ Per-tool detailed usage with parameter notes, decision tree for which tool to us
 
 The MCP server instructions define every term used here, in learning order. This file adds per-tool mechanics on top of them rather than restating them.
 
-The tool surface is these **eleven** tools: `resolve_scope` (tool), `list_sources` (tool), `query_scope_activity` (tool), `query_device_health` (tool), `describe_pattern` (tool), `list_fields` (tool), `query_event_counts_by_severity` (tool), `query_logs` (tool), `refine_query_result` (tool), `get_query_metadata` (tool), `server_info` (tool). Three differential tools (`query_period_diff`, `compare_populations`, `cluster_event_contexts`) are fast-follow; see the bottom of this file for v1 equivalents.
+The tool surface is these **eleven** tools: `resolve_scope` (tool), `list_sources` (tool), `query_scope_activity` (tool), `query_device_health` (tool), `describe_pattern` (tool), `list_fields` (tool), `query_event_counts_by_severity` (tool), `query_logs` (tool), `refine_query_result` (tool), `get_query_metadata` (tool), `server_info` (tool). Three differential tools (`query_period_diff` (other), `compare_populations` (other), `cluster_event_contexts` (other)) are fast-follow; see the bottom of this file for v1 equivalents.
 
 **Every scoped or data tool takes `external_investigation_id` (arg)** (REQUIRED on all of them except
 `server_info` (tool), which takes NO parameters at all and REJECTS an id; a friendly, human-meaningful correlation handle you supply, 8-200 chars free text, e.g. `investigate-ticket-1234-disk-errors` - not a generated hash. Reusing the same value RESUMES that investigation; use a fresh, distinctive value to start a new one; tagged on every call).
-**Time windows are flat `start` (arg) / `end` (arg) in RFC3339 UTC** (e.g. `2026-07-01T00:00:00Z`). There is no `time_range` object and no `relative:` shorthand - compute the absolute window yourself.
+**Time windows are flat `start` (arg) / `end` (arg) in RFC3339 UTC** (e.g. `2026-07-01T00:00:00Z`). There is no `time_range` (other) object and no `relative:` shorthand - compute the absolute window yourself.
 
 ---
 
@@ -32,7 +32,7 @@ One trigger per tool. If your question is not on this list, it is almost always 
 
 | Tool | Reach for it when |
 |---|---|
-| `resolve_scope` (tool) | You have a name (client, host, ticket) and need an `org_id`. Always first. |
+| `resolve_scope` (tool) | You have a name (client, host, ticket) and need an `org_id` (col). Always first. |
 | `list_sources` (tool) | Before concluding anything from an absence: did this source send data in THIS window? |
 | `query_device_health` (tool) | You need standing condition, what is installed or mounted, or which devices reported nothing. State, not sequence. |
 | `query_event_counts_by_severity` (tool) | "What is going on here", at any altitude. The default tool. `group_by=["reason"]` or `["pattern"]`; pass two fields when the question has two nouns in it. |
@@ -210,7 +210,7 @@ describe_pattern(
 -> pattern text; stats (`event_count`, `cnt_interesting`, one count per failure-side severity band, first/last seen, affected senders and sources); diverse example messages with recurrence `count`/`seen_at`. The summary's `severity_bands` is an ORDERED array of `{band, count}` carrying only the bands that occurred, so a band missing from it is a band this pattern never reached. Example COUNTS are chosen server-side for diversity, and examples are returned for roughly your first 25 patterns by list order, so list the highest-interest hashes first. Examples need `mcp:query`; without it the response is stats-only, never an error.
 ```
 
-**Examples are server-chosen, diverse, and truthful.** You do not pick counts: the server returns a text-diverse set of example messages per pattern (not just the most recent), sized to fit the response. List your highest-interest `pattern_hashes` (arg) FIRST: examples cover roughly the first 25 by list order; the rest get stats only (the scope line says so). Each example carries `count`, `[first, last]`, and (when it recurred 3+ times) `seen_at`: times this exact message recurred, identical except embedded timestamps.
+**Examples are server-chosen, diverse, and truthful.** You do not pick counts: the server returns a text-diverse set of example messages per pattern (not just the most recent), sized to fit the response. List your highest-interest `pattern_hashes` (arg) FIRST: examples cover roughly the first 25 by list order; the rest get stats only (the scope line says so). Each example carries `count` (value), `[first, last]`, and (when it recurred 3+ times) `seen_at` (col): times this exact message recurred, identical except embedded timestamps.
 
 **Access tiers:** stats work on `mcp:observe`; examples additionally need query authority. If the token lacks it (or the workspace trial has expired), the call succeeds with stats only (no error) and the scope line names the reason: do not retry; read the stats and, when relevant, tell the engineer why examples are missing (e.g. expired trial).
 
@@ -284,7 +284,7 @@ than the width you asked for.
 - "Which reason, on which machines?" -> `group_by` (arg) with two fields (reason by instance, config-change type by target). One call answers what two single-field passes only hint at, because the pairing is what carries the shape.
 
 **A cross-tab counts a smaller population than you asked for.** With one `group_by` (arg) field a catch-all
-row holds everything past `limit` (arg), so `total_count` is the whole matched population. With two or three
+row holds everything past `limit` (arg), so `total_count` (col) is the whole matched population. With two or three
 there is no catch-all, and any event where one of the grouped fields is ABSENT is excluded outright,
 with no row to mark it: `sparklogs.instance` (LQL) is null on a host-scoped reason, so those events vanish
 from a reason-by-instance cross-tab. Read `summary.scope` (col) for how many combinations came back, and
@@ -353,13 +353,13 @@ refine_query_result(
 
 **The central efficiency lever.** Queue one broad slice, then refine many times against the same `query_id` (arg). Multiple refines are encouraged; each is an independent view over that same cached slice.
 
-**A refine response keeps the `query_id` (arg) you gave it.** Refined output is not a separate cache: run every further refine against the original `query_logs` (tool) `query_id` (arg). On refine responses, `page.rows_cached` means rows in that underlying cache, not the size of your transformed output.
+**A refine response keeps the `query_id` (arg) you gave it.** Refined output is not a separate cache: run every further refine against the original `query_logs` (tool) `query_id` (arg). On refine responses, `page.rows_cached` (col) means rows in that underlying cache, not the size of your transformed output.
 
 **Pagination:** repeat the SAME refine arguments and change only `offset` (arg). A partial page's `page.next` (col) hands the full continuation back (your arguments + the next `offset` (arg)); follow it verbatim.
 
 **Binding rule:** `filter_lql` (arg) resolves against the cached table's ROW columns (see the response schema descriptor for the vocabulary); `having_lql` (arg) resolves against the POST-GROUP columns (group + aggregate aliases).
 
-**Sample restrictions:** `sample` (arg) is row mode only; combining it with `group_by` (arg)/`aggregate`/`having_lql` (arg) is rejected (a sampled aggregate would look exact without being exact). Sampled paging is approximate: each call may select a different subset.
+**Sample restrictions:** `sample` (arg) is row mode only; combining it with `group_by` (arg)/`aggregate` (arg)/`having_lql` (arg) is rejected (a sampled aggregate would look exact without being exact). Sampled paging is approximate: each call may select a different subset.
 
 **Cache expiry:** a cold cache (roughly a day old) regenerates automatically under the SAME `query_id` (arg) when you refine it (the header's cache status reflects it). Grouped results remain non-refinable (re-run the grouped call). If the server reports the cache cannot be restored, re-issue the original backing query.
 
@@ -381,7 +381,7 @@ refine_query_result(query_id="<qid>",
   external_investigation_id="<id>")
 ```
 
-`order_by` (arg) accepts a group column or an aggregate alias; `dir` is `asc` or `desc`. Group on any
+`order_by` (arg) accepts a group column or an aggregate alias; `dir` (other) is `asc` (other) or `desc` (other). Group on any
 column the response's schema block lists: the standard ones (`severity` (LQL), `source` (LQL), `subsource` (LQL),
 `app` (LQL), `service` (LQL), `pattern` (LQL), `t` (LQL)) and the dotted custom paths beside them (`sparklogs.reason` (LQL)).
 
@@ -396,7 +396,7 @@ refine_query_result(query_id="<qid>",
   external_investigation_id="<id>")
 ```
 
-`bucket_usec` is microseconds (1h = 3600000000, 5m = 300000000). `col` defaults to the event
+`bucket_usec` (other) is microseconds (1h = 3600000000, 5m = 300000000). `col` (other) defaults to the event
 timestamp. Ascending order reads as a series; a run of low counts is where the stream thinned.
 
 **Common patterns:**
@@ -505,6 +505,6 @@ the pass-the-id-everywhere rule: there is no scope and no query to correlate.
 
 If you find yourself reaching for one of these, use the substitute:
 
-- **`query_period_diff`** ("what changed between two windows") -> run `query_event_counts_by_severity` (tool) over each window (`group_by=["pattern"]`) and compare the two grouped results.
-- **`compare_populations`** ("what's different about broken vs working") -> run `query_event_counts_by_severity` (tool) over each population separately (via distinct `lql` (arg)) and compare.
-- **`cluster_event_contexts`** ("distinct contexts around these events") -> `query_logs` (tool) narrowed to the pattern, then `refine_query_result` (tool) group_by to cluster.
+- **`query_period_diff` (other)** ("what changed between two windows") -> run `query_event_counts_by_severity` (tool) over each window (`group_by=["pattern"]`) and compare the two grouped results.
+- **`compare_populations` (other)** ("what's different about broken vs working") -> run `query_event_counts_by_severity` (tool) over each population separately (via distinct `lql` (arg)) and compare.
+- **`cluster_event_contexts` (other)** ("distinct contexts around these events") -> `query_logs` (tool) narrowed to the pattern, then `refine_query_result` (tool) group_by to cluster.

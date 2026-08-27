@@ -46,7 +46,7 @@ discover likely log file locations for analysis.
 | Huntress Managed EDR | Win | `HuntressAgent`, `HuntressUpdater`, `HuntressRio` | `<Prog>/Huntress/` | `<Prog>/Huntress/Logs/` | `huntress/...` | HM10 |
 | ThreatLocker | Win | `ThreatLockerService` | `<Prog>/ThreatLocker/` | `<Prog>/ThreatLocker/Logs/` | `threatlocker/...` | HM10, cross-vendor scripting blocks |
 | Bitdefender GravityZone | Win | `EPSecurityService`, `EPProtectedService` | `<Prog>/Bitdefender/Endpoint Security/` | `<ProgramData>/Bitdefender/Endpoint Security/Logs/` | `bitdefender/...` | HM10 |
-| ESET Protect | Win | `ekrn`, `ESET Service` | `<Prog>/ESET/ESET Endpoint Antivirus/` | `<ProgramData>/ESET/ESET Endpoint Antivirus/Logs/` | `eset/...` | HM10 |
+| ESET Protect | Win | `ekrn` (other), `ESET Service` | `<Prog>/ESET/ESET Endpoint Antivirus/` | `<ProgramData>/ESET/ESET Endpoint Antivirus/Logs/` | `eset/...` | HM10 |
 | Malwarebytes | Win | `MBAMService`, `MBEndpointAgent` | `<Prog>/Malwarebytes/` | varies | `malwarebytes/...` | HM10 |
 
 ## Firewalls / Network
@@ -69,7 +69,7 @@ discover likely log file locations for analysis.
 | Microsoft Endpoint Manager / Intune | Hybrid | OS-bundled (Intune Management Extension on managed device) | winlog Microsoft-Windows-DeviceManagement-Enterprise-Diagnostics-Provider | HM4 |
 | PDQ Deploy / PDQ Inventory | Win | `PDQDeployService`, `PDQInventoryService` | `pdq/...` | HM4 |
 | ManageEngine Patch Manager Plus | Win | `Patch Manager Plus` | `manageengine-pmp/...` | HM4 |
-| Automox | Win/Mac | `amagent` | `automox/...` | HM4 |
+| Automox | Win/Mac | `amagent` (other) | `automox/...` | HM4 |
 | Adaptiva | Win | `Adaptiva Client` | `adaptiva/...` | HM4 |
 
 ## Common Windows Event Log channels for HM mapping
@@ -106,6 +106,6 @@ discover likely log file locations for analysis.
 
 When investigating:
 1. If the symptom names a specific vendor product (e.g., "Veeam reports backup failed"), look up the vendor here for service names, log paths, and HM mapping.
-2. If you see unexpected services in `state.services`, check the registry - recognize MSP-tool services so you can frame them correctly.
+2. If you see unexpected services in state.services, check the registry - recognize MSP-tool services so you can frame them correctly.
 
 ---

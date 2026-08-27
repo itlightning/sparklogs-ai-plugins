@@ -19,7 +19,7 @@ source = "<host>" AND sparklogs.actor.name = "<account>"
 ```
 
 Group by `sparklogs.reason` (LQL), `win.eventlog.security.logon_type_name` (LQL).
-Failing-then-retrying looks nothing like a slow single `logon_cached_interactive`.
+Failing-then-retrying looks nothing like a slow single `logon_cached_interactive` (value).
 
 Decoded auth failures (`win.eventlog.security.status_meaning` (LQL) is the cause without opening the body):
 

@@ -19,10 +19,10 @@ Operator names, syntax forms, and edge cases are quoted from sparklogs.com docs.
 | `=` | exact match | Pattern or regex allowed on right side. |
 | `!=` or `<>` | exact non-match | See **Negated operators (scalar vs array)** below. |
 | `>=`, `>`, `<`, `<=` | numeric/ordinal comparison | Right side must be a literal, not a pattern or regex. |
-| `<field>!` | field is present in the event | Presence check; matches even when the value is an explicit JSON `null` (absent field = no match). e.g., `correlation_id!` |
+| `<field>!` | field is present in the event | Presence check; matches even when the value is an explicit JSON `null` (other) (absent field = no match). e.g., `correlation_id!` |
 | `<field> between <literal> and <literal>` | inclusive range | Works for numeric and timestamp fields. |
 | `<field> in (a, b, c)` | match any in value list | Comma-separated, parenthesized. NOT `[a, b, c]`. |
-| `<field> not in (a, b, c)` | match NONE in value list | Inverse of `in`. |
+| `<field> not in (a, b, c)` | match NONE in value list | Inverse of `in` (other). |
 
 ### No `IS NULL` operator
 Use `NOT <field>!` for is-null. Use `<field>!` for is-not-null.
@@ -55,7 +55,7 @@ message MATCHES "regex"               <- WRONG (no MATCHES)
 - `!:` and `!=` match when the field is **absent or NULL** as well as when the value does not match.
 - `subsource!:win.servicing.dism` matches events with no `subsource` (LQL) value.
 
-**Array fields** (unindexed `x.tags`, not `x.tags[0]`):
+**Array fields** (unindexed `x.tags` (LQL), not `x.tags[0]`):
 
 - `!:` and `!=` apply only when the field is present **and** is a JSON array.
 - Absent or non-array values do **not** match.
@@ -65,7 +65,7 @@ message MATCHES "regex"               <- WRONG (no MATCHES)
 
 ### Empty string literals (scalar strings only)
 
-These rules apply to string fields such as `source` (LQL), `app` (LQL), `subsource` (LQL), and custom paths like `x.foo`. The behavior is the same for every string field name in LQL.
+These rules apply to string fields such as `source` (LQL), `app` (LQL), `subsource` (LQL), and custom paths like `x.foo` (LQL). The behavior is the same for every string field name in LQL.
 
 | Form | Meaning |
 |---|---|
@@ -80,7 +80,7 @@ Do not use `field:""` (matches every event) or `field!:""` (matches no events). 
 
 ### No `CONTAINS` / `CONTAINS_ANY` / `CONTAINS_ALL` (array fields use scalar operators directly)
 
-For an array field like `anomaly_categories`:
+For an array field like `anomaly_categories` (other):
 
 ```
 anomaly_categories: spike              <- matches if any element equals "spike"
@@ -98,7 +98,7 @@ LQL does NOT support `state.services.*.status = STOPPED`. Type resolution requir
 
 **Workarounds:**
 - Filter on a promoted field instead. Curated sources promote the values worth querying to named paths (`sparklogs.*` and the module-prefixed fields); the generated per-source field schema lists them.
-- Use top-level anomaly fields (`anomaly_max_score`, `anomaly_categories`) once they are emitted; nothing in the product writes them today.
+- Use top-level anomaly fields (`anomaly_max_score` (other), `anomaly_categories` (other)) once they are emitted; nothing in the product writes them today.
 - Use a direct keyed lookup **only when the instance key is already known**. Do not discover instance maps via `list_fields` (tool) on `sparklogs.agent.state` (value) (see `guides/stream-kinds/device-state.md`).
 
 ```
@@ -123,9 +123,9 @@ http_status_code: ?00                     <- matches 100, 200, 300, ..., 900
 ```
 
 A bare term with no field name searches the standard string fields: `message` (LQL), `pattern` (LQL), `category` (LQL),
-`subsource` (LQL), `source` (LQL), `app` (LQL), `service` (LQL), `trace_id`, `span_id`, and the companion hash fields
+`subsource` (LQL), `source` (LQL), `app` (LQL), `service` (LQL), `trace_id` (LQL), `span_id` (LQL), and the companion hash fields
 (`pattern_hash` (LQL), `category_hash` (LQL), `subsource_hash` (LQL), `source_hash` (LQL), `app_hash` (LQL), `service_hash` (LQL)).
-It does NOT search custom fields; use the `any` meta field for that.
+It does NOT search custom fields; use the `any` (other) meta field for that.
 
 ```
 failed                                    <- matches events with "failed" in any standard string field
@@ -240,7 +240,7 @@ Auto-resolves type when omitted. Only use type suffix when the field has multipl
 
 ---
 
-## `any` meta field
+## `any` (other) meta field
 
 Searches all standard string + custom fields (same standard string fields as a bare term, plus every custom field). Only with `:` operator. Slow - use sparingly.
 
@@ -262,7 +262,7 @@ any: "credit card"                       <- search all fields for "credit card"
 
 ## Canonical recurring patterns
 
-**Field-availability note.** `sparklogs.*` curated fields exist on events a source pack curated, and only on the surfaces that promote them; module-prefixed fields are narrower still. `anomaly_max_score` / `anomaly_categories` are designed and not emitted anywhere in the product today, so they return empty on every source. An empty result on a curated or module field may mean the source never writes that field, so check what the source carries before reading anything into it, and fall back to `severity` (LQL) / `message` (LQL) / `pattern` (LQL), which every source carries. The retired names `event_kind`, `SLASnapshot`, `SLAAgentOp`, `event_summary`, `snapshot_id` and `state.*` resolve to nothing at all: an empty result there is a spelling problem, not a health signal.
+**Field-availability note.** `sparklogs.*` curated fields exist on events a source pack curated, and only on the surfaces that promote them; module-prefixed fields are narrower still. `anomaly_max_score` (other) / `anomaly_categories` (other) are designed and not emitted anywhere in the product today, so they return empty on every source. An empty result on a curated or module field may mean the source never writes that field, so check what the source carries before reading anything into it, and fall back to `severity` (LQL) / `message` (LQL) / `pattern` (LQL), which every source carries. The retired names event_kind, `SLASnapshot`, `SLAAgentOp`, `event_summary` (other), `snapshot_id` (other) and `state.*` resolve to nothing at all: an empty result there is a spelling problem, not a health signal.
 
 ### Context-reduction filter (the most common starting filter)
 

@@ -155,7 +155,7 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` (value) or `
 
 **Why it's wrong.** It's a REQUIRED parameter - the tool rejects the call. The server-side per-call audit is keyed on `external_investigation_id` (arg); omitting it isn't just an audit gap, it's a hard failure.
 
-**Recovery.** Pick one distinctive, human-meaningful value at investigation start (8-200 chars free text, e.g. `investigate-ticket-4781-veeam-backup`; embed a ticket/incident id or a nonce so it's unique per real investigation). Pass it on every data-access and refinement call. If you're resuming a paused investigation, recover the id from the local investigation-state document and reuse it - reusing an id RESUMES that investigation. Don't reuse a generic string like `diskcheck` across unrelated incidents; they'd merge into one investigation.
+**Recovery.** Pick one distinctive, human-meaningful value at investigation start (8-200 chars free text, e.g. `investigate-ticket-4781-veeam-backup`; embed a ticket/incident id or a nonce so it's unique per real investigation). Pass it on every data-access and refinement call. If you're resuming a paused investigation, recover the id from the local investigation-state document and reuse it - reusing an id RESUMES that investigation. Don't reuse a generic string like `diskcheck` (other) across unrelated incidents; they'd merge into one investigation.
 
 ### `external_investigation_id` (arg) validation error
 
@@ -197,7 +197,7 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` (value) or `
 
 ### Reading Level 3 by default
 
-**Symptom.** Your `select` (arg) includes `state.<category>` or `anomalies` on every call.
+**Symptom.** Your `select` (arg) includes `state.<category>` or `anomalies` (other) on every call.
 
 **Why it's wrong.** Level 3 returns far more data than Level 1 or 2. Default should be Level 1 (triage) -> Level 2 (assess) -> Level 3 only when ground truth is needed.
 
@@ -239,7 +239,7 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` (value) or `
 
 **Symptom.** You conclude "no evidence of X" without checking that the source actually had complete data ingestion during the relevant window.
 
-**Why it's wrong.** Source might have been emitting `ingest_drop` / `spool_full` / `backpressure` events during the window, in which case "no evidence" might just mean "data was incomplete."
+**Why it's wrong.** Source might have been emitting `ingest_drop` (other) / `spool_full` (other) / `backpressure` (value) events during the window, in which case "no evidence" might just mean "data was incomplete."
 
 **Recovery.** Before any "no evidence found" conclusion, read `agent_complete_through` (col) and `advisories` (col) on the agent row, then run `query_logs(lql='source = "<X>" AND sparklogs.kind = agent_op', start=..., end=...)`. Those rows are stamped when an investigator must distrust other data on that host. If any fired, qualify the Finding's confidence and surface it in WHAT WAS NOT CHECKED. An EMPTY result is inconclusive rather than reassuring: a healthy agent, an agent that is not reporting, and a topic disabled for that agent's rollout ring all look identical from here. `list_sources` (tool) event-count trends are a prompt to look, never a coverage measurement. Say which case you could not rule out.
 

@@ -10,7 +10,7 @@ Few publishers. `provider_name` (LQL) is optional confirmation, not the first sp
 
 1. Scope this `subsource` (LQL).
 2. Group `winlog.event_id` (LQL) / `pattern` (LQL) / `sparklogs.reason` (LQL).
-3. Read **`user_data.*`** (not Application-style `event_data`).
+3. Read **`user_data.*`** (not Application-style `event_data` (LQL)).
 4. Join with CBS/DISM via `themes/windows-updates-and-patching.md`.
 
 ## Accuracy

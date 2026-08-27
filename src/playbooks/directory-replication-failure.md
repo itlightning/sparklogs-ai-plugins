@@ -21,7 +21,7 @@ sparklogs.reason in (kerberos_ticket_failed, kerberos_preauth_failed, ntlm_valid
 ```
 
 Group by `source` (LQL), `win.eventlog.security.status_meaning` (LQL).
-`clock_skew` concentrated on one DC is a different story from `client_unknown` spread evenly.
+`clock_skew` (value) concentrated on one DC is a different story from `client_unknown` (value) spread evenly.
 
 Directory object changes: `sparklogs.reason = directory_object_changed`.
 

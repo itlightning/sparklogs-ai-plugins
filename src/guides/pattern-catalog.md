@@ -114,7 +114,7 @@ The catalog covers ~25 commonly-seen patterns and is expanded over time as more 
 ## Network
 
 ### `The network adapter <X> has linked at <Y> Mbps full duplex.`
-- **Likely meaning:** NIC link-up event. Useful as `disappeared` signal when the link goes down between snapshots.
+- **Likely meaning:** NIC link-up event. Useful as `disappeared` (other) signal when the link goes down between snapshots.
 - **HM:** HM10, HM2 (slow logon over network)
 
 ### `Name resolution for the name <X> timed out after none of the configured DNS servers responded.`
@@ -149,11 +149,11 @@ The catalog covers ~25 commonly-seen patterns and is expanded over time as more 
 
 ## How patterns relate to anomaly indicators
 
-When the local detector flags an event with `anomaly_categories`:
-- `unexpected_state` often correlates with patterns like "service entered Stopped state" when the rule expects Running.
-- `unexpected_state_change` often correlates with patterns like "VSS writer is in state Failed."
-- `expected_change_missing` correlates with absence of patterns like "Successful auto enrollment" within the expected window.
-- `spike` correlates with sudden increase in a known pattern's frequency.
+When the local detector flags an event with `anomaly_categories` (other):
+- `unexpected_state` (other) often correlates with patterns like "service entered Stopped state" when the rule expects Running.
+- `unexpected_state_change` (other) often correlates with patterns like "VSS writer is in state Failed."
+- `expected_change_missing` (other) correlates with absence of patterns like "Successful auto enrollment" within the expected window.
+- `spike` (other) correlates with sudden increase in a known pattern's frequency.
 
 The catalog entries above include `HM` tags so you can cross-reference: when investigating HM<N>, the catalog's HM-tagged patterns are the most relevant.
 

@@ -97,8 +97,8 @@ A specific, actionable check that would meaningfully weaken or eliminate this hy
 - "Show that NAS-01 had no I/O errors during the relevant windows."
 
 ### Off-endpoint check needed
-- `no` - the confirm/refute step uses on-endpoint data accessible via SparkLogs.
-- `yes` - the confirm/refute step requires checking something off-endpoint (cloud service, network device, third-party SaaS). Name what.
+- `no` (other) - the confirm/refute step uses on-endpoint data accessible via SparkLogs.
+- `yes` (other) - the confirm/refute step requires checking something off-endpoint (cloud service, network device, third-party SaaS). Name what.
 
 ### Alternative framings
 If the symptom could mean something different than the obvious interpretation, enumerate. Example:

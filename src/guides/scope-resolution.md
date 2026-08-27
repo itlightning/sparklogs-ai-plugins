@@ -17,7 +17,7 @@ Every log event carries two distinct identity fields:
 
 **"Collector" means one thing only:** the log-shipping process on the device that the agent supervises. It is not a synonym for the sender and not a synonym for the agent.
 
-**Public row kinds from `resolve_scope` (tool):** `org`, `agent` (value) (a registered SparkLogs Agent), `ingest_key` (value) (API ingest credential; never call it an agent in reports).
+**Public row kinds from `resolve_scope` (tool):** `org` (other), `agent` (value) (a registered SparkLogs Agent), `ingest_key` (value) (API ingest credential; never call it an agent in reports).
 Ingest keys participate in name matching and appear when `include_agents` (arg) is true (default). That parameter means "include agents and ingest keys," not agents alone.
 
 **Correlation ids.** Org and agent rows carry `rmm_client_id` (arg) and `psa_client_id` (arg), read live. In an automated workflow (per-ticket automation), pass one: it is an EXACT lookup that returns the single org holding that id, or nothing, and never falls back to name matching. An absent correlation id means the org holds no such id.
@@ -105,8 +105,8 @@ Agent rows carry two SEPARATE readings plus a collection group: is the agent the
 
 - **`agent_status` (col)** is where the device stands, and each value is a whole answer: `online` (value), `offline` (value), `never_seen` (value) (enrolled, nothing ever arrived), `stopped` (value), `system_shutdown` (value), `uninstalled` (value), `upgrading_overdue` (value) (an update that has not come back), `deleted` (value). `offline` (value) means NO SIGNAL RECEIVED and the cause is unknown; a device that announced it was stopping reads as what it announced instead.
 - **The arrival stamps** behind that reading: **`last_data_at` (col)** (when log data last arrived, so legitimately old on a quiet, healthy machine) and **`last_heartbeat_at` (col)** (when the agent last checked in, about every five minutes).
-- **`stuck_reason` (col)** says why an enrolled agent is not collecting (`pack_missing`, `pack_requires_newer_agent`, `collector_down`, `collector_flapping`, `config_apply_stuck`, `feeds_inactive`). Render an unfamiliar value as the raw string.
-- **The collection group** is what the device last reported about its own log gathering, rolled up across its data feeds: `collection_status` (col) (`healthy`, `behind`, `onboarding`, `degraded`, `unknown` (value)) with `collection_reasons` (col) (each glossed), `collection_feeds` (counts) and `collection_observed_at`. `unknown` (value) and absent are UNKNOWN, never healthy. On an offline device the group is LAST REPORTED, from before contact ended: keep it, say when it is from, never blank it.
+- **`stuck_reason` (col)** says why an enrolled agent is not collecting (`pack_missing` (value), `pack_requires_newer_agent` (value), `collector_down` (value), `collector_flapping` (value), `config_apply_stuck` (value), `feeds_inactive` (value)). Render an unfamiliar value as the raw string.
+- **The collection group** is what the device last reported about its own log gathering, rolled up across its data feeds: `collection_status` (col) (`healthy` (value), `behind` (value), `onboarding` (value), `degraded` (value), `unknown` (value)) with `collection_reasons` (col) (each glossed), `collection_feeds` (col) (counts) and `collection_observed_at` (col). `unknown` (value) and absent are UNKNOWN, never healthy. On an offline device the group is LAST REPORTED, from before contact ended: keep it, say when it is from, never blank it.
 - **`agent_complete_through` (col)** is the instant up to which this agent's data is complete. See the completeness section below.
 - **`advisories` (col)** are hints about what would improve data collection, not demands. Use them rather than inventing triage, so every SparkLogs surface tells the engineer the same thing. Empty means nothing to note.
 - A device with no sign of life on any stamp for 14 days is annotated **inactive since a date**. Leave it out of today's triage unless the question is about it.
@@ -171,9 +171,9 @@ Each row is one **(sender, source)** pair in the window:
 | `sent_via` (col) | How the stream was authorized to ingest: `agent` (value), `ingest_key` (value), or `unresolved` (value) (UUID in events but not visible in this token's fleet directory). A key is how a stream arrived, never what collected it |
 | `name` (col), `agent_status` (col) | Present when the sender resolves; empty for `unresolved` (value) |
 | `source` (LQL) | Origin host label |
-| `event_count` (col), `bytes_ingested` | Volume in the window |
+| `event_count` (col), `bytes_ingested` (other) | Volume in the window |
 | `cnt_interesting` (col), `distinct_interesting` (col) | Triage: how much is going on here |
-| `cnt_warning` (col) .. `cnt_severe` | One count per failure-side band, 13 through 19 (the ladder is in `category-classes.md`) |
+| `cnt_warning` (col) .. `cnt_severe` (col) | One count per failure-side band, 13 through 19 (the ladder is in `category-classes.md`) |
 | `cnt_critical_plus` (col) | Severity 20 and above. Rare, and fetch-first whatever the ticket was about |
 | `first_event_at` (col), `last_event_at` (col) | Exact window bounds for this pair |
 
@@ -213,10 +213,10 @@ When a feed is behind, stuck or blocked, an advisory explains the lag and carrie
 Collection sometimes has to skip over events because the underlying collection engine could not provide them; in v1 that engine is the Windows event log itself. Call this **missed events** or **skipped events**, bounded by a **skip window**. It is a limitation of collection, never a fault of the machine or the operator, and the tone is measured: a skip is a notice, not an incident.
 
 - State what happened and its bounds, then stop. The events may still exist in the device's local Windows event log; SparkLogs does not re-collect them, so never offer or imply recovery.
-- The cause slug decides whether a count is exact. `skip_record` is exactly one event. `+1s` through `+30m` are an unknown count inside a window whose width the slug names. `future_only` is everything from the last event sent up to the new subscription. Render an unfamiliar slug verbatim and state the window bounds.
+- The cause slug decides whether a count is exact. `skip_record` (value) is exactly one event. `+1s` through `+30m` are an unknown count inside a window whose width the slug names. `future_only` (value) is everything from the last event sent up to the new subscription. Render an unfamiliar slug verbatim and state the window bounds.
 - **An ABSENT skips entry means the source type does not detect skips at all**, never that none occurred. Today only Windows event log feeds detect them.
 - **Skips are orthogonal to feed health.** A current, advancing feed can carry a skip window. Freshness never disproves a skip, and a skip never means the feed is unhealthy now.
-- Never write "gap", "data loss" or "lost" for this. A delayed feed is `behind` or `stuck`, which is a different thing from skipped.
+- Never write "gap", "data loss" or "lost" for this. A delayed feed is `behind` (value) or `stuck` (value), which is a different thing from skipped.
 
 ---
 

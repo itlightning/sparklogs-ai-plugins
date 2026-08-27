@@ -55,18 +55,18 @@ events_summarized: <count>
 
 **The `severity` (LQL) field is a four-bucket summary, and it is lossy on purpose.** SparkLogs severity is
 a twelve-rung ladder; this schema collapses it so an orchestrator can scan many findings at once. Map
-it this way, and keep the exact returned value in `summary` whenever the rung matters:
+it this way, and keep the exact returned value in `summary` (other) whenever the rung matters:
 
 | Bucket | Ladder rungs |
 |---|---|
-| `ok` | Trace, Debug, Verbose, Info, Display, Notice |
-| `warning` | Warning, Minor |
-| `error` | Error, Serious, Severe |
-| `critical` | Critical, Fatal (severity >= 20) |
+| `ok` (value) | Trace, Debug, Verbose, Info, Display, Notice |
+| `warning` (value) | Warning, Minor |
+| `error` (value) | Error, Serious, Severe |
+| `critical` (value) | Critical, Fatal (severity >= 20) |
 
-The lossy edge worth knowing: `Severe` and `Error` both land in `error`, and `Severe` is
+The lossy edge worth knowing: `Severe` and `Error` both land in `error` (value), and `Severe` is
 availability-threatening while `Error` is bounded in scope. If a finding turns on that difference,
-name the rung in `summary` rather than leaving the bucket to carry it. `critical` is the one bucket
+name the rung in `summary` (other) rather than leaving the bucket to carry it. `critical` (value) is the one bucket
 with a contract attached: it means fetch-first, whatever the ticket was about.
 
 **The orchestrator uses the structured output as evidence in Findings, citing the same query_urls.** The orchestrator never receives the raw events back - only the summary.
@@ -101,9 +101,9 @@ top_patterns:
 
 ## Subagent: `sparklogs-cluster-interpreter`
 
-**Not usable yet.** This subagent depends on `cluster_event_contexts`, which does not exist. Approximate clustering with a `query_logs` (tool) slice narrowed to the pattern plus `refine_query_result` (tool) group_by over the surrounding context fields.
+**Not usable yet.** This subagent depends on `cluster_event_contexts` (other), which does not exist. Approximate clustering with a `query_logs` (tool) slice narrowed to the pattern plus `refine_query_result` (tool) group_by over the surrounding context fields.
 
-**Purpose.** Given a `cluster_event_contexts` result with multiple distinct clusters, interpret each cluster's representative_surround and produce a structured human-readable description.
+**Purpose.** Given a `cluster_event_contexts` (other) result with multiple distinct clusters, interpret each cluster's representative_surround and produce a structured human-readable description.
 
 **Model tier:** fast, lightweight tier.
 

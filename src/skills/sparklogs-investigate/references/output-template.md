@@ -84,10 +84,10 @@ The cap is the point. An engineer reads this to decide whether to open the Findi
 The right version is factual; the wrong version is cause analysis. Cause analysis lives in `/sparklogs:analyze-cause`.
 
 ### Source(s)
-Specific sources investigated (e.g., `srv-fileshare01`, `ws022.acme`). Not generic ("a server in Acme Dental") - name them.
+Specific sources investigated (e.g., `srv-fileshare01`, ws022.acme). Not generic ("a server in Acme Dental") - name them.
 
 ### Org(s)
-The `org_id`(s) the investigation was scoped to (from `resolve_scope` (tool)).
+The `org_id` (col)(s) the investigation was scoped to (from `resolve_scope` (tool)).
 
 ### Time window
 Absolute UTC timestamps for the investigation's data window. Not relative ("last 24 hours") - bind to absolute timestamps so the summary remains interpretable when re-read days later.
@@ -149,7 +149,7 @@ NOT:
 - "Note: recommend restarting the service" <- recommendation; not this skill's role
 
 ### Anomaly Signals Used
-Optional section, and **normally absent**: `anomaly_max_score` / `anomaly_max_score_confidence` are designed and not emitted anywhere in the product today, so the canonical context-reduction filter reduces to its `severity` (LQL) half on every source. Omitting the section is the usual correct outcome, and the missing anomaly half is never "no anomalies."
+Optional section, and **normally absent**: `anomaly_max_score` (other) / `anomaly_max_score_confidence` (other) are designed and not emitted anywhere in the product today, so the canonical context-reduction filter reduces to its `severity` (LQL) half on every source. Omitting the section is the usual correct outcome, and the missing anomaly half is never "no anomalies."
 
 Include it only if you actually read an anomaly field and it carried a value. Then list briefly, with the required framing: anomalies are internal investigation tools, not standalone problem alerts. Never build a Finding on one: a citation for a signal no source emits is the confidently-wrong shape this template exists to prevent.
 
