@@ -26,7 +26,8 @@ Export `SPARKLOGS_API_TOKEN` in your shell profile and restart Cursor.
 
 ## Claude
 
-Claude skips OAuth when `headers.Authorization` is set. Add the header only on a user MCP config you control, with a real token value or a substitution your Claude build actually expands. Unsubstituted `${SPARKLOGS_API_TOKEN}` is not a working token path in Claude.
+Claude skips OAuth when `headers.Authorization` is set.
+Add the header only on a user MCP config where you want to force token-based authentication.
 
 ## Codex
 
@@ -40,4 +41,4 @@ bearer_token_env_var = "SPARKLOGS_API_TOKEN"
 
 ## Other hosts
 
-Add a bearer header using that host's secret substitution.
+Add an Authentication Bearer header using that host's secret substitution.
