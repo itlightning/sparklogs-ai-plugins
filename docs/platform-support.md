@@ -1,7 +1,7 @@
 # Platform Support
 
 The SparkLogs plugin installs from this repository's marketplace on Claude, Codex, and Cursor.
-Every host uses the same `SPARKLOGS_API_TOKEN`; each install guide covers where to put it.
+Default auth is SparkLogs OAuth (browser sign-in).
 
 ## What each host gets
 
@@ -21,4 +21,4 @@ Every host uses the same `SPARKLOGS_API_TOKEN`; each install guide covers where 
 ## Good to know
 
 - Cursor may render the command names differently than documented; if a `/sparklogs-...` command does not appear in the picker, asking in chat works the same and is always available.
-- On Cursor team plans, admins set the API token once in the dashboard; individual users can instead add the server to their own `~/.cursor/mcp.json` (covered in the install guide).
+- For headless or automated environments: [API token auth](install/api-token.md) instead of OAuth.

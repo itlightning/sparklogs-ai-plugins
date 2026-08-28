@@ -186,15 +186,13 @@ async function validatePackage(host) {
   if (!layout.mcpFile && manifest.mcpServers) {
     throw new Error(`${host} manifest points at an MCP config the package does not ship`);
   }
+  if (server.headers) {
+    throw new Error(`${host} MCP entry must not set headers; hosts skip OAuth when Authorization is present`);
+  }
+  if (server.bearer_token_env_var) {
+    throw new Error(`${host} MCP entry must not set bearer_token_env_var; an unset env var fails startup`);
+  }
   if (host === 'codex') {
-    // Codex resolves the token from the environment by variable NAME. A header carrying a
-    // ${...} placeholder would reach the server as those literal characters, so the entry
-    // must authenticate the one way Codex actually implements.
-    const token = (await readJson(path.join(ROOT, METADATA_FILE))).mcp.tokenVariable;
-    if (server.bearer_token_env_var !== token) {
-      throw new Error(`Codex MCP entry must set bearer_token_env_var to ${token}`);
-    }
-    if (server.headers) throw new Error('Codex MCP entry must not carry headers; Codex expands no placeholder');
     // The manifest pointer is what makes Codex read the file at all.
     if (manifest.mcpServers !== `./${layout.mcpFile}`) {
       throw new Error(`Codex manifest must point mcpServers at ./${layout.mcpFile}`);
@@ -202,13 +200,8 @@ async function validatePackage(host) {
   }
   if (manifest.name !== 'sparklogs') throw new Error(`${host} manifest name must be sparklogs`);
   if (!SEMVER.test(manifest.version)) throw new Error(`${host} manifest version is invalid`);
-  if (host === 'cursor') {
-    // Cursor resolves the mcp.json header placeholder only from a declared plugin variable.
-    const token = server.headers.Authorization.match(/\$\{([A-Z0-9_]+)\}/)?.[1];
-    if (!token) throw new Error('Cursor MCP header does not reference a variable');
-    if (!manifest.variables?.properties?.[token]) {
-      throw new Error(`Cursor manifest does not declare variable ${token}`);
-    }
+  if (host === 'cursor' && manifest.variables?.required?.length) {
+    throw new Error('Cursor manifest must not require plugin variables; OAuth is the default');
   }
   await validateShippedMarkdown(host, base);
 }

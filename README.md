@@ -35,10 +35,6 @@ Each package carries only what its host documents:
 | `plugins/codex/sparklogs` | yes | no | no | no | `.mcp.json` | inside each skill's `references/` |
 | `plugins/generic/sparklogs` | yes | no | no | no | `mcp.json` | inside each skill's `references/` |
 
-Codex documents skills, MCP servers, and hooks as the components a plugin bundles, and Agent Plugins v1 defines skills and `mcp.json`. Commands, rules, and subagents are host-specific formats, so they ship only where the host reads them.
-
-The Codex package bundles its MCP server, so installing the plugin configures the server too; export `SPARKLOGS_API_TOKEN` and Codex reads it by name. A `[mcp_servers.sparklogs]` entry in `~/.codex/config.toml` is how you run the server without the plugin, and it outranks the plugin's entry, so configure one or the other.
-
 ## Install And Update
 
 This repository uses a two-branch publishing model: `dist` is the generated default branch for marketplace-ready plugin packages, and `source` is the authoring branch for contributions.
@@ -50,6 +46,7 @@ Install from the GitHub repository marketplace root, not from a raw `marketplace
 - [Codex](docs/install/codex.md)
 - [Generic (other Agent Skills hosts)](docs/install/generic.md)
 - [Copilot Studio MCP](docs/install/copilot-studio-mcp.md)
+- [API token auth (optional)](docs/install/api-token.md)
 
 ## Trust And Safety
 

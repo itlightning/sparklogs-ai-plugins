@@ -19,14 +19,6 @@ Investigation skills for SparkLogs MCP.
 
 Then run `/reload-plugins` or restart Claude Code.
 
-## Token
-
-`.mcp.json` sends `Authorization: Bearer {{token_ref}}`. Export the token in your shell profile and restart the shell before starting Claude Code:
-
-```
-export {{token_var}}="your-token-here"
-```
-
-Get the token from the SparkLogs app at [sparklogs.app](https://sparklogs.app).
+When Claude prompts, sign in to SparkLogs in the browser (OAuth).
 
 Product docs: {{docs_url}}
