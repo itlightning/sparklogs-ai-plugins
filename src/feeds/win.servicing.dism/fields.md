@@ -33,21 +33,14 @@ This module populates no portable family.
 
 ## What sets each field
 
-Presence is per curated surface and per event id, because promotion is a property of the branch, not of the module.
+Presence is per curated surface, from what its author declared under `promotions`: a field reaches this row only when the surface's own arm or shape names it, never from a text scan of classify guessing which branch a write belongs to.
 A row lists what the surface CAN write, not what every event of it carries: a field whose value the payload does not supply stays unset, which is why absence of a field is never by itself evidence that a condition did not happen.
 A surface that promotes nothing says so: an empty row is a stated fact, not an omission.
 
 | Surface | Event ids | Fields set |
 |---|---|---|
-| `bracket_hresult` / `default` | n/a | `win.servicing.dism.component` |
-| `cbs_session_options` / `default` | n/a | `win.servicing.dism.component` |
-| `cli_option_rejected` / `default` | n/a | `win.servicing.dism.component` |
-| `dism_api_error` / `default` | n/a | `win.servicing.dism.component` |
-| `dism_package_manager_error` / `default` | n/a | `win.servicing.dism.component` |
-| `failed_generic` / `default` | n/a | `win.servicing.dism.component` |
-| `health_command` / `default` | n/a | `win.servicing.dism.component` |
-| `hresult_error` / `default` | n/a | `win.servicing.dism.component` |
-| `lookup_dummy_path` / `default` | n/a | `win.servicing.dism.component` |
-| `provider_image_probe` / `default` | n/a | `win.servicing.dism.component` |
-| `reboot_required` / `default` | n/a | `win.servicing.dism.component` |
-| `source_files_missing` / `default` | n/a | `win.servicing.dism.component` |
+| `win_dism_command_failed` / `default` | n/a | `win.servicing.dism.component` |
+| `win_dism_feature_change_failed` / `default` | n/a | `win.servicing.dism.component` |
+| `win_dism_health_command` / `default` | n/a | `win.servicing.dism.component` |
+| `win_dism_reboot_required` / `default` | n/a | `win.servicing.dism.component` |
+| `win_dism_source_files_missing` / `default` | n/a | `win.servicing.dism.component` |

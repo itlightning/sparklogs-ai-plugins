@@ -83,11 +83,11 @@ To require the field to be present and not equal to a value, write `field! AND f
 
 ### Array of objects (`[]()`)
 
-For an array of objects, `path[](expr)` (LQL) matches when at least one element satisfies `expr`.
+For an array of objects, `path[](expr)` (LQL) matches when at least one element satisfies `expr` (other).
 Names inside the parentheses are fields on that element, not on the event.
 `path[].leaf=val` (LQL) is the same as `path[](leaf=val)` (LQL).
 
-`path[]!` (LQL) matches when `path` is present and is an array, including an empty array.
+`path[]!` (LQL) matches when `path` (other) is present and is an array, including an empty array.
 
 | Query | Missing field | Empty array | Has a matching element | Other elements only |
 |---|---|---|---|---|

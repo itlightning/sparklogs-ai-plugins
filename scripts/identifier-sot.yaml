@@ -152,6 +152,7 @@ cols:
   - source
   - stuck_reason
   - subsource
+  - summary.cache_status
   - summary.scope
   - summary.severity_histogram
   - summary.total_count
@@ -251,6 +252,12 @@ values:
     - degraded
     - unknown
     - stuck
+  # refine / get_query_metadata envelope (not collection_status)
+  cache_status:
+    - cache_invalidated
+    - expired
+  mcp_call:
+    - scope_violation
   sent_via:
     - agent
     - ingest_key

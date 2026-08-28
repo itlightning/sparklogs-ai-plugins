@@ -1,9 +1,8 @@
 // Copyright (C) 2026 IT Lightning, LLC. All rights reserved.
 // See LICENSE.
 
-// Sync `src/guides/app-vocabulary.md` table from sparklogs-source-library `registry.yaml`
-// `app_vocabulary`. Pack-minted product tokens only. The unminted comment block in the registry
-// is not copied.
+// Pack-minted `app` tokens are closed vocabulary. Emit `(value)` so src/ matches
+// identifier-tag authoring; render strips that tag. The GENERATED block is not linted.
 
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -80,7 +79,7 @@ function renderTable(vocab, unpublished) {
   const lines = [
     '| Token | Product |',
     '|---|---|',
-    ...keys.map((key) => `| \`${key}\` | ${cell(publicBlurb(key, vocab[key]))} |`),
+    ...keys.map((key) => `| \`${key}\` (value) | ${cell(publicBlurb(key, vocab[key]))} |`),
   ];
   return lines.join('\n');
 }

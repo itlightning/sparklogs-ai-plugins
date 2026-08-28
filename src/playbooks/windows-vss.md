@@ -33,8 +33,10 @@ Group by `sparklogs.reason` (LQL) first.
 | `win.eventlog.application.vss_snapshot_context` (LQL) | Kind of copy (`VSS_CTX_BACKUP`, `VSS_CTX_CLIENT_ACCESSIBLE`, `VSS_CTX_APP_ROLLBACK`, …) |
 | `win.eventlog.application.vss_snapshot_attrs` (LQL) | Modifier flags on that context (`VSS_VOLSNAP_ATTR_*`) |
 | `win.eventlog.application.vss_snapshot_set` (LQL) | Snapshot Set GUID from Application 8231 |
-| `win.eventlog.application.vss_process_command_line` (LQL) | Who asked for the copy (8231). Inventory of requesters, not a job verdict |
 | `win.eventlog.application.vss_routine` (LQL) | API symbol on call-failure ids (8193, 12289, 12293) |
+
+8231 requester command line is message-tail `process_command_line` (other), not an LQL field.
+Inventory of who asked, not a job verdict.
 
 `VSS_CTX_CLIENT_ACCESSIBLE` is Previous Versions / Shadow Copies for Shared Folders, not backup copies.
 Absent writer is a real answer: many failures are coordinator-side.
@@ -67,7 +69,7 @@ Who is snapshotting (stays Info so default sweeps see it):
 source = "<host>" AND subsource = win.eventlog.application AND winlog.event_id = 8231
 ```
 
-Group requesters by `win.eventlog.application.vss_process_command_line` (LQL).
+Read requesters from the 8231 message tail; there is no command-line LQL field to group by.
 Group attempts by `win.eventlog.application.vss_snapshot_set` (LQL).
 
 Writer × code:
