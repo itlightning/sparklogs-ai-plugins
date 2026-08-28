@@ -96,9 +96,13 @@ Required after any `top_interesting_patterns` (col) teaser row before the patter
 **CORRELATE ACROSS WINDOWS - first-occurrence detection.**
 A `pattern_hash` (LQL) present in the incident window but absent from a healthy baseline window signals new behavior. Run `query_event_counts_by_severity` (tool) twice, once per window, and compare hash populations (v1 substitute for the fast-follow `query_period_diff` (other) tool; see `mcp-tool-decision-tree.md`).
 
-**RESOLVE - read the value, not the hash.**
+**RESOLVE - read the value; show the hash when it is a pivot.**
 The response envelope header carries a hash-dictionary `lookups` (col) table mapping frequent hashes to their values.
-When a row's inline value is blank, resolve it from `lookups` (col). Never show a raw `_hash` to the engineer; use the hash verbatim only as a drill-down filter value.
+When a row's inline value is blank, resolve it from `lookups` (col) before you speak.
+Lead with the resolved text (and `describe_pattern` (tool) for a `pattern_hash` (LQL)).
+Show the raw `*_hash` when it helps the engineer pivot (paste into LQL, compare windows, hand off a filter).
+Do not dump hashes with no text, and do not parse or pretty-print the token.
+Always use the hash verbatim as the drill-down filter value.
 
 ---
 

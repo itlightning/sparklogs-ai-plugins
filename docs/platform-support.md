@@ -14,7 +14,10 @@ Default auth is SparkLogs OAuth (browser sign-in).
 - **Cursor**: skills, commands, subagents, rules, and the SparkLogs MCP server.
   [Install guide](install/cursor.md).
 - **Copilot Studio**: connects to the SparkLogs MCP server directly, no plugin needed.
-  [Setup guide](install/copilot-studio-mcp.md).
+  Refer to our official docs
+  [Connect MCP](https://sparklogs.com/docs/it-fleet-intelligence/connect#mcp) and 
+  [Agent Instruction Template](https://sparklogs.com/docs/it-fleet-intelligence/agent-instructions).
+  Or the short [Setup guide](install/copilot-studio-mcp.md).
 - **Anything else that speaks MCP or Agent Plugins v1**: use the generic package.
   [Guide](install/generic.md).
 

@@ -78,7 +78,10 @@ When `query` (arg) is omitted, the tool lists everything in scope (unranked).
 
 ### Step 5: If multiple ambiguous matches, ask the engineer
 
-If several rows share the best `match_kind` (col) (no clear winner), **ask the engineer to disambiguate. Don't guess.**
+Ask when identity is fuzzy. Do not guess.
+
+- One exact org plus many agent rows is the inventory of that client, not an ambiguous match. Keep them when the question is about that org or the fleet.
+- Several **org** rows at the same best `match_kind` (col), or several **host** rows when the question named a device (no clear winner): **ask which org or which device**.
 
 Example:
 > "I found two organizations that could match 'Acme': Acme Dental (acme-dental) and Acme Manufacturing (acme-mfg). Which one are you investigating?"
@@ -106,7 +109,7 @@ Agent rows carry two SEPARATE readings plus a collection group: is the agent the
 - **`agent_status` (col)** is where the device stands, and each value is a whole answer: `online` (value), `offline` (value), `never_seen` (value) (enrolled, nothing ever arrived), `stopped` (value), `system_shutdown` (value), `uninstalled` (value), `upgrading_overdue` (value) (an update that has not come back), `deleted` (value). `offline` (value) means NO SIGNAL RECEIVED and the cause is unknown; a device that announced it was stopping reads as what it announced instead.
 - **The arrival stamps** behind that reading: **`last_data_at` (col)** (when log data last arrived, so legitimately old on a quiet, healthy machine) and **`last_heartbeat_at` (col)** (when the agent last checked in, about every five minutes).
 - **`stuck_reason` (col)** says why an enrolled agent is not collecting (`pack_missing` (value), `pack_requires_newer_agent` (value), `collector_down` (value), `collector_flapping` (value), `config_apply_stuck` (value), `feeds_inactive` (value)). Render an unfamiliar value as the raw string.
-- **The collection group** is what the device last reported about its own log gathering, rolled up across its data feeds: `collection_status` (col) (`healthy` (value), `behind` (value), `onboarding` (value), `degraded` (value), `unknown` (value)) with `collection_reasons` (col) (each glossed), `collection_feeds` (col) (counts) and `collection_observed_at` (col). `unknown` (value) and absent are UNKNOWN, never healthy. On an offline device the group is LAST REPORTED, from before contact ended: keep it, say when it is from, never blank it.
+- **The collection group** is what the device last reported about its own log gathering, rolled up across its data feeds: `collection_status` (col) (`healthy` (value), `behind` (value), `onboarding` (value), `degraded` (value), `unknown` (value)) with `collection_reasons` (col) (each glossed), `collection_feeds` (col) (counts) and `collection_observed_at` (col). `unknown` (value) and absent stay unknown (do not imply healthy from absence). On an offline device the group is LAST REPORTED, from before contact ended: keep it, say when it is from, never blank it.
 - **`agent_complete_through` (col)** is the instant up to which this agent's data is complete. See the completeness section below.
 - **`advisories` (col)** are hints about what would improve data collection, not demands. Use them rather than inventing triage, so every SparkLogs surface tells the engineer the same thing. Empty means nothing to note.
 - A device with no sign of life on any stamp for 14 days is annotated **inactive since a date**. Leave it out of today's triage unless the question is about it.

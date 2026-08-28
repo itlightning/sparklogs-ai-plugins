@@ -239,7 +239,7 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` (value) or `
 
 **Symptom.** No feed reported, no advisory appeared, or the stream came in on an ingest key, and you treat that quiet as reassurance: "no problems reported", "the feeds were healthy", "no missed events".
 
-**Why it's wrong.** An ingest-key stream makes no completeness claim at all, so its silence carries nothing. A feed that has not reported is `unknown` (value), never healthy. An absent skips entry means the source type does not detect skips, not that none occurred. Absence of events is not evidence of absence.
+**Why it's wrong.** An ingest-key stream makes no completeness claim at all, so its silence carries nothing. A feed that has not reported is `unknown` (value) (do not imply healthy from absence). An absent skips entry means the source type does not detect skips, not that none occurred. Absence of events is not evidence of absence.
 
 **Recovery.** Name the absence as an absence: "the feed made no report for this window, so completeness is unknown". Put it in WHAT WAS NOT CHECKED rather than in a Finding, and never upgrade it to a health statement.
 
@@ -251,11 +251,11 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` (value) or `
 
 **Recovery.** Before any "no evidence found" conclusion, read `agent_complete_through` (col) and `advisories` (col) on the agent row, then run `query_logs(lql='source = "<X>" AND sparklogs.kind = agent_op', start=..., end=...)`. Those rows are stamped when an investigator must distrust other data on that host. If any fired, qualify the Finding's confidence and surface it in WHAT WAS NOT CHECKED. An EMPTY result is inconclusive rather than reassuring: a healthy agent, an agent that is not reporting, and a topic disabled for that agent's rollout ring all look identical from here. `list_sources` (tool) event-count trends are a prompt to look, never a coverage measurement. Say which case you could not rule out.
 
-### Reading an empty curated-field query as a clean bill of health
+### Reading empty `sparklogs.*` fields as a health finding
 
 **Symptom.** You filter on a curated field (`sparklogs.reason` (LQL), a module-prefixed field), get zero rows back, and conclude the system is healthy or the check passed.
 
-**Why it's wrong.** Most WEL rows have no curated reason. Empty means this predicate did not match, never "no problem found." Uncurated native text and sibling providers can still carry the ticket.
+**Why it's wrong.** Most WEL rows have no curated reason. Empty `sparklogs.*` fields on an event mean the event is uncurated (this is not a health finding). Empty means this predicate did not match, never "no problem found" and never "the box is unhealthy." Uncurated native text and sibling providers can still carry the ticket.
 
 **Recovery.** Drop the curated predicate. Group the host by `subsource` (LQL), then follow `guides/stream-kinds.md`. Use `query_event_counts_by_severity` (tool) on `severity` (LQL) or `pattern` (LQL) for volume. Say in WHAT WAS NOT CHECKED which curated filters you tried.
 
@@ -282,6 +282,22 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` (value) or `
 **Why it's wrong.** Wastes investigation budget. Also produces a confidently-wrong conclusion because absence of evidence is treated as evidence of absence.
 
 **Recovery.** Always run `list_sources` (tool) with the investigation's `start` (arg)/`end` (arg) window as your first or second tool call (after `resolve_scope` (tool)). If the source has no data in the window, halt and ask the engineer for clarification per `scope-resolution.md`.
+
+### Asking which device when one org already resolved
+
+**Symptom.** `resolve_scope` (tool) returned one exact org and many agent rows, and you asked the engineer to pick a host before answering a client- or fleet-scoped question.
+
+**Why it's wrong.** Many devices under one resolved org is the inventory, not a tie. Asking stalls a question that already has a scope.
+
+**Recovery.** Keep the agent rows. Ask only if org identity or host identity is fuzzy: tied matches at the same `match_kind` (col), a sole weak match, or zero hits. See `guides/scope-resolution.md`.
+
+### Scanning the whole fleet unprompted
+
+**Symptom.** They named one client or one host, and you opened with estate-wide `query_logs` (tool) (or a wide counts scan with no LQL) to "see if it is anywhere".
+
+**Why it's wrong.** Default scope is what they named. A fleet hunt is a suggested next step when a finding looks serious or shared, not the first move.
+
+**Recovery.** Stay in the named scope. If the finding looks shared (same `pattern_hash` (LQL) / `service` (LQL) / reason; ransomware-class, backup-wide, identity), suggest a hunt and wait unless they already asked. Climb `query_scope_activity` (tool) and `query_event_counts_by_severity` (tool), then `describe_pattern` (tool) for spread. Raw logs only after that list is narrow.
 
 ### Running 30 tool calls without converging
 

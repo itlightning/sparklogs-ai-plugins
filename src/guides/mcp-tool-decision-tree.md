@@ -81,8 +81,9 @@ resolve_scope(
 ```
 
 **Decision logic:**
-- One row with `match_kind` (col) **`exact` (value)**: proceed.
-- Multiple rows at the same best `match_kind` (col): ask the engineer; don't guess.
+- One org row with `match_kind` (col) **`exact` (value)** plus agent rows for that org: proceed. That is the client inventory, not a tie.
+- One host/agent row with `match_kind` (col) **`exact` (value)**: proceed.
+- Multiple org rows at the same best `match_kind` (col), or multiple host rows when the question named a device: ask the engineer; don't guess.
 - Sole match at `prefix` (value)/`word` (value)/`substring` (value): confirm before proceeding.
 - Zero matches: surface closest candidates.
 
@@ -460,6 +461,8 @@ the pass-the-id-everywhere rule: there is no scope and no query to correlate.
 
 ### Recipe: "Is this just us? Fleet pivot from a specific pattern"
 
+Use this when they asked, or after they accepted a suggested hunt. Do not open with a fleet-wide `query_logs` (tool).
+
 ```
 1. resolve_scope(<msp / org scope>)
 2. query_event_counts_by_severity with lql filtering to the pattern_hash, group_by=["source"]
@@ -495,7 +498,7 @@ the pass-the-id-everywhere rule: there is no scope and no query to correlate.
 
 **Reading coverage out of counts.** No count, bucket series, or first/last event bound establishes what happened in the middle of a window. `agent_complete_through` (col) and the feed reports behind it are the only completeness answer; without them the honest statement is that completeness was not established.
 
-**Showing a `*_hash` id to a human.** Resolve it via the header `lookups` (col) first. Use the hash verbatim only as a drill-down filter value.
+**Showing a `*_hash` with no resolved text.** Resolve via the header `lookups` (col) (and `describe_pattern` (tool) for `pattern_hash` (LQL)) first. Then show the hash when it is a useful pivot. Use the hash verbatim as the drill-down filter value.
 
 **Not setting `external_investigation_id` (arg).** Audit trail breaks. Always set it.
 

@@ -44,8 +44,8 @@ Install from the GitHub repository marketplace root, not from a raw `marketplace
 - [Claude](docs/install/claude.md)
 - [Cursor](docs/install/cursor.md)
 - [Codex](docs/install/codex.md)
+- [Copilot Studio MCP](https://sparklogs.com/docs/it-fleet-intelligence/connect#copilot-studio)
 - [Generic (other Agent Skills hosts)](docs/install/generic.md)
-- [Copilot Studio MCP](docs/install/copilot-studio-mcp.md)
 - [API token auth (optional)](docs/install/api-token.md)
 
 ## Trust And Safety

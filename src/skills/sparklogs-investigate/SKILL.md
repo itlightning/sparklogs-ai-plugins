@@ -288,7 +288,7 @@ The complete per-investigation-type list is in `guides/off-endpoint-causes.md`. 
 Do not invent field names. event_kind, SLAAgentOp, SLASnapshot, event_summary and `worst_severity` (col) are RETIRED names from an older model and resolve to nothing. The morphology field is `sparklogs.kind` (LQL) with values `inventory` (value), `monitor` (value), `delta` (value), `agent_op` (value), `config_change` (value).
 
 When a query on a curated or module field comes back empty:
-1. Do not conclude the system is healthy or that the check passed.
+1. Empty `sparklogs.*` fields on an event mean the event is uncurated (this is not a health finding).
 2. Check whether that source populates the field at all before reading anything into it.
 3. Fall back to universal signals: severity distribution, message and pattern counts via `query_event_counts_by_severity` (tool), volume trends.
 4. Say so explicitly in the Finding or WHAT WAS NOT CHECKED.
@@ -311,7 +311,7 @@ Six fields carry a normalized value plus an opaque `_hash` companion, and togeth
 - **Dedup and track stability.** A `_hash` is a stable identity - the same hash means the same normalized value or pattern, across events and across time.
 - **Drill** with `query_logs(lql='pattern_hash = "<h>"')` or `refine_query_result(filter_lql=...)` to read the actual events behind a hash.
 - **Correlate across windows for first-occurrence detection.** A `pattern_hash` (LQL) present in the incident window but absent from a healthy baseline window signals new behavior - a primary RCA signal. Run `query_event_counts_by_severity` (tool) twice, once per window, and compare the two hash populations (the v1 substitute for the fast-follow `query_period_diff` (other) tool). **A source-pack release recomputes pattern identity for the sources it curates**, so a baseline window on one side of a pack deploy and an incident window on the other compare nothing: every hash reads as new. When the two windows straddle a release, pick a baseline inside the same pack era and say which era you used.
-- **Resolve, don't display.** Resolve a `_hash` through the envelope's `lookups` (col) table (Section 11) before it reaches a Finding; use the hash itself only as a drill-down filter value.
+- **Resolve, then show the hash when it is a pivot.** Resolve a `_hash` through the envelope's `lookups` (col) table (Section 11) before it reaches a Finding. Include the raw hash when the engineer may want to filter or hand it off. Always use the hash itself as the drill-down filter value.
 
 Full detail and a worked localize-then-land shape: `guides/scope-ladder.md`. The controlled `service` (LQL) vocabulary (the cross-vendor ticket-class values worth pivoting on, e.g. `backup` (value), `storage` (value), `security_audit` (value)) is in `guides/service-taxonomy.md`.
 
@@ -326,9 +326,11 @@ Before any deep investigation, resolve the scope (which org / sources / time win
 1. Parse the engineer's message for an explicit customer, org, or agent UUID. Pass UUIDs via `org_ids` (arg) when recognized; otherwise use `query` (arg).
 2. **Host-first:** when the engineer names a host/device, pass it as `query` (arg); the server matches `name` (col) and `reported_hostname` (col) across authorized orgs.
 3. Otherwise try org or customer name via `query` (arg). Matching is ranked by **`match_kind` (col)** (`exact` (value) > `prefix` (value) > `word` (value) > `substring` (value)). There are no numeric confidence scores.
-4. Single row with `match_kind` (col) **`exact` (value)**: proceed. Multiple rows at the same best tier, or a sole weak (`prefix` (value)/`word` (value)/`substring` (value)) match: **ask the engineer. Don't guess.**
+4. One **org** row with `match_kind` (col) **`exact` (value)** plus that org's agent rows: proceed. That is the client inventory, not a tie. One **host** row with `match_kind` (col) **`exact` (value)**: proceed. Multiple **org** rows at the same best tier, or multiple **host** rows when the question named a device, or a sole weak (`prefix` (value)/`word` (value)/`substring` (value)) match: **ask. Don't guess.**
 5. Read the state readings on agent rows: **`agent_status` (col)** (`online` (value), `offline` (value), `never_seen` (value), `stopped` (value), `system_shutdown` (value), `uninstalled` (value), `upgrading_overdue` (value), `deleted` (value)) beside the collection group (`collection_status` (col) with `collection_reasons` (col), `collection_feeds` (col), `collection_observed_at` (col)), **`advisories` (col)**, and **`agent_complete_through` (col)**. Ingest-key rows carry `last_data_at` (col) freshness only. `include_agents` (arg) (default true) returns agents **and** ingest keys. Filter devices with `device_classes` (arg) / `device_roles` (arg) rather than guessing from hostnames.
 6. Default `include_sub_orgs: true` on org-scoped calls. Scope may expand mid-investigation; keep the same `external_investigation_id` (arg).
+
+**Fleet hunt.** Default scope is what they named (one org, one host, or that set). Do not scan the whole fleet unprompted. If a finding looks serious or shared (same `pattern_hash` (LQL), `service` (LQL), or reason on one box; ransomware-class, backup-wide, identity), suggest a fleet hunt and wait unless they already asked. Climb the scope ladder and pattern counts first (`query_scope_activity` (tool), `query_event_counts_by_severity` (tool) with `group_by` (arg) `source` (LQL) / `service` (LQL) / `pattern_hash` (LQL), tight `start` (arg)/`end` (arg), LQL on the suspected shape). `describe_pattern` (tool) (list the important hashes first) for text, severity-band counts, and how many senders/sources are hit: that is the fleet-spread read. `query_logs` (tool) only after that list is narrow. Do not open with raw logs across every device.
 
 **Source discovery - confirm sources have trustworthy data in the window.** Use `list_sources` (tool) with the investigation's `start` (arg)/`end` (arg); do NOT infer scope from recent heartbeat alone.
 
@@ -416,7 +418,7 @@ Every data-tool response is ONE text block, not JSON you parse as a whole:
 
 **Sampled results.** A scan too large to read in full is sampled rather than refused: the matched-population aggregates (total count, severity histogram, event counts) become estimates, while the returned raw rows stay exact matches. `summary.scope` (col) states a DETECTION FLOOR once for the whole response, and every cell then says which kind it is. `<N` means fewer than about N events rather than NONE. A plain integer at or above the floor is rounded to the significant digits its sample supports. Quote the cell as it came, bound and all, instead of second-guessing a small number; narrow the query (tighter window, tighter LQL) and re-run when a Finding needs exact figures. When `sampled` (other) is absent, aggregates are exact.
 
-**Hash-dictionary rule.** Rows carry `*_hash` companions for six fields (pattern, source, subsource, category, service, app). When a row's value field is absent, resolve its `*_hash` in the header `lookups` (col). NEVER show a `*_hash` id to a human - resolve it to its value first. But DO use the `*_hash` verbatim as a drill-down filter value (it is the drill-down handle). Treat every `*_hash` as an OPAQUE string: `pattern_hash` (LQL) = a mnemonic prefix + `_` + a 16-char base36 tail; source/subsource/category/service/app = a bare 16-char base36 string. Never parse, split, or length-validate a hash. Dedup, filter, and correlate on `pattern_hash` (LQL), never on `pattern` (LQL) text.
+**Hash-dictionary rule.** Rows carry `*_hash` companions for six fields (pattern, source, subsource, category, service, app). When a row's value field is absent, resolve its `*_hash` in the header `lookups` (col). Lead with the resolved value (and `describe_pattern` (tool) before citing a `pattern_hash` (LQL)). Show the raw `*_hash` when it adds value as a queryable pivot for the engineer; never as a substitute for the text. Always use the `*_hash` verbatim as a drill-down filter value (it is the drill-down handle). Treat every `*_hash` as an OPAQUE string: `pattern_hash` (LQL) = a mnemonic prefix + `_` + a 16-char base36 tail; source/subsource/category/service/app = a bare 16-char base36 string. Never parse, split, or length-validate a hash. Dedup, filter, and correlate on `pattern_hash` (LQL), never on `pattern` (LQL) text.
 
 **Schema descriptor + deeper field discovery.** The header `schema` (other) lists the standard fields plus the top custom fields by fill-rate FOR THIS PAGE. When it carries `more_fields` (other), that points at `get_query_metadata` (tool). `get_query_metadata` (tool)'s default call is lightweight (bookkeeping only); its `top_n` (arg) / `field_match` (arg) deep discovery is a full catalog scan of the source - reach for it only when the inline schema genuinely isn't enough.
 
@@ -550,10 +552,12 @@ The full list of common mistakes, anti-patterns, and recovery is in `guides/comm
 8. **Capitulating to engineer pressure for conclusions.** Hold the goal-framing. Offer the analyze-cause skill instead.
 9. **Confidence inflation.** "high" is for direct, corroborated, recent evidence. "insufficient_evidence" is a valid finding - use it.
 10. **Concluding "no problem" instead of "no evidence found in <scope>."** The first claim is wrong; the second is honest and useful.
-11. **Reading an empty result on a field the source does not carry as a clean bill of health.** Curated and module fields are per-source and per-surface; empty may mean "this source never writes that", not "no problem". Check what the source carries, fall back to universal fields, and say so (Section 8).
+11. **Reading empty `sparklogs.*` fields as a health finding.** Empty `sparklogs.*` fields on an event mean the event is uncurated (this is not a health finding). Curated and module fields are per-source and per-surface; empty may mean "this source never writes that". Check what the source carries, fall back to universal fields, and say so (Section 8).
 12. **Stopping at playbook LQL.** Empty or thin recipe queries are a miss on the recipe. Widen by `subsource` (LQL) then `pattern` (LQL), then raw logs, before "cannot analyze".
 13. **Claiming coverage from counts.** Volume and first/last event bounds never establish what happened in the middle of a window. Completeness is `agent_complete_through` (col) and the feed reports behind it, or it is not claimed.
 14. **Writing a completeness section the question did not need.** On an ongoing issue, one sentence saying completeness is not material is the whole obligation.
+15. **Asking which device when one org already resolved.** One exact org plus many agent rows is that client's inventory. Keep them. Ask only when org identity or host identity is fuzzy.
+16. **Scanning the whole fleet unprompted.** Default to the named scope. Suggest a fleet hunt when a finding looks serious or shared; climb counts and `describe_pattern` (tool) before raw logs across the estate.
 
 ---
 
@@ -618,7 +622,7 @@ After every investigation, mentally check:
 - Did I check whether the agent was collecting before concluding "no evidence"?
 - Did every completeness statement come from `agent_complete_through` (col) and the feed reports, never from counts or first/last bounds?
 - Did I keep completeness to its material minimum, and name the checks I declined rather than padding around them?
-- If a query came back empty on a field this source may not carry, did I say so rather than calling it "no problem"?
+- If a query came back empty on a field this source may not carry, did I treat empty `sparklogs.*` fields as uncurated (not a health finding)?
 - If I stated a duration or a clear time, did I read `episode_age_basis` (col) and `episode_clear_time_basis` (col) first?
 
 If the answer to any of these is "no," fix the summary before delivering it.
