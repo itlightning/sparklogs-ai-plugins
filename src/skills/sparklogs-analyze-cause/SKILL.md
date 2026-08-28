@@ -154,7 +154,7 @@ Sometimes the prior evidence is enough; sometimes one cheap check moves a hypoth
 - The check would be off-endpoint (in which case, surface as "off-endpoint check needed" in the hypothesis).
 - The check would significantly expand the investigation without proportional benefit.
 
-When you do make additional MCP calls, reuse the prior investigation's `external_investigation_id` (arg). Cached queries from the prior investigation may be reusable via `refine_query_result` (tool), which runs against the cache instead of issuing a fresh backing query. You MUST only re-use the same query scope (list of organization IDs) that was resolved during the prior investigation; if you need to expand query scope, you MUST get explicit permission to do so.
+When you do make additional MCP calls, reuse the prior investigation's `external_investigation_id` (arg). Cached queries from the prior investigation may be reusable via `refine_query_result` (tool), which runs against the cache instead of issuing a fresh backing query. If refine returns `cache_invalidated` (value), issue a new data-tool call rather than retrying that `query_id` (arg). You MUST only re-use the same query scope (list of organization IDs) that was resolved during the prior investigation; if you need to expand query scope, you MUST get explicit permission to do so.
 
 ---
 

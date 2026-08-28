@@ -22,7 +22,7 @@ Answer first, then stop talking, never mid-query. Hedge precisely: "not in this 
 - Completeness claims need `agent_complete_through` (col) / feed reports, never first/last event bounds.
 - Cite a `query_url` (col) on factual claims.
 - If org/host/window is not obvious, `resolve_scope` (tool). On several matches, ask. Do not guess.
-- Prefer `query_device_health` (tool) or counts over `query_logs` (tool). Prefer `refine_query_result` (tool) on a cached slice over a new scan.
+- Prefer `query_device_health` (tool) or counts over `query_logs` (tool). Prefer `refine_query_result` (tool) on a cached slice over a new scan. If refine returns `cache_invalidated` (value), issue a new tool call; do not retry that `query_id` (arg).
 - Every data-access call needs `external_investigation_id` (arg). Pick a short id that names the topic and reuse it across follow-ups until the topic clearly changes.
 
 ## Which tool

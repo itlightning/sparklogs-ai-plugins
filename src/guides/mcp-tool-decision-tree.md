@@ -290,7 +290,7 @@ with no row to mark it: `sparklogs.instance` (LQL) is null on a host-scoped reas
 from a reason-by-instance cross-tab. Read `summary.scope` (col) for how many combinations came back, and
 group on the field alone when you need the null side.
 
-**Grouped output is not a refinable cache.** Calling `refine_query_result` (tool) on its `query_id` (arg) returns expired. Read grouped results directly. If a grouped result is truncated, follow its hint (narrow the `lql` (arg)/window and re-run). To then pull raw events for an interesting group, run `query_logs` (tool) with that group's value in `lql` (arg) (use the `*_hash` verbatim for the six hash fields).
+**Grouped output is not a refinable cache.** Calling `refine_query_result` (tool) on its `query_id` (arg) returns `cache_invalidated` (value) (success envelope; issue a new tool call). Read grouped results directly. If a grouped result is truncated, follow its hint (narrow the `lql` (arg)/window and re-run). To then pull raw events for an interesting group, run `query_logs` (tool) with that group's value in `lql` (arg) (use the `*_hash` verbatim for the six hash fields).
 
 ---
 
@@ -361,7 +361,7 @@ refine_query_result(
 
 **Sample restrictions:** `sample` (arg) is row mode only; combining it with `group_by` (arg)/`aggregate` (arg)/`having_lql` (arg) is rejected (a sampled aggregate would look exact without being exact). Sampled paging is approximate: each call may select a different subset.
 
-**Cache expiry:** a cold cache (roughly a day old) regenerates automatically under the SAME `query_id` (arg) when you refine it (the header's cache status reflects it). Grouped results remain non-refinable (re-run the grouped call). If the server reports the cache cannot be restored, re-issue the original backing query.
+**Cache expiry:** a cold cache (roughly a day old) regenerates automatically under the SAME `query_id` (arg) when you refine it (the header's cache status reflects it). Grouped results remain non-refinable. If `summary.cache_status` (col) is `cache_invalidated` (value), the handle is dead: issue a new data-tool call, do not retry refine on this id. That is not a bad org list you passed (`scope_violation` (value) is this-call unauthorized org). If the server reports the cache cannot be restored (`expired` (value)), re-issue the original backing query.
 
 **`group_by` (arg) takes bare column names; `order_by` (arg) items are OBJECTS.** A `group_by` (arg) term becomes an
 object only when it carries a time bucket or an alias. Two worked shapes:
@@ -489,7 +489,7 @@ the pass-the-id-everywhere rule: there is no scope and no query to correlate.
 
 **Skipping `list_sources` (tool).** Source might not have data in the investigation's window. Always confirm with `list_sources` (tool) scoped to the investigation's `start` (arg)/`end` (arg).
 
-**Refining a grouped result.** `query_event_counts_by_severity` (tool) output is not refinable; it returns expired. Read it directly or pull raw events with `query_logs` (tool).
+**Refining a grouped result.** `query_event_counts_by_severity` (tool) output is not refinable; it returns `cache_invalidated` (value). Read it directly or pull raw events with `query_logs` (tool).
 
 **Re-scanning instead of refining.** After ONE broad `query_logs` (tool) slice, use `refine_query_result` (tool) for other views - it's a cache lookup, not a fresh scan.
 

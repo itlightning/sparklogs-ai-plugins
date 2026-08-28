@@ -424,7 +424,7 @@ Every data-tool response is ONE text block, not JSON you parse as a whole:
 
 ### Grouped results are not refinable
 
-`query_event_counts_by_severity` (tool) output is NOT a refinable cache - calling `refine_query_result` (tool) on it returns expired. Read grouped results directly. If a grouped result is truncated, follow its hint (narrow the filter or window and re-run the grouped call). `refine_query_result` (tool) applies ONLY to `query_logs` (tool) slices; a refine response keeps the same `query_id` (arg), so run every further refine against that same id.
+`query_event_counts_by_severity` (tool) output is NOT a refinable cache: calling `refine_query_result` (tool) on it returns `cache_invalidated` (value) (success envelope; issue a new tool call). Read grouped results directly. If a grouped result is truncated, follow its hint (narrow the filter or window and re-run the grouped call). `refine_query_result` (tool) applies ONLY to `query_logs` (tool) slices; a refine response keeps the same `query_id` (arg), so run every further refine against that same id.
 
 Detailed per-tool usage with examples is in `guides/mcp-tool-decision-tree.md`.
 
@@ -485,7 +485,7 @@ Investigations are usually conversations. Follow-up questions ("look at X furthe
 
 ## Section 14. Error handling - recover gracefully
 
-**Cache expired on `refine_query_result` (tool):** a cold `query_logs` (tool) cache regenerates automatically under the SAME `query_id` (arg) when you refine it (the header's cache status reflects it). A grouped result is not refinable (re-run the grouped call). If the server reports the cache cannot be restored, re-issue the original backing query.
+**Cache expired on `refine_query_result` (tool):** a cold `query_logs` (tool) cache regenerates automatically under the SAME `query_id` (arg) when you refine it (the header's cache status reflects it). A grouped result is not refinable (re-run the grouped call). If `summary.cache_status` (col) is `cache_invalidated` (value), issue a new data-tool call rather than retrying refine on this id. If the server reports the cache cannot be restored (`expired` (value)), re-issue the original backing query.
 
 **Rate or capacity errors:** if a tool call fails with a retryable server error, retry up to 2x with a brief backoff, then surface to the engineer rather than hammering the same call.
 

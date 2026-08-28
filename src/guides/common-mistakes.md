@@ -203,13 +203,21 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` (value) or `
 
 **Recovery.** Always set `select` (arg) explicitly. Use the level-recipes from `mcp-tool-decision-tree.md`. Field-length caps are SERVER-ENFORCED - there is no client override. If a capped field is truncating data you need, narrow the query (tighter `lql` (arg), fewer subsources) or project a smaller field set with `select` (arg), then page or refine to reach the specific rows.
 
+### Retrying refine on `cache_invalidated` (value)
+
+**Symptom.** `refine_query_result` (tool) or `get_query_metadata` (tool) returns a successful envelope with `summary.cache_status` (col) `cache_invalidated` (value), and you call refine again on the same `query_id` (arg), or you treat it as `scope_violation` (value) (a bad org list you passed).
+
+**Why it's wrong.** The handle is dead for this token. Retrying refine cannot revive it. It is not a caller-argument error: the original query's org snapshot is no longer usable as-is. A new data-tool call with live scope is the recovery.
+
+**Recovery.** Issue a new `query_logs` (tool) (or a new `query_event_counts_by_severity` (tool) for counts). Copy a fresh `query_id` (arg). Do not pass the dead id to refine again.
+
 ### Re-running queries instead of refining cached results
 
 **Symptom.** You issue a fresh `query_logs` (tool) or `query_event_counts_by_severity` (tool) when you already had a relevant cached query.
 
 **Why it's wrong.** Backing queries do meaningfully more work than `refine_query_result` (tool), which runs against the cache. The cache lasts a long time; reuse it.
 
-**Recovery.** Before issuing a fresh backing query, check if an existing `query_id` (arg) (from earlier in this investigation) covers the universe you need. If yes, refine.
+**Recovery.** Before issuing a fresh backing query, check if an existing `query_id` (arg) (from earlier in this investigation) covers the universe you need. If yes, refine. If the refine (or `get_query_metadata` (tool)) response has `summary.cache_status` (col) `cache_invalidated` (value), that handle is dead under the current token: issue a new `query_logs` (tool) (or a new counts call), do not retry refine on that id. It is not a bad org list you passed.
 
 ### Claiming coverage from counts and endpoints
 
