@@ -7,10 +7,10 @@ The plugin gives your AI assistant a SparkLogs workflow:
 - `sparklogs-ask`: answer what happened, or what the device/fleet looks like, from logs and health/state. Default door.
 - `sparklogs-investigate` gathers evidence into a cited system-condition summary.
 - `sparklogs-analyze-cause` is an explicit second step that turns prior findings into candidate hypotheses with confirm/refute steps.
-- A `summary` command re-renders an existing investigation summary for ticket updates or customer communication.
-- An `explain` command walks the evidence behind a specific claim or finding.
+- A `sparklogs-summary` command re-renders an existing investigation summary for ticket updates or customer communication.
+- A `sparklogs-explain` command walks the evidence behind a specific claim or finding.
 
-Command invocation differs by host, so each package renders its own form: Claude namespaces plugin commands as `/sparklogs:ask`, `/sparklogs:investigate`, `/sparklogs:analyze-cause`, `/sparklogs:summary`, `/sparklogs:explain`; Cursor invokes the same set as `/sparklogs-ask` and so on. Codex and the generic Agent Plugins package ship no commands, so you name the workflow instead of typing one.
+Ask, investigate, and analyze-cause are skills (plain language works). Command invocation for the two follow-ups differs by host: Claude Code namespaces them as `/sparklogs:sparklogs-explain` and `/sparklogs:sparklogs-summary` (Desktop's picker shows `sparklogs-explain` / `sparklogs-summary` because it has no marketplace namespace). Cursor invokes `/sparklogs-explain` and `/sparklogs-summary`. Codex and the generic Agent Plugins package ship no commands, so you name the workflow instead of typing one.
 
 ## Why MSPs Should Care
 

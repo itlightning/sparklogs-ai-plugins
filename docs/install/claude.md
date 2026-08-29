@@ -20,16 +20,14 @@ The SparkLogs plugin installs from this repository's marketplace, in Claude Code
 
 3. When Claude prompts, sign in to SparkLogs in the browser (OAuth).
 
-4. Try it. Ask a question about a monitored host, or:
+4. Try it. Ask a question about a monitored host (the `sparklogs-ask` skill). Ask for a cited report when you want `sparklogs-investigate`. Cause hypotheses: `sparklogs-analyze-cause` after a summary exists.
+
+   Follow-up commands (Claude Code namespaces the filename, so these look doubled):
 
 ```
-   /sparklogs:ask <question>
+   /sparklogs:sparklogs-explain <finding or claim>
+   /sparklogs:sparklogs-summary <external_investigation_id>
 ```
-
-   Use `/sparklogs:investigate <scope>` only when you want a full cited report.
-
-   The other commands are `/sparklogs:analyze-cause`, `/sparklogs:summary`, and
-   `/sparklogs:explain`.
 
 ## Claude Desktop
 
@@ -45,7 +43,7 @@ The SparkLogs plugin installs from this repository's marketplace, in Claude Code
 
 4. Find **sparklogs** in the marketplace listing and click **Install**.
 5. When Claude prompts, sign in to SparkLogs in the browser (OAuth).
-6. Start a new conversation and ask a question about a monitored host, or try `/sparklogs:ask`.
+6. Start a new conversation and ask a question about a monitored host. The picker lists `sparklogs-explain` and `sparklogs-summary` (Desktop has no marketplace namespace, so those filenames carry the `sparklogs-` prefix). Ask, investigate, and analyze-cause are skills: ask in plain language.
 
 > Looking for SparkLogs in **Customize → Plugins → Browse plugins**?
 > 

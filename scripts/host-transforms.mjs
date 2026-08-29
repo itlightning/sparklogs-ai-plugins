@@ -9,8 +9,11 @@
 //     agent and command markdown, so the reference becomes root-anchored there. Other hosts hand a
 //     skill only its own directory, so the corpus is copied into that skill's references/ subtree and
 //     the citation becomes a path relative to the citing file.
-//  2. Command invocation. Claude namespaces a plugin command as /sparklogs:<name>. Cursor invokes the
-//     command's frontmatter name. Codex ships no repo commands at all, so the citation names the skill.
+//  2. Command invocation. Claude namespaces a plugin command as /sparklogs:<filename-stem>.
+//     Remaining commands are named sparklogs-explain / sparklogs-summary so Desktop's
+//     unscoped picker matches skill naming; Claude Code therefore shows
+//     /sparklogs:sparklogs-explain. Cursor uses the frontmatter name. Codex ships no
+//     repo commands, so the citation names the skill.
 //
 // Source stays single-source: no host dialect is hand-written into src/.
 
@@ -95,12 +98,17 @@ export function rewriteCorpusRelative(text, fileDirPkgRel, referencesDirPkgRel) 
 }
 
 export function rewriteCommandsForCursor(text) {
-  return text.replace(COMMAND_RE, (_, name) => `/sparklogs-${name}`);
+  return text.replace(COMMAND_RE, (_, name) => {
+    const stem = name.startsWith('sparklogs-') ? name.slice('sparklogs-'.length) : name;
+    return `/sparklogs-${stem}`;
+  });
 }
 
 /** Codex and generic ship no commands; the workflow is named, not invoked. */
 export function rewriteCommandsAsSkillNames(text) {
-  return text.replace(COMMAND_RE, (_, name) => `sparklogs-${name}`);
+  return text.replace(COMMAND_RE, (_, name) => (
+    name.startsWith('sparklogs-') ? name : `sparklogs-${name}`
+  ));
 }
 
 export function rewriteArgumentsForCursor(text) {
@@ -166,14 +174,14 @@ export function proveHostTransforms() {
     'relative rewrite from a materialized feed artifact',
   );
   expectEqual(
-    rewriteCommandsForCursor('Offer `/sparklogs:analyze-cause` next.'),
-    'Offer `/sparklogs-analyze-cause` next.',
-    'cursor command rewrite',
+    rewriteCommandsForCursor('Offer `/sparklogs:sparklogs-explain` next.'),
+    'Offer `/sparklogs-explain` next.',
+    'cursor rewrite strips a filename that already carries sparklogs-',
   );
   expectEqual(
-    rewriteCommandsAsSkillNames('Offer `/sparklogs:analyze-cause` next.'),
-    'Offer `sparklogs-analyze-cause` next.',
-    'skill-name command rewrite',
+    rewriteCommandsAsSkillNames('Offer `/sparklogs:sparklogs-explain` next.'),
+    'Offer `sparklogs-explain` next.',
+    'skill-name rewrite keeps a filename that already carries sparklogs-',
   );
   expectEqual(
     rewriteArgumentsForCursor('Investigate: $ARGUMENTS'),

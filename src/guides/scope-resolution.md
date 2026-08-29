@@ -44,7 +44,7 @@ If `resolve_scope` (tool) returns a single row with `match_kind` (col) **`exact`
 ### Step 2: Host-first path
 
 When the engineer names a **host or device** ("srv-fileshare01", "WORKSTATION-42") rather than a customer org, pass that string as `query` (arg).
-The server matches against managed agent **`name` (col)** and **`reported_hostname` (col)** across all authorized orgs and can back into the org scope from the matching agent row.
+The server matches against SparkLogs Agent **`name` (col)** and **`reported_hostname` (col)** across all authorized orgs and can back into the org scope from the matching agent row.
 
 If one agent row wins with `match_kind` (col) **`exact` (value)**, proceed.
 If several agents share similar names across orgs, ask which org or site the engineer means.

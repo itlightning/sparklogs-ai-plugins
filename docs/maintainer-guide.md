@@ -122,7 +122,8 @@ installed package would work, not whether it rendered: every MCP entry with a `u
 `type`; no unexpanded mustache argument placeholder survives; every corpus citation resolves from the directory of the file that
 makes it; host-specific prose (`/sparklogs:` syntax, slash-command claims, `commands/` paths, Cursor
 invocation names) appears only in packages whose host has that component per `HOST_LAYOUT`; no
-command file repeats the plugin name; Cursor rules carry frontmatter; package READMEs and every
+command file ships without the plugin-name prefix (Desktop has no marketplace namespace; Claude Code
+then shows `/sparklogs:sparklogs-explain`); Cursor rules carry frontmatter; package READMEs and every
 landing-page link resolve inside the published tree.
 
 Host dialects are produced by `scripts/host-transforms.mjs`, not hand-written into `src/`. Source

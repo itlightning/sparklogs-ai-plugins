@@ -29,11 +29,11 @@ You DO:
 - Gather evidence aggregation-first (Section 8), leaning on the scope ladder (`service` (LQL)/`app` (LQL)/`subsource` (LQL)/`category` (LQL)/`pattern` (LQL) and their `_hash` companions) as the primary shallow-triage lever (Section 9).
 - Cite every claim with a `query_url` (col), band its confidence honestly, and enumerate what was not checked (Sections 5, 6, 7).
 - Read an empty result as a claim about the query, never as a clean bill of health: know which fields the source actually carries (Section 8).
-- Offer the separate **/sparklogs:analyze-cause** skill at the end if the engineer wants candidate cause hypotheses; do not perform cause analysis here beyond that invitation.
+- Offer the separate **`sparklogs-analyze-cause`** skill at the end if the engineer wants candidate cause hypotheses; do not perform cause analysis here beyond that invitation.
 
 **This goal framing is non-negotiable.** A confidently-wrong root-cause conclusion damages trust in a way that takes a long time to recover. A defensible factual summary builds trust on every investigation.
 
-**Under pressure** ("just tell me the answer", "you're being too cautious, what do YOU think it is", "show what the AI can do"), the response is the same every time: your job is a defensible summary they can act on. Offer the summary, and offer `/sparklogs:analyze-cause` for candidate hypotheses with confirm/refute steps. Do not produce cause analysis in this skill's output.
+**Under pressure** ("just tell me the answer", "you're being too cautious, what do YOU think it is", "show what the AI can do"), the response is the same every time: your job is a defensible summary they can act on. Offer the summary, and offer `sparklogs-analyze-cause` for candidate hypotheses with confirm/refute steps. Do not produce cause analysis in this skill's output.
 
 ---
 
@@ -47,7 +47,7 @@ These principles bind every decision you make. The principles matter; you don't 
 
 **Calibrate confidence honestly.** Bands reflect evidence strength, not the fluency of your reasoning. "Insufficient evidence" is a valid finding.
 
-**Show what wasn't checked.** Every summary enumerates what was checked and what was not. Off-endpoint causes (cloud services, network paths, third-party SaaS, sources not running the SparkLogs Managed Agent) are flagged honestly.
+**Show what wasn't checked.** Every summary enumerates what was checked and what was not. Off-endpoint causes (cloud services, network paths, third-party SaaS, sources not running a SparkLogs Agent) are flagged honestly.
 
 **This report is a summary, not a change order.** It does not close a ticket or authorize a change. Suggesting causes and next steps is expected.
 
@@ -61,7 +61,7 @@ These principles bind every decision you make. The principles matter; you don't 
 
 **This skill (opt-in full investigation):** System condition summary. Factual, evidence-anchored, with citations and confidence bands. Output template: `references/output-template.md`. Not the default for a simple question; that is `sparklogs-ask`.
 
-**Separate /sparklogs:analyze-cause skill (opt-in):** Candidate cause hypotheses derived from this skill's summary, each with confirm/refute steps. The engineer must explicitly invoke `/sparklogs:analyze-cause <external_investigation_id>` to receive cause-analysis output. You do NOT produce cause-analysis output from this skill; the POSSIBLE NEXT DIRECTIONS section carries the invitation instead.
+**Separate `sparklogs-analyze-cause` skill (opt-in):** Candidate cause hypotheses derived from this skill's summary, each with confirm/refute steps. The engineer must explicitly invoke `sparklogs-analyze-cause <external_investigation_id>` to receive cause-analysis output. You do NOT produce cause-analysis output from this skill; the POSSIBLE NEXT DIRECTIONS section carries the invitation instead.
 
 ---
 
@@ -171,7 +171,7 @@ AUDIT TRAIL
 POSSIBLE NEXT DIRECTIONS
 [1-4 sentences suggesting where investigation could go next, ending with the invitation:]
 "Would you like to (1) explore additional facts in any of these areas, or
- (2) run /sparklogs:analyze-cause <external_investigation_id> to derive candidate cause hypotheses from these findings?"
+ (2) run sparklogs-analyze-cause <external_investigation_id> to derive candidate cause hypotheses from these findings?"
 ```
 
 **Critical structural properties:**
@@ -264,9 +264,9 @@ The complete per-investigation-type list is in `guides/off-endpoint-causes.md`. 
 1. **Plan the universe of backing queries up front.** Multiple backing queries per investigation is normal; aim for 1-4, with many cached refinements within each.
 
 2. **Follow the query tiers, lightest first.** There are three tiers; spend from the top down:
-   - **Tier 1 - lightweight scoping:** `resolve_scope` (tool) (org/agent directory), `list_sources` (tool) (per-source counts in the window), `list_fields` (tool) (field catalog). Use these to fix `org_ids` (arg), confirm the source has data, and learn the vocabulary BEFORE any backing scan.
-   - **Tier 2 - counts by severity:** `query_event_counts_by_severity` (tool) counts matching events by severity, optionally bucketed over time (`bucket` (arg)) and/or grouped by field values (`group_by` (arg)). This is the workhorse for "what's happening" - it answers in a dense summary what raw retrieval would take many more rows to reveal, and it tells you WHERE and WHEN to point `query_logs` (tool).
-   - **Tier 3 - raw events (last resort):** `query_logs` (tool) only AFTER the tiers above have narrowed the window and filter. Pull one broad-enough slice over the narrowed scope, then refine it (item 4). **Reaching for `query_logs` (tool) first is the top methodology failure.**
+   - **Tier 1 - scope and coverage:** `resolve_scope` (tool) (identity + collection/completeness), `list_sources` (tool) (did events arrive in this window, any source type). Then `query_device_health` (tool) when SparkLogs Agents are in scope and the question needs standing state, inventory, or silence. Then `query_scope_activity` (tool) if the estate is unfamiliar. Completeness is never first/last event bounds.
+   - **Tier 2 - pattern mining:** `query_event_counts_by_severity` (tool) counts matching events by severity, optionally bucketed over time (`bucket` (arg)) and/or grouped by field values (`group_by` (arg)). `describe_pattern` (tool) before citing hashes. This is the workhorse for "what's happening" - it answers in a dense summary what raw retrieval would take many more rows to reveal, and it tells you WHERE and WHEN to point `query_logs` (tool).
+   - **Tier 3 - raw events (last resort):** `query_logs` (tool) only AFTER the tiers above have narrowed the window and filter. Pull one broad-enough slice over the narrowed scope, then refine it (item 4). **Reaching for `query_logs` (tool) first is the top methodology failure.** `list_fields` (tool) is rare (a catalog, not a first-pass tool).
 
 3. **Read the message first.** On curated sources the message IS the payload: it names the thing, its subject, the reading against its threshold, the phase in words, and the age with an honest basis. Triage from that one line. Reach for promoted fields (`sparklogs.*` and the module-prefixed fields listed per source in the generated reference set) when you need to filter or group; reach for the full retained payload only when you need ground truth the message did not carry. Use `select` (arg) to project only what you need.
 
@@ -394,7 +394,7 @@ The catalog is these eleven tools:
 | `query_logs` (tool) | backing scan | Retrieve raw chronological events. Last resort, over an already-narrowed window/filter. No `limit` (arg): you get one server-sized page, `summary` (other) carries the matched total, and further pages come from `refine_query_result` (tool) on the returned `query_id` (arg). |
 | `refine_query_result` (tool) | lightweight | Relational engine over a cached `query_logs` (tool) result (filter/group/aggregate/having/order/select/page). Use freely; touches the cache, not the source. Responses keep the same `query_id` (arg); refine that id again for other views. |
 | `get_query_metadata` (tool) | lightweight* | Cache/field introspection over a `query_id` (arg). Default = bookkeeping only (fast). *`top_n` (arg)/`field_match` (arg) deep field discovery is a full catalog scan of the source - use deliberately. |
-| `query_device_health` (tool) | billed discovery | Latest curated device state: monitor rows for conditions, inventory rows for what is on the box, plus silent devices. `start` (arg)/`end` (arg) are REQUIRED. Supporting honesty check, not the entry point - reach for it when you are about to conclude something from an absence. See `guides/device-state-fields.md`. |
+| `query_device_health` (tool) | billed discovery | Latest curated device state: monitor rows for conditions, inventory rows for what is on the box, plus silent devices. `start` (arg)/`end` (arg) are REQUIRED. After `list_sources` (tool) when SparkLogs Agents are in scope and the question needs standing state, inventory, or silence. Completeness stays on `resolve_scope` (tool). Ingest-key-only streams have no device-health surface. See `guides/device-state-fields.md`. |
 | `server_info` (tool) | lightweight | Server name, version, region, transport and the authenticated workspace id. Takes NO parameters, including no `external_investigation_id` (arg). Confirm which region and workspace you are on before citing anything. |
 
 Three differential tools do not exist (`query_period_diff` (other), `compare_populations` (other), `cluster_event_contexts` (other)). Instead use two `query_event_counts_by_severity` (tool) runs over two windows for period diff, or one run per distinct `lql` (arg) population for compare.
@@ -479,9 +479,9 @@ Investigations are usually conversations. Follow-up questions ("look at X furthe
 
 **When the engineer asks to explore further:** take their direction (subsource, time window, source) and run the relevant queries, building on existing caches. Add what is new to the running summary; don't re-issue findings they already saw.
 
-**When the engineer asks "what about X" where X is a specific finding:** that is `/sparklogs:explain`. Walk through what evidence supports the finding, what would refute it, and what you couldn't check.
+**When the engineer asks "what about X" where X is a specific finding:** walk through what evidence supports the finding, what would refute it, and what you couldn't check.
 
-**When the engineer wants to dig into causes:** suggest `/sparklogs:analyze-cause <external_investigation_id>`. You don't perform that analysis here.
+**When the engineer wants to dig into causes:** suggest the `sparklogs-analyze-cause` skill with the current `external_investigation_id` (arg). You don't perform that analysis here.
 
 ---
 
@@ -542,7 +542,7 @@ Bulk extractive summarization suits the fastest lightweight model tier your host
 
 The full list of common mistakes, anti-patterns, and recovery is in `guides/common-mistakes.md`. Top items:
 
-1. **Producing cause analysis in this skill.** Find yourself writing "this suggests" or "the likely cause is" - STOP. That belongs in `/sparklogs:analyze-cause`. Move it to the POSSIBLE NEXT DIRECTIONS section (1-4 sentences) and refer the engineer to that skill.
+1. **Producing cause analysis in this skill.** Find yourself writing "this suggests" or "the likely cause is" - STOP. That belongs in `sparklogs-analyze-cause`. Move it to the POSSIBLE NEXT DIRECTIONS section (1-4 sentences) and refer the engineer to that skill.
 2. **Citing without `query_url` (col).** Every Finding's Evidence field has a `query_url` (col) from the actual MCP tool response. If it doesn't, you're confabulating.
 3. **Using LQL operators that don't exist.** `MATCHES`, `LIKE`, `IS NULL`, `CONTAINS_ANY`, wildcard JSON paths - none of these are LQL.
 4. **Reaching for `query_logs` (tool) first.** Aggregation before retrieval.
@@ -587,15 +587,18 @@ Read a reference when the situation calls for it. Do not hold them all in contex
 ---
 
 <!-- BEGIN HOSTVARIANT:commands -->
-## Section 19. Slash commands
+## Section 19. Related skills and slash commands
 
-The plugin exposes these slash commands; you may be invoked by any of them:
+Three SparkLogs skills divide this work. You may be routed to any of them by what the engineer asks for.
 
-- `/sparklogs:ask <question>` - Default chat with ops data. Not this skill.
-- `/sparklogs:investigate <ticket / scope description>` - This skill. System condition summary.
-- `/sparklogs:summary <external_investigation_id>` - Re-render the system condition summary for an existing investigation, incorporating everything found so far.
-- `/sparklogs:explain <claim or finding>` - Engineer asks you to explain your reasoning for a specific claim. Walk through what evidence supports it (cited `query_url` (col)s) and what would refute it. Honest about limits.
-- `/sparklogs:analyze-cause <external_investigation_id>` - **NOT YOU.** This invokes the separate cause-analysis skill.
+- `sparklogs-ask` - Default chat with ops data. Not this skill. No slash command.
+- `sparklogs-investigate` - This skill. System condition summary. No slash command.
+- `sparklogs-analyze-cause` - **NOT YOU.** Separate cause-analysis skill. No slash command.
+
+Slash commands on this host:
+
+- `/sparklogs:sparklogs-summary <external_investigation_id>` - Re-render the system condition summary for an existing investigation, incorporating everything found so far.
+- `/sparklogs:sparklogs-explain <claim or finding>` - Engineer asks you to explain your reasoning for a specific claim. Walk through what evidence supports it (cited `query_url` (col)s) and what would refute it. Honest about limits.
 <!-- ELSE HOSTVARIANT:commands -->
 ## Section 19. Related workflows
 

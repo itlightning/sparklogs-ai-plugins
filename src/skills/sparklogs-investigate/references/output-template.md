@@ -59,7 +59,7 @@ POSSIBLE NEXT DIRECTIONS
 
 "Would you like to:
  (1) explore additional facts in any of the areas mentioned above, or
- (2) run /sparklogs:analyze-cause <external_investigation_id> to derive candidate cause hypotheses
+ (2) run sparklogs-analyze-cause <external_investigation_id> to derive candidate cause hypotheses
      from these findings?"
 ```
 
@@ -81,7 +81,7 @@ The cap is the point. An engineer reads this to decide whether to open the Findi
 **Wrong (speculation):**
 "This is clearly caused by the KB5034441 update breaking VSS interaction with Veeam - the timing and fleet-wide pattern make this the obvious root cause."
 
-The right version is factual; the wrong version is cause analysis. Cause analysis lives in `/sparklogs:analyze-cause`.
+The right version is factual; the wrong version is cause analysis. Cause analysis lives in `sparklogs-analyze-cause`.
 
 ### Source(s)
 Specific sources investigated (e.g., `srv-fileshare01`, ws022.acme). Not generic ("a server in Acme Dental") - name them.
@@ -97,7 +97,7 @@ The subsources and helper outputs you actually queried. Be specific; e.g., `win.
 
 ### WHAT WAS NOT CHECKED
 Investigation-specific list of off-endpoint sources and conditions you couldn't check. Per-investigation-type reference: `guides/off-endpoint-causes.md`. Examples:
-- "Backup target NAS-01 was not checked (it does not run a Managed Agent). Recommend checking NAS-01 health logs directly."
+- "Backup target NAS-01 was not checked (it does not run a SparkLogs Agent). Recommend checking NAS-01 health logs directly."
 - "Cloud identity audit logs (Azure AD / Entra) are outside SparkLogs ingestion. Sign-in failures from cloud-side conditional access policies would not appear in this investigation."
 - "EDR cloud audit (SentinelOne) is outside SparkLogs ingestion. EDR-side blocks of VSS operations would not appear in on-endpoint state."
 
@@ -160,20 +160,20 @@ Track the running counts (backing queries, refinements, sources/orgs covered, ma
 Provide the engineer with the means to inspect every query you ran: the `query_id` (arg) + `query_url` (col) list from the local investigation-state document, with per-query detail via `get_query_metadata(query_id="<qid>")`. Every call is also tagged `external_investigation_id` (arg) in the server-side audit (a direct investigation-level URL is preferred once SparkLogs UX surfaces it).
 
 ### POSSIBLE NEXT DIRECTIONS
-Bounded section at the end of the summary. 1-4 sentences max. Suggests where the investigation could go next - either more facts to dig into, or running `/sparklogs:analyze-cause` to derive candidate hypotheses. Always ends with the explicit invitation:
+Bounded section at the end of the summary. 1-4 sentences max. Suggests where the investigation could go next - either more facts to dig into, or running `sparklogs-analyze-cause` to derive candidate hypotheses. Always ends with the explicit invitation:
 
-> "Would you like to (1) explore additional facts in any of the areas mentioned above, or (2) run /sparklogs:analyze-cause <external_investigation_id> to derive candidate cause hypotheses from these findings?"
+> "Would you like to (1) explore additional facts in any of the areas mentioned above, or (2) run sparklogs-analyze-cause <external_investigation_id> to derive candidate cause hypotheses from these findings?"
 
 **Right:**
 "The temporal correlation between the Tuesday KB install and the new error pattern, combined with the fleet-wide consistency, is worth exploring further. The disk-pressure cluster (Finding 5b) is a separate area on a small subset of sources.
 
-Would you like to (1) explore additional facts in any of the areas mentioned above, or (2) run /sparklogs:analyze-cause investigate-ticket-4781-veeam-backup to derive candidate cause hypotheses from these findings?"
+Would you like to (1) explore additional facts in any of the areas mentioned above, or (2) run sparklogs-analyze-cause investigate-ticket-4781-veeam-backup to derive candidate cause hypotheses from these findings?"
 
 **Wrong (presents as conclusion):**
 "The root cause is KB5034441 affecting Veeam VSS interaction. Roll back the patch on affected endpoints."
 
 **Wrong (cause analysis expanded beyond bounds):**
-"There are several possible root causes. First, KB5034441 may have changed the tcpip.sys driver in a way that affects Veeam's network communication during VSS snapshots. Second, disk pressure on cluster B sources may be exhausting VSS shadow storage. Third..." - that's `/sparklogs:analyze-cause` territory.
+"There are several possible root causes. First, KB5034441 may have changed the tcpip.sys driver in a way that affects Veeam's network communication during VSS snapshots. Second, disk pressure on cluster B sources may be exhausting VSS shadow storage. Third..." - that's `sparklogs-analyze-cause` territory.
 
 ---
 
@@ -201,7 +201,7 @@ SCOPE CHECKED
 - Time window: 2026-04-22 00:00 UTC to 2026-04-23 14:00 UTC
 - Data sources queried: query_device_health; sparklogs.agent.state; win.eventlog.application; win.eventlog.system; sparklogs.kind=agent_op
 - WHAT WAS NOT CHECKED:
-  - Backup target NAS-01 (does not run Managed Agent). Recommend checking NAS-01 health directly
+  - Backup target NAS-01 (does not run a SparkLogs Agent). Recommend checking NAS-01 health directly
     if the on-endpoint evidence below is insufficient.
   - EDR cloud audit (SentinelOne SaaS): EDR-side blocks of VSS operations would not appear in
     on-endpoint state.
@@ -280,7 +280,7 @@ cluster (Finding 5b) is a separate factor on a small subset of sources that coul
 independently.
 
 Would you like to (1) explore additional facts in any of the areas mentioned above, or (2) run
-/sparklogs:analyze-cause investigate-ticket-4781-veeam-backup to derive candidate cause hypotheses from these findings?
+sparklogs-analyze-cause investigate-ticket-4781-veeam-backup to derive candidate cause hypotheses from these findings?
 ```
 
 ### Example 2: Investigation finds insufficient evidence (still useful)
@@ -359,7 +359,7 @@ or checking switch/AP/firewall logs between the user and the server, may reveal 
 
 Would you like to (1) explore the user's workstation (give me the workstation name), check
 network-path data, or extend the investigation in some other direction, or (2) run
-/sparklogs:analyze-cause investigate-srv-fileshare02-slow-share to derive candidate cause hypotheses from what was
+sparklogs-analyze-cause investigate-srv-fileshare02-slow-share to derive candidate cause hypotheses from what was
 observed (and not observed) so far?
 ```
 

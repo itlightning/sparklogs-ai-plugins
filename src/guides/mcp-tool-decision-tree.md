@@ -14,12 +14,12 @@ The tool surface is these **eleven** tools: `resolve_scope` (tool), `list_source
 
 ## Query tiers - funnel before raw
 
-Spend from the top down:
+**Coverage before claims.** Spend from the top down:
 
-- **Tier 1, lightweight scoping:** `resolve_scope` (tool), `list_fields` (tool). Fix `org_ids` (arg) and the fleet directory (orgs, agents, ingest keys, and the agent state readings). Do this before backing scans.
-- **Tier 1b, billed discovery:** `list_sources` (tool), `query_scope_activity` (tool), `describe_pattern` (tool) (stats). Confirm data in window, enumerate structure, read pattern detail. See `scope-resolution.md` and `scope-ladder.md`.
-- **Tier 2, counts by severity:** `query_event_counts_by_severity` (tool). Counts matching events by severity, optionally bucketed over time and/or grouped by field values. The workhorse for "what's happening" and the only tool that answers "when" - it tells you where and when to point `query_logs` (tool). Group by a scope-ladder field (`service` (LQL), `app` (LQL), `subsource` (LQL), `category` (LQL), `pattern` (LQL), or a `_hash`) to localize before drilling - see `scope-ladder.md`.
+- **Tier 1, scope and coverage:** `resolve_scope` (tool) first: identity plus collection/completeness on agent rows (`agent_complete_through` (col), feed reports, advisories). Then `list_sources` (tool): did events arrive in this window, any source type including ingest keys. Then `query_device_health` (tool) when SparkLogs Agents are in scope and the question needs standing state, inventory, or silence on that surface (ingest-key-only streams have no device-health surface). Then `query_scope_activity` (tool): what app/service/subsource combinations exist. See `scope-resolution.md`.
+- **Tier 2, pattern mining:** `query_event_counts_by_severity` (tool) (what dominates, how severe, when) and `describe_pattern` (tool) (text and spread before citing hashes). This is the workhorse. Group by a scope-ladder field (`service` (LQL), `app` (LQL), `subsource` (LQL), `category` (LQL), `pattern` (LQL), or a `_hash`) to localize before drilling - see `scope-ladder.md`.
 - **Tier 3, raw events (last resort):** `query_logs` (tool), only after Tiers 1-2 narrowed the window and filter. Then `refine_query_result` (tool) (lightweight) over that cached slice - do NOT re-scan.
+- **Rare:** `list_fields` (tool) and deep `get_query_metadata` (tool). Catalogs, not the explore ladder.
 
 `refine_query_result` (tool) and the default `get_query_metadata` (tool) are lightweight - they run against the cache. Backing scans (`query_logs` (tool), `query_event_counts_by_severity` (tool), and the opt-in `get_query_metadata` (tool) deep discovery) touch the underlying source and take meaningfully longer.
 
@@ -27,21 +27,21 @@ Spend from the top down:
 
 ## Reach for this when
 
-One trigger per tool. If your question is not on this list, it is almost always a
-`query_event_counts_by_severity` (tool) question.
+One trigger per tool. After coverage, it is almost always a
+`query_event_counts_by_severity` (tool) / `describe_pattern` (tool) question.
 
 | Tool | Reach for it when |
 |---|---|
-| `resolve_scope` (tool) | You have a name (client, host, ticket) and need an `org_id` (col). Always first. |
-| `list_sources` (tool) | Before concluding anything from an absence: did this source send data in THIS window? |
-| `query_device_health` (tool) | You need standing condition, what is installed or mounted, or which devices reported nothing. State, not sequence. |
-| `query_event_counts_by_severity` (tool) | "What is going on here", at any altitude. The default tool. `group_by=["reason"]` or `["pattern"]`; pass two fields when the question has two nouns in it. |
+| `resolve_scope` (tool) | You have a name (client, host, ticket) and need an `org_id` (col). Always first. Collection/completeness live here. |
+| `list_sources` (tool) | Before concluding anything from an absence: did this source send data in THIS window? Any source type, including ingest keys. |
+| `query_device_health` (tool) | SparkLogs Agents in scope, and you need standing condition, what is installed or mounted, or which devices reported nothing on that surface. State, not sequence. Not the first tool for ingest-key-only streams. |
+| `query_scope_activity` (tool) | You do not know what this client HAS: which apps, services and subsources exist at all. Orientation on an unfamiliar estate. |
+| `query_event_counts_by_severity` (tool) | "What is going on here", at any altitude. The default mid-tier tool. `group_by=["reason"]` or `["pattern"]`; pass two fields when the question has two nouns in it. |
+| `describe_pattern` (tool) | You are about to cite a pattern and need its text and spread. Pass `pattern_hashes` (arg) (a list). Required before citing any teaser pattern. Mid-tier with counts. |
 | `query_logs` (tool) | The grouping pointed somewhere specific and you now need the actual events. Last resort, over a narrowed filter. |
 | `refine_query_result` (tool) | You already pulled a slice and want a different view of it. Free; never re-scans the source. |
-| `describe_pattern` (tool) | You are about to cite a pattern and need its text and spread. Pass `pattern_hashes` (arg) (a list). Required before citing any teaser pattern. |
-| `query_scope_activity` (tool) | You do not know what this client HAS: which apps, services and subsources exist at all. Orientation on an unfamiliar estate. |
 | `get_query_metadata` (tool) | A cached result behaved oddly and you need its schema, filter or cache status. |
-| `list_fields` (tool) | A field name you have not seen yet. Catalog, not the first grouping call. |
+| `list_fields` (tool) | A field name you have not seen yet. Catalog, not a first-pass tool. |
 | `server_info` (tool) | A call failed and you need to know whether region, transport or auth is the problem. |
 
 **Two honest demotions.** Both tools below exist and work; neither is where you should start.
@@ -152,8 +152,10 @@ See `scope-ladder.md` for when to reach for this instead of `query_event_counts_
 ### `query_device_health` (tool)
 
 Latest curated device state: monitor rows for conditions, inventory rows for what is on the box.
-**Supporting evidence, not the entry point.** Reach for it when you are about to conclude something
-from an absence and need to know whether the agent was observing.
+**After `resolve_scope` (tool) and `list_sources` (tool), when SparkLogs Agents are in scope** and the
+question is standing state, inventory, or silence on this surface. Completeness stays on
+`resolve_scope` (tool). Ingest-key-only streams have no device-health surface; `list_sources` (tool)
+is the arrival check for those.
 
 ```
 query_device_health(
@@ -451,12 +453,13 @@ the pass-the-id-everywhere rule: there is no scope and no query to correlate.
 ```
 1. resolve_scope(<source description>)
 2. list_sources with the investigation's start/end, filtered to source - confirm data in window
-3. query_event_counts_by_severity group_by=["pattern"] - what's happening, by severity
-4. query_logs over the narrowed window/filter - primary cache
-5. Multiple refine_query_result per subsource / field of interest
-6. query_logs ingest-health check (subsource in ingest_drop/spool_full/backpressure)
-7. get_query_metadata on any cache whose schema or status needs a check
-8. system condition summary output
+3. query_device_health if SparkLogs Agents are in scope and the question needs state, inventory, or silence
+4. query_scope_activity if the estate is unfamiliar
+5. query_event_counts_by_severity group_by=["pattern"] - pattern mining
+6. describe_pattern on hashes you will cite
+7. query_logs over the narrowed window/filter - primary cache
+8. Multiple refine_query_result per subsource / field of interest
+9. system condition summary output
 ```
 
 ### Recipe: "Is this just us? Fleet pivot from a specific pattern"
@@ -479,8 +482,8 @@ Use this when they asked, or after they accepted a suggested hunt. Do not open w
 3. query_event_counts_by_severity group_by=["pattern"] over window A (e.g. incident window)
 4. query_event_counts_by_severity group_by=["pattern"] over window B (e.g. prior baseline)
 5. Compare the two grouped results - new / disappeared / accelerated patterns
-6. query_logs over the changed pattern if you need to see actual events
-7. get_query_metadata
+6. describe_pattern on the hashes that differ
+7. query_logs over the changed pattern if you need to see actual events
 8. system condition summary output
 ```
 

@@ -150,8 +150,9 @@ async function renderCommands(base, host) {
     const { data } = parseFrontmatter(raw, from);
     if (!data.description) throw new Error(`${from} needs a description`);
     const stem = name.replace(/\.md$/, '');
+    const cursorName = stem.startsWith('sparklogs-') ? stem : `sparklogs-${stem}`;
     const shipped = host === 'cursor'
-      ? { name: `sparklogs-${stem}`, description: data.description }
+      ? { name: cursorName, description: data.description }
       : { description: data.description, 'argument-hint': data['argument-hint'] };
     const body = renderMarkdownText(raw, from, host, pkgRel);
     const withoutHead = parseFrontmatter(body, from).body.replace(/^\n+/, '');

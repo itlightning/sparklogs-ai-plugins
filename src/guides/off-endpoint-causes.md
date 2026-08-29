@@ -17,7 +17,7 @@ The list is **not exhaustive** - it's a starting set covering common patterns. I
 
 **Off-endpoint causes the AI agent should flag when on-endpoint evidence is insufficient:**
 
-- **Backup target health (NAS, cloud destination, SAN).** Veeam/Datto/Acronis often write to a NAS or cloud target. If the target is failing, slow, or out of space, the on-endpoint side sees "VSS error" but the cause is upstream. Backup target typically does not run a Managed Agent.
+- **Backup target health (NAS, cloud destination, SAN).** Veeam/Datto/Acronis often write to a NAS or cloud target. If the target is failing, slow, or out of space, the on-endpoint side sees "VSS error" but the cause is upstream. Backup target typically does not run a SparkLogs Agent.
 - **EDR cloud blocking VSS operations.** SentinelOne, Sophos, CrowdStrike, Defender for Endpoint may flag VSS operations as suspicious and block them. The block is recorded in the EDR cloud audit, NOT on-endpoint. EDR cloud is outside SparkLogs ingestion currently.
 - **Bespoke / unsupported backup vendor.** SparkLogs autodetect rules cover Veeam, Datto, Acronis, MSP360, Cove, and a few others. If the MSP is using a less-common vendor (or a custom backup script), the vendor's log file may not be ingested.
 - **Backup credential expiry.** Veeam/Datto runs as a service account whose credentials live in vault/AD. Credential expiry manifests as auth failure earlier in the backup pipeline; the VSS error is a downstream symptom. Credential vault is outside on-endpoint state.
@@ -32,9 +32,9 @@ The list is **not exhaustive** - it's a starting set covering common patterns. I
 
 - **Azure AD / Entra conditional-access policy.** Policy changes can silently block logon for a subset of users. On-prem AD shows healthy; the failure is in the cloud identity layer. Azure AD audit logs are outside SparkLogs ingestion currently.
 - **MFA cloud (Duo, Microsoft Authenticator).** Rate-limits, outages, user-side MFA issues. From the endpoint, looks like generic auth failure. MFA cloud audit is outside SparkLogs ingestion currently.
-- **Federation server (ADFS) cert expiry or outage.** Federation servers are sometimes on a separate machine that may or may not run a Managed Agent. If not, ADFS issues are invisible from on-endpoint state.
+- **Federation server (ADFS) cert expiry or outage.** Federation servers are sometimes on a separate machine that may or may not run a SparkLogs Agent. If not, ADFS issues are invisible from on-endpoint state.
 - **Time drift on the PDC emulator.** If the PDC's clock is drifting, Kerberos fails silently for clients. The PDC needs to be in scope for the investigation; if only the workstation is investigated, the PDC's time state is invisible.
-- **Azure AD Connect sync break.** Users get silently dropped from on-prem replica. Sync state lives in Azure AD Connect logs (which the Managed Agent could ship if Connect is installed and the log location is known) but not in on-prem AD itself.
+- **Azure AD Connect sync break.** Users get silently dropped from on-prem replica. Sync state lives in Azure AD Connect logs (which the SparkLogs Agent could ship if Connect is installed and the log location is known) but not in on-prem AD itself.
 - **Network path between user and DC.** Packet loss, latency, intermittent DNS - visible from network monitoring, not from endpoint state alone.
 - **Cellular / coffee-shop WiFi for laptops.** Some "slow logon" reports are devices with intermittent network paths to the DC. The system_health subsource (rev-8) captures network latency to cloud but not to DC specifically.
 
@@ -86,7 +86,7 @@ The list is **not exhaustive** - it's a starting set covering common patterns. I
 
 **Off-endpoint causes:**
 
-- **SAN / NAS health.** When storage is networked (iSCSI, NFS, SMB), the storage device's own health logs are off-endpoint. Storage devices typically don't run a Managed Agent.
+- **SAN / NAS health.** When storage is networked (iSCSI, NFS, SMB), the storage device's own health logs are off-endpoint. Storage devices typically don't run a SparkLogs Agent.
 - **Vendor RAID controller firmware advisories.** Known firmware bugs and recommended updates are vendor-portal information.
 - **Disk vendor SMART thresholds.** Some disk vendors define "failing" differently; vendor utilities may report problems before SMART thresholds trigger.
 
@@ -98,7 +98,7 @@ The list is **not exhaustive** - it's a starting set covering common patterns. I
 
 - **WAN between DCs.** Site-to-site connectivity, MPLS, SD-WAN, VPN concentrator - all off-endpoint.
 - **DNS infrastructure not on a DC.** External DNS, conditional-forwarder targets - off-endpoint.
-- **Azure AD Connect sync** (when hybrid). Connect server may or may not run Managed Agent.
+- **Azure AD Connect sync** (when hybrid). Connect server may or may not run a SparkLogs Agent.
 - **Site link configuration in AD topology.** Visible on DCs (in scope) but interpreting requires understanding of intended topology - partly outside data, partly outside agent reasoning.
 
 ---
@@ -108,8 +108,8 @@ The list is **not exhaustive** - it's a starting set covering common patterns. I
 **Off-endpoint causes:**
 
 - **Public CA cert lifecycle.** Public certs are managed via vendor portals (DigiCert, Let's Encrypt, Sectigo); renewal state is outside endpoint.
-- **Federation server certs.** If ADFS is on a separate server without Managed Agent, federation certs are invisible.
-- **Internal CA infrastructure.** If the internal CA is on a server without Managed Agent, CA-issued cert state and renewal cycles are off-endpoint.
+- **Federation server certs.** If ADFS is on a separate server without a SparkLogs Agent, federation certs are invisible.
+- **Internal CA infrastructure.** If the internal CA is on a server without a SparkLogs Agent, CA-issued cert state and renewal cycles are off-endpoint.
 - **Third-party SaaS app certs.** Cert expiry on a SaaS-hosted app is off-endpoint by definition.
 
 ---
@@ -158,7 +158,7 @@ Some off-endpoint causes apply across many symptom categories and are worth flag
 The point of enumeration is to support the engineer's decision about where to investigate next, not to pad the summary with caveats. Prefer specific, actionable wording.
 
 **Right (specific, actionable):**
-- "Backup target NAS-01 was not checked (it does not run a Managed Agent). Recommend checking NAS-01 health logs directly to confirm or rule out a target-side cause."
+- "Backup target NAS-01 was not checked (it does not run a SparkLogs Agent). Recommend checking NAS-01 health logs directly to confirm or rule out a target-side cause."
 - "Azure AD audit logs are outside SparkLogs ingestion currently. If on-endpoint evidence does not explain the logon failures (Findings 1-3 are inconclusive), check the Azure AD admin center for recent conditional-access policy changes."
 
 **Wrong (generic boilerplate):**
