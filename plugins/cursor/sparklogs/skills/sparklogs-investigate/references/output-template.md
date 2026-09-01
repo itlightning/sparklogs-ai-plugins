@@ -59,7 +59,7 @@ POSSIBLE NEXT DIRECTIONS
 
 "Would you like to:
  (1) explore additional facts in any of the areas mentioned above, or
- (2) run /sparklogs-analyze-cause <external_investigation_id> to derive candidate cause hypotheses
+ (2) run sparklogs-analyze-cause <external_investigation_id> to derive candidate cause hypotheses
      from these findings?"
 ```
 
@@ -81,23 +81,23 @@ The cap is the point. An engineer reads this to decide whether to open the Findi
 **Wrong (speculation):**
 "This is clearly caused by the KB5034441 update breaking VSS interaction with Veeam - the timing and fleet-wide pattern make this the obvious root cause."
 
-The right version is factual; the wrong version is cause analysis. Cause analysis lives in `/sparklogs-analyze-cause`.
+The right version is factual; the wrong version is cause analysis. Cause analysis lives in `sparklogs-analyze-cause`.
 
 ### Source(s)
-Specific sources investigated (e.g., `srv-fileshare01`, `ws022.acme`). Not generic ("a server in Acme Dental") - name them.
+Specific sources investigated (e.g., `srv-fileshare01`, ws022.acme). Not generic ("a server in Acme Dental") - name them.
 
 ### Org(s)
-The `org_id`(s) the investigation was scoped to (from `resolve_scope`).
+The `org_id` (col)(s) the investigation was scoped to (from `resolve_scope`).
 
 ### Time window
 Absolute UTC timestamps for the investigation's data window. Not relative ("last 24 hours") - bind to absolute timestamps so the summary remains interpretable when re-read days later.
 
 ### Data sources queried
-The subsources, channels, and helper outputs you actually queried during the investigation. Be specific; e.g., `state/services`, `state/vss_writers`, `state/volumes`, `state/system_health`, `winlog/Microsoft-Windows-Backup/Operational`, `winlog/VSS`. This list lets the engineer (and future investigations) understand the investigation's coverage.
+The subsources and helper outputs you actually queried. Be specific; e.g., `win.eventlog.application`, `win.eventlog.system`, `sparklogs.agent.state` (`query_device_health`), `win.defender.eventlog`.
 
 ### WHAT WAS NOT CHECKED
 Investigation-specific list of off-endpoint sources and conditions you couldn't check. Per-investigation-type reference: `guides/off-endpoint-causes.md`. Examples:
-- "Backup target NAS-01 was not checked (it does not run a Managed Agent). Recommend checking NAS-01 health logs directly."
+- "Backup target NAS-01 was not checked (it does not run a SparkLogs Agent). Recommend checking NAS-01 health logs directly."
 - "Cloud identity audit logs (Azure AD / Entra) are outside SparkLogs ingestion. Sign-in failures from cloud-side conditional access policies would not appear in this investigation."
 - "EDR cloud audit (SentinelOne) is outside SparkLogs ingestion. EDR-side blocks of VSS operations would not appear in on-endpoint state."
 
@@ -128,7 +128,7 @@ Format: `<subject> was <state> at <time>`, or `<event class> occurred N times in
 - "Backups are failing."
 
 ### Evidence
-One or more `query_url` values from the MCP tool responses that produced the evidence for this Finding. The engineer clicks these to verify in the SparkLogs cached-query explorer. **If you don't have a query_url, you don't have the evidence - don't make the claim.**
+One or more `query_url` (col) values from the MCP tool responses that produced the evidence for this Finding. The engineer clicks these to verify in the SparkLogs cached-query explorer. **If you don't have a query_url, you don't have the evidence - don't make the claim.**
 
 ### Confidence
 One of: `high`, `medium`, `low`, `insufficient_evidence`. See SKILL.md Section 6 for calibration guidance.
@@ -149,7 +149,7 @@ NOT:
 - "Note: recommend restarting the service" <- recommendation; not this skill's role
 
 ### Anomaly Signals Used
-Optional section, and **normally absent**: `anomaly_max_score` / `anomaly_max_score_confidence` are designed and not emitted anywhere in the product today, so the canonical context-reduction filter reduces to its `severity` half on every source. Omitting the section is the usual correct outcome, and the missing anomaly half is never "no anomalies."
+Optional section, and **normally absent**: `anomaly_max_score` / `anomaly_max_score_confidence` are designed and not emitted anywhere in the product today, so the canonical context-reduction filter reduces to its `severity` (LQL) half on every source. Omitting the section is the usual correct outcome, and the missing anomaly half is never "no anomalies."
 
 Include it only if you actually read an anomaly field and it carried a value. Then list briefly, with the required framing: anomalies are internal investigation tools, not standalone problem alerts. Never build a Finding on one: a citation for a signal no source emits is the confidently-wrong shape this template exists to prevent.
 
@@ -157,23 +157,23 @@ Include it only if you actually read an anomaly field and it carried a value. Th
 Track the running counts (backing queries, refinements, sources/orgs covered, matched population) in your local investigation-state document as you go. All figures here come from server-returned query summaries, not self-reported estimates. This section shows the engineer how much evidence backs the summary: how many queries ran, how broad a scope they covered, how many events were in the matched population.
 
 ### Audit Trail
-Provide the engineer with the means to inspect every query you ran: the `query_id` + `query_url` list from the local investigation-state document, with per-query detail via `get_query_metadata(query_id="<qid>")`. Every call is also tagged `external_investigation_id` in the server-side audit (a direct investigation-level URL is preferred once SparkLogs UX surfaces it).
+Provide the engineer with the means to inspect every query you ran: the `query_id` (arg) + `query_url` (col) list from the local investigation-state document, with per-query detail via `get_query_metadata(query_id="<qid>")`. Every call is also tagged `external_investigation_id` (arg) in the server-side audit (a direct investigation-level URL is preferred once SparkLogs UX surfaces it).
 
 ### POSSIBLE NEXT DIRECTIONS
-Bounded section at the end of the summary. 1-4 sentences max. Suggests where the investigation could go next - either more facts to dig into, or running `/sparklogs-analyze-cause` to derive candidate hypotheses. Always ends with the explicit invitation:
+Bounded section at the end of the summary. 1-4 sentences max. Suggests where the investigation could go next - either more facts to dig into, or running `sparklogs-analyze-cause` to derive candidate hypotheses. Always ends with the explicit invitation:
 
-> "Would you like to (1) explore additional facts in any of the areas mentioned above, or (2) run /sparklogs-analyze-cause <external_investigation_id> to derive candidate cause hypotheses from these findings?"
+> "Would you like to (1) explore additional facts in any of the areas mentioned above, or (2) run sparklogs-analyze-cause <external_investigation_id> to derive candidate cause hypotheses from these findings?"
 
 **Right:**
 "The temporal correlation between the Tuesday KB install and the new error pattern, combined with the fleet-wide consistency, is worth exploring further. The disk-pressure cluster (Finding 5b) is a separate area on a small subset of sources.
 
-Would you like to (1) explore additional facts in any of the areas mentioned above, or (2) run /sparklogs-analyze-cause investigate-ticket-4781-veeam-backup to derive candidate cause hypotheses from these findings?"
+Would you like to (1) explore additional facts in any of the areas mentioned above, or (2) run sparklogs-analyze-cause investigate-ticket-4781-veeam-backup to derive candidate cause hypotheses from these findings?"
 
 **Wrong (presents as conclusion):**
 "The root cause is KB5034441 affecting Veeam VSS interaction. Roll back the patch on affected endpoints."
 
 **Wrong (cause analysis expanded beyond bounds):**
-"There are several possible root causes. First, KB5034441 may have changed the tcpip.sys driver in a way that affects Veeam's network communication during VSS snapshots. Second, disk pressure on cluster B sources may be exhausting VSS shadow storage. Third..." - that's `/sparklogs-analyze-cause` territory.
+"There are several possible root causes. First, KB5034441 may have changed the tcpip.sys driver in a way that affects Veeam's network communication during VSS snapshots. Second, disk pressure on cluster B sources may be exhausting VSS shadow storage. Third..." - that's `sparklogs-analyze-cause` territory.
 
 ---
 
@@ -199,11 +199,9 @@ SCOPE CHECKED
 - Source(s): srv-fileshare01
 - Org(s): org_acme_dental
 - Time window: 2026-04-22 00:00 UTC to 2026-04-23 14:00 UTC
-- Data sources queried: state/services, state/vss_writers, state/volumes, state/installed_products,
-  state/system_health, winlog/Application, winlog/VSS, winlog/Microsoft-Windows-Backup/Operational,
-  agent_op/ingest_drop, agent_op/spool_full, agent_op/backpressure
+- Data sources queried: query_device_health; sparklogs.agent.state; win.eventlog.application; win.eventlog.system; sparklogs.kind=agent_op
 - WHAT WAS NOT CHECKED:
-  - Backup target NAS-01 (does not run Managed Agent). Recommend checking NAS-01 health directly
+  - Backup target NAS-01 (does not run a SparkLogs Agent). Recommend checking NAS-01 health directly
     if the on-endpoint evidence below is insufficient.
   - EDR cloud audit (SentinelOne SaaS): EDR-side blocks of VSS operations would not appear in
     on-endpoint state.
@@ -282,7 +280,7 @@ cluster (Finding 5b) is a separate factor on a small subset of sources that coul
 independently.
 
 Would you like to (1) explore additional facts in any of the areas mentioned above, or (2) run
-/sparklogs-analyze-cause investigate-ticket-4781-veeam-backup to derive candidate cause hypotheses from these findings?
+sparklogs-analyze-cause investigate-ticket-4781-veeam-backup to derive candidate cause hypotheses from these findings?
 ```
 
 ### Example 2: Investigation finds insufficient evidence (still useful)
@@ -303,9 +301,7 @@ SCOPE CHECKED
 - Source(s): srv-fileshare02
 - Org(s): org_acme_dental
 - Time window: 2026-04-23 06:00 UTC to 2026-04-23 14:30 UTC
-- Data sources queried: state/services, state/processes, state/perf_counters_curated,
-  state/network_connections, state/system_health, winlog/Microsoft-Windows-SMBServer/Operational,
-  winlog/Microsoft-Windows-Windows Defender/Operational, agent_op/ingest_drop
+- Data sources queried: query_device_health; sparklogs.agent.state; win.eventlog.system; win.defender.eventlog; sparklogs.kind=agent_op
 - WHAT WAS NOT CHECKED:
   - User workstations making SMB requests (only the file server is in scope).
   - Network path between user workstations and srv-fileshare02 (switches, APs, firewall).
@@ -363,7 +359,7 @@ or checking switch/AP/firewall logs between the user and the server, may reveal 
 
 Would you like to (1) explore the user's workstation (give me the workstation name), check
 network-path data, or extend the investigation in some other direction, or (2) run
-/sparklogs-analyze-cause investigate-srv-fileshare02-slow-share to derive candidate cause hypotheses from what was
+sparklogs-analyze-cause investigate-srv-fileshare02-slow-share to derive candidate cause hypotheses from what was
 observed (and not observed) so far?
 ```
 

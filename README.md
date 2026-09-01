@@ -46,13 +46,7 @@ What new failures are happening this week that we have not seen before?
 
    In Cursor, add `itlightning/sparklogs-ai-plugins` as a marketplace source from Cursor's plugin flow, then install the `sparklogs` plugin.
 
-3. Set your SparkLogs MCP token in your shell profile and restart your shell:
-
-   ```
-   export SPARKLOGS_API_TOKEN="your-token-here"
-   ```
-
-   Cursor reads the token from a plugin variable rather than your shell, so follow the [Cursor guide](docs/install/cursor.md) there.
+3. When the host prompts, sign in to SparkLogs in the browser (OAuth).
 
 4. Ask one of the prompts above.
 
@@ -81,7 +75,7 @@ This branch is generated from the `source` branch, so pull requests land on `sou
 
 ---
 
-Version: 1.4.2
+Version: 1.5.0
 
 License: Apache-2.0, see [LICENSE](LICENSE).
 

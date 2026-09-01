@@ -15,18 +15,5 @@
   "logo": "assets/logo.svg",
   "name": "sparklogs",
   "repository": "https://github.com/itlightning/sparklogs-ai-plugins",
-  "variables": {
-    "properties": {
-      "SPARKLOGS_API_TOKEN": {
-        "description": "Workspace-scoped SparkLogs API token from the SparkLogs app (sparklogs.app).",
-        "title": "SparkLogs API token",
-        "type": "string"
-      }
-    },
-    "required": [
-      "SPARKLOGS_API_TOKEN"
-    ],
-    "type": "object"
-  },
-  "version": "1.4.2"
+  "version": "1.5.0"
 }

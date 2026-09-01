@@ -41,13 +41,13 @@ Stored flat under the `win.eventlog.security.` prefix.
 | `win.eventlog.security.logon_type_name` | string | Bounded meaning token decoded from the logon type (logon_system, logon_interactive, logon_network, logon_service, logon_batch, logon_unlock, logon_network_cleartext, logon_new_credentials, logon_remote_interactive, logon_cached_interactive, logon_cached_remote_interactive, logon_cached_unlock). An unlisted code leaves this unset. |
 | `win.eventlog.security.auth_package` | string | Authentication package that answered the sign-in on 4624/4625, downcased as the provider names it (kerberos, ntlm, negotiate, negoextender, and any package outside the curated set). The provider dash sentinel leaves this unset. |
 | `win.eventlog.security.lm_package` | string | LAN Manager package variant on 4624/4625 as the provider names it (for example NTLM V2): the NTLM downgrade inventory. Not a curated vocabulary, so it stays a raw value. |
-| `win.eventlog.security.elevated` | bool | Whether the sign-in minted a full-privilege token on 4624, decoded from the message-catalog reference. False is stored as false, so a negative is distinguishable from an event that states nothing; an unrecognized reference leaves this unset. |
+| `win.eventlog.security.token_elevated` | bool | Whether the sign-in minted a full-privilege token on 4624, decoded from the message-catalog reference. False is stored as false, so a negative is distinguishable from an event that states nothing; an unrecognized reference leaves this unset. Same name as the pattern token that renders when this is true. |
 | `win.eventlog.security.privileges` | array | Sensitive privileges assigned to the new session on 4672, as the list of literal Se* constants the provider named. Locale-invariant, so unknown privileges pass through verbatim and no decode table applies. |
 | `win.eventlog.security.workstation` | string | Source machine name of the attempt in the provider NetBIOS form (WorkstationName on 4624/4625, Workstation on 4776/4777/4794), on the succeeding rows as well as the failing ones. Kept verbatim on every row; the portable origin host is gated to values naming a machine other than the reporting host. |
 | `win.eventlog.security.caller_computer` | string | Machine the bad attempts came from in the provider NetBIOS form (CallerComputerName on 4740): the lockout-source forensic pivot, the highest-ticket-value field in the channel. Kept verbatim on every row; the portable origin host is gated to values naming a machine other than the reporting host. |
 | `win.eventlog.security.status` | string | Failure code as logged, downcased hex: NTSTATUS on 4625/4776/4777, Kerberos result code on 4768/4769/4770/4771. The raw code is the classify key and the provider fidelity; the portable error code carries the normalized value and its number space. |
 | `win.eventlog.security.substatus` | string | Detailed NTSTATUS on 4625 (usually the real cause; 0x0 means the Status field carries it). |
-| `win.eventlog.security.status_meaning` | string | Bounded meaning token decoded from the status code (NTSTATUS and SSPI causes on 4625/4776/4777, Kerberos result codes on 4768/4769/4770/4771). Also rendered as a bare inline token on those arms, so the cause forms part of the pattern instead of variabilizing away. An undecoded code leaves this unset; a meaning is never invented. |
+| `win.eventlog.security.status_meaning` | string | Bounded meaning token decoded from the status code (NTSTATUS and SSPI causes on 4625/4776/4777, Kerberos result codes on 4768/4769/4770/4771). Also rendered as a bare inline token on those arms, so the cause forms part of the pattern instead of variabilizing away. An undecoded code leaves this unset; a meaning is never invented. Not a synonym of the portable sparklogs.result.code_name, which carries the VENDOR constant name (STATUS_WRONG_PASSWORD) decoded from the same table row: two vocabularies with different owners and different jobs, so both exist. This one is ours and is chosen for the message head; that one is the published name an engineer searches for and transfers to every source speaking the space. |
 | `win.eventlog.security.psdirect_handshake` | string | Hyper-V PowerShell Direct legacy handshake constant on 4625, read back as ASCII. The emitting integration service fuses byte pairs of the constant into single UTF-16 code units, so the provider records it as unreadable mojibake in the domain field; this is the same bytes in the encoding they were written in. Set only on the handshake arm, and only when every character reverses cleanly, so a value that does not fit the pattern leaves this unset rather than shipping a partial reading. |
 | `win.eventlog.security.kerberos_target` | string | Service principal the Kerberos request named (ServiceName, casefolded) on 4768/4769/4770/4771: which service a ticket was asked for, and the kerberoast target join on 4769. |
 | `win.eventlog.security.ticket_encryption_type` | string | Kerberos ticket encryption type (hex enum) on every ticket row of 4768/4769/4770 that states one; 0x17 RC4-HMAC and 0x18 RC4-HMAC-EXP are the downgrade pair the RC4 arm labels. |
@@ -55,7 +55,9 @@ Stored flat under the `win.eventlog.security.` prefix.
 | `win.eventlog.security.target_server` | string | Server the explicit credential was presented to (TargetServerName on 4648), kept verbatim on every row including the routine localhost form; the portable destination host carries the same value only when it names a machine other than the reporting host. |
 | `win.eventlog.security.audit_subcategory_guid` | string | Audit subcategory GUID from 4719/4912 (SubcategoryGuid): the locale-invariant key of WHICH audit policy changed. |
 | `win.eventlog.security.new_process_id` | string | Created process id from 4688 in the hex form the provider logged; equals the ProcessId of the matching 4689 exit, so this is the join key at rest. The portable process id carries the same number in decimal. |
-| `win.eventlog.security.token_elevation` | string | Elevation state of the created process token on 4688, decoded from the message-catalog reference (no_uac_split, elevated, limited). An unrecognized reference leaves this unset. no_uac_split is the type the vendor constant calls Default: UAC produced no filtered pair for this token. |
+| `win.eventlog.security.uac_token_type` | string | UAC split of the created process token on 4688, decoded from TokenElevationType (unsplit, full, limited). unsplit is TokenElevationTypeDefault: UAC produced no filtered pair. full is TokenElevationTypeFull (type 2), not Default. An unrecognized reference leaves this unset. |
+| `win.eventlog.security.integrity_level` | string | MIC integrity level of the created process token on 4688, decoded from MandatoryLabel (untrusted, low, medium, high, system). An unrecognized SID leaves this unset and stamps the raw SID on integrity_level_sid. |
+| `win.eventlog.security.integrity_level_sid` | string | Raw MandatoryLabel SID from 4688, kept beside the decoded token so an unrecognized integrity SID remains queryable. |
 | `win.eventlog.security.parent_process_name` | string | Creator process image path from 4688 (present on modern builds only; 2012R2-era 4688 lacks it). |
 | `win.eventlog.security.service_name` | string | Installed service name from 4697. Same join semantics as the System-channel 7045 record of the same fact. |
 | `win.eventlog.security.service_image_path` | string | Installed service IMAGE path from 4697, with the arguments of the ServiceFileName command line removed. Unset where the image cannot be split off unambiguously (an unterminated quote, or an unquoted path containing spaces), so the value is always a path and never a command line. |
@@ -120,8 +122,10 @@ Prefer these over the per-feed fields for anything that spans feeds.
 | `sparklogs.origin.host` | The initiating network endpoint. Populated only when the value names a machine other than the reporting host, which is what makes the populated side the direction. |
 | `sparklogs.origin.port` | The initiating network endpoint. Populated only when the value names a machine other than the reporting host, which is what makes the populated side the direction. |
 | `sparklogs.destination.host` | The receiving network endpoint. |
-| `sparklogs.error.code` | The failure code the source reported, plus the number space it belongs to. |
-| `sparklogs.error.code_space` | The failure code the source reported, plus the number space it belongs to. |
+| `sparklogs.result.code` | The main result code the source reported, the number space it belongs to, the constant name that space gives it, and whether that code is a failure. The name is a DECODE of the first two, present only where the source pack holds a decode table for that space. `failed` is a marker: presence means failure, absence of the field means success, and it is never false. |
+| `sparklogs.result.code_space` | The main result code the source reported, the number space it belongs to, the constant name that space gives it, and whether that code is a failure. The name is a DECODE of the first two, present only where the source pack holds a decode table for that space. `failed` is a marker: presence means failure, absence of the field means success, and it is never false. |
+| `sparklogs.result.code_name` | The main result code the source reported, the number space it belongs to, the constant name that space gives it, and whether that code is a failure. The name is a DECODE of the first two, present only where the source pack holds a decode table for that space. `failed` is a marker: presence means failure, absence of the field means success, and it is never false. |
+| `sparklogs.result.failed` | The main result code the source reported, the number space it belongs to, the constant name that space gives it, and whether that code is a failure. The name is a DECODE of the first two, present only where the source pack holds a decode table for that space. `failed` is a marker: presence means failure, absence of the field means success, and it is never false. |
 
 ## Tail keys and where the value is queryable
 
@@ -140,7 +144,7 @@ Each key names one field; that field is where the value is queried.
 | `new_name` | `win.eventlog.security.new_target_user` |
 | `member` | `sparklogs.member.name` |
 | `session` | `sparklogs.actor.session` |
-| `error_code` | `sparklogs.error.code` |
+| `error_code` | `sparklogs.result.code` |
 | `etype_meaning` | `win.eventlog.security.etype_meaning` |
 | `kerberos_target` | `win.eventlog.security.kerberos_target` |
 | `nps_reason_code` | `win.eventlog.security.nps_reason_code` |
@@ -152,7 +156,7 @@ Each key names one field; that field is where the value is queried.
 | `object_name` | `win.eventlog.security.object_name` |
 | `previous_time` | `win.eventlog.security.previous_time` |
 | `new_time` | `win.eventlog.security.new_time` |
-| `token_elevation` | `win.eventlog.security.token_elevation` |
+| `uac_token_type` | `win.eventlog.security.uac_token_type` |
 | `process_path` | `sparklogs.process.path` |
 | `process_id` | `sparklogs.process.id` |
 | `lm_package` | `win.eventlog.security.lm_package` |
@@ -166,124 +170,108 @@ Each key names one field; that field is where the value is queried.
 
 ## What sets each field
 
-Presence is per curated surface and per event id, because promotion is a property of the branch, not of the module.
+Presence is per curated surface, from what its author declared under `promotions`: a field reaches this row only when the surface's own arm or shape names it, never from a text scan of classify guessing which branch a write belongs to.
 A row lists what the surface CAN write, not what every event of it carries: a field whose value the payload does not supply stays unset, which is why absence of a field is never by itself evidence that a condition did not happen.
 A surface that promotes nothing says so: an empty row is a stated fact, not an omission.
 
 | Surface | Event ids | Fields set |
 |---|---|---|
-| `account_changed` / `default` | 4738, 4742 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.config_change.action` `sparklogs.config_change.type` `sparklogs.target.domain` `sparklogs.target.id` `sparklogs.target.kind` `sparklogs.target.name` `sparklogs.target.type` |
-| `account_created` / `default` | 4720, 4741 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.config_change.action` `sparklogs.config_change.type` `sparklogs.target.domain` `sparklogs.target.id` `sparklogs.target.kind` `sparklogs.target.name` `sparklogs.target.type` |
-| `account_deleted` / `default` | 4726, 4743 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.config_change.action` `sparklogs.config_change.type` `sparklogs.target.domain` `sparklogs.target.id` `sparklogs.target.kind` `sparklogs.target.name` `sparklogs.target.type` |
-| `account_disabled` / `default` | 4725 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.config_change.action` `sparklogs.config_change.type` `sparklogs.target.domain` `sparklogs.target.id` `sparklogs.target.kind` `sparklogs.target.name` `sparklogs.target.type` |
-| `account_enabled` / `default` | 4722 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.config_change.action` `sparklogs.config_change.type` `sparklogs.target.domain` `sparklogs.target.id` `sparklogs.target.kind` `sparklogs.target.name` `sparklogs.target.type` |
-| `account_locked_out` / `default` | 4740 | `sparklogs.origin.host` `sparklogs.target.domain` `sparklogs.target.id` `sparklogs.target.name` `sparklogs.target.type` `win.eventlog.security.caller_computer` |
-| `account_password_change_failed` / `default` | 4723 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.target.domain` `sparklogs.target.id` `sparklogs.target.kind` `sparklogs.target.name` `sparklogs.target.type` |
-| `account_password_reset` / `default` | 4724 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.config_change.action` `sparklogs.config_change.type` `sparklogs.target.domain` `sparklogs.target.id` `sparklogs.target.kind` `sparklogs.target.name` `sparklogs.target.type` |
-| `account_password_reset_failed` / `default` | 4724 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.target.domain` `sparklogs.target.id` `sparklogs.target.kind` `sparklogs.target.name` `sparklogs.target.type` |
-| `anonymous_remote_logon` / `default` | 4624 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.kind` `sparklogs.actor.name` `sparklogs.actor.session` `sparklogs.actor.type` `sparklogs.origin.host` `sparklogs.origin.ip` `sparklogs.origin.port` `sparklogs.running_as.domain` `sparklogs.running_as.id` `sparklogs.running_as.kind` `sparklogs.running_as.name` `sparklogs.running_as.type` `win.eventlog.security.auth_package` `win.eventlog.security.elevated` `win.eventlog.security.lm_package` `win.eventlog.security.logon_guid` `win.eventlog.security.logon_type` `win.eventlog.security.logon_type_name` `win.eventlog.security.workstation` |
+| `account_changed` / `default` | 4738, 4742 | **fields: none** |
+| `account_created` / `default` | 4720, 4741 | **fields: none** |
+| `account_deleted` / `default` | 4726, 4743 | **fields: none** |
+| `account_disabled` / `default` | 4725 | **fields: none** |
+| `account_enabled` / `default` | 4722 | **fields: none** |
+| `account_locked_out` / `default` | 4740 | `win.eventlog.security.caller_computer` |
+| `account_password_change_failed` / `default` | 4723 | **fields: none** |
+| `account_password_reset` / `default` | 4724 | **fields: none** |
+| `account_password_reset_failed` / `default` | 4724 | **fields: none** |
+| `anonymous_remote_logon` / `default` | 4624 | `win.eventlog.security.auth_package` `win.eventlog.security.lm_package` `win.eventlog.security.logon_guid` `win.eventlog.security.logon_type` `win.eventlog.security.logon_type_name` `win.eventlog.security.token_elevated` `win.eventlog.security.workstation` |
 | `audit_events_dropped` / `default` | 1101 | `win.eventlog.security.dropped_count` |
-| `audit_log_cleared` / `default` | 1102 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` |
+| `audit_log_cleared` / `default` | 1102 | **fields: none** |
 | `audit_log_full` / `default` | 1104 | **fields: none** |
 | `audit_pipeline_error` / `default` | 1108 | `win.eventlog.security.publisher_id` |
-| `audit_policy_changed` / `default` | 4715, 4719, 4912 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.config_change.action` `sparklogs.config_change.type` `win.eventlog.security.audit_subcategory_guid` |
+| `audit_policy_changed` / `default` | 4715, 4719, 4912 | `win.eventlog.security.audit_subcategory_guid` |
 | `ca_request_failed` / `default` | 4888 | **fields: none** |
 | `ca_tamper` / `admin_config` | 4882, 4885, 4890, 4896 | **fields: none** |
 | `ca_tamper` / `evidence_tamper` | 4882, 4885, 4890, 4896 | **fields: none** |
-| `crypto_selftest_failed` / `default` | 6418 | `sparklogs.process.name` `sparklogs.process.path` |
-| `directory_object_access_denied` / `default` | 4662 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` |
-| `directory_object_changed` / `default` | 5136, 5137, 5138, 5139, 5141 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.config_change.action` `sparklogs.config_change.type` `win.eventlog.security.attribute_name` `win.eventlog.security.object_dn` |
-| `directory_replication_access` / `default` | 4662 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` |
-| `domain_policy_changed` / `default` | 4739 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.config_change.action` `sparklogs.config_change.target` `sparklogs.config_change.type` |
-| `dsrm_password_changed` / `failed` | 4794 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.config_change.action` `sparklogs.config_change.type` `sparklogs.origin.host` `win.eventlog.security.workstation` |
-| `dsrm_password_changed` / `success` | 4794 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.config_change.action` `sparklogs.config_change.type` `sparklogs.origin.host` `win.eventlog.security.workstation` |
+| `crypto_selftest_failed` / `default` | 6418 | **fields: none** |
+| `directory_object_access_denied` / `default` | 4662 | **fields: none** |
+| `directory_object_changed` / `default` | 5136, 5137, 5138, 5139, 5141 | `win.eventlog.security.attribute_name` `win.eventlog.security.object_dn` |
+| `directory_replication_access` / `default` | 4662 | **fields: none** |
+| `domain_policy_changed` / `default` | 4739 | **fields: none** |
+| `dsrm_password_changed` / `failed` | 4794 | `win.eventlog.security.workstation` |
+| `dsrm_password_changed` / `success` | 4794 | `win.eventlog.security.workstation` |
 | `event_logging_stopped` / `default` | 1100 | **fields: none** |
-| `explicit_credential_use` / `default` | 4648 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.kind` `sparklogs.actor.name` `sparklogs.actor.session` `sparklogs.actor.type` `sparklogs.destination.host` `sparklogs.process.id` `sparklogs.process.name` `sparklogs.process.path` `sparklogs.target.domain` `sparklogs.target.name` `sparklogs.target.type` `win.eventlog.security.target_server` |
-| `firewall_rule_changed` / `default` | 4946, 4947, 4948, 4950, 4954, 4956, 4957 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.config_change.action` `sparklogs.config_change.target` `sparklogs.config_change.type` `win.eventlog.security.rule_id` `win.eventlog.security.rule_name` |
+| `explicit_credential_use` / `default` | 4648 | `win.eventlog.security.target_server` |
+| `firewall_rule_changed` / `default` | 4946, 4947, 4948, 4950, 4954, 4956, 4957 | `win.eventlog.security.rule_id` `win.eventlog.security.rule_name` |
 | `firewall_service_stopped` / `default` | 5025, 5034 | **fields: none** |
-| `group_member_added` / `default` | 4728, 4732, 4756 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.config_change.action` `sparklogs.config_change.type` `sparklogs.member.id` `sparklogs.member.kind` `sparklogs.member.name` `sparklogs.member.type` `sparklogs.target.domain` `sparklogs.target.id` `sparklogs.target.kind` `sparklogs.target.name` `sparklogs.target.type` |
-| `group_member_removed` / `default` | 4729, 4733, 4757 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.config_change.action` `sparklogs.config_change.type` `sparklogs.member.id` `sparklogs.member.kind` `sparklogs.member.name` `sparklogs.member.type` `sparklogs.target.domain` `sparklogs.target.id` `sparklogs.target.kind` `sparklogs.target.name` `sparklogs.target.type` |
-| `group_membership_changed` / `default` | 4727, 4730, 4731, 4734, 4735, 4737, 4754, 4755, 4758, 4764 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.config_change.action` `sparklogs.config_change.type` `sparklogs.target.domain` `sparklogs.target.id` `sparklogs.target.kind` `sparklogs.target.name` `sparklogs.target.type` |
-| `guest_account_sign_in` / `default` | 4624 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.kind` `sparklogs.actor.name` `sparklogs.actor.session` `sparklogs.actor.type` `sparklogs.origin.host` `sparklogs.origin.ip` `sparklogs.origin.port` `sparklogs.running_as.domain` `sparklogs.running_as.id` `sparklogs.running_as.kind` `sparklogs.running_as.name` `sparklogs.running_as.type` `win.eventlog.security.auth_package` `win.eventlog.security.elevated` `win.eventlog.security.lm_package` `win.eventlog.security.logon_guid` `win.eventlog.security.logon_type` `win.eventlog.security.logon_type_name` `win.eventlog.security.workstation` |
+| `group_member_added` / `default` | 4728, 4732, 4756 | **fields: none** |
+| `group_member_removed` / `default` | 4729, 4733, 4757 | **fields: none** |
+| `group_membership_changed` / `default` | 4727, 4730, 4731, 4734, 4735, 4737, 4754, 4755, 4758, 4764 | **fields: none** |
+| `guest_account_sign_in` / `default` | 4624 | `win.eventlog.security.auth_package` `win.eventlog.security.lm_package` `win.eventlog.security.logon_guid` `win.eventlog.security.logon_type` `win.eventlog.security.logon_type_name` `win.eventlog.security.token_elevated` `win.eventlog.security.workstation` |
 | `insecure_boot_config` / `default` | 4826 | `win.eventlog.security.insecure_boot_flags` |
-| `kerberos_preauth_failed` / `default` | 4771 | `sparklogs.actor.id` `sparklogs.actor.kind` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.error.code` `sparklogs.error.code_space` `sparklogs.origin.ip` `sparklogs.origin.port` `win.eventlog.security.kerberos_target` `win.eventlog.security.status` `win.eventlog.security.status_meaning` |
-| `kerberos_rc4_ticket` / `default` | 4769 | `sparklogs.actor.domain` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.origin.ip` `sparklogs.origin.port` `win.eventlog.security.etype_meaning` `win.eventlog.security.kerberos_target` `win.eventlog.security.ticket_encryption_type` |
-| `kerberos_ticket_failed` / `service_ticket` | 4768, 4769, 4770 | `sparklogs.actor.domain` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.error.code` `sparklogs.error.code_space` `sparklogs.origin.ip` `sparklogs.origin.port` `win.eventlog.security.kerberos_target` `win.eventlog.security.status` `win.eventlog.security.status_meaning` |
-| `kerberos_ticket_failed` / `tgt_request` | 4768, 4769, 4770 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.kind` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.error.code` `sparklogs.error.code_space` `sparklogs.origin.ip` `sparklogs.origin.port` `win.eventlog.security.kerberos_target` `win.eventlog.security.status` `win.eventlog.security.status_meaning` |
-| `kerberos_ticket_failed` / `ticket_renewal` | 4768, 4769, 4770 | `sparklogs.actor.domain` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.error.code` `sparklogs.error.code_space` `sparklogs.origin.ip` `sparklogs.origin.port` `win.eventlog.security.kerberos_target` `win.eventlog.security.status` `win.eventlog.security.status_meaning` |
-| `logon_failed` / `account_attempt` | 4625 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.kind` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.error.code` `sparklogs.error.code_space` `sparklogs.origin.host` `sparklogs.origin.ip` `sparklogs.origin.port` `sparklogs.process.id` `sparklogs.process.name` `sparklogs.process.path` `sparklogs.running_as.domain` `sparklogs.running_as.id` `sparklogs.running_as.kind` `sparklogs.running_as.name` `sparklogs.running_as.type` `win.eventlog.security.auth_package` `win.eventlog.security.lm_package` `win.eventlog.security.logon_type` `win.eventlog.security.logon_type_name` `win.eventlog.security.status` `win.eventlog.security.status_meaning` `win.eventlog.security.substatus` `win.eventlog.security.workstation` |
-| `logon_failed` / `sspi_probe` | 4625 | `sparklogs.error.code` `sparklogs.error.code_space` `sparklogs.origin.host` `sparklogs.origin.ip` `sparklogs.origin.port` `sparklogs.process.id` `sparklogs.process.name` `sparklogs.process.path` `sparklogs.running_as.domain` `sparklogs.running_as.id` `sparklogs.running_as.kind` `sparklogs.running_as.name` `sparklogs.running_as.type` `win.eventlog.security.auth_package` `win.eventlog.security.lm_package` `win.eventlog.security.logon_type` `win.eventlog.security.logon_type_name` `win.eventlog.security.status` `win.eventlog.security.status_meaning` `win.eventlog.security.substatus` `win.eventlog.security.workstation` |
-| `logon_right_granted` / `default` | 4717 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.config_change.action` `sparklogs.config_change.type` `sparklogs.target.id` `sparklogs.target.kind` `sparklogs.target.name` `sparklogs.target.type` |
-| `logon_right_removed` / `default` | 4718 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.config_change.action` `sparklogs.config_change.type` `sparklogs.target.id` `sparklogs.target.kind` `sparklogs.target.name` `sparklogs.target.type` |
-| `network_share_added` / `default` | 5142 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.config_change.action` `sparklogs.config_change.target` `sparklogs.config_change.type` `win.eventlog.security.share_name` `win.eventlog.security.share_path` |
-| `nps_access_denied` / `default` | 6273 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.origin.host` `sparklogs.origin.ip` `win.eventlog.security.nps_policy` `win.eventlog.security.nps_reason_code` `win.eventlog.security.nps_reason_meaning` |
-| `nps_lockout` / `default` | 6279 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.origin.host` `sparklogs.origin.ip` `win.eventlog.security.nps_reason_code` `win.eventlog.security.nps_reason_meaning` |
-| `nps_request_discarded` / `default` | 6274 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.origin.host` `sparklogs.origin.ip` `win.eventlog.security.nps_policy` `win.eventlog.security.nps_reason_code` `win.eventlog.security.nps_reason_meaning` |
-| `ntlm_validation_failed` / `default` | 4776, 4777 | `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.error.code` `sparklogs.error.code_space` `sparklogs.origin.host` `win.eventlog.security.status` `win.eventlog.security.status_meaning` `win.eventlog.security.workstation` |
-| `principal_renamed` / `default` | 4781 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.config_change.action` `sparklogs.config_change.type` `sparklogs.target.domain` `sparklogs.target.id` `sparklogs.target.kind` `sparklogs.target.name` `sparklogs.target.type` `win.eventlog.security.new_target_user` `win.eventlog.security.old_target_user` |
-| `psdirect_handshake_probe` / `default` | 4625 | `sparklogs.error.code` `sparklogs.error.code_space` `sparklogs.origin.host` `sparklogs.origin.ip` `sparklogs.origin.port` `sparklogs.process.id` `sparklogs.process.name` `sparklogs.process.path` `sparklogs.running_as.domain` `sparklogs.running_as.id` `sparklogs.running_as.kind` `sparklogs.running_as.name` `sparklogs.running_as.type` `win.eventlog.security.auth_package` `win.eventlog.security.lm_package` `win.eventlog.security.logon_type` `win.eventlog.security.logon_type_name` `win.eventlog.security.psdirect_handshake` `win.eventlog.security.status` `win.eventlog.security.status_meaning` `win.eventlog.security.substatus` `win.eventlog.security.workstation` |
-| `registry_value_changed` / `default` | 4657 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.config_change.action` `sparklogs.config_change.target` `sparklogs.config_change.type` `sparklogs.process.name` `sparklogs.process.path` `win.eventlog.security.object_name` `win.eventlog.security.object_value_name` `win.eventlog.security.operation_meaning` |
-| `replay_attack_detected` / `default` | 4649 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` |
-| `scheduled_task_changed` / `content_mutate` | 4698, 4699, 4701, 4702 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.config_change.action` `sparklogs.config_change.target` `sparklogs.config_change.type` `win.eventlog.security.task_name` |
-| `scheduled_task_changed` / `disabled` | 4698, 4699, 4701, 4702 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.config_change.action` `sparklogs.config_change.target` `sparklogs.config_change.type` `win.eventlog.security.task_name` |
-| `service_installed` / `default` | 4697 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.config_change.action` `sparklogs.config_change.target` `sparklogs.config_change.type` `win.eventlog.security.service_account` `win.eventlog.security.service_image_path` `win.eventlog.security.service_name` |
-| `sid_history_changed` / `add_failed` | 4765, 4766 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.config_change.action` `sparklogs.config_change.type` `sparklogs.target.domain` `sparklogs.target.id` `sparklogs.target.name` `sparklogs.target.type` |
-| `sid_history_changed` / `added` | 4765, 4766 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.config_change.action` `sparklogs.config_change.type` `sparklogs.target.domain` `sparklogs.target.id` `sparklogs.target.name` `sparklogs.target.type` |
-| `special_group_logon` / `default` | 4964 | `sparklogs.actor.domain` `sparklogs.actor.name` `sparklogs.actor.type` |
-| `system_time_changed` / `other_caller` | 4616 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.config_change.action` `sparklogs.config_change.type` `sparklogs.process.id` `sparklogs.process.name` `sparklogs.process.path` `win.eventlog.security.new_time` `win.eventlog.security.previous_time` |
-| `system_time_changed` / `routine_time_service` | 4616 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.config_change.action` `sparklogs.config_change.type` `sparklogs.process.id` `sparklogs.process.name` `sparklogs.process.path` `win.eventlog.security.new_time` `win.eventlog.security.previous_time` |
-| `admin_session_started` | 4672 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.kind` `sparklogs.actor.name` `sparklogs.actor.session` `sparklogs.actor.type` `win.eventlog.security.privileges` |
-| `anonymous_sign_in` | 4624 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.kind` `sparklogs.actor.name` `sparklogs.actor.session` `sparklogs.actor.type` `sparklogs.origin.host` `sparklogs.origin.ip` `sparklogs.origin.port` `sparklogs.running_as.domain` `sparklogs.running_as.id` `sparklogs.running_as.kind` `sparklogs.running_as.name` `sparklogs.running_as.type` `win.eventlog.security.auth_package` `win.eventlog.security.elevated` `win.eventlog.security.lm_package` `win.eventlog.security.logon_guid` `win.eventlog.security.logon_type` `win.eventlog.security.logon_type_name` `win.eventlog.security.workstation` |
-| `anonymous_sign_out` | 4647 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.kind` `sparklogs.actor.name` `sparklogs.actor.session` `sparklogs.actor.type` |
+| `kerberos_preauth_failed` / `default` | 4771 | `win.eventlog.security.kerberos_target` `win.eventlog.security.status` `win.eventlog.security.status_meaning` |
+| `kerberos_rc4_ticket` / `default` | 4769 | `win.eventlog.security.etype_meaning` `win.eventlog.security.kerberos_target` `win.eventlog.security.ticket_encryption_type` |
+| `kerberos_ticket_failed` / `service_ticket` | 4768, 4769, 4770 | `win.eventlog.security.kerberos_target` `win.eventlog.security.status` `win.eventlog.security.status_meaning` |
+| `kerberos_ticket_failed` / `tgt_request` | 4768, 4769, 4770 | `win.eventlog.security.kerberos_target` `win.eventlog.security.status` `win.eventlog.security.status_meaning` |
+| `kerberos_ticket_failed` / `ticket_renewal` | 4768, 4769, 4770 | `win.eventlog.security.kerberos_target` `win.eventlog.security.status` `win.eventlog.security.status_meaning` |
+| `logon_failed` / `account_attempt` | 4625 | `win.eventlog.security.auth_package` `win.eventlog.security.lm_package` `win.eventlog.security.logon_type` `win.eventlog.security.logon_type_name` `win.eventlog.security.status` `win.eventlog.security.status_meaning` `win.eventlog.security.substatus` `win.eventlog.security.workstation` |
+| `logon_failed` / `sspi_probe` | 4625 | `win.eventlog.security.auth_package` `win.eventlog.security.lm_package` `win.eventlog.security.logon_type` `win.eventlog.security.logon_type_name` `win.eventlog.security.status` `win.eventlog.security.status_meaning` `win.eventlog.security.substatus` `win.eventlog.security.workstation` |
+| `logon_right_granted` / `default` | 4717 | **fields: none** |
+| `logon_right_removed` / `default` | 4718 | **fields: none** |
+| `network_share_added` / `default` | 5142 | `win.eventlog.security.share_name` `win.eventlog.security.share_path` |
+| `nps_access_denied` / `default` | 6273 | `win.eventlog.security.nps_policy` `win.eventlog.security.nps_reason_code` `win.eventlog.security.nps_reason_meaning` |
+| `nps_lockout` / `default` | 6279 | `win.eventlog.security.nps_reason_code` `win.eventlog.security.nps_reason_meaning` |
+| `nps_request_discarded` / `default` | 6274 | `win.eventlog.security.nps_policy` `win.eventlog.security.nps_reason_code` `win.eventlog.security.nps_reason_meaning` |
+| `ntlm_validation_failed` / `default` | 4776, 4777 | `win.eventlog.security.status` `win.eventlog.security.status_meaning` `win.eventlog.security.workstation` |
+| `principal_renamed` / `default` | 4781 | `win.eventlog.security.new_target_user` `win.eventlog.security.old_target_user` |
+| `psdirect_handshake_probe` / `default` | 4625 | `win.eventlog.security.auth_package` `win.eventlog.security.lm_package` `win.eventlog.security.logon_type` `win.eventlog.security.logon_type_name` `win.eventlog.security.psdirect_handshake` `win.eventlog.security.status` `win.eventlog.security.status_meaning` `win.eventlog.security.substatus` `win.eventlog.security.workstation` |
+| `registry_value_changed` / `default` | 4657 | `win.eventlog.security.object_name` `win.eventlog.security.object_value_name` `win.eventlog.security.operation_meaning` |
+| `replay_attack_detected` / `default` | 4649 | **fields: none** |
+| `scheduled_task_changed` / `content_mutate` | 4698, 4699, 4701, 4702 | `win.eventlog.security.task_name` |
+| `scheduled_task_changed` / `disabled` | 4698, 4699, 4701, 4702 | `win.eventlog.security.task_name` |
+| `service_installed` / `default` | 4697 | `command_line` `win.eventlog.security.service_account` `win.eventlog.security.service_image_path` `win.eventlog.security.service_name` |
+| `sid_history_changed` / `add_failed` | 4765, 4766 | **fields: none** |
+| `sid_history_changed` / `added` | 4765, 4766 | **fields: none** |
+| `special_group_logon` / `default` | 4964 | **fields: none** |
+| `system_time_changed` / `other_caller` | 4616 | `win.eventlog.security.new_time` `win.eventlog.security.previous_time` |
+| `system_time_changed` / `routine_time_service` | 4616 | `win.eventlog.security.new_time` `win.eventlog.security.previous_time` |
+| `admin_session_started` | 4672 | `win.eventlog.security.privileges` |
+| `anonymous_sign_in` | 4624 | `win.eventlog.security.auth_package` `win.eventlog.security.lm_package` `win.eventlog.security.logon_guid` `win.eventlog.security.logon_type` `win.eventlog.security.logon_type_name` `win.eventlog.security.token_elevated` `win.eventlog.security.workstation` |
+| `anonymous_sign_out` | 4647 | **fields: none** |
 | `audit_subsystem_started` | 4608 | **fields: none** |
 | `boot_configuration_loaded` | 4826 | **fields: none** |
-| `credman_credentials_read` | 5379, 5381, 5382 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` |
-| `crypto_operation` | 5061 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` |
-| `fips_selftest_passed` | 6417 | `sparklogs.process.id` `sparklogs.process.name` `sparklogs.process.path` |
+| `credman_credentials_read` | 5379, 5381, 5382 | **fields: none** |
+| `crypto_operation` | 5061 | **fields: none** |
+| `fips_selftest_passed` | 6417 | **fields: none** |
 | `firewall_driver_started` | 5033 | **fields: none** |
 | `firewall_service_started` | 5024 | **fields: none** |
-| `group_membership_enumerated` | 4799 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.process.id` `sparklogs.process.name` `sparklogs.process.path` `sparklogs.target.domain` `sparklogs.target.id` `sparklogs.target.kind` `sparklogs.target.name` `sparklogs.target.type` |
-| `key_file_operation` | 5058 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` |
-| `key_migration_operation` | 5059 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` |
-| `non_account_sign_out` | 4647 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.kind` `sparklogs.actor.name` `sparklogs.actor.session` `sparklogs.actor.type` |
-| `ntlm_credentials_validated` | 4776 | `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.origin.host` `win.eventlog.security.workstation` |
-| `object_audit_settings_changed` | 4907 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.process.id` `sparklogs.process.name` `sparklogs.process.path` `win.eventlog.security.object_name` `win.eventlog.security.object_type` |
+| `group_membership_enumerated` | 4799 | **fields: none** |
+| `key_file_operation` | 5058 | **fields: none** |
+| `key_migration_operation` | 5059 | **fields: none** |
+| `non_account_sign_out` | 4647 | **fields: none** |
+| `ntlm_credentials_validated` | 4776 | `win.eventlog.security.workstation` |
+| `object_audit_settings_changed` | 4907 | `win.eventlog.security.object_name` `win.eventlog.security.object_type` |
 | `per_user_audit_policy_table_created` | 4902 | `win.eventlog.security.pua_count` |
-| `platform_privileges_assigned` | 4672 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.kind` `sparklogs.actor.name` `sparklogs.actor.session` `sparklogs.actor.type` `win.eventlog.security.privileges` |
-| `primary_token_assigned` | 4696 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.process.id` |
-| `privileges_assigned_unclaimed_principal` | 4672 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.kind` `sparklogs.actor.name` `sparklogs.actor.session` `sparklogs.actor.type` `win.eventlog.security.privileges` |
-| `process_created` | 4688 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.session` `sparklogs.actor.type` `sparklogs.process.id` `sparklogs.process.name` `sparklogs.process.path` `win.eventlog.security.new_process_id` `win.eventlog.security.parent_process_name` `win.eventlog.security.token_elevation` |
-| `routine_token_refresh` | 4648 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.kind` `sparklogs.actor.name` `sparklogs.actor.session` `sparklogs.actor.type` `sparklogs.destination.host` `sparklogs.target.domain` `sparklogs.target.name` `sparklogs.target.type` `win.eventlog.security.target_server` |
-| `service_or_machine_sign_in` | 4624 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.kind` `sparklogs.actor.name` `sparklogs.actor.session` `sparklogs.actor.type` `sparklogs.origin.host` `sparklogs.origin.ip` `sparklogs.origin.port` `sparklogs.running_as.domain` `sparklogs.running_as.id` `sparklogs.running_as.kind` `sparklogs.running_as.name` `sparklogs.running_as.type` `win.eventlog.security.auth_package` `win.eventlog.security.elevated` `win.eventlog.security.lm_package` `win.eventlog.security.logon_guid` `win.eventlog.security.logon_type` `win.eventlog.security.logon_type_name` `win.eventlog.security.workstation` |
-| `service_ticket_issued` | 4769 | `sparklogs.actor.domain` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.origin.ip` `sparklogs.origin.port` `win.eventlog.security.etype_meaning` `win.eventlog.security.kerberos_target` `win.eventlog.security.logon_guid` `win.eventlog.security.ticket_encryption_type` |
-| `session_ended` | 4634 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.kind` `sparklogs.actor.name` `sparklogs.actor.session` `sparklogs.actor.type` `win.eventlog.security.logon_type` `win.eventlog.security.logon_type_name` |
-| `sign_in_unclaimed_principal` | 4624 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.kind` `sparklogs.actor.name` `sparklogs.actor.session` `sparklogs.actor.type` `sparklogs.origin.host` `sparklogs.origin.ip` `sparklogs.origin.port` `sparklogs.running_as.domain` `sparklogs.running_as.id` `sparklogs.running_as.kind` `sparklogs.running_as.name` `sparklogs.running_as.type` `win.eventlog.security.auth_package` `win.eventlog.security.elevated` `win.eventlog.security.lm_package` `win.eventlog.security.logon_guid` `win.eventlog.security.logon_type` `win.eventlog.security.logon_type_name` `win.eventlog.security.workstation` |
-| `tgt_issued` | 4768 | `sparklogs.actor.domain` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.origin.ip` `sparklogs.origin.port` `win.eventlog.security.etype_meaning` `win.eventlog.security.kerberos_target` `win.eventlog.security.logon_guid` `win.eventlog.security.ticket_encryption_type` |
-| `ticket_renewed` | 4770 | `sparklogs.actor.domain` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.origin.ip` `sparklogs.origin.port` `win.eventlog.security.etype_meaning` `win.eventlog.security.kerberos_target` `win.eventlog.security.ticket_encryption_type` |
-| `user_group_membership_enumerated` | 4798 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.name` `sparklogs.actor.type` `sparklogs.process.id` `sparklogs.process.name` `sparklogs.process.path` `sparklogs.target.domain` `sparklogs.target.id` `sparklogs.target.kind` `sparklogs.target.name` `sparklogs.target.type` |
-| `user_sign_in` | 4624 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.kind` `sparklogs.actor.name` `sparklogs.actor.session` `sparklogs.actor.type` `sparklogs.origin.host` `sparklogs.origin.ip` `sparklogs.origin.port` `sparklogs.running_as.domain` `sparklogs.running_as.id` `sparklogs.running_as.kind` `sparklogs.running_as.name` `sparklogs.running_as.type` `win.eventlog.security.auth_package` `win.eventlog.security.elevated` `win.eventlog.security.lm_package` `win.eventlog.security.logon_guid` `win.eventlog.security.logon_type` `win.eventlog.security.logon_type_name` `win.eventlog.security.workstation` |
-| `user_signed_out` | 4647 | `sparklogs.actor.domain` `sparklogs.actor.id` `sparklogs.actor.kind` `sparklogs.actor.name` `sparklogs.actor.session` `sparklogs.actor.type` |
+| `platform_privileges_assigned` | 4672 | `win.eventlog.security.privileges` |
+| `primary_token_assigned` | 4696 | **fields: none** |
+| `privileges_assigned_unclaimed_principal` | 4672 | `win.eventlog.security.privileges` |
+| `process_created` | 4688 | `command_line` `win.eventlog.security.integrity_level` `win.eventlog.security.integrity_level_sid` `win.eventlog.security.new_process_id` `win.eventlog.security.parent_process_name` `win.eventlog.security.uac_token_type` |
+| `routine_token_refresh` | 4648 | `win.eventlog.security.target_server` |
+| `service_or_machine_sign_in` | 4624 | `win.eventlog.security.auth_package` `win.eventlog.security.lm_package` `win.eventlog.security.logon_guid` `win.eventlog.security.logon_type` `win.eventlog.security.logon_type_name` `win.eventlog.security.token_elevated` `win.eventlog.security.workstation` |
+| `service_ticket_issued` | 4769 | `win.eventlog.security.etype_meaning` `win.eventlog.security.kerberos_target` `win.eventlog.security.logon_guid` `win.eventlog.security.ticket_encryption_type` |
+| `session_ended` | 4634 | `win.eventlog.security.logon_type` `win.eventlog.security.logon_type_name` |
+| `sign_in_unclaimed_principal` | 4624 | `win.eventlog.security.auth_package` `win.eventlog.security.lm_package` `win.eventlog.security.logon_guid` `win.eventlog.security.logon_type` `win.eventlog.security.logon_type_name` `win.eventlog.security.token_elevated` `win.eventlog.security.workstation` |
+| `tgt_issued` | 4768 | `win.eventlog.security.etype_meaning` `win.eventlog.security.kerberos_target` `win.eventlog.security.logon_guid` `win.eventlog.security.ticket_encryption_type` |
+| `ticket_renewed` | 4770 | `win.eventlog.security.etype_meaning` `win.eventlog.security.kerberos_target` `win.eventlog.security.ticket_encryption_type` |
+| `user_group_membership_enumerated` | 4798 | **fields: none** |
+| `user_sign_in` | 4624 | `win.eventlog.security.auth_package` `win.eventlog.security.lm_package` `win.eventlog.security.logon_guid` `win.eventlog.security.logon_type` `win.eventlog.security.logon_type_name` `win.eventlog.security.token_elevated` `win.eventlog.security.workstation` |
+| `user_signed_out` | 4647 | **fields: none** |
 
 ### Surfaces that promote nothing
 
 These carry class, reason and message text only.
 A predicate over them uses the reason, the class, or the retained payload; there is no promoted field to filter on.
-
-- `audit_log_full` / `default`
-- `ca_request_failed` / `default`
-- `ca_tamper` / `admin_config`
-- `ca_tamper` / `evidence_tamper`
-- `event_logging_stopped` / `default`
-- `firewall_service_stopped` / `default`
-- `audit_subsystem_started`
-- `boot_configuration_loaded`
-- `firewall_driver_started`
-- `firewall_service_started`
-
-### Surfaces with no `win.eventlog.security.` field
-
-These populate portable families only.
-Looking for a feed-namespaced field on one of them finds nothing, and that is the design rather than a gap: the value has a cross-feed home instead.
 
 - `account_changed` / `default`
 - `account_created` / `default`
@@ -294,10 +282,16 @@ Looking for a feed-namespaced field on one of them finds nothing, and that is th
 - `account_password_reset` / `default`
 - `account_password_reset_failed` / `default`
 - `audit_log_cleared` / `default`
+- `audit_log_full` / `default`
+- `ca_request_failed` / `default`
+- `ca_tamper` / `admin_config`
+- `ca_tamper` / `evidence_tamper`
 - `crypto_selftest_failed` / `default`
 - `directory_object_access_denied` / `default`
 - `directory_replication_access` / `default`
 - `domain_policy_changed` / `default`
+- `event_logging_stopped` / `default`
+- `firewall_service_stopped` / `default`
 - `group_member_added` / `default`
 - `group_member_removed` / `default`
 - `group_membership_changed` / `default`
@@ -308,9 +302,13 @@ Looking for a feed-namespaced field on one of them finds nothing, and that is th
 - `sid_history_changed` / `added`
 - `special_group_logon` / `default`
 - `anonymous_sign_out`
+- `audit_subsystem_started`
+- `boot_configuration_loaded`
 - `credman_credentials_read`
 - `crypto_operation`
 - `fips_selftest_passed`
+- `firewall_driver_started`
+- `firewall_service_started`
 - `group_membership_enumerated`
 - `key_file_operation`
 - `key_migration_operation`

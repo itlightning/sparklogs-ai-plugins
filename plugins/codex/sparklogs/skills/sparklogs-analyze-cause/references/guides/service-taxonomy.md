@@ -1,16 +1,16 @@
-# Service taxonomy: the `service` ticket-class vocabulary
+# Service taxonomy: the `service` (LQL) ticket-class vocabulary
 
-`service` is the curated cross-source ticket-class taxonomy: the MSP ticket class an event or
+`service` (LQL) is the curated cross-source ticket-class taxonomy: the MSP ticket class an event or
 snapshot is **evidence for**. It is cross-OS and cross-vendor on purpose (Veeam, Acronis, and
 Windows Server Backup all emit `service = "backup"`), so fleet-wide analysis spans vendors.
-`app` is the complementary axis (product identity as users know it); a vendor spans services and a
+`app` (LQL) is the complementary axis (product identity): `app-vocabulary.md`. A vendor spans services and a
 service spans vendors; neither nests in the other.
 
 Values are snake_case and drawn from a closed, registry-gated vocabulary. The set is additive-only:
 values are never renamed and never removed, so a query written against one keeps working. The table
 below is the whole vocabulary.
 
-`service` is a conditional scope-ladder field: present when the source's shaping carries it, absent
+`service` (LQL) is a conditional scope-ladder field: present when the source's shaping carries it, absent
 otherwise (see `scope-ladder.md` for the degrade-gracefully rule). It is set per event; CONTEXT
 (unlabeled) events can carry a service too (for example, Outlook context events on the Application
 channel carry `service = "email"`).
@@ -44,7 +44,7 @@ channel carry `service = "email"`).
 | `clustering` | Failover Clustering: quorum/CSV/witness, HA state. |
 | `database` | SQL Server and LOB database engines. |
 | `web` | IIS/HTTPERR, Apache/nginx. |
-| `email` | Exchange transport / message tracking. Email-security and filtering products fold here, with `app` carrying the product. |
+| `email` | Exchange transport / message tracking. Email-security and filtering products fold here, with `app` (LQL) carrying the product. |
 | `time_sync` | W32Time. Clock-skew tickets map to `time_sync` plus `auth`. |
 | `licensing` | Windows/Office activation, KMS, RDS CAL grace. |
 | `telephony` | PBX/VoIP (3CX and peers); a cross-source ticket class. |
@@ -54,9 +54,9 @@ channel carry `service = "email"`).
 ## Audit-adjacent events homed elsewhere (demarcation list)
 
 `service = "security_audit"` is **not** the complete audit surface. An event gets exactly one
-`service`: the ticket class it is evidence for. Security-channel evidence whose consequence belongs
-to a ticket class is homed under that class; the security/forensic angle is carried by `reason`,
-channel, and `category`, never duplicated into a second event or a second service.
+`service` (LQL): the ticket class it is evidence for. Security-channel evidence whose consequence belongs
+to a ticket class is homed under that class; the security/forensic angle is carried by `sparklogs.reason` (LQL),
+channel, and `category` (LQL), never duplicated into a second event or a second service.
 
 Maintained list (grows as Windows Event Log modules land):
 
@@ -67,10 +67,10 @@ Maintained list (grows as Windows Event Log modules land):
 - The same homing rule applies to auth lifecycle (-> `auth`), CA events (-> `certificates`), and
   directory object changes (-> `directory_services`) as those rows ship.
 
-**Rule for forensic/audit sweeps: pivot on reason slugs, channel (`subsource`), and `category`,
+**Rule for forensic/audit sweeps: pivot on reason slugs, channel (`subsource` (LQL)), and `category` (LQL),
 never on `service = "security_audit"` alone.**
 
 ## Coverage
 
-This table is the complete `service` vocabulary, and it is kept complete: it cannot drift from the
+This table is the complete `service` (LQL) vocabulary, and it is kept complete: it cannot drift from the
 vocabulary without failing a check. A value you see in data and cannot find here is worth reporting.

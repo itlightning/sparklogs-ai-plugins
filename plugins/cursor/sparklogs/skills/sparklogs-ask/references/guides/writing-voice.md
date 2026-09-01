@@ -1,6 +1,6 @@
 # Writing Voice
 
-Style rules for every user-visible SparkLogs answer: chat (`/sparklogs-ask`), system condition summaries (`/sparklogs-investigate`), and cause analyses (`/sparklogs-analyze-cause`). Consistency here is what makes SparkLogs output read as engineered, not generated.
+Style rules for every user-visible SparkLogs answer: chat (`sparklogs-ask`), system condition summaries (`sparklogs-investigate`), and cause analyses (`sparklogs-analyze-cause`). Consistency here is what makes SparkLogs output read as engineered, not generated.
 
 ---
 

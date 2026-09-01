@@ -108,7 +108,7 @@ If the symptom could mean something different than the obvious interpretation, e
 ### What is uncertain
 Explicit enumeration of weak evidence and gaps. **Do not minimize.** Examples:
 - "Whether the disk-pressure cluster (Finding 5b) is independent or related to the primary pattern."
-- "Whether NAS-01 issues are contributing - backup target was not checked (no Managed Agent)."
+- "Whether NAS-01 issues are contributing - backup target was not checked (no SparkLogs Agent)."
 - "Whether there is a non-KB factor common to the 7 affected sources."
 
 ### Recommended next steps
@@ -168,7 +168,7 @@ HYPOTHESIS #3: Backup target NAS-01 issues compound with VSS issues.
   Confidence: low
   What would confirm this: check NAS-01 health logs directly during the error windows.
   What would refute this: NAS-01 health is normal during the windows.
-  Off-endpoint check needed: yes (NAS-01 does not run a Managed Agent)
+  Off-endpoint check needed: yes (NAS-01 does not run a SparkLogs Agent)
 
 ALTERNATIVE FRAMINGS
 - The "fleet-wide pattern" (Finding 6) could mean these 7 sources share a common factor that

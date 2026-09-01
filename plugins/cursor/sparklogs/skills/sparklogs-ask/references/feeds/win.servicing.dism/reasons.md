@@ -8,163 +8,48 @@ Every section below is from the public reason block only.
 
 | reason | service | severity |
 |---|---|---|
-| `bracket_hresult` | `patching` | Error / Warning |
-| `cbs_session_options` | `patching` | Info |
-| `cli_option_rejected` | `patching` | Warning |
-| `dism_api_error` | `patching` | Error |
-| `dism_package_manager_error` | `patching` | Error |
-| `failed_generic` | `patching` | Error / Warning |
-| `health_command` | `patching` | Notice |
-| `hresult_error` | `patching` | Error / Warning |
-| `lookup_dummy_path` | `patching` | Info cap |
-| `provider_image_probe` | `patching` | Info cap |
-| `reboot_required` | `patching` | Warning |
-| `source_files_missing` | `patching` | Error |
+| `win_dism_command_failed` | `patching` | Info pin |
+| `win_dism_feature_change_failed` | `patching` | Info pin |
+| `win_dism_health_command` | `patching` | Info pin |
+| `win_dism_reboot_required` | `patching` | Info pin |
+| `win_dism_source_files_missing` | `patching` | Notice pin |
 
-## `bracket_hresult`
+## `win_dism_command_failed`
 
-DISM emitted a bracketed HRESULT detail line.
+A DISM command reported failure.
 
-**Severity:** Error / Warning
+**Severity:** Info pin
 
-**Impact:** The HRESULT may explain why a DISM command or provider operation failed.
+**Impact:** Depends on the command. Read the servicing outcome from CBS rather than from the tool exit.
 
-**Consider:**
+## `win_dism_feature_change_failed`
 
-- Search the exact HRESULT.
-- Read the parent dated line when the bracket detail was joined.
+A Windows optional feature could not be enabled or disabled.
 
-## `cbs_session_options`
+**Severity:** Info pin
 
-DISM recorded CBS session options for a servicing operation.
+**Impact:** That feature is not in the requested state.
 
-**Severity:** Info
+## `win_dism_health_command`
 
-**Impact:** Helps tie a DISM command to the corresponding CBS servicing window.
+A DISM health or repair command was run on this machine.
 
-**Consider:**
+**Severity:** Info pin
 
-- Use the timestamp to align DISM and CBS windows.
+**Impact:** None. This records an action, not a fault.
 
-## `cli_option_rejected`
+## `win_dism_reboot_required`
 
-DISM rejected a command-line option in the current context.
+A DISM change needs a reboot to take effect.
 
-**Severity:** Warning
+**Severity:** Info pin
 
-**Impact:** The requested DISM command did not run as intended until the option or context is corrected.
+**Impact:** The change applies after the next reboot.
 
-**Consider:**
+## `win_dism_source_files_missing`
 
-- Verify whether the option is supported for online vs offline images and this Windows build.
+A DISM operation could not find the source files it needed.
 
-## `dism_api_error`
+**Severity:** Notice pin
 
-DISM API reported an error.
-
-**Severity:** Error
-
-**Impact:** A DISM API operation failed; the surrounding lines identify the operation and HRESULT.
-
-**Consider:**
-
-- Read nearby API operation and HRESULT lines.
-- Ignore Time_InternalToPublic in this context; that noise is not this reason.
-
-## `dism_package_manager_error`
-
-DISM Package Manager failed during a servicing operation.
-
-**Severity:** Error
-
-**Impact:** The DISM operation did not complete successfully and may leave the image or component store unrepaired.
-
-**Consider:**
-
-- Check the operation name and HRESULT near the error.
-- Pair with CBS.log for lower-level component details.
-
-## `failed_generic`
-
-DISM logged a failure outside a narrower DISM reason.
-
-**Severity:** Error / Warning
-
-**Impact:** A DISM step failed, but surrounding context is required to identify the exact operation and fix.
-
-**Consider:**
-
-- Read the surrounding command and component lines.
-- Use the raw Failed text as the first search key.
-
-## `health_command`
-
-DISM ran a component-store health command.
-
-**Severity:** Notice
-
-**Impact:** Provides the command timeline for later health, source, or reboot outcomes.
-
-**Consider:**
-
-- Use as the start of a DISM health-operation timeline.
-- Pair with CBS.log for corruption counts and per-file repair detail.
-
-## `hresult_error`
-
-DISM emitted a non-zero HRESULT or failed operation.
-
-**Severity:** Error / Warning
-
-**Impact:** A DISM step failed or degraded; the exact HRESULT and operation determine remediation.
-
-**Consider:**
-
-- Search the exact HRESULT.
-- Prefer source_files_missing or package-manager-specific reasons when present.
-
-## `lookup_dummy_path`
-
-DISM missed a dummy path during session setup.
-
-**Severity:** Info cap
-
-**Consider:**
-
-- Keep as context only.
-
-## `provider_image_probe`
-
-DISM rejected a path during routine imaging-provider discovery.
-
-**Severity:** Info cap
-
-**Consider:**
-
-- Treat C: drive provider rejections as setup chatter unless a non-benign parent line also exists.
-
-## `reboot_required`
-
-DISM reported that a reboot is required.
-
-**Severity:** Warning
-
-**Impact:** Further updates or repairs may not complete until the host reboots.
-
-**Consider:**
-
-- Check whether later servicing failures occur before reboot.
-- Use with pending-reboot state signals when available.
-
-## `source_files_missing`
-
-DISM could not find required repair source files.
-
-**Severity:** Error
-
-**Impact:** RestoreHealth or image repair cannot complete until a valid matching source is available.
-
-**Consider:**
-
-- Verify OS build and source-image match.
-- Check /Source, /LimitAccess, policy, and Windows Update reachability.
+**Impact:** Repair or install will keep failing until a valid source is supplied.

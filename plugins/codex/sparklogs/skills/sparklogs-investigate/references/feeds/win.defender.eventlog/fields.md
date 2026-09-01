@@ -40,7 +40,7 @@ Stored flat under the `win.defender.eventlog.` prefix.
 | `win.defender.eventlog.user` | string | User context Defender associated with the event: detection (`User`), scan lifecycle (1000/1001, `User`). |
 | `win.defender.eventlog.action_id` | int | Numeric remediation action from 1117/1007 (`Action ID`). |
 | `win.defender.eventlog.action_name` | string | Rendered remediation action text from 1117/1007 (`Action Name`, downcased). Locale-sensitive, so an allow on a non-English system reads in the local language. |
-| `win.defender.eventlog.error_code` | string | Error code as logged: 1117/1007, 1118/1119/1008, 1005 scan failure, 2001/2003/2004 definition update failure, 3002/5008 engine failure (`Error Code`). |
+| `win.defender.eventlog.status` | string | Result code as logged (`Error Code`): 1117/1007 remediation outcome, 1118/1119/1008 remediation failure, 1005 scan failure, 2001/2003/2004 definition update failure, 3002/5008 engine failure. The remediation ids state a completed action as a zero here, so the value is the outcome and not a failure claim. |
 | `win.defender.eventlog.new_value` | string | 5007 config-change new value (`New Value`): the setting content Defender wrote, never message text. Exclusions, real-time monitoring, anti-spyware, tamper protection and cloud reporting are the settings this value names on a tamper-shaped change. |
 | `win.defender.eventlog.old_value` | string | 5007 config-change prior value (`Old Value`). |
 | `win.defender.eventlog.sig_version` | string | Current security intelligence version: 2000/2002/2010/2014 update lifecycle, 2001/2003/2004 update failure (`Current security intelligence Version`). |
@@ -63,27 +63,27 @@ Prefer these over the per-feed fields for anything that spans feeds.
 
 ## What sets each field
 
-Presence is per curated surface and per event id, because promotion is a property of the branch, not of the module.
+Presence is per curated surface, from what its author declared under `promotions`: a field reaches this row only when the surface's own arm or shape names it, never from a text scan of classify guessing which branch a write belongs to.
 A row lists what the surface CAN write, not what every event of it carries: a field whose value the payload does not supply stays unset, which is why absence of a field is never by itself evidence that a condition did not happen.
 A surface that promotes nothing says so: an empty row is a stated fact, not an omission.
 
 | Surface | Event ids | Fields set |
 |---|---|---|
 | `asr_block` / `default` | 1121 | `win.defender.eventlog.process_name` `win.defender.eventlog.rule_id` `win.defender.eventlog.threat_path` |
-| `av_config_tamper` / `default` | 5007 | `sparklogs.config_change.action` `sparklogs.config_change.type` `win.defender.eventlog.new_value` `win.defender.eventlog.old_value` |
+| `av_config_tamper` / `default` | 5007 | `win.defender.eventlog.new_value` `win.defender.eventlog.old_value` |
 | `av_tamper_blocked` / `default` | 5013 | **fields: none** |
 | `av_threat_detected` / `high_severity` | 1006, 1116 | `win.defender.eventlog.category_id` `win.defender.eventlog.category_name` `win.defender.eventlog.detection_origin` `win.defender.eventlog.detection_source` `win.defender.eventlog.detection_type` `win.defender.eventlog.process_name` `win.defender.eventlog.severity_id` `win.defender.eventlog.severity_name` `win.defender.eventlog.threat_name` `win.defender.eventlog.threat_path` `win.defender.eventlog.user` |
 | `av_threat_detected` / `standard` | 1006, 1116 | `win.defender.eventlog.category_id` `win.defender.eventlog.category_name` `win.defender.eventlog.detection_origin` `win.defender.eventlog.detection_source` `win.defender.eventlog.detection_type` `win.defender.eventlog.process_name` `win.defender.eventlog.severity_id` `win.defender.eventlog.severity_name` `win.defender.eventlog.threat_name` `win.defender.eventlog.threat_path` `win.defender.eventlog.user` |
-| `defender_engine_failed` / `default` | 3002, 5008 | `win.defender.eventlog.error_code` `win.defender.eventlog.feature_name` |
-| `defender_scan_failed` / `default` | 1005 | `win.defender.eventlog.error_code` `win.defender.eventlog.scan_id` |
-| `definition_update_failed` / `default` | 2001, 2003, 2004 | `win.defender.eventlog.error_code` `win.defender.eventlog.sig_version` `win.defender.eventlog.sig_version_previous` |
+| `defender_engine_failed` / `default` | 3002, 5008 | `win.defender.eventlog.feature_name` `win.defender.eventlog.status` |
+| `defender_scan_failed` / `default` | 1005 | `win.defender.eventlog.scan_id` `win.defender.eventlog.status` |
+| `definition_update_failed` / `default` | 2001, 2003, 2004 | `win.defender.eventlog.sig_version` `win.defender.eventlog.sig_version_previous` `win.defender.eventlog.status` |
 | `network_protection_block` / `default` | 1126 | **fields: none** |
-| `protection_disabled` / `disabled` | 5000, 5001, 5009, 5010, 5011, 5012 | `sparklogs.config_change.action` `sparklogs.config_change.type` |
-| `protection_disabled` / `enabled` | 5000, 5001, 5009, 5010, 5011, 5012 | `sparklogs.config_change.action` `sparklogs.config_change.type` |
+| `protection_disabled` / `disabled` | 5000, 5001, 5009, 5010, 5011, 5012 | **fields: none** |
+| `protection_disabled` / `enabled` | 5000, 5001, 5009, 5010, 5011, 5012 | **fields: none** |
 | `suspicious_behavior` / `default` | 1015 | `win.defender.eventlog.process_name` `win.defender.eventlog.threat_name` `win.defender.eventlog.threat_path` |
-| `threat_not_remediated` / `default` | 1007, 1117 | `win.defender.eventlog.action_id` `win.defender.eventlog.action_name` `win.defender.eventlog.error_code` `win.defender.eventlog.process_name` `win.defender.eventlog.threat_name` `win.defender.eventlog.threat_path` `win.defender.eventlog.user` |
-| `threat_remediated` / `default` | 1007, 1117 | `win.defender.eventlog.action_id` `win.defender.eventlog.action_name` `win.defender.eventlog.error_code` `win.defender.eventlog.process_name` `win.defender.eventlog.threat_name` `win.defender.eventlog.threat_path` `win.defender.eventlog.user` |
-| `threat_remediation_failed` / `default` | 1008, 1118, 1119 | `win.defender.eventlog.error_code` `win.defender.eventlog.threat_name` `win.defender.eventlog.threat_path` |
+| `threat_not_remediated` / `default` | 1007, 1117 | `win.defender.eventlog.action_id` `win.defender.eventlog.action_name` `win.defender.eventlog.process_name` `win.defender.eventlog.status` `win.defender.eventlog.threat_name` `win.defender.eventlog.threat_path` `win.defender.eventlog.user` |
+| `threat_remediated` / `default` | 1007, 1117 | `win.defender.eventlog.action_id` `win.defender.eventlog.action_name` `win.defender.eventlog.process_name` `win.defender.eventlog.status` `win.defender.eventlog.threat_name` `win.defender.eventlog.threat_path` `win.defender.eventlog.user` |
+| `threat_remediation_failed` / `default` | 1008, 1118, 1119 | `win.defender.eventlog.status` `win.defender.eventlog.threat_name` `win.defender.eventlog.threat_path` |
 
 ### Surfaces that promote nothing
 
@@ -92,11 +92,5 @@ A predicate over them uses the reason, the class, or the retained payload; there
 
 - `av_tamper_blocked` / `default`
 - `network_protection_block` / `default`
-
-### Surfaces with no `win.defender.eventlog.` field
-
-These populate portable families only.
-Looking for a feed-namespaced field on one of them finds nothing, and that is the design rather than a gap: the value has a cross-feed home instead.
-
 - `protection_disabled` / `disabled`
 - `protection_disabled` / `enabled`

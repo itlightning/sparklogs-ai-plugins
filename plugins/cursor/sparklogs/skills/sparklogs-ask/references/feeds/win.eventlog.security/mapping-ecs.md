@@ -42,8 +42,10 @@ ECS is field-per-concept and flat-dotted. Its identity fields collapse the initi
 | `sparklogs.origin.host` | `source.domain` |
 | `sparklogs.origin.port` | `source.port` |
 | `sparklogs.destination.host` | `destination.domain` |
-| `sparklogs.error.code` |  |
-| `sparklogs.error.code_space` |  |
+| `sparklogs.result.code` |  |
+| `sparklogs.result.code_space` |  |
+| `sparklogs.result.code_name` |  |
+| `sparklogs.result.failed` |  |
 | `sparklogs.config_change.type` |  |
 | `sparklogs.config_change.action` | `event.action` |
 | `sparklogs.config_change.target` |  |
@@ -57,7 +59,7 @@ ECS is field-per-concept and flat-dotted. Its identity fields collapse the initi
 - **`member`**: The principal whose membership in the target changed. A member is only ever a member, so no role collision is possible; group-in-group nesting reads member kind=group. No ECS neighbour. ECS models group membership nowhere.
 - **`origin`**: The initiating network endpoint. Populated only when the value names a machine other than the reporting host, which is what makes the populated side the direction. Caution: Windows WorkstationName lands on ECS `source.domain`, a wart worth knowing when translating queries. Our `origin.host` is a host name, never a domain.
 - **`destination`**: The receiving network endpoint.
-- **`error`**: The failure code the source reported, plus the number space it belongs to.
+- **`result`**: The main result code the source reported, the number space it belongs to, the constant name that space gives it, and whether that code is a failure. The name is a DECODE of the first two, present only where the source pack holds a decode table for that space. `failed` is a marker: presence means failure, absence of the field means success, and it is never false.
 - **`config_change`**: What configuration changed, in what direction, on what.
 
 ## Module fields
@@ -69,7 +71,7 @@ ECS is field-per-concept and flat-dotted. Its identity fields collapse the initi
 | `win.eventlog.security.logon_type_name` | `winlog.logon.type` |
 | `win.eventlog.security.auth_package` | `winlog.event_data.AuthenticationPackageName` |
 | `win.eventlog.security.lm_package` |  |
-| `win.eventlog.security.elevated` |  |
+| `win.eventlog.security.token_elevated` |  |
 | `win.eventlog.security.privileges` |  |
 | `win.eventlog.security.workstation` | `source.domain` |
 | `win.eventlog.security.caller_computer` | `source.domain` |
@@ -83,7 +85,9 @@ ECS is field-per-concept and flat-dotted. Its identity fields collapse the initi
 | `win.eventlog.security.target_server` | `destination.domain` |
 | `win.eventlog.security.audit_subcategory_guid` |  |
 | `win.eventlog.security.new_process_id` | `process.pid` |
-| `win.eventlog.security.token_elevation` |  |
+| `win.eventlog.security.uac_token_type` |  |
+| `win.eventlog.security.integrity_level` |  |
+| `win.eventlog.security.integrity_level_sid` |  |
 | `win.eventlog.security.parent_process_name` | `process.parent.executable` |
 | `win.eventlog.security.service_name` | `service.name` |
 | `win.eventlog.security.service_image_path` | `process.executable` |

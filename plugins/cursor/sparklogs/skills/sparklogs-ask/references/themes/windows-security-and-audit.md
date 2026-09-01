@@ -1,6 +1,7 @@
 # Windows security and audit
 
 **Data feed:** `win.eventlog.security`. Open `../feeds/win.eventlog.security/README.md`, then one artifact.
+Explore: `../guides/stream-kinds/wel-security.md`.
 
 Defender is not this theme. Use `endpoint-protection.md`.
 
@@ -9,7 +10,7 @@ Defender is not this theme. Use `endpoint-protection.md`.
 Change-class events keep actor join keys: subject user, logon id, origin IP, process creation (4688), service install, scheduled-task change, GPO.
 
 1. Set the window from symptom onset.
-2. Sweep change-class reasons in that window (grouped `sparklogs.reason` / `category`). Include System `service_installed` (SCM 7045) as a cross-feed witness; Security 4697 is the Security-channel sibling.
+2. Sweep change-class reasons in that window (grouped `sparklogs.reason` (LQL) / `category` (LQL)). Include System `service_installed` (SCM 7045) as a cross-feed witness; Security 4697 is the Security-channel sibling.
 3. Attribute: actor keys on the change event; join that logon session. Logon type 10 is RDP; origin IP is on the logon row.
 4. Expand: everything the same `SubjectLogonId` / actor name touched in the window.
 

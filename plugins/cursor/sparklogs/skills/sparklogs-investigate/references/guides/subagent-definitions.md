@@ -30,7 +30,7 @@ For delegated bulk-summarization work, use **the fastest, most lightweight moder
 **Model tier:** fast, lightweight tier per the platform you're running on.
 
 **Inputs the orchestrator passes:**
-- The `query_id` and `query_url` of a cached query.
+- The `query_id` (arg) and `query_url` (col) of a cached query.
 - A focusing question: "what unusual events happened in this set?", "which patterns dominate?", "are there any errors I should know about?"
 - An output schema: structured fields the subagent fills.
 
@@ -53,7 +53,7 @@ events_examined: <count>
 events_summarized: <count>
 ```
 
-**The `severity` field is a four-bucket summary, and it is lossy on purpose.** SparkLogs severity is
+**The `severity` (LQL) field is a four-bucket summary, and it is lossy on purpose.** SparkLogs severity is
 a twelve-rung ladder; this schema collapses it so an orchestrator can scan many findings at once. Map
 it this way, and keep the exact returned value in `summary` whenever the rung matters:
 
@@ -77,12 +77,12 @@ with a contract attached: it means fetch-first, whatever the ticket was about.
 
 ## Subagent: `sparklogs-pattern-enumerator`
 
-**Purpose.** Given a `query_event_counts_by_severity` result with many groups, summarize the top N pattern_hashes with their meanings (looking up pattern text via a `query_logs` message projection filtered to the `pattern_hash` if needed) and produce a structured enumeration the orchestrator can use as Findings input.
+**Purpose.** Given a `query_event_counts_by_severity` result with many groups, summarize the top N pattern_hashes with their meanings (looking up pattern text via a `query_logs` message projection filtered to the `pattern_hash` (LQL) if needed) and produce a structured enumeration the orchestrator can use as Findings input.
 
 **Model tier:** fast, lightweight tier.
 
 **Inputs:**
-- The `query_id` and `query_url` of the `query_event_counts_by_severity` result.
+- The `query_id` (arg) and `query_url` (col) of the `query_event_counts_by_severity` result.
 - Top N parameter (default 10).
 
 **Output schema:**
@@ -130,7 +130,7 @@ cluster_interpretations:
 
 - **Cross-correlating inference.** "Does Finding X explain Finding Y?" - orchestrator's job.
 - **Anomaly judgment requiring domain knowledge.** "Is this anomaly meaningful in this investigation context?" - orchestrator's job.
-- **Hypothesis evaluation.** "Does the evidence support hypothesis H?" - orchestrator's job (and `/sparklogs-analyze-cause`'s job for cause hypotheses).
+- **Hypothesis evaluation.** "Does the evidence support hypothesis H?" - orchestrator's job (and `sparklogs-analyze-cause`'s job for cause hypotheses).
 - **Output template assembly.** Orchestrator assembles Findings, Executive Summary, What Was Not Checked.
 - **Citation discipline.** Orchestrator owns ensuring every Finding cites a query_url; subagents pass through the URL but don't author the Findings.
 

@@ -37,7 +37,7 @@ Every section below is from the public reason block only.
 | `firewall_service_stopped` | `networking` | Warning |
 | `group_member_added` | `security_audit` | Error (privileged group) / Notice (any other security group) |
 | `group_member_removed` | `security_audit` | Warning (privileged group) / Notice (any other security group) |
-| `group_membership_changed` | `security_audit` | Warning (privileged group) / Notice (any other security group) |
+| `group_membership_changed` | `security_audit` | Warning (privileged group) / Notice (any other security group) / Info (Windows provisioning its own builtin groups) |
 | `guest_account_sign_in` | `auth` | Notice |
 | `insecure_boot_config` | `security_audit` | Warning |
 | `kerberos_preauth_failed` | `auth` | Warning (account state or broken infrastructure) / Notice (wrong password, unknown client, undecoded) |
@@ -485,7 +485,7 @@ A member was removed from a security-enabled group. Removals from privileged gro
 
 A security group was created, deleted, or changed (scope, type, or attributes). Changes to privileged groups (Administrators, Domain Admins, and similar) carry a higher band. Member adds and removals are their own reasons: group_member_added and group_member_removed.
 
-**Severity:** Warning (privileged group) / Notice (any other security group)
+**Severity:** Warning (privileged group) / Notice (any other security group) / Info (Windows provisioning its own builtin groups)
 
 **Impact:** What the group grants changes everywhere it is referenced, for every member at once. A deleted operator group revokes rights across every account that held them through it.
 
@@ -757,6 +757,7 @@ A scheduled task was created, deleted, updated, or disabled. Content changes are
 
 - Pivot on TaskName and Subject
 - Task XML stays in the raw payload; do not expect it as a curated field
+- The run-as password is not in the XML; Command/Arguments may still hold secrets and are swept with other event_data strings
 
 config_change.action reads updated on the modification id and created or deleted on the ids that
 name those directions, so pivot on the action rather than assuming one value.

@@ -23,21 +23,9 @@ There is no separate marketplace manifest for generic; clone or browse **`dist`*
 
 1. Open the **`dist`** branch of `itlightning/sparklogs-ai-plugins` (default branch on GitHub).
 2. Use `plugins/generic/sparklogs/` as the plugin root, or copy that directory where your host expects skills.
-3. Supply the SparkLogs API token, per **Token** below.
+3. Connect the MCP server. Sign in with SparkLogs (OAuth) when the host prompts.
 4. Ask a question about a monitored host, or name a workflow: "use sparklogs-investigate on SRV-FILE01".
 
-## Token
+`mcp.json` is the server URL and transport only. Token overlay: [API token auth](api-token.md).
 
-`mcp.json` ships this header:
-
-```json
-"headers": { "Authorization": "Bearer ${SPARKLOGS_API_TOKEN}" }
-```
-
-Agent Plugins v1 does **not** expand placeholders in remote URLs or HTTP headers, so `${SPARKLOGS_API_TOKEN}` is literal text, not a variable reference. Edit `mcp.json` and replace the whole value of the `Authorization` key under `mcpServers.sparklogs.headers` with `Bearer` followed by your token.
-
-If your host has its own secret substitution for MCP configs, use that instead and follow its syntax.
-
-The edited `mcp.json` holds a live token in plain text. Treat it as a secret: do not commit it.
-
-Exact wiring (paths, reload behavior, secret stores) depends on the agent product; treat this package as the portable **content** bundle plus MCP metadata.
+Exact wiring (paths, reload behavior) depends on the agent product; treat this package as the portable **content** bundle plus MCP metadata.

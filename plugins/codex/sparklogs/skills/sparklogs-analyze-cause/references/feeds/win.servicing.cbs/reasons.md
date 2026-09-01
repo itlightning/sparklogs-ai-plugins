@@ -8,373 +8,228 @@ Every section below is from the public reason block only.
 
 | reason | service | severity |
 |---|---|---|
-| `assembly_missing` | `patching` | Error |
-| `cannot_repair` | `patching` | Error |
-| `corruption_generic` | `patching` | Error / Warning |
-| `csi_fatal_marker` | `patching` | Error |
-| `delta_apply_fail` | `patching` | Error |
-| `failed_generic` | `patching` | Error / Warning |
-| `file_repaired` | `patching` | Warning |
-| `hash_mismatch` | `patching` | Error |
-| `hresult_error` | `patching` | Error / Warning |
-| `hydration_fail` | `patching` | Error |
-| `manifest_format_error` | `patching` | Error |
-| `offline_reg_unload` | `patching` | Info cap |
-| `orphan_package_probe` | `patching` | Info cap |
-| `package_open_failure` | `patching` | Error / Warning |
-| `payload_corrupt` | `patching` | Error / Warning |
-| `read_absence` | `patching` | Info cap |
-| `reproject_fail` | `patching` | Error |
-| `reserve_manager_probe` | `patching` | Info cap |
-| `sfc_scan` | `patching` | Info |
-| `source_missing` | `patching` | Error |
-| `store_corrupt_sxs` | `patching` | Error |
-| `store_corruption` | `patching` | Error |
-| `store_repair_complete` | `patching` | Notice |
-| `store_scan_clean` | `patching` | Info |
-| `store_scan_corruption_found` | `patching` | Warning |
-| `store_scan_corruption_repaired` | `patching` | Notice |
-| `sxs_status_error` | `patching` | Error / Warning |
-| `unable_to_repair_payload` | `patching` | Error / Warning |
+| `win_component_store_assembly_missing` | `patching` | Notice pin |
+| `win_component_store_corrupt_blocks_package` | `patching` | Warning pin |
+| `win_component_store_corruption_recurrence` | `patching` | Notice pin |
+| `win_component_store_file_repaired` | `patching` | Notice pin |
+| `win_component_store_flag_corruption_suspected` | `patching` | Notice pin |
+| `win_component_store_payload_corrupt` | `patching` | Notice pin |
+| `win_component_store_payload_unrepairable` | `patching` | Warning pin |
+| `win_component_store_repair_completed` | `patching` | Notice pin |
+| `win_component_store_repair_unavailable` | `patching` | Warning pin |
+| `win_component_store_reprojection_failed` | `patching` | Notice pin |
+| `win_component_store_scan_found_corruption` | `patching` | Notice pin |
+| `win_component_store_scan_repaired_corruption` | `patching` | Notice pin |
+| `win_component_store_source_missing` | `patching` | Warning pin |
+| `win_component_store_sxs_corrupt` | `patching` | Warning pin |
+| `win_servicing_commit_skipped_reboot_required` | `patching` | Notice pin |
+| `win_servicing_delta_patch_failed` | `patching` | Notice pin |
+| `win_servicing_duplicate_update_name` | `patching` | Notice pin |
+| `win_servicing_manifest_malformed` | `patching` | Notice pin |
+| `win_servicing_manifest_unparseable` | `patching` | Debug pin |
+| `win_servicing_package_change_reported` | `patching` | Debug pin |
+| `win_servicing_package_stage_failed` | `patching` | Warning pin |
+| `win_servicing_session_finalized` | `patching` | Debug pin |
+| `win_servicing_startup_package_failed` | `patching` | Notice pin |
+| `win_servicing_update_package_create_failed` | `patching` | Warning pin |
+| `win_sfc_repairing_components` | `patching` | Notice pin |
 
-## `assembly_missing`
+## `win_component_store_assembly_missing`
 
-CBS reported a missing side-by-side assembly.
+A component assembly is missing from the store.
 
-**Severity:** Error
+**Severity:** Notice pin
 
-**Impact:** Package installation or repair may fail because a required assembly is absent.
+**Impact:** Windows will usually repair this automatically.
 
-**Consider:**
+## `win_component_store_corrupt_blocks_package`
 
-- Pivot on the assembly identity and package name when present.
+A Windows package failed to apply because the component store is corrupt.
 
-## `cannot_repair`
+**Severity:** Warning pin
 
-Windows servicing could not repair a member file.
+**Impact:** Updates will keep failing on this machine until the component store is repaired.
 
-**Severity:** Error
+## `win_component_store_corruption_recurrence`
 
-**Impact:** The component may remain corrupt after the scan or repair operation.
+Windows reported how often component-store corruption has been detected.
 
-**Consider:**
+**Severity:** Notice pin
 
-- Pivot on the member file and component identity.
-- Compare with later DISM RestoreHealth or SFC reruns.
+**Impact:** None directly. A rising count suggests the underlying cause is not being fixed.
 
-## `corruption_generic`
+## `win_component_store_file_repaired`
 
-CBS mentioned corruption outside a narrower corruption rule.
+Windows repaired a file from its component store or backup.
 
-**Severity:** Error / Warning
+**Severity:** Notice pin
 
-**Impact:** Some servicing corruption may be present, but nearby lines are needed to identify the object and outcome.
+**Impact:** None. The file was restored.
 
-**Consider:**
+## `win_component_store_flag_corruption_suspected`
 
-- Use adjacent component, file, and HRESULT lines to narrow the cause.
+Windows suspects component-store file-flag corruption.
 
-## `csi_fatal_marker`
+**Severity:** Notice pin
 
-CSI emitted a fatal or error marker during servicing.
+**Impact:** None established. The event records a suspicion, not a finding.
 
-**Severity:** Error
+## `win_component_store_payload_corrupt`
 
-**Impact:** The servicing operation hit an error path; nearby CBS lines are needed to identify the exact operation.
+A payload file in the component store is corrupt.
 
-**Consider:**
+**Severity:** Notice pin
 
-- Read the nearest component, HRESULT, and package lines before assigning cause.
+**Impact:** Windows will usually repair this automatically.
 
-## `delta_apply_fail`
+## `win_component_store_payload_unrepairable`
 
-CBS failed to apply a servicing delta payload.
+Windows could not repair a damaged payload file.
 
-**Severity:** Error
+**Severity:** Warning pin
 
-**Impact:** The update or package operation may fail until the payload or component state is corrected.
+**Impact:** Servicing operations needing this payload will fail until it is restored.
 
-**Consider:**
+## `win_component_store_repair_completed`
 
-- Check the package identity and update history around the same timestamp.
+Windows repaired all recorded component-store corruption.
 
-## `failed_generic`
+**Severity:** Notice pin
 
-CBS logged a failure outside a narrower CBS reason.
+**Impact:** None. The store is consistent again.
 
-**Severity:** Error / Warning
+## `win_component_store_repair_unavailable`
 
-**Impact:** A servicing step failed, but the exact operation and consequence require the surrounding CBS context.
+Windows could not repair a damaged component.
 
-**Consider:**
+**Severity:** Warning pin
 
-- Read the surrounding component and package lines.
-- Use the raw failed text as the first search key.
+**Impact:** Updates touching this component are likely to fail until it is repaired manually.
 
-## `file_repaired`
+## `win_component_store_reprojection_failed`
 
-Windows servicing repaired a corrupted file.
+Windows could not reproject a component.
 
-**Severity:** Warning
+**Severity:** Notice pin
 
-**Impact:** A corruption issue was corrected, but the root cause may still matter if repairs recur.
+**Impact:** Usually none: the operation is normally retried.
 
-**Consider:**
+## `win_component_store_scan_found_corruption`
 
-- Treat as closure for the file when no later cannot_repair appears.
-- Recurring repaired files can indicate disk, update, or image health problems.
+A component-store scan detected corruption.
 
-## `hash_mismatch`
+**Severity:** Notice pin
 
-CBS detected a servicing file hash mismatch.
+**Impact:** Windows updates may fail later if the damage is not repaired. Detection alone does not mean anything is currently broken.
 
-**Severity:** Error
+## `win_component_store_scan_repaired_corruption`
 
-**Impact:** A component payload may be altered, incomplete, or mismatched, which can block servicing or repair.
+A component-store scan repaired corruption it found.
 
-**Consider:**
+**Severity:** Notice pin
 
-- Inspect the corrupt_file or component name when present.
-- Check whether a later repair or source_missing event explains the outcome.
+**Impact:** None. The damage was fixed.
 
-## `hresult_error`
+## `win_component_store_source_missing`
 
-CBS emitted a non-zero servicing HRESULT or error family.
+A servicing operation could not find the source files it needed.
 
-**Severity:** Error / Warning
+**Severity:** Warning pin
 
-**Impact:** The servicing operation may have failed or degraded; the exact code and nearby operation determine impact.
+**Impact:** Repair or install will keep failing until a valid source is supplied.
 
-**Consider:**
+## `win_component_store_sxs_corrupt`
 
-- Search the exact HRESULT.
-- Prefer a narrower reason when one appears in the same event window.
+The side-by-side component store is corrupt.
 
-## `hydration_fail`
+**Severity:** Warning pin
 
-CBS failed to hydrate servicing content.
+**Impact:** Servicing operations may fail until the store is repaired.
 
-**Severity:** Error
+## `win_servicing_commit_skipped_reboot_required`
 
-**Impact:** Servicing may be unable to materialize required files for the operation.
+A servicing change was deferred because a reboot is pending.
 
-**Consider:**
+**Severity:** Notice pin
 
-- Check package and source context near the failure.
+**Impact:** The change applies after the next reboot.
 
-## `manifest_format_error`
+## `win_servicing_delta_patch_failed`
 
-CBS found invalid component manifest format data.
+A component delta patch could not be applied.
 
-**Severity:** Error
+**Severity:** Notice pin
 
-**Impact:** Package processing or repair may fail because component metadata is malformed.
+**Impact:** Usually none: Windows falls back to a full payload.
 
-**Consider:**
+## `win_servicing_duplicate_update_name`
 
-- Look for the component or manifest path in nearby CBS lines.
+Windows found a duplicate update name in a package.
 
-## `offline_reg_unload`
+**Severity:** Notice pin
 
-CBS could not unload an offline registry hive during servicing cleanup.
+**Impact:** None established. It may indicate a store inconsistency.
 
-**Severity:** Info cap
+## `win_servicing_manifest_malformed`
 
-**Consider:**
+A component manifest is malformed.
 
-- Use as context only unless repeated with other registry or VSS failures.
+**Severity:** Notice pin
 
-## `orphan_package_probe`
+**Impact:** Operations touching that component may fail.
 
-CBS failed to open a legacy or orphaned package during package enumeration.
+## `win_servicing_manifest_unparseable`
 
-**Severity:** Info cap
+Windows could not parse a package manifest.
 
-**Consider:**
+**Severity:** Debug pin
 
-- Treat 0x800f0805 in this pattern as expected enumeration noise.
-- Look for nearby package_open_failure or hresult_error records with different HRESULTs.
+**Impact:** That optional feature may not be installable.
 
-## `package_open_failure`
+## `win_servicing_package_change_reported`
 
-CBS failed to open or resolve a servicing package.
+A Windows package was added, removed or updated.
 
-**Severity:** Error / Warning
+**Severity:** Debug pin
 
-**Impact:** The package operation may not proceed until package identity, manifests, or source data are corrected.
+**Impact:** None on its own.
 
-**Consider:**
+## `win_servicing_package_stage_failed`
 
-- Separate 0x800f0805 orphan probes from other HRESULTs.
-- Pivot on the package identity when present.
+A Windows package could not be staged for installation.
 
-## `payload_corrupt`
+**Severity:** Warning pin
 
-CSI reported a corrupt servicing payload.
+**Impact:** That update will not install until the underlying cause is fixed.
 
-**Severity:** Error / Warning
+## `win_servicing_session_finalized`
 
-**Impact:** The affected component may need repair from the component store, Windows Update, or a matching source image.
+A Windows servicing session started and finished.
 
-**Consider:**
+**Severity:** Debug pin
 
-- Use extracted corrupt_file or corrupt_component values when present.
-- Look for later file_repaired or cannot_repair records.
+**Impact:** None. This is a liveness marker.
 
-## `read_absence`
+## `win_servicing_startup_package_failed`
 
-CBS did not find optional servicing state or telemetry data.
+A Windows package failed during startup processing.
 
-**Severity:** Info cap
+**Severity:** Notice pin
 
-**Consider:**
+**Impact:** That package is not installed. Patching status is better read from the update client.
 
-- Do not treat this line alone as evidence of servicing failure.
-- Check whether the same session also emits hresult_error or source_missing.
+## `win_servicing_update_package_create_failed`
 
-## `reproject_fail`
+Windows could not create an update package.
 
-CBS could not reproject a corrupted file during repair.
+**Severity:** Warning pin
 
-**Severity:** Error
+**Impact:** That update will not install until the underlying cause is fixed.
 
-**Impact:** The affected component may remain inconsistent after repair.
+## `win_sfc_repairing_components`
 
-**Consider:**
+System File Checker started repairing components.
 
-- Check adjacent payload and member-file lines for the affected component.
+**Severity:** Notice pin
 
-## `reserve_manager_probe`
-
-CBS failed an update reserve-manager startup probe.
-
-**Severity:** Info cap
-
-**Consider:**
-
-- Keep for session context only.
-
-## `sfc_scan`
-
-CBS recorded SFC scan activity.
-
-**Severity:** Info
-
-**Impact:** Provides timeline context for an SFC scan; impact depends on nearby repair or cannot-repair records.
-
-**Consider:**
-
-- Use this as a session marker, not a failure by itself.
-
-## `source_missing`
-
-CBS could not find required source files for servicing repair.
-
-**Severity:** Error
-
-**Impact:** RestoreHealth or package repair may fail until a valid matching source is supplied.
-
-**Consider:**
-
-- Verify the OS build and source image match.
-- Check whether Windows Update access or /Source policy blocked repair.
-
-## `store_corrupt_sxs`
-
-CBS reported the SxS component store corrupt.
-
-**Severity:** Error
-
-**Impact:** Windows servicing and repair operations may fail until component-store corruption is repaired.
-
-**Consider:**
-
-- Run or review DISM RestoreHealth and SFC outcomes for the same window.
-
-## `store_corruption`
-
-CBS reported component-store corruption.
-
-**Severity:** Error
-
-**Impact:** Windows updates, feature installs, and repair operations may fail until the component store is repaired.
-
-**Consider:**
-
-- Pair with DISM RestoreHealth and later store_repair_complete records.
-- Pivot on HRESULT 0x800f0831 when present.
-
-## `store_repair_complete`
-
-CBS reported component-store corruption was fixed.
-
-**Severity:** Notice
-
-**Impact:** Repair appears to have completed for the corruption CBS detected.
-
-**Consider:**
-
-- Use as a recovery marker after store_corruption or store_corrupt_sxs.
-
-## `store_scan_clean`
-
-A component-store scan completed and found no corruption.
-
-**Severity:** Info
-
-**Consider:**
-
-- Use as the evidence that the component store was intact at that time.
-- Pair with DISM session logs for the command that initiated the scan.
-
-## `store_scan_corruption_found`
-
-A component-store scan counted corrupt items.
-
-**Severity:** Warning
-
-**Impact:** The component store holds items that no longer match their servicing metadata. Updates and feature installs that touch those items can fail until the store is repaired.
-
-**Consider:**
-
-- Compare with the repair count from the same session before deciding the store is still corrupt.
-- Run DISM RestoreHealth when the corruption was detected but never repaired.
-- Pair with DISM session logs for the command that initiated the scan.
-
-## `store_scan_corruption_repaired`
-
-A component-store scan counted items it repaired.
-
-**Severity:** Notice
-
-**Impact:** Corruption existed and repairs were made for it. The line does not say whether anything corrupt was left behind.
-
-**Consider:**
-
-- Compare the repair count with the detected count from the same session.
-- Treat a count that returns on later scans as damage recurring, not as a machine that was fixed.
-
-## `sxs_status_error`
-
-CBS emitted a side-by-side or status error code.
-
-**Severity:** Error / Warning
-
-**Impact:** Servicing may be blocked or degraded depending on the specific SxS or STATUS code.
-
-**Consider:**
-
-- Use the exact error literal as the search and vendor-doc pivot.
-
-## `unable_to_repair_payload`
-
-CSI could not repair a payload from the local backup.
-
-**Severity:** Error / Warning
-
-**Impact:** Repair may need Windows Update or a matching source image if the local backup cannot satisfy the payload.
-
-**Consider:**
-
-- Check the unrepairable_file value when present.
-- Look for a later successful repair before opening an incident.
+**Impact:** None on its own.

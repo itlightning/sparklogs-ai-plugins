@@ -16,7 +16,7 @@ Verify with the confirm/refute steps and use judgment before acting.
 
 INPUT
 The prior investigation's system condition summary
-(referenced by external_investigation_id <id>, accessible via /sparklogs:summary <id>).
+(referenced by external_investigation_id <id>, accessible via /sparklogs:sparklogs-summary <id>).
 
 CANDIDATE HYPOTHESES (ranked by evidence support)
 
@@ -61,7 +61,7 @@ Reused from the prior investigation. Do not generate a new one - this analysis e
 Required at the top of every analysis, right after the title. Plain, calm framing: these are ranked explanations that fit the evidence, not established conclusions. Verbatim wording suggested above. Every hypothesis still needs the confirm/refute steps below; the intro sets expectations once instead of repeating a warning per hypothesis.
 
 ### INPUT
-Reference to the prior investigation summary. The engineer can re-display it via `/sparklogs:summary <id>`.
+Reference to the prior investigation summary. The engineer can re-display it via `/sparklogs:sparklogs-summary <id>`.
 
 ### Hypothesis statement
 A plain-language statement of the candidate cause. State it directly and specifically - the Confidence field and the WORKING THEORIES intro already carry the "candidate, not proven" framing, so the statement itself shouldn't hedge.
@@ -108,7 +108,7 @@ If the symptom could mean something different than the obvious interpretation, e
 ### What is uncertain
 Explicit enumeration of weak evidence and gaps. **Do not minimize.** Examples:
 - "Whether the disk-pressure cluster (Finding 5b) is independent or related to the primary pattern."
-- "Whether NAS-01 issues are contributing - backup target was not checked (no Managed Agent)."
+- "Whether NAS-01 issues are contributing - backup target was not checked (no SparkLogs Agent)."
 - "Whether there is a non-KB factor common to the 7 affected sources."
 
 ### Recommended next steps
@@ -138,7 +138,7 @@ Verify with the confirm/refute steps and use judgment before acting.
 INPUT
 The prior investigation's system condition summary
 (referenced by external_investigation_id investigate-ticket-4781-veeam-backup, accessible via
- /sparklogs:summary investigate-ticket-4781-veeam-backup).
+ /sparklogs:sparklogs-summary investigate-ticket-4781-veeam-backup).
 
 CANDIDATE HYPOTHESES
 
@@ -168,7 +168,7 @@ HYPOTHESIS #3: Backup target NAS-01 issues compound with VSS issues.
   Confidence: low
   What would confirm this: check NAS-01 health logs directly during the error windows.
   What would refute this: NAS-01 health is normal during the windows.
-  Off-endpoint check needed: yes (NAS-01 does not run a Managed Agent)
+  Off-endpoint check needed: yes (NAS-01 does not run a SparkLogs Agent)
 
 ALTERNATIVE FRAMINGS
 - The "fleet-wide pattern" (Finding 6) could mean these 7 sources share a common factor that

@@ -32,7 +32,7 @@ This module populates no portable family.
 
 ## What sets each field
 
-Presence is per curated surface and per event id, because promotion is a property of the branch, not of the module.
+Presence is per curated surface, from what its author declared under `promotions`: a field reaches this row only when the surface's own arm or shape names it, never from a text scan of classify guessing which branch a write belongs to.
 A row lists what the surface CAN write, not what every event of it carries: a field whose value the payload does not supply stays unset, which is why absence of a field is never by itself evidence that a condition did not happen.
 A surface that promotes nothing says so: an empty row is a stated fact, not an omission.
 

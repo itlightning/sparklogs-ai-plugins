@@ -47,13 +47,13 @@ An open monitor (a holding episode) is an interesting signal, not automatically 
 must act on.
 
 - Problemhood rides **severity** plus the MSP's own policy, never "there is an open monitor".
-- Do not treat `open_monitors_count` or a dump of open episodes as the finding list.
+- Do not treat `open_monitors_count` (col) or a dump of open episodes as the finding list.
 - `ELEVATED` + Info can be normal forever on a large share of a fleet (busy CPU, SQL memory
   dominance, crash dumps disabled on desktops) and still matter as RCA context.
 
 ## The category ladder is class-LAST
 
-`category` is a PROJECTION computed at emit from `topic`, `reason`, `class` and `kind`, each of which
+`category` (LQL) is a PROJECTION computed at emit from `sparklogs.topic` (LQL), `sparklogs.reason` (LQL), `sparklogs.class` (LQL) and `sparklogs.kind` (LQL), each of which
 is independently stamped as its own field on the same event.
 
 ```
@@ -65,10 +65,10 @@ hash_mismatch.NOTABLE
 
 The class segment, when present, is LAST. `ELEVATED.os_volume_space_exhausting` is not a shape this
 system produces, and neither is any ladder led by the module name: the producing module is already a
-field (`subsource`), so it never leads the ladder.
+field (`subsource` (LQL)), so it never leads the ladder.
 
-**Never parse a field back out of the category.** Want the reason, read `sparklogs.reason`. Want the
-class, read `sparklogs.class`. A value that lives only inside a dotted string looks right in an
+**Never parse a field back out of the category.** Want the reason, read `sparklogs.reason` (LQL). Want the
+class, read `sparklogs.class` (LQL). A value that lives only inside a dotted string looks right in an
 example while the field it was supposed to mirror is quietly absent, and that is exactly how
 recurrence and fleet grouping stop being answerable.
 
@@ -77,10 +77,10 @@ projects to nothing and says so.
 
 **One reason spans a lifecycle.** Onset, hold and closure of one condition share a single reason:
 `….<reason>.NOTABLE` at onset, `….<reason>.ELEVATED` while held, `….<reason>.RECOVERED` at clearance.
-Group by `sparklogs.reason` to collapse a lifecycle into one finding. Treating the three as three
+Group by `sparklogs.reason` (LQL) to collapse a lifecycle into one finding. Treating the three as three
 findings triples the apparent problem count.
 
-**Say reason, not slug.** Older material calls this field a slug. It is `sparklogs.reason`, and MSPs
+**Say reason, not slug.** Older material calls this field a slug. It is `sparklogs.reason` (LQL), and MSPs
 read it, so the word in your output is "reason".
 
 ## Severity
@@ -114,23 +114,23 @@ bridge; everything else about severity in this doc set points here.
 | Where you see it | Form | Example |
 |---|---|---|
 | Prose you write, and LQL filters | lowercase rung name | `severity in (error, critical)` |
-| The `severity` cell on a returned row | UPPERCASE rung name | `ERROR`, `CRITICAL`, and `WARN2` / `WARN3` for rungs between the named ones |
-| Numeric filters and `severity_level` | integer 1-24 | `min_severity: 17` |
-| Anything that COUNTS events: the `cnt_<band>` columns and `summary.severity_histogram` | lowercase band name, one of nine | `critical_plus`, `info_or_notice` |
+| The `severity` (LQL) cell on a returned row | UPPERCASE rung name | `ERROR`, `CRITICAL`, and `WARN2` / `WARN3` for rungs between the named ones |
+| Numeric filters and `severity_level` (col) | integer 1-24 | `min_severity: 17` |
+| Anything that COUNTS events: the `cnt_<band>` columns and `summary.severity_histogram` (col) | lowercase band name, one of nine | `critical_plus`, `info_or_notice` |
 
-**A cell and a digest speak different vocabularies on purpose.** A row's `severity` reports ONE
+**A cell and a digest speak different vocabularies on purpose.** A row's `severity` (LQL) reports ONE
 observation, so it names the exact rung, down to `WARN3`. A histogram breaks down a POPULATION, so it
 speaks the nine bands and nothing finer: `critical_plus`, never `CRITICAL`. Peak severity is not lost
-to the coarser grain; it stays exact on `max_severity`.
+to the coarser grain; it stays exact on `max_severity` (col).
 
 The nine bands are defined by one sentence, which the tools repeat verbatim so there is only ever one
 spelling to trust:
 
 Severity bands are the same on every tool here: cnt_debug_or_below (severity 6 and below), cnt_verbose (7-8), cnt_info_or_notice (9-12), cnt_warning (13-15), cnt_minor (16), cnt_error (17), cnt_serious (18), cnt_severe (19), cnt_critical_plus (20 and above). Listings of what is wrong carry the failure side only (cnt_warning and above); tools that count all traffic carry every band.
 
-`summary.severity_histogram` is an ORDERED list of `{band, count}` over those bands, worst-last,
+`summary.severity_histogram` (col) is an ORDERED list of `{band, count}` over those bands, worst-last,
 carrying only the bands that occurred: a band missing from it is a band that response never saw.
-The failure-side subset is the five columns `cnt_warning` through `cnt_critical_plus`, and a listing
+The failure-side subset is the five columns `cnt_warning` (col) through `cnt_critical_plus` (col), and a listing
 that carries them is not hiding the quiet traffic: it never counted it.
 
 **Quote returned values verbatim, write rung names in your own voice.** A returned severity is a
@@ -152,15 +152,15 @@ vendor's taxonomy. A curated pack re-grades by consequence.
 
 ## Kind, and why counts double
 
-`sparklogs.kind` says what MORPHOLOGY a row is: `inventory`, `monitor`, `delta`, `agent_op`,
+`sparklogs.kind` (LQL) says what MORPHOLOGY a row is: `inventory`, `monitor`, `delta`, `agent_op`,
 `config_change`, `malformed`. It is a different question from class and from severity.
 
 `malformed` marks a row that did not parse cleanly, and it does not stand alone: a row can keep a
-valid `kind` and still carry `malformed_event=true`, so a `kind=malformed` filter by itself misses
+valid `sparklogs.kind` (LQL) and still carry `malformed_event=true`, so a `kind=malformed` filter by itself misses
 those. Read the pair. A kind outside this list is possible and is not a bug: a newer agent may emit
-one, and it is deliberately not dropped, so an unfamiliar `kind` is a real row rather than noise.
+one, and it is deliberately not dropped, so an unfamiliar `sparklogs.kind` (LQL) is a real row rather than noise.
 
-Counts are keyed on `kind`, and one underlying fault can legitimately appear twice: a failing volume
+Counts are keyed on `sparklogs.kind` (LQL), and one underlying fault can legitimately appear twice: a failing volume
 shows up as a `monitor` row for the condition and again inside the `inventory` row for the box. That
 is one fact with two witnesses, not two problems. Say which kind you counted.
 

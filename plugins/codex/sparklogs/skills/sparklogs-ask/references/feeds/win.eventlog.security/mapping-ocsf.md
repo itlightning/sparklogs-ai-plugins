@@ -42,8 +42,10 @@ OCSF nests entities under the event actor. Anchors below name the object path, n
 | `sparklogs.origin.host` | `src_endpoint.hostname` |
 | `sparklogs.origin.port` | `src_endpoint.port` |
 | `sparklogs.destination.host` | `dst_endpoint.hostname` |
-| `sparklogs.error.code` | `status_code` |
-| `sparklogs.error.code_space` |  |
+| `sparklogs.result.code` | `status_code` |
+| `sparklogs.result.code_space` |  |
+| `sparklogs.result.code_name` |  |
+| `sparklogs.result.failed` |  |
 | `sparklogs.config_change.type` |  |
 | `sparklogs.config_change.action` | `activity_name` |
 | `sparklogs.config_change.target` |  |
@@ -57,7 +59,7 @@ OCSF nests entities under the event actor. Anchors below name the object path, n
 - **`member`**: The principal whose membership in the target changed. A member is only ever a member, so no role collision is possible; group-in-group nesting reads member kind=group. OCSF group-management carries the group as `group` and the member as `user`. Our shape inverts nothing: target holds the group with kind=group, member holds the principal, and the anchor names where OCSF puts the same fact.
 - **`origin`**: The initiating network endpoint. Populated only when the value names a machine other than the reporting host, which is what makes the populated side the direction. Anchors `src_endpoint`, whichever class the event belongs to.
 - **`destination`**: The receiving network endpoint.
-- **`error`**: The failure code the source reported, plus the number space it belongs to.
+- **`result`**: The main result code the source reported, the number space it belongs to, the constant name that space gives it, and whether that code is a failure. The name is a DECODE of the first two, present only where the source pack holds a decode table for that space. `failed` is a marker: presence means failure, absence of the field means success, and it is never false.
 - **`config_change`**: What configuration changed, in what direction, on what.
 
 ## Module fields
@@ -69,7 +71,7 @@ OCSF nests entities under the event actor. Anchors below name the object path, n
 | `win.eventlog.security.logon_type_name` | `logon_type` |
 | `win.eventlog.security.auth_package` | `auth_protocol` |
 | `win.eventlog.security.lm_package` | `auth_protocol` |
-| `win.eventlog.security.elevated` | `session.is_privileged` |
+| `win.eventlog.security.token_elevated` | `session.is_privileged` |
 | `win.eventlog.security.privileges` |  |
 | `win.eventlog.security.workstation` | `src_endpoint.hostname` |
 | `win.eventlog.security.caller_computer` | `src_endpoint.hostname` |
@@ -83,7 +85,9 @@ OCSF nests entities under the event actor. Anchors below name the object path, n
 | `win.eventlog.security.target_server` | `dst_endpoint.hostname` |
 | `win.eventlog.security.audit_subcategory_guid` |  |
 | `win.eventlog.security.new_process_id` | `process.pid` |
-| `win.eventlog.security.token_elevation` |  |
+| `win.eventlog.security.uac_token_type` |  |
+| `win.eventlog.security.integrity_level` |  |
+| `win.eventlog.security.integrity_level_sid` |  |
 | `win.eventlog.security.parent_process_name` | `actor.process.file.path` |
 | `win.eventlog.security.service_name` | `service.name` |
 | `win.eventlog.security.service_image_path` | `file.path` |

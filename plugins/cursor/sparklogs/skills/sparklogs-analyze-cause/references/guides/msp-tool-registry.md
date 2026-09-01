@@ -2,7 +2,7 @@
 
 A compact registry of common MSP tools to recognize during investigations. Covers the most common tools per category; expands over time.
 
-Per entry: tool name, category, OS, typical service name(s), typical install path, typical log location, typical SparkLogs `app` field value when ingested, primary investigation contexts where it surfaces, vendor docs URL.
+Per entry: tool name, category, OS, typical service name(s), typical install path, typical log location, typical SparkLogs `app` (LQL) field value when ingested, primary investigation contexts where it surfaces, vendor docs URL.
 
 Read this file when investigating any symptom that involves a specific vendor product or where you need to
 discover likely log file locations for analysis.
@@ -11,7 +11,7 @@ discover likely log file locations for analysis.
 
 ## RMM (Remote Monitoring and Management)
 
-| Tool | OS | Service name(s) | Install path | Log location | SparkLogs `app` | HM | Docs |
+| Tool | OS | Service name(s) | Install path | Log location | SparkLogs `app` (LQL) | HM | Docs |
 |---|---|---|---|---|---|---|---|
 | ConnectWise Automate | Win | `LTService`, `LTSvcMon` | `<Prog>/LabTech/Service/` | `<Prog>/LabTech/Service/Logs/` | `connectwise-automate/...` | HM10, HM4 | https://docs.connectwise.com/ConnectWise_Automate_Documentation |
 | ConnectWise RMM | Win | `Datto.RMM.Agent` | `<Prog>/CentraStage/` | `<Prog>/CentraStage/Logs/` | `connectwise-rmm/...` | HM10 | https://docs.connectwise.com/ConnectWise |
@@ -25,7 +25,7 @@ discover likely log file locations for analysis.
 
 ## Backup / BCDR
 
-| Tool | OS | Service name(s) | Install path | Log location | SparkLogs `app` | HM |
+| Tool | OS | Service name(s) | Install path | Log location | SparkLogs `app` (LQL) | HM |
 |---|---|---|---|---|---|---|
 | Veeam Backup & Replication | Win | `VeeamBackupSvc`, `VeeamCatalogSvc`, `VeeamCloudSvc`, `VeeamMountSvc`, `VeeamNFSSvc`, `VeeamTransportSvc` | `<Prog>/Veeam/Backup and Replication/` | `<Prog>/Veeam/Backup and Replication/Backup/` and `<ProgramData>/Veeam/Backup/` | `veeam/...` | HM1 |
 | Veeam Agent | Win | `VeeamEndpointBackupSvc` | `<Prog>/Veeam/Endpoint Backup/` | `<ProgramData>/Veeam/Endpoint Backup/` | `veeam-agent/...` | HM1 |
@@ -37,7 +37,7 @@ discover likely log file locations for analysis.
 
 ## Endpoint Security (AV / EDR / XDR)
 
-| Tool | OS | Service name(s) | Install path | Log location | SparkLogs `app` | HM |
+| Tool | OS | Service name(s) | Install path | Log location | SparkLogs `app` (LQL) | HM |
 |---|---|---|---|---|---|---|
 | SentinelOne | Win/Mac | `SentinelAgent`, `LogProcessorService` | `<Prog>/SentinelOne/Sentinel Agent/` | varies (cloud-side) | `sentinelone/...` | HM10, HM1 |
 | CrowdStrike Falcon | Win | `CSAgent`, `CSFalconService` | `<Prog>/CrowdStrike/` | varies (cloud-side) | `crowdstrike/...` | HM10 |
@@ -51,7 +51,7 @@ discover likely log file locations for analysis.
 
 ## Firewalls / Network
 
-| Tool | Type | Source format | SparkLogs `app` | HM |
+| Tool | Type | Source format | SparkLogs `app` (LQL) | HM |
 |---|---|---|---|---|
 | FortiGate | Edge firewall | syslog (CEF, key-value) | `firewall/fortigate/...` | HM10, cross-vendor |
 | SonicWall | Edge firewall | syslog | `firewall/sonicwall/...` | HM10 |
@@ -63,7 +63,7 @@ discover likely log file locations for analysis.
 
 ## Patch Management
 
-| Tool | OS | Service name(s) | SparkLogs `app` | HM |
+| Tool | OS | Service name(s) | SparkLogs `app` (LQL) | HM |
 |---|---|---|---|---|
 | WSUS (server-side) | Win Server | `WsusService` | `wsus/...` | HM4 |
 | Microsoft Endpoint Manager / Intune | Hybrid | OS-bundled (Intune Management Extension on managed device) | winlog Microsoft-Windows-DeviceManagement-Enterprise-Diagnostics-Provider | HM4 |
@@ -106,6 +106,6 @@ discover likely log file locations for analysis.
 
 When investigating:
 1. If the symptom names a specific vendor product (e.g., "Veeam reports backup failed"), look up the vendor here for service names, log paths, and HM mapping.
-2. If you see unexpected services in `state.services`, check the registry - recognize MSP-tool services so you can frame them correctly.
+2. If you see unexpected services in state.services, check the registry - recognize MSP-tool services so you can frame them correctly.
 
 ---

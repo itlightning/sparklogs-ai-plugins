@@ -20,6 +20,8 @@ the wrong one.
 | "Is this pattern string something the pack meant to produce?" | `patterns.md` | a decision procedure: expected, unexpected, or uncurated |
 | "I know this data as ECS or OCSF, what is it called here?" | `mapping-ecs.md` / `mapping-ocsf.md` | anchors from the external taxonomy onto these fields |
 | "What is on this box right now?" | none of the above | inventory rows from the MCP tools, not reference content |
+| "How do I explore this kind of stream?" | `${CLAUDE_PLUGIN_ROOT}/guides/stream-kinds.md` | feed → kind → explore ladder. Not `fields.md` |
+| "What does this `app` (LQL) token mean?" | `${CLAUDE_PLUGIN_ROOT}/guides/app-vocabulary.md` | pack-minted product identity; empty is normal |
 
 Two shapes deserve their own line because they are the ones people get wrong:
 
@@ -32,8 +34,8 @@ Two shapes deserve their own line because they are the ones people get wrong:
 
 ## How to get to a module
 
-1. Resolve the source. A ticket names a machine and a symptom; a query result names a `subsource`.
-   The `subsource` IS the module id, and it works in both directions. Given an event carrying
+1. Resolve the source. A ticket names a machine and a symptom; a query result names a `subsource` (LQL).
+   The `subsource` (LQL) IS the module id, and it works in both directions. Given an event carrying
    `subsource = win.eventlog.security`, the module is `${CLAUDE_PLUGIN_ROOT}/feeds/win.eventlog.security/`. Given a
    module you want to query, the module id IS the LQL scoping predicate:
 
@@ -41,20 +43,20 @@ Two shapes deserve their own line because they are the ones people get wrong:
    subsource = "win.eventlog.security"
    ```
 
-   That is the canonical way to scope a query to one channel. Reach for `query_scope_activity` to
+   That is the canonical way to scope a query to one feed. Reach for `query_scope_activity` to
    discover which subsources a client HAS, not to look up one you already know.
 2. Open that module's `README.md`. It is the module index and it is short.
 3. Open the one artifact the table above points at.
 
 If no module directory exists for a subsource, the source is uncurated or its reference set has not
-been generated yet. Fall back to `message`, `pattern`, `severity` and the raw provider payload, and
+been generated yet. Fall back to `message` (LQL), `pattern` (LQL), `severity` (LQL) and the raw provider payload, and
 say in your findings that you were reading uncurated text.
 
 ## What this content is not
 
 - **Not the device-health column names.** Generated artifacts describe the event wire schema, the
   `sparklogs.*` and module-prefixed JSON paths you filter on with `query_logs`. The device-health
-  tools return their own column names (`kind`, `reason`, `instance`, `episode_replaced_id`, and the
+  tools return their own column names (`kind` (col), `reason` (col), `instance` (col), `episode_replaced_id` (col), and the
   rest). Same concepts, different surface; do not paste one into the other.
 - **Not a severity table.** Severity is a shared ladder across every source and is documented once,
   in `category-classes.md`. A module never defines its own bands.
@@ -66,6 +68,8 @@ say in your findings that you were reading uncurated text.
 - **Not a substitute for reading the schema.** A recipe's field names and query shapes resolve, but
   its reasoning is prose: read it as reasoning, and confirm the shape against `fields.md` before a
   finding rests on it.
+- **Not the stream-kind explore ladder.** `fields.md` does not teach `provider_name` (LQL) vs `filename` (LQL) vs
+  device-state maps. That is `${CLAUDE_PLUGIN_ROOT}/guides/stream-kinds.md`.
 
 ## Inventory
 

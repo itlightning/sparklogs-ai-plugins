@@ -6,9 +6,9 @@
 Every token an agent can group by, with what it means.
 These sets are closed: a value outside them leaves its field unset rather than being invented.
 
-## `status_codes`
+## `win_status_codes`
 
-25 row(s).
+26 row(s).
 
 | Code | Token | Meaning | Constant |
 |---|---|---|---|
@@ -37,6 +37,7 @@ These sets are closed: a value outside them leaves its field unset rather than b
 | `0x80090302` | `function_unsupported` | the requested security function is not supported | `SEC_E_UNSUPPORTED_FUNCTION` |
 | `0x8009030d` | `unknown_credentials` | the credentials supplied were not recognized by the package | `SEC_E_UNKNOWN_CREDENTIALS` |
 | `0xc0000380` | `smartcard_wrong_pin` | the smart card PIN entered was wrong | `STATUS_SMARTCARD_WRONG_PIN` |
+| `0xc000014d` | `registry_io_failed` | an I/O operation on a registry hive file failed, so the registry could not read, write or flush that file | `STATUS_REGISTRY_IO_FAILED` |
 
 ## `kerberos`
 
@@ -62,7 +63,7 @@ These sets are closed: a value outside them leaves its field unset rather than b
 | `0x29` | `message_modified` | the message was altered in transit | `KRB_AP_ERR_MODIFIED` |
 | `0x3c` | `generic_error` | the KDC reported a generic failure | `KRB_ERR_GENERIC` |
 
-## `logon_types`
+## `win_logon_types`
 
 12 row(s).
 
@@ -81,7 +82,7 @@ These sets are closed: a value outside them leaves its field unset rather than b
 | `12` | `logon_cached_remote_interactive` | signed in over remote desktop with cached credentials |  |
 | `13` | `logon_cached_unlock` | unlocked an existing session with cached credentials |  |
 
-## `nps_reason_codes`
+## `win_nps_reason_codes`
 
 10 row(s).
 
@@ -137,18 +138,18 @@ Which authentication package answered. Only the curated packages render; any oth
 - `auth_negotiate`
 - `auth_negoextender`
 
-### `elevated`
+### `token_elevated`
 
-A flag, not a vocabulary: rendered only when the sign-in minted a full-privilege token. Absence means not-elevated or not-stated, and the presence of the token is what splits the admin-session pattern from the ordinary one.
+A flag, not a vocabulary: rendered only when the sign-in minted a full-privilege token. Absence means not-elevated or not-stated, and the presence of the token is what splits the admin-session pattern from the ordinary one. Same name as the module bool field.
 
-- `elevated`
+- `token_elevated`
 
-### `token_elevation`
+### `uac_token_type`
 
-What UAC did to the created process token, decoded from the TokenElevationType message-catalog reference: the same three values the promoted module field carries, so the token maps one to one onto a queryable field. An elevated process creation separating from ambient creation is the point of rendering it inline. no_uac_split is the type the vendor constant calls Default: UAC produced no filtered pair for this token. An unrecognized reference renders no token and leaves the field unset.
+What UAC did to the created process token, decoded from TokenElevationType: the same three values the promoted module field carries, so the token maps one to one onto a queryable field. Inline so a full token separates from ambient creation in the pattern. unsplit is TokenElevationTypeDefault (no filtered pair). full is TokenElevationTypeFull (type 2), not Default. An unrecognized reference renders no token and leaves the field unset.
 
-- `no_uac_split`
-- `elevated`
+- `unsplit`
+- `full`
 - `limited`
 
 ### `logon_right`
@@ -184,14 +185,16 @@ Library-wide closed sets, so the same token means the same thing on every data f
 - `sid`: Windows security identifier (S-1-5-...)
 - `upn`: user principal name (user@domain email-shaped identity)
 
-### `sparklogs.error.code_space`
+### `sparklogs.result.code_space`
 
 - `kerberos`: Kerberos protocol result code (KDC_ERR_*), a protocol space of its own, not an NTSTATUS
 - `ntstatus`: Windows NTSTATUS code (kernel and security subsystem)
+- `sspi`: Windows SSPI security result (SEC_E_*/SEC_I_*), the space the security packages report in
 
 ### `sparklogs.running_as.kind`
 
 - `account`: an ordinary directory account and never any other kind, not resolved any further
+- `anonymous`: a session opened under no identity, where the source states that no principal was named
 - `machine`: a computer account acting as itself (Windows names these with a trailing dollar sign; a group Managed Service Account name ends in one too, so a source reading the name alone reports a gMSA here when it is a service identity)
 - `service`: a service or daemon account, including the platform service identities
 - `system`: the operating system itself acting with no delegating principal

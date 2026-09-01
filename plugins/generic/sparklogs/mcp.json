@@ -2,9 +2,6 @@
   "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
   "mcpServers": {
     "sparklogs": {
-      "headers": {
-        "Authorization": "Bearer ${SPARKLOGS_API_TOKEN}"
-      },
       "type": "streamable-http",
       "url": "https://mcp.sparklogs.app/mcp"
     }

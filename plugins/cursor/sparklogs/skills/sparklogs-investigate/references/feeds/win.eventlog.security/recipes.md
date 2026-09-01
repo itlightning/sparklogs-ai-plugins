@@ -93,7 +93,7 @@ Privilege assignment is dominated by platform identities. One predicate collapse
    sparklogs.actor.session = "0x51c2a9"
    ```
 
-4. At sign-in time the same question is one field: win.eventlog.security.elevated is true when the sign-in minted a full-privilege token.
+4. At sign-in time the same question is one field: win.eventlog.security.token_elevated is true when the sign-in minted a full-privilege token.
 
 ## Reconstruct one sign-in session end to end
 
