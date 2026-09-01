@@ -41,7 +41,7 @@ This repository uses a two-branch publishing model: `dist` is the generated defa
 
 Install from the GitHub repository marketplace root, not from a raw `marketplace.json` URL.
 
-- [Claude](docs/install/claude.md) (Claude Teams and Enterprises: additional configuration required, [docs](https://sparklogs.com/docs/it-fleet-intelligence/connect))
+- [Claude](docs/install/claude.md) (Claude Teams and Enterprises: additional configuration required, [docs](https://sparklogs.com/docs/it-fleet-intelligence/connect#claude-team))
 - [Cursor](docs/install/cursor.md)
 - [Codex](docs/install/codex.md)
 - [Copilot Studio MCP](https://sparklogs.com/docs/it-fleet-intelligence/connect#copilot-studio)

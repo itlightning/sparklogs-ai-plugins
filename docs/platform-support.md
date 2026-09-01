@@ -9,7 +9,7 @@ Default auth is SparkLogs OAuth (browser sign-in).
   Desktop can keep the plugin updated automatically; the CLI updates when you ask it to.
   [Install guide](install/claude.md).
   For Claude Teams and Enterprises, additional configuration is required:
-  [Connect SparkLogs](https://sparklogs.com/docs/it-fleet-intelligence/connect).
+  [Connect SparkLogs](https://sparklogs.com/docs/it-fleet-intelligence/connect#claude-team).
 - **Codex**: skills and the SparkLogs MCP server.
   Skills are invoked as `$sparklogs:sparklogs-ask`, `$sparklogs:sparklogs-investigate`, and `$sparklogs:sparklogs-analyze-cause`, or just ask in plain language.
   [Install guide](install/codex.md).
