@@ -2,6 +2,8 @@
 
 The SparkLogs plugin installs from this repository's marketplace, in Claude Code (terminal) and in Claude Desktop.
 
+For Claude Teams and Enterprises, additional configuration is required: [Connect SparkLogs](https://sparklogs.com/docs/it-fleet-intelligence/connect).
+
 ## Claude Code
 
 1. Add the SparkLogs marketplace:
