@@ -25,20 +25,31 @@ sourcing detail its own authors work against; `docs/generated-public/` is the re
 same filenames, no provenance artifact. **This repo consumes the public tree verbatim.** Nothing is
 transformed on the way through, which is what lets the drift check compare bytes.
 
-Refresh it from a sibling source-library checkout:
+Refresh from a sibling source-library checkout (clean tree required):
 
 ```bash
 SPARKLOGS_SOURCE_LIBRARY_DIR=../sparklogs-source-library yarn sync-generated
 ```
 
+That one command copies `docs/generated-public/` into `src/feeds/` **and** regenerates the `app` token table in `guides/app-vocabulary.md` from `registry.yaml` `app_vocabulary` (`public` strings only).
+
 The environment variable is optional when the checkout sits beside this repo. A path that is set
 but unusable is a hard failure rather than a fallback: a drift guard that quietly reads a different
 checkout reports green about the wrong tree.
 
+Run it after a source-library change that affects public AI feed files or `app_vocabulary`.
+Workstation discipline: CI will not catch a stale table by itself (see the drift table below).
+
+`yarn stitch-indexes` is a different command: it rebuilds SKILL / playbook index tables from **this** repo's leaf YAML, not from the library.
+
+Identifier tags (`guides/names.md`): authored `src/` prose backticks that match `[a-z][a-z0-9_.]*` must carry `(arg)`, `(col)`, `(LQL)`, `(tool)`, `(value)`, or `(other)`. Render strips `(tool)`, `(value)`, and `(other)`. Membership is `scripts/identifier-sot.yaml` plus a sibling library harvest. Fenced LQL/JSON is exempt. `src/feeds/` and GENERATED blocks are skipped. `validate-rendered.mjs` scans shipped `.md`: leftover strip-tags fail; each host pack must still contain `(arg)`, `(col)`, and `(LQL)` (empty match is not a pass).
+
+Agents run `make precommit` (or `yarn precommit`) before commit. It is fail-closed without a usable sibling library checkout. CI `yarn validate` still SKIPPED-passes drift when the library is absent.
+
 `scripts/generated-SYNC-MANIFEST.json` records the library branch and commit the current content came from.
 It does not ship on `dist`.
-Do not hand-edit anything under `src/feeds/`: an edit is
-reverted by the next sync and fails the drift check in the meantime.
+Do not hand-edit anything under `src/feeds/` or the generated table in `src/guides/app-vocabulary.md`:
+an edit is reverted by the next sync and fails the drift check in the meantime.
 
 `yarn validate:generated` runs the gates and then the drift check. **They are enforced in different
 places, and the split is worth knowing:**
@@ -111,7 +122,8 @@ installed package would work, not whether it rendered: every MCP entry with a `u
 `type`; no unexpanded mustache argument placeholder survives; every corpus citation resolves from the directory of the file that
 makes it; host-specific prose (`/sparklogs:` syntax, slash-command claims, `commands/` paths, Cursor
 invocation names) appears only in packages whose host has that component per `HOST_LAYOUT`; no
-command file repeats the plugin name; Cursor rules carry frontmatter; package READMEs and every
+command file ships without the plugin-name prefix (Desktop has no marketplace namespace; Claude Code
+then shows `/sparklogs:sparklogs-explain`); Cursor rules carry frontmatter; package READMEs and every
 landing-page link resolve inside the published tree.
 
 Host dialects are produced by `scripts/host-transforms.mjs`, not hand-written into `src/`. Source
@@ -132,9 +144,12 @@ running them locally before tagging:
   component inventory and that the MCP server is counted.
 - **The generated-feed drift check** (`sync-generated-references.mjs --check`) compares `src/feeds/`
   against a sibling `sparklogs-source-library` checkout, found via `SPARKLOGS_SOURCE_LIBRARY_DIR` or
-  `../sparklogs-source-library`. Without that checkout there is nothing to compare against. The
-  recorded commit in `scripts/generated-SYNC-MANIFEST.json` is only as current as the last maintainer
-  who had the sibling repo checked out.
+  `../sparklogs-source-library`. Without that checkout there is nothing to compare against, so CI
+  skips the check. The snapshot in `scripts/generated-SYNC-MANIFEST.json` is only as current
+  as the last maintainer who had the sibling repo checked out.
+- **Identifier membership** (`lint-identifier-tags.mjs`) still runs in that CI container: it harvests
+  LQL paths and app tokens from committed `src/feeds/` and `guides/app-vocabulary.md` when the
+  sibling is missing. An explicit `SPARKLOGS_SOURCE_LIBRARY_DIR` that is unusable still fails.
 
 ## Versioning
 

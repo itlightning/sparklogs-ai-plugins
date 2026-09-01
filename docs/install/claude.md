@@ -2,6 +2,8 @@
 
 The SparkLogs plugin installs from this repository's marketplace, in Claude Code (terminal) and in Claude Desktop.
 
+For Claude Teams and Enterprises, additional configuration is required: [Connect SparkLogs](https://sparklogs.com/docs/it-fleet-intelligence/connect#claude-team).
+
 ## Claude Code
 
 1. Add the SparkLogs marketplace:
@@ -18,25 +20,16 @@ The SparkLogs plugin installs from this repository's marketplace, in Claude Code
 
    Then run `/reload-plugins` (or restart Claude Code) to activate it.
 
-3. Set your SparkLogs MCP token in your shell profile (`~/.zshrc`,
-   `~/.bashrc`, etc.):
+3. When Claude prompts, sign in to SparkLogs in the browser (OAuth).
+
+4. Try it. Ask a question about a monitored host (the `sparklogs-ask` skill). Ask for a cited report when you want `sparklogs-investigate`. Cause hypotheses: `sparklogs-analyze-cause` after a summary exists.
+
+   Follow-up commands (Claude Code namespaces the filename, so these look doubled):
 
 ```
-   export SPARKLOGS_API_TOKEN="your-token-here"
+   /sparklogs:sparklogs-explain <finding or claim>
+   /sparklogs:sparklogs-summary <external_investigation_id>
 ```
-
-   Restart your shell and Claude Code.
-
-4. Try it. Ask a question about a monitored host, or:
-
-```
-   /sparklogs:ask <question>
-```
-
-   Use `/sparklogs:investigate <scope>` only when you want a full cited report.
-
-   The other commands are `/sparklogs:analyze-cause`, `/sparklogs:summary`, and
-   `/sparklogs:explain`.
 
 ## Claude Desktop
 
@@ -51,9 +44,8 @@ The SparkLogs plugin installs from this repository's marketplace, in Claude Code
    Leave **Sync automatically** on to pick up plugin updates whenever this repository publishes a new release.
 
 4. Find **sparklogs** in the marketplace listing and click **Install**.
-5. Set the `SPARKLOGS_API_TOKEN` environment variable and then re-launch
-   Claude Desktop.
-6. Start a new conversation and ask a question about a monitored host, or try `/sparklogs:ask`.
+5. When Claude prompts, sign in to SparkLogs in the browser (OAuth).
+6. Start a new conversation and ask a question about a monitored host. The picker lists `sparklogs-explain` and `sparklogs-summary` (Desktop has no marketplace namespace, so those filenames carry the `sparklogs-` prefix). Ask, investigate, and analyze-cause are skills: ask in plain language.
 
 > Looking for SparkLogs in **Customize → Plugins → Browse plugins**?
 > 
@@ -76,3 +68,4 @@ directory.
 # Security
 
 Don't paste API tokens into prompts or commit them to this repository.
+OAuth is the default. Token overlay: [API token auth](api-token.md).

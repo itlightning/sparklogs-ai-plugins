@@ -23,11 +23,11 @@ if (marketplace.plugins[0].source !== 'plugins/cursor/sparklogs') {
 }
 
 const manifest = await readJson(path.join(base, '.cursor-plugin', 'plugin.json'));
-for (const key of ['name', 'description', 'version', 'variables']) {
+for (const key of ['name', 'description', 'version']) {
   if (!manifest[key]) throw new Error(`Cursor plugin manifest missing ${key}`);
 }
-if (manifest.variables.type !== 'object' || !manifest.variables.properties) {
-  throw new Error('Cursor plugin variables must be a JSON-Schema object with properties');
+if (manifest.variables?.required?.length) {
+  throw new Error('Cursor plugin must not require variables; MCP auth is OAuth');
 }
 
 await fs.access(path.join(base, 'rules', 'when-to-use-sparklogs.md'));

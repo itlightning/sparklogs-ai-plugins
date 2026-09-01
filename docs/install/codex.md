@@ -20,18 +20,7 @@ The Codex package ships **skills and the MCP server**. Codex exposes each instal
    codex plugin add sparklogs@sparklogs-ai-plugins
 ```
 
-3. Set your SparkLogs MCP token in your shell profile (`~/.zshrc`,
-   `~/.bashrc`, etc.):
-
-```
-   export SPARKLOGS_API_TOKEN="your-token-here"
-```
-
-   Restart your shell. The plugin bundles the SparkLogs MCP server, so
-   installing it configures the server too, and Codex reads the variable by
-   **name** at connect time: the token itself never enters a config file.
-
-   Get the token from the SparkLogs app at [sparklogs.app](https://sparklogs.app).
+3. When Codex prompts, sign in to SparkLogs in the browser (OAuth).
 
 4. Try it. Ask a question about a monitored host, or invoke a workflow directly:
    `$sparklogs:sparklogs-investigate` (or in plain language: "use sparklogs-investigate on SRV-FILE01 this week").
@@ -55,9 +44,10 @@ To use the SparkLogs MCP server on its own, without installing the plugin, add i
 ```toml
 [mcp_servers.sparklogs]
 url = "https://mcp.sparklogs.app/mcp"
-bearer_token_env_var = "SPARKLOGS_API_TOKEN"
 ```
 
 Do not configure both. This entry and the plugin's bundled `.mcp.json` both define a server named `sparklogs`. Codex resolves the collision in favor of `config.toml`, so the plugin's entry would be silently shadowed rather than duplicated. If you installed the plugin, leave `[mcp_servers.sparklogs]` out of your `config.toml`.
+
+API token instead of OAuth: [API token auth](api-token.md).
 
 You can still tune the bundled server without editing the plugin. Codex reads per-plugin policy from `config.toml` under `plugins.<plugin>.mcp_servers.sparklogs`, which is where an `enabled` or tool-approval override belongs.

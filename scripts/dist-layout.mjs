@@ -49,9 +49,9 @@ export const HOST_LAYOUT = {
     manifest: '.cursor-plugin/plugin.json',
     mcpFile: 'mcp.json',
   },
-  // Codex reads a bundled .mcp.json through the same server config type as ~/.codex/config.toml, so
-  // the entry takes url and bearer_token_env_var rather than an interpolated header. A config.toml
-  // entry of the same name outranks the plugin's, so the install guide offers it only as a fallback.
+  // Codex reads a bundled .mcp.json through the same server config type as ~/.codex/config.toml.
+  // The shipped entry is URL plus transport only (OAuth). A config.toml entry of the same name
+  // outranks the plugin's, so the install guide offers it only as a fallback.
   codex: {
     trees: [],
     commands: false,

@@ -1,0 +1,378 @@
+# Identifier membership SoT (hand-authored).
+# LQL module paths and reason slugs are harvested from the sibling library
+# (docs/generated-public). This file is the rest: tools, args, cols, resident
+# LQL, families, and small closed vocabs.
+# Grow a list when docs name a new shipped identifier.
+
+tools:
+  - server_info
+  - resolve_scope
+  - list_sources
+  - list_fields
+  - query_scope_activity
+  - describe_pattern
+  - get_query_metadata
+  - query_device_health
+  - query_logs
+  - query_event_counts_by_severity
+  - refine_query_result
+
+args:
+  - add_fields
+  - agent_ids
+  - aggregate
+  - bucket
+  - device_classes
+  - device_roles
+  - end
+  - external_investigation_id
+  - field_match
+  - fieldset
+  - filter_lql
+  - group_by
+  - group_by_reason
+  - having_lql
+  - include_agents
+  - include_examples
+  - include_sub_orgs
+  - include_top_interesting_patterns
+  - kinds
+  - limit
+  - lql
+  - min_severity
+  - offset
+  - order_by
+  - org_ids
+  - pattern_hashes
+  - psa_client_id
+  - query
+  - query_id
+  - reasons
+  - rmm_client_id
+  - sample
+  - select
+  - start
+  - top_n
+
+# Union of MCP response headers (health fieldsets, list_sources, resolve_scope,
+# counts, describe_pattern, envelope). Wire paths (sparklogs.*) are not cols.
+cols:
+  - actor_id
+  - actor_name
+  - actor_type
+  - advisories
+  - affected_agents
+  - affected_senders
+  - affected_sources
+  - agent_complete_through
+  - agent_id
+  - agent_status
+  - agent_version
+  - app
+  - as_of
+  - as_of_age_s
+  - class
+  - cnt_critical_plus
+  - cnt_error
+  - cnt_interesting
+  - cnt_minor
+  - cnt_serious
+  - cnt_severe
+  - cnt_warning
+  - collection_feeds
+  - collection_observed_at
+  - collection_reasons
+  - collection_status
+  - condition_total
+  - config_change_action
+  - config_change_target
+  - config_change_type
+  - display_name
+  - distinct_interesting
+  - episode_age_basis
+  - episode_clear_time_basis
+  - episode_cleared_ts
+  - episode_count
+  - episode_end_reason
+  - episode_event_seq
+  - episode_first_observed_ts
+  - episode_id
+  - episode_last_confirmed_ts
+  - episode_max_observation_gap_s
+  - episode_occurrence
+  - episode_phase
+  - episode_post_gap_s
+  - episode_recovering_total_s
+  - episode_recovery_attempts
+  - episode_replaced_id
+  - episode_transition
+  - epoch_id
+  - epoch_prev_id
+  - epoch_seq
+  - event_count
+  - feed_pack_version
+  - first_event_at
+  - instance
+  - instance_label
+  - inventory_part_number
+  - inventory_row_count
+  - inventory_total_parts
+  - kind
+  - last_data_at
+  - last_event_at
+  - last_heartbeat_at
+  - lookups
+  - malformed_event
+  - match_kind
+  - max_severity
+  - message
+  - name
+  - observed_at
+  - open_monitors_count
+  - org_id
+  - page.next
+  - page.rows_cached
+  - page.rows_returned
+  - parent_id
+  - pattern
+  - pattern_hash
+  - query_url
+  - reason
+  - reported_hostname
+  - rows_cached
+  - rows_returned
+  - row_kind
+  - schema.fields_with_no_values
+  - seen_at
+  - sent_via
+  - service
+  - severity
+  - severity_level
+  - silent_total
+  - source
+  - stuck_reason
+  - subsource
+  - summary.cache_status
+  - summary.scope
+  - summary.severity_histogram
+  - summary.total_count
+  - target_id
+  - target_name
+  - target_type
+  - top_interesting_patterns
+  - topic
+  - total_count
+  - window_partial
+  - worst_severity
+
+# Resident LQL: query-engine / wire fields the pack field tables do not own.
+# Module paths (win.eventlog.*) come from the library harvest.
+lql_resident:
+  - agent_id
+  - app
+  - app_hash
+  - category
+  - category_hash
+  - filename
+  - message
+  - origin
+  - pattern
+  - pattern_hash
+  - provider_name
+  - service
+  - service_hash
+  - severity
+  - source
+  - source_hash
+  - span_id
+  - sparklogs.class
+  - sparklogs.episode.replaced_id
+  - sparklogs.epoch.seq
+  - sparklogs.instance
+  - sparklogs.kind
+  - sparklogs.reason
+  - sparklogs.result.code
+  - sparklogs.result.code_name
+  - sparklogs.topic
+  - subsource
+  - subsource_hash
+  - t
+  - trace_id
+  - winlog.event_id
+  # Pedagogical custom paths in lql-reference.md
+  - correlation_id
+  - x.foo
+  - x.tags
+
+lql_families:
+  - event_data
+  - sparklogs.actor
+  - sparklogs.config_change
+  - sparklogs.data
+  - sparklogs.delta
+  - sparklogs.episode
+  - sparklogs.epoch
+  - sparklogs.inventory
+  - sparklogs.member
+  - sparklogs.origin
+  - sparklogs.process
+  - sparklogs.result
+  - sparklogs.running_as
+  - sparklogs.target
+  - sparklogs.error
+  - sparklogs.destination
+
+# Small closed vocabs. Feed ids come from MODULES. Apps from registry.yaml.
+# Reason slugs from library reasons.md. Extra tokens the docs already use:
+values:
+  kinds:
+    - inventory
+    - monitor
+    - delta
+    - agent_op
+    - config_change
+    - malformed
+  fieldsets:
+    - rca
+    - fleet
+    - minimal
+  agent_status:
+    - online
+    - offline
+    - never_seen
+    - stopped
+    - system_shutdown
+    - uninstalled
+    - upgrading_overdue
+    - deleted
+  collection_status:
+    - healthy
+    - behind
+    - onboarding
+    - degraded
+    - unknown
+    - stuck
+  # refine / get_query_metadata envelope (not collection_status)
+  cache_status:
+    - cache_invalidated
+    - expired
+  mcp_call:
+    - scope_violation
+  sent_via:
+    - agent
+    - ingest_key
+    - unresolved
+  match_kind:
+    - exact
+    - prefix
+    - word
+    - substring
+  fieldset_confidence:
+    - high
+    - medium
+    - low
+  episode_phase:
+    - onset
+    - held
+    - recovering
+    - ended
+    - recovered
+    - opened
+    - relapsed
+    - closed
+  episode_age_basis:
+    - observed
+    - unknown_ongoing
+  episode_clear_time_basis:
+    - unobserved_gap
+    - observed
+  episode_transition:
+    - severity_raised
+    - severity_lowered
+  topics:
+    - disk_volumes
+    - processes
+    - services
+    - performance
+  services:
+    - app_stability
+    - auth
+    - backup
+    - certificates
+    - clustering
+    - database
+    - device_management
+    - directory_services
+    - email
+    - endpoint_protection
+    - file_sharing
+    - file_sync
+    - hardware
+    - licensing
+    - networking
+    - os_stability
+    - patching
+    - printing
+    - remote_access
+    - rmm
+    - scheduled_tasks
+    - security_audit
+    - storage
+    - telephony
+    - time_sync
+    - user_profiles
+    - virtualization
+    - vpn
+    - web
+  aggregate_fn:
+    - count
+    - count_distinct
+    - sum
+    - avg
+    - min
+    - max
+    - stddev
+    - p50
+    - p90
+    - p95
+    - p99
+  other_closed:
+    - insufficient_evidence
+    - service_detail
+    - unknown
+    - workstation
+    - server
+    - domain_controller
+    - auto
+    - none
+    - contains
+    - equals
+    - regex
+  stuck_reason:
+    - collector_down
+    - collector_flapping
+    - config_apply_stuck
+    - feeds_inactive
+    - pack_missing
+    - pack_requires_newer_agent
+    - backpressure
+    - skip_record
+    - future_only
+  severity_band:
+    - debug
+    - info_or_notice
+    - warning
+    - warn2
+    - warn3
+    - warn4
+    - error
+    - error2
+    - error3
+    - error4
+    - minor
+    - serious
+    - severe
+    - critical
+    - critical_plus
+    - ok
+

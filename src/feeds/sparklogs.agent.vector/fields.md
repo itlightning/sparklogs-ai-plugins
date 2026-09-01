@@ -54,37 +54,20 @@ Each key names one field; that field is where the value is queried.
 
 ## What sets each field
 
-Presence is per curated surface and per event id, because promotion is a property of the branch, not of the module.
+Presence is per curated surface, from what its author declared under `promotions`: a field reaches this row only when the surface's own arm or shape names it, never from a text scan of classify guessing which branch a write belongs to.
 A row lists what the surface CAN write, not what every event of it carries: a field whose value the payload does not supply stays unset, which is why absence of a field is never by itself evidence that a condition did not happen.
 A surface that promotes nothing says so: an empty row is a stated fact, not an omission.
 
 | Surface | Event ids | Fields set |
 |---|---|---|
-| `data_collection_feed_not_collecting` / `default` | n/a | **fields: none** |
-| `data_collection_feed_unavailable` / `feed_scoped` | n/a | **fields: none** |
-| `data_collection_feed_unavailable` / `onset` | n/a | **fields: none** |
-| `data_collection_feed_unavailable` / `recovered` | n/a | **fields: none** |
-| `data_collection_feed_unavailable` / `reminder` | n/a | **fields: none** |
-| `data_collection_read_failed` / `default` | n/a | **fields: none** |
-| `data_collection_restarted_from_oldest` / `default` | n/a | **fields: none** |
-| `data_collection_skipped_records_overwritten` / `default` | n/a | **fields: none** |
-| `data_collection_skipped_to_recover` / `default` | n/a | **fields: none** |
-| `data_collection_stream_not_started` / `default` | n/a | **fields: none** |
-| `data_delivery_failed` / `default` | n/a | **fields: none** |
-
-### Surfaces that promote nothing
-
-These carry class, reason and message text only.
-A predicate over them uses the reason, the class, or the retained payload; there is no promoted field to filter on.
-
-- `data_collection_feed_not_collecting` / `default`
-- `data_collection_feed_unavailable` / `feed_scoped`
-- `data_collection_feed_unavailable` / `onset`
-- `data_collection_feed_unavailable` / `recovered`
-- `data_collection_feed_unavailable` / `reminder`
-- `data_collection_read_failed` / `default`
-- `data_collection_restarted_from_oldest` / `default`
-- `data_collection_skipped_records_overwritten` / `default`
-- `data_collection_skipped_to_recover` / `default`
-- `data_collection_stream_not_started` / `default`
-- `data_delivery_failed` / `default`
+| `data_collection_feed_not_collecting` / `default` | n/a | `sparklogs.agent.vector.channel` `sparklogs.agent.vector.component_id` `sparklogs.agent.vector.skip_cause` |
+| `data_collection_feed_unavailable` / `feed_scoped` | n/a | `sparklogs.agent.vector.component_id` |
+| `data_collection_feed_unavailable` / `onset` | n/a | `sparklogs.agent.vector.component_id` |
+| `data_collection_feed_unavailable` / `recovered` | n/a | `sparklogs.agent.vector.component_id` |
+| `data_collection_feed_unavailable` / `reminder` | n/a | `sparklogs.agent.vector.component_id` |
+| `data_collection_read_failed` / `default` | n/a | `sparklogs.agent.vector.component_id` |
+| `data_collection_restarted_from_oldest` / `default` | n/a | `sparklogs.agent.vector.component_id` |
+| `data_collection_skipped_records_overwritten` / `default` | n/a | `sparklogs.agent.vector.channel` `sparklogs.agent.vector.component_id` `sparklogs.agent.vector.missing_records` `sparklogs.agent.vector.previous_record_id` `sparklogs.agent.vector.record_id` |
+| `data_collection_skipped_to_recover` / `default` | n/a | `sparklogs.agent.vector.channel` `sparklogs.agent.vector.component_id` `sparklogs.agent.vector.missing_records` `sparklogs.agent.vector.resume_rung` |
+| `data_collection_stream_not_started` / `default` | n/a | `sparklogs.agent.vector.component_id` |
+| `data_delivery_failed` / `default` | n/a | `sparklogs.agent.vector.component_id` |

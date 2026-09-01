@@ -7,10 +7,10 @@ The plugin gives your AI assistant a SparkLogs workflow:
 - `sparklogs-ask`: answer what happened, or what the device/fleet looks like, from logs and health/state. Default door.
 - `sparklogs-investigate` gathers evidence into a cited system-condition summary.
 - `sparklogs-analyze-cause` is an explicit second step that turns prior findings into candidate hypotheses with confirm/refute steps.
-- A `summary` command re-renders an existing investigation summary for ticket updates or customer communication.
-- An `explain` command walks the evidence behind a specific claim or finding.
+- A `sparklogs-summary` command re-renders an existing investigation summary for ticket updates or customer communication.
+- A `sparklogs-explain` command walks the evidence behind a specific claim or finding.
 
-Command invocation differs by host, so each package renders its own form: Claude namespaces plugin commands as `/sparklogs:ask`, `/sparklogs:investigate`, `/sparklogs:analyze-cause`, `/sparklogs:summary`, `/sparklogs:explain`; Cursor invokes the same set as `/sparklogs-ask` and so on. Codex and the generic Agent Plugins package ship no commands, so you name the workflow instead of typing one.
+Ask, investigate, and analyze-cause are skills (plain language works). Command invocation for the two follow-ups differs by host: Claude Code namespaces them as `/sparklogs:sparklogs-explain` and `/sparklogs:sparklogs-summary` (Desktop's picker shows `sparklogs-explain` / `sparklogs-summary` because it has no marketplace namespace). Cursor invokes `/sparklogs-explain` and `/sparklogs-summary`. Codex and the generic Agent Plugins package ship no commands, so you name the workflow instead of typing one.
 
 ## Why MSPs Should Care
 
@@ -35,21 +35,18 @@ Each package carries only what its host documents:
 | `plugins/codex/sparklogs` | yes | no | no | no | `.mcp.json` | inside each skill's `references/` |
 | `plugins/generic/sparklogs` | yes | no | no | no | `mcp.json` | inside each skill's `references/` |
 
-Codex documents skills, MCP servers, and hooks as the components a plugin bundles, and Agent Plugins v1 defines skills and `mcp.json`. Commands, rules, and subagents are host-specific formats, so they ship only where the host reads them.
-
-The Codex package bundles its MCP server, so installing the plugin configures the server too; export `SPARKLOGS_API_TOKEN` and Codex reads it by name. A `[mcp_servers.sparklogs]` entry in `~/.codex/config.toml` is how you run the server without the plugin, and it outranks the plugin's entry, so configure one or the other.
-
 ## Install And Update
 
 This repository uses a two-branch publishing model: `dist` is the generated default branch for marketplace-ready plugin packages, and `source` is the authoring branch for contributions.
 
 Install from the GitHub repository marketplace root, not from a raw `marketplace.json` URL.
 
-- [Claude](docs/install/claude.md)
+- [Claude](docs/install/claude.md) (Claude Teams and Enterprises: additional configuration required, [docs](https://sparklogs.com/docs/it-fleet-intelligence/connect#claude-team))
 - [Cursor](docs/install/cursor.md)
 - [Codex](docs/install/codex.md)
+- [Copilot Studio MCP](https://sparklogs.com/docs/it-fleet-intelligence/connect#copilot-studio)
 - [Generic (other Agent Skills hosts)](docs/install/generic.md)
-- [Copilot Studio MCP](docs/install/copilot-studio-mcp.md)
+- [API token auth (optional)](docs/install/api-token.md)
 
 ## Trust And Safety
 

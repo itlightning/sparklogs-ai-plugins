@@ -6,7 +6,8 @@
 //   a. an MCP entry with a url and no transport is silently dropped by Claude
 //   b. a {{args}} placeholder no host expands leaves the command body reading as literal mustache
 //   c. a corpus citation that does not resolve from the citing file makes the skill's references dead
-//   d. commands/<plugin>-x.md installs as /<plugin>:<plugin>-x, a doubled prefix
+//   d. Desktop has no plugin namespace, so command files must start with <plugin>-
+//      (Claude Code then invokes /<plugin>:<plugin>-x). Cursor render must not prefix again.
 //   e. a rules file without frontmatter is ignored by Cursor
 //   f. a README that points at a file the package does not contain
 //   g. the host's own validator, when it is on the machine
@@ -148,7 +149,7 @@ const HOST_PROSE_RULES = [
   },
   {
     what: 'Cursor command invocation',
-    pattern: /(?<!\w)\/sparklogs-(?:ask|investigate|analyze-cause|summary|explain)\b/g,
+    pattern: /(?<!\w)\/sparklogs-(?:summary|explain)\b/g,
     allowed: (host) => host === 'cursor',
   },
   {
@@ -183,7 +184,7 @@ async function checkHostProse() {
   }
 }
 
-/** d. A command file named after the plugin installs under a doubled prefix. */
+/** d. Desktop has no plugin namespace; command files must carry the plugin prefix. */
 async function checkCommandNames() {
   const metadata = JSON.parse(await fs.readFile(path.join(ROOT, METADATA_FILE), 'utf8'));
   const plugin = metadata.name;
@@ -194,8 +195,9 @@ async function checkCommandNames() {
   }
   for (const dir of roots) {
     for (const name of await fs.readdir(dir)) {
-      if (name.startsWith(`${plugin}-`) || name.startsWith(`${plugin}.`)) {
-        fail(`${path.relative(ROOT, path.join(dir, name))} repeats the plugin name; it would invoke as /${plugin}:${plugin}-...`);
+      if (!name.endsWith('.md')) continue;
+      if (!name.startsWith(`${plugin}-`)) {
+        fail(`${path.relative(ROOT, path.join(dir, name))} must start with ${plugin}- so Desktop's picker matches skill naming`);
       }
     }
   }

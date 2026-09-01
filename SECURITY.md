@@ -6,9 +6,9 @@ Only the latest released version is supported. If a security issue affects a pri
 
 ## Data Flow
 
-The plugin ships prompts, markdown references, manifests, and MCP configuration. The plugin package itself makes no outbound network calls and adds no analytics, telemetry, or phone-home behavior. Runtime data flows through the selected AI host, the customer-configured SparkLogs MCP endpoint, and SparkLogs APIs authorized by the customer's workspace token.
+The plugin ships prompts, markdown references, manifests, and MCP configuration. The plugin package itself makes no outbound network calls and adds no analytics, telemetry, or phone-home behavior. Runtime data flows through the selected AI host, the SparkLogs MCP endpoint, and SparkLogs APIs authorized by the signed-in SparkLogs user (OAuth) or, if the operator configured one, an API token.
 
-Configure API tokens through the host's supported secret/config mechanism. Never paste secrets into prompts or commit them to this repository.
+Never paste secrets into prompts or commit them to this repository.
 
 ## Build Supply Chain
 

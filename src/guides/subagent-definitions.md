@@ -25,12 +25,12 @@ For delegated bulk-summarization work, use **the fastest, most lightweight moder
 
 ## Subagent: `sparklogs-log-summarizer`
 
-**Purpose.** Read a large set of raw log events (typically Level-1 or Level-2 events from a `query_logs` cache) and return a structured summary the orchestrator can use without reading the raw events itself.
+**Purpose.** Read a large set of raw log events (typically Level-1 or Level-2 events from a `query_logs` (tool) cache) and return a structured summary the orchestrator can use without reading the raw events itself.
 
 **Model tier:** fast, lightweight tier per the platform you're running on.
 
 **Inputs the orchestrator passes:**
-- The `query_id` and `query_url` of a cached query.
+- The `query_id` (arg) and `query_url` (col) of a cached query.
 - A focusing question: "what unusual events happened in this set?", "which patterns dominate?", "are there any errors I should know about?"
 - An output schema: structured fields the subagent fills.
 
@@ -53,20 +53,20 @@ events_examined: <count>
 events_summarized: <count>
 ```
 
-**The `severity` field is a four-bucket summary, and it is lossy on purpose.** SparkLogs severity is
+**The `severity` (LQL) field is a four-bucket summary, and it is lossy on purpose.** SparkLogs severity is
 a twelve-rung ladder; this schema collapses it so an orchestrator can scan many findings at once. Map
-it this way, and keep the exact returned value in `summary` whenever the rung matters:
+it this way, and keep the exact returned value in `summary` (other) whenever the rung matters:
 
 | Bucket | Ladder rungs |
 |---|---|
-| `ok` | Trace, Debug, Verbose, Info, Display, Notice |
-| `warning` | Warning, Minor |
-| `error` | Error, Serious, Severe |
-| `critical` | Critical, Fatal (severity >= 20) |
+| `ok` (value) | Trace, Debug, Verbose, Info, Display, Notice |
+| `warning` (value) | Warning, Minor |
+| `error` (value) | Error, Serious, Severe |
+| `critical` (value) | Critical, Fatal (severity >= 20) |
 
-The lossy edge worth knowing: `Severe` and `Error` both land in `error`, and `Severe` is
+The lossy edge worth knowing: `Severe` and `Error` both land in `error` (value), and `Severe` is
 availability-threatening while `Error` is bounded in scope. If a finding turns on that difference,
-name the rung in `summary` rather than leaving the bucket to carry it. `critical` is the one bucket
+name the rung in `summary` (other) rather than leaving the bucket to carry it. `critical` (value) is the one bucket
 with a contract attached: it means fetch-first, whatever the ticket was about.
 
 **The orchestrator uses the structured output as evidence in Findings, citing the same query_urls.** The orchestrator never receives the raw events back - only the summary.
@@ -77,12 +77,12 @@ with a contract attached: it means fetch-first, whatever the ticket was about.
 
 ## Subagent: `sparklogs-pattern-enumerator`
 
-**Purpose.** Given a `query_event_counts_by_severity` result with many groups, summarize the top N pattern_hashes with their meanings (looking up pattern text via a `query_logs` message projection filtered to the `pattern_hash` if needed) and produce a structured enumeration the orchestrator can use as Findings input.
+**Purpose.** Given a `query_event_counts_by_severity` (tool) result with many groups, summarize the top N pattern_hashes with their meanings (looking up pattern text via a `query_logs` (tool) message projection filtered to the `pattern_hash` (LQL) if needed) and produce a structured enumeration the orchestrator can use as Findings input.
 
 **Model tier:** fast, lightweight tier.
 
 **Inputs:**
-- The `query_id` and `query_url` of the `query_event_counts_by_severity` result.
+- The `query_id` (arg) and `query_url` (col) of the `query_event_counts_by_severity` (tool) result.
 - Top N parameter (default 10).
 
 **Output schema:**
@@ -95,15 +95,15 @@ top_patterns:
     catalog_match: <pattern_catalog.md entry name or null>
 ```
 
-**Delegation heuristic:** when `query_event_counts_by_severity` returns 50+ groups and you need the top N enumerated with meanings.
+**Delegation heuristic:** when `query_event_counts_by_severity` (tool) returns 50+ groups and you need the top N enumerated with meanings.
 
 ---
 
 ## Subagent: `sparklogs-cluster-interpreter`
 
-**Not usable yet.** This subagent depends on `cluster_event_contexts`, which does not exist. Approximate clustering with a `query_logs` slice narrowed to the pattern plus `refine_query_result` group_by over the surrounding context fields.
+**Not usable yet.** This subagent depends on `cluster_event_contexts` (other), which does not exist. Approximate clustering with a `query_logs` (tool) slice narrowed to the pattern plus `refine_query_result` (tool) group_by over the surrounding context fields.
 
-**Purpose.** Given a `cluster_event_contexts` result with multiple distinct clusters, interpret each cluster's representative_surround and produce a structured human-readable description.
+**Purpose.** Given a `cluster_event_contexts` (other) result with multiple distinct clusters, interpret each cluster's representative_surround and produce a structured human-readable description.
 
 **Model tier:** fast, lightweight tier.
 
@@ -130,7 +130,7 @@ cluster_interpretations:
 
 - **Cross-correlating inference.** "Does Finding X explain Finding Y?" - orchestrator's job.
 - **Anomaly judgment requiring domain knowledge.** "Is this anomaly meaningful in this investigation context?" - orchestrator's job.
-- **Hypothesis evaluation.** "Does the evidence support hypothesis H?" - orchestrator's job (and `/sparklogs:analyze-cause`'s job for cause hypotheses).
+- **Hypothesis evaluation.** "Does the evidence support hypothesis H?" - orchestrator's job (and `sparklogs-analyze-cause`'s job for cause hypotheses).
 - **Output template assembly.** Orchestrator assembles Findings, Executive Summary, What Was Not Checked.
 - **Citation discipline.** Orchestrator owns ensuring every Finding cites a query_url; subagents pass through the URL but don't author the Findings.
 

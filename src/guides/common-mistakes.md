@@ -12,7 +12,7 @@ The mistakes are grouped by the operating principle they violate.
 
 **Symptom.** You catch yourself writing "the cause is...", "this suggests that...", "the likely root cause is...", "this is clearly...", "the obvious explanation is...", or any similar phrase in the OBSERVED CONDITIONS or EXECUTIVE SUMMARY sections.
 
-**Why it's wrong.** This skill produces facts. Cause analysis happens in `/sparklogs:analyze-cause` (a separate skill) where it's clearly labeled and the engineer opted in. Mixing them collapses the trust boundary that protects the engineer from confidently-wrong conclusions.
+**Why it's wrong.** This skill produces facts. Cause analysis happens in `sparklogs-analyze-cause` (a separate skill) where it's clearly labeled and the engineer opted in. Mixing them collapses the trust boundary that protects the engineer from confidently-wrong conclusions.
 
 **Recovery.** Before producing the summary:
 1. Read every Finding's main statement. If it asserts a *cause*, restate it as an *observation*. ("The cause is high CPU" -> "Process X was at 92% CPU in Finding 4.")
@@ -25,7 +25,7 @@ The mistakes are grouped by the operating principle they violate.
 
 **Why it's wrong.** The trust posture is what makes SparkLogs durably valuable. Eroding it under pressure is short-term gain, long-term loss.
 
-**Recovery.** Stick to the response: "My job is to produce a defensible summary you can act on. The summary is here. If you want hypothesis sketches with confirm/refute steps, run /sparklogs:analyze-cause." Do this once politely; if the engineer persists, repeat with the same content. Don't escalate the cause-shaped language in your output.
+**Recovery.** Stick to the response: "My job is to produce a defensible summary you can act on. The summary is here. If you want hypothesis sketches with confirm/refute steps, run sparklogs-analyze-cause." Do this once politely; if the engineer persists, repeat with the same content. Don't escalate the cause-shaped language in your output.
 
 ### Prescribing a change as the report's conclusion
 
@@ -33,35 +33,35 @@ The mistakes are grouped by the operating principle they violate.
 
 **Why it's wrong.** This skill's output is a cited summary. Suggestions belong in POSSIBLE NEXT DIRECTIONS, not as the finding.
 
-**Recovery.** Keep OBSERVED CONDITIONS factual. Put likely causes and next steps in the invitation section. `/sparklogs:analyze-cause` is the confirm/refute channel.
+**Recovery.** Keep OBSERVED CONDITIONS factual. Put likely causes and next steps in the invitation section. `sparklogs-analyze-cause` is the confirm/refute channel.
 
 ---
 
 ## Mistakes against "Cite everything"
 
-### Claims without `query_url`
+### Claims without `query_url` (col)
 
 **Symptom.** A Finding's Evidence field says "based on snapshot data," "from the logs," "the agent observed," or any similar uncited phrasing.
 
-**Why it's wrong.** Without a `query_url`, the engineer can't verify your claim. This is exactly how confabulation hides.
+**Why it's wrong.** Without a `query_url` (col), the engineer can't verify your claim. This is exactly how confabulation hides.
 
-**Recovery.** For every Finding, the Evidence field is one or more `query_url` values (the URL field returned by the MCP tool you used to gather the evidence). If you didn't make the query that produced the evidence, you don't have the evidence - either make the query, or downgrade to "insufficient_evidence" and don't make the claim.
+**Recovery.** For every Finding, the Evidence field is one or more `query_url` (col) values (the URL field returned by the MCP tool you used to gather the evidence). If you didn't make the query that produced the evidence, you don't have the evidence - either make the query, or downgrade to "insufficient_evidence" and don't make the claim.
 
-### Fabricated or modified `query_url`
+### Fabricated or modified `query_url` (col)
 
 **Symptom.** You construct a URL that "looks like" it points to the data, rather than copying the URL from the MCP tool response.
 
 **Why it's wrong.** Fabricated URLs return errors when the engineer clicks them. Trust collapses immediately.
 
-**Recovery.** Always copy the `query_url` field verbatim from the MCP tool response. Never construct, modify, or guess.
+**Recovery.** Always copy the `query_url` (col) field verbatim from the MCP tool response. Never construct, modify, or guess.
 
 ### Cited URL doesn't actually support the claim
 
-**Symptom.** You cite a `query_url` for a Finding, but the cached query at that URL doesn't actually contain the evidence the Finding asserts.
+**Symptom.** You cite a `query_url` (col) for a Finding, but the cached query at that URL doesn't actually contain the evidence the Finding asserts.
 
 **Why it's wrong.** Misrepresentation is worse than absent citation - engineer assumes you've supported the claim and won't double-check.
 
-**Recovery.** When you write a Finding, ask: "If the engineer clicks this URL and looks at the data, will they see what I'm asserting?" If unsure, refine the cached query (`refine_query_result` with `filter_lql` to narrow) so the URL points to the specific evidence subset.
+**Recovery.** When you write a Finding, ask: "If the engineer clicks this URL and looks at the data, will they see what I'm asserting?" If unsure, refine the cached query (`refine_query_result` (tool) with `filter_lql` (arg) to narrow) so the URL points to the specific evidence subset.
 
 ### Executive Summary makes claims not in any Finding
 
@@ -75,23 +75,23 @@ The mistakes are grouped by the operating principle they violate.
 
 ## Mistakes against "Calibrate confidence honestly"
 
-### Claiming `high` confidence on weak evidence
+### Claiming `high` (value) confidence on weak evidence
 
-**Symptom.** You marked a Finding `high` because the data fits a story you formed, even though the evidence is single-source / single-snapshot / inferred / sparse.
+**Symptom.** You marked a Finding `high` (value) because the data fits a story you formed, even though the evidence is single-source / single-snapshot / inferred / sparse.
 
 **Why it's wrong.** Confidence is supposed to reflect evidence strength, not narrative fluency. Models naturally express certainty in proportion to fluency; this is the failure mode you're defending against.
 
-**Recovery.** For every `high` Finding, ask:
+**Recovery.** For every `high` (value) Finding, ask:
 - Is the evidence direct (you observed the actual state) or inferred (you concluded from related evidence)?
 - Is it corroborated across multiple sources / snapshots / time windows, or single-point?
 - Is it recent (within the investigation window) or stale?
 - Has the relevant detector completed warmup and avoided recent baseline reset?
 
-If any answer is "no/single/stale/uncertain," downgrade to `medium` or `low`.
+If any answer is "no/single/stale/uncertain," downgrade to `medium` (value) or `low` (value).
 
-### Avoiding `insufficient_evidence` because it feels like failure
+### Avoiding `insufficient_evidence` (value) because it feels like failure
 
-**Symptom.** You stretch to a `low` or `medium` Finding rather than admitting "I checked and didn't find what I needed."
+**Symptom.** You stretch to a `low` (value) or `medium` (value) Finding rather than admitting "I checked and didn't find what I needed."
 
 **Why it's wrong.** "Insufficient_evidence" is often the most useful answer. It tells the engineer "I looked here and the answer isn't in the data I have access to" - which is actionable information that points them toward different evidence sources.
 
@@ -149,17 +149,17 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` or `low`.
 
 ## Mistakes against auditability
 
-### Forgetting `external_investigation_id` on calls
+### Forgetting `external_investigation_id` (arg) on calls
 
-**Symptom.** You make MCP calls without including `external_investigation_id`.
+**Symptom.** You make MCP calls without including `external_investigation_id` (arg).
 
-**Why it's wrong.** It's a REQUIRED parameter - the tool rejects the call. The server-side per-call audit is keyed on `external_investigation_id`; omitting it isn't just an audit gap, it's a hard failure.
+**Why it's wrong.** It's a REQUIRED parameter - the tool rejects the call. The server-side per-call audit is keyed on `external_investigation_id` (arg); omitting it isn't just an audit gap, it's a hard failure.
 
-**Recovery.** Pick one distinctive, human-meaningful value at investigation start (8-200 chars free text, e.g. `investigate-ticket-4781-veeam-backup`; embed a ticket/incident id or a nonce so it's unique per real investigation). Pass it on every data-access and refinement call. If you're resuming a paused investigation, recover the id from the local investigation-state document and reuse it - reusing an id RESUMES that investigation. Don't reuse a generic string like `diskcheck` across unrelated incidents; they'd merge into one investigation.
+**Recovery.** Pick one distinctive, human-meaningful value at investigation start (8-200 chars free text, e.g. `investigate-ticket-4781-veeam-backup`; embed a ticket/incident id or a nonce so it's unique per real investigation). Pass it on every data-access and refinement call. If you're resuming a paused investigation, recover the id from the local investigation-state document and reuse it - reusing an id RESUMES that investigation. Don't reuse a generic string like `diskcheck` (other) across unrelated incidents; they'd merge into one investigation.
 
-### `external_investigation_id` validation error
+### `external_investigation_id` (arg) validation error
 
-**Symptom.** A tool call fails with a validation error on `external_investigation_id`.
+**Symptom.** A tool call fails with a validation error on `external_investigation_id` (arg).
 
 **Why it's wrong.** It didn't fit the 8-200 char bound. This isn't a generated hash - it's free text you choose.
 
@@ -181,43 +181,51 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` or `low`.
 
 **Symptom.** A query comes back with N rows. You count them, or you read the earliest and latest row as the data's start and end, and report from that.
 
-**Why it's wrong.** Responses are capped: a wide fieldset or a big match returns ONE PAGE, and the page looks exactly like a complete short answer. The envelope already tells you otherwise: the summary carries the matched TOTAL, and `last_event_at` carries when data actually stops.
+**Why it's wrong.** Responses are capped: a wide fieldset or a big match returns ONE PAGE, and the page looks exactly like a complete short answer. The envelope already tells you otherwise: the summary carries the matched TOTAL, and `last_event_at` (col) carries when data actually stops.
 
 **The failure this produces.** An investigation read the first page of a capped result, saw its oldest rows dated four days back, and reported that both monitored systems had been dead for four days. Both were healthy and reporting; the later pages were simply never fetched. The contradicting total was in the same response, unread.
 
-**Recovery.** Before any claim about how much, how many, or how long: read the matched total, read `last_event_at`, and page with `refine_query_result` if you need rows the first page did not carry. If the total is larger than what you received, say which you are quoting.
+**Recovery.** Before any claim about how much, how many, or how long: read the matched total, read `last_event_at` (col), and page with `refine_query_result` (tool) if you need rows the first page did not carry. If the total is larger than what you received, say which you are quoting.
 
-### Reaching for `query_logs` first
+### Reaching for `query_logs` (tool) first
 
-**Symptom.** First MCP call (after `resolve_scope` and `list_sources`) is `query_logs` for a broad raw retrieval.
+**Symptom.** First MCP call (after `resolve_scope` (tool) and `list_sources` (tool)) is `query_logs` (tool) for a broad raw retrieval.
 
-**Why it's wrong.** Aggregation first. `query_logs` is the *last resort*, not the first. Aggregation returns a dense, denominated answer instead of a pile of raw rows: you learn what the population looks like before you spend the window reading a slice of it.
+**Why it's wrong.** Aggregation first. `query_logs` (tool) is the *last resort*, not the first. Aggregation returns a dense, denominated answer instead of a pile of raw rows: you learn what the population looks like before you spend the window reading a slice of it.
 
-**Recovery.** First substantive call should usually be `query_event_counts_by_severity` (group by the field the question is about). Use `query_logs` only when aggregation has narrowed to a specific small set whose raw text matters.
+**Recovery.** First substantive call should usually be `query_event_counts_by_severity` (tool) (group by the field the question is about). Use `query_logs` (tool) only when aggregation has narrowed to a specific small set whose raw text matters.
 
 ### Reading Level 3 by default
 
-**Symptom.** Your `select` includes `state.<category>` or `anomalies` on every call.
+**Symptom.** Your `select` (arg) includes `state.<category>` or `anomalies` (other) on every call.
 
 **Why it's wrong.** Level 3 returns far more data than Level 1 or 2. Default should be Level 1 (triage) -> Level 2 (assess) -> Level 3 only when ground truth is needed.
 
-**Recovery.** Always set `select` explicitly. Use the level-recipes from `mcp-tool-decision-tree.md`. Field-length caps are SERVER-ENFORCED - there is no client override. If a capped field is truncating data you need, narrow the query (tighter `lql`, fewer subsources) or project a smaller field set with `select`, then page or refine to reach the specific rows.
+**Recovery.** Always set `select` (arg) explicitly. Use the level-recipes from `mcp-tool-decision-tree.md`. Field-length caps are SERVER-ENFORCED - there is no client override. If a capped field is truncating data you need, narrow the query (tighter `lql` (arg), fewer subsources) or project a smaller field set with `select` (arg), then page or refine to reach the specific rows.
+
+### Retrying refine on `cache_invalidated` (value)
+
+**Symptom.** `refine_query_result` (tool) or `get_query_metadata` (tool) returns a successful envelope with `summary.cache_status` (col) `cache_invalidated` (value), and you call refine again on the same `query_id` (arg), or you treat it as `scope_violation` (value) (a bad org list you passed).
+
+**Why it's wrong.** The handle is dead for this token. Retrying refine cannot revive it. It is not a caller-argument error: the original query's org snapshot is no longer usable as-is. A new data-tool call with live scope is the recovery.
+
+**Recovery.** Issue a new `query_logs` (tool) (or a new `query_event_counts_by_severity` (tool) for counts). Copy a fresh `query_id` (arg). Do not pass the dead id to refine again.
 
 ### Re-running queries instead of refining cached results
 
-**Symptom.** You issue a fresh `query_logs` or `query_event_counts_by_severity` when you already had a relevant cached query.
+**Symptom.** You issue a fresh `query_logs` (tool) or `query_event_counts_by_severity` (tool) when you already had a relevant cached query.
 
-**Why it's wrong.** Backing queries do meaningfully more work than `refine_query_result`, which runs against the cache. The cache lasts a long time; reuse it.
+**Why it's wrong.** Backing queries do meaningfully more work than `refine_query_result` (tool), which runs against the cache. The cache lasts a long time; reuse it.
 
-**Recovery.** Before issuing a fresh backing query, check if an existing `query_id` (from earlier in this investigation) covers the universe you need. If yes, refine.
+**Recovery.** Before issuing a fresh backing query, check if an existing `query_id` (arg) (from earlier in this investigation) covers the universe you need. If yes, refine. If the refine (or `get_query_metadata` (tool)) response has `summary.cache_status` (col) `cache_invalidated` (value), that handle is dead under the current token: issue a new `query_logs` (tool) (or a new counts call), do not retry refine on that id. It is not a bad org list you passed.
 
 ### Claiming coverage from counts and endpoints
 
-**Symptom.** You read `event_count`, `first_event_at` and `last_event_at` (or a dense bucket series) and write "no gaps", "continuous coverage", "the data is complete", or "the source was reporting throughout".
+**Symptom.** You read `event_count` (col), `first_event_at` (col) and `last_event_at` (col) (or a dense bucket series) and write "no gaps", "continuous coverage", "the data is complete", or "the source was reporting throughout".
 
-**Why it's wrong.** Those columns count what ARRIVED. They are consistent with any amount of missing middle, so they cannot establish interior coverage at all. Only a data feed's own report can, and it reaches you as `agent_complete_through` with the advisories beside it on the `resolve_scope` agent row.
+**Why it's wrong.** Those columns count what ARRIVED. They are consistent with any amount of missing middle, so they cannot establish interior coverage at all. Only a data feed's own report can, and it reaches you as `agent_complete_through` (col) with the advisories beside it on the `resolve_scope` (tool) agent row.
 
-**Recovery.** Read `agent_complete_through`. If it reaches the end of your window and advisories are empty, one sentence: "data is complete through <instant>". If it is `"unknown"`, say completeness could not be established, which is a statement about the claim, never a fault and never a claim that data is missing. Then stop; a healthy answer does not earn a section.
+**Recovery.** Read `agent_complete_through` (col). If it reaches the end of your window and advisories are empty, one sentence: "data is complete through <instant>". If it is `"unknown"`, say completeness could not be established, which is a statement about the claim, never a fault and never a claim that data is missing. Then stop; a healthy answer does not earn a section.
 
 ### Writing a completeness statement the question did not need
 
@@ -231,7 +239,7 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` or `low`.
 
 **Symptom.** No feed reported, no advisory appeared, or the stream came in on an ingest key, and you treat that quiet as reassurance: "no problems reported", "the feeds were healthy", "no missed events".
 
-**Why it's wrong.** An ingest-key stream makes no completeness claim at all, so its silence carries nothing. A feed that has not reported is `unknown`, never healthy. An absent skips entry means the source type does not detect skips, not that none occurred. Absence of events is not evidence of absence.
+**Why it's wrong.** An ingest-key stream makes no completeness claim at all, so its silence carries nothing. A feed that has not reported is `unknown` (value) (do not imply healthy from absence). An absent skips entry means the source type does not detect skips, not that none occurred. Absence of events is not evidence of absence.
 
 **Recovery.** Name the absence as an absence: "the feed made no report for this window, so completeness is unknown". Put it in WHAT WAS NOT CHECKED rather than in a Finding, and never upgrade it to a health statement.
 
@@ -239,25 +247,57 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` or `low`.
 
 **Symptom.** You conclude "no evidence of X" without checking that the source actually had complete data ingestion during the relevant window.
 
-**Why it's wrong.** Source might have been emitting `ingest_drop` / `spool_full` / `backpressure` events during the window, in which case "no evidence" might just mean "data was incomplete."
+**Why it's wrong.** Source might have been emitting `ingest_drop` (other) / `spool_full` (other) / `backpressure` (value) events during the window, in which case "no evidence" might just mean "data was incomplete."
 
-**Recovery.** Before any "no evidence found" conclusion, read `agent_complete_through` and `advisories` on the agent row, then run `query_logs(lql='source = "<X>" AND sparklogs.kind = agent_op', start=..., end=...)`. Those rows are stamped when an investigator must distrust other data on that host. If any fired, qualify the Finding's confidence and surface it in WHAT WAS NOT CHECKED. An EMPTY result is inconclusive rather than reassuring: a healthy agent, an agent that is not reporting, and a topic disabled for that agent's rollout ring all look identical from here. `list_sources` event-count trends are a prompt to look, never a coverage measurement. Say which case you could not rule out.
+**Recovery.** Before any "no evidence found" conclusion, read `agent_complete_through` (col) and `advisories` (col) on the agent row, then run `query_logs(lql='source = "<X>" AND sparklogs.kind = agent_op', start=..., end=...)`. Those rows are stamped when an investigator must distrust other data on that host. If any fired, qualify the Finding's confidence and surface it in WHAT WAS NOT CHECKED. An EMPTY result is inconclusive rather than reassuring: a healthy agent, an agent that is not reporting, and a topic disabled for that agent's rollout ring all look identical from here. `list_sources` (tool) event-count trends are a prompt to look, never a coverage measurement. Say which case you could not rule out.
 
-### Reading an empty deep-field query as a clean bill of health
+### Reading empty `sparklogs.*` fields as a health finding
 
-**Symptom.** You filter on a curated field (`sparklogs.reason`, a module-prefixed field) or on a retired name (`event_kind`, `SLAAgentOp`, `event_summary`, `state.*`), get zero rows back, and conclude the system is healthy or the check passed.
+**Symptom.** You filter on a curated field (`sparklogs.reason` (LQL), a module-prefixed field), get zero rows back, and conclude the system is healthy or the check passed.
 
-**Why it's wrong.** These are DESIGNED fields in the schema, but the SparkLogs Managed Agent has zero production emission of them today. Every query filtering on them returns empty on every source, whether or not a problem exists. Empty means "not emitted yet," never "no problem found."
+**Why it's wrong.** Most WEL rows have no curated reason. Empty `sparklogs.*` fields on an event mean the event is uncurated (this is not a health finding). Empty means this predicate did not match, never "no problem found" and never "the box is unhealthy." Uncurated native text and sibling providers can still carry the ticket.
 
-**Recovery.** Fall back to shallow-triage fields that ARE emitted today: `message`, `severity`, `source`, `app`, `subsource`, `pattern` / `pattern_hash`, timestamps. Use `query_event_counts_by_severity` on `severity` or `pattern` for volume/anomaly triage instead of the deep fields. State explicitly in the Finding or WHAT WAS NOT CHECKED that the deep-field check came back empty because the telemetry isn't emitted yet, not because nothing is wrong.
+**Recovery.** Drop the curated predicate. Group the host by `subsource` (LQL), then follow `guides/stream-kinds.md`. Use `query_event_counts_by_severity` (tool) on `severity` (LQL) or `pattern` (LQL) for volume. Say in WHAT WAS NOT CHECKED which curated filters you tried.
+
+### Treating a playbook as the event catalog
+
+**Symptom.** You ran the LQL in `playbooks/<symptom>.md`, got little or nothing, and wrote that there are no relevant events, the host is quiet, or the issue cannot be analyzed.
+
+**Why it's wrong.** A playbook is an incomplete starting recipe for a common shape of that symptom. Its `service` (LQL) / `sparklogs.reason` (LQL) / id filters miss uncurated native text, sibling providers, and channels the file never named. Empty recipe LQL is a miss on the recipe, not proof the ticket has no telemetry.
+
+**Recovery.** Confirm the source has data in the window (`list_sources` (tool)). Then drop the recipe's extra predicates and group that host by `subsource` (LQL). Open the kind file in `guides/stream-kinds.md` for that `subsource` (LQL) (WEL classic: `provider_name` (LQL) before `pattern` (LQL); file log: `origin` (LQL); device state: `query_device_health` (tool) / `sparklogs.kind` (LQL)+`sparklogs.topic` (LQL)+`sparklogs.reason` (LQL)). Then group as that ladder says, including `sparklogs.reason` (LQL) when populated. Open `feeds/<id>/` only after a subsource showed up. Pull a narrow raw slice of the dominant groups. If you still cannot speak to the ticket, say which discovery steps you ran and put the rest in WHAT WAS NOT CHECKED. Do not stop at the playbook queries.
+
+### Treating `list_fields` (tool) as the device-state explore ladder
+
+**Symptom.** You ran `list_fields` (tool), then grouped or filtered on every `sparklogs.data.*` path you saw.
+
+**Why it's wrong.** `list_fields` (tool) is a good catalog call. It names fields; it does not rank what matters. For device state, group `sparklogs.kind` (LQL), `sparklogs.topic` (LQL), `sparklogs.reason` (LQL) first (`guides/stream-kinds/device-state.md`). Discovery omits unstable process-id map paths (`sparklogs.data.processes.<pid>...`). Service and similar instance keys can remain in the catalog; they are names to look up, not the ladder.
+
+**Recovery.** Latest-in-window: `query_device_health` (tool). Event stream: group `sparklogs.kind` (LQL) / `sparklogs.topic` (LQL) / `sparklogs.reason` (LQL). Use `list_fields` (tool) when you need a name the rows did not already show.
 
 ### Failing to check that the source has data in the investigation window
 
-**Symptom.** You investigate a source that has no Managed Agent telemetry in the investigation's time window. You spend many tool calls finding nothing.
+**Symptom.** You investigate a source that has no SparkLogs Agent telemetry in the investigation's time window. You spend many tool calls finding nothing.
 
 **Why it's wrong.** Wastes investigation budget. Also produces a confidently-wrong conclusion because absence of evidence is treated as evidence of absence.
 
-**Recovery.** Always run `list_sources` with the investigation's `start`/`end` window as your first or second tool call (after `resolve_scope`). If the source has no data in the window, halt and ask the engineer for clarification per `scope-resolution.md`.
+**Recovery.** Always run `list_sources` (tool) with the investigation's `start` (arg)/`end` (arg) window as your first or second tool call (after `resolve_scope` (tool)). If the source has no data in the window, halt and ask the engineer for clarification per `scope-resolution.md`.
+
+### Asking which device when one org already resolved
+
+**Symptom.** `resolve_scope` (tool) returned one exact org and many agent rows, and you asked the engineer to pick a host before answering a client- or fleet-scoped question.
+
+**Why it's wrong.** Many devices under one resolved org is the inventory, not a tie. Asking stalls a question that already has a scope.
+
+**Recovery.** Keep the agent rows. Ask only if org identity or host identity is fuzzy: tied matches at the same `match_kind` (col), a sole weak match, or zero hits. See `guides/scope-resolution.md`.
+
+### Scanning the whole fleet unprompted
+
+**Symptom.** They named one client or one host, and you opened with estate-wide `query_logs` (tool) (or a wide counts scan with no LQL) to "see if it is anywhere".
+
+**Why it's wrong.** Default scope is what they named. A fleet hunt is a suggested next step when a finding looks serious or shared, not the first move.
+
+**Recovery.** Stay in the named scope. If the finding looks shared (same `pattern_hash` (LQL) / `service` (LQL) / reason; ransomware-class, backup-wide, identity), suggest a hunt and wait unless they already asked. Climb `query_scope_activity` (tool) and `query_event_counts_by_severity` (tool), then `describe_pattern` (tool) for spread. Raw logs only after that list is narrow.
 
 ### Running 30 tool calls without converging
 
@@ -303,7 +343,7 @@ Every summary MUST have: EXECUTIVE SUMMARY (at top), SCOPE CHECKED, OBSERVED CON
 
 ### Making the POSSIBLE NEXT DIRECTIONS section longer than 3 sentences
 
-The section is bounded. If it expands, it's becoming cause analysis. Trim and refer to `/sparklogs:analyze-cause`.
+The section is bounded. If it expands, it's becoming cause analysis. Trim and refer to `sparklogs-analyze-cause`.
 
 ### Generic Findings
 

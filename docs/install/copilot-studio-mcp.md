@@ -1,10 +1,11 @@
 # Copilot Studio MCP Setup
 
-SparkLogs does not ship a Copilot Studio prompt-skill package in the MVP. Use the SparkLogs remote MCP endpoint as the integration point.
+Microsoft Copilot Studio does not load this plugin's skills.
+Connect SparkLogs MCP and paste the agent instruction template.
 
-High-level setup:
+Detailed docs (URL, OAuth, Microsoft 365 Copilot licensing, instruction template):
+[Connect SparkLogs MCP](https://sparklogs.com/docs/it-fleet-intelligence/connect#mcp)
+and
+[Agent Instruction Template](https://sparklogs.com/docs/it-fleet-intelligence/agent-instructions).
 
-1. Create or open the relevant Copilot Studio agent.
-2. Add SparkLogs as a remote MCP server: https://mcp.sparklogs.app/mcp
-3. Configure the workspace-scoped SparkLogs API token using Copilot Studio's supported secret mechanism. (if using an env var, we recommend naming it `SPARKLOGS_API_TOKEN`)
-4. Add instructions that preserve the SparkLogs trust posture: cite evidence, label speculation, and keep humans accountable for actions.
+Token overlay when a host cannot do OAuth: [API token auth](api-token.md).

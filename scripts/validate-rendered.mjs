@@ -19,6 +19,12 @@ import {
 } from './dist-layout.mjs';
 import { MODULES } from './generated-references.config.mjs';
 import { AUTHORING_FRONTMATTER_KEYS, parseFrontmatter } from './skill-indexes.mjs';
+import {
+  KEEP_TAGS,
+  leftoverAuthoringTags,
+  keepTagKindsFound,
+  proveDistIdentifierScan,
+} from './identifier-tags.mjs';
 
 assertRepoRoot(import.meta);
 
@@ -180,15 +186,13 @@ async function validatePackage(host) {
   if (!layout.mcpFile && manifest.mcpServers) {
     throw new Error(`${host} manifest points at an MCP config the package does not ship`);
   }
+  if (server.headers) {
+    throw new Error(`${host} MCP entry must not set headers; hosts skip OAuth when Authorization is present`);
+  }
+  if (server.bearer_token_env_var) {
+    throw new Error(`${host} MCP entry must not set bearer_token_env_var; an unset env var fails startup`);
+  }
   if (host === 'codex') {
-    // Codex resolves the token from the environment by variable NAME. A header carrying a
-    // ${...} placeholder would reach the server as those literal characters, so the entry
-    // must authenticate the one way Codex actually implements.
-    const token = (await readJson(path.join(ROOT, METADATA_FILE))).mcp.tokenVariable;
-    if (server.bearer_token_env_var !== token) {
-      throw new Error(`Codex MCP entry must set bearer_token_env_var to ${token}`);
-    }
-    if (server.headers) throw new Error('Codex MCP entry must not carry headers; Codex expands no placeholder');
     // The manifest pointer is what makes Codex read the file at all.
     if (manifest.mcpServers !== `./${layout.mcpFile}`) {
       throw new Error(`Codex manifest must point mcpServers at ./${layout.mcpFile}`);
@@ -196,13 +200,8 @@ async function validatePackage(host) {
   }
   if (manifest.name !== 'sparklogs') throw new Error(`${host} manifest name must be sparklogs`);
   if (!SEMVER.test(manifest.version)) throw new Error(`${host} manifest version is invalid`);
-  if (host === 'cursor') {
-    // Cursor resolves the mcp.json header placeholder only from a declared plugin variable.
-    const token = server.headers.Authorization.match(/\$\{([A-Z0-9_]+)\}/)?.[1];
-    if (!token) throw new Error('Cursor MCP header does not reference a variable');
-    if (!manifest.variables?.properties?.[token]) {
-      throw new Error(`Cursor manifest does not declare variable ${token}`);
-    }
+  if (host === 'cursor' && manifest.variables?.required?.length) {
+    throw new Error('Cursor manifest must not require plugin variables; OAuth is the default');
   }
   await validateShippedMarkdown(host, base);
 }
@@ -211,10 +210,16 @@ async function validateShippedMarkdown(host, base) {
   const markerHits = [];
   const authoringHits = [];
   const yamlHits = [];
+  const leftoverHits = [];
+  const keepKinds = new Set();
   await walk(base, async (file, stat) => {
     if (!stat.isFile() || !file.endsWith('.md')) return;
     const relative = path.relative(base, file).split(path.sep).join('/');
     const text = await fs.readFile(file, 'utf8');
+    for (const hit of leftoverAuthoringTags(text)) {
+      leftoverHits.push(`${relative}: ${hit}`);
+    }
+    for (const kind of keepTagKindsFound(text)) keepKinds.add(kind);
     if (/BEGIN GENERATED|END GENERATED|HOSTVARIANT/.test(text)) markerHits.push(relative);
     const { data } = parseFrontmatter(text, `${host}:${relative}`);
     for (const key of Object.keys(data)) {
@@ -246,6 +251,14 @@ async function validateShippedMarkdown(host, base) {
   if (yamlHits.length) {
     throw new Error(`frontmatter fails strict YAML parse:\n  ${yamlHits.join('\n  ')}`);
   }
+  if (leftoverHits.length) {
+    throw new Error(`${host} leftover authoring tags on dist:\n  ${leftoverHits.join('\n  ')}`);
+  }
+  for (const need of KEEP_TAGS) {
+    if (!keepKinds.has(need)) {
+      throw new Error(`${host} missing kept identifier tag (${need}); empty scan is not a pass`);
+    }
+  }
   for (const skill of ['sparklogs-ask', 'sparklogs-investigate', 'sparklogs-analyze-cause']) {
     const text = await fs.readFile(path.join(base, 'skills', skill, 'SKILL.md'), 'utf8');
     for (const id of MODULES) {
@@ -264,6 +277,7 @@ async function validateShippedMarkdown(host, base) {
 }
 
 if (!await exists(DIST)) throw new Error(`Rendered directory does not exist: ${DIST}`);
+proveDistIdentifierScan();
 await validateMarketplace();
 await validateDistTree();
 for (const host of HOSTS) await validatePackage(host);

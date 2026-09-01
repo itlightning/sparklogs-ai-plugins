@@ -30,6 +30,7 @@ import {
   rewriteCorpusRelative,
 } from './host-transforms.mjs';
 import { formatFrontmatter, parseFrontmatter, shipMarkdown } from './skill-indexes.mjs';
+import { stripAuthoringTags } from './identifier-tags.mjs';
 
 assertRepoRoot(import.meta);
 
@@ -119,6 +120,7 @@ async function writeText(file, text) {
 // path inside the rendered package, which is what the corpus rewrite measures against.
 function renderMarkdownText(text, srcLabel, host, pkgRel) {
   let out = shipMarkdown(text, srcLabel);
+  out = stripAuthoringTags(out);
   out = applyHostVariants(out, { commands: HOST_LAYOUT[host].commands }, srcLabel);
   out = host === 'claude' ? rewriteCorpusForClaude(out) : rewriteCorpusInSkill(out, pkgRel);
   if (host === 'cursor') out = rewriteCommandsForCursor(out);
@@ -148,8 +150,9 @@ async function renderCommands(base, host) {
     const { data } = parseFrontmatter(raw, from);
     if (!data.description) throw new Error(`${from} needs a description`);
     const stem = name.replace(/\.md$/, '');
+    const cursorName = stem.startsWith('sparklogs-') ? stem : `sparklogs-${stem}`;
     const shipped = host === 'cursor'
-      ? { name: `sparklogs-${stem}`, description: data.description }
+      ? { name: cursorName, description: data.description }
       : { description: data.description, 'argument-hint': data['argument-hint'] };
     const body = renderMarkdownText(raw, from, host, pkgRel);
     const withoutHead = parseFrontmatter(body, from).body.replace(/^\n+/, '');
@@ -241,26 +244,14 @@ function claudeManifest(metadata, version) {
 }
 
 /**
- * Cursor plugin manifest. `variables` is a JSON-Schema object; the plugin's own mcp.json resolves
- * bare ${SPARKLOGS_API_TOKEN} from it, and only from it, so an undeclared variable ships an
- * unauthenticated MCP entry.
+ * Cursor plugin manifest. MCP config is URL-only (OAuth). Do not declare a token
+ * variable: a required plugin variable blocks connect, and an Authorization header
+ * makes Claude-class hosts skip OAuth entirely.
  */
 function cursorManifest(metadata, version) {
-  const token = metadata.mcp.tokenVariable;
   return {
     ...commonManifest(metadata, version),
     logo: 'assets/logo.svg',
-    variables: {
-      type: 'object',
-      properties: {
-        [token]: {
-          type: 'string',
-          title: metadata.mcp.tokenTitle,
-          description: metadata.mcp.tokenDescription,
-        },
-      },
-      required: [token],
-    },
   };
 }
 
@@ -370,29 +361,19 @@ function buildCodexMarketplace(metadata) {
 }
 
 /**
- * MCP server entry. Every host needs an explicit transport: Claude drops a url entry that omits
- * `type`, and the Agent Plugins schema names the same transport `streamable-http`. Neither Claude,
- * Cursor nor the spec expands shell environment variables in a header; Cursor resolves
- * ${SPARKLOGS_API_TOKEN} from the manifest's `variables` block, and the generic package ships the
- * placeholder for the reader to replace by hand (its README says so, by key name).
+ * MCP server entry. URL plus transport only. Claude disables OAuth when
+ * headers.Authorization is set, even to an unsubstituted ${VAR}. Codex fails
+ * startup if bearer_token_env_var names an unset env var. Default auth is the
+ * host's OAuth flow against the SparkLogs authorization server.
  *
- * Codex is the exception, so it gets its own entry. It reads the token through
- * `bearer_token_env_var`, which takes the environment variable's NAME and is read from the
- * environment at connect time. A `${...}` header would ship to the server as those literal
- * characters, so Codex carries no headers at all and no placeholder to substitute.
+ * Every host needs an explicit transport: Claude drops a url entry that omits
+ * `type`, and the Agent Plugins schema names the same transport `streamable-http`.
  */
 function mcpConfig(metadata, host) {
-  const entry = host === 'codex'
-    ? {
-      type: 'http',
-      url: metadata.mcp.url,
-      bearer_token_env_var: metadata.mcp.tokenVariable,
-    }
-    : {
-      type: host === 'generic' ? 'streamable-http' : 'http',
-      url: metadata.mcp.url,
-      headers: { Authorization: `Bearer \${${metadata.mcp.tokenVariable}}` },
-    };
+  const entry = {
+    type: host === 'generic' ? 'streamable-http' : 'http',
+    url: metadata.mcp.url,
+  };
   const config = { mcpServers: { sparklogs: entry } };
   if (host === 'generic') config.$schema = AGENT_PLUGINS_MCP_SCHEMA;
   return config;
@@ -416,8 +397,6 @@ async function pluginPackageReadme(host, metadata) {
     .replaceAll('{{host_label}}', HOST_LABELS[host] ?? host)
     .replaceAll('{{docs_url}}', DOCS_URL)
     .replaceAll('{{mcp_url}}', metadata.mcp.url)
-    .replaceAll('{{token_var}}', metadata.mcp.tokenVariable)
-    .replaceAll('{{token_ref}}', `\${${metadata.mcp.tokenVariable}}`)
     .replaceAll('{{repo_url}}', metadata.repository);
   const leftover = text.match(/\{\{[a-z_]+\}\}/);
   if (leftover) throw new Error(`Unfilled placeholder in package-README-${host}.md: ${leftover[0]}`);

@@ -1,8 +1,8 @@
 # LQL Reference - for the SparkLogs Investigator skill
 
-The complete, verified syntax of Lightning Query Language (LQL) - the filter language used by every LQL parameter on the SparkLogs MCP tools: `lql` (on `query_logs` / `query_event_counts_by_severity`), and `filter_lql` / `having_lql` (on `refine_query_result`). Read this file when composing any non-trivial LQL.
+The complete, verified syntax of Lightning Query Language (LQL) - the filter language used by every LQL parameter on the SparkLogs MCP tools: `lql` (arg) (on `query_logs` (tool) / `query_event_counts_by_severity` (tool)), and `filter_lql` (arg) / `having_lql` (arg) (on `refine_query_result` (tool)). Read this file when composing any non-trivial LQL.
 
-An empty or omitted `lql` matches everything in the tool's `start`/`end` window and `org_ids` scope - useful as a starting point before narrowing.
+An empty or omitted `lql` (arg) matches everything in the tool's `start` (arg)/`end` (arg) window and `org_ids` (arg) scope - useful as a starting point before narrowing.
 
 Operator names, syntax forms, and edge cases are quoted from sparklogs.com docs.
 
@@ -19,10 +19,10 @@ Operator names, syntax forms, and edge cases are quoted from sparklogs.com docs.
 | `=` | exact match | Pattern or regex allowed on right side. |
 | `!=` or `<>` | exact non-match | See **Negated operators (scalar vs array)** below. |
 | `>=`, `>`, `<`, `<=` | numeric/ordinal comparison | Right side must be a literal, not a pattern or regex. |
-| `<field>!` | field is present in the event | Presence check; matches even when the value is an explicit JSON `null` (absent field = no match). e.g., `correlation_id!` |
+| `<field>!` | field is present in the event | Presence check; matches even when the value is an explicit JSON `null` (other) (absent field = no match). e.g., `correlation_id!` |
 | `<field> between <literal> and <literal>` | inclusive range | Works for numeric and timestamp fields. |
 | `<field> in (a, b, c)` | match any in value list | Comma-separated, parenthesized. NOT `[a, b, c]`. |
-| `<field> not in (a, b, c)` | match NONE in value list | Inverse of `in`. |
+| `<field> not in (a, b, c)` | match NONE in value list | Inverse of `in` (other). |
 
 ### No `IS NULL` operator
 Use `NOT <field>!` for is-null. Use `<field>!` for is-not-null.
@@ -36,8 +36,8 @@ correlation_id!         <- is-not-null
 Use pattern operators `*` and `?` directly in unquoted terms.
 
 ```
-app: winlog/*           <- right (matches any winlog channel)
-app LIKE "winlog/%"     <- WRONG (no LIKE; no % or _)
+subsource: win.eventlog.*     <- right (`:` plus `*`)
+subsource LIKE "win.eventlog/%"  <- WRONG (no LIKE; no % or _)
 ```
 
 ### No `MATCHES` (no separate regex keyword)
@@ -50,12 +50,12 @@ message MATCHES "regex"               <- WRONG (no MATCHES)
 
 ### Negated operators (scalar vs array)
 
-**Scalar fields** (including `subsource` and other string paths):
+**Scalar fields** (including `subsource` (LQL) and other string paths):
 
 - `!:` and `!=` match when the field is **absent or NULL** as well as when the value does not match.
-- `subsource!:win.servicing.dism` matches events with no `subsource` value.
+- `subsource!:win.servicing.dism` matches events with no `subsource` (LQL) value.
 
-**Array fields** (unindexed `x.tags`, not `x.tags[0]`):
+**Array fields** (unindexed `x.tags` (LQL), not `x.tags[0]`):
 
 - `!:` and `!=` apply only when the field is present **and** is a JSON array.
 - Absent or non-array values do **not** match.
@@ -65,7 +65,7 @@ message MATCHES "regex"               <- WRONG (no MATCHES)
 
 ### Empty string literals (scalar strings only)
 
-These rules apply to string fields such as `source`, `app`, `subsource`, and custom paths like `x.foo`. The behavior is the same for every string field name in LQL.
+These rules apply to string fields such as `source` (LQL), `app` (LQL), `subsource` (LQL), and custom paths like `x.foo` (LQL). The behavior is the same for every string field name in LQL.
 
 | Form | Meaning |
 |---|---|
@@ -78,9 +78,33 @@ These rules apply to string fields such as `source`, `app`, `subsource`, and cus
 
 Do not use `field:""` (matches every event) or `field!:""` (matches no events). Use `NOT field!` to test for a missing field. Use `field#s!` when you need to assert JSON type on a custom path.
 
+`field!=val` (LQL) on a scalar also matches when the field is missing.
+To require the field to be present and not equal to a value, write `field! AND field!=val` (LQL).
+
+### Array of objects (`[]()`)
+
+For an array of objects, `path[](expr)` (LQL) matches when at least one element satisfies `expr` (other).
+Names inside the parentheses are fields on that element, not on the event.
+`path[].leaf=val` (LQL) is the same as `path[](leaf=val)` (LQL).
+
+`path[]!` (LQL) matches when `path` (other) is present and is an array, including an empty array.
+
+| Query | Missing field | Empty array | Has a matching element | Other elements only |
+|---|---|---|---|---|
+| `path[](pid=1)` (LQL) | no | no | yes | no |
+| `NOT path[](pid=1)` (LQL) | yes | yes | no | yes |
+| `path[]!` (LQL) | no | yes | yes | yes |
+| `path[]! AND NOT path[](pid=1)` (LQL) | no | yes | no | yes |
+
+Do not use `processes!` (LQL) for array presence when the named parent is not itself an array field.
+Use `path[]!` (LQL).
+
+Bare terms and `any:` (LQL) are not allowed inside `[]()`.
+Name a field on the element, for example `pid=1234` (LQL).
+
 ### No `CONTAINS` / `CONTAINS_ANY` / `CONTAINS_ALL` (array fields use scalar operators directly)
 
-For an array field like `anomaly_categories`:
+For an array field like `anomaly_categories` (other):
 
 ```
 anomaly_categories: spike              <- matches if any element equals "spike"
@@ -98,13 +122,13 @@ LQL does NOT support `state.services.*.status = STOPPED`. Type resolution requir
 
 **Workarounds:**
 - Filter on a promoted field instead. Curated sources promote the values worth querying to named paths (`sparklogs.*` and the module-prefixed fields); the generated per-source field schema lists them.
-- Use top-level anomaly fields (`anomaly_max_score`, `anomaly_categories`) once they are emitted; nothing in the product writes them today.
-- Use a direct keyed lookup when the key is known: `x.services.spooler.status = STOPPED` works fine.
+- Use top-level anomaly fields (`anomaly_max_score` (other), `anomaly_categories` (other)) once they are emitted; nothing in the product writes them today.
+- Use a direct keyed lookup **only when the instance key is already known**. Do not discover instance maps via `list_fields` (tool) on `sparklogs.agent.state` (value) (see `guides/stream-kinds/device-state.md`).
 
 ```
 x.services.*.status = STOPPED     <- WRONG (wildcard JSON paths not supported)
 sparklogs.reason = service_not_running   <- right (promoted field)
-x.services.spooler.status = STOPPED      <- right (direct key)
+x.services.spooler.status = STOPPED      <- right only if you already know that key
 ```
 
 ---
@@ -117,15 +141,15 @@ Pattern operators in unquoted terms:
 - Pattern operators only work on STRING-typed fields; on a numeric field they fail to compile ("invalid numeric value"). Coerce with the `#s` type suffix: `x.http.response.status#s not in (2??, 3??)`.
 
 ```
-app: winlog/Microsoft-Windows-*           <- any Microsoft-Windows winlog channel
+subsource: win.eventlog.*                 <- any WEL channel subsource
 process_name: msedge*                     <- anything starting with msedge
 http_status_code: ?00                     <- matches 100, 200, 300, ..., 900
 ```
 
-A bare term with no field name searches the standard string fields: `message`, `pattern`, `category`,
-`subsource`, `source`, `app`, `service`, `trace_id`, `span_id`, and the companion hash fields
-(`pattern_hash`, `category_hash`, `subsource_hash`, `source_hash`, `app_hash`, `service_hash`).
-It does NOT search custom fields; use the `any` meta field for that.
+A bare term with no field name searches the standard string fields: `message` (LQL), `pattern` (LQL), `category` (LQL),
+`subsource` (LQL), `source` (LQL), `app` (LQL), `service` (LQL), `trace_id` (LQL), `span_id` (LQL), and the companion hash fields
+(`pattern_hash` (LQL), `category_hash` (LQL), `subsource_hash` (LQL), `source_hash` (LQL), `app_hash` (LQL), `service_hash` (LQL)).
+It does NOT search custom fields; use the `any` (other) meta field for that.
 
 ```
 failed                                    <- matches events with "failed" in any standard string field
@@ -240,7 +264,7 @@ Auto-resolves type when omitted. Only use type suffix when the field has multipl
 
 ---
 
-## `any` meta field
+## `any` (other) meta field
 
 Searches all standard string + custom fields (same standard string fields as a bare term, plus every custom field). Only with `:` operator. Slow - use sparingly.
 
@@ -254,7 +278,7 @@ any: "credit card"                       <- search all fields for "credit card"
 
 - **No JOIN** across event rows. LQL is a row predicate.
 - **No subqueries** in filter expressions.
-- **No COUNT or other aggregations in filter expressions.** `query_event_counts_by_severity` always returns `event_count` plus the per-band severity counts; there is no aggregation list to pass it. Named aggregates (`{fn, col, as}`) live on `refine_query_result`, over a cached result.
+- **No COUNT or other aggregations in filter expressions.** `query_event_counts_by_severity` (tool) always returns `event_count` (col) plus the per-band severity counts; there is no aggregation list to pass it. Named aggregates (`{fn, col, as}`) live on `refine_query_result` (tool), over a cached result.
 - **No wildcard JSON paths** (per above).
 - **No `LIKE`, `MATCHES`, `IS NULL`, `CONTAINS_ANY`, `CONTAINS_ALL`** keywords.
 
@@ -262,7 +286,7 @@ any: "credit card"                       <- search all fields for "credit card"
 
 ## Canonical recurring patterns
 
-**Field-availability note.** `sparklogs.*` curated fields exist on events a source pack curated, and only on the surfaces that promote them; module-prefixed fields are narrower still. `anomaly_max_score` / `anomaly_categories` are designed and not emitted anywhere in the product today, so they return empty on every source. An empty result on a curated or module field may mean the source never writes that field, so check what the source carries before reading anything into it, and fall back to `severity` / `message` / `pattern`, which every source carries. The retired names `event_kind`, `SLASnapshot`, `SLAAgentOp`, `event_summary`, `snapshot_id` and `state.*` resolve to nothing at all: an empty result there is a spelling problem, not a health signal.
+**Field-availability note.** `sparklogs.*` curated fields exist on events a source pack curated, and only on the surfaces that promote them; module-prefixed fields are narrower still. `anomaly_max_score` (other) / `anomaly_categories` (other) are designed and not emitted anywhere in the product today, so they return empty on every source. An empty result on a curated or module field may mean the source never writes that field, so check what the source carries before reading anything into it, and fall back to `severity` (LQL) / `message` (LQL) / `pattern` (LQL), which every source carries. The retired names event_kind, `SLASnapshot`, `SLAAgentOp`, `event_summary` (other), `snapshot_id` (other) and `state.*` resolve to nothing at all: an empty result there is a spelling problem, not a health signal.
 
 ### Context-reduction filter (the most common starting filter)
 
@@ -278,7 +302,7 @@ Use this whenever you want to focus on signal-rich events without specifying a m
 source = "srv-fileshare01"
 ```
 
-Combined with the `start` / `end` window parameters (which are separate from the LQL filter).
+Combined with the `start` (arg) / `end` (arg) window parameters (which are separate from the LQL filter).
 
 ### Multi-source set
 
@@ -308,12 +332,15 @@ sparklogs.kind = monitor                               <- a tracked condition
 sparklogs.kind = agent_op                              <- agent self-observability
 ```
 
-### Winlog channel pattern
+### Windows Event Log (WEL) channel and publisher
+
+WEL identity is **`subsource` (LQL)**.
+`app` (LQL) is a product token when present (`guides/app-vocabulary.md`).
+Explore ladders: `guides/stream-kinds.md`.
 
 ```
-app: winlog/Microsoft-Windows-Backup/*                 <- any Backup channel
-app: winlog/VSS                                        <- exact channel
-app: winlog/Application AND winlog.event_id = 1000     <- Application channel event ID 1000
+subsource = "win.eventlog.application" AND winlog.event_id = 1000
+provider_name: Microsoft-Windows-Backup*
 ```
 
 ### Direct keyed lookup
@@ -329,7 +356,7 @@ state.vss_writers."Microsoft Exchange Writer".state = "Failed"   <- writer name 
 sparklogs.epoch.id = "qX9k2mp4n7t1c8r5"
 ```
 
-Order within the era on `sparklogs.epoch.seq`, which is monotonic, rather than on the timestamp.
+Order within the era on `sparklogs.epoch.seq` (LQL), which is monotonic, rather than on the timestamp.
 
 ### Correlation ID
 
@@ -343,7 +370,7 @@ correlation_id = "abc123def456"
 sparklogs.kind = agent_op
 ```
 
-`agent_op` rows are stamped when an investigator must distrust or re-interpret other data on that host. Treat an EMPTY result as inconclusive rather than reassuring: a healthy agent, an agent that is not reporting, and a topic disabled for that agent's rollout ring look identical from here.
+`agent_op` (value) rows are stamped when an investigator must distrust or re-interpret other data on that host. Treat an EMPTY result as inconclusive rather than reassuring: a healthy agent, an agent that is not reporting, and a topic disabled for that agent's rollout ring look identical from here.
 
 ### Detector lifecycle awareness
 
@@ -355,7 +382,7 @@ Identifies warmup-complete and baseline-reset events. Same caveat: empty is inco
 
 ### Time-range narrowing within an LQL filter
 
-The `start` / `end` window is the primary time scope. To narrow further inside a cached scan via `refine_query_result`'s `filter_lql`:
+The `start` (arg) / `end` (arg) window is the primary time scope. To narrow further inside a cached scan via `refine_query_result` (tool)'s `filter_lql` (arg):
 
 ```
 t between 2026-04-23T03:00:00Z and 2026-04-23T04:00:00Z
@@ -365,7 +392,7 @@ t between 2026-04-23T03:00:00Z and 2026-04-23T04:00:00Z
 
 ## Common LQL mistakes (most-bitten-by-this-list)
 
-1. **`LIKE "winlog/%"` instead of `: winlog/*`.** SparkLogs is not SQL.
+1. **`LIKE "win.eventlog/%"` instead of a pattern with `*`.** SparkLogs is not SQL.
 2. **`MATCHES "regex"` instead of `: /regex/`.** Slash-delimited.
 3. **`IS NULL` / `IS NOT NULL` instead of `NOT field!` / `field!`.** Different syntax.
 4. **`CONTAINS "value"` for arrays instead of `field: value` or `field = value`.** Array fields use scalar operators directly.
@@ -374,7 +401,8 @@ t between 2026-04-23T03:00:00Z and 2026-04-23T04:00:00Z
 7. **Quoting unquoted terms unnecessarily.** `severity = "error"` works but `severity = error` is fine and more readable.
 8. **Forgetting parentheses around OR with implicit AND.** `severity = error OR anomaly_max_score >= 60 source = "x"` parses unexpectedly. Use parentheses: `(severity = error OR anomaly_max_score >= 60) AND source = "x"`.
 9. **Mixing `&&` / `||` with `AND` / `OR` in the same expression.** Both work but consistency reads better.
-10. **Hallucinating field names.** A name nothing has emitted is not refused; it reads as empty, and the response lists it under `schema.fields_with_no_values`. That is a normal outcome rather than an error, so treat it as a prompt to check the spelling, not as something to report. Use canonical field names from `mcp-tool-decision-tree.md`, `list_fields` discovery, or `get_query_metadata` field discovery over a cached query.
+10. **Hallucinating field names.** A name nothing has emitted is not refused; it reads as empty, and the response lists it under `schema.fields_with_no_values` (col). That is a normal outcome rather than an error, so treat it as a prompt to check the spelling, not as something to report. Use canonical field names from `mcp-tool-decision-tree.md`, `list_fields` (tool), or `get_query_metadata` (tool) over a cached query. `list_fields` (tool) omits unstable process-id paths; it is still the catalog for names you have not seen (`guides/stream-kinds/device-state.md`).
+11. **Bare terms inside `[]()`.** Name a field on the element (`pid=1234` (LQL)). `processes!` (LQL) is not array presence; use `path[]!` (LQL).
 
 ---
 
