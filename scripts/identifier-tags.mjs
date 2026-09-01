@@ -10,7 +10,8 @@
 //   (other) syntax/pedagogy   stripped on render
 //
 // Fenced code is exempt. src/feeds/ and GENERATED blocks are skipped.
-// Membership: each tag must match scripts/identifier-sot.yaml plus library harvest.
+// Membership: each tag must match scripts/identifier-sot.yaml plus library harvest
+// (committed src/feeds + app-vocabulary.md when the sibling library is absent).
 // (other) cannot launder a product identifier or a dotted path.
 
 import fs from 'node:fs/promises';

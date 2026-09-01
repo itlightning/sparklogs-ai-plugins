@@ -144,9 +144,12 @@ running them locally before tagging:
   component inventory and that the MCP server is counted.
 - **The generated-feed drift check** (`sync-generated-references.mjs --check`) compares `src/feeds/`
   against a sibling `sparklogs-source-library` checkout, found via `SPARKLOGS_SOURCE_LIBRARY_DIR` or
-  `../sparklogs-source-library`. Without that checkout there is nothing to compare against. The
-  recorded commit in `scripts/generated-SYNC-MANIFEST.json` is only as current as the last maintainer
-  who had the sibling repo checked out.
+  `../sparklogs-source-library`. Without that checkout there is nothing to compare against, so CI
+  skips the check. The snapshot in `scripts/generated-SYNC-MANIFEST.json` is only as current
+  as the last maintainer who had the sibling repo checked out.
+- **Identifier membership** (`lint-identifier-tags.mjs`) still runs in that CI container: it harvests
+  LQL paths and app tokens from committed `src/feeds/` and `guides/app-vocabulary.md` when the
+  sibling is missing. An explicit `SPARKLOGS_SOURCE_LIBRARY_DIR` that is unusable still fails.
 
 ## Versioning
 

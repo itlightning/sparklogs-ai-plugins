@@ -1,18 +1,23 @@
 // Copyright (C) 2026 IT Lightning, LLC. All rights reserved.
 // See LICENSE.
 
-// Load identifier-sot.yaml and harvest LQL paths / reason slugs / app tokens
-// from a sibling sparklogs-source-library checkout.
+// Load identifier-sot.yaml and harvest LQL paths / reason slugs / app tokens.
+// Prefer a sibling sparklogs-source-library checkout. GitHub CI has none: harvest
+// the same public identifiers from committed src/feeds + app-vocabulary.md.
 
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import yaml from 'js-yaml';
 import {
   DEFAULT_SOURCE_LIBRARY_DIR,
+  GENERATED_DIR,
   LIBRARY_GENERATED_SUBPATH,
   MODULES,
   SOURCE_LIBRARY_DIR_ENV,
 } from './generated-references.config.mjs';
+
+const APP_VOCAB_BEGIN = '<!-- BEGIN GENERATED APP_VOCABULARY -->';
+const APP_VOCAB_END = '<!-- END GENERATED APP_VOCABULARY -->';
 
 const TABLE_CELL_RE = /^\| `([a-z][a-z0-9_.]*)` /gm;
 const FAMILY_GLOB_RE = /`([a-z][a-z0-9_.]*)\.\*`/g;
@@ -82,18 +87,14 @@ function markdownSection(text, heading) {
   return next < 0 ? from : from.slice(0, next + 3);
 }
 
-export async function harvestLibrary(libRoot) {
-  const publicRoot = path.join(libRoot, LIBRARY_GENERATED_SUBPATH);
-  if (!await exists(publicRoot)) {
-    throw new Error(`source-library has no ${LIBRARY_GENERATED_SUBPATH} at ${publicRoot}`);
-  }
+export async function harvestPublicTree(publicRoot) {
   const lql = new Set();
   const families = new Set();
   const reasons = new Set();
   for (const module of MODULES) {
     const fieldsPath = path.join(publicRoot, module, 'fields.md');
     if (!await exists(fieldsPath)) {
-      throw new Error(`missing library fields.md for ${module}: ${fieldsPath}`);
+      throw new Error(`missing fields.md for ${module}: ${fieldsPath}`);
     }
     const fields = await fs.readFile(fieldsPath, 'utf8');
     addAll(lql, parseTableIdentifiers(markdownSection(fields, 'Module fields')));
@@ -110,6 +111,10 @@ export async function harvestLibrary(libRoot) {
       addAll(reasons, parseAllBacktickIdentifiers(await fs.readFile(enumsPath, 'utf8')));
     }
   }
+  return { lql, families, reasons };
+}
+
+async function harvestAppsFromRegistry(libRoot) {
   const registryPath = path.join(libRoot, 'registry.yaml');
   if (!await exists(registryPath)) {
     throw new Error(`missing registry.yaml at ${registryPath}`);
@@ -121,8 +126,38 @@ export async function harvestLibrary(libRoot) {
   }
   const unpublished = new Set(Array.isArray(parsed.app_vocabulary_unpublished)
     ? parsed.app_vocabulary_unpublished : []);
-  const apps = new Set(Object.keys(vocab).filter((k) => !unpublished.has(k)));
-  return { lql, families, reasons, apps };
+  return new Set(Object.keys(vocab).filter((k) => !unpublished.has(k)));
+}
+
+async function harvestAppsFromPluginGuide(root) {
+  const guidePath = path.join(root, 'src/guides/app-vocabulary.md');
+  const text = await fs.readFile(guidePath, 'utf8');
+  const begin = text.indexOf(APP_VOCAB_BEGIN);
+  const end = text.indexOf(APP_VOCAB_END);
+  if (begin < 0 || end < 0 || end < begin) {
+    throw new Error(`${guidePath} is missing ${APP_VOCAB_BEGIN} / ${APP_VOCAB_END}`);
+  }
+  return parseTableIdentifiers(text.slice(begin, end));
+}
+
+export async function harvestLibrary(libRoot) {
+  const publicRoot = path.join(libRoot, LIBRARY_GENERATED_SUBPATH);
+  if (!await exists(publicRoot)) {
+    throw new Error(`source-library has no ${LIBRARY_GENERATED_SUBPATH} at ${publicRoot}`);
+  }
+  const tree = await harvestPublicTree(publicRoot);
+  const apps = await harvestAppsFromRegistry(libRoot);
+  return { ...tree, apps };
+}
+
+export async function harvestCommittedPlugin(root) {
+  const publicRoot = path.join(root, GENERATED_DIR);
+  if (!await exists(publicRoot)) {
+    throw new Error(`committed feed tree missing at ${publicRoot}`);
+  }
+  const tree = await harvestPublicTree(publicRoot);
+  const apps = await harvestAppsFromPluginGuide(root);
+  return { ...tree, apps };
 }
 
 export function mergeSot(fileDoc, harvested, modules) {
@@ -185,10 +220,15 @@ export async function loadIdentifierSot(root) {
   const doc = yaml.load(await fs.readFile(yamlPath, 'utf8'));
   if (!doc || typeof doc !== 'object') throw new Error('identifier-sot.yaml is empty');
   const { dir, explicit } = libraryDir(root);
-  if (!await exists(dir)) {
-    const where = explicit ? `${SOURCE_LIBRARY_DIR_ENV}=${dir}` : dir;
-    throw new Error(`identifier membership needs a source-library checkout (${where})`);
+  const libPublic = path.join(dir, LIBRARY_GENERATED_SUBPATH);
+  let harvested;
+  if (await exists(libPublic)) {
+    harvested = await harvestLibrary(dir);
+  } else if (explicit) {
+    throw new Error(`${SOURCE_LIBRARY_DIR_ENV} is set to ${dir} but it holds no ${LIBRARY_GENERATED_SUBPATH}`);
+  } else {
+    console.log(`identifier membership: no source-library checkout at ${dir}, using committed ${GENERATED_DIR}`);
+    harvested = await harvestCommittedPlugin(root);
   }
-  const harvested = await harvestLibrary(dir);
   return mergeSot(doc, harvested, MODULES);
 }

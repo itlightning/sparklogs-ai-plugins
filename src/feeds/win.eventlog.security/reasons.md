@@ -757,6 +757,7 @@ A scheduled task was created, deleted, updated, or disabled. Content changes are
 
 - Pivot on TaskName and Subject
 - Task XML stays in the raw payload; do not expect it as a curated field
+- The run-as password is not in the XML; Command/Arguments may still hold secrets and are swept with other event_data strings
 
 config_change.action reads updated on the modification id and created or deleted on the ids that
 name those directions, so pivot on the action rather than assuming one value.

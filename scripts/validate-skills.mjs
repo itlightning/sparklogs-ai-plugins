@@ -141,7 +141,8 @@ async function validateServiceTaxonomy() {
   const text = await fs.readFile(file, 'utf8');
   const rows = new Set();
   for (const line of text.split('\n')) {
-    const match = line.match(/^\| `([a-z0-9_]+)` \|/);
+    // Rows are identifier-tagged: `| `storage` (value) |`. Untagged `| `storage` |` still counts.
+    const match = line.match(/^\| `([a-z0-9_]+)`(?: \(value\))? \|/);
     if (match) rows.add(match[1]);
   }
   const expected = new Set(REGISTRY_SERVICE_VALUES);
