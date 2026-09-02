@@ -48,7 +48,7 @@ Show the user the exact comment, summary, and session detail (whichever apply) a
 
 ### d. Send it
 
-Call the feedback tool with the type, the chosen level, the comment, and the summary and session detail if the user approved them. Pass the current investigation id whenever this session has one, so SparkLogs can see the operational record alongside what the user said; omit it when there is none.
+Call the feedback tool with the type, the chosen level, the comment, and the summary and session detail if the user approved them. `external_investigation_id` (arg) is required, so SparkLogs can always see the operational record alongside what the user said. Reuse the session's current id when it already has one. When it does not, mint one the same way `sparklogs-investigate` does: a human-meaningful correlation handle, 8-200 chars free text (for example `feedback-ticket-4781-veeam-backup`), not a generated hash, carrying a ticket/incident id or a nonce if nothing else identifies the session.
 
 ```
 send_sparklogs_feedback(
@@ -57,7 +57,7 @@ send_sparklogs_feedback(
   comment="<approved comment text>",
   summary="<approved summary text, if chosen>",
   session_detail="<approved session detail text, if chosen>",
-  investigation_id="<current investigation id, if one exists>"
+  external_investigation_id="<current or newly minted investigation id>"
 )
 ```
 
