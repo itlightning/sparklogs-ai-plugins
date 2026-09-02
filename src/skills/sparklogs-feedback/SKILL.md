@@ -32,7 +32,7 @@ Ask what they want to say, and which kind fits: positive, negative, neutral, a b
 
 Explain, in one short paragraph, what is emailed and what stays private to their workspace's region. Use this sentence exactly:
 
-"What is emailed: the user's comment and basic metadata, to SparkLogs and to the user. What is stored only, in the workspace's own region: the summary and session detail, for SparkLogs staff to read alongside the operational record of the tools this session called."
+"What is emailed, leaving the workspace's region: the user's comment and basic metadata, to SparkLogs and, when the request was made with a user's token, to that user. What is stored only, in the workspace's own region: the summary and session detail, for SparkLogs staff to read alongside the operational record of the tools this session called."
 
 Then offer three levels in plain words, defaulting to the middle one unless they ask for more or less:
 
