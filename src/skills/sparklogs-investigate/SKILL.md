@@ -632,4 +632,12 @@ If the answer to any of these is "no," fix the summary before delivering it.
 
 ---
 
+## Section 21. Offering feedback
+
+At most once per session, and only at a natural end point, you may offer to send feedback: point the engineer at `/sparklogs:sparklogs-feedback`. A natural end point is one of: the investigation closed without a supported cause, the engineer expressed frustration tied to SparkLogs results, or the outcome was notably good. Never offer mid-turn. Never offer again after a decline.
+
+**Hard rule: offer feedback at most once per session.**
+
+---
+
 *End of SKILL.md.*
