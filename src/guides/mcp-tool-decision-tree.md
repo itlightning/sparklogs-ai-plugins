@@ -431,6 +431,27 @@ get_query_metadata(
 
 ---
 
+### `send_sparklogs_feedback` (tool)
+
+The surface's only WRITE tool (`ReadOnlyHint=false`). Call only after the user approves the exact text. Only the one-line **subject** (arg) is emailed; comment, summary, and session detail stay in the workspace region.
+
+```
+send_sparklogs_feedback(
+  type: "positive" | "negative" | "neutral" | "bug" | "idea",   # REQUIRED
+  tier: "comment_only" | "comment_and_summary" | "comment_summary_and_detail",  # REQUIRED
+  subject: "...",                # REQUIRED one-line receipt emailed to SparkLogs and the user
+  comment: "...",                 # optional user words; stored in region only
+  summary: "...",                 # optional; tiers 2-3 only; stored in region only
+  session_detail: "...",          # optional; tier 3 only; stored in region only
+  external_investigation_id: "..."
+)
+-> text result: reference id, what was emailed, per-field stored sizes, per-field redaction counts
+```
+
+Use the `sparklogs-feedback` skill for the consent conversation and placeholder rules before calling.
+
+---
+
 ### `server_info` (tool)
 
 ```
