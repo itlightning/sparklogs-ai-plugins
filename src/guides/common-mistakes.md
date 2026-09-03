@@ -331,7 +331,7 @@ These don't exist in LQL. Use `:`/`*`/`?`, `:`/`/regex/`, `<field>!`/`NOT <field
 
 ### After 2 retries on broken LQL, surface to user
 
-Don't keep retrying with slightly different broken expressions. If the LQL parser returns errors twice in a row, the issue is fundamental - surface to the engineer rather than burning more tool calls.
+Don't keep retrying with slightly different broken expressions. If the LQL parser returns errors twice in a row, the issue is fundamental - surface to the engineer rather than burning more tool calls. Syntax and common parser messages: `guides/lql-reference.md` (parser-errors section).
 
 ---
 

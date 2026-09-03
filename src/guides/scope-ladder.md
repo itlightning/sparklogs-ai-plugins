@@ -17,7 +17,7 @@ This is the primary shallow-triage RCA lever available today: lean on it hard.
 **`app` (LQL)** is product identity when present (`guides/app-vocabulary.md`). Empty is normal.
 Stream identity is `subsource` (LQL). Explore: `guides/stream-kinds.md`.
 
-**The ladder is universal where curated fields are not.** `pattern_hash` (LQL) is computed on every source; the other five are computed whenever the source's data carries that base field. Curated and module fields are per-source and per-surface (see the field-availability rule in SKILL.md Section 8), so an empty result there says less than it looks like it does.
+**The ladder is universal where curated fields are not.** `pattern_hash` (LQL) is computed on every source; the other five are computed whenever the source's data carries that base field. Curated and module fields are per-source and per-surface (see field-availability notes in `sparklogs-investigate` Section 8 and `guides/generated-reference-router.md`). An empty ladder field value is normal for many events.
 
 ---
 
