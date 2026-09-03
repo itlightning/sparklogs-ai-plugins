@@ -10,10 +10,10 @@ Consent wrapper for `send_sparklogs_feedback` (tool). Read the tool description 
 ## Flow
 
 1. Ask kind (positive, negative, neutral, bug, or idea) and what they want to say. A short comment is enough; do not require more.
-2. Confirm they understand only the one-line subject is emailed; everything else stays in their workspace region (see tool description). Offer tier; default `comment_and_summary`.
-3. Draft `subject` (required) and any tier fields. Follow the tool description for pseudonymization and what not to paste raw.
+2. Confirm they understand only the one-line subject is emailed; everything else stays in their workspace region (see tool description). Offer tier; default `comment_and_summary` (value).
+3. Draft `subject` (arg) (required) and any tier fields. Follow the tool description for pseudonymization and what not to paste raw.
 4. Show the exact text you will send. Wait for explicit yes. Revise and show again on edits; stop on decline (do not send, do not ask again this session).
-5. Call the tool. Reuse the session `external_investigation_id`, or mint one like `sparklogs-investigate` (8-200 chars, human-meaningful handle).
+5. Call the tool. Reuse the session `external_investigation_id` (arg), or mint one like `sparklogs-investigate` (8-200 chars, human-meaningful handle).
 6. Relay the tool result in substance: reference id, emailed vs stored, redaction line. Do not paraphrase vaguer than the tool.
 
 ## Rules

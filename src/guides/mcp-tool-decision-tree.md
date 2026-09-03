@@ -4,24 +4,17 @@ Per-tool detailed usage with parameter notes, decision tree for which tool to us
 
 The MCP server instructions define every term used here, in learning order. This file adds per-tool mechanics on top of them rather than restating them.
 
-The tool surface is these **eleven** tools: `resolve_scope` (tool), `list_sources` (tool), `query_scope_activity` (tool), `query_device_health` (tool), `describe_pattern` (tool), `list_fields` (tool), `query_event_counts_by_severity` (tool), `query_logs` (tool), `refine_query_result` (tool), `get_query_metadata` (tool), `server_info` (tool). Three differential tools (`query_period_diff` (other), `compare_populations` (other), `cluster_event_contexts` (other)) are fast-follow; see the bottom of this file for v1 equivalents.
+The tool surface is these **twelve** tools: `resolve_scope` (tool), `list_sources` (tool), `query_scope_activity` (tool), `query_device_health` (tool), `describe_pattern` (tool), `list_fields` (tool), `query_event_counts_by_severity` (tool), `query_logs` (tool), `refine_query_result` (tool), `get_query_metadata` (tool), `send_sparklogs_feedback` (tool), `server_info` (tool). Three differential tools (`query_period_diff` (other), `compare_populations` (other), `cluster_event_contexts` (other)) are fast-follow; see the bottom of this file for v1 equivalents.
 
-**Every scoped or data tool takes `external_investigation_id` (arg)** (REQUIRED on all of them except
-`server_info` (tool), which takes NO parameters at all and REJECTS an id; a friendly, human-meaningful correlation handle you supply, 8-200 chars free text, e.g. `investigate-ticket-1234-disk-errors` - not a generated hash. Reusing the same value RESUMES that investigation; use a fresh, distinctive value to start a new one; tagged on every call).
-**Time windows are flat `start` (arg) / `end` (arg) in RFC3339 UTC** (e.g. `2026-07-01T00:00:00Z`). There is no `time_range` (other) object and no `relative:` shorthand - compute the absolute window yourself.
+**Cross-cutting (full detail in MCP server instructions):**
 
----
+- **Funnel:** coverage before claims (`resolve_scope` (tool) → `list_sources` (tool) → health/activity when needed → counts/patterns → `query_logs` (tool) last).
+- **`external_investigation_id` (arg):** required on every scoped/data call except `server_info` (tool); reuse within one investigation, mint fresh for a new one.
+- **Time windows:** flat `start` (arg) / `end` (arg) in RFC3339 UTC; no relative shorthand.
+- **Scope ladder:** service → app → subsource → category → pattern; an empty rung is not a finding.
+- **Prohibitions:** volume and first/last bounds never prove interior coverage; absence of a feed report is not evidence.
 
-## Query tiers - funnel before raw
-
-**Coverage before claims.** Spend from the top down:
-
-- **Tier 1, scope and coverage:** `resolve_scope` (tool) first: identity plus collection/completeness on agent rows (`agent_complete_through` (col), feed reports, advisories). Then `list_sources` (tool): did events arrive in this window, any source type including ingest keys. Then `query_device_health` (tool) when SparkLogs Agents are in scope and the question needs standing state, inventory, or silence on that surface (ingest-key-only streams have no device-health surface). Then `query_scope_activity` (tool): what app/service/subsource combinations exist. See `scope-resolution.md`.
-- **Tier 2, pattern mining:** `query_event_counts_by_severity` (tool) (what dominates, how severe, when) and `describe_pattern` (tool) (text and spread before citing hashes). This is the workhorse. Group by a scope-ladder field (`service` (LQL), `app` (LQL), `subsource` (LQL), `category` (LQL), `pattern` (LQL), or a `_hash`) to localize before drilling - see `scope-ladder.md`.
-- **Tier 3, raw events (last resort):** `query_logs` (tool), only after Tiers 1-2 narrowed the window and filter. Then `refine_query_result` (tool) (lightweight) over that cached slice - do NOT re-scan.
-- **Rare:** `list_fields` (tool) and deep `get_query_metadata` (tool). Catalogs, not the explore ladder.
-
-`refine_query_result` (tool) and the default `get_query_metadata` (tool) are lightweight - they run against the cache. Backing scans (`query_logs` (tool), `query_event_counts_by_severity` (tool), and the opt-in `get_query_metadata` (tool) deep discovery) touch the underlying source and take meaningfully longer.
+See **Server instructions** at the end of this file for the full vocabulary walkthrough.
 
 ---
 
@@ -42,6 +35,7 @@ One trigger per tool. After coverage, it is almost always a
 | `refine_query_result` (tool) | You already pulled a slice and want a different view of it. Free; never re-scans the source. |
 | `get_query_metadata` (tool) | A cached result behaved oddly and you need its schema, filter or cache status. |
 | `list_fields` (tool) | A field name you have not seen yet. Catalog, not a first-pass tool. |
+| `send_sparklogs_feedback` (tool) | The engineer wants to send session feedback to SparkLogs, or accepted a one-time offer. Run `sparklogs-feedback` first; not part of the query funnel. |
 | `server_info` (tool) | A call failed and you need to know whether region, transport or auth is the problem. |
 
 **Two honest demotions.** Both tools below exist and work; neither is where you should start.
@@ -433,24 +427,11 @@ get_query_metadata(
 
 ### `send_sparklogs_feedback` (tool)
 
-Used to send product feedback to SparkLogs team.
-Call only after the user approves the exact text.
-Only the one-line **subject** (arg) is emailed; comment, summary, and session detail stay in the workspace region.
+**For:** sending the engineer's feedback about this SparkLogs session (quality, bugs, ideas) to the product team, linked to the investigation audit trail via `external_investigation_id` (arg).
 
-```
-send_sparklogs_feedback(
-  type: "positive" | "negative" | "neutral" | "bug" | "idea",   # REQUIRED
-  tier: "comment_only" | "comment_and_summary" | "comment_summary_and_detail",  # REQUIRED
-  subject: "...",                # REQUIRED one-line receipt emailed to SparkLogs and the user
-  comment: "...",                 # optional user words; stored in region only
-  summary: "...",                 # optional; tiers 2-3 only; stored in region only
-  session_detail: "...",          # optional; tier 3 only; stored in region only
-  external_investigation_id: "..."
-)
--> text result: reference id, what was emailed, per-field stored sizes, per-field redaction counts
-```
+**Shape:** not a query tool. Run the `sparklogs-feedback` skill first: agree kind and tier, draft fields, show exact text, wait for explicit yes, then call once. Reuse or mint `external_investigation_id` (arg). Relay the tool's result text (reference id, emailed vs stored, redaction).
 
-Use the `sparklogs-feedback` skill for the consent conversation and placeholder rules before calling.
+**Parameters and privacy:** live tool description and JSON schema only; do not paraphrase limits or redaction rules here.
 
 ---
 
@@ -512,6 +493,18 @@ Use this when they asked, or after they accepted a suggested hunt. Do not open w
 
 ---
 
+## Response envelope
+
+Every data-tool response is one text block (not JSON you parse as a whole): header JSON (`meta` (other), `summary` (other), `schema` (other), `lookups` (col), `page` (other)), delimiter line, rows (TSV or omit-empty JSONL), optional trailing hint.
+
+- **Counts.** `summary.total_count` (col) = matched population. `page.rows_cached` (col) / `page.rows_returned` (col) = cache slice / this page. Ground claims in the matched population.
+- **Sampled.** When `sampled` (other) is set, aggregates are estimates; quote cells as returned or narrow and re-run for exact figures.
+- **Hashes.** Resolve `*_hash` via header `lookups` (col); use `describe_pattern` (tool) before citing `pattern_hash` (LQL). Treat hashes as opaque drill-down handles.
+- **Empty columns.** `schema.fields_with_no_values` (col) is normal, not a Finding.
+- **Grouped results.** `query_event_counts_by_severity` (tool) output is not refinable; `refine_query_result` (tool) applies only to `query_logs` (tool) caches.
+
+---
+
 ## Tool selection failure modes
 
 **Reaching for `query_logs` (tool) first.** Aggregation first. Almost always.
@@ -522,11 +515,7 @@ Use this when they asked, or after they accepted a suggested hunt. Do not open w
 
 **Re-scanning instead of refining.** After ONE broad `query_logs` (tool) slice, use `refine_query_result` (tool) for other views - it's a cache lookup, not a fresh scan.
 
-**Reading coverage out of counts.** No count, bucket series, or first/last event bound establishes what happened in the middle of a window. `agent_complete_through` (col) and the feed reports behind it are the only completeness answer; without them the honest statement is that completeness was not established.
-
-**Showing a `*_hash` with no resolved text.** Resolve via the header `lookups` (col) (and `describe_pattern` (tool) for `pattern_hash` (LQL)) first. Then show the hash when it is a useful pivot. Use the hash verbatim as the drill-down filter value.
-
-**Not setting `external_investigation_id` (arg).** Audit trail breaks. Always set it.
+**Showing a `*_hash` with no resolved text.** Resolve via header `lookups` (col) (and `describe_pattern` (tool) for `pattern_hash` (LQL)) first.
 
 ---
 
@@ -537,3 +526,9 @@ If you find yourself reaching for one of these, use the substitute:
 - **`query_period_diff` (other)** ("what changed between two windows") -> run `query_event_counts_by_severity` (tool) over each window (`group_by=["pattern"]`) and compare the two grouped results.
 - **`compare_populations` (other)** ("what's different about broken vs working") -> run `query_event_counts_by_severity` (tool) over each population separately (via distinct `lql` (arg)) and compare.
 - **`cluster_event_contexts` (other)** ("distinct contexts around these events") -> `query_logs` (tool) narrowed to the pattern, then `refine_query_result` (tool) group_by to cluster.
+
+---
+
+## Server instructions
+
+The MCP server instructions loaded with the session are the canonical cross-cutting contract: scope, data model, agent and feed health, completeness, funnel order, scope ladder, LQL basics, event fields, and the three prohibitions. This guide adds per-tool mechanics, response-envelope shape, recipes, and failure modes on top. On cross-cutting facts, server instructions win; on parameters for a specific call, the live tool description and schema win.

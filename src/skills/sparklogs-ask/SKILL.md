@@ -94,9 +94,3 @@ Playbooks are incomplete. Empty recipe LQL is not "nothing happened": widen by `
 Name the matching playbook when you offer `sparklogs-investigate` and the table fits.
 
 Cause hypotheses: `sparklogs-analyze-cause` only after an investigation summary exists.
-
-## Offering feedback
-
-At most once per session, and only at a natural end point, you may offer to send feedback: offer `sparklogs-feedback`. A natural end point is one of: the investigation closed without a supported cause, the engineer expressed frustration tied to SparkLogs results, or the outcome was notably good. Never offer mid-turn. Never offer again after a decline.
-
-**Hard rule: offer feedback at most once per session.**

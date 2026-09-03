@@ -37,23 +37,9 @@ You DO:
 
 ---
 
-## Section 2. The core trust principles you operate under
+## Section 2. Trust principles
 
-These principles bind every decision you make. The principles matter; you don't need to cite them by name.
-
-**Augment, don't replace.** You gather and structure evidence; the engineer is the decision-maker.
-
-**Cite everything.** Every factual claim cites a `query_url` (col) the engineer can click to verify. Without a citation, you don't have evidence - don't make the claim.
-
-**Calibrate confidence honestly.** Bands reflect evidence strength, not the fluency of your reasoning. "Insufficient evidence" is a valid finding.
-
-**Show what wasn't checked.** Every summary enumerates what was checked and what was not. Off-endpoint causes (cloud services, network paths, third-party SaaS, sources not running a SparkLogs Agent) are flagged honestly.
-
-**This report is a summary, not a change order.** It does not close a ticket or authorize a change. Suggesting causes and next steps is expected.
-
-**Auditable everything.** Every investigation produces a complete audit trail: the local investigation-state document plus the server-side per-call audit, with `get_query_metadata(query_id=...)` for any single cached query.
-
-**Earn trust incrementally.** When in doubt about expanding scope, recommending an action, or asserting a finding, take the conservative choice.
+`guides/common-mistakes.md` groups mistakes by principle. This skill adds: cite every factual claim with a `query_url` (col); WHAT WAS NOT CHECKED is required every time; do not assert root cause here (offer `sparklogs-analyze-cause` instead).
 
 ---
 
@@ -311,7 +297,7 @@ Six fields carry a normalized value plus an opaque `_hash` companion, and togeth
 - **Dedup and track stability.** A `_hash` is a stable identity - the same hash means the same normalized value or pattern, across events and across time.
 - **Drill** with `query_logs(lql='pattern_hash = "<h>"')` or `refine_query_result(filter_lql=...)` to read the actual events behind a hash.
 - **Correlate across windows for first-occurrence detection.** A `pattern_hash` (LQL) present in the incident window but absent from a healthy baseline window signals new behavior - a primary RCA signal. Run `query_event_counts_by_severity` (tool) twice, once per window, and compare the two hash populations (the v1 substitute for the fast-follow `query_period_diff` (other) tool). **A source-pack release recomputes pattern identity for the sources it curates**, so a baseline window on one side of a pack deploy and an incident window on the other compare nothing: every hash reads as new. When the two windows straddle a release, pick a baseline inside the same pack era and say which era you used.
-- **Resolve, then show the hash when it is a pivot.** Resolve a `_hash` through the envelope's `lookups` (col) table (Section 11) before it reaches a Finding. Include the raw hash when the engineer may want to filter or hand it off. Always use the hash itself as the drill-down filter value.
+- **Resolve, then show the hash when it is a pivot.** Resolve a `_hash` through the envelope `lookups` (col) table (`guides/mcp-tool-decision-tree.md`) before it reaches a Finding. Include the raw hash when the engineer may want to filter or hand it off. Always use the hash itself as the drill-down filter value.
 
 Full detail and a worked localize-then-land shape: `guides/scope-ladder.md`. The controlled `service` (LQL) vocabulary (the cross-vendor ticket-class values worth pivoting on, e.g. `backup` (value), `storage` (value), `security_audit` (value)) is in `guides/service-taxonomy.md`.
 
@@ -379,88 +365,15 @@ Label stream liveness as what it is: data arriving now is not a completeness gua
 
 ---
 
-## Section 11. MCP tools quick reference
+## Section 11. MCP tools
 
-The catalog is these eleven tools:
-
-| Tool | Tier | Use when |
-|---|---|---|
-| `resolve_scope` (tool) | lightweight | Always first - turn natural-language scope into `org_ids` (arg) (orgs, agents, ingest keys). Ranked `match_kind` (col) on org names and agent name/`reported_hostname` (col); exact `rmm_client_id` (arg) / `psa_client_id` (arg) lookup for automated workflows; `device_classes` (arg) / `device_roles` (arg) filters. Carries the agent state readings, `advisories` (col) and `agent_complete_through` (col). `include_agents` (arg) = agents and ingest keys (default true). |
-| `list_sources` (tool) | billed discovery | Confirm sender/origin pairs have data in the window (`start` (arg)/`end` (arg) required). Triage columns, `sent_via` (col), optional `top_interesting_patterns` (col) teaser. Counts what arrived; never a coverage claim. |
-| `query_scope_activity` (tool) | billed discovery | Discover app/service/subsource structure (not LQL-filtered). Narrow with `agent_ids` (arg) / `source` (LQL) / `field_match` (arg). For filtered counts within an LQL slice, use `query_event_counts_by_severity` (tool). |
-| `describe_pattern` (tool) | billed* | Full pattern text, stats, fleet spread, and diverse example messages (with recurrence `count` (value)/`seen_at` (col)). The parameter is **`pattern_hashes` (arg), a LIST**, even for one hash. There is no per-pattern sample count to set: counts are chosen server-side for diversity, and examples come back for roughly your first 25 hashes by list order, so list the highest-interest ones first. *Examples require `mcp:query`; stats-only works on `mcp:observe` (the call degrades, never errors). Required before citing teaser patterns. |
-| `list_fields` (tool) | lightweight | Field catalog for building NEW queries - only if standard/known fields don't surface enough. Not a first-pass tool. |
-| `query_event_counts_by_severity` (tool) | backing scan | Counts by severity, optionally bucketed over time (`bucket` (arg)) and/or grouped by field values (`group_by` (arg): one ranks that field's values, 2-3 cross-tab). Every row carries `event_count` (col) plus the band counts. The workhorse for "what's happening" and the only tool that answers "when" - run it BEFORE raw logs. |
-| `query_logs` (tool) | backing scan | Retrieve raw chronological events. Last resort, over an already-narrowed window/filter. No `limit` (arg): you get one server-sized page, `summary` (other) carries the matched total, and further pages come from `refine_query_result` (tool) on the returned `query_id` (arg). |
-| `refine_query_result` (tool) | lightweight | Relational engine over a cached `query_logs` (tool) result (filter/group/aggregate/having/order/select/page). Use freely; touches the cache, not the source. Responses keep the same `query_id` (arg); refine that id again for other views. |
-| `get_query_metadata` (tool) | lightweight* | Cache/field introspection over a `query_id` (arg). Default = bookkeeping only (fast). *`top_n` (arg)/`field_match` (arg) deep field discovery is a full catalog scan of the source - use deliberately. |
-| `query_device_health` (tool) | billed discovery | Latest curated device state: monitor rows for conditions, inventory rows for what is on the box, plus silent devices. `start` (arg)/`end` (arg) are REQUIRED. After `list_sources` (tool) when SparkLogs Agents are in scope and the question needs standing state, inventory, or silence. Completeness stays on `resolve_scope` (tool). Ingest-key-only streams have no device-health surface. See `guides/device-state-fields.md`. |
-| `server_info` (tool) | lightweight | Server name, version, region, transport and the authenticated workspace id. Takes NO parameters, including no `external_investigation_id` (arg). Confirm which region and workspace you are on before citing anything. |
-
-Three differential tools do not exist (`query_period_diff` (other), `compare_populations` (other), `cluster_event_contexts` (other)). Instead use two `query_event_counts_by_severity` (tool) runs over two windows for period diff, or one run per distinct `lql` (arg) population for compare.
-
-**Always pass `external_investigation_id` (arg)** on every scoped or data call - it is REQUIRED, not optional. The one exception is `server_info` (tool), which takes NO parameters and REJECTS an id. It is a human-meaningful correlation handle you supply, 8-200 chars free text (e.g. `investigate-ticket-1234-disk-errors`), not a generated hash. Pick one distinctive value at investigation start and reuse it for the entire session: reusing an id RESUMES that investigation and appends to the same audit trail. A genuinely new investigation needs a fresh value carrying a ticket/incident id or a nonce; a generic string like `diskcheck` (other) would merge unrelated incidents into one investigation.
-
-**Always pass `org_ids` (arg)** explicitly (derived from `resolve_scope` (tool)). Empty = all-orgs is strongly discouraged.
-
-**Query shape.** Backing scans (`query_logs` (tool), `query_event_counts_by_severity` (tool)) touch the underlying source and take meaningfully longer than the lightweight tools and `refine_query_result` (tool).
-
-### Reading the response envelope
-
-Every data-tool response is ONE text block, not JSON you parse as a whole:
-
-1. **Header line** - one minified JSON object: `meta` (other) (`query_id` (arg), `query_url` (col), tool, `external_investigation_id` (arg)), `summary` (other) (grounding aggregates over the MATCHED POPULATION: total count, time span, severity histogram, cache status), `schema` (other) (columns in `name#typecode` form + fill rates), `lookups` (col) (hash dictionary), `page` (other) (`rows_returned` (col), `rows_cached` (col), `offset` (arg), and `next` (other) when partial), `data_content_type` (other).
-2. **Delimiter line** - restates shape and counts, e.g. `rows (tsv, 78 of 300 cached, ordered by t asc):`.
-3. **Rows** - TSV (dense shapes: grouped aggregation, most refine outputs) or omit-empty JSONL (ragged raw events).
-4. **Trailing hint line** - present only when a limit was hit; it gives the exact next call.
-
-**Three-tier vocabulary (contract).** `summary.total_count` (col) = the matched population (all events matching the query). `page.rows_cached` (col) = the slice the cache holds. `page.rows_returned` (col) = the rows on THIS page. Ground every count claim in the matched population, never in the page you happened to see.
-
-**Sampled results.** A scan too large to read in full is sampled rather than refused: the matched-population aggregates (total count, severity histogram, event counts) become estimates, while the returned raw rows stay exact matches. `summary.scope` (col) states a DETECTION FLOOR once for the whole response, and every cell then says which kind it is. `<N` means fewer than about N events rather than NONE. A plain integer at or above the floor is rounded to the significant digits its sample supports. Quote the cell as it came, bound and all, instead of second-guessing a small number; narrow the query (tighter window, tighter LQL) and re-run when a Finding needs exact figures. When `sampled` (other) is absent, aggregates are exact.
-
-**Hash-dictionary rule.** Rows carry `*_hash` companions for six fields (pattern, source, subsource, category, service, app). When a row's value field is absent, resolve its `*_hash` in the header `lookups` (col). Lead with the resolved value (and `describe_pattern` (tool) before citing a `pattern_hash` (LQL)). Show the raw `*_hash` when it adds value as a queryable pivot for the engineer; never as a substitute for the text. Always use the `*_hash` verbatim as a drill-down filter value (it is the drill-down handle). Treat every `*_hash` as an OPAQUE string: `pattern_hash` (LQL) = a mnemonic prefix + `_` + a 16-char base36 tail; source/subsource/category/service/app = a bare 16-char base36 string. Never parse, split, or length-validate a hash. Dedup, filter, and correlate on `pattern_hash` (LQL), never on `pattern` (LQL) text.
-
-**Schema descriptor + deeper field discovery.** The header `schema` (other) lists the standard fields plus the top custom fields by fill-rate FOR THIS PAGE. When it carries `more_fields` (other), that points at `get_query_metadata` (tool). `get_query_metadata` (tool)'s default call is lightweight (bookkeeping only); its `top_n` (arg) / `field_match` (arg) deep discovery is a full catalog scan of the source - reach for it only when the inline schema genuinely isn't enough.
-
-**Fields with no values.** `schema.fields_with_no_values` (col) names the fields you asked for that no row on the page carried. This is a normal outcome, not an error and not a Finding: field names are an OPEN namespace, so a name exists once some event emits it, and an empty column means this workspace has emitted nothing under that name in this window. It says nothing about the health of the fleet, so it does not belong in an investigation summary. Two useful responses: re-check the spelling against schema.custom or `list_fields` (tool) if you expected values, or accept that the window has none and carry on with the fields that do.
-
-### Grouped results are not refinable
-
-`query_event_counts_by_severity` (tool) output is NOT a refinable cache: calling `refine_query_result` (tool) on it returns `cache_invalidated` (value) (success envelope; issue a new tool call). Read grouped results directly. If a grouped result is truncated, follow its hint (narrow the filter or window and re-run the grouped call). `refine_query_result` (tool) applies ONLY to `query_logs` (tool) slices; a refine response keeps the same `query_id` (arg), so run every further refine against that same id.
-
-Detailed per-tool usage with examples is in `guides/mcp-tool-decision-tree.md`.
+Cross-cutting terms, funnel, and prohibitions: MCP server instructions (loaded with the session). Per-tool parameters, response-envelope shape, recipes, and failure modes: `guides/mcp-tool-decision-tree.md`. Tool descriptions are authoritative for each call; open the guide only when you need mechanics beyond them.
 
 ---
 
-## Section 12. LQL basics - the syntax you use most
+## Section 12. LQL
 
-LQL (Lightning Query Language) is the filter language used by every LQL parameter: `lql` (arg) (on `query_logs` (tool) / `query_event_counts_by_severity` (tool)), and `filter_lql` (arg) / `having_lql` (arg) (on `refine_query_result` (tool)).
-
-**Operators:** `:` contains, `!:` doesn't contain, `=` exact match, `!=` exact non-match, `>=` `>` `<` `<=` numeric, `<field>!` non-null, `<field> between X and Y`, `<field> in (a, b, c)`, `<field> not in (a, b, c)`. Boolean: `AND` `OR` `NOT`. Implicit AND between adjacent expressions. Patterns: `*` `?` directly in unquoted terms (NOT `%` or `_`). Regex: `/regex/` slash-delimited (re2 syntax).
-
-**`/regex/` operator semantics matter:**
-- `field: /regex/` - match if value *contains* the regex pattern anywhere.
-- `field = /regex/` - match if regex matches the *entire* value (full match).
-
-Pick the operator that matches your intent.
-
-**No `IS NULL` operator** - use `NOT <field>!` for is-null.
-
-**No `LIKE`** - use `*` and `?` patterns.
-
-**No `MATCHES`** - use `:` or `=` with `/regex/`.
-
-**No `CONTAINS_ANY` / `CONTAINS_ALL`** - array fields use scalar operators directly; positive ops match if any element matches, negative ops require all-not-match.
-
-**No wildcard JSON paths** - `x.services.*.status` does NOT work; type resolution needs an exact path. Filter on a promoted field, on the message, or on a direct keyed lookup when you know the key.
-
-**Canonical context-reduction filter** for finding signal-rich events:
-```
-severity in (error, critical) OR (anomaly_max_score >= 60 AND anomaly_max_score_confidence >= 70)
-```
-`anomaly_max_score` (other) / `anomaly_max_score_confidence` (other) are designed and not emitted anywhere in the product today, so this filter reduces to `severity in (error, critical)` on every source. That degraded form is a fine fallback; do not read the missing anomaly half as "no anomalies."
-
-The complete LQL reference with all operators, edge cases, and common mistakes is in `guides/lql-reference.md`.
+Complete syntax, operators, edge cases, and examples: `guides/lql-reference.md`.
 
 ---
 
@@ -493,7 +406,7 @@ Investigations are usually conversations. Follow-up questions ("look at X furthe
 
 **Row-ceiling exceeded on backing query:** narrow `lql` (arg) (tighter time range, restricted `org_ids` (arg), add `severity` (LQL)/`anomaly_max_score` (other) predicates) or split into multiple queries. Then refine the cached slice rather than re-scanning.
 
-**Field name you requested returned nothing:** not an error. The response names it under `schema.fields_with_no_values` (col); Section 11 says what to do with it.
+**Field name you requested returned nothing:** not an error. The response names it under `schema.fields_with_no_values` (col); see `guides/mcp-tool-decision-tree.md` (response envelope).
 
 **Partial page (`page.next` (col) present, or a trailing hint line):** the page hit a limit. Follow `page.next` (col) for the next page via `refine_query_result(offset=...)`, or narrow the filter for fewer rows.
 
@@ -538,26 +451,9 @@ Bulk extractive summarization suits the fastest lightweight model tier your host
 
 ---
 
-## Section 17. Common mistakes to avoid
+## Section 17. Common mistakes
 
-The full list of common mistakes, anti-patterns, and recovery is in `guides/common-mistakes.md`. Top items:
-
-1. **Producing cause analysis in this skill.** Find yourself writing "this suggests" or "the likely cause is" - STOP. That belongs in `sparklogs-analyze-cause`. Move it to the POSSIBLE NEXT DIRECTIONS section (1-4 sentences) and refer the engineer to that skill.
-2. **Citing without `query_url` (col).** Every Finding's Evidence field has a `query_url` (col) from the actual MCP tool response. If it doesn't, you're confabulating.
-3. **Using LQL operators that don't exist.** `MATCHES`, `LIKE`, `IS NULL`, `CONTAINS_ANY`, wildcard JSON paths - none of these are LQL.
-4. **Reaching for `query_logs` (tool) first.** Aggregation before retrieval.
-5. **Reading Level 3 by default.** Always set `select` (arg) explicitly.
-6. **Forgetting `external_investigation_id` (arg) on calls.** Every data-access and refinement call requires it; the tool rejects the call without it.
-7. **Skipping the WHAT WAS NOT CHECKED section.** Required, every time. Investigation-specific, not boilerplate.
-8. **Capitulating to engineer pressure for conclusions.** Hold the goal-framing. Offer the analyze-cause skill instead.
-9. **Confidence inflation.** "high" is for direct, corroborated, recent evidence. "insufficient_evidence" is a valid finding - use it.
-10. **Concluding "no problem" instead of "no evidence found in <scope>."** The first claim is wrong; the second is honest and useful.
-11. **Reading empty `sparklogs.*` fields as a health finding.** Empty `sparklogs.*` fields on an event mean the event is uncurated (this is not a health finding). Curated and module fields are per-source and per-surface; empty may mean "this source never writes that". Check what the source carries, fall back to universal fields, and say so (Section 8).
-12. **Stopping at playbook LQL.** Empty or thin recipe queries are a miss on the recipe. Widen by `subsource` (LQL) then `pattern` (LQL), then raw logs, before "cannot analyze".
-13. **Claiming coverage from counts.** Volume and first/last event bounds never establish what happened in the middle of a window. Completeness is `agent_complete_through` (col) and the feed reports behind it, or it is not claimed.
-14. **Writing a completeness section the question did not need.** On an ongoing issue, one sentence saying completeness is not material is the whole obligation.
-15. **Asking which device when one org already resolved.** One exact org plus many agent rows is that client's inventory. Keep them. Ask only when org identity or host identity is fuzzy.
-16. **Scanning the whole fleet unprompted.** Default to the named scope. Suggest a fleet hunt when a finding looks serious or shared; climb counts and `describe_pattern` (tool) before raw logs across the estate.
+See `guides/common-mistakes.md` (e.g. cause analysis in this skill, claims without `query_url` (col), `query_logs` (tool) first, coverage inferred from counts, "no problem" instead of "no evidence in scope"). Open it when you suspect an anti-pattern; do not hold the full catalog in context.
 
 ---
 
@@ -629,11 +525,3 @@ After every investigation, mentally check:
 - If I stated a duration or a clear time, did I read `episode_age_basis` (col) and `episode_clear_time_basis` (col) first?
 
 If the answer to any of these is "no," fix the summary before delivering it.
-
----
-
-## Section 21. Offering feedback
-
-At most once per session, and only at a natural end point, you may offer to send feedback: offer `sparklogs-feedback`. A natural end point is one of: the investigation closed without a supported cause, the engineer expressed frustration tied to SparkLogs results, or the outcome was notably good. Never offer mid-turn. Never offer again after a decline.
-
-**Hard rule: offer feedback at most once per session.**
