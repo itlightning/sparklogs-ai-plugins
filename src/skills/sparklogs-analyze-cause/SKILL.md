@@ -248,7 +248,3 @@ After every analysis, mentally check:
 - If completeness was not material, did I say so in one sentence instead of building a section around it?
 
 If any answer is "no," fix the analysis before delivering it.
-
----
-
-*End of SKILL.md.*

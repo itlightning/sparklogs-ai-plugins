@@ -433,7 +433,9 @@ get_query_metadata(
 
 ### `send_sparklogs_feedback` (tool)
 
-The surface's only WRITE tool (`ReadOnlyHint=false`). Call only after the user approves the exact text. Only the one-line **subject** (arg) is emailed; comment, summary, and session detail stay in the workspace region.
+Used to send product feedback to SparkLogs team.
+Call only after the user approves the exact text.
+Only the one-line **subject** (arg) is emailed; comment, summary, and session detail stay in the workspace region.
 
 ```
 send_sparklogs_feedback(
