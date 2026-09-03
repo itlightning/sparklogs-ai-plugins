@@ -61,37 +61,17 @@ Rule of thumb: `query_scope_activity` (tool) = "what app/service/subsource combi
 
 ## How to use the ladder for RCA
 
-**DISCOVER - enumerate structure before heavy scans.**
-```
-query_scope_activity(
-  org_ids: [...],
-  start: "...",
-  end: "...",
-  agent_ids: ["<collector uuid>"],
-  external_investigation_id: "..."
-)
-```
+**DISCOVER - enumerate structure before heavy scans.** Call `query_scope_activity` (tool) with org scope, the investigation window, optional `agent_ids` (arg), and the session `external_investigation_id` (arg).
 
-**GROUP - find dominant or anomalous groups (filtered measure).**
-```
-query_event_counts_by_severity(group_by=["<field or its _hash>"], lql='...', ...)
-```
+**GROUP - find dominant or anomalous groups (filtered measure).** Call `query_event_counts_by_severity` (tool) with `group_by` (arg) on a ladder field or its `_hash` companion and an `lql` (arg) slice as needed.
 Group by `pattern_hash` (LQL) for the most-repeated normalized events; by `service` (LQL) or `subsource` (LQL) to localize the noisy component.
 
 **DEDUP / STABILITY - track one pattern over time.**
 A `_hash` is a stable identity: the same hash means the same normalized value or pattern, across events and across time.
 
-**DRILL - read the events behind a hash.**
-```
-query_logs(lql='pattern_hash = "<h>"', ...)
-refine_query_result(query_id=<qid>, filter_lql='pattern_hash = "<h>"', ...)
-```
+**DRILL - read the events behind a hash.** Narrow with `query_logs` (tool) or `refine_query_result` (tool) using `pattern_hash` (LQL) in `lql` (arg) or `filter_lql` (arg).
 
-**DESCRIBE - read pattern text and exemplars before citing.**
-```
-describe_pattern(pattern_hashes=["<h>"], start="...", end="...", ...)
-```
-Required after any `top_interesting_patterns` (col) teaser row before the pattern appears in a Finding.
+**DESCRIBE - read pattern text and exemplars before citing.** Call `describe_pattern` (tool) with the hash list, window, and session id before the pattern appears in a Finding. Required after any `top_interesting_patterns` (col) teaser row.
 
 **CORRELATE ACROSS WINDOWS - first-occurrence detection.**
 A `pattern_hash` (LQL) present in the incident window but absent from a healthy baseline window signals new behavior. Run `query_event_counts_by_severity` (tool) twice, once per window, and compare hash populations (v1 substitute for the fast-follow `query_period_diff` (other) tool; see `mcp-tool-decision-tree.md`).

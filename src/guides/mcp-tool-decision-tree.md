@@ -4,6 +4,8 @@ Per-tool detailed usage with parameter notes, decision tree for which tool to us
 
 The MCP server instructions define every term used here, in learning order. This file adds per-tool mechanics on top of them rather than restating them.
 
+**Tool API surface:** parameter names, defaults, and response columns live in the live MCP tool description and JSON schema only. This guide does not duplicate them; an old plugin with a new server must follow what the server advertises.
+
 The tool surface is these **twelve** tools: `resolve_scope` (tool), `list_sources` (tool), `query_scope_activity` (tool), `query_device_health` (tool), `describe_pattern` (tool), `list_fields` (tool), `query_event_counts_by_severity` (tool), `query_logs` (tool), `refine_query_result` (tool), `get_query_metadata` (tool), `send_sparklogs_feedback` (tool), `server_info` (tool). Three differential tools (`query_period_diff` (other), `compare_populations` (other), `cluster_event_contexts` (other)) are fast-follow; see the bottom of this file for v1 equivalents.
 
 **Cross-cutting (full detail in MCP server instructions):**
@@ -57,23 +59,6 @@ One trigger per tool. After coverage, it is almost always a
 
 Always first. Turn natural-language scope into `org_ids` (arg), and enumerate orgs, SparkLogs Agents, and ingest keys in scope.
 
-```
-resolve_scope(
-  query: "Acme Dental" | "srv-fileshare01",   # optional; ranked match on org names and agent name/reported_hostname (exact/prefix/word/substring). Omit to list everything in scope.
-  org_ids: ["..."],              # optional; omit for all orgs the token can access
-  include_agents: true,          # default true; includes agents AND ingest keys
-  include_sub_orgs: true,        # default true; expand each org to its sub-org subtree
-  rmm_client_id: "...",          # optional EXACT match; the correct path for automated per-ticket scoping
-  psa_client_id: "...",          # optional EXACT match; same
-  device_classes: ["..."],       # optional; filter devices by reported class rather than guessing from hostnames
-  device_roles: ["..."],         # optional; same, by reported role
-  external_investigation_id: "..."
-)
--> rows: kind org | agent | ingest_key; match_kind when query set; agent rows include agent_status,
-   stuck_reason, the collection group (collection_status, collection_reasons, collection_feeds, collection_observed_at),
-   advisories, agent_complete_through, last_data_at, last_heartbeat_at, reported_hostname, versions, OS
-```
-
 **Decision logic:**
 - One org row with `match_kind` (col) **`exact` (value)** plus agent rows for that org: proceed. That is the client inventory, not a tie.
 - One host/agent row with `match_kind` (col) **`exact` (value)**: proceed.
@@ -91,20 +76,7 @@ resolve_scope(
 
 ### `list_sources` (tool)
 
-Per **(sender `agent_id` (LQL), origin `source` (LQL))** activity in the investigation window. Billed backing scan.
-
-```
-list_sources(
-  org_ids: ["..."],
-  start: "2026-07-01T00:00:00Z",   # REQUIRED
-  end: "2026-07-02T00:00:00Z",     # REQUIRED, exclusive
-  include_sub_orgs: true,          # default true
-  include_top_interesting_patterns: true,   # default true; summary teaser ~8 patterns
-  external_investigation_id: "..."
-)
--> rows: agent_id, sent_via, name, agent_status, source, event_count, cnt_interesting, one cnt_<band> per failure-side severity band, distinct_interesting, bytes_ingested, first/last_event_at
--> summary may include top_interesting_patterns; call describe_pattern before citing
-```
+Per **(sender `agent_id` (LQL), origin `source` (LQL))** activity in the investigation window.
 
 **Use the investigation's actual window.** Do NOT infer scope from recent heartbeat alone.
 
@@ -124,21 +96,6 @@ list_sources(
 
 Discover app / service / subsource structure via cheap discovery scan. **Not LQL-filtered** (cheap steering). For counts within an LQL slice, use `query_event_counts_by_severity` (tool).
 
-```
-query_scope_activity(
-  org_ids: ["..."],
-  start: "...",
-  end: "...",
-  agent_ids: ["..."],              # optional sender UUIDs
-  source: "hostname-substring",    # optional
-  field_match: {mode, pattern},    # optional name grep over ladder dims
-  include_sub_orgs: true,          # default true
-  include_top_interesting_patterns: true,
-  external_investigation_id: "..."
-)
--> rows: agent_id, source, app, service, subsource, triage columns, first/last_event_at
-```
-
 See `scope-ladder.md` for when to reach for this instead of `query_event_counts_by_severity` (tool).
 
 ---
@@ -150,24 +107,6 @@ Latest curated device state: monitor rows for conditions, inventory rows for wha
 question is standing state, inventory, or silence on this surface. Completeness stays on
 `resolve_scope` (tool). Ingest-key-only streams have no device-health surface; `list_sources` (tool)
 is the arrival check for those.
-
-```
-query_device_health(
-  org_ids: ["..."],
-  start: "...",                             # REQUIRED
-  end: "...",                               # REQUIRED, exclusive
-  include_sub_orgs: true,                   # default true
-  agent_ids: ["..."],                       # optional sender UUIDs
-  fieldset: "rca" | "fleet" | "minimal",    # rca is the default
-  add_fields: ["..."],                      # optional; ADDS to the fieldset, never replaces it
-  kinds: ["inventory", "monitor"],          # default; agent_op and delta are opt-in
-  reasons: ["..."],                         # optional, filter to named conditions
-  min_severity: 13,                         # optional integer floor on the ladder
-  group_by_reason: false,                   # true returns the fleet shape of each reason
-  external_investigation_id: "..."
-)
--> data rows keyed by `kind`; silent devices as separate `row_kind=silent_device` rows
-```
 
 **Use cases:**
 - **Honesty check:** was this device reporting during the window, and are its episode spans
@@ -194,19 +133,6 @@ how far its data is complete is `agent_complete_through` (col) and the advisorie
 
 Pattern detail for one or more patterns. The parameter is **`pattern_hashes` (arg), a LIST**, even when you have one hash: `pattern_hash` (LQL) (singular) is the FIELD name on an event row, not the parameter name. **Call before citing any `top_interesting_patterns` (col) teaser row.**
 
-```
-describe_pattern(
-  org_ids: ["..."],
-  start: "...",
-  end: "...",
-  pattern_hashes: ["..."],           # REQUIRED; order = your priority, examples cover roughly the first 25
-  include_sub_orgs: true,            # default true
-  include_examples: true,            # default true; false for stats only. There is no per-pattern sample count to set
-  external_investigation_id: "..."
-)
--> pattern text; stats (`event_count`, `cnt_interesting`, one count per failure-side severity band, first/last seen, affected senders and sources); diverse example messages with recurrence `count`/`seen_at`. The summary's `severity_bands` is an ORDERED array of `{band, count}` carrying only the bands that occurred, so a band missing from it is a band this pattern never reached. Example COUNTS are chosen server-side for diversity, and examples are returned for roughly your first 25 patterns by list order, so list the highest-interest hashes first. Examples need `mcp:query`; without it the response is stats-only, never an error.
-```
-
 **Examples are server-chosen, diverse, and truthful.** You do not pick counts: the server returns a text-diverse set of example messages per pattern (not just the most recent), sized to fit the response. List your highest-interest `pattern_hashes` (arg) FIRST: examples cover roughly the first 25 by list order; the rest get stats only (the scope line says so). Each example carries `count` (value), `[first, last]`, and (when it recurred 3+ times) `seen_at` (col): times this exact message recurred, identical except embedded timestamps.
 
 **Access tiers:** stats work on `mcp:observe`; examples additionally need query authority. If the token lacks it (or the workspace trial has expired), the call succeeds with stats only (no error) and the scope line names the reason: do not retry; read the stats and, when relevant, tell the engineer why examples are missing (e.g. expired trial).
@@ -218,17 +144,6 @@ describe_pattern(
 Field catalog over a source and window. Use when you need a **name** the rows you already read did not surface.
 It does not rank what matters; grouping on `sparklogs.reason` (LQL) or `pattern` (LQL) does. Discovery omits unstable process-id map paths (`guides/stream-kinds/device-state.md`). To inspect fields WITHIN a cached result, use `get_query_metadata` (tool).
 
-```
-list_fields(
-  org_ids: ["..."],
-  start: "...",                    # REQUIRED
-  end: "...",                      # REQUIRED, exclusive
-  include_sub_orgs: true,
-  external_investigation_id: "..."
-)
--> rows: {field, type, event_count}
-```
-
 **Common mistake:** grouping or filtering on every catalog path instead of the stream-kind ladder.
 
 ---
@@ -237,21 +152,6 @@ list_fields(
 
 Count of matching events by severity, optionally bucketed over time and/or grouped by field values.
 The workhorse for "what's happening" questions, and the only tool that answers "when".
-
-```
-query_event_counts_by_severity(
-  org_ids: ["..."],
-  start: "...",
-  end: "...",
-  include_sub_orgs: true,
-  group_by: ["pattern" | "source" | "service" | "app" | "subsource" | "category" | "<field>_hash" | "<custom.field>"],   # one field ranks its values; 2-3 cross-tab. Omit to count the whole population
-  bucket: "30s" | "5m" | "1h" | "6h" | "1d",   # optional; a TIME SERIES instead of a flat ranking. At most one group_by field with it
-  lql: "...",                      # optional LQL filter applied before grouping
-  limit: 50,                       # max distinct groups returned, by event count (default 50, hard cap 10000)
-  external_investigation_id: "..."
-)
--> rows: {<group_by values and/or bucket>, event_count, one cnt_<band> per band present}   # dense TSV
-```
 
 **Severity is never separable from volume here.** Every row carries `event_count` (col) plus the band counts,
 in the flat ranking and in the series alike, so "how much" and "how bad" arrive together. A band is a
@@ -295,22 +195,9 @@ group on the field alone when you need the null side.
 
 Retrieve raw chronological events. **Last resort after aggregation.** Its result is a refinable cache.
 
-```
-query_logs(
-  org_ids: ["..."],
-  start: "...",
-  end: "...",
-  include_sub_orgs: true,
-  lql: "...",                      # optional LQL filter; omit to match all in scope
-  select: [...],                   # REPLACES the projection; response-only, cache keeps full width. Set explicitly.
-  external_investigation_id: "..."
-)
--> header (query_id, query_url, summary, schema, lookups, page) + one page of events (JSONL)
-
 **There is no `limit`.** The response carries ONE PAGE, sized by the server, not the whole match.
 `summary` reports the matched TOTAL, so read that rather than counting rows. Further pages come from
 `refine_query_result` against the returned `query_id`, never from re-running this tool.
-```
 
 **Use cases:**
 - Last-resort raw event retrieval AFTER aggregation narrowed to a specific small set.
@@ -331,23 +218,6 @@ query_logs(
 
 An in-cache relational engine over a `query_logs` (tool) result. Meaningfully faster than a backing query; never re-touches the source.
 
-```
-refine_query_result(
-  query_id: "...",                 # from a prior query_logs result
-  filter_lql: "...",               # WHERE over the cached table's ROW columns
-  group_by: [ "severity" ],                   # bare column names, or objects for a bucket/alias; present => aggregation, absent => row slice
-  aggregate: [ {"fn": "count", "col": "*", "as": "hits"} ],   # fn in count/count_distinct/sum/avg/min/max/stddev/p50/p90/p95/p99; `col: "*"` works with count only, every other fn needs a real column
-  having_lql: "...",               # HAVING over POST-GROUP columns (group + aggregate aliases)
-  order_by: [ {"col": "hits", "dir": "desc"} ],   # LIST OF OBJECTS; col may be a group column or an aggregate alias
-  select: [...],                   # row-mode projection
-  limit: 500,
-  offset: 0,                       # deterministic paging of the transformed output
-  sample: {n: ..., method: ...},   # optional row-mode down-sampling (see restrictions below)
-  external_investigation_id: "..."
-)
--> same envelope shape as query_logs (dense TSV for grouped/projected output)
-```
-
 **The central efficiency lever.** Queue one broad slice, then refine many times against the same `query_id` (arg). Multiple refines are encouraged; each is an independent view over that same cached slice.
 
 **A refine response keeps the `query_id` (arg) you gave it.** Refined output is not a separate cache: run every further refine against the original `query_logs` (tool) `query_id` (arg). On refine responses, `page.rows_cached` (col) means rows in that underlying cache, not the size of your transformed output.
@@ -361,37 +231,14 @@ refine_query_result(
 **Cache expiry:** a cold cache (roughly a day old) regenerates automatically under the SAME `query_id` (arg) when you refine it (the header's cache status reflects it). Grouped results remain non-refinable. If `summary.cache_status` (col) is `cache_invalidated` (value), the handle is dead: issue a new data-tool call, do not retry refine on this id. That is not a bad org list you passed (`scope_violation` (value) is this-call unauthorized org). If the server reports the cache cannot be restored (`expired` (value)), re-issue the original backing query.
 
 **`group_by` (arg) takes bare column names; `order_by` (arg) items are OBJECTS.** A `group_by` (arg) term becomes an
-object only when it carries a time bucket or an alias. Two worked shapes:
-
-```
-# distribution over a cached slice
-refine_query_result(query_id="<qid>",
-  group_by=["severity"],
-  aggregate=[{"fn": "count", "col": "*", "as": "hits"}],
-  external_investigation_id="<id>")
-
-# same, densest first
-refine_query_result(query_id="<qid>",
-  group_by=["source"],
-  aggregate=[{"fn": "count", "col": "*", "as": "hits"}],
-  order_by=[{"col": "hits", "dir": "desc"}],
-  external_investigation_id="<id>")
-```
+object only when it carries a time bucket or an alias. Common shapes: group by `severity` (LQL) with a `count` aggregate alias `hits`; group by `source` (LQL) with the same aggregate and `order_by` on `hits` descending.
 
 `order_by` (arg) accepts a group column or an aggregate alias; `dir` (other) is `asc` (other) or `desc` (other). Group on any
 column the response's schema block lists: the standard ones (`severity` (LQL), `source` (LQL), `subsource` (LQL),
 `app` (LQL), `service` (LQL), `pattern` (LQL), `t` (LQL)) and the dotted custom paths beside them (`sparklogs.reason` (LQL)).
 
 **Time bucketing** groups a datetime column into fixed buckets, so one cached slice answers when
-something happened without a second backing scan:
-
-```
-refine_query_result(query_id="<qid>",
-  group_by=[{"time_bucket": {"col": "t", "bucket_usec": 3600000000}, "as": "hour"}],
-  aggregate=[{"fn": "count", "col": "*", "as": "hits"}],
-  order_by=[{"col": "hour", "dir": "asc"}],
-  external_investigation_id="<id>")
-```
+something happened without a second backing scan. Use a `group_by` time-bucket object on `t` (LQL) (for example one-hour buckets via `bucket_usec` (other) = 3600000000), count rows, and order by the bucket ascending for a series.
 
 `bucket_usec` (other) is microseconds (1h = 3600000000, 5m = 300000000). `col` (other) defaults to the event
 timestamp. Ascending order reads as a series; a run of low counts is where the stream thinned.
@@ -407,16 +254,6 @@ timestamp. Ascending order reads as a series; a run of low counts is where the s
 
 Cache and field introspection over a cached `query_id` (arg).
 
-```
-get_query_metadata(
-  query_id: "...",
-  top_n: 500,                      # OPT-IN deep discovery: ranked custom-field list. Full catalog scan of the source.
-  field_match: {mode: "equals"|"contains"|"regex", pattern: "..."},   # OPT-IN deep discovery: grep custom field NAMES. Full catalog scan.
-  external_investigation_id: "..."
-)
--> bookkeeping (schema, custom_source, stats, cache status, tie-breaker/sort); or, with top_n/field_match, a ranked/matched custom-field list
-```
-
 **The default call is cheap** (bookkeeping only, no backing scan). **`top_n` (arg) / `field_match` (arg) deep discovery is a full catalog scan of the source** scoped to the cached query's window + orgs - use deliberately, only when the inline response schema isn't enough.
 
 **Use cases:**
@@ -429,17 +266,11 @@ get_query_metadata(
 
 **For:** sending the engineer's feedback about this SparkLogs session (quality, bugs, ideas) to the product team, linked to the investigation audit trail via `external_investigation_id` (arg).
 
-**Shape:** not a query tool. Run the `sparklogs-feedback` skill first: agree kind and tier, draft fields, show exact text, wait for explicit yes, then call once. Reuse or mint `external_investigation_id` (arg). Relay the tool's result text (reference id, emailed vs stored, redaction).
-
-**Parameters and privacy:** live tool description and JSON schema only; do not paraphrase limits or redaction rules here.
+**Shape:** not a query tool. Run the `sparklogs-feedback` skill first: agree kind and tier, draft fields, show exact text, wait for explicit yes, then call once. Reuse or mint `external_investigation_id` (arg). Relay the tool's result text (reference id, emailed vs stored, redaction) as relevant.
 
 ---
 
 ### `server_info` (tool)
-
-```
-server_info()
-```
 
 Static server metadata (name, version, region, transport) plus the authenticated workspace id. No
 query, no billing. Use it to confirm which region and workspace you are talking to before citing

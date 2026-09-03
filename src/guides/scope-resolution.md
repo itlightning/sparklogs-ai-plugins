@@ -30,14 +30,7 @@ Approach in order of preference; stop at the first step that gives an unambiguou
 
 ### Step 1: Parse the engineer's message for an explicit ID
 
-If the message includes a customer ID, org ID, agent UUID, or workspace identifier (e.g. "ACME-DENT", "client_id=42", a full UUID), pass it as `org_ids` (arg) when it is already a UUID you recognize, or as the `query` (arg) substring otherwise:
-
-```
-resolve_scope(
-  query: "<extracted ID or name>",
-  external_investigation_id: "<id>"
-)
-```
+If the message includes a customer ID, org ID, agent UUID, or workspace identifier (e.g. "ACME-DENT", "client_id=42", a full UUID), pass it as `org_ids` (arg) when it is already a UUID you recognize, or as the `query` (arg) substring otherwise. Call `resolve_scope` (tool) with that value and the session `external_investigation_id` (arg).
 
 If `resolve_scope` (tool) returns a single row with `match_kind` (col) **`exact` (value)**, proceed with that scope.
 
@@ -51,14 +44,7 @@ If several agents share similar names across orgs, ask which org or site the eng
 
 ### Step 3: Org name match
 
-If no host match, try the org or customer name verbatim:
-
-```
-resolve_scope(
-  query: "Acme Dental",
-  external_investigation_id: "<id>"
-)
-```
+If no host match, try the org or customer name verbatim via `query` (arg) on `resolve_scope` (tool).
 
 Org names use the same ranked matching as agents (see **match_kind** below).
 
@@ -123,17 +109,7 @@ Use these readings in the cross-check below; do not treat a silent source as hea
 ### Step 9: Sub-org expansion
 
 When a single org is identified, by default include all sub-orgs underneath it.
-Pass `include_sub_orgs: true` (default) on org-scoped MCP calls so the server expands the tree:
-
-```
-list_sources(
-  org_ids: [<resolved org>],
-  include_sub_orgs: true,
-  start: "<investigation start, RFC3339 UTC>",
-  end: "<investigation end, RFC3339 UTC>",
-  external_investigation_id: "<id>"
-)
-```
+Pass `include_sub_orgs: true` (default) on org-scoped MCP calls so the server expands the tree. Then call `list_sources` (tool) with the resolved `org_ids` (arg), the investigation `start` (arg)/`end` (arg) (RFC3339 UTC), and the session `external_investigation_id` (arg).
 
 If the engineer scopes to one sub-org only, set `org_ids` (arg) to that sub-org.
 Keep `include_sub_orgs` (arg) true unless they explicitly want a single node with no descendants.
@@ -153,16 +129,7 @@ After resolving scope, confirm the source(s) of interest have data in the invest
 Use the investigation's actual **`start` (arg)** / **`end` (arg)** (RFC3339 UTC).
 Do **not** infer scope from recent heartbeat alone; historical windows need historical event presence.
 
-```
-list_sources(
-  org_ids: [<from resolve_scope>],
-  include_sub_orgs: true,
-  start: "<investigation start, RFC3339 UTC>",
-  end: "<investigation end, RFC3339 UTC>",
-  include_top_interesting_patterns: true,
-  external_investigation_id: "<id>"
-)
-```
+Call `list_sources` (tool) with org scope from `resolve_scope` (tool), default `include_sub_orgs: true` (arg), the investigation window, `include_top_interesting_patterns: true` (arg) when you want the teaser, and the session `external_investigation_id` (arg).
 
 ### Per-row fields (shipped)
 
@@ -240,16 +207,7 @@ Do not filter `list_sources` (tool) by "reporting now" when the engineer asked a
 
 ## Sender-first LQL scoping
 
-After scope resolution, prefer **`agent_id` (LQL)** filters when the question is about everything one sender shipped:
-
-```
-query_event_counts_by_severity(
-  org_ids: [...],
-  lql: 'agent_id = "<uuid from resolve_scope or list_sources>"',
-  group_by: ["pattern"],
-  ...
-)
-```
+After scope resolution, prefer **`agent_id` (LQL)** filters when the question is about everything one sender shipped. Call `query_event_counts_by_severity` (tool) with an `lql` (arg) filter such as `agent_id = "<uuid from resolve_scope or list_sources>"` and a `group_by` (arg) such as `pattern` (LQL).
 
 Use **`source = "hostname"`** when the question is about the origin host label, or combine both when you need on-host events from one agent:
 

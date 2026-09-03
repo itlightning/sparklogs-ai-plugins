@@ -318,17 +318,7 @@ Before any deep investigation, resolve the scope (which org / sources / time win
 
 **Fleet hunt.** Default scope is what they named (one org, one host, or that set). Do not scan the whole fleet unprompted. If a finding looks serious or shared (same `pattern_hash` (LQL), `service` (LQL), or reason on one box; ransomware-class, backup-wide, identity), suggest a fleet hunt and wait unless they already asked. Climb the scope ladder and pattern counts first (`query_scope_activity` (tool), `query_event_counts_by_severity` (tool) with `group_by` (arg) `source` (LQL) / `service` (LQL) / `pattern_hash` (LQL), tight `start` (arg)/`end` (arg), LQL on the suspected shape). `describe_pattern` (tool) (list the important hashes first) for text, severity-band counts, and how many senders/sources are hit: that is the fleet-spread read. `query_logs` (tool) only after that list is narrow. Do not open with raw logs across every device.
 
-**Source discovery - confirm sources have trustworthy data in the window.** Use `list_sources` (tool) with the investigation's `start` (arg)/`end` (arg); do NOT infer scope from recent heartbeat alone.
-
-```
-list_sources(
-  org_ids=[<from resolve_scope>],
-  include_sub_orgs=true,
-  start="<investigation start, RFC3339 UTC>",
-  end="<investigation end, RFC3339 UTC>",
-  external_investigation_id="<id>"
-)
-```
+**Source discovery - confirm sources have trustworthy data in the window.** Use `list_sources` (tool) with the investigation's `start` (arg)/`end` (arg); do NOT infer scope from recent heartbeat alone. Pass resolved `org_ids` (arg), default `include_sub_orgs: true` (arg), and the session `external_investigation_id` (arg).
 
 Each row is a **(sender `agent_id` (LQL), origin `source` (LQL))** pair with `sent_via` (col) (`agent` (value) / `ingest_key` (value) / `unresolved` (value)), triage columns (`cnt_interesting` (col), one count per failure-side severity band from `cnt_warning` (col) to `cnt_critical_plus` (col), `distinct_interesting` (col)) and optional summary **`top_interesting_patterns` (col)** teaser. Call **`describe_pattern` (tool)** before citing any teaser pattern.
 
