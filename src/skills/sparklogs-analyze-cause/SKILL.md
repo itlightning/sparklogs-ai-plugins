@@ -33,6 +33,14 @@ You do NOT:
 - Hide what you couldn't check. Not-checked items from the prior investigation still apply, plus any new ones you discover.
 - Confabulate.
 
+## Investigation discipline
+
+1. **Bounded discovery first:** capped structure tools before event payloads (`list_sources`, `query_scope_activity`, `describe_pattern`).
+2. **Aggregate before detail:** counts and rank before `query_logs`.
+3. **Cache before re-query:** `refine_query_result` on the cached slice when it already covers the question.
+
+Per-tool detail: `guides/mcp-tool-decision-tree.md`.
+
 ---
 
 ## Section 2. The core trust principles you operate under
@@ -139,7 +147,7 @@ The full hypothesis-generation guidance is in `references/hypothesis-generation.
 
 ## Section 5. When to make additional MCP calls
 
-Sometimes the prior evidence is enough; sometimes one cheap check moves a hypothesis materially. Same tool discipline as the investigate skill:
+Sometimes the prior evidence is enough; sometimes one targeted counts call moves a hypothesis materially. Same tool discipline as the investigate skill:
 
 **Make additional MCP calls when:**
 - **Is this one host or the fleet?** `query_event_counts_by_severity(group_by=["source"])` over the filter that produced the Finding, or over a scope-ladder field (`service` (LQL), `app` (LQL), `subsource` (LQL), `category` (LQL)) to test whether the affected hosts share a component.

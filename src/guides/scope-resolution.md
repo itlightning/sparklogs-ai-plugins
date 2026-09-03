@@ -222,10 +222,12 @@ For fleet-wide origin pivots, group by `source` (LQL) or filter `source` (LQL) d
 
 ## Structure discovery vs filtered measure
 
+See `mcp-tool-decision-tree.md` (Investigation discipline) for why order matters.
+
 Two different tools answer "what exists" vs "how much in this slice":
 
-- **`query_scope_activity` (tool)** (cheap discovery scan): discover app / service / subsource structure in the org and window. Optional narrowing via `agent_ids` (arg), `source` (LQL) substring, or `field_match` (arg). Not LQL-filtered. See `scope-ladder.md`.
-- **`query_event_counts_by_severity` (tool)** (billed backing scan): count and rank within an **LQL-filtered** population (severity, time sub-slice, `pattern_hash` (LQL), etc.).
+- **`query_scope_activity` (tool)** (**bounded discovery**): discover app / service / subsource structure in the org and window. Capped, pre-aggregated rows; not LQL-filtered. Optional narrowing via `agent_ids` (arg), `source` (LQL) substring, or `field_match` (arg). See `scope-ladder.md`.
+- **`query_event_counts_by_severity` (tool)** (**LQL-filtered measure**): count and rank within an **LQL-filtered** population (severity, time sub-slice, `pattern_hash` (LQL), etc.).
 
 Use `query_scope_activity` (tool) to see what dimensions exist; use `query_event_counts_by_severity` (tool) to measure within a hypothesis-specific filter.
 

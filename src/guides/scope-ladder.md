@@ -44,14 +44,16 @@ Climb the ladder to localize a problem: group coarse to find the noisy component
 
 ## Discover structure vs measure within a filter
 
-**`query_scope_activity` (tool)** (cheap discovery, not LQL-filtered):
-- Runs a cheap discovery scan for app / service / subsource structure in org scope and time window.
+See `mcp-tool-decision-tree.md` (Investigation discipline) for why order matters.
+
+**`query_scope_activity` (tool)** (**bounded discovery**, not LQL-filtered):
+- Capped, pre-aggregated structure for app / service / subsource in org scope and time window.
 - Per-row triage: `event_count` (col), `cnt_interesting` (col), one count per failure-side severity band (`cnt_warning` (col) through `cnt_critical_plus` (col); the bands are defined in `category-classes.md`), `distinct_interesting` (col), `first_event_at` (col), `last_event_at` (col).
 - Critical+ fetch-first: a non-zero `cnt_critical_plus` (col) in any row in scope means fetch those events before proceeding, whatever the investigation topic (`category-classes.md`, Query notes).
 - Narrow with `agent_ids` (arg) (collector UUIDs), `source` (LQL) substring, or `field_match` (arg) over dimension names.
 - Summary may include `top_interesting_patterns` (col) teaser; call **`describe_pattern` (tool)** before citing any teaser pattern.
 
-**`query_event_counts_by_severity` (tool)** (billed, LQL-filtered measure):
+**`query_event_counts_by_severity` (tool)** (**LQL-filtered measure**):
 - Counts events matching an **`lql` (arg)** filter, by severity, optionally over the `group_by` (arg) fields and/or `bucket` (arg) time buckets.
 - Use when you already have a hypothesis slice (severity, time sub-range, `pattern_hash` (LQL), `agent_id` (LQL), etc.) and need counts, ranking or a time series within that slice.
 

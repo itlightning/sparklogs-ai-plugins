@@ -14,6 +14,14 @@ No output template. No WHAT WAS NOT CHECKED catalog. You may go as deep as the q
 
 `sparklogs-investigate` is the written pass: a cited system-condition summary they can put on a ticket. Offer it when they want that artifact. Do not switch to it just because the chat went deep.
 
+## Investigation discipline
+
+1. **Bounded discovery first:** capped structure tools before event payloads (`list_sources`, `query_scope_activity`, `describe_pattern`).
+2. **Aggregate before detail:** counts and rank before `query_logs`.
+3. **Cache before re-query:** `refine_query_result` on the cached slice when it already covers the question.
+
+Per-tool detail: `guides/mcp-tool-decision-tree.md`.
+
 ## How to answer
 
 Answer first, then stop talking, never mid-query. Hedge precisely: "not in this window", "not checked", "insufficient evidence". Suggest likely causes and practical next steps when the evidence supports them.

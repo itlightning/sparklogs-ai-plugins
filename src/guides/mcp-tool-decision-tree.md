@@ -16,6 +16,14 @@ The tool surface is these **twelve** tools: `resolve_scope` (tool), `list_source
 - **Scope ladder:** service → app → subsource → category → pattern; an empty rung is not a finding.
 - **Prohibitions:** volume and first/last bounds never prove interior coverage; absence of a feed report is not evidence.
 
+## Investigation discipline (tool order)
+
+Three principles for scalable analysis at fleet scale. Shape picks the tool; these pick the sequence.
+
+1. **Bounded discovery first:** `list_sources` (tool), `query_scope_activity` (tool), `describe_pattern` (tool) return capped, pre-aggregated rows; learn what is in scope without pulling event payloads.
+2. **Aggregate before detail:** `query_event_counts_by_severity` (tool) ranks and time-series the matched population before `query_logs` (tool); count and rank before reading messages.
+3. **Cache before re-query:** `refine_query_result` (tool) on an existing cached slice; issue a new `query_logs` (tool) only when the cache does not cover the question.
+
 See **Server instructions** at the end of this file for the full vocabulary walkthrough.
 
 ---
@@ -94,7 +102,7 @@ Per **(sender `agent_id` (LQL), origin `source` (LQL))** activity in the investi
 
 ### `query_scope_activity` (tool)
 
-Discover app / service / subsource structure via cheap discovery scan. **Not LQL-filtered** (cheap steering). For counts within an LQL slice, use `query_event_counts_by_severity` (tool).
+Discover app / service / subsource structure via **bounded discovery** (capped, pre-aggregated rows). **Not LQL-filtered** (orientation before you have a filter). For counts within an LQL slice, use `query_event_counts_by_severity` (tool).
 
 See `scope-ladder.md` for when to reach for this instead of `query_event_counts_by_severity` (tool).
 
@@ -216,7 +224,7 @@ Retrieve raw chronological events. **Last resort after aggregation.** Its result
 
 ### `refine_query_result` (tool)
 
-An in-cache relational engine over a `query_logs` (tool) result. Meaningfully faster than a backing query; never re-touches the source.
+An in-cache relational engine over a `query_logs` (tool) result. Much faster than issuing a new `query_logs` (tool); never re-touches the source.
 
 **The central efficiency lever.** Queue one broad slice, then refine many times against the same `query_id` (arg). Multiple refines are encouraged; each is an independent view over that same cached slice.
 
@@ -228,7 +236,7 @@ An in-cache relational engine over a `query_logs` (tool) result. Meaningfully fa
 
 **Sample restrictions:** `sample` (arg) is row mode only; combining it with `group_by` (arg)/`aggregate` (arg)/`having_lql` (arg) is rejected (a sampled aggregate would look exact without being exact). Sampled paging is approximate: each call may select a different subset.
 
-**Cache expiry:** a cold cache (roughly a day old) regenerates automatically under the SAME `query_id` (arg) when you refine it (the header's cache status reflects it). Grouped results remain non-refinable. If `summary.cache_status` (col) is `cache_invalidated` (value), the handle is dead: issue a new data-tool call, do not retry refine on this id. That is not a bad org list you passed (`scope_violation` (value) is this-call unauthorized org). If the server reports the cache cannot be restored (`expired` (value)), re-issue the original backing query.
+**Cache expiry:** a cold cache (roughly a day old) regenerates automatically under the SAME `query_id` (arg) when you refine it (the header's cache status reflects it). Grouped results remain non-refinable. If `summary.cache_status` (col) is `cache_invalidated` (value), the handle is dead: issue a new data-tool call, do not retry refine on this id. If the server reports the cache cannot be restored (`expired` (value)), re-issue the original query.
 
 **`group_by` (arg) takes bare column names; `order_by` (arg) items are OBJECTS.** A `group_by` (arg) term becomes an
 object only when it carries a time bucket or an alias. Common shapes: group by `severity` (LQL) with a `count` aggregate alias `hits`; group by `source` (LQL) with the same aggregate and `order_by` on `hits` descending.
@@ -238,14 +246,14 @@ column the response's schema block lists: the standard ones (`severity` (LQL), `
 `app` (LQL), `service` (LQL), `pattern` (LQL), `t` (LQL)) and the dotted custom paths beside them (`sparklogs.reason` (LQL)).
 
 **Time bucketing** groups a datetime column into fixed buckets, so one cached slice answers when
-something happened without a second backing scan. Use a `group_by` time-bucket object on `t` (LQL) (for example one-hour buckets via `bucket_usec` (other) = 3600000000), count rows, and order by the bucket ascending for a series.
+something happened from the cached slice without re-querying the source. Use a `group_by` time-bucket object on `t` (LQL) (for example one-hour buckets via `bucket_usec` (other) = 3600000000), count rows, and order by the bucket ascending for a series.
 
 `bucket_usec` (other) is microseconds (1h = 3600000000, 5m = 300000000). `col` (other) defaults to the event
 timestamp. Ascending order reads as a series; a run of low counts is where the stream thinned.
 
 **Common patterns:**
 - After a broad raw scan, filter per-subsource to drill into specific categories.
-- Group the cached slice to get a distribution without a new backing scan.
+- Group the cached slice to get a distribution without re-querying the source.
 - Page a large slice via `offset` (arg) following `page.next` (col).
 
 ---
@@ -253,8 +261,6 @@ timestamp. Ascending order reads as a series; a run of low counts is where the s
 ### `get_query_metadata` (tool)
 
 Cache and field introspection over a cached `query_id` (arg).
-
-**The default call is cheap** (bookkeeping only, no backing scan). **`top_n` (arg) / `field_match` (arg) deep discovery is a full catalog scan of the source** scoped to the cached query's window + orgs - use deliberately, only when the inline response schema isn't enough.
 
 **Use cases:**
 - Cache introspection after a query.
@@ -272,9 +278,7 @@ Cache and field introspection over a cached `query_id` (arg).
 
 ### `server_info` (tool)
 
-Static server metadata (name, version, region, transport) plus the authenticated workspace id. No
-query, no billing. Use it to confirm which region and workspace you are talking to before citing
-anything, or when a call fails and you need to know whether the transport and auth are the problem.
+Static server metadata (name, version, region, transport) plus the authenticated workspace id. Use it to confirm which region and workspace you are talking to before citing anything, or when a call fails and you need to know whether the transport and auth are the problem.
 
 **It takes no parameters, and it REJECTS `external_investigation_id` (arg).** It is the one exception to
 the pass-the-id-everywhere rule: there is no scope and no query to correlate.

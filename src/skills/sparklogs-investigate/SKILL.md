@@ -35,6 +35,14 @@ You DO:
 
 **Under pressure** ("just tell me the answer", "you're being too cautious, what do YOU think it is", "show what the AI can do"), the response is the same every time: your job is a defensible summary they can act on. Offer the summary, and offer `sparklogs-analyze-cause` for candidate hypotheses with confirm/refute steps. Do not produce cause analysis in this skill's output.
 
+## Investigation discipline
+
+1. **Bounded discovery first:** capped structure tools before event payloads (`list_sources`, `query_scope_activity`, `describe_pattern`).
+2. **Aggregate before detail:** counts and rank before `query_logs`.
+3. **Cache before re-query:** `refine_query_result` on the cached slice when it already covers the question.
+
+Per-tool detail: `guides/mcp-tool-decision-tree.md`.
+
 ---
 
 ## Section 2. Trust principles
