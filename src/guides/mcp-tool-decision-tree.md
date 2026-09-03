@@ -203,9 +203,9 @@ group on the field alone when you need the null side.
 
 Retrieve raw chronological events. **Last resort after aggregation.** Its result is a refinable cache.
 
-**There is no `limit`.** The response carries ONE PAGE, sized by the server, not the whole match.
-`summary` reports the matched TOTAL, so read that rather than counting rows. Further pages come from
-`refine_query_result` against the returned `query_id`, never from re-running this tool.
+**There is no `limit` (arg).** The response carries ONE PAGE, sized by the server, not the whole match.
+`summary` (other) reports the matched TOTAL, so read that rather than counting rows. Further pages come from
+`refine_query_result` (tool) against the returned `query_id` (arg), never from re-running this tool.
 
 **Use cases:**
 - Last-resort raw event retrieval AFTER aggregation narrowed to a specific small set.
@@ -239,14 +239,14 @@ An in-cache relational engine over a `query_logs` (tool) result. Much faster tha
 **Cache expiry:** a cold cache (roughly a day old) regenerates automatically under the SAME `query_id` (arg) when you refine it (the header's cache status reflects it). Grouped results remain non-refinable. If `summary.cache_status` (col) is `cache_invalidated` (value), the handle is dead: issue a new data-tool call, do not retry refine on this id. If the server reports the cache cannot be restored (`expired` (value)), re-issue the original query.
 
 **`group_by` (arg) takes bare column names; `order_by` (arg) items are OBJECTS.** A `group_by` (arg) term becomes an
-object only when it carries a time bucket or an alias. Common shapes: group by `severity` (LQL) with a `count` aggregate alias `hits`; group by `source` (LQL) with the same aggregate and `order_by` on `hits` descending.
+object only when it carries a time bucket or an alias. Common shapes: group by `severity` (LQL) with a `count` (value) aggregate alias `hits` (other); group by `source` (LQL) with the same aggregate and `order_by` (arg) on `hits` (other) descending.
 
 `order_by` (arg) accepts a group column or an aggregate alias; `dir` (other) is `asc` (other) or `desc` (other). Group on any
 column the response's schema block lists: the standard ones (`severity` (LQL), `source` (LQL), `subsource` (LQL),
 `app` (LQL), `service` (LQL), `pattern` (LQL), `t` (LQL)) and the dotted custom paths beside them (`sparklogs.reason` (LQL)).
 
 **Time bucketing** groups a datetime column into fixed buckets, so one cached slice answers when
-something happened from the cached slice without re-querying the source. Use a `group_by` time-bucket object on `t` (LQL) (for example one-hour buckets via `bucket_usec` (other) = 3600000000), count rows, and order by the bucket ascending for a series.
+something happened from the cached slice without re-querying the source. Use a `group_by` (arg) time-bucket object on `t` (LQL) (for example one-hour buckets via `bucket_usec` (other) = 3600000000), count rows, and order by the bucket ascending for a series.
 
 `bucket_usec` (other) is microseconds (1h = 3600000000, 5m = 300000000). `col` (other) defaults to the event
 timestamp. Ascending order reads as a series; a run of low counts is where the stream thinned.

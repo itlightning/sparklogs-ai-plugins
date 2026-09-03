@@ -32,13 +32,14 @@ export const AGENT_PLUGINS_PLUGIN_SCHEMA = 'https://agent-plugins.org/schemas/1.
 export const AGENT_PLUGINS_MCP_SCHEMA = 'https://agent-plugins.org/schemas/1.0.0/mcp.schema.json';
 
 // What each host package actually contains, and where its two config files go.
-// `trees` excludes skills/ (always rendered) and the corpus, which Claude carries at the package
-// root and every other host carries inside each skill's references/ subtree.
+// `trees` excludes skills/ (always rendered). Every host also materializes the corpus under each
+// skill's references/ subtree. Claude additionally ships guides/playbooks/themes/feeds at the
+// package root for commands and agents.
 // Codex documents skills, MCP servers and hooks as the bundled component kinds: no commands, no
 // rules, no subagents. Generic follows Agent Plugins v1, which defines skills and mcp.json only.
 export const HOST_LAYOUT = {
   claude: {
-    trees: ['agents', 'guides', 'playbooks', 'themes', 'feeds'],
+    trees: ['agents'],
     commands: true,
     manifest: '.claude-plugin/plugin.json',
     mcpFile: '.mcp.json',
@@ -84,11 +85,10 @@ export const FEED_ID = /^[a-z][a-z0-9]*(?:\.[a-z][a-z0-9]*)*$/;
 
 // SKILL.md is ~59 KiB today. A dump that is not an index should fail before it ships.
 export const MAX_SRC_FILE_BYTES = 128 * 1024;
-// Hosts other than Claude carry a copy of the reference corpus inside every skill, so a package is
-// roughly the corpus times the skill count. The caps are sized for that plus room to grow, and are
-// still small enough that an accidental tree (node_modules, a build dir) trips them.
+// Every host materializes the corpus inside each skill. Claude additionally ships agents/ at the
+// package root. Cap is sized for corpus times skill count plus commands and assets.
+export const MAX_PACKAGE_BYTES = 4 * 1024 * 1024;
 export const MAX_DIST_BYTES = 12 * 1024 * 1024;
-export const MAX_PACKAGE_BYTES = 3 * 1024 * 1024;
 
 export const DOCS_URL = 'https://sparklogs.com/docs/it-fleet-intelligence';
 

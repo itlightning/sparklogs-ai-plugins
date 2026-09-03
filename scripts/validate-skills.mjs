@@ -87,9 +87,12 @@ async function validateSkills() {
     if (!PORTABLE.test(data.name ?? '')) throw new Error(`${file} has non-portable name: ${data.name}`);
     if (data.name !== entry.name) throw new Error(`${file} name must match directory ${entry.name}`);
     if (!data.description || data.description.length < 40) throw new Error(`${file} description is too short`);
-    const indexes = data.indexes ?? [];
-    if (!Array.isArray(indexes) || indexes.length === 0) {
-      throw new Error(`${file} needs indexes: frontmatter listing generated tables`);
+    if (data.indexes === undefined) {
+      throw new Error(`${file} needs indexes: frontmatter listing generated tables (use indexes: [] when none)`);
+    }
+    const indexes = data.indexes;
+    if (!Array.isArray(indexes)) {
+      throw new Error(`${file} indexes: must be a list`);
     }
     for (const kind of indexes) {
       if (!INDEX_KINDS.includes(kind)) throw new Error(`${file} unknown indexes entry: ${kind}`);

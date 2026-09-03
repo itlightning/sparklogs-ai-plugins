@@ -1,6 +1,7 @@
 ---
 name: sparklogs-feedback
 description: Send feedback to SparkLogs about this session (positive, negative, neutral, a bug, or an idea), after the user picks how much detail to include and approves the exact text. Use when the user asks to send feedback. Offer feedback once per session if the user is frustrated or did not get a good result.
+indexes: []
 ---
 
 # SparkLogs Feedback

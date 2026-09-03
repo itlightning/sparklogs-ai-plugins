@@ -5,10 +5,9 @@
 // Two things differ between hosts and neither can be expressed portably in the source text:
 //
 //  1. Corpus paths. Source prose cites `guides/x.md`, `playbooks/x.md`, `themes/x.md`, `feeds/<id>/`
-//     as if the reader stood at the package root. Claude resolves ${CLAUDE_PLUGIN_ROOT} inside skill,
-//     agent and command markdown, so the reference becomes root-anchored there. Other hosts hand a
-//     skill only its own directory, so the corpus is copied into that skill's references/ subtree and
-//     the citation becomes a path relative to the citing file.
+//     as if the reader stood at the package root. Skill markdown is rewritten to paths under that
+//     skill's references/ subtree (all hosts, including Claude). Commands, agents, and other
+//     package-root markdown on Claude use ${CLAUDE_PLUGIN_ROOT}.
 //  2. Command invocation. Claude namespaces a plugin command as /sparklogs:<filename-stem>.
 //     Remaining commands are named sparklogs-explain / sparklogs-summary so Desktop's
 //     unscoped picker matches skill naming; Claude Code therefore shows
