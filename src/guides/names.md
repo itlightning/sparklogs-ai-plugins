@@ -8,7 +8,7 @@ In authored `src/` prose, tag every identifier-shaped backtick (`[a-z][a-z0-9_.]
 | `(col)` | Response column | yes | cols (not sparklogs.* wire paths) |
 | `(LQL)` | Log filter / counts `group_by` (arg) | yes | library public fields + lql_resident; family globs need lql_families |
 | `(tool)` | MCP tool name | stripped on render | tools (11 shipped names) |
-| `(value)` | Closed vocabulary | stripped on render | feeds, kinds, apps, statuses, topics, reason slugs, enums |
+| `(value)` | Closed vocabulary | stripped on render | feeds, kinds, apps, statuses, topics, reason values, enums |
 | `(other)` | Syntax / pedagogy (`in` (other), `null` (other), `asc` (other)) | stripped on render | not in any product set; not dotted |
 
 Fenced LQL and JSON tool-call blocks are not tagged.

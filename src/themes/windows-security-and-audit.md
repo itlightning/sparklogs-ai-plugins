@@ -18,6 +18,6 @@ Change-class events keep actor join keys: subject user, logon id, origin IP, pro
 3. Attribute: actor keys on the change event; join that logon session. Logon type 10 is RDP; origin IP is on the logon row.
 4. Expand: everything the same `SubjectLogonId` / actor name touched in the window.
 
-Worked Security pivots: `feeds/win.eventlog.security/recipes.md`. Field names: `fields.md`. Do not read the whole reasons file; search the `##` heading for the reason slug.
+Worked Security pivots: `feeds/win.eventlog.security/recipes.md`. Field names: `fields.md`. Do not read the whole reasons file; search the `##` heading for the reason.
 
 Never key on a Windows event id alone. Security 4625 is logon failure; Application/System can emit other 4625s. Provider + channel + id.

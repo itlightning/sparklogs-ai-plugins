@@ -1,5 +1,5 @@
 # Identifier membership SoT (hand-authored).
-# LQL module paths and reason slugs are harvested from the sibling library
+# LQL module paths and reason values are harvested from the sibling library
 # (docs/generated-public). This file is the rest: tools, args, cols, resident
 # LQL, families, and small closed vocabs.
 # Grow a list when docs name a new shipped identifier.
@@ -229,7 +229,7 @@ lql_families:
   - sparklogs.destination
 
 # Small closed vocabs. Feed ids come from MODULES. Apps from registry.yaml.
-# Reason slugs from library reasons.md. Extra tokens the docs already use:
+# Reason values from library reasons.md. Extra tokens the docs already use:
 values:
   kinds:
     - inventory

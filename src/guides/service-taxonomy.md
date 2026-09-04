@@ -67,7 +67,7 @@ Maintained list (grows as Windows Event Log modules land):
 - The same homing rule applies to auth lifecycle (-> `auth` (value)), CA events (-> `certificates` (value)), and
   directory object changes (-> `directory_services` (value)) as those rows ship.
 
-**Rule for forensic/audit sweeps: pivot on reason slugs, channel (`subsource` (LQL)), and `category` (LQL),
+**Rule for forensic/audit sweeps: pivot on `sparklogs.reason` (LQL), channel (`subsource` (LQL)), and `category` (LQL),
 never on `service = "security_audit"` alone.**
 
 ## Coverage

@@ -18,8 +18,8 @@ Load what you need. Do not dump a folder.
 |---|---|---|
 | 0-ask | `skills/sparklogs-ask/SKILL.md` | Default. Conversation with the data. May go deep. No report template. |
 | 0-investigate | `skills/sparklogs-investigate/SKILL.md` | User asked for a full investigation or accepted the offer. Written cited summary. |
-| 1a | `playbooks/<slug>.md` | Symptom recipe. Ask may open it as a recipe. Investigate walks it. |
-| 1b | `themes/<slug>.md` | Domain (feeds that join) without a canned playbook, or the playbook pointed here. |
+| 1a | `playbooks/<name>.md` | Symptom recipe. Ask may open it as a recipe. Investigate walks it. |
+| 1b | `themes/<name>.md` | Domain (feeds that join) without a canned playbook, or the playbook pointed here. |
 | 2 | `feeds/<id>/<artifact>.md` | After a `subsource` or theme pointer. README, then the artifact you need. |
 | 3 | `guides/<name>.md` | Stuck on LQL, tools, class/severity, mistakes, honesty, stream kind. |
 
@@ -29,8 +29,8 @@ It does not duplicate playbooks.
 
 ## SKILL.md index tables (generated)
 
-1. Symptom to `playbooks/<slug>.md` (ask + investigate)
-2. Topic to `themes/<slug>.md`
+1. Symptom to `playbooks/<name>.md` (ask + investigate)
+2. Topic to `themes/<name>.md`
 3. Feed id (`subsource`) to `feeds/<id>/`
 
 Leaf `index:` is the table cell. Optional `aliases:` add extra rows with the same path. Table prose lives on the leaf.
@@ -59,7 +59,7 @@ Omit an artifact when it would be empty.
 Only `win.eventlog.security` is full: recipes, patterns, mappings, plus reasons.
 
 One `reasons.md` per feed, not one file per reason.
-Index table at the top, then `## \`slug\`` sections from `public.*` YAML only.
+Index table at the top, then `## \`reason\`` sections from `public.*` YAML only.
 
 ## Authored vs generated
 

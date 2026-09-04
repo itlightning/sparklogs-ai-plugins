@@ -261,7 +261,7 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` (value) or `
 
 ### Loading a whole `enums.md` or `reasons.md`
 
-**Symptom.** You opened `feeds/<id>/enums.md` or `reasons.md` and read most of the file into context to decode one code or slug.
+**Symptom.** You opened `feeds/<id>/enums.md` or `reasons.md` and read most of the file into context to decode one code or reason.
 
 **Why it's wrong.** `enums.md` can be hundreds of lines per feed. `reasons.md` is long and the summary table up front is enough to pick the right `##` section. Whole-file reads blow context and duplicate what grep or one-section reads give you.
 

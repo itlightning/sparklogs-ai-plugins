@@ -2,7 +2,7 @@
 
 - **`subsource` (LQL) = feed id.** Scope ladder before `query_logs` (tool): `service` (LQL) → `app` (LQL) → `subsource` (LQL) → `category` (LQL) → `pattern_hash` (LQL).
 - **Curated events** carry `sparklogs.reason` (LQL), `sparklogs.class` (LQL), and module fields. Empty `sparklogs.*` on an event means **uncurated** (not a collection-health finding).
-- **Reason slug** = our vocabulary (`sparklogs.reason` (LQL)). **Vendor code** = NTSTATUS, HRESULT, MSI exit, Kerberos result, etc. **pattern_hash** (LQL) = stable shape id on every event.
+- **Reason** (`sparklogs.reason` (LQL)) = our curated vocabulary. **Vendor code** = NTSTATUS, HRESULT, MSI exit, Kerberos result, etc. **pattern_hash** (LQL) = stable shape id on every event.
 - **Device row** (`query_device_health` (tool), feed health, `agent_complete_through` (col)) is authoritative for collection and completeness. Event volume is not coverage.
 - **Playbooks** = symptom recipes. **Themes** = investigation topic bundles (not customer marketing themes).
 
@@ -16,7 +16,7 @@
 2. **Stream kind** and explore ladder: `guides/stream-kinds.md`. Classic WEL: `provider_name` (LQL) before `pattern` (LQL); device state: `query_device_health` (tool) with `sparklogs.kind` (LQL) / `sparklogs.topic` (LQL) / `sparklogs.reason` (LQL).
 3. Open **one** artifact (read-mode table below). Rich feeds (especially `win.eventlog.security` (value)) often need `recipes.md` or `reasons.md` first, not only `fields.md` or `enums.md`. Security also carries `patterns.md` and `mapping-ecs.md` / `mapping-ocsf.md` when shape or external taxonomy is the question.
 
-**Reason slug meaning:** the slug and the event `message` (col) together; grep `reasons.md` for the matching `##` heading (summary table first, one section only).
+**Reason meaning:** the `sparklogs.reason` (LQL) value and the event `message` (col) together; grep `reasons.md` for the matching `##` heading (summary table first, one section only).
 
 ## Decode tables (`enums.md`)
 
@@ -36,7 +36,7 @@ Per-feed closed vocabularies. **Grep** the code, constant, or `##` heading; neve
 | Playbook | Symptom matches index below | One file, whole |
 | Theme | Investigation topic matches index | One file, whole |
 | Feed `README.md` | You picked a `subsource` (LQL) | Whole (short index) |
-| `reasons.md` | Need reason slug meaning | Skim summary table (~first 100 lines), then **one** `##` section |
+| `reasons.md` | Need what a reason means | Skim summary table (~first 100 lines), then **one** `##` section |
 | `enums.md` | Vendor/status code | **Search only** |
 | `fields.md` | Filter/group on a field | Search for field name |
 | `recipes.md` | Worked pivot for this feed | One section |
@@ -46,5 +46,5 @@ Per-feed closed vocabularies. **Grep** the code, constant, or `##` heading; neve
 ## Unfamiliar `pattern_hash` (LQL)
 
 1. `describe_pattern` (tool) for text, examples, fleet spread.
-2. Grep `feeds/<id>/reasons.md` or `recipes.md` if a slug or pivot is the question.
+2. Grep `feeds/<id>/reasons.md` or `recipes.md` if a reason or pivot is the question.
 3. `patterns.md` only when the question is whether the pack meant to produce that string shape.

@@ -1,7 +1,7 @@
 // Copyright (C) 2026 IT Lightning, LLC. All rights reserved.
 // See LICENSE.
 
-// Load identifier-sot.yaml and harvest LQL paths / reason slugs / app tokens.
+// Load identifier-sot.yaml and harvest LQL paths / reason values / app tokens.
 // Prefer a sibling sparklogs-source-library checkout. GitHub CI has none: harvest
 // the same public identifiers from committed src/feeds + app-vocabulary.md.
 

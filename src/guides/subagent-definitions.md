@@ -92,7 +92,7 @@ top_patterns:
     pattern_text: <from a query_logs message projection filtered to the pattern_hash>
     count: <int>
     likely_meaning: <plain-language from pattern_text; use describe_pattern or grep feed reasons.md when needed; else null>
-    reason_slug: <sparklogs.reason if identifiable from curation; else null>
+    reason: <sparklogs.reason if identifiable from curation; else null>
 ```
 
 **Delegation heuristic:** when `query_event_counts_by_severity` (tool) returns 50+ groups and you need the top N enumerated with meanings.
@@ -119,7 +119,7 @@ cluster_interpretations:
     pattern_summary: <plain-language description of what the surround patterns suggest>
     representative_event_t: <ISO>
     contributing_sources: <list>
-    related_reason_slugs: <reason slugs suggested by surround patterns; else empty>
+    related_reasons: <sparklogs.reason values suggested by surround patterns; else empty>
 ```
 
 **Delegation heuristic:** when cluster_event_contexts returns 4+ clusters with non-trivial pattern_hash sets in surrounds.
