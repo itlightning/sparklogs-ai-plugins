@@ -86,6 +86,14 @@ Stay in role: candidates with confirm/refute, not a single asserted cause. Stron
 
 `playbooks/`, `themes/`, `feeds/<id>/` (`README.md`, `reasons.md`, `enums.md`, `fields.md`, `recipes.md`, `patterns.md` where present), `guides/`. Artifact choice detail: `guides/generated-reference-router.md`.
 
+## After you pick a `subsource` (LQL)
+
+1. Open `feeds/<id>/README.md` (short index).
+2. **Stream kind** and explore ladder: `guides/stream-kinds.md`. Classic WEL: `provider_name` (LQL) before `pattern` (LQL); device state: `query_device_health` (tool) with `sparklogs.kind` (LQL) / `sparklogs.topic` (LQL) / `sparklogs.reason` (LQL).
+3. Open **one** artifact (read-mode table below). Rich feeds (especially `win.eventlog.security` (value)) often need `recipes.md` or `reasons.md` first, not only `fields.md` or `enums.md`. Security also carries `patterns.md` and `mapping-ecs.md` / `mapping-ocsf.md` when shape or external taxonomy is the question.
+
+**Reason slug meaning:** the slug and the event `message` (col) together; grep `reasons.md` for the matching `##` heading (summary table first, one section only).
+
 ## Decode tables (`enums.md`)
 
 Per-feed closed vocabularies. **Grep** the code, constant, or `##` heading; never load a whole file.
@@ -93,9 +101,9 @@ Per-feed closed vocabularies. **Grep** the code, constant, or `##` heading; neve
 | Kind | Typical feed | Use when |
 |---|---|---|
 | NTSTATUS / security status | `win.eventlog.security` (value) | Logon/auth failure codes |
-| Win32 / HRESULT | application, system, setup | Servicing, app, VSS errors |
+| Win32 / HRESULT | `win.eventlog.application` (value), `win.eventlog.system` (value), `win.eventlog.setup` (value) | Servicing, app, VSS errors |
 | MSI exit codes | `win.eventlog.application` (value) | Installer failures |
-| Logon types, WU result codes | security, application | Discriminate 4625/4624, update errors |
+| Logon types, WU result codes | `win.eventlog.security` (value), `win.eventlog.application` (value) | Discriminate 4625/4624, update errors |
 
 ## How much to read
 

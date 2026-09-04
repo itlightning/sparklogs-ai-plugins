@@ -31,7 +31,8 @@ Two shapes deserve their own line because they are the ones people get wrong:
 - **"Nothing came back, is that good news?"** is never a reference-content question.
   An empty result is a claim about the query, the window, and whether the agent was observing.
   Resolve it against the tool output and the honesty fields, never by reading a schema.
-- **"What does this reason mean?"** is answered by `reasons.md` (summary table, then one `##` section).
+- **"What does this reason mean?"** is answered by the reason slug **and** the message on the event.
+  Start with `reasons.md` (summary table, then one `##` section).
   Reach for `fields.md` only when you need to filter or group on something the message does not
   already say.
 
