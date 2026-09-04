@@ -31,6 +31,7 @@ args:
   - field_match
   - fieldset
   - filter_lql
+  - full_length_values
   - group_by
   - group_by_reason
   - having_lql
@@ -57,7 +58,6 @@ args:
   - start
   - subject
   - tier
-  - top_n
   - type
 
 # Union of MCP response headers (health fieldsets, list_sources, resolve_scope,
@@ -139,6 +139,7 @@ cols:
   - page.next
   - page.rows_cached
   - page.rows_returned
+  - page.truncated_fields
   - parent_id
   - pattern
   - pattern_hash
@@ -148,7 +149,8 @@ cols:
   - rows_cached
   - rows_returned
   - row_kind
-  - schema.fields_with_no_values
+  - schema.empty_requested_columns
+  - schema.columns
   - seen_at
   - sent_via
   - service

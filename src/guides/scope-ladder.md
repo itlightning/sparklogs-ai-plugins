@@ -91,7 +91,7 @@ Always use the hash verbatim as the drill-down filter value.
 ## Worked shape: localize then land
 
 1. `query_scope_activity` (tool) or `query_event_counts_by_severity(group_by=["service"], ...)` over the fleet or source: which component is noisiest.
-2. `query_event_counts_by_severity(group_by=["pattern"], lql='service = "<noisy service>"', ...)`: which pattern within that component dominates.
+2. `query_event_counts_by_severity(group_by=["pattern_hash"], lql='service = "<noisy service>"', ...)`: which pattern within that component dominates.
 3. Compare against a healthy baseline window: is the top pattern new, or normal volume?
 4. `describe_pattern(pattern_hashes=["<h>"])` on the surviving hash, then `query_logs(lql='pattern_hash = "<h>"', ...)` for event-level evidence.
 

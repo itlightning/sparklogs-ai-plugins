@@ -39,25 +39,24 @@ One trigger per tool. After coverage, it is almost always a
 | `list_sources` (tool) | Before concluding anything from an absence: did this source send data in THIS window? Any source type, including ingest keys. |
 | `query_device_health` (tool) | SparkLogs Agents in scope, and you need standing condition, what is installed or mounted, or which devices reported nothing on that surface. State, not sequence. Not the first tool for ingest-key-only streams. |
 | `query_scope_activity` (tool) | You do not know what this client HAS: which apps, services and subsources exist at all. Orientation on an unfamiliar estate. |
-| `query_event_counts_by_severity` (tool) | "What is going on here", at any altitude. The default mid-tier tool. `group_by=["reason"]` or `["pattern"]`; pass two fields when the question has two nouns in it. |
+| `query_event_counts_by_severity` (tool) | "What is going on here", at any altitude. The default mid-tier tool. `group_by=["reason"]` or `["pattern_hash"]`; pass two fields when the question has two nouns in it. |
 | `describe_pattern` (tool) | You are about to cite a pattern and need its text and spread. Pass `pattern_hashes` (arg) (a list). Required before citing any teaser pattern. Mid-tier with counts. |
 | `query_logs` (tool) | The grouping pointed somewhere specific and you now need the actual events. Last resort, over a narrowed filter. |
 | `refine_query_result` (tool) | You already pulled a slice and want a different view of it. Free; never re-scans the source. |
-| `get_query_metadata` (tool) | A cached result behaved oddly and you need its schema, filter or cache status. |
+| `get_query_metadata` (tool) | A cached result behaved oddly and you need its filter or cache status (bookkeeping only). |
 | `list_fields` (tool) | A field name you have not seen yet. Catalog, not a first-pass tool. |
 | `send_sparklogs_feedback` (tool) | The engineer wants to send session feedback to SparkLogs, or accepted a one-time offer. Run `sparklogs-feedback` first; not part of the query funnel. |
 | `server_info` (tool) | A call failed and you need to know whether region, transport or auth is the problem. |
 
 **Two honest demotions.** Both tools below exist and work; neither is where you should start.
 
-- **`list_fields` (tool) is a catalog, not the explore ladder.** It returns field names with fill counts.
-  `query_event_counts_by_severity` (tool) on `sparklogs.reason` (LQL) or `pattern` (LQL) tells you what the source is SAYING.
+- **`list_fields` (tool) is the workspace catalog, not the explore ladder.**
+  `query_event_counts_by_severity` (tool) on `sparklogs.reason` (LQL) or `pattern_hash` (LQL) tells you what the source is SAYING.
   Reach for `list_fields` (tool) when you need a name the data you have already seen did not surface.
   Discovery omits unstable process-id map paths (`sparklogs.data.processes.<pid>...`); service and
   similar instance keys can remain. Device-state explore: `guides/stream-kinds/device-state.md`.
-- **`get_query_metadata` (tool)'s deep discovery (`top_n` (arg) / `field_match` (arg)) is a full catalog scan.** The
-  inline response schema on every query already names the columns and their fill rates. Use the deep
-  mode when that is genuinely not enough, not as a routine step.
+- **`get_query_metadata` (tool) is bookkeeping only.** It reads cache status and stored parameters for a `query_id` (arg).
+  It does not list extra fields. Column names live in TSV `schema.columns` (col), JSONL row keys, or `list_fields` (tool).
 
 ---
 
@@ -150,7 +149,7 @@ Pattern detail for one or more patterns. The parameter is **`pattern_hashes` (ar
 ### `list_fields` (tool)
 
 Field catalog over a source and window. Use when you need a **name** the rows you already read did not surface.
-It does not rank what matters; grouping on `sparklogs.reason` (LQL) or `pattern` (LQL) does. Discovery omits unstable process-id map paths (`guides/stream-kinds/device-state.md`). To inspect fields WITHIN a cached result, use `get_query_metadata` (tool).
+It does not rank what matters; grouping on `sparklogs.reason` (LQL) or `pattern_hash` (LQL) does. Discovery omits unstable process-id map paths (`guides/stream-kinds/device-state.md`).
 
 **Common mistake:** grouping or filtering on every catalog path instead of the stream-kind ladder.
 
@@ -182,7 +181,7 @@ than the width you asked for.
 **Sampled counts:** a scan too large to read in full is sampled rather than refused, and `summary.scope` (col) then states a DETECTION FLOOR once for the whole response. Below it a cell reads `<N`, meaning fewer than about N events rather than NONE. At or above it a cell is an integer rounded to the significant digits its sample supports: an estimate, never an exact figure. The cell tells you which one you are reading, so quote it as it came. Narrow the window or filter for exact counts. Same treatment on `query_logs` (tool) grounding totals.
 
 **Use cases:**
-- "What patterns appeared most?" -> `group_by=["pattern"]`.
+- "What patterns appeared most?" -> `group_by=["pattern_hash"]`.
 - "Which sources show this?" -> filter on a `pattern_hash` (LQL) in `lql` (arg), `group_by=["source"]`.
 - "Which component is noisiest?" -> `group_by=["service"]` or `["subsource"]`, then narrow with a second call - see the scope ladder (`scope-ladder.md`).
 - "When did it start, and did it stop?" -> `bucket="1h"`, optionally with one `group_by` (arg) field.
@@ -209,15 +208,16 @@ Retrieve raw chronological events. **Last resort after aggregation.** Its result
 
 **Use cases:**
 - Last-resort raw event retrieval AFTER aggregation narrowed to a specific small set.
-- Level-3 ground-truth reads with an explicit `select` (arg).
+- Ground-truth reads with an explicit `select` (arg) when you already know the column names.
 - "Show me events with this filter" when aggregation isn't useful (e.g. one specific event you want to see in detail).
 
-**Then refine, don't re-query.** Pull ONE broad-enough slice; use `refine_query_result` (tool) for every other view of it. To page a partial result, follow the response's `page.next` (col).
+**Exploring unknown or wide events: omit `select` (arg).** Full-width JSONL is the default; populate `select` (arg) only when you know the names.
+
+**Then refine, don't re-query.** Pull ONE broad-enough slice; use `refine_query_result` (tool) for every other view of it. To page a partial result, follow the response's `page.next` (col), never `get_query_metadata` (tool).
 
 **Common mistakes:**
 - Reaching for this first. Aggregation first.
-- Omitting `select` (arg) (returns the standard set; usually too much).
-- Reading Level 3 by default.
+- Populating `select` (arg) before you know the shape (exploring should omit it).
 - Forgetting `external_investigation_id` (arg).
 
 ---
@@ -251,6 +251,9 @@ something happened from the cached slice without re-querying the source. Use a `
 `bucket_usec` (other) is microseconds (1h = 3600000000, 5m = 300000000). `col` (other) defaults to the event
 timestamp. Ascending order reads as a series; a run of low counts is where the stream thinned.
 
+**Truncated values:** cut values end with `…[truncated:…]` and are listed in `page.truncated_fields` (col).
+Whole values: refine with `full_length_values=true` (arg), narrowed with `filter_lql` (arg); the response may then reach 1 MB.
+
 **Common patterns:**
 - After a broad raw scan, filter per-subsource to drill into specific categories.
 - Group the cached slice to get a distribution without re-querying the source.
@@ -260,11 +263,14 @@ timestamp. Ascending order reads as a series; a run of low counts is where the s
 
 ### `get_query_metadata` (tool)
 
-Cache and field introspection over a cached `query_id` (arg).
+Bookkeeping over a cached `query_id` (arg): stored parameters, cache status, filter shape.
 
 **Use cases:**
-- Cache introspection after a query.
-- Deep custom-field discovery within a specific cached result (distinct from `list_fields` (tool), which builds NEW queries over a source).
+- Cache introspection after a query behaves oddly.
+- Confirm whether a cache is complete, invalidated, or expired.
+
+**Not for field discovery.** Column names: TSV `schema.columns` (col), JSONL row keys, or `list_fields` (tool).
+Overflow on a refinable cache: follow `page.next` (col) via `refine_query_result` (tool), not this tool.
 
 ---
 
@@ -294,7 +300,7 @@ the pass-the-id-everywhere rule: there is no scope and no query to correlate.
 2. list_sources with the investigation's start/end, filtered to source - confirm data in window
 3. query_device_health if SparkLogs Agents are in scope and the question needs state, inventory, or silence
 4. query_scope_activity if the estate is unfamiliar
-5. query_event_counts_by_severity group_by=["pattern"] - pattern mining
+5. query_event_counts_by_severity group_by=["pattern_hash"] - pattern mining
 6. describe_pattern on hashes you will cite
 7. query_logs over the narrowed window/filter - primary cache
 8. Multiple refine_query_result per subsource / field of interest
@@ -309,8 +315,7 @@ Use this when they asked, or after they accepted a suggested hunt. Do not open w
 1. resolve_scope(<msp / org scope>)
 2. query_event_counts_by_severity with lql filtering to the pattern_hash, group_by=["source"]
 3. Optional: query_logs + refine for first/last seen per source
-4. get_query_metadata
-5. system condition summary output (concise - this is a quick-pivot pattern)
+4. system condition summary output (concise - this is a quick-pivot pattern)
 ```
 
 ### Recipe: "What changed?"
@@ -318,8 +323,8 @@ Use this when they asked, or after they accepted a suggested hunt. Do not open w
 ```
 1. resolve_scope
 2. list_sources
-3. query_event_counts_by_severity group_by=["pattern"] over window A (e.g. incident window)
-4. query_event_counts_by_severity group_by=["pattern"] over window B (e.g. prior baseline)
+3. query_event_counts_by_severity group_by=["pattern_hash"] over window A (e.g. incident window)
+4. query_event_counts_by_severity group_by=["pattern_hash"] over window B (e.g. prior baseline)
 5. Compare the two grouped results - new / disappeared / accelerated patterns
 6. describe_pattern on the hashes that differ
 7. query_logs over the changed pattern if you need to see actual events
@@ -332,10 +337,13 @@ Use this when they asked, or after they accepted a suggested hunt. Do not open w
 
 Every data-tool response is one text block (not JSON you parse as a whole): header JSON (`meta` (other), `summary` (other), `schema` (other), `lookups` (col), `page` (other)), delimiter line, rows (TSV or omit-empty JSONL), optional trailing hint.
 
+- **Two modes, one namespace.** TSV (dense): `schema.columns` (col) lists `{name, type}` for every output column; header cells are bare names. JSONL (raw events and any array/object column): omit `schema.columns` (col) entirely; column names are the JSON keys on each row (never `"columns": null`).
 - **Counts.** `summary.total_count` (col) = matched population. `page.rows_cached` (col) / `page.rows_returned` (col) = cache slice / this page. Ground claims in the matched population.
 - **Sampled.** When `sampled` (other) is set, aggregates are estimates; quote cells as returned or narrow and re-run for exact figures.
 - **Hashes.** Resolve `*_hash` via header `lookups` (col); use `describe_pattern` (tool) before citing `pattern_hash` (LQL). Treat hashes as opaque drill-down handles.
-- **Empty columns.** `schema.fields_with_no_values` (col) is normal, not a Finding.
+- **Empty requested columns.** `schema.empty_requested_columns` (col) is normal, not a Finding.
+- **Overflow.** When `page.next` (col) is present on a refinable cache, follow it via `refine_query_result` (tool); never call `get_query_metadata` (tool) for more fields.
+- **Truncation.** Cut values carry `…[truncated:…]` markers and appear in `page.truncated_fields` (col). Whole values: `refine_query_result` (tool) with `full_length_values=true` (arg), narrowed with `filter_lql` (arg).
 - **Grouped results.** `query_event_counts_by_severity` (tool) output is not refinable; `refine_query_result` (tool) applies only to `query_logs` (tool) caches.
 
 ---
@@ -358,7 +366,7 @@ Every data-tool response is one text block (not JSON you parse as a whole): head
 
 If you find yourself reaching for one of these, use the substitute:
 
-- **`query_period_diff` (other)** ("what changed between two windows") -> run `query_event_counts_by_severity` (tool) over each window (`group_by=["pattern"]`) and compare the two grouped results.
+- **`query_period_diff` (other)** ("what changed between two windows") -> run `query_event_counts_by_severity` (tool) over each window (`group_by=["pattern_hash"]`) and compare the two grouped results.
 - **`compare_populations` (other)** ("what's different about broken vs working") -> run `query_event_counts_by_severity` (tool) over each population separately (via distinct `lql` (arg)) and compare.
 - **`cluster_event_contexts` (other)** ("distinct contexts around these events") -> `query_logs` (tool) narrowed to the pattern, then `refine_query_result` (tool) group_by to cluster.
 

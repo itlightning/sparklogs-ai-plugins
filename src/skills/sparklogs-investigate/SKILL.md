@@ -276,7 +276,7 @@ Fresh report → re-render per Section 4 with all Findings so far. Explore furth
 
 **Row-ceiling exceeded on backing query:** narrow `lql` (arg) per `guides/lql-reference.md`, or split queries; then refine the cached slice.
 
-**Field name you requested returned nothing:** not an error. The response names it under `schema.fields_with_no_values` (col); see `guides/mcp-tool-decision-tree.md` (response envelope).
+**Field name you requested returned nothing:** not an error. The response names it under `schema.empty_requested_columns` (col); see `guides/mcp-tool-decision-tree.md` (response envelope).
 
 **Partial page (`page.next` (col) present, or a trailing hint line):** the page hit a limit. Follow `page.next` (col) for the next page via `refine_query_result(offset=...)`, or narrow the filter for fewer rows.
 
