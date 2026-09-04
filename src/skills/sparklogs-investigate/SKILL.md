@@ -121,127 +121,33 @@ Detail: `playbooks/playbooks.md`.
 
 ## Section 4. Output structure - what every investigation produces
 
-Every investigation produces a structured document in this order. The full template lives in `references/output-template.md` with field definitions and worked examples. Write every free-text field per `guides/writing-voice.md`. The structure here is the minimum.
+Canonical template (field definitions, right-vs-wrong examples): `references/output-template.md`. Voice: `guides/writing-voice.md`.
 
-```
-INVESTIGATION SUMMARY - <ticket / scope description>
-external_investigation_id: <friendly handle, 8-200 chars, e.g. investigate-ticket-4781-veeam-backup>
+**Produce in this order:** title + `external_investigation_id` (arg) → EXECUTIVE SUMMARY → SCOPE CHECKED (incl. WHAT WAS NOT CHECKED) → OBSERVED CONDITIONS (Findings) → ANOMALY SIGNALS USED (only if used; normally absent) → WHAT WAS EXAMINED → AUDIT TRAIL → POSSIBLE NEXT DIRECTIONS (explore-or-analyze invitation).
 
-EXECUTIVE SUMMARY
-[ONE paragraph, six sentences maximum, plain language, citing Finding numbers.
- Headline-first: the engineer reads this to decide whether to open the Findings.]
-
-SCOPE CHECKED
-- Source(s): [list]
-- Org(s): [list]
-- Time window: [start UTC] to [end UTC]
-- Data sources queried: [list of subsources, channels, helpers]
-- WHAT WAS NOT CHECKED (not checked / not available): [one bullet per item, one sentence each]
-
-OBSERVED CONDITIONS
-[one structured Finding per material observation. One sentence, then the fields; no prose
- paragraph restating what the fields already say:]
-  Finding N: <one-sentence factual statement, observation-grounded>
-  Evidence: [<query_url(s)>]
-  Confidence: high | medium | low | insufficient_evidence
-  Sources contributing: [list]
-  Time window of evidence: [start] to [end]
-  [Optional Note: brief context, observation-grounded, no speculation]
-
-ANOMALY SIGNALS USED (only if applicable; normally absent)
-[brief list, with explicit framing as internal investigation tools, not user-visible problem alerts.
- `anomaly_max_score` / `anomaly_max_score_confidence` are designed and not emitted anywhere in the product today, so this section is normally absent.]
-
-WHAT WAS EXAMINED
-- Backing queries: <N>
-- Cached refinements: <M>
-- Sources / orgs covered: <list>
-- Matched population examined: <total rows/events, from query summaries>
-- Wall-clock: <minutes>
-
-AUDIT TRAIL
-<the running list of query_id + query_url per backing query, from the local investigation-state document; per-query detail via get_query_metadata(query_id=...)>
-
-POSSIBLE NEXT DIRECTIONS
-[1-4 sentences suggesting where investigation could go next, ending with the invitation:]
-"Would you like to (1) explore additional facts in any of these areas, or
- (2) run sparklogs-analyze-cause <external_investigation_id> to derive candidate cause hypotheses from these findings?"
-```
-
-**Critical structural properties:**
-- The WHAT WAS NOT CHECKED section appears in every summary, even when the answer is "everything I needed was on-endpoint."
-- The Confidence field is required on every Finding. Use "insufficient_evidence" rather than skipping when you don't have enough.
-- POSSIBLE NEXT DIRECTIONS is the invitation, never cause analysis.
+**Non-negotiable:** every Finding cites `query_url` (col); Confidence on every Finding; WHAT WAS NOT CHECKED every time; POSSIBLE NEXT DIRECTIONS invites `sparklogs-analyze-cause`, never performs cause analysis.
 
 ---
 
 ## Section 5. Citation discipline - every claim links to verifiable evidence
 
-**Every factual claim cites a `query_url` (col).** This is non-negotiable.
+Every factual claim cites a `query_url` (col) from the MCP response header; record `query_id` (arg) beside it when several queries share a window. URLs scope org and time in explore, not your cached filter: copy verbatim. Quote `message` (LQL) bytes exactly when a Finding rests on log text. No query, no claim, or use `insufficient_evidence` (value).
 
-When you call any data-access MCP tool (`query_logs` (tool), `query_event_counts_by_severity` (tool), `refine_query_result` (tool), `get_query_metadata` (tool)), the response's header line carries both `query_id` (arg) and `query_url` (col). You embed that `query_url` (col) in the **Evidence** field of every Finding that derives from that query.
-
-**What the URL actually resolves to.** It is a SparkLogs explore link scoped to the ORG AND TIME WINDOW the query ran over, not a replay of your exact filtered result. The engineer lands where the evidence lives and can see it; they do not land on your cached rows. Copy it verbatim and do not modify it.
-
-**So record the `query_id` (arg) beside it.** The `query_id` (arg) is the discriminator that identifies the exact query, and `get_query_metadata(query_id=...)` recovers its filter, schema and cache status. A citation is the URL plus that id: the URL locates the evidence, the id reproduces the query. Citing the URL alone leaves a reader unable to tell which of several queries over the same window produced the claim.
-
-**Quote message text verbatim.** When a Finding rests on log content, copy the `message` (LQL) bytes exactly as returned - never paraphrase or reconstruct an event's text.
-
-**Right (URL plus the query_id that reproduces it):**
-```
-Finding 1: VSS writer SqlServerWriter was in FAILED state at 2026-04-23 03:14:32 UTC
-  Evidence: <query_url as returned> (query_id: qXY9a3m...)
-  Confidence: high
-```
-
-**Wrong (no citation):**
-```
-Finding 1: VSS writer SqlServerWriter was in FAILED state at 2026-04-23 03:14:32 UTC
-  Evidence: based on snapshot data
-  Confidence: high
-```
-
-**Wrong (URL fabricated or modified):**
-```
-Finding 1: ...
-  Evidence: https://sparklogs.app/srv-fileshare01/vss/sqlserverwriter
-  Confidence: high
-```
-
-**If you didn't make the query, you don't have the evidence - don't make the claim.** If you find yourself wanting to assert something without a URL backing it, either: (a) make the query that would produce the URL, or (b) downgrade to "insufficient_evidence" and don't make the claim.
-
-When the same evidence supports multiple findings, cite the same URL on each. When a finding requires evidence from multiple queries, list multiple URLs.
+Right/wrong shapes: `references/output-template.md`.
 
 ---
 
 ## Section 6. Confidence calibration - be honest about uncertainty
 
-Every Finding has a Confidence band. Pick the highest band whose conditions you can defend with cited evidence:
+Every Finding carries Confidence (`high` (value) / `medium` (value) / `low` (value) / `insufficient_evidence` (value)). Pick the highest band defensible with cited evidence; `insufficient_evidence` (value) when you looked but lack support is valid.
 
-- **`high` (value)** - Direct on-endpoint evidence; multiple corroborating sources; recent data; no detector-warmup issues. Example: "service spooler is STOPPED" backed by current state snapshot + recent winlog SCM 7036 event + multiple snapshots showing same.
-- **`medium` (value)** - Direct evidence but with a caveat (single source, slight time gap, partial corroboration). Example: "high CPU since 14:00" backed by perf-counter point samples without continuous monitoring.
-- **`low` (value)** - Indirect evidence, inference required, or evidence quality limitations (recent detector reset, sparse data, intermittent symptom). Example: "anomaly score 65 on certificates subsource, but detector reset 3 days ago - confidence in baseline is short."
-- **`insufficient_evidence` (value)** - You looked but didn't find what you needed. **This is a valid finding.** Use it instead of stretching to a low-confidence claim.
-
-**Honest calibration patterns:**
-
-When checking turned up nothing: `"Finding N: No evidence of X in the checked sources. Confidence: insufficient_evidence."` - distinguishes "I checked and didn't find it" from "X did not happen anywhere ever."
-
-When the data is there but your uncertainty is high: `"Confidence: low - see Note below"`, with a Note naming specifically what would raise it (more time, an additional source).
+Patterns and examples: `references/output-template.md`.
 
 ---
 
 ## Section 7. Visibility limits - explicit, every time
 
-**Every summary enumerates the WHAT WAS NOT CHECKED section.**
-
-The section lists what is *not* checked because it's outside what SparkLogs collects on the source(s) you investigated: cloud identity and MFA services on a logon issue, the RMM cloud and the network path to it on a connectivity issue, the backup target and the EDR cloud on a backup issue.
-
-The complete per-investigation-type list is in `guides/off-endpoint-causes.md`. Read that file when investigating any specific symptom and customize the WHAT WAS NOT CHECKED section to the actual investigation scope.
-
-**Name the checks you declined, and why.** A health call you deliberately did not make belongs here in one line ("the agent's collection state was not established; this finding rests on the events that arrived"). Explicit restraint reads as rigor; an unexplained silence reads as an oversight.
-
-**The section is investigation-specific, not boilerplate.** If you're investigating a single source, list what wasn't checked for *that source*. If on-endpoint evidence is sufficient and off-endpoint causes are not implicated, the section can be brief: "The off-endpoint causes typically associated with this kind of investigation were considered but the on-endpoint evidence is sufficient to characterize the observed conditions - see Findings."
+Every summary lists WHAT WAS NOT CHECKED: off-endpoint and declined checks for this scope (`guides/off-endpoint-causes.md`). Name checks you skipped and why. Brief is fine when on-endpoint evidence is sufficient.
 
 ---
 
@@ -251,7 +157,7 @@ The complete per-investigation-type list is in `guides/off-endpoint-causes.md`. 
 
 **Rows returned are not the population.** Read matched TOTAL and `last_event_at` (col) before any how-much / how-long claim.
 
-**Query shape (lightest first):**
+**Query shape (lightest first):** (e.g., whose scope? what arrived? what's on the box? what's noisy and where? what do the events say?)
 1. **Scope and coverage:** `resolve_scope` (tool), `list_sources` (tool); then `query_device_health` (tool) when agents are in scope; `query_scope_activity` (tool) when the estate is unfamiliar.
 2. **Pattern mining:** `query_event_counts_by_severity` (tool) and `describe_pattern` (tool) before citing hashes.
 3. **Raw events (last resort):** one broad `query_logs` (tool) slice, then `refine_query_result` (tool) (not another backing query). `list_fields` (tool) is rare.
@@ -278,6 +184,8 @@ Full ladder, worked shapes, RCA usage: `guides/scope-ladder.md`. Controlled `ser
 
 Before deep investigation: resolve org / sources / time window, then confirm data in that window via `list_sources` (tool). Full sequence, sender vs origin, completeness, missed events, fleet hunt: `guides/scope-resolution.md`.
 
+**Questions before deep work:** (e.g., which org/host? is data present? is collection trustworthy? one machine or fleet? critical+ in scope?)
+
 **Resolution in brief:** explicit UUID or name via `resolve_scope` (tool); host-first when they name a device; ranked by `match_kind` (col) (`exact` (value) proceeds; ties or weak-only matches: ask). Read `agent_status` (col), collection group, `advisories` (col), `agent_complete_through` (col) on agent rows. Default `include_sub_orgs: true` (arg); reuse `external_investigation_id` (arg) when scope expands.
 
 **Operational gates (skill-local):**
@@ -301,22 +209,9 @@ Complete syntax, operators, edge cases, and examples: `guides/lql-reference.md`.
 
 ## Section 13. Working through an ongoing investigation
 
-Investigations are usually conversations. Follow-up questions ("look at X further", "check this time period", "what about source Z?") extend the same investigation rather than starting new ones.
+Follow-ups extend the same investigation: reuse `external_investigation_id` (arg), reuse caches (`refine_query_result` (tool)), update `./investigations/<external_investigation_id>.md`. New id only for a clearly different problem.
 
-**Continuity rules:**
-
-- **Reuse the same `external_investigation_id` (arg)** for every follow-up tool call.
-- **Reuse cached queries.** When a follow-up touches data already in a cache from earlier in the conversation, refine it (`refine_query_result` (tool)) rather than issuing a new backing query.
-- **Update the local investigation-state document continuously.** Append new findings, time windows, and not-checked items as the conversation progresses.
-- **Pick a new, distinct `external_investigation_id` (arg) only when the engineer is clearly investigating a different problem** (different ticket, different scope, different symptom). When in doubt, ask: "Is this a separate investigation from the one we've been working on, or an extension of it?"
-
-**When the engineer asks for a fresh report** ("give me an updated summary", "share the report"): re-render the full system condition summary per the Section 4 template with every finding accumulated to date, and update the EXECUTIVE SUMMARY to the current state.
-
-**When the engineer asks to explore further:** take their direction (subsource, time window, source) and run the relevant queries, building on existing caches. Add what is new to the running summary; don't re-issue findings they already saw.
-
-**When the engineer asks "what about X" where X is a specific finding:** walk through what evidence supports the finding, what would refute it, and what you couldn't check.
-
-**When the engineer wants to dig into causes:** suggest the `sparklogs-analyze-cause` skill with the current `external_investigation_id` (arg). You don't perform that analysis here.
+Fresh report → re-render per Section 4 with all Findings so far. Explore further → their direction on existing caches. Explain a Finding → evidence, refute paths, limits. Causes → offer `sparklogs-analyze-cause` (not here).
 
 ---
 
@@ -326,7 +221,7 @@ Investigations are usually conversations. Follow-up questions ("look at X furthe
 
 **Rate or capacity errors:** if a tool call fails with a retryable server error, retry up to 2x with a brief backoff, then surface to the engineer rather than hammering the same call.
 
-**Row-ceiling exceeded on backing query:** narrow `lql` (arg) (tighter time range, restricted `org_ids` (arg), add `severity` (LQL)/`anomaly_max_score` (other) predicates) or split into multiple queries. Then refine the cached slice rather than re-scanning.
+**Row-ceiling exceeded on backing query:** narrow `lql` (arg) per `guides/lql-reference.md`, or split queries; then refine the cached slice.
 
 **Field name you requested returned nothing:** not an error. The response names it under `schema.fields_with_no_values` (col); see `guides/mcp-tool-decision-tree.md` (response envelope).
 
@@ -353,23 +248,9 @@ Heuristics for stopping:
 
 ## Section 16. Context management - make the long investigation work
 
-For investigations that span many tool calls or pause/resume across sessions:
+Maintain `./investigations/<external_investigation_id>.md` (scope, Findings, audit trail, open questions, not-checked). Re-read after compaction; `get_query_metadata` (tool) is per `query_id` (arg), not per investigation.
 
-**Maintain a local investigation-state document.** Use the host's filesystem tools to maintain a markdown file at `./investigations/<external_investigation_id>.md` that tracks:
-- The original ticket text and resolved scope
-- `external_investigation_id` (arg)
-- Time windows under investigation
-- Findings accumulated so far (with `query_url` (col)s)
-- Open questions / things still to check
-- Not-checked items already flagged
-
-Re-read this file at the start of each new tool-use cycle, especially after context compaction.
-
-**Delegate bulk analysis to subagents (where the host supports it).** If a step requires reading more than ~500 raw events whose content the final summary won't need, delegate to a subagent. The subagent reads in its own context, returns a structured summary (findings, timestamps, referenced `pattern_hash` (LQL) values, `query_url` (col)s), and you continue with that summary in your context.
-
-Bulk extractive summarization suits the fastest lightweight model tier your host offers; you stay on the more capable model for cross-correlating inference, hypothesis evaluation, and template assembly. Definitions and host-specific notes are in `guides/subagent-definitions.md`.
-
-**The local investigation-state document is your history.** `get_query_metadata` (tool) inspects ONE cached query at a time (by `query_id` (arg)); it does NOT enumerate an investigation's history by `external_investigation_id` (arg). After context compaction, re-read the local state document to re-orient, then `get_query_metadata(query_id=...)` on a specific cache if you need its schema or cache status.
+Bulk raw reads (>~500 events): delegate per `guides/subagent-definitions.md` when the host supports it.
 
 ---
 
@@ -430,19 +311,6 @@ Two follow-up requests stay inside this skill. Re-rendering: the engineer names 
 
 ---
 
-## Section 20. Calibration - how to know you're doing this well
+## Section 20. Calibration
 
-After every investigation, mentally check:
-- Does my Executive Summary follow from my Findings, with no claims that aren't in Findings?
-- Is every Finding cited with a properly formed `query_url` (col)?
-- Are my confidence bands honest? Would the engineer be surprised by any one of them?
-- Did I list what wasn't checked, specifically (not generically)?
-- Did I avoid producing cause analysis here (or bound it to 1-4 sentences in POSSIBLE NEXT DIRECTIONS with the explicit framing)?
-- Did I use aggregation-first methodology, or did I reach for `query_logs` (tool) too early?
-- Did I check whether the agent was collecting before concluding "no evidence"?
-- Did every completeness statement come from `agent_complete_through` (col) and the feed reports, never from counts or first/last bounds?
-- Did I keep completeness to its material minimum, and name the checks I declined rather than padding around them?
-- If a query came back empty on a field this source may not carry, did I treat empty `sparklogs.*` fields as uncurated (not a health finding)?
-- If I stated a duration or a clear time, did I read `episode_age_basis` (col) and `episode_clear_time_basis` (col) first?
-
-If the answer to any of these is "no," fix the summary before delivering it.
+Before delivering: Executive Summary tracks Findings only; every Finding has a valid `query_url` (col); WHAT WAS NOT CHECKED is specific; no cause analysis here; funnel before `query_logs` (tool); collection/completeness gates (§8, §10) respected. Anti-patterns: `guides/common-mistakes.md`.
