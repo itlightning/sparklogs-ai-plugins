@@ -60,7 +60,7 @@ The plugin is mostly readable markdown. Browse it here before you install:
 
 - [Playbooks](plugins/claude/sparklogs/skills/sparklogs-investigate/references/playbooks/playbooks.md): symptom-by-symptom investigation steps.
 - [Skills](plugins/claude/sparklogs/skills): ask, investigate, cause analysis, and feedback workflows.
-- [Guides](plugins/claude/sparklogs/skills/sparklogs-investigate/references/guides): query language, tool selection, scope resolution, pattern catalog.
+- [Guides](plugins/claude/sparklogs/skills/sparklogs-investigate/references/guides): query language, tool selection, scope resolution, feed reference routing.
 - [Feed references](plugins/claude/sparklogs/skills/sparklogs-investigate/references/feeds): fields, enums, and reason codes per data feed.
 - [Themes](plugins/claude/sparklogs/skills/sparklogs-investigate/references/themes): patching, security and audit, endpoint protection, operational events, device health.
 - [Subagents](plugins/claude/sparklogs/agents): pattern enumeration, clustering, and log summarization helpers.

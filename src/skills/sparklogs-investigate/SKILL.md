@@ -280,7 +280,6 @@ See `guides/common-mistakes.md` (e.g. cause analysis in this skill, claims witho
 | Voice for free-text fields | `guides/writing-voice.md` |
 | Bulk read delegation | `guides/subagent-definitions.md` |
 | MSP tool → log location | `guides/msp-tool-registry.md` |
-| High-signal `pattern_hash` (LQL) catalog | `guides/pattern-catalog.md` |
 
 ---
 
