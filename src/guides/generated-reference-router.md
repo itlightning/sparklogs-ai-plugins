@@ -12,23 +12,26 @@ the wrong one.
 
 ## Route by question shape
 
-| The question you are holding | Artifact | What you get |
-|---|---|---|
-| "Which field carries X on this source, and what happens when it is missing?" | `fields.md` | every promoted field, which curated surface writes it, and the raw provider fallback when nothing does |
-| "What values can this token take, and is it safe to group by?" | `enums.md` | the closed vocabularies, with what each token means |
-| "How do I actually answer this investigation question here?" | `recipes.md` | worked pivots for that source, written against real field names |
-| "Is this pattern string something the pack meant to produce?" | `patterns.md` | a decision procedure: expected, unexpected, or uncurated |
-| "I know this data as ECS or OCSF, what is it called here?" | `mapping-ecs.md` / `mapping-ocsf.md` | anchors from the external taxonomy onto these fields |
-| "What is on this box right now?" | none of the above | inventory rows from the MCP tools, not reference content |
-| "How do I explore this kind of stream?" | `guides/stream-kinds.md` | feed → kind → explore ladder. Not `fields.md` |
-| "What does this `app` (LQL) token mean?" | `guides/app-vocabulary.md` | pack-minted product identity; empty is normal |
+| The question you are holding | Artifact | Read mode | What you get |
+|---|---|---|---|
+| "Which field carries X on this source, and what happens when it is missing?" | `fields.md` | Search field name | every promoted field, which curated surface writes it, and the raw provider fallback when nothing does |
+| "What values can this token take, and is it safe to group by?" | `enums.md` | **Grep only** (code or `##`) | the closed vocabularies, with what each token means |
+| "What does this status/HRESULT/MSI/constant mean?" | `enums.md` | **Grep only** | same as above; pick the feed from the event `subsource` (LQL) |
+| "What does this `sparklogs.reason` (LQL) slug mean?" | `reasons.md` | Summary table, then one `##` | public summary, severity, impact for that slug |
+| "How do I actually answer this investigation question here?" | `recipes.md` | One section | worked pivots for that source, written against real field names |
+| "Is this pattern string something the pack meant to produce?" | `patterns.md` | Search one surface heading | a decision procedure: expected, unexpected, or uncurated |
+| "I know this data as ECS or OCSF, what is it called here?" | `mapping-ecs.md` / `mapping-ocsf.md` | One section | anchors from the external taxonomy onto these fields |
+| "What is on this box right now?" | none of the above | n/a | inventory rows from the MCP tools, not reference content |
+| "How do I explore this kind of stream?" | `guides/stream-kinds.md` | One guide | feed → kind → explore ladder. Not `fields.md` |
+| "What does this `app` (LQL) token mean?" | `guides/app-vocabulary.md` | Search token | pack-minted product identity; empty is normal |
+| "Unfamiliar `pattern_hash` (LQL) — what is this shape?" | MCP `describe_pattern` (tool) first | Tool, then grep | pattern text, examples, fleet spread; then `reasons.md` / `recipes.md` if needed |
 
 Two shapes deserve their own line because they are the ones people get wrong:
 
 - **"Nothing came back, is that good news?"** is never a reference-content question.
   An empty result is a claim about the query, the window, and whether the agent was observing.
   Resolve it against the tool output and the honesty fields, never by reading a schema.
-- **"What does this reason mean?"** is answered by the reason itself plus the message on the event.
+- **"What does this reason mean?"** is answered by `reasons.md` (summary table, then one `##` section).
   Reach for `fields.md` only when you need to filter or group on something the message does not
   already say.
 

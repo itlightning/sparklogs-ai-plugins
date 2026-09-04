@@ -20,6 +20,7 @@ const SHARED_REFERENCES = [
   'mcp-tool-decision-tree.md',
   'msp-tool-registry.md',
   'off-endpoint-causes.md',
+  'reference-navigation.md',
   'scope-ladder.md',
   'scope-resolution.md',
   'service-taxonomy.md',
