@@ -74,7 +74,7 @@ Always first. Turn natural-language scope into `org_ids` (arg), and enumerate or
 - Sole match at `prefix` (value)/`word` (value)/`substring` (value): confirm before proceeding.
 - Zero matches: surface closest candidates.
 
-**Read the state readings as SUPPORTING context, never as a work queue.** `agent_status` (col) (is the agent there) and `collection_status` (col) (is it collecting) are two separate readings and are never merged into one statement; `offline` (value) means no signal was received, cause unknown, not that the machine is down. The collection group is what the device last reported, kept and dated even when the device is offline. `agent_complete_through` (col) and `advisories` (col) say how far the data can be trusted. Field-by-field detail and the halt rules are in `scope-resolution.md`.
+**Agent row readings are supporting context, never a work queue.** `agent_status` (col) (is the agent there) and `collection_status` (col) (is it collecting) are two separate readings; never merge them into one statement. `offline` (value) means no signal was received, cause unknown, not that the machine is down. The collection group is what the device last reported, kept and dated even when the device is offline. `agent_complete_through` (col) and `advisories` (col) say how far the data can be trusted. Field-by-field semantics and halt rules: `scope-resolution.md` (Step 8 and state cross-check table).
 
 **`device_classes` (arg) / `device_roles` (arg) beat hostname guessing.** A workstation named `srv-laptop` is how a hostname guess puts the wrong device in a server answer. Both vocabularies are open; an unfamiliar value is the device's own word for itself, and a device with no reported class matches no `device_classes` (arg) filter.
 
@@ -88,7 +88,7 @@ Per **(sender `agent_id` (LQL), origin `source` (LQL))** activity in the investi
 
 **Use the investigation's actual window.** Do NOT infer scope from recent heartbeat alone.
 
-**These columns count events; they never establish coverage.** `event_count` (col) with `first_event_at` (col) and `last_event_at` (col) is consistent with any amount of missing middle, so no row here supports "no gaps" or "continuous coverage". Completeness comes from `agent_complete_through` (col) on `resolve_scope` (tool) and the feed reports behind it, or it is not claimed. `sent_via: ingest_key` makes no completeness claim at all.
+**These columns count events; they never establish coverage.** `event_count` (col) with `first_event_at` (col) and `last_event_at` (col) can have events at both ends and still miss the middle, so no row here supports "no gaps", "continuous coverage", or "the data is complete". Completeness comes from `agent_complete_through` (col) on the agent row and the feed reports behind it, or it is not claimed (`scope-resolution.md`). `sent_via: ingest_key` makes no completeness claim at all.
 
 **Use cases:**
 - **Scope discovery:** confirm expected sender/source pairs have events; cross-check the agent row's state readings (halt rules in `scope-resolution.md`).
