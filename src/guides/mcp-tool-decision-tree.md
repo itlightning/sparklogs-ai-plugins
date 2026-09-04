@@ -243,7 +243,7 @@ object only when it carries a time bucket or an alias. Common shapes: group by `
 
 `order_by` (arg) accepts a group column or an aggregate alias; `dir` (other) is `asc` (other) or `desc` (other). Group on any
 column the response's schema block lists: the standard ones (`severity` (LQL), `source` (LQL), `subsource` (LQL),
-`app` (LQL), `service` (LQL), `pattern` (LQL), `t` (LQL)) and the dotted custom paths beside them (`sparklogs.reason` (LQL)).
+`app` (LQL), `service` (LQL), `pattern_hash` (LQL), `t` (LQL)) and the dotted custom paths beside them (`sparklogs.reason` (LQL)).
 
 **Time bucketing** groups a datetime column into fixed buckets, so one cached slice answers when
 something happened from the cached slice without re-querying the source. Use a `group_by` (arg) time-bucket object on `t` (LQL) (for example one-hour buckets via `bucket_usec` (other) = 3600000000), count rows, and order by the bucket ascending for a series.
@@ -338,6 +338,7 @@ Use this when they asked, or after they accepted a suggested hunt. Do not open w
 Every data-tool response is one text block (not JSON you parse as a whole): header JSON (`meta` (other), `summary` (other), `schema` (other), `lookups` (col), `page` (other)), delimiter line, rows (TSV or omit-empty JSONL), optional trailing hint.
 
 - **Two modes, one namespace.** TSV (dense): `schema.columns` (col) lists `{name, type}` for every output column; header cells are bare names. JSONL (raw events and any array/object column): omit `schema.columns` (col) entirely; column names are the JSON keys on each row (never `"columns": null`).
+- **Datetime.** Known datetime fields render as RFC3339. A leftover 15 or 16 digit integer, quoted or not, inside a JSON value may be epoch microseconds UTC; do not treat other numbers as times.
 - **Counts.** `summary.total_count` (col) = matched population. `page.rows_cached` (col) / `page.rows_returned` (col) = cache slice / this page. Ground claims in the matched population.
 - **Sampled.** When `sampled` (other) is set, aggregates are estimates; quote cells as returned or narrow and re-run for exact figures.
 - **Hashes.** Resolve `*_hash` via header `lookups` (col); use `describe_pattern` (tool) before citing `pattern_hash` (LQL). Treat hashes as opaque drill-down handles.
