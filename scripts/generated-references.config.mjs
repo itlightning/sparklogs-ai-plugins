@@ -13,6 +13,9 @@
 // exist so that a regression there fails here instead of shipping.
 
 export const SOURCE_LIBRARY_DIR_ENV = 'SPARKLOGS_SOURCE_LIBRARY_DIR';
+// Identifier lint membership defaults to committed src/feeds (what CI ships). Set to 1 while
+// authoring against a sibling library checkout before sync lands those identifiers in the repo.
+export const IDENTIFIER_SOT_INCLUDE_LIBRARY_ENV = 'SPARKLOGS_IDENTIFIER_SOT_INCLUDE_LIBRARY';
 export const DEFAULT_SOURCE_LIBRARY_DIR = '../sparklogs-source-library';
 export const LIBRARY_GENERATED_SUBPATH = 'docs/generated-public';
 export const GENERATED_DIR = 'src/feeds';

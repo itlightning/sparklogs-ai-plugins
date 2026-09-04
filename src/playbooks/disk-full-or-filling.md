@@ -7,7 +7,7 @@ index: Disk full or filling
 **Trigger.** A volume crosses 90% or fills; users hit "no space" errors.
 
 **Accuracy.** State answers this category.
-Monitor reasons encode the *claim*: `vol_os_space_exhausting` (value) is projection-to-empty (projection fields present); `vol_os_space_low` (value) is a level claim only.
+Monitor reasons encode the *claim*: `os_volume_space_exhausting` (value) is projection-to-empty (projection fields present); `os_volume_space_low` (value) is a level claim only.
 Two volumes on one host share a reason; `sparklogs.instance` (LQL) tells them apart.
 Display `coalesce(display_name, instance)`.
 Fleet totals: device-health grouped by reason (no `fieldset` (arg)); that is the exact condition count.
