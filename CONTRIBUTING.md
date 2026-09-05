@@ -20,6 +20,8 @@ yarn run smoke
 
 Use `yarn run <script>` consistently. This project is Yarn-only.
 
+Identifier-tag lint (`lint-identifier-tags.mjs`) checks `(value)` / `(LQL)` tokens against **committed** `src/feeds/` (same as CI). To lint against a sibling `sparklogs-source-library` checkout while authoring ahead of sync, set `SPARKLOGS_IDENTIFIER_SOT_INCLUDE_LIBRARY=1`.
+
 ## Layout
 
 Published plugin content lives under `src/` (`skills/`, `commands/`, `agents/`, `rules/`, `themes/`, `feeds/`, `playbooks/`, `guides/`, `assets/`, `metadata/`).

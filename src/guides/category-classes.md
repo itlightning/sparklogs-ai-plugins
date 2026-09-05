@@ -80,8 +80,7 @@ projects to nothing and says so.
 Group by `sparklogs.reason` (LQL) to collapse a lifecycle into one finding. Treating the three as three
 findings triples the apparent problem count.
 
-**Say reason, not slug.** Older material calls this field a slug. It is `sparklogs.reason` (LQL), and MSPs
-read it, so the word in your output is "reason".
+**Use reason.** The field is `sparklogs.reason` (LQL); MSP-facing copy names these values **reasons**.
 
 ## Severity
 

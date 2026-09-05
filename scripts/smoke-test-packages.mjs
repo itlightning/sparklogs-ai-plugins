@@ -16,6 +16,7 @@ const checks = [
   'plugins/claude/sparklogs/skills/sparklogs-ask/SKILL.md',
   'plugins/cursor/sparklogs/rules/when-to-use-sparklogs.md',
   'plugins/codex/sparklogs/.codex-plugin/plugin.json',
+  'plugins/claude/sparklogs/skills/sparklogs-ask/references/guides/lql-reference.md',
   'plugins/codex/sparklogs/skills/sparklogs-ask/references/guides/lql-reference.md',
   'plugins/generic/sparklogs/plugin.json',
   'plugins/generic/sparklogs/skills/sparklogs-analyze-cause/SKILL.md',

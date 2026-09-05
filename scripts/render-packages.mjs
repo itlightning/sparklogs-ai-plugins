@@ -122,15 +122,19 @@ function renderMarkdownText(text, srcLabel, host, pkgRel) {
   let out = shipMarkdown(text, srcLabel);
   out = stripAuthoringTags(out);
   out = applyHostVariants(out, { commands: HOST_LAYOUT[host].commands }, srcLabel);
-  out = host === 'claude' ? rewriteCorpusForClaude(out) : rewriteCorpusInSkill(out, pkgRel);
+  if (/^skills\/[^/]+\//.test(pkgRel)) {
+    out = rewriteCorpusInSkill(out, pkgRel);
+  } else if (host === 'claude') {
+    out = rewriteCorpusForClaude(out);
+  }
   if (host === 'cursor') out = rewriteCommandsForCursor(out);
   else if (host !== 'claude') out = rewriteCommandsAsSkillNames(out);
   if (host === 'cursor' && pkgRel.startsWith('commands/')) out = rewriteArgumentsForCursor(out);
   return out;
 }
 
-// Hosts other than Claude hand a skill only its own directory, so the corpus is materialized under
-// skills/<skill>/references/ and citations resolve from wherever the citing file landed.
+// Skill markdown cites the corpus relative to references/ under that skill. Commands, agents, and
+// package-root guides on Claude still use ${CLAUDE_PLUGIN_ROOT}.
 function rewriteCorpusInSkill(text, pkgRel) {
   const match = pkgRel.match(/^skills\/([^/]+)\//);
   if (!match) return text;
@@ -414,7 +418,6 @@ async function copyAssets(base) {
 async function renderSkills(base, host) {
   const skillsDir = path.join(ROOT, 'src', 'skills');
   await renderTree(skillsDir, base, 'skills', host);
-  if (host === 'claude') return;
   // Corpus lives inside each skill for hosts that load a skill directory in isolation. Copies, not
   // links: the rendered-package validator rejects symlinks, and several hosts refuse to follow them.
   const skills = (await fs.readdir(skillsDir, { withFileTypes: true }))

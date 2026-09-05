@@ -1,7 +1,7 @@
 ---
 name: sparklogs-analyze-cause
 description: From a prior SparkLogs investigation summary, derive candidate cause hypotheses with confirm/refute steps and confidence. Use when the engineer wants cause analysis after findings exist.
-indexes: [themes, feeds]
+indexes: [corpus-navigation, themes, feeds]
 ---
 
 
@@ -15,176 +15,126 @@ Your output is a clearly-labeled set of candidate hypotheses, each anchored on p
 
 ## Section 1. Your job - read this first and re-read it whenever the task gets ambiguous
 
-**Your job is to derive candidate cause hypotheses, not to assert conclusions.**
+**Your job:** ranked candidate cause hypotheses from a prior investigate summary, not established conclusions.
 
-You:
+Start from `./investigations/<external_investigation_id>.md` (Findings + audit trail). Add MCP calls only when a discriminator needs data the summary lacks (§5). Each hypothesis: statement, prior Finding refs, confidence, confirm, refute, off-endpoint flag when relevant. Surface uncertainty; suggest next steps, never prescribe a fix.
 
-1. Recover the prior investigation's system condition summary from the local investigation-state document (which holds the findings + the per-query `query_id` (arg)/`query_url` (col) list). Inspect any specific cached query with `get_query_metadata(query_id=...)` if you need its schema or cache status.
-2. Optionally make additional MCP calls where the analysis needs evidence the prior summary does not carry. Section 5 gives the trigger per tool; the common three are a fleet pivot on `source` (LQL), a cross-tab on `group_by` (arg) to characterize the affected population, and `query_device_health` (tool) to check the agent was observing.
-3. Generate candidate cause hypotheses anchored on the prior findings.
-4. For each hypothesis: state the hypothesis, cite which prior findings support it, give a confidence band, specify what would confirm it, what would refute it, and whether off-endpoint checks are needed.
-5. Identify alternative framings of the symptom.
-6. Enumerate what you are most uncertain about.
-7. Suggest (do not prescribe) next steps the engineer could take.
+You do NOT: assert one root cause, hypothesize without Finding anchors, hide gaps, or confabulate.
 
-You do NOT:
-- Assert a single root cause as established fact.
-- Make hypotheses that aren't anchored on prior Findings. Every hypothesis cites Finding numbers from the prior investigation.
-- Hide what you couldn't check. Not-checked items from the prior investigation still apply, plus any new ones you discover.
-- Confabulate.
+## Investigation discipline
+
+1. **Bounded discovery first:** capped structure tools before event payloads (`list_sources` (tool), `query_scope_activity` (tool), `describe_pattern` (tool)).
+2. **Aggregate before detail:** counts and rank before `query_logs` (tool).
+3. **Cache before re-query:** `refine_query_result` (tool) on the cached slice when it already covers the question.
+
+Per-tool detail: `guides/mcp-tool-decision-tree.md`.
 
 ---
 
-## Section 2. The core trust principles you operate under
+## Section 2. Trust principles
 
-These principles bind every decision you make.
-
-**Augment, don't replace.** Each hypothesis is a candidate for the engineer to evaluate; they pick which to pursue.
-
-**Cite everything.** Every hypothesis cites prior Finding numbers. Any new evidence you gather cites a `query_url` (col). Without a citation, you don't have evidence - don't make the claim.
-
-**Calibrate confidence honestly.** Hypothesis confidence reflects evidence strength. Speculation is *expected* to be more uncertain than the prior investigation's factual summary; don't overstate confidence to seem useful.
-
-**Show what you can't see.** Off-endpoint causes flagged in the prior investigation still apply. Any new causes you can't check, name explicitly.
-
-**Human-in-the-loop for the written analysis.** Suggested next steps are candidates to confirm or refute. This document does not authorize a change.
-
-**Auditable everything.** Reuse the prior `external_investigation_id` (arg). Any additional MCP calls you make are part of the audit trail.
+Augment, don't replace: hypotheses are for the engineer to choose. Cite prior Findings and any new `query_url` (col). Calibrate confidence to evidence (usually looser than the factual summary). Carry forward prior not-checked items. Reuse `external_investigation_id` (arg).
 
 ---
 
 ## Section 3. Output structure
 
-Every analysis produces a structured document in this order. The full template lives in `references/output-template.md`. Write every free-text field per `guides/writing-voice.md`. The minimum:
+Canonical template (field definitions, right-vs-wrong examples): `references/output-template.md`. Voice: `guides/writing-voice.md`.
 
-```
-ROOT-CAUSE ANALYSIS: <ticket / scope description>
-external_investigation_id: <reused from prior investigation>
+**Produce in this order:** title + `external_investigation_id` (arg) → WORKING THEORIES intro → INPUT (pointer to prior investigate summary) → ranked CANDIDATE HYPOTHESES (each: statement, prior Finding refs, confidence, confirm, refute, off-endpoint flag) → ALTERNATIVE FRAMINGS → WHAT IS UNCERTAIN → RECOMMENDED NEXT STEPS (suggested, not prescribed) → WHAT WAS EXAMINED (incremental counts only if you ran more queries).
 
-WORKING THEORIES
-Below are <N> ranked explanations that fit the investigation evidence.
-Verify with the confirm/refute steps and use judgment before acting.
-
-INPUT
-The prior investigation's system condition summary
-(referenced by external_investigation_id <id>, accessible via /sparklogs:sparklogs-summary <id>).
-
-CANDIDATE HYPOTHESES (ranked by evidence support)
-
-  HYPOTHESIS #1: <plain-language statement>
-    Evidence support: [Prior Findings #X, #Y, #Z]
-    Confidence: high | medium | low
-    What would confirm this: [specific additional check the engineer could run]
-    What would refute this: [specific additional check that would rule it out]
-    Off-endpoint check needed: [yes/no - if yes, what to check off-endpoint]
-
-  HYPOTHESIS #2: ...
-  HYPOTHESIS #3: ...
-
-ALTERNATIVE FRAMINGS
-[If the symptom could mean something different than the obvious interpretation, enumerate.]
-
-WHAT IS UNCERTAIN
-[Explicit enumeration of weak evidence and weak links in the reasoning.]
-
-RECOMMENDED NEXT STEPS (suggested, not prescribed)
-[Concrete things the engineer could do to confirm or refute the top hypothesis.]
-
-WHAT WAS EXAMINED (incremental over the prior investigation)
-- Additional backing queries: <N>
-- Additional cached refinements: <M>
-- Additional matched population examined: <rows/events, from query summaries, if any additional queries ran>
-- Wall-clock: <minutes>
-```
-
-**Critical structural properties:**
-- The WORKING THEORIES intro is at the top, every time, framing the hypotheses as candidates to verify, not conclusions.
-- Every hypothesis is anchored on prior Finding numbers.
-- Every hypothesis includes both "what would confirm" and "what would refute" - preserves engineer autonomy.
-- Off-endpoint checks are explicit per hypothesis.
-- WHAT IS UNCERTAIN is required - do not skip.
-- RECOMMENDED NEXT STEPS are framed as suggestions, never prescriptions.
+**Non-negotiable:** hypotheses are candidates (WORKING THEORIES intro sets that once); every hypothesis cites prior Finding numbers; confirm and refute both required; WHAT IS UNCERTAIN is never skipped.
 
 ---
 
-## Section 4. Hypothesis generation - how to derive cause candidates from findings
+## Section 4. Hypothesis generation
 
-Convert the prior investigation's facts into candidate causes:
-
-1. **Re-read the prior summary's Findings.** Note the temporal patterns, sources affected, anomaly signals used, and not-checked flags.
-
-2. **For each Finding, ask: "what could explain this?"** Generate 2-5 candidate causes per Finding. Don't filter yet.
-
-3. **Cluster related causes.** If multiple Findings point to the same underlying cause (e.g., several Findings about disk I/O all consistent with disk hardware degradation), merge into one hypothesis.
-
-4. **Rank by evidence support.** A hypothesis backed by 4 corroborating Findings is stronger than one backed by 1. Account for off-endpoint causes - those are inherently lower-confidence because the on-endpoint evidence is necessarily indirect.
-
-5. **For each hypothesis, derive the discriminator:** what additional check would distinguish this hypothesis from the next-most-likely? That's the "what would confirm" / "what would refute" content.
-
-6. **Surface uncertainty explicitly.** Where evidence is weak or where multiple hypotheses fit equally well, name that - don't paper over it.
-
-7. **State each hypothesis directly.** "Disk signature collision on Harddisk2" beats "it is possible there may be a disk issue." The Confidence field and the WORKING THEORIES intro already carry the "candidate, not proven" caveat - the hypothesis statement itself should be a direct, specific claim.
-
-**What the evidence cannot carry.** Three hard rules, because a hypothesis built on any of them is confidently wrong:
-
-1. **Event volume and first/last event bounds NEVER establish interior coverage.** Only a data feed's own report does. No hypothesis may rest on "the data was continuous" or "there were no gaps" inferred from `event_count` (col) and endpoints, and no hypothesis may rest on a quiet stretch being real rather than uncollected.
-2. **Completeness is usually not material.** An ongoing issue (recurring failures, a live RCA) needs no completeness statement at all. When it is not material, one sentence saying so is the correct amount, and it belongs in WHAT IS UNCERTAIN rather than in a hypothesis.
-3. **Absence of a feed report is never evidence about the data.** An ingest-key stream makes no completeness claim, a feed that has not reported is `unknown` (value) rather than healthy, and absence of events is not evidence of absence. "The agent missed the events" is a hypothesis only when a feed actually reported missed events, with a skip window to cite.
-
-**State the check you are declining.** Naming a discriminator you deliberately did not run, and why, is part of the analysis: it tells the engineer which door is still open. Treat `advisories` (col) as the server's judgment rather than raw material for triage you invent.
-
-The full hypothesis-generation guidance is in `references/hypothesis-generation.md`.
+From prior Findings: research and propose explanations, cluster, rank by corroboration, name and confirm/refute discriminators. State hypotheses directly; Confidence carries uncertainty. Same evidence limits as investigate (coverage, completeness, feed reports). Detail: `references/hypothesis-generation.md`.
 
 ---
 
 ## Section 5. When to make additional MCP calls
 
-Sometimes the prior evidence is enough; sometimes one cheap check moves a hypothesis materially. Same tool discipline as the investigate skill:
+Prior summary is the default evidence. Add MCP calls only when a discriminator needs data the summary lacks. (e.g., One host or fleet? why is this population diff? what is the device's health right now?) Same investigation discipline and tool tiers as `sparklogs-investigate` (`guides/mcp-tool-decision-tree.md`).
 
-**Make additional MCP calls when:**
-- **Is this one host or the fleet?** `query_event_counts_by_severity(group_by=["source"])` over the filter that produced the Finding, or over a scope-ladder field (`service` (LQL), `app` (LQL), `subsource` (LQL), `category` (LQL)) to test whether the affected hosts share a component.
-- **What is DIFFERENT about the affected population?** This is the cross-tab question, and it is the one most often answered badly. `group_by=["<a>", "<b>"]` groups by 2-3 fields at once: `["reason", "source"]` separates one reason concentrated on one host from the same volume spread across forty, which two single-field runs cannot distinguish. `["config_change_type", "config_change_target"]` answers "what changed, on what". Reach for it whenever the hypothesis names two things. Contrasting two single-field runs (one per population) still works where the populations need different `lql` (arg); `compare_populations` (other) is fast-follow and not in the surface.
-- **What is standing on the box right now?** `query_device_health` (tool) for open conditions, what is installed, and whether the device reported at all. A hypothesis that assumes the agent was watching should be checked against the honesty fields before it is offered.
-- **Does the hypothesis depend on the data being complete?** Then read `agent_complete_through` (col) and `advisories` (col) on the `resolve_scope` (tool) agent row, which is the only place completeness is answered. Most hypotheses do not depend on it: a recurring failure is carried by the events themselves, and one sentence saying completeness is not material is the correct amount.
-- A hypothesis needs a pattern's text or spread before it can be cited: `describe_pattern` (tool).
-- A hypothesis depends on a narrow time-window check the prior investigation did not include.
+**Typical triggers:** fleet spread (`group_by` (arg) on `source` (LQL) or ladder fields); cross-tab when two nouns matter (`group_by` (arg) with 2-3 fields); standing state (`query_device_health` (tool)); pattern text/spread (`describe_pattern` (tool)); narrow time window not in the prior run.
 
-**Skip additional MCP calls when:**
-- The prior investigation's findings already provide sufficient evidence for the hypothesis.
-- The check would be off-endpoint (in which case, surface as "off-endpoint check needed" in the hypothesis).
-- The check would significantly expand the investigation without proportional benefit.
-
-When you do make additional MCP calls, reuse the prior investigation's `external_investigation_id` (arg). Cached queries from the prior investigation may be reusable via `refine_query_result` (tool), which runs against the cache instead of issuing a fresh backing query. If refine returns `cache_invalidated` (value), issue a new data-tool call rather than retrying that `query_id` (arg). You MUST only re-use the same query scope (list of organization IDs) that was resolved during the prior investigation; if you need to expand query scope, you MUST get explicit permission to do so.
+**Skip when:** prior Findings already suffice, check is off-endpoint (flag in hypothesis), or scope expansion needs engineer permission. Reuse `external_investigation_id` (arg) and prior caches via `refine_query_result` (tool) when possible.
 
 ---
 
-## Section 6. Common pressure scenarios
+## Section 6. Under pressure
 
-- *Engineer says "just tell me the cause":* Politely respond that your job is to surface candidate hypotheses with confirm/refute steps so they can make an informed decision. Walk them through the top hypothesis and its discriminator. Don't collapse the candidate set into a single asserted cause.
-- *Engineer says "you're hedging too much":* Confidence reflects evidence strength. If evidence is genuinely strong for one hypothesis, it earns higher confidence. If multiple hypotheses fit, that's an honest reading.
-- *Engineer asks for a recommendation on which fix to deploy:* Give the confirm/refute steps for the top hypothesis, and say what a fix would be testing. They decide whether to act.
+Stay in role: candidates with confirm/refute, not a single asserted cause. Strong evidence earns higher confidence; multiple fits is an honest answer. Fixes are the engineer's call.
 
 ---
 
 ## Section 7. Reference files
 
-Skill-local:
+**Prerequisite:** prior `sparklogs-investigate` summary (same `external_investigation_id` (arg)); shared investigate guides apply when you query.
 
-- `references/output-template.md` - full output template with field definitions and worked examples.
-- `references/hypothesis-generation.md` - detailed guidance on deriving cause candidates from findings.
+<!-- BEGIN GENERATED INDEX:corpus-navigation -->
+## Curated data (read this before opening reference files)
 
-The `guides/` set is shared with the investigate skill, word for word:
+- **`subsource` (LQL) = feed id.** Scope ladder before `query_logs` (tool): `service` (LQL) → `app` (LQL) → `subsource` (LQL) → `category` (LQL) → `pattern_hash` (LQL).
+- **Curated events** carry `sparklogs.reason` (LQL), `sparklogs.class` (LQL), and module fields. Empty `sparklogs.*` on an event means **uncurated** (not a collection-health finding).
+- **Reason** (`sparklogs.reason` (LQL)) = our curated vocabulary. **Vendor code** = NTSTATUS, HRESULT, MSI exit, Kerberos result, etc. **pattern_hash** (LQL) = stable shape id on every event.
+- **Device row** (`query_device_health` (tool), feed health, `agent_complete_through` (col)) is authoritative for collection and completeness. Event volume is not coverage.
+- **Playbooks** = symptom recipes. **Themes** = investigation topic bundles (not customer marketing themes).
 
-- `guides/scope-ladder.md` - the six grouping fields and their `_hash` companions; the source of fleet-pivot discriminators.
-- `guides/category-classes.md` - class, the class-last category ladder, and the severity ladder. Read before ranking a hypothesis by anything other than severity.
-- `guides/device-state-fields.md` - device and agent state, and the honesty fields that decide whether a duration or a clear time can carry a hypothesis at all.
-- `guides/stream-kinds.md` - how to explore a feed (Windows Event Log / WEL vs file log vs device-state maps). Not `fields.md`.
-- `guides/app-vocabulary.md` - pack-minted `app` (LQL) product tokens. Empty is normal.
-- `guides/generated-reference-router.md` - how to reach the per-source generated reference set by question shape, when a confirm step needs real field names.
-- `guides/scope-resolution.md`, `guides/lql-reference.md`, `guides/mcp-tool-decision-tree.md` - reach for these when you make additional MCP calls.
-- `guides/off-endpoint-causes.md`, `guides/common-mistakes.md`, `guides/msp-tool-registry.md`, `guides/pattern-catalog.md`, `guides/subagent-definitions.md`, `guides/writing-voice.md`.
+## What is in the pack
 
-Themes and feeds carry confirm-step field names and change analysis. Do not load playbooks.
+`playbooks/`, `themes/`, `feeds/<id>/` (`README.md`, `reasons.md`, `enums.md`, `fields.md`, `recipes.md`, `patterns.md` where present), `guides/`. Artifact choice detail: `guides/generated-reference-router.md`.
+
+## After you pick a `subsource` (LQL)
+
+1. Open `feeds/<id>/README.md` (short index).
+2. **Stream kind** and explore ladder: `guides/stream-kinds.md`. Classic WEL: `provider_name` (LQL) before `pattern` (LQL); device state: `query_device_health` (tool) with `sparklogs.kind` (LQL) / `sparklogs.topic` (LQL) / `sparklogs.reason` (LQL).
+3. Open **one** artifact (read-mode table below). Rich feeds (especially `win.eventlog.security` (value)) often need `recipes.md` or `reasons.md` first, not only `fields.md` or `enums.md`. Security also carries `patterns.md` and `mapping-ecs.md` / `mapping-ocsf.md` when shape or external taxonomy is the question.
+
+**Reason meaning:** the `sparklogs.reason` (LQL) value and the event `message` (col) together; grep `reasons.md` for the matching `##` heading (summary table first, one section only).
+
+## Decode tables (`enums.md`)
+
+Per-feed closed vocabularies. **Grep** the code, constant, or `##` heading; never load a whole file.
+
+| Kind | Typical feed | Use when |
+|---|---|---|
+| NTSTATUS / security status | `win.eventlog.security` (value) | Logon/auth failure codes |
+| Win32 / HRESULT | `win.eventlog.application` (value), `win.eventlog.system` (value), `win.eventlog.setup` (value) | Servicing, app, VSS errors |
+| MSI exit codes | `win.eventlog.application` (value) | Installer failures |
+| Logon types, WU result codes | `win.eventlog.security` (value), `win.eventlog.application` (value) | Discriminate 4625/4624, update errors |
+
+## How much to read
+
+| Material | When | How |
+|---|---|---|
+| Playbook | Symptom matches index below | One file, whole |
+| Theme | Investigation topic matches index | One file, whole |
+| Feed `README.md` | You picked a `subsource` (LQL) | Whole (short index) |
+| `reasons.md` | Need what a reason means | Skim summary table (~first 100 lines), then **one** `##` section |
+| `enums.md` | Vendor/status code | **Search only** |
+| `fields.md` | Filter/group on a field | Search for field name |
+| `recipes.md` | Worked pivot for this feed | One section |
+| `patterns.md` | Is this pattern string expected? | Search one surface heading (grammar/drift, not meaning) |
+| Guides | Cross-cutting stuck point | One file from skill when→file table |
+
+## Unfamiliar `pattern_hash` (LQL)
+
+1. `describe_pattern` (tool) for text, examples, fleet spread.
+2. Grep `feeds/<id>/reasons.md` or `recipes.md` if a reason or pivot is the question.
+3. `patterns.md` only when the question is whether the pack meant to produce that string shape.
+<!-- END GENERATED INDEX:corpus-navigation -->
+
+| When | File |
+|---|---|
+| Output template + examples | `references/output-template.md` |
+| Hypothesis procedure | `references/hypothesis-generation.md` |
+| Symptom playbooks | `sparklogs-investigate` skill (§3b) |
+| Theme / feed routing | generated indexes below |
+| Tool tiers, LQL, scope | `guides/mcp-tool-decision-tree.md`, `guides/lql-reference.md`, `guides/scope-resolution.md`, `guides/scope-ladder.md` |
+| Category / device state / fields | `guides/category-classes.md`, `guides/device-state-fields.md`, `guides/generated-reference-router.md`, `guides/stream-kinds.md`, `guides/app-vocabulary.md` |
+| Off-endpoint, mistakes, voice | `guides/off-endpoint-causes.md`, `guides/common-mistakes.md`, `guides/writing-voice.md` |
 
 <!-- BEGIN GENERATED INDEX:themes -->
 | Topic | File |
@@ -235,20 +185,6 @@ Slash commands on this host (they invoke the investigation skill, not you):
 
 ---
 
-## Section 9. Calibration - how to know you're doing this well
+## Section 9. Calibration
 
-After every analysis, mentally check:
-- Is every hypothesis anchored on prior Finding numbers?
-- Does every hypothesis have both "what would confirm" and "what would refute"?
-- Does the WORKING THEORIES intro frame these as candidates to verify, not conclusions?
-- Are confidence bands honest? Would the engineer be surprised by any of them?
-- Did I name what I'm most uncertain about explicitly, not minimize it?
-- Are next steps useful without pretending this document authorized a change?
-- Does any hypothesis rest on coverage inferred from counts or endpoints, or on the absence of a feed report? Both are disallowed.
-- If completeness was not material, did I say so in one sentence instead of building a section around it?
-
-If any answer is "no," fix the analysis before delivering it.
-
----
-
-*End of SKILL.md.*
+Hypotheses anchor on Finding numbers; confirm and refute both present; WORKING THEORIES frames candidates; uncertainty named; no coverage-from-counts hypotheses. `guides/common-mistakes.md` for anti-patterns.

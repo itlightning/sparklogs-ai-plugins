@@ -4,11 +4,11 @@ Investigation skills for SparkLogs MCP.
 
 ## What is in this package
 
-- `skills/`: `sparklogs-ask`, `sparklogs-investigate`, `sparklogs-analyze-cause`. Each skill carries the reference corpus it cites under its own references directory.
+- `skills/`: `sparklogs-ask`, `sparklogs-investigate`, `sparklogs-analyze-cause`, `sparklogs-feedback`. Each skill carries the reference corpus it cites under its own references directory.
 - `.codex-plugin/plugin.json`: the plugin manifest.
 - `.mcp.json`: the SparkLogs MCP server, named `sparklogs` (OAuth).
 
-Codex exposes each skill as `$plugin:skill`: `$sparklogs:sparklogs-ask`, `$sparklogs:sparklogs-investigate`, `$sparklogs:sparklogs-analyze-cause`. Asking in plain language works too: "use sparklogs-investigate on ...".
+Codex exposes each skill as `$plugin:skill`: `$sparklogs:sparklogs-ask`, `$sparklogs:sparklogs-investigate`, `$sparklogs:sparklogs-analyze-cause`, `$sparklogs:sparklogs-feedback`. Asking in plain language works too: "use sparklogs-investigate on ...".
 
 ## Install
 

@@ -7,7 +7,7 @@ Empty `app` (LQL) is a curated answer on OS-generic and multi-product channels (
 Stream identity is **`subsource` (LQL)**. Explore: `guides/stream-kinds.md`.
 
 The table is pack-minted keys that have a public stream. Additive-only.
-Reserved slugs with no curated stream yet stay in the registry for lint and are omitted here.
+Reserved app tokens with no curated stream yet stay in the registry for lint and are omitted here.
 Other `app` (LQL) values can still arrive from non-pack senders; those are real events, not a schema error.
 
 ## Pack-minted tokens

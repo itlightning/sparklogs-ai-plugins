@@ -13,6 +13,9 @@
 // exist so that a regression there fails here instead of shipping.
 
 export const SOURCE_LIBRARY_DIR_ENV = 'SPARKLOGS_SOURCE_LIBRARY_DIR';
+// Identifier lint membership defaults to committed src/feeds (what CI ships). Set to 1 while
+// authoring against a sibling library checkout before sync lands those identifiers in the repo.
+export const IDENTIFIER_SOT_INCLUDE_LIBRARY_ENV = 'SPARKLOGS_IDENTIFIER_SOT_INCLUDE_LIBRARY';
 export const DEFAULT_SOURCE_LIBRARY_DIR = '../sparklogs-source-library';
 export const LIBRARY_GENERATED_SUBPATH = 'docs/generated-public';
 export const GENERATED_DIR = 'src/feeds';
@@ -86,7 +89,7 @@ export const ARTIFACT_SUMMARY = {
   'README.md': 'feed index: what each artifact answers and the order to read them in',
   'fields.md': 'what exists at rest, which surface writes it, and the raw fallback when nothing does',
   'enums.md': 'the closed token vocabularies that are safe to group by',
-  'reasons.md': 'what each reason slug means (public summary, severity, impact)',
+  'reasons.md': 'what each reason means (public summary, severity, impact)',
   'patterns.md': 'the decision procedure for whether a rendered pattern is expected, unexpected, or uncurated',
   'recipes.md': 'worked pivots, each resolving against the field schema',
   'mapping-ecs.md': 'ECS anchors for a query written against another taxonomy',

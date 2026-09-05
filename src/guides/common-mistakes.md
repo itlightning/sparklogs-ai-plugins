@@ -225,7 +225,7 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` (value) or `
 
 **Why it's wrong.** Those columns count what ARRIVED. They are consistent with any amount of missing middle, so they cannot establish interior coverage at all. Only a data feed's own report can, and it reaches you as `agent_complete_through` (col) with the advisories beside it on the `resolve_scope` (tool) agent row.
 
-**Recovery.** Read `agent_complete_through` (col). If it reaches the end of your window and advisories are empty, one sentence: "data is complete through <instant>". If it is `"unknown"`, say completeness could not be established, which is a statement about the claim, never a fault and never a claim that data is missing. Then stop; a healthy answer does not earn a section.
+**Recovery.** Read-mode table in the skill corpus block. Read `agent_complete_through` (col). If it reaches the end of your window and advisories are empty, one sentence: "data is complete through <instant>". If it is `"unknown"`, say completeness could not be established, which is a statement about the claim, never a fault and never a claim that data is missing. Then stop; a healthy answer does not earn a section. Full rules: `scope-resolution.md` (Completeness).
 
 ### Writing a completeness statement the question did not need
 
@@ -257,7 +257,23 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` (value) or `
 
 **Why it's wrong.** Most WEL rows have no curated reason. Empty `sparklogs.*` fields on an event mean the event is uncurated (this is not a health finding). Empty means this predicate did not match, never "no problem found" and never "the box is unhealthy." Uncurated native text and sibling providers can still carry the ticket.
 
-**Recovery.** Drop the curated predicate. Group the host by `subsource` (LQL), then follow `guides/stream-kinds.md`. Use `query_event_counts_by_severity` (tool) on `severity` (LQL) or `pattern` (LQL) for volume. Say in WHAT WAS NOT CHECKED which curated filters you tried.
+**Recovery.** Drop the curated predicate. Group the host by `subsource` (LQL), then follow `guides/stream-kinds.md`. Use `query_event_counts_by_severity` (tool) on `severity` (LQL) or `pattern` (LQL) for volume. Say in WHAT WAS NOT CHECKED which curated filters you tried. Corpus block in skill restates the rule.
+
+### Loading a whole `enums.md` or `reasons.md`
+
+**Symptom.** You opened `feeds/<id>/enums.md` or `reasons.md` and read most of the file into context to decode one code or reason.
+
+**Why it's wrong.** `enums.md` can be hundreds of lines per feed. `reasons.md` is long and the summary table up front is enough to pick the right `##` section. Whole-file reads blow context and duplicate what grep or one-section reads give you.
+
+**Recovery.** `enums.md`: grep the HRESULT, NTSTATUS, MSI code, or `##` heading only. `reasons.md`: skim the summary table (~first 100 lines), then open **one** `##` section. Read-mode table: skill corpus block.
+
+### Using `patterns.md` for "what does this mean?"
+
+**Symptom.** You opened `patterns.md` looking for the meaning of a `pattern_hash` (LQL) or vendor message.
+
+**Why it's wrong.** `patterns.md` is a grammar/decision procedure (expected vs unexpected shape), not a meaning catalog. Semantic questions belong elsewhere.
+
+**Recovery.** `describe_pattern` (tool) first, then grep `reasons.md` or `recipes.md`. Use `patterns.md` only when the question is whether the pack meant to produce that string shape (search one surface heading).
 
 ### Treating a playbook as the event catalog
 
@@ -331,7 +347,7 @@ These don't exist in LQL. Use `:`/`*`/`?`, `:`/`/regex/`, `<field>!`/`NOT <field
 
 ### After 2 retries on broken LQL, surface to user
 
-Don't keep retrying with slightly different broken expressions. If the LQL parser returns errors twice in a row, the issue is fundamental - surface to the engineer rather than burning more tool calls.
+Don't keep retrying with slightly different broken expressions. If the LQL parser returns errors twice in a row, the issue is fundamental - surface to the engineer rather than burning more tool calls. Syntax and common parser messages: `guides/lql-reference.md` (parser-errors section).
 
 ---
 

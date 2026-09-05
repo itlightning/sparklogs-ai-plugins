@@ -12,3 +12,5 @@ SparkLogs is the query and analysis layer for what happened on a system and what
 **On request: `sparklogs-investigate`.** The user needs a thorough cited system-condition summary for a ticket or a written investigation report.
 
 `sparklogs-analyze-cause` gives candidate cause hypotheses, only after a factual summary exists. `/sparklogs:sparklogs-summary` refreshes an existing report; `/sparklogs:sparklogs-explain` walks a specific finding back to its evidence.
+
+**When the user wants to send us feedback:** `sparklogs-feedback`. Consent on the exact text before anything is sent.

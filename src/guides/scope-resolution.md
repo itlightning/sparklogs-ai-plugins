@@ -30,14 +30,7 @@ Approach in order of preference; stop at the first step that gives an unambiguou
 
 ### Step 1: Parse the engineer's message for an explicit ID
 
-If the message includes a customer ID, org ID, agent UUID, or workspace identifier (e.g. "ACME-DENT", "client_id=42", a full UUID), pass it as `org_ids` (arg) when it is already a UUID you recognize, or as the `query` (arg) substring otherwise:
-
-```
-resolve_scope(
-  query: "<extracted ID or name>",
-  external_investigation_id: "<id>"
-)
-```
+If the message includes a customer ID, org ID, agent UUID, or workspace identifier (e.g. "ACME-DENT", "client_id=42", a full UUID), pass it as `org_ids` (arg) when it is already a UUID you recognize, or as the `query` (arg) substring otherwise. Call `resolve_scope` (tool) with that value and the session `external_investigation_id` (arg).
 
 If `resolve_scope` (tool) returns a single row with `match_kind` (col) **`exact` (value)**, proceed with that scope.
 
@@ -51,14 +44,7 @@ If several agents share similar names across orgs, ask which org or site the eng
 
 ### Step 3: Org name match
 
-If no host match, try the org or customer name verbatim:
-
-```
-resolve_scope(
-  query: "Acme Dental",
-  external_investigation_id: "<id>"
-)
-```
+If no host match, try the org or customer name verbatim via `query` (arg) on `resolve_scope` (tool).
 
 Org names use the same ranked matching as agents (see **match_kind** below).
 
@@ -123,17 +109,7 @@ Use these readings in the cross-check below; do not treat a silent source as hea
 ### Step 9: Sub-org expansion
 
 When a single org is identified, by default include all sub-orgs underneath it.
-Pass `include_sub_orgs: true` (default) on org-scoped MCP calls so the server expands the tree:
-
-```
-list_sources(
-  org_ids: [<resolved org>],
-  include_sub_orgs: true,
-  start: "<investigation start, RFC3339 UTC>",
-  end: "<investigation end, RFC3339 UTC>",
-  external_investigation_id: "<id>"
-)
-```
+Pass `include_sub_orgs: true` (default) on org-scoped MCP calls so the server expands the tree. Then call `list_sources` (tool) with the resolved `org_ids` (arg), the investigation `start` (arg)/`end` (arg) (RFC3339 UTC), and the session `external_investigation_id` (arg).
 
 If the engineer scopes to one sub-org only, set `org_ids` (arg) to that sub-org.
 Keep `include_sub_orgs` (arg) true unless they explicitly want a single node with no descendants.
@@ -153,16 +129,7 @@ After resolving scope, confirm the source(s) of interest have data in the invest
 Use the investigation's actual **`start` (arg)** / **`end` (arg)** (RFC3339 UTC).
 Do **not** infer scope from recent heartbeat alone; historical windows need historical event presence.
 
-```
-list_sources(
-  org_ids: [<from resolve_scope>],
-  include_sub_orgs: true,
-  start: "<investigation start, RFC3339 UTC>",
-  end: "<investigation end, RFC3339 UTC>",
-  include_top_interesting_patterns: true,
-  external_investigation_id: "<id>"
-)
-```
+Call `list_sources` (tool) with org scope from `resolve_scope` (tool), default `include_sub_orgs: true` (arg), the investigation window, `include_top_interesting_patterns: true` (arg) when you want the teaser, and the session `external_investigation_id` (arg).
 
 ### Per-row fields (shipped)
 
@@ -216,7 +183,7 @@ When a feed is behind, stuck or blocked, an advisory explains the lag and carrie
 Collection sometimes has to skip over events because the underlying collection engine could not provide them; in v1 that engine is the Windows event log itself. Call this **missed events** or **skipped events**, bounded by a **skip window**. It is a limitation of collection, never a fault of the machine or the operator, and the tone is measured: a skip is a notice, not an incident.
 
 - State what happened and its bounds, then stop. The events may still exist in the device's local Windows event log; SparkLogs does not re-collect them, so never offer or imply recovery.
-- The cause slug decides whether a count is exact. `skip_record` (value) is exactly one event. `+1s` through `+30m` are an unknown count inside a window whose width the slug names. `future_only` (value) is everything from the last event sent up to the new subscription. Render an unfamiliar slug verbatim and state the window bounds.
+- The skip cause code decides whether a count is exact. `skip_record` (value) is exactly one event. `+1s` through `+30m` are an unknown count inside a window whose width the code names. `future_only` (value) is everything from the last event sent up to the new subscription. Render an unfamiliar code verbatim and state the window bounds.
 - **An ABSENT skips entry means the source type does not detect skips at all**, never that none occurred. Today only Windows event log feeds detect them.
 - **Skips are orthogonal to feed health.** A current, advancing feed can carry a skip window. Freshness never disproves a skip, and a skip never means the feed is unhealthy now.
 - Never write "gap", "data loss" or "lost" for this. A delayed feed is `behind` (value) or `stuck` (value), which is a different thing from skipped.
@@ -240,16 +207,7 @@ Do not filter `list_sources` (tool) by "reporting now" when the engineer asked a
 
 ## Sender-first LQL scoping
 
-After scope resolution, prefer **`agent_id` (LQL)** filters when the question is about everything one sender shipped:
-
-```
-query_event_counts_by_severity(
-  org_ids: [...],
-  lql: 'agent_id = "<uuid from resolve_scope or list_sources>"',
-  group_by: ["pattern"],
-  ...
-)
-```
+After scope resolution, prefer **`agent_id` (LQL)** filters when the question is about everything one sender shipped. Call `query_event_counts_by_severity` (tool) with an `lql` (arg) filter such as `agent_id = "<uuid from resolve_scope or list_sources>"` and a `group_by` (arg) such as `pattern` (LQL).
 
 Use **`source = "hostname"`** when the question is about the origin host label, or combine both when you need on-host events from one agent:
 
@@ -264,10 +222,12 @@ For fleet-wide origin pivots, group by `source` (LQL) or filter `source` (LQL) d
 
 ## Structure discovery vs filtered measure
 
+See `mcp-tool-decision-tree.md` (Investigation discipline) for why order matters.
+
 Two different tools answer "what exists" vs "how much in this slice":
 
-- **`query_scope_activity` (tool)** (cheap discovery scan): discover app / service / subsource structure in the org and window. Optional narrowing via `agent_ids` (arg), `source` (LQL) substring, or `field_match` (arg). Not LQL-filtered. See `scope-ladder.md`.
-- **`query_event_counts_by_severity` (tool)** (billed backing scan): count and rank within an **LQL-filtered** population (severity, time sub-slice, `pattern_hash` (LQL), etc.).
+- **`query_scope_activity` (tool)** (**bounded discovery**): discover app / service / subsource structure in the org and window. Capped, pre-aggregated rows; not LQL-filtered. Optional narrowing via `agent_ids` (arg), `source` (LQL) substring, or `field_match` (arg). See `scope-ladder.md`.
+- **`query_event_counts_by_severity` (tool)** (**LQL-filtered measure**): count and rank within an **LQL-filtered** population (severity, time sub-slice, `pattern_hash` (LQL), etc.).
 
 Use `query_scope_activity` (tool) to see what dimensions exist; use `query_event_counts_by_severity` (tool) to measure within a hypothesis-specific filter.
 

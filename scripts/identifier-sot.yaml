@@ -1,5 +1,5 @@
 # Identifier membership SoT (hand-authored).
-# LQL module paths and reason slugs are harvested from the sibling library
+# LQL module paths and reason values are harvested from the sibling library
 # (docs/generated-public). This file is the rest: tools, args, cols, resident
 # LQL, families, and small closed vocabs.
 # Grow a list when docs name a new shipped identifier.
@@ -16,12 +16,14 @@ tools:
   - query_logs
   - query_event_counts_by_severity
   - refine_query_result
+  - send_sparklogs_feedback
 
 args:
   - add_fields
   - agent_ids
   - aggregate
   - bucket
+  - comment
   - device_classes
   - device_roles
   - end
@@ -29,6 +31,7 @@ args:
   - field_match
   - fieldset
   - filter_lql
+  - full_length_values
   - group_by
   - group_by_reason
   - having_lql
@@ -51,8 +54,11 @@ args:
   - rmm_client_id
   - sample
   - select
+  - session_detail
   - start
-  - top_n
+  - subject
+  - tier
+  - type
 
 # Union of MCP response headers (health fieldsets, list_sources, resolve_scope,
 # counts, describe_pattern, envelope). Wire paths (sparklogs.*) are not cols.
@@ -133,6 +139,7 @@ cols:
   - page.next
   - page.rows_cached
   - page.rows_returned
+  - page.truncated_fields
   - parent_id
   - pattern
   - pattern_hash
@@ -142,7 +149,8 @@ cols:
   - rows_cached
   - rows_returned
   - row_kind
-  - schema.fields_with_no_values
+  - schema.empty_requested_columns
+  - schema.columns
   - seen_at
   - sent_via
   - service
@@ -173,6 +181,7 @@ lql_resident:
   - app_hash
   - category
   - category_hash
+  - facility
   - filename
   - message
   - origin
@@ -223,7 +232,7 @@ lql_families:
   - sparklogs.destination
 
 # Small closed vocabs. Feed ids come from MODULES. Apps from registry.yaml.
-# Reason slugs from library reasons.md. Extra tokens the docs already use:
+# Reason values from library reasons.md. Extra tokens the docs already use:
 values:
   kinds:
     - inventory
@@ -271,6 +280,10 @@ values:
     - high
     - medium
     - low
+  feedback_tier:
+    - comment_only
+    - comment_and_summary
+    - comment_summary_and_detail
   episode_phase:
     - onset
     - held
