@@ -181,6 +181,7 @@ lql_resident:
   - app_hash
   - category
   - category_hash
+  - facility
   - filename
   - message
   - origin

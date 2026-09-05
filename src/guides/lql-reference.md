@@ -257,10 +257,14 @@ Append `#` followed by type letter:
 - `#i` - 64-bit integer
 - `#t` - timestamp
 - `#b` - boolean
+- `#severity` - ordered severity enum. Renders as a name (ERROR, WARNING, ...); compare by name (`severity >= error` (LQL)), never by number. No arithmetic aggregate (sum/avg/stddev/percentile) - use `min` (value) or `max` (value) instead, or `group_by` (arg).
+- `#facility` - ordered facility enum (kern, user, ...). Same rules as `#severity`: compare by name, no arithmetic aggregate.
 
 `[]` for array. e.g., `x.my_array#i[]` - array of integers.
 
 Auto-resolves type when omitted. Only use type suffix when the field has multiple types and you need to disambiguate.
+
+In a `refine_query_result` (tool) response, a `severity` (LQL) or `facility` (LQL) column reports its `schema.columns` (col) type as the enum name (severity, facility), not i or n - honest to the enum, not the integer storage.
 
 ---
 
