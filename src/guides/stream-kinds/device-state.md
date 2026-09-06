@@ -1,7 +1,7 @@
 # Kind: device state
 
 **Latest in a window:** `query_device_health` (tool) (`fieldset` (arg) = `rca` (value) for one host).
-Columns: `guides/device-state-fields.md`.
+Columns: the response `schema.columns` (col) or the tool description. Episode and honesty interpretation: `guides/device-state-fields.md`.
 A row is the latest event of each episode that emitted inside the requested window.
 That is not a time series.
 
@@ -16,7 +16,7 @@ The snapshot payload lives under the wire family `sparklogs.data` (LQL) and is a
 
 | Question | Surface |
 |---|---|
-| What is on the box / open condition in this window (episode-collapsed) | `query_device_health` (tool) (`fieldset` (arg) = `rca` (value) for one host). Columns: `guides/device-state-fields.md` |
+| What is on the box / open condition in this window (episode-collapsed) | `query_device_health` (tool) (`fieldset` (arg) = `rca` (value) for one host). Episode and honesty interpretation: `guides/device-state-fields.md` |
 | How it changed, every snapshot, hour by hour | `query_logs` (tool) on this `subsource` (LQL). Group `sparklogs.kind` (LQL), `sparklogs.topic` (LQL), `sparklogs.reason` (LQL) |
 
 Do not paste MCP column names into LQL.

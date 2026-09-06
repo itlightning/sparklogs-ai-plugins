@@ -301,7 +301,7 @@ any: "credit card"                       <- search all fields for "credit card"
 
 - **No JOIN** across event rows. LQL is a row predicate.
 - **No subqueries** in filter expressions.
-- **No COUNT or other aggregations in filter expressions.** `query_event_counts_by_severity` (tool) always returns `event_count` (col) plus the per-band severity counts; there is no aggregation list to pass it. Named aggregates (`{fn, col, as}`) live on `refine_query_result` (tool), over a cached result.
+- **No COUNT or other aggregations in filter expressions.** `query_event_counts_by_severity` (tool) always returns `event_count` (col) plus the per-band severity counts; there is no aggregation list to pass it.
 - **No wildcard JSON paths** (per above).
 - **No `LIKE`, `MATCHES`, `IS NULL`, `CONTAINS_ANY`, `CONTAINS_ALL`** keywords.
 

@@ -6,7 +6,7 @@ indexes: []
 
 # SparkLogs Feedback
 
-Consent wrapper for `send_sparklogs_feedback` (tool). Read the tool description for what is emailed, field limits, placeholders, and redaction. Parameters: `guides/mcp-tool-decision-tree.md`.
+Consent wrapper for `send_sparklogs_feedback` (tool). Read the tool description for parameters, what is emailed, field limits, placeholders, and redaction.
 
 ## Flow
 

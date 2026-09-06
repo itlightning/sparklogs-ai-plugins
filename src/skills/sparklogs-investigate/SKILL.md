@@ -41,7 +41,7 @@ You DO:
 2. **Aggregate before detail:** counts and rank before `query_logs` (tool).
 3. **Cache before re-query:** `refine_query_result` (tool) on the cached slice when it already covers the question.
 
-Per-tool detail: `guides/mcp-tool-decision-tree.md`.
+Tool decision tree and recipes: `guides/mcp-tool-decision-tree.md`.
 
 ---
 
@@ -250,7 +250,7 @@ Before deep investigation: resolve org / sources / time window, then confirm dat
 
 ## Section 11. MCP tools
 
-Cross-cutting terms, funnel, and prohibitions: MCP server instructions (loaded with the session). Per-tool parameters, response-envelope shape, recipes, and failure modes: `guides/mcp-tool-decision-tree.md`. Tool descriptions are authoritative for each call; open the guide only when you need mechanics beyond them.
+Cross-cutting terms, funnel, and prohibitions: MCP server instructions (loaded with the session). Tool decision tree, paste-back rules, large-response handling, and failure modes: `guides/mcp-tool-decision-tree.md`. Per-tool parameters and response shape: the live tool description, authoritative for each call.
 
 ---
 
@@ -276,7 +276,7 @@ Fresh report → re-render per Section 4 with all Findings so far. Explore furth
 
 **Row-ceiling exceeded on backing query:** narrow `lql` (arg) per `guides/lql-reference.md`, or split queries; then refine the cached slice.
 
-**Field name you requested returned nothing:** not an error. The response names it under `schema.empty_requested_columns` (col); see `guides/mcp-tool-decision-tree.md` (response envelope).
+**Field name you requested returned nothing:** not an error. The response names it under `schema.empty_requested_columns` (col); see `guides/lql-reference.md` (hallucinating field names).
 
 **Partial page (`page.next` (col) present, or a trailing hint line):** the page hit a limit. Follow `page.next` (col) for the next page via `refine_query_result(offset=...)`, or narrow the filter for fewer rows.
 
@@ -320,7 +320,7 @@ See `guides/common-mistakes.md` (e.g. cause analysis in this skill, claims witho
 | When | File |
 |---|---|
 | Output field definitions + examples | `references/output-template.md` |
-| Tool choice, tiers, response envelope | `guides/mcp-tool-decision-tree.md` |
+| Tool choice, tiers, recipes | `guides/mcp-tool-decision-tree.md` |
 | Scope resolve, discovery, completeness | `guides/scope-resolution.md` |
 | Scope ladder detail | `guides/scope-ladder.md` |
 | LQL syntax | `guides/lql-reference.md` |

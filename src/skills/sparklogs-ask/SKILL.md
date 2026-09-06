@@ -20,7 +20,7 @@ No output template. No WHAT WAS NOT CHECKED catalog. Go as deep as the question 
 2. **Aggregate before detail:** counts and rank before `query_logs` (tool).
 3. **Cache before re-query:** `refine_query_result` (tool) on the cached slice when it already covers the question.
 
-Per-tool detail: `guides/mcp-tool-decision-tree.md`.
+Tool decision tree and recipes: `guides/mcp-tool-decision-tree.md`.
 
 ## How to answer
 
