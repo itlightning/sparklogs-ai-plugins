@@ -53,8 +53,8 @@ One trigger per tool. After coverage, it is almost always a
 - **`list_fields` (tool) is the workspace catalog, not the explore ladder.**
   `query_event_counts_by_severity` (tool) on `sparklogs.reason` (LQL) or `pattern_hash` (LQL) tells you what the source is SAYING.
   Reach for `list_fields` (tool) when you need a name the data you have already seen did not surface.
-  Discovery omits unstable process-id map paths (`sparklogs.data.processes.<pid>...`); service and
-  similar instance keys can remain. Device-state explore: `guides/stream-kinds/device-state.md`.
+  Snapshot payload leaves are listed with their array mark (`sparklogs.data.processes[].image_name`);
+  narrow with `path_prefix` (arg) and `path_match` (arg). Device-state explore: `guides/stream-kinds/device-state.md`.
 - **`get_query_metadata` (tool) is bookkeeping only.** It reads cache status and stored parameters for a `query_id` (arg).
   It does not list extra fields. Column names live in TSV `schema.columns` (col), JSONL row keys, or `list_fields` (tool).
 
@@ -149,7 +149,8 @@ Pattern detail for one or more patterns. The parameter is **`pattern_hashes` (ar
 ### `list_fields` (tool)
 
 Field catalog over a source and window. Use when you need a **name** the rows you already read did not surface.
-It does not rank what matters; grouping on `sparklogs.reason` (LQL) or `pattern_hash` (LQL) does. Discovery omits unstable process-id map paths (`guides/stream-kinds/device-state.md`).
+It does not rank what matters; grouping on `sparklogs.reason` (LQL) or `pattern_hash` (LQL) does.
+`path_prefix` (arg) narrows to one family and `path_match` (arg) is an RE2 regex over the rest; they combine, and neither filters the standard columns that lead the response. Snapshot payload leaves carry their array mark (`guides/stream-kinds/device-state.md`).
 
 **Common mistake:** grouping or filtering on every catalog path instead of the stream-kind ladder.
 
@@ -346,6 +347,27 @@ Every data-tool response is one text block (not JSON you parse as a whole): head
 - **Overflow.** When `page.next` (col) is present on a refinable cache, follow it via `refine_query_result` (tool); never call `get_query_metadata` (tool) for more fields.
 - **Truncation.** Cut values carry `…[truncated:…]` markers and appear in `page.truncated_fields` (col). Whole values: `refine_query_result` (tool) with `full_length_values=true` (arg), narrowed with `filter_lql` (arg).
 - **Grouped results.** `query_event_counts_by_severity` (tool) output is not refinable; `refine_query_result` (tool) applies only to `query_logs` (tool) caches.
+
+---
+
+## Paste-back rules
+
+Every rendered cell is meant to go back into a filter unchanged.
+
+- **`""` means no value.** In a TSV cell and in a group key it covers missing, SQL null and the empty string alike. Paste it back as `col=""` and you get exactly the rows that cell came from. TSV carries no null marker, and a pasted null matches the four-character string.
+- **Hash twins paste into either name.** A `*_hash` value works as `pattern_hash` (LQL) `= "<hash>"` and as `pattern` (LQL) `= "<hash>"`; an equality on the base field whose literal has the hash token shape widens to cover both. The twins are listed by `list_fields` (tool) because they are meant to be pasted.
+- **`t` (LQL), `ingested_t` (LQL) and `org_id` (LQL) are filter names.** They are the names on the wire and the names LQL accepts, in `lql` (arg) and in `filter_lql` (arg). Inside an element scope they are payload keys, not the standard fields.
+- **A rendered severity name is a filter literal.** `severity >= warning` works; the integer behind it is not the query surface.
+- **An element leaf is not a row column.** A value read out of an array of objects pastes back inside `path[](leaf=value)`, and `group_by` (arg) on that leaf is refused.
+- **String equality ignores case** on resident columns and on payload leaves alike.
+
+## When the response is large
+
+- **The first `query_logs` (tool) page is small on purpose.** It carries the minted `query_id` (arg), so it is budgeted well under the other tools to keep the handle out of a client-side spill. Read `summary.total_count` (col) for the population and `page.rows_cached` (col) for what the cache holds.
+- **Page the cache, do not re-scan.** `refine_query_result` (tool) with the SAME arguments and a new `offset` (arg); `page.next` (col) hands back the literal next call. Refine pages carry `rows_matched` (col) (how many cached rows match this refine) and no `total_count` (col), because a derived page has no matched population of its own.
+- **`full_length_values` (arg) recovers one cut value.** Cut values end with `…[truncated:N]` and are named in `page.truncated_fields` (col). Narrow with `filter_lql` (arg) to the one row first; the response may then reach 1 MB.
+- **Project the array, not the row.** On a wide inventory event, `select` (arg) the one array you need. When the filtered element projection ships, project the matching elements instead and the page shrinks by the ratio of matches to elements.
+- **`format` (arg) when a fixed parser is on the other end.** TSV refuses whenever a column is array- or object-typed. Raw event rows from `query_logs` (tool) are always JSONL and refuse TSV even with a scalar-only `select` (arg); refine the cache when you want those same rows as TSV.
 
 ---
 

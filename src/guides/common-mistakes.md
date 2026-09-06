@@ -287,7 +287,7 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` (value) or `
 
 **Symptom.** You ran `list_fields` (tool), then grouped or filtered on every `sparklogs.data.*` path you saw.
 
-**Why it's wrong.** `list_fields` (tool) is a good catalog call. It names fields; it does not rank what matters. For device state, group `sparklogs.kind` (LQL), `sparklogs.topic` (LQL), `sparklogs.reason` (LQL) first (`guides/stream-kinds/device-state.md`). Discovery omits unstable process-id map paths (`sparklogs.data.processes.<pid>...`). Service and similar instance keys can remain in the catalog; they are names to look up, not the ladder.
+**Why it's wrong.** `list_fields` (tool) is a good catalog call. It names fields; it does not rank what matters. For device state, group `sparklogs.kind` (LQL), `sparklogs.topic` (LQL), `sparklogs.reason` (LQL) first (`guides/stream-kinds/device-state.md`). The catalog lists snapshot payload leaves with their array mark (`sparklogs.data.services[].current_state`); those are names to filter on inside `[]()`, not the ladder.
 
 **Recovery.** Latest-in-window: `query_device_health` (tool). Event stream: group `sparklogs.kind` (LQL) / `sparklogs.topic` (LQL) / `sparklogs.reason` (LQL). Use `list_fields` (tool) when you need a name the rows did not already show.
 
@@ -335,7 +335,7 @@ These don't exist in LQL. Use `:`/`*`/`?`, `:`/`/regex/`, `<field>!`/`NOT <field
 
 ### Wildcard JSON paths
 
-`x.services.*.status = STOPPED` does NOT work: type resolution needs an exact path. Use a promoted field, the message, or a direct keyed lookup when the key is known.
+`x.services.*.status = STOPPED` does NOT work: type resolution needs an exact path. For an array of objects use the element grammar (`x.services[](status=stopped)`). Otherwise use a promoted field or the message.
 
 ### Square brackets for value lists
 

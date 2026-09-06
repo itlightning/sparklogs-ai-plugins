@@ -31,6 +31,7 @@ args:
   - field_match
   - fieldset
   - filter_lql
+  - format
   - full_length_values
   - group_by
   - group_by_reason
@@ -46,6 +47,8 @@ args:
   - offset
   - order_by
   - org_ids
+  - path_match
+  - path_prefix
   - pattern_hashes
   - psa_client_id
   - query
@@ -147,6 +150,7 @@ cols:
   - reason
   - reported_hostname
   - rows_cached
+  - rows_matched
   - rows_returned
   - row_kind
   - schema.empty_requested_columns
@@ -183,7 +187,9 @@ lql_resident:
   - category_hash
   - facility
   - filename
+  - ingested_t
   - message
+  - org_id
   - origin
   - pattern
   - pattern_hash
@@ -302,11 +308,28 @@ values:
   episode_transition:
     - severity_raised
     - severity_lowered
+  # sparklogs.topic values observed on sparklogs.agent.state in a live workspace.
   topics:
+    - agent_overhead
+    - agent_pipeline
+    - collector_health
+    - crash_dump_config
     - disk_volumes
+    - drivers
+    - feed_health
+    - installed_products
+    - installed_products_summary
+    - performance
     - processes
     - services
-    - performance
+    - storage_device_io
+    - storage_devices
+    - storage_io
+    - system_info
+    - volume_map
+    - vss_shadowstorage
+    - vss_writers
+    - windows_update_agent_state
   services:
     - app_stability
     - auth
