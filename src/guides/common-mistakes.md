@@ -229,7 +229,7 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` (value) or `
 
 ### Writing a completeness statement the question did not need
 
-**Symptom.** An investigation into a recurring failure, or a live RCA on something happening now, carries a paragraph about data completeness, feed health, or agent state that no finding depends on.
+**Symptom.** An investigation into a recurring failure, or a live RCA on something happening now, carries a paragraph about data completeness, feed health, or device health that no finding depends on.
 
 **Why it's wrong.** The events in front of you carry an ongoing issue on their own. Completeness prose that changes no conclusion pushes the finding down the page and reads as padding.
 
