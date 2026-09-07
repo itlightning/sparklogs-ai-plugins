@@ -64,11 +64,10 @@ args:
   - type
 
 # Union of MCP response headers (health fieldsets, list_sources, resolve_scope,
-# counts, describe_pattern, envelope). Wire paths (sparklogs.*) are not cols.
+# counts, describe_pattern, envelope). A wire path (sparklogs.*) is a col too
+# whenever a tool renders it under that dotted name (device-health does, for
+# every wire field it lifts); resolve_scope's own flat "kind" is unrelated.
 cols:
-  - actor_id
-  - actor_name
-  - actor_type
   - advisories
   - affected_agents
   - affected_senders
@@ -80,7 +79,6 @@ cols:
   - app
   - as_of
   - as_of_age_s
-  - class
   - cnt_critical_plus
   - cnt_error
   - cnt_interesting
@@ -93,51 +91,22 @@ cols:
   - collection_reasons
   - collection_status
   - condition_total
-  - config_change_action
-  - config_change_target
-  - config_change_type
-  - display_name
   - distinct_interesting
-  - episode_age_basis
-  - episode_clear_time_basis
-  - episode_cleared_ts
   - episode_count
-  - episode_end_reason
-  - episode_event_seq
-  - episode_first_observed_ts
-  - episode_id
-  - episode_last_confirmed_ts
-  - episode_max_observation_gap_s
-  - episode_occurrence
-  - episode_phase
-  - episode_post_gap_s
-  - episode_recovering_total_s
-  - episode_recovery_attempts
-  - episode_replaced_id
-  - episode_transition
-  - epoch_id
-  - epoch_prev_id
-  - epoch_seq
   - event_count
   - feed_pack_version
   - first_event_at
-  - instance
   - instance_label
-  - inventory_part_number
-  - inventory_row_count
-  - inventory_total_parts
   - kind
   - last_data_at
   - last_event_at
   - last_heartbeat_at
   - lookups
-  - malformed_event
   - match_kind
   - max_severity
   - message
   - name
   - observed_at
-  - open_monitors_count
   - org_id
   - page.next
   - page.rows_cached
@@ -147,7 +116,6 @@ cols:
   - pattern
   - pattern_hash
   - query_url
-  - reason
   - reported_hostname
   - rows_cached
   - rows_matched
@@ -162,19 +130,56 @@ cols:
   - severity_level
   - silent_total
   - source
+  - sparklogs.actor.id
+  - sparklogs.actor.name
+  - sparklogs.actor.type
+  - sparklogs.class
+  - sparklogs.config_change.action
+  - sparklogs.config_change.target
+  - sparklogs.config_change.type
+  - sparklogs.delta.id
+  - sparklogs.delta.prev_id
+  - sparklogs.display_name
+  - sparklogs.episode.age_basis
+  - sparklogs.episode.clear_time_basis
+  - sparklogs.episode.cleared_ts
+  - sparklogs.episode.end_reason
+  - sparklogs.episode.event_seq
+  - sparklogs.episode.first_observed_ts
+  - sparklogs.episode.id
+  - sparklogs.episode.last_confirmed_ts
+  - sparklogs.episode.max_observation_gap_s
+  - sparklogs.episode.occurrence
+  - sparklogs.episode.phase
+  - sparklogs.episode.post_gap_s
+  - sparklogs.episode.recovering_total_s
+  - sparklogs.episode.recovery_attempts
+  - sparklogs.episode.replaced_id
+  - sparklogs.episode.transition
+  - sparklogs.epoch.id
+  - sparklogs.epoch.prev_id
+  - sparklogs.epoch.seq
+  - sparklogs.instance
+  - sparklogs.inventory.part_number
+  - sparklogs.inventory.row_count
+  - sparklogs.inventory.total_parts
+  - sparklogs.kind
+  - sparklogs.malformed_event
+  - sparklogs.open_monitors_count
+  - sparklogs.reason
+  - sparklogs.target.id
+  - sparklogs.target.name
+  - sparklogs.target.type
+  - sparklogs.topic
+  - sparklogs.window_partial
   - stuck_reason
   - subsource
   - summary.cache_status
   - summary.scope
   - summary.severity_histogram
   - summary.total_count
-  - target_id
-  - target_name
-  - target_type
   - top_interesting_patterns
-  - topic
   - total_count
-  - window_partial
   - worst_severity
 
 # Resident LQL: query-engine / wire fields the pack field tables do not own.

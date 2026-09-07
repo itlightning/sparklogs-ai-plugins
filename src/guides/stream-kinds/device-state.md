@@ -19,10 +19,9 @@ The snapshot payload lives under the wire family `sparklogs.data` (LQL) and is a
 | What is on the box / open condition in this window (episode-collapsed) | `query_device_health` (tool) (`fieldset` (arg) = `rca` (value) for one host). Episode and honesty interpretation: `guides/device-state-fields.md` |
 | How it changed, every snapshot, hour by hour | `query_logs` (tool) on this `subsource` (LQL). Group `sparklogs.kind` (LQL), `sparklogs.topic` (LQL), `sparklogs.reason` (LQL) |
 
-Do not paste MCP column names into LQL.
-`kind` (col) in device-health is `sparklogs.kind` (LQL) in logs.
+MCP column names paste straight into LQL now: `sparklogs.kind` (col) on a device-health row is `sparklogs.kind` (LQL) in logs, same spelling.
 `subsource` (col) on health rows is the feed id `sparklogs.agent.state` (value), the same stamp as logs.
-`topic` (col) is the subject family (`disk_volumes` (value), `processes` (value), `services` (value)).
+`sparklogs.topic` (col) is the subject family (`disk_volumes` (value), `processes` (value), `services` (value)).
 
 ## Event kinds (logs)
 
@@ -57,7 +56,7 @@ sparklogs.data.system_info.reboot_pending
 
 Both spellings are discoverable. No topic is keyed by process id, and LQL map wildcards over instance keys are not shipped.
 
-`sparklogs.instance` (LQL) is empty on every snapshot event: the instance identity sits on the element, under keys such as instance, name and volume. The MCP `instance` (col) on device-health rows is the health surface's own naming.
+`sparklogs.instance` (LQL) is empty on every snapshot event: the instance identity sits on the element, under keys such as instance, name and volume. The MCP `sparklogs.instance` (col) on device-health rows comes from the health surface's own per-episode identity, not this per-element key.
 
 ## Step 1: find the field
 

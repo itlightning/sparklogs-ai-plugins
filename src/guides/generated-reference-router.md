@@ -60,8 +60,8 @@ say in your findings that you were reading uncurated text.
 
 - **Not the device-health column names.** Generated artifacts describe the event wire schema, the
   `sparklogs.*` and module-prefixed JSON paths you filter on with `query_logs` (tool). The device-health
-  tools return their own column names (`kind` (col), `reason` (col), `instance` (col), `episode_replaced_id` (col), and the
-  rest). Same concepts, different surface; do not paste one into the other.
+  tool renders those same wire fields as its column names (`sparklogs.kind` (col), `sparklogs.reason` (col),
+  `sparklogs.instance` (col), `sparklogs.episode.replaced_id` (col), and the rest): one spelling, either surface.
 - **Not a severity table.** Severity is a shared ladder across every source and is documented once,
   in `category-classes.md`. A module never defines its own bands.
 - **Not exhaustive about what exists at rest.** A field is listed once a curated surface promotes

@@ -44,4 +44,4 @@ Absence is a missing promotion, not a missing event.
 
 "What is on the box / open condition in this window" is `query_device_health` (tool) (latest event per episode that emitted in the window, not a time series).
 The event stream of the same feed is `query_logs` (tool) scoped to `subsource` (LQL) `=` `"sparklogs.agent.state"`.
-MCP column names (`kind` (col), `instance` (col), `episode_replaced_id` (col)) are not LQL paths. Wire LQL uses dotted `sparklogs.*`. Detail: `guides/device-state-fields.md`.
+MCP column names (`sparklogs.kind` (col), `sparklogs.instance` (col), `sparklogs.episode.replaced_id` (col)) are the same dotted `sparklogs.*` spelling as the LQL path. Detail: `guides/device-state-fields.md`.

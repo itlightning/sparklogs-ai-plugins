@@ -45,7 +45,7 @@ findings:
     evidence_query_url: <the query_url passed in, optionally with a refinement param>
 patterns_observed:
   - pattern_hash: <hash>
-    pattern_text: <if known>
+    pattern: <if known>
     count: <int>
 notable_observations:
   - <text>
@@ -89,9 +89,9 @@ with a contract attached: it means fetch-first, whatever the ticket was about.
 ```yaml
 top_patterns:
   - pattern_hash: <hash>
-    pattern_text: <from a query_logs message projection filtered to the pattern_hash>
+    pattern: <from a query_logs message projection filtered to the pattern_hash>
     count: <int>
-    likely_meaning: <plain-language from pattern_text; use describe_pattern or grep feed reasons.md when needed; else null>
+    likely_meaning: <plain-language from pattern; use describe_pattern or grep feed reasons.md when needed; else null>
     reason: <sparklogs.reason if identifiable from curation; else null>
 ```
 

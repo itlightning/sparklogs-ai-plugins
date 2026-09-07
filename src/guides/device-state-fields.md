@@ -27,7 +27,7 @@ you will re-filter yourself.
 **A kind outside the known vocabulary survives the filter by design.** If a newer agent emits a kind
 this surface does not know, an explicit `kinds` (arg) list does not silence it: the alternative is dropping
 rows nobody has decided about yet, which loses evidence exactly when something new is happening. So a
-`kinds` (arg) filter is a narrowing, not a guarantee, and a row with an unfamiliar `kind` (col) is a real row.
+`kinds` (arg) filter is a narrowing, not a guarantee, and a row with an unfamiliar `sparklogs.kind` (col) is a real row.
 
 **Silent-device accounting is trustworthy; what the silence MEANS is a separate, narrower question.**
 See "What silence does and does not tell you" below before any conclusion rests on it.
@@ -36,15 +36,14 @@ See "What silence does and does not tell you" below before any conclusion rests 
 
 A few rows read wrong if you go by the column name alone:
 
-- **`malformed_event` (col) is independent of `kind` (col).** A row can keep a valid `kind` (col) and still carry
-  `malformed_event=true`, so filtering on `kind=malformed` alone misses those. Read them together;
+- **`sparklogs.malformed_event` (col) is independent of `sparklogs.kind` (col).** A row can keep a valid `sparklogs.kind` (col) and still carry
+  `sparklogs.malformed_event=true`, so filtering on `sparklogs.kind=malformed` alone misses those. Read them together;
   either one set means don't trust the row's other fields without looking.
-- **`display_name` (col)** is a friendlier name when it differs from `instance` (col). Read `coalesce(display_name, instance)`,
-  not `instance` (col) alone.
-- **`open_monitors_count` (col)** is how many monitors are open, not a problem count.
-- **Device-health column names are not LQL field names.** `episode_replaced_id` (col) is derived from the wire path
-  `sparklogs.episode.replaced_id` (LQL); an LQL filter on `query_logs` (tool) needs the dotted path. Pasting a
-  device-health column name into `lql` (arg) returns nothing.
+- **`sparklogs.display_name` (col)** is a friendlier name when it differs from `sparklogs.instance` (col). Read `coalesce(sparklogs.display_name, sparklogs.instance)`,
+  not `sparklogs.instance` (col) alone.
+- **`sparklogs.open_monitors_count` (col)** is how many monitors are open, not a problem count.
+- **Device-health column names ARE the wire LQL paths.** `sparklogs.episode.replaced_id` (col) on a device-health row
+  and `sparklogs.episode.replaced_id` (LQL) on a `query_logs` (tool) filter are the same name; paste either into the other.
 
 ## The honesty fields, and what they forbid
 
@@ -56,7 +55,7 @@ feed reporting a skip window over events the collection engine could not provide
 either one as the other, and do not carry the word "gap" out of these column names into report
 prose.
 
-**`episode_age_basis` (col) has three values, and two of them are not onsets.**
+**`sparklogs.episode.age_basis` (col) has three values, and two of them are not onsets.**
 
 | Value | What you may say |
 |---|---|
@@ -64,19 +63,19 @@ prose.
 | `observed` (value) | it was already true when we first looked. A LOWER BOUND: "for at least 3 days" |
 | `unknown_ongoing` (value) | ongoing with no witnessed start (a standing config, something true since boot). **Never render this as a duration at all** |
 
-**`episode_clear_time_basis` (col)**: `observed` (value) means the clear was watched and the timestamp is real.
+**`sparklogs.episode.clear_time_basis` (col)**: `observed` (value) means the clear was watched and the timestamp is real.
 `unobserved_gap` (value) means the timestamp was CLAMPED backwards to the last confirmation before a blind
 spot. Never date a cause to a clamped clear. Say "cleared at or before <ts>, exact time unknown".
 
-**`episode_max_observation_gap_s` (col)** is the longest stretch the agent was blind during the episode. An
+**`sparklogs.episode.max_observation_gap_s` (col)** is the longest stretch the agent was blind during the episode. An
 ABSENT value is not a claim that there was no gap.
 
-**`window_partial` (col)** means the window was only partly observed. Do not change a conclusion on a
-partial window. It is the one honesty field with no `episode_` (other) prefix, because it describes one row's
-measurement window rather than the episode's crossing lifecycle: do not look for
-episode_window_partial, and do not read a partial row as a partially observed episode.
+**`sparklogs.window_partial` (col)** means the window was only partly observed. Do not change a conclusion on a
+partial window. It is the one honesty field with no episode family prefix, because it describes one row's
+measurement window rather than the episode's crossing lifecycle: do not look for it nested under episode,
+and do not read a partial row as a partially observed episode.
 
-**`episode_post_gap_s` (col)** on the first reading after an outage says this reading resumed after a blind
+**`sparklogs.episode.post_gap_s` (col)** on the first reading after an outage says this reading resumed after a blind
 spot. A post-gap sample is trusted to say a condition is no longer holding, never to say WHEN it
 stopped.
 
@@ -86,9 +85,9 @@ An episode is one continuous occurrence of one condition on one subject. A reaso
 episodes over time, and that is what recurrence means.
 
 - **A burst of RECOVERED is not an incident.** A flapping condition emits an onset and a closure each
-  cycle. Group by `reason` (col) and read `episode_recovery_attempts` (col); an episode oscillating without
+  cycle. Group by `sparklogs.reason` (col) and read `sparklogs.episode.recovery_attempts` (col); an episode oscillating without
   closing is chronically unstable, which is a different and often worse condition than steadily bad.
-- **`episode_replaced_id` (col)** means this episode superseded another. Follow it before concluding a
+- **`sparklogs.episode.replaced_id` (col)** means this episode superseded another. Follow it before concluding a
   condition is new.
 - **Correlation is your job.** Nothing joins a monitor row to the raw events that explain it. Take
   the reason, the instance and the span, then query the events yourself.

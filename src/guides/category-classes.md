@@ -47,7 +47,7 @@ An open monitor (a holding episode) is an interesting signal, not automatically 
 must act on.
 
 - Problemhood rides **severity** plus the MSP's own policy, never "there is an open monitor".
-- Do not treat `open_monitors_count` (col) or a dump of open episodes as the finding list.
+- Do not treat `sparklogs.open_monitors_count` (col) or a dump of open episodes as the finding list.
 - `ELEVATED` + Info can be normal forever on a large share of a fleet (busy CPU, SQL memory
   dominance, crash dumps disabled on desktops) and still matter as RCA context.
 
@@ -155,7 +155,7 @@ vendor's taxonomy. A curated pack re-grades by consequence.
 `config_change` (value), `malformed` (value). It is a different question from class and from severity.
 
 `malformed` (value) marks a row that did not parse cleanly, and it does not stand alone: a row can keep a
-valid `sparklogs.kind` (LQL) and still carry `malformed_event=true`, so a `kind=malformed` filter by itself misses
+valid `sparklogs.kind` (LQL) and still carry `sparklogs.malformed_event=true`, so a `sparklogs.kind=malformed` filter by itself misses
 those. Read the pair. A kind outside this list is possible and is not a bug: a newer agent may emit
 one, and it is deliberately not dropped, so an unfamiliar `sparklogs.kind` (LQL) is a real row rather than noise.
 
