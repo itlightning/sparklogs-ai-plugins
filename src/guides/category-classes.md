@@ -125,7 +125,7 @@ to the coarser grain; it stays exact on `max_severity` (col).
 The nine bands are defined by one sentence, which the tools repeat verbatim so there is only ever one
 spelling to trust:
 
-Severity bands are the same on every tool here: cnt_debug_or_below (severity 6 and below), cnt_verbose (7-8), cnt_info_or_notice (9-12), cnt_warning (13-15), cnt_minor (16), cnt_error (17), cnt_serious (18), cnt_severe (19), cnt_critical_plus (20 and above). Listings of what is wrong carry the failure side only (cnt_warning and above); tools that count all traffic carry every band.
+Severity bands, same on every tool: cnt_debug_or_below (severity 6 and below), cnt_verbose (7-8), cnt_info_or_notice (9-12), cnt_warning (13-15), cnt_minor (16), cnt_error (17), cnt_serious (18), cnt_severe (19), cnt_critical_plus (20 and above). Listings of problems carry the failure side only (cnt_warning and above). Tools that count all traffic carry every band.
 
 `summary.severity_histogram` (col) is an ORDERED list of `{band, count}` over those bands, worst-last,
 carrying only the bands that occurred: a band missing from it is a band that response never saw.
