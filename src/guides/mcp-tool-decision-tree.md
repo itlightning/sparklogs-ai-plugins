@@ -4,9 +4,9 @@ Decision tree for which tool to use when, plus judgment the live tool descriptio
 
 The MCP server instructions define every term used here, in learning order. This file adds per-tool mechanics on top of them rather than restating them.
 
-**Tool API surface:** parameter names, defaults, and response columns live in the live MCP tool description and JSON schema only. This guide does not duplicate them; an old plugin with a new server must follow what the server advertises.
+**Parameters and columns:** names, defaults, and response columns live in the live MCP tool description and JSON schema only. This guide does not duplicate them; an old plugin with a new server must follow what the server advertises.
 
-The tool surface is these **twelve** tools: `resolve_scope` (tool), `list_sources` (tool), `query_scope_activity` (tool), `query_device_health` (tool), `describe_pattern` (tool), `list_fields` (tool), `query_event_counts_by_severity` (tool), `query_logs` (tool), `refine_query_result` (tool), `get_query_metadata` (tool), `send_sparklogs_feedback` (tool), `server_info` (tool). Three differential tools (`query_period_diff` (other), `compare_populations` (other), `cluster_event_contexts` (other)) are fast-follow; see the bottom of this file for v1 equivalents.
+There are **twelve** tools: `resolve_scope` (tool), `list_sources` (tool), `query_scope_activity` (tool), `query_device_health` (tool), `describe_pattern` (tool), `list_fields` (tool), `query_event_counts_by_severity` (tool), `query_logs` (tool), `refine_query_result` (tool), `get_query_metadata` (tool), `send_sparklogs_feedback` (tool), `server_info` (tool). Three differential tools (`query_period_diff` (other), `compare_populations` (other), `cluster_event_contexts` (other)) are fast-follow; see the bottom of this file for v1 equivalents.
 
 **Cross-cutting (full detail in MCP server instructions):**
 
@@ -37,7 +37,7 @@ One trigger per tool. After coverage, it is almost always a
 |---|---|
 | `resolve_scope` (tool) | You have a name (client, host, ticket) and need an `org_id` (col). Always first. Collection/completeness live here. Multiple rows at the same best `match_kind` (col): confirm with the engineer before proceeding, don't guess. |
 | `list_sources` (tool) | Before concluding anything from an absence: did this source send data in THIS window? Any source type, including ingest keys. Any non-zero `cnt_critical_plus` (col) in scope: fetch those events before proceeding, whatever the investigation topic. |
-| `query_device_health` (tool) | SparkLogs Agents in scope, and you need standing condition, what is installed or mounted, or which devices reported nothing on that surface. State, not sequence. Not the first tool for ingest-key-only streams. `group_by_reason: true` takes no `fieldset` (arg) or `add_fields` (arg): passing either alongside it is an error. |
+| `query_device_health` (tool) | SparkLogs Agents in scope, and you need standing condition, what is installed or mounted, or which devices reported nothing. State, not sequence. Not the first tool for ingest-key-only streams. `group_by_reason: true` takes no `fieldset` (arg) or `add_fields` (arg): passing either alongside it is an error. Rows are JSONL by default with absent fields omitted; `format: tsv` gives a fixed column layout. `group_by_reason: true` always renders TSV. |
 | `query_scope_activity` (tool) | You do not know what this client HAS: which apps, services and subsources exist at all. Orientation on an unfamiliar estate. |
 | `query_event_counts_by_severity` (tool) | "What is going on here", at any altitude. The default mid-tier tool. `group_by=["reason"]` or `["pattern_hash"]`; pass two fields when the question has two nouns in it. |
 | `describe_pattern` (tool) | You are about to cite a pattern and need its text and spread. Pass `pattern_hashes` (arg) (a list). Required before citing any teaser pattern. Mid-tier with counts. |
@@ -79,10 +79,10 @@ Use this when they asked, or after they accepted a suggested hunt. Do not open w
 
 Every rendered cell is meant to go back into a filter unchanged.
 
-- **`""` means no value.** In a TSV cell and in a group key it covers missing, SQL null and the empty string alike. Paste it back as `col=""` and you get exactly the rows that cell came from. TSV carries no null marker, and a pasted null matches the four-character string.
+- **`""` means no value.** In a TSV cell and in a group key it covers missing, SQL null and the empty string alike; a JSONL row omits the field instead. Paste `""` back as `col=""` and you get exactly the rows that cell came from. TSV carries no null marker, and a pasted null matches the four-character string.
 - **Hash twins paste into either name.** A `*_hash` value works as `pattern_hash` (LQL) `= "<hash>"` and as `pattern` (LQL) `= "<hash>"`; an equality on the base field whose literal has the hash token shape widens to cover both. The twins are listed by `list_fields` (tool) because they are meant to be pasted.
-- **`t` (LQL), `ingested_t` (LQL) and `org_id` (LQL) are filter names.** They are the names on the wire and the names LQL accepts, in `lql` (arg) and in `filter_lql` (arg). Inside an element scope they are payload keys, not the standard fields.
-- **A rendered severity name is a filter literal.** `severity >= warning` works; the integer behind it is not the query surface.
+- **`t` (LQL), `ingested_t` (LQL) and `org_id` (LQL) are filter names.** They are the names in every response and the names LQL accepts, in `lql` (arg) and in `filter_lql` (arg). Inside an element scope they are payload keys, not the standard fields.
+- **A rendered severity name is a filter literal.** `severity >= warning` works; you cannot filter on the integer behind it.
 - **An element leaf is not a row column.** A value read out of an array of objects pastes back inside `path[](leaf=value)`, and `group_by` (arg) on that leaf is refused.
 - **String equality ignores case** on resident columns and on payload leaves alike.
 - **A bare 15 or 16 digit integer can be a timestamp.** Known datetime fields render as RFC3339; a leftover digit string that long, quoted or not, may be epoch microseconds UTC. Do not treat other numbers as times.
@@ -108,7 +108,7 @@ Every rendered cell is meant to go back into a filter unchanged.
 
 **Re-scanning instead of refining.** After ONE broad `query_logs` (tool) slice, use `refine_query_result` (tool) for other views - it's a cache lookup, not a fresh scan.
 
-**Showing a `*_hash` with no resolved text.** Resolve via header `lookups` (col) (and `describe_pattern` (tool) for `pattern_hash` (LQL)) first.
+**Showing a `*_hash` with no resolved text.** Resolve via the response's `lookups` (col) (and `describe_pattern` (tool) for `pattern_hash` (LQL)) first.
 
 ---
 

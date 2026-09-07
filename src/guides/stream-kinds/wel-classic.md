@@ -16,10 +16,10 @@ Scope with **`subsource` (LQL)** (`win.eventlog.application` (value) or `win.eve
 
 ## Payload
 
-`event_data.*` is sparse unless a curated surface promoted it.
-Module fields live in `feeds/<id>/fields.md`. Envelope keys above often are not listed there.
+`event_data.*` is sparse unless curation promoted it.
+Module fields live in `feeds/<id>/fields.md`. `provider_name` (LQL), `winlog.event_id` (LQL) and `origin` (LQL) above often are not listed there.
 
 ## Accuracy
 
-`sparklogs.reason` (LQL) / curated `service` (LQL) miss uncurated native text and sibling providers.
+`sparklogs.reason` (LQL) / curated `service` (LQL) miss uncurated raw text and sibling providers.
 Widen by dropping those predicates before you say the channel is quiet.

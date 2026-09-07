@@ -74,7 +74,7 @@ These rules apply to string fields such as `source` (LQL), `app` (LQL), `subsour
 | `field in ("", a, …)` / `field=("", …)` with `""` in the list | The field is missing, null, empty, or matches any other listed value |
 | `field not in (…)` or a negated list that includes `""` | The opposite of the matching rules in the row above |
 
-`""` is also what an absent value RENDERS as, in a TSV cell and in a group key. Pasting the cell back as `field=""` returns the rows it came from.
+`""` is what an absent value RENDERS as, in a TSV cell and in a group key; a JSONL row omits the field instead. Pasting `""` back as `field=""` returns the rows it came from.
 
 **Numbers and other non-string types:** `x.count=0` matches only when the stored value is exactly `0`. It does not match a missing field, and a missing field is not treated as zero. Use `NOT x.count!` to test for absence on numeric fields.
 
@@ -165,7 +165,7 @@ failed                                    <- matches events with "failed" in any
 win.servicing.dism                        <- matches events with that subsource (or any standard string field)
 ```
 
-A bare term reaches standard strings and JSON-resident standards. It does not reach payload leaves; `any` (other) does.
+A bare term reaches every standard field listed above. It does not reach payload leaves; `any` (other) does.
 
 **Hash paste widening.** An equality on one of the six base fields whose literal has the hash token shape compiles to base OR twin, so a `*_hash` value pastes into either name:
 
@@ -174,7 +174,7 @@ pattern_hash = "divgfo_9v7cgvjijykp0zu5"       <- the twin
 pattern = "divgfo_9v7cgvjijykp0zu5"            <- same rows; the equality widens
 ```
 
-**Permanent aliases.** `t` (LQL) and `ingested_t` (LQL) are the timestamp and the ingest timestamp; `org_id` (LQL) is the organization. They are the names the wire renders and the names LQL accepts, in every LQL parameter. Inside an element scope (`[]()`) the same three names are payload keys on the element.
+**Permanent aliases.** `t` (LQL) and `ingested_t` (LQL) are the timestamp and the ingest timestamp; `org_id` (LQL) is the organization. They are the same names in responses and the names LQL accepts, in every LQL parameter. Inside an element scope (`[]()`) the same three names are payload keys on the element.
 
 ---
 

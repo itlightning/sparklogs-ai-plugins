@@ -104,7 +104,7 @@ Per-feed closed vocabularies. **Grep** the code, constant, or `##` heading; neve
 | `enums.md` | Vendor/status code | **Search only** |
 | `fields.md` | Filter/group on a field | Search for field name |
 | `recipes.md` | Worked pivot for this feed | One section |
-| `patterns.md` | Is this pattern string expected? | Search one surface heading (grammar/drift, not meaning) |
+| `patterns.md` | Is this pattern string expected? | Search one heading (grammar/drift, not meaning) |
 | Guides | Cross-cutting stuck point | One file from skill when→file table |
 
 ## Unfamiliar `pattern_hash` (LQL)
@@ -184,7 +184,7 @@ Canonical template (field definitions, right-vs-wrong examples): `references/out
 
 ## Section 5. Citation discipline - every claim links to verifiable evidence
 
-Every factual claim cites a `query_url` (col) from the MCP response header; record `query_id` (arg) beside it when several queries share a window. URLs scope org and time in explore, not your cached filter: copy verbatim. Quote `message` (LQL) bytes exactly when a Finding rests on log text. No query, no claim, or use `insufficient_evidence` (value).
+Every factual claim cites a `query_url` (col) from the MCP response; record `query_id` (arg) beside it when several queries share a window. URLs scope org and time in explore, not your cached filter: copy verbatim. Quote `message` (LQL) bytes exactly when a Finding rests on log text. No query, no claim, or use `insufficient_evidence` (value).
 
 Right/wrong shapes: `references/output-template.md`.
 
@@ -227,7 +227,7 @@ Symptom playbooks: Section 3b and `playbooks/playbooks.md`.
 
 Climb coarse to fine: `service` (LQL) -> `app` (LQL) -> `subsource` (LQL) -> `category` (LQL) -> `pattern_hash` (LQL); `source` (LQL) is the host pivot beside the ladder. `pattern_hash` (LQL) is always present; other ladder fields are conditional (empty group = field absent on this source, fall back to `pattern_hash` (LQL), not a Finding).
 
-**Use it:** `query_event_counts_by_severity` (tool) with `group_by` (arg) to localize; cross-tab with 2-3 fields when the pairing is the question; drill with `pattern_hash = "..."` or refine on cache; resolve `_hash` via envelope `lookups` (col) before citing. Baseline-vs-incident hash compare: mind source-pack releases that recompute pattern identity.
+**Use it:** `query_event_counts_by_severity` (tool) with `group_by` (arg) to localize; cross-tab with 2-3 fields when the pairing is the question; drill with `pattern_hash = "..."` or refine on cache; resolve `_hash` via `lookups` (col) before citing. Baseline-vs-incident hash compare: mind source-pack releases that recompute pattern identity.
 
 Full ladder, worked shapes, RCA usage: `guides/scope-ladder.md`. Controlled `service` (LQL) vocabulary: `guides/service-taxonomy.md`.
 
@@ -270,7 +270,7 @@ Fresh report → re-render per Section 4 with all Findings so far. Explore furth
 
 ## Section 14. Error handling - recover gracefully
 
-**Cache expired on `refine_query_result` (tool):** a cold `query_logs` (tool) cache regenerates automatically under the SAME `query_id` (arg) when you refine it (the header's cache status reflects it). A grouped result is not refinable (re-run the grouped call). If `summary.cache_status` (col) is `cache_invalidated` (value), issue a new data-tool call rather than retrying refine on this id. If the server reports the cache cannot be restored (`expired` (value)), re-issue the original backing query.
+**Cache expired on `refine_query_result` (tool):** a cold `query_logs` (tool) cache regenerates automatically under the SAME `query_id` (arg) when you refine it (`summary.cache_status` (col) reflects it). A grouped result is not refinable (re-run the grouped call). If `summary.cache_status` (col) is `cache_invalidated` (value), issue a new data-tool call rather than retrying refine on this id. If the server reports the cache cannot be restored (`expired` (value)), re-issue the original backing query.
 
 **Rate or capacity errors:** if a tool call fails with a retryable server error, retry up to 2x with a brief backoff, then surface to the engineer rather than hammering the same call.
 

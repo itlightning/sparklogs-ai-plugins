@@ -9,7 +9,7 @@ Several feeds share a kind (Application and System are the same ladder).
 Kind is the explore shape, not a 1:1 map to `subsource` (LQL).
 
 `feeds/<id>/fields.md` answers a different question: which promoted fields that module writes.
-Envelope keys (`provider_name` (LQL), `winlog.event_id` (LQL), `origin` (LQL)) often live only on the kind ladder.
+`provider_name` (LQL), `winlog.event_id` (LQL) and `origin` (LQL) often live only on the kind ladder, not in `fields.md`.
 
 Product tokens on `app` (LQL): `guides/app-vocabulary.md`.
 

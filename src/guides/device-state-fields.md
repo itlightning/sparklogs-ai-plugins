@@ -25,7 +25,7 @@ device or a handful, `fleet` (value) when the question is how many and which, `m
 you will re-filter yourself.
 
 **A kind outside the known vocabulary survives the filter by design.** If a newer agent emits a kind
-this surface does not know, an explicit `kinds` (arg) list does not silence it: the alternative is dropping
+this tool does not know, an explicit `kinds` (arg) list does not silence it: the alternative is dropping
 rows nobody has decided about yet, which loses evidence exactly when something new is happening. So a
 `kinds` (arg) filter is a narrowing, not a guarantee, and a row with an unfamiliar `sparklogs.kind` (col) is a real row.
 
@@ -42,7 +42,7 @@ A few rows read wrong if you go by the column name alone:
 - **`sparklogs.display_name` (col)** is a friendlier name when it differs from `sparklogs.instance` (col). Read `coalesce(sparklogs.display_name, sparklogs.instance)`,
   not `sparklogs.instance` (col) alone.
 - **`sparklogs.open_monitors_count` (col)** is how many monitors are open, not a problem count.
-- **Device-health column names ARE the wire LQL paths.** `sparklogs.episode.replaced_id` (col) on a device-health row
+- **Device-health column names ARE the LQL paths.** `sparklogs.episode.replaced_id` (col) on a device-health row
   and `sparklogs.episode.replaced_id` (LQL) on a `query_logs` (tool) filter are the same name; paste either into the other.
 
 ## The honesty fields, and what they forbid

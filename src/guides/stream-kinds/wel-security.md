@@ -14,7 +14,7 @@ Then **`sparklogs.actor.*`**, **`sparklogs.reason` (LQL)**, **`winlog.event_id` 
 
 ## Payload
 
-Actor and reason are the portable `sparklogs.*` / top-level `sparklogs.reason` (LQL) surface on this kind.
+Actor and reason are the portable `sparklogs.*` / top-level `sparklogs.reason` (LQL) fields on this kind.
 Raw Security payload remains under provider paths in `fields.md`.
 
 ## Accuracy

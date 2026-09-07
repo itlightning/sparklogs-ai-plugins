@@ -10,11 +10,11 @@ Group `sparklogs.kind` (LQL), `sparklogs.topic` (LQL), `sparklogs.reason` (LQL).
 
 No `provider_name` (LQL). Do not explore this feed like WEL.
 Generated `feeds/sparklogs.agent.state/fields.md` lists module promotions only.
-The snapshot payload lives under the wire family `sparklogs.data` (LQL) and is absent from that file, so `list_fields` (tool) is where you read its names.
+The snapshot payload lives under `sparklogs.data` (LQL) and is absent from that file, so `list_fields` (tool) is where you read its names.
 
 ## Latest-in-window vs event stream
 
-| Question | Surface |
+| Question | Tool |
 |---|---|
 | What is on the box / open condition in this window (episode-collapsed) | `query_device_health` (tool) (`fieldset` (arg) = `rca` (value) for one host). Episode and honesty interpretation: `guides/device-state-fields.md` |
 | How it changed, every snapshot, hour by hour | `query_logs` (tool) on this `subsource` (LQL). Group `sparklogs.kind` (LQL), `sparklogs.topic` (LQL), `sparklogs.reason` (LQL) |
@@ -56,7 +56,7 @@ sparklogs.data.system_info.reboot_pending
 
 Both spellings are discoverable. No topic is keyed by process id, and LQL map wildcards over instance keys are not shipped.
 
-`sparklogs.instance` (LQL) is empty on every snapshot event: the instance identity sits on the element, under keys such as instance, name and volume. The MCP `sparklogs.instance` (col) on device-health rows comes from the health surface's own per-episode identity, not this per-element key.
+`sparklogs.instance` (LQL) is empty on every snapshot event: the instance identity sits on the element, under keys such as instance, name and volume. The MCP `sparklogs.instance` (col) on device-health rows comes from the device-health tool's own per-episode identity, not this per-element key.
 
 ## Step 1: find the field
 

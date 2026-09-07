@@ -5,7 +5,7 @@ In authored `src/` prose, tag every identifier-shaped backtick (`[a-z][a-z0-9_.]
 | Tag | Meaning | Ships in the pack? | SoT |
 |---|---|---|---|
 | `(arg)` | MCP tool input | yes | identifier-sot.yaml args |
-| `(col)` | Response column | yes | cols (some are dotted sparklogs.* wire paths on device-health) |
+| `(col)` | Response column | yes | cols (some are dotted sparklogs.* paths on device-health) |
 | `(LQL)` | Log filter / counts `group_by` (arg) | yes | library public fields + lql_resident; family globs need lql_families |
 | `(tool)` | MCP tool name | stripped on render | tools (11 shipped names) |
 | `(value)` | Closed vocabulary | stripped on render | feeds, kinds, apps, statuses, topics, reason values, enums |

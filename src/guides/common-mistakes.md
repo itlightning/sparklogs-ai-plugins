@@ -181,7 +181,7 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` (value) or `
 
 **Symptom.** A query comes back with N rows. You count them, or you read the earliest and latest row as the data's start and end, and report from that.
 
-**Why it's wrong.** Responses are capped: a wide fieldset or a big match returns ONE PAGE, and the page looks exactly like a complete short answer. The envelope already tells you otherwise: the summary carries the matched TOTAL, and `last_event_at` (col) carries when data actually stops.
+**Why it's wrong.** Responses are capped: a wide fieldset or a big match returns ONE PAGE, and the page looks exactly like a complete short answer. The response already tells you otherwise: the summary carries the matched TOTAL, and `last_event_at` (col) carries when data actually stops.
 
 **The failure this produces.** An investigation read the first page of a capped result, saw its oldest rows dated four days back, and reported that both monitored systems had been dead for four days. Both were healthy and reporting; the later pages were simply never fetched. The contradicting total was in the same response, unread.
 
@@ -205,7 +205,7 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` (value) or `
 
 ### Retrying refine on `cache_invalidated` (value)
 
-**Symptom.** `refine_query_result` (tool) or `get_query_metadata` (tool) returns a successful envelope with `summary.cache_status` (col) `cache_invalidated` (value), and you call refine again on the same `query_id` (arg), or you treat it as `scope_violation` (value) (a bad org list you passed).
+**Symptom.** `refine_query_result` (tool) or `get_query_metadata` (tool) returns a successful response with `summary.cache_status` (col) `cache_invalidated` (value), and you call refine again on the same `query_id` (arg), or you treat it as `scope_violation` (value) (a bad org list you passed).
 
 **Why it's wrong.** The handle is dead for this token. Retrying refine cannot revive it. It is not a caller-argument error: the original query's org snapshot is no longer usable as-is. A new data-tool call with live scope is the recovery.
 
@@ -255,7 +255,7 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` (value) or `
 
 **Symptom.** You filter on a curated field (`sparklogs.reason` (LQL), a module-prefixed field), get zero rows back, and conclude the system is healthy or the check passed.
 
-**Why it's wrong.** Most WEL rows have no curated reason. Empty `sparklogs.*` fields on an event mean the event is uncurated (this is not a health finding). Empty means this predicate did not match, never "no problem found" and never "the box is unhealthy." Uncurated native text and sibling providers can still carry the ticket.
+**Why it's wrong.** Most WEL rows have no curated reason. Empty `sparklogs.*` fields on an event mean the event is uncurated (this is not a health finding). Empty means this predicate did not match, never "no problem found" and never "the box is unhealthy." Uncurated raw text and sibling providers can still carry the ticket.
 
 **Recovery.** Drop the curated predicate. Group the host by `subsource` (LQL), then follow `guides/stream-kinds.md`. Use `query_event_counts_by_severity` (tool) on `severity` (LQL) or `pattern` (LQL) for volume. Say in WHAT WAS NOT CHECKED which curated filters you tried. Corpus block in skill restates the rule.
 
@@ -273,13 +273,13 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` (value) or `
 
 **Why it's wrong.** `patterns.md` is a grammar/decision procedure (expected vs unexpected shape), not a meaning catalog. Semantic questions belong elsewhere.
 
-**Recovery.** `describe_pattern` (tool) first, then grep `reasons.md` or `recipes.md`. Use `patterns.md` only when the question is whether the pack meant to produce that string shape (search one surface heading).
+**Recovery.** `describe_pattern` (tool) first, then grep `reasons.md` or `recipes.md`. Use `patterns.md` only when the question is whether the pack meant to produce that string shape (search one heading).
 
 ### Treating a playbook as the event catalog
 
 **Symptom.** You ran the LQL in `playbooks/<symptom>.md`, got little or nothing, and wrote that there are no relevant events, the host is quiet, or the issue cannot be analyzed.
 
-**Why it's wrong.** A playbook is an incomplete starting recipe for a common shape of that symptom. Its `service` (LQL) / `sparklogs.reason` (LQL) / id filters miss uncurated native text, sibling providers, and channels the file never named. Empty recipe LQL is a miss on the recipe, not proof the ticket has no telemetry.
+**Why it's wrong.** A playbook is an incomplete starting recipe for a common shape of that symptom. Its `service` (LQL) / `sparklogs.reason` (LQL) / id filters miss uncurated raw text, sibling providers, and channels the file never named. Empty recipe LQL is a miss on the recipe, not proof the ticket has no telemetry.
 
 **Recovery.** Confirm the source has data in the window (`list_sources` (tool)). Then drop the recipe's extra predicates and group that host by `subsource` (LQL). Open the kind file in `guides/stream-kinds.md` for that `subsource` (LQL) (WEL classic: `provider_name` (LQL) before `pattern` (LQL); file log: `origin` (LQL); device state: `query_device_health` (tool) / `sparklogs.kind` (LQL)+`sparklogs.topic` (LQL)+`sparklogs.reason` (LQL)). Then group as that ladder says, including `sparklogs.reason` (LQL) when populated. Open `feeds/<id>/` only after a subsource showed up. Pull a narrow raw slice of the dominant groups. If you still cannot speak to the ticket, say which discovery steps you ran and put the rest in WHAT WAS NOT CHECKED. Do not stop at the playbook queries.
 

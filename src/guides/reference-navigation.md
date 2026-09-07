@@ -40,7 +40,7 @@ Per-feed closed vocabularies. **Grep** the code, constant, or `##` heading; neve
 | `enums.md` | Vendor/status code | **Search only** |
 | `fields.md` | Filter/group on a field | Search for field name |
 | `recipes.md` | Worked pivot for this feed | One section |
-| `patterns.md` | Is this pattern string expected? | Search one surface heading (grammar/drift, not meaning) |
+| `patterns.md` | Is this pattern string expected? | Search one heading (grammar/drift, not meaning) |
 | Guides | Cross-cutting stuck point | One file from skill when→file table |
 
 ## Unfamiliar `pattern_hash` (LQL)

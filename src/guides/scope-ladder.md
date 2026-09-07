@@ -17,7 +17,7 @@ This is the primary shallow-triage RCA lever available today: lean on it hard.
 **`app` (LQL)** is product identity when present (`guides/app-vocabulary.md`). Empty is normal.
 Stream identity is `subsource` (LQL). Explore: `guides/stream-kinds.md`.
 
-**The ladder is universal where curated fields are not.** `pattern_hash` (LQL) is computed on every source; the other five are computed whenever the source's data carries that base field. Curated and module fields are per-source and per-surface (see field-availability notes in `sparklogs-investigate` Section 8 and `guides/generated-reference-router.md`). An empty ladder field value is normal for many events.
+**The ladder is universal where curated fields are not.** `pattern_hash` (LQL) is computed on every source; the other five are computed whenever the source's data carries that base field. Curated and module fields are per-source and differ by which tool renders them (see field-availability notes in `sparklogs-investigate` Section 8 and `guides/generated-reference-router.md`). An empty ladder field value is normal for many events.
 
 ---
 
@@ -79,7 +79,7 @@ A `_hash` is a stable identity: the same hash means the same normalized value or
 A `pattern_hash` (LQL) present in the incident window but absent from a healthy baseline window signals new behavior. Run `query_event_counts_by_severity` (tool) twice, once per window, and compare hash populations (v1 substitute for the fast-follow `query_period_diff` (other) tool; see `mcp-tool-decision-tree.md`).
 
 **RESOLVE - read the value; show the hash when it is a pivot.**
-The response envelope header carries a hash-dictionary `lookups` (col) table mapping frequent hashes to their values.
+The response carries a hash-dictionary `lookups` (col) table mapping frequent hashes to their values.
 When a row's inline value is blank, resolve it from `lookups` (col) before you speak.
 Lead with the resolved text (and `describe_pattern` (tool) for a `pattern_hash` (LQL)).
 Show the raw `*_hash` when it helps the engineer pivot (paste into LQL, compare windows, hand off a filter).

@@ -87,7 +87,7 @@ export const INTERNAL_ARTIFACTS = [];
 // One-line reader summary per artifact, used to build the router inventory block.
 export const ARTIFACT_SUMMARY = {
   'README.md': 'feed index: what each artifact answers and the order to read them in',
-  'fields.md': 'what exists at rest, which surface writes it, and the raw fallback when nothing does',
+  'fields.md': 'what exists at rest, what curates it, and the raw fallback when nothing does',
   'enums.md': 'the closed token vocabularies that are safe to group by',
   'reasons.md': 'what each reason means (public summary, severity, impact)',
   'patterns.md': 'the decision procedure for whether a rendered pattern is expected, unexpected, or uncurated',
