@@ -102,6 +102,8 @@ Do not use `processes!` (LQL) for array presence when the named parent is not it
 Use `path[]!` (LQL).
 
 Bare terms and `any:` (LQL) are not allowed inside `[]()`.
+
+One `[]` per path. A list of plain values inside an element needs no second `[]`: `sparklogs.data.processes[](services="NcbService")` (LQL) matches the process whose `services` list contains that name, and the same predicate in `select` (arg) with a leaf (`sparklogs.data.processes[](services="NcbService").image_name`) returns that leaf for the matching elements. `[]` is for lists of objects only.
 Name a field on the element, for example `pid=1234` (LQL).
 
 Two terms inside one `[]()` bind to the SAME element; the same two terms as separate `path[].leaf` (LQL) predicates can be satisfied by two different elements.
