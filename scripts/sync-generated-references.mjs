@@ -28,6 +28,7 @@ import {
   ARTIFACT_SUMMARY,
   KNOWN_DEFECTS,
   DEFAULT_SOURCE_LIBRARY_DIR,
+  EXCLUDED_MODULES,
   GENERATED_DIR,
   INTERNAL_ARTIFACTS,
   LIBRARY_GENERATED_SUBPATH,
@@ -167,7 +168,7 @@ async function main() {
     .filter((entry) => entry.isDirectory())
     .map((entry) => entry.name)
     .sort();
-  const unlisted = libraryModules.filter((name) => !MODULES.includes(name));
+  const unlisted = libraryModules.filter((name) => !MODULES.includes(name) && !(name in EXCLUDED_MODULES));
   if (unlisted.length > 0) {
     throw new Error(
       `Source library produces modules this repo has not ruled on: ${unlisted.join(', ')}. `

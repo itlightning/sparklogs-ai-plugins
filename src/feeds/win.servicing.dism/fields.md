@@ -36,11 +36,12 @@ This module populates no portable family.
 Presence is per curated surface, from what its author declared under `promotions`: a field reaches this row only when the surface's own arm or shape names it, never from a text scan of classify guessing which branch a write belongs to.
 A row lists what the surface CAN write, not what every event of it carries: a field whose value the payload does not supply stays unset, which is why absence of a field is never by itself evidence that a condition did not happen.
 A surface that promotes nothing says so: an empty row is a stated fact, not an omission.
+The last column is different in kind: it is the author's account of the row or evidence fields an event of that surface carries, declared per arm and compared to nothing, so read it as documentation rather than as a checked contract. An empty cell means the arm declares none, not that the event carries none.
 
-| Surface | Event ids | Fields set |
-|---|---|---|
-| `win_dism_command_failed` / `default` | n/a | `win.servicing.dism.component` |
-| `win_dism_feature_change_failed` / `default` | n/a | `win.servicing.dism.component` |
-| `win_dism_health_command` / `default` | n/a | `win.servicing.dism.component` |
-| `win_dism_reboot_required` / `default` | n/a | `win.servicing.dism.component` |
-| `win_dism_source_files_missing` / `default` | n/a | `win.servicing.dism.component` |
+| Surface | Event ids | Fields set | Row fields |
+|---|---|---|---|
+| `win_dism_command_failed` / `default` | n/a | `win.servicing.dism.component` |  |
+| `win_dism_feature_change_failed` / `default` | n/a | `win.servicing.dism.component` |  |
+| `win_dism_health_command_run` / `default` | n/a | `win.servicing.dism.component` |  |
+| `win_dism_reboot_required` / `default` | n/a | `win.servicing.dism.component` |  |
+| `win_dism_source_files_missing` / `default` | n/a | `win.servicing.dism.component` |  |

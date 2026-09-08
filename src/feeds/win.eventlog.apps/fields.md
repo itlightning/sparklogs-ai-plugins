@@ -1,7 +1,7 @@
 <!-- GENERATED reference. Do not hand-edit. -->
 <!-- Public reference tree: field meaning and usage. All example values are synthetic. -->
 
-# Field schema: `sparklogs.agent.log`
+# Field schema: `win.eventlog.apps`
 
 Generated from the module registries at pack-render time.
 Hand edits are lost.
@@ -16,15 +16,14 @@ Read every row below as a query contract, the same way a reason slug is read.
 
 ## Raw fallback
 
-This source has no named provider payload, so there is no field-shaped raw fallback.
-A value that is not promoted here lives in the retained message text and nowhere else.
-
-Message field extraction is disabled on this module.
-The rendered `key=value` tail exists to be READ, not re-parsed: its values are not extracted into fields, so query the promoted field named for each tail key below, never the tail key itself.
+Every value the provider emits under a NAME is still queryable at rest under `event_data.<ProviderFieldName>`, whether or not this module promotes it.
+Provider names are case-sensitive: `event_data.ipaddress` does not match `IpAddress`.
+Prefer the promoted field when one exists: promoted fields are stable across pack versions, normalized, and documented here, while the raw payload is provider surface that can change with a vendor build.
+A promoted field being absent does not mean the raw one is: promotion is per curated surface, so a field promoted on one event id may be raw-only on another.
 
 ## Module fields
 
-Stored flat under the `sparklogs.agent.log.` prefix.
+Stored flat under the `win.eventlog.apps.` prefix.
 
 | LQL path | Type | Meaning |
 |---|---|---|
@@ -42,19 +41,3 @@ The last column is different in kind: it is the author's account of the row or e
 
 | Surface | Event ids | Fields set | Row fields |
 |---|---|---|---|
-| `sparklogs_agent_config_rejected` / `default` | n/a | **fields: none** |  |
-| `sparklogs_agent_emission_capped` / `default` | n/a | **fields: none** |  |
-| `sparklogs_agent_spool_drop` / `default` | n/a | **fields: none** |  |
-| `sparklogs_agent_spool_expire` / `default` | n/a | **fields: none** |  |
-| `sparklogs_agent_spool_truncate` / `default` | n/a | **fields: none** |  |
-
-### Surfaces that promote nothing
-
-These carry class, reason and message text only.
-A predicate over them uses the reason, the class, or the retained payload; there is no promoted field to filter on.
-
-- `sparklogs_agent_config_rejected` / `default`
-- `sparklogs_agent_emission_capped` / `default`
-- `sparklogs_agent_spool_drop` / `default`
-- `sparklogs_agent_spool_expire` / `default`
-- `sparklogs_agent_spool_truncate` / `default`

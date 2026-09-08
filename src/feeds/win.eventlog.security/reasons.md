@@ -6,60 +6,68 @@
 Open this file and search the reason heading. Do not read the whole file.
 Every section below is from the public reason block only.
 
-| reason | service | severity |
-|---|---|---|
-| `account_changed` | `security_audit` | Notice |
-| `account_created` | `security_audit` | Notice |
-| `account_deleted` | `security_audit` | Notice |
-| `account_disabled` | `security_audit` | Notice |
-| `account_enabled` | `security_audit` | Notice |
-| `account_locked_out` | `auth` | Error (privileged account) / Warning |
-| `account_password_change_failed` | `security_audit` | Info |
-| `account_password_reset` | `security_audit` | Warning |
-| `account_password_reset_failed` | `security_audit` | Warning |
-| `anonymous_remote_logon` | `auth` | Notice |
-| `audit_events_dropped` | `security_audit` | Error when records were discarded; Debug when the count is zero |
-| `audit_log_cleared` | `security_audit` | Critical (non-system clearer) / Error |
-| `audit_log_full` | `security_audit` | Serious |
-| `audit_pipeline_error` | `security_audit` | Warning |
-| `audit_policy_changed` | `security_audit` | Warning |
-| `ca_request_failed` | `certificates` | Warning |
-| `ca_tamper` | `certificates` | Serious (audit filter changed or CA database rows deleted) / Error (permissions or certificate-manager settings) |
-| `crypto_selftest_failed` | `security_audit` | Error |
-| `directory_object_access_denied` | `directory_services` | Notice |
-| `directory_object_changed` | `directory_services` | Warning |
-| `directory_replication_access` | `directory_services` | Warning (any other account) / Info (a domain controller, a platform identity, or a directory-sync connector under its default name) |
-| `domain_policy_changed` | `security_audit` | Warning; Debug for the platform writing a new machine's own setup policy |
-| `dsrm_password_changed` | `security_audit` | Serious (completed change) / Error (failed attempt) |
-| `event_logging_stopped` | `security_audit` | Info |
-| `explicit_credential_use` | `auth` | Info |
-| `firewall_rule_changed` | `networking` | Warning |
-| `firewall_service_stopped` | `networking` | Warning |
-| `group_member_added` | `security_audit` | Error (privileged group) / Notice (any other security group) |
-| `group_member_removed` | `security_audit` | Warning (privileged group) / Notice (any other security group) |
-| `group_membership_changed` | `security_audit` | Warning (privileged group) / Notice (any other security group) / Info (Windows provisioning its own builtin groups) |
-| `guest_account_sign_in` | `auth` | Notice |
-| `insecure_boot_config` | `security_audit` | Warning |
-| `kerberos_preauth_failed` | `auth` | Warning (account state or broken infrastructure) / Notice (wrong password, unknown client, undecoded) |
-| `kerberos_rc4_ticket` | `auth` | Warning |
-| `kerberos_ticket_failed` | `auth` | Warning (account state or broken infrastructure) / Notice (wrong password, unknown principal, expired, undecoded) |
-| `logon_failed` | `auth` | Warning (account-state) / Notice (other) / Verbose (credential-less probe) |
-| `logon_right_granted` | `security_audit` | Notice |
-| `logon_right_removed` | `security_audit` | Notice |
-| `network_share_added` | `file_sharing` | Warning |
-| `nps_access_denied` | `auth` | Warning (policy or infrastructure defect) / Notice (credentials, account state, undecoded) |
-| `nps_lockout` | `auth` | Error (privileged account) / Warning |
-| `nps_request_discarded` | `auth` | Warning |
-| `ntlm_validation_failed` | `auth` | Warning (account state) / Notice (wrong password, unknown username, undecoded) |
-| `principal_renamed` | `security_audit` | Notice for a rename that changed the name; Debug when the old and new names are identical |
-| `psdirect_handshake_probe` | `auth` | Debug |
-| `registry_value_changed` | `security_audit` | Warning |
-| `replay_attack_detected` | `auth` | Error |
-| `scheduled_task_changed` | `scheduled_tasks` | Warning (create/delete/update) / Info (disable) |
-| `service_installed` | `security_audit` | Notice |
-| `sid_history_changed` | `security_audit` | Serious (added) / Error (failed attempt) |
-| `special_group_logon` | `security_audit` | Warning |
-| `system_time_changed` | `time_sync` | Warning (non-time-service) / Debug (routine time service) |
+| reason | service | severity | benign |
+|---|---|---|---|
+| `account_changed` | `security_audit` | Notice |  |
+| `account_created` | `security_audit` | Notice |  |
+| `account_deleted` | `security_audit` | Notice |  |
+| `account_disabled` | `security_audit` | Notice |  |
+| `account_enabled` | `security_audit` | Notice |  |
+| `account_locked_out` | `auth` | Error (privileged account) / Warning |  |
+| `account_password_change_failed` | `security_audit` | Info |  |
+| `account_password_reset` | `security_audit` | Warning |  |
+| `account_password_reset_failed` | `security_audit` | Warning |  |
+| `adcs_audit_evidence_tampered` | `certificates` | Serious |  |
+| `adcs_config_changed` | `certificates` | Error |  |
+| `adcs_request_failed` | `certificates` | Warning |  |
+| `anonymous_remote_logon` | `auth` | Notice |  |
+| `audit_events_dropped` | `security_audit` | Error when records were discarded; Debug when the count is zero |  |
+| `audit_log_cleared` | `security_audit` | Critical (non-system clearer) / Error |  |
+| `audit_log_full` | `security_audit` | Serious |  |
+| `audit_pipeline_error` | `security_audit` | Warning |  |
+| `audit_policy_changed` | `security_audit` | Warning |  |
+| `crypto_selftest_failed` | `os_stability` | Error |  |
+| `directory_object_access_denied` | `directory_services` | Notice |  |
+| `directory_object_changed` | `directory_services` | Warning |  |
+| `directory_replication_access_requested` | `directory_services` | Warning (any other account) / Info (a domain controller, a platform identity, or a directory-sync connector under its default name) |  |
+| `domain_policy_changed` | `security_audit` | Warning; Debug for the platform writing a new machine's own setup policy |  |
+| `dsrm_password_change_failed` | `security_audit` | Error |  |
+| `dsrm_password_changed` | `security_audit` | Serious |  |
+| `event_logging_stopped` | `security_audit` | Info |  |
+| `explicit_credential_use` | `auth` | Info |  |
+| `firewall_rule_changed` | `networking` | Warning |  |
+| `firewall_service_stopped` | `networking` | Warning |  |
+| `group_member_added` | `security_audit` | Error (privileged group) / Notice (any other security group) |  |
+| `group_member_removed` | `security_audit` | Warning (privileged group) / Notice (any other security group) |  |
+| `guest_account_sign_in` | `auth` | Notice |  |
+| `insecure_boot_config` | `hardware` | Warning |  |
+| `kerberos_preauth_failed` | `auth` | Warning (account state or broken infrastructure) / Notice (wrong password, unknown client, undecoded) |  |
+| `kerberos_rc4_ticket` | `auth` | Warning |  |
+| `kerberos_ticket_failed` | `auth` | Warning (account state or broken infrastructure) / Notice (wrong password, unknown principal, expired, undecoded) |  |
+| `logon_failed` | `auth` | Warning (account-state) / Notice (other) / Verbose (credential-less probe) | benign possible |
+| `logon_right_granted` | `security_audit` | Notice |  |
+| `logon_right_removed` | `security_audit` | Notice |  |
+| `network_share_added` | `file_sharing` | Warning |  |
+| `nps_access_denied` | `auth` | Warning (policy or infrastructure defect) / Notice (credentials, account state, undecoded) |  |
+| `nps_lockout` | `auth` | Error (privileged account) / Warning |  |
+| `nps_request_discarded` | `auth` | Warning |  |
+| `ntlm_validation_failed` | `auth` | Warning (account state) / Notice (wrong password, unknown username, undecoded) |  |
+| `principal_renamed` | `security_audit` | Notice for a rename that changed the name; Debug when the old and new names are identical |  |
+| `psdirect_handshake_probe` | `auth` | Debug | benign |
+| `registry_value_changed` | `security_audit` | Warning |  |
+| `replay_attack_detected` | `auth` | Error |  |
+| `scheduled_task_created` | `scheduled_tasks` | Warning |  |
+| `scheduled_task_deleted` | `scheduled_tasks` | Warning |  |
+| `scheduled_task_disabled` | `scheduled_tasks` | Info |  |
+| `scheduled_task_updated` | `scheduled_tasks` | Warning |  |
+| `security_group_changed` | `security_audit` | Warning for a privileged group, Notice for any other security group, Info when Windows configures its own builtin groups. |  |
+| `security_group_created` | `security_audit` | Warning for a privileged group, Notice for any other security group, Info when Windows provisions its own builtin groups. |  |
+| `security_group_deleted` | `security_audit` | Warning for a privileged group, Notice for any other security group. |  |
+| `service_installed` | `security_audit` | Notice |  |
+| `sid_history_add_failed` | `security_audit` | Error |  |
+| `sid_history_added` | `security_audit` | Serious |  |
+| `special_group_logon` | `security_audit` | Warning |  |
+| `system_time_changed` | `time_sync` | Warning (non-time-service) / Debug (routine time service) |  |
 
 ## `account_changed`
 
@@ -187,6 +195,52 @@ One principal attempted to reset the password of another principal and the reset
 An event that states neither success nor failure is reported here rather than as a completed
 reset.
 
+## `adcs_audit_evidence_tampered`
+
+The Certification Authority audit filter was changed, or rows were deleted from the CA database.
+
+**Severity:** Serious
+
+**Impact:** Less of what the CA does can be reconstructed afterwards. A narrowed audit filter stops recording issuance events, and a deleted database row removes the record of a certificate that may still be trusted wherever it was presented.
+
+**Consider:**
+
+- Confirm change window against approved CA maintenance
+- Remember these events only appear when CA auditing is fully enabled
+- Check what issuance records exist either side of the change
+
+These two ids carry the higher band because they reduce what can be audited later. Permission
+and certificate-manager changes are adcs_config_changed.
+
+## `adcs_config_changed`
+
+Certification Authority control settings changed: the security permissions on Certificate Services, or who may act as a certificate manager.
+
+**Severity:** Error
+
+**Impact:** Who can administer the CA or approve certificates has changed, and it stays changed until somebody changes it back. On an enterprise CA that is a control-plane change worth confirming.
+
+**Consider:**
+
+- Confirm change window against approved CA maintenance
+- Remember these events only appear when CA auditing is fully enabled
+
+Permissions and certificate-manager changes have routine administrative forms, which is why they
+carry a lower band than the audit-filter and database-deletion pair.
+
+## `adcs_request_failed`
+
+A certification authority denied or failed a certificate request.
+
+**Severity:** Warning
+
+**Impact:** The requester did not receive a certificate. May be expected policy denial or a broken enrollment path for that template/host.
+
+**Consider:**
+
+- Confirm whether the denial matches intended enrollment policy
+- Absence of these events does not prove quiet CA activity (auditing is double-gated)
+
 ## `anonymous_remote_logon`
 
 A sign-in succeeded with no identity, from a machine other than this one. Windows uses anonymous logons routinely for its own local plumbing, but those name no source machine; this one did.
@@ -273,35 +327,6 @@ Local audit policy changed (system, object security descriptor, or per-user). Th
 - Use SubcategoryGuid to see which subcategory changed
 - On DCs, correlate with GPO refresh before treating every hit as tamper
 
-## `ca_request_failed`
-
-A certification authority denied or failed a certificate request.
-
-**Severity:** Warning
-
-**Impact:** The requester did not receive a certificate. May be expected policy denial or a broken enrollment path for that template/host.
-
-**Consider:**
-
-- Confirm whether the denial matches intended enrollment policy
-- Absence of these events does not prove quiet CA activity (auditing is double-gated)
-
-## `ca_tamper`
-
-Certification Authority control settings changed (security permissions, audit filter, certificate-manager settings) or rows were deleted from the CA database.
-
-**Severity:** Serious (audit filter changed or CA database rows deleted) / Error (permissions or certificate-manager settings)
-
-**Impact:** Future certificate issuance may be less auditable, or CA policy may have shifted. Unexpected changes deserve immediate review on any enterprise CA.
-
-**Consider:**
-
-- Confirm change window against approved CA maintenance
-- Remember these events only appear when CA auditing is fully enabled
-
-The audit-filter and database-deletion forms carry the higher band because they reduce what can
-be audited later; permissions and certificate-manager changes have routine administrative forms.
-
 ## `crypto_selftest_failed`
 
 A FIPS cryptographic self-test failed. The platform could not verify its crypto primitives.
@@ -345,7 +370,7 @@ A directory service object was created, modified, moved, or deleted. Typical on 
 config_change.action reads updated on the modification id and created or deleted on the ids that
 name those directions, so pivot on the action rather than assuming one value.
 
-## `directory_replication_access`
+## `directory_replication_access_requested`
 
 An account asked a domain controller for directory replication rights, the access that lets a caller read directory content in bulk. Domain controllers do this with each other constantly; almost nothing else has a reason to.
 
@@ -383,20 +408,36 @@ Password or lockout policy for a domain was changed.
 The domain the policy belongs to rides the config-change target. The full before-and-after
 setting list stays in the retained event payload rather than becoming fields.
 
+## `dsrm_password_change_failed`
+
+An attempt to set the Directory Services Restore Mode (DSRM) password on a domain controller did not succeed. That password unlocks offline DC recovery.
+
+**Severity:** Error
+
+**Impact:** The offline recovery credential is unchanged. The attempt itself is worth accounting for, since the same action succeeding would hand its holder offline access to the controller.
+
+**Consider:**
+
+- Confirm change window and Subject against approved DC maintenance
+- Use Workstation when present to locate where the attempt ran
+- Repeated failures from one source are worth separating from a single mistyped attempt
+
+DC-only in practice. The event proves the attempt, not that any password was used.
+
 ## `dsrm_password_changed`
 
-An attempt was made to set the Directory Services Restore Mode (DSRM) password on a domain controller. That password unlocks offline DC recovery.
+The Directory Services Restore Mode (DSRM) password was set on a domain controller. That password unlocks offline DC recovery.
 
-**Severity:** Serious (completed change) / Error (failed attempt)
+**Severity:** Serious
 
 **Impact:** Whoever holds the DSRM password can recover or manipulate that DC offline. Unexpected changes are a high-priority integrity concern.
 
 **Consider:**
 
 - Confirm change window and Subject against approved DC maintenance
-- Use Workstation when present to locate where the attempt ran
+- Use Workstation when present to locate where the change ran
 
-DC-only in practice. The event proves the attempt or the change, not that the password was used.
+DC-only in practice. The event proves the change, not that the password was used.
 
 ## `event_logging_stopped`
 
@@ -480,20 +521,6 @@ A member was removed from a security-enabled group. Removals from privileged gro
 - The group is the target (kind group): every change to it is one target.id query
 - The removed principal is the member family; group-in-group nesting reads member.kind
 - Scheduled deprovisioning produces this row too; the event cannot tell it from tampering
-
-## `group_membership_changed`
-
-A security group was created, deleted, or changed (scope, type, or attributes). Changes to privileged groups (Administrators, Domain Admins, and similar) carry a higher band. Member adds and removals are their own reasons: group_member_added and group_member_removed.
-
-**Severity:** Warning (privileged group) / Notice (any other security group) / Info (Windows provisioning its own builtin groups)
-
-**Impact:** What the group grants changes everywhere it is referenced, for every member at once. A deleted operator group revokes rights across every account that held them through it.
-
-**Consider:**
-
-- The group is the target (kind group): every change to it is one target.id query
-- config_change.action carries created/deleted/updated for the lifecycle direction
-- Locale-safe: privilege test uses SID/RID, not group display name
 
 ## `guest_account_sign_in`
 
@@ -745,22 +772,103 @@ Windows reported a Kerberos authentication replay. Rare; treat as high-signal ev
 One event is enough to act on. The event reports a detected replay; it does not show that any
 access succeeded.
 
-## `scheduled_task_changed`
+## `scheduled_task_created`
 
-A scheduled task was created, deleted, updated, or disabled. Content changes are louder than a lone disable; re-enable alone is not labeled here.
+A scheduled task was created.
 
-**Severity:** Warning (create/delete/update) / Info (disable)
+**Severity:** Warning
 
-**Impact:** Tasks can run code on a schedule or at logon. Unexpected creates or content edits are a common persistence path; disables can hide monitoring jobs.
+**Impact:** The new task can run code on a schedule or at logon, under whatever identity it was registered with. Unexpected creates are a common persistence path.
 
 **Consider:**
 
 - Pivot on TaskName and Subject
 - Task XML stays in the raw payload; do not expect it as a curated field
-- The run-as password is not in the XML; Command/Arguments may still hold secrets and are swept with other event_data strings
+- The run-as password is not in the XML; Command and Arguments may still hold secrets and are swept with other event_data strings
 
-config_change.action reads updated on the modification id and created or deleted on the ids that
-name those directions, so pivot on the action rather than assuming one value.
+## `scheduled_task_deleted`
+
+A scheduled task was deleted.
+
+**Severity:** Warning
+
+**Impact:** Whatever the task did on its schedule will not happen again, and nothing on the host restores it. A deletion can equally be routine housekeeping or an attacker removing their own task after it ran.
+
+**Consider:**
+
+- Pivot on TaskName and Subject
+- Check whether the same task name was created shortly before
+- Task XML stays in the raw payload; do not expect it as a curated field
+
+## `scheduled_task_disabled`
+
+A scheduled task was disabled. The task still exists and no longer runs.
+
+**Severity:** Info
+
+**Impact:** Whatever the task did on its schedule stops until it is enabled again. Most disables are routine, but disabling a monitoring or backup job is also how it is switched off quietly.
+
+**Consider:**
+
+- Pivot on TaskName and Subject
+- A re-enable is not labeled on its own; read the disable next to the surrounding activity
+- Task XML stays in the raw payload; do not expect it as a curated field
+
+## `scheduled_task_updated`
+
+An existing scheduled task's definition was updated.
+
+**Severity:** Warning
+
+**Impact:** The task keeps its name and now runs something else, on a different schedule, or as a different identity. An edit to a trusted task is a quieter persistence path than a new one.
+
+**Consider:**
+
+- Pivot on TaskName and Subject
+- Compare against the last create or update of the same task name
+- Task XML stays in the raw payload; do not expect it as a curated field
+
+## `security_group_changed`
+
+A security group's scope, type, or attributes changed. Changes to privileged groups (Administrators, Domain Admins, and similar) carry a higher band.
+
+**Severity:** Warning for a privileged group, Notice for any other security group, Info when Windows configures its own builtin groups.
+
+**Impact:** What the group reaches changes everywhere it is referenced, for every member at once. A retype or re-scope carries the existing members into a different set of resources.
+
+**Consider:**
+
+- The group is the target (kind group): every change to it is one target.id query
+- Locale-safe: privilege test uses SID/RID, not group display name
+- These ids grant nothing: a membership change is a different reason
+
+## `security_group_created`
+
+A security group was created. Creation of a privileged group (Administrators, Domain Admins, and similar) carries a higher band.
+
+**Severity:** Warning for a privileged group, Notice for any other security group, Info when Windows provisions its own builtin groups.
+
+**Impact:** A new grant surface exists. Nothing has been granted through it yet: everything added to the group later inherits whatever the group carries.
+
+**Consider:**
+
+- The group is the target (kind group): every change to it is one target.id query
+- Locale-safe: privilege test uses SID/RID, not group display name
+- Windows creating its own builtin groups during setup is the everyday-tier population
+
+## `security_group_deleted`
+
+A security group was deleted. Deletion of a privileged group (Administrators, Domain Admins, and similar) carries a higher band.
+
+**Severity:** Warning for a privileged group, Notice for any other security group.
+
+**Impact:** Every account that held rights through the group loses them at once, and permission references to the group elsewhere stop resolving. Nothing on the host reconciles that.
+
+**Consider:**
+
+- The group is the target (kind group): every change to it is one target.id query
+- Locale-safe: privilege test uses SID/RID, not group display name
+- Windows never deletes its own builtin groups, so a SYSTEM delete of one is not provisioning
 
 ## `service_installed`
 
@@ -775,21 +883,37 @@ A Windows service was installed. This Security-channel event appears when servic
 - Inspect the service name, the installed image path, and the account it runs as together
 - Cross-check System SCM install events when Security auditing is off
 
-## `sid_history_changed`
+## `sid_history_add_failed`
 
-SID History was added to an account, or an attempt to add it failed. Rare outside migrations; often a privilege-inheritance or persistence tell.
+An attempt to add SID History to an account did not succeed. Rare outside migrations.
 
-**Severity:** Serious (added) / Error (failed attempt)
+**Severity:** Error
 
-**Impact:** The account may inherit rights from another domain SID. Treat unexpected adds as high-signal until migration context is confirmed.
+**Impact:** The account's rights are unchanged. The attempt is still worth accounting for, since the same action succeeding would give the account rights carried by another domain SID.
+
+**Consider:**
+
+- Confirm whether a domain migration or SID-history tooling is in progress
+- Inspect Subject and TargetUserName together
+- Repeated failures against one target read differently from a single tooling error
+
+The event proves the attempt, not that any rights were inherited.
+
+## `sid_history_added`
+
+SID History was added to an account. Rare outside migrations; often a privilege-inheritance or persistence tell.
+
+**Severity:** Serious
+
+**Impact:** The account inherits rights carried by the added SID, including rights granted in another domain. Treat unexpected adds as high-signal until migration context is confirmed.
 
 **Consider:**
 
 - Confirm whether a domain migration or SID-history tooling is in progress
 - Inspect Subject and TargetUserName together
 
-One event is enough to act on. The event proves the SID History write or the failed attempt; it
-does not show that the inherited rights were used.
+One event is enough to act on. The event proves the SID History write; it does not show that the
+inherited rights were used.
 
 ## `special_group_logon`
 

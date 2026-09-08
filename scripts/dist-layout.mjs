@@ -81,7 +81,7 @@ export const DIST_ROOT_DOCS_EXCLUDE = new Set([
   'docs/maintainer-guide.md',
 ]);
 
-export const FEED_ID = /^[a-z][a-z0-9]*(?:\.[a-z][a-z0-9]*)*$/;
+export const FEED_ID = /^[a-z][a-z0-9_]*(?:\.[a-z][a-z0-9_]*)*$/;
 
 // SKILL.md is ~59 KiB today. A dump that is not an index should fail before it ships.
 export const MAX_SRC_FILE_BYTES = 128 * 1024;

@@ -139,6 +139,12 @@ Playbooks are incomplete recipes. If a recipe LQL produces empty results: widen 
 | `win.eventlog.system` | System channel: services, drivers, kernel, VSS, storage | `feeds/win.eventlog.system/` |
 | `win.eventlog.application` | Application channel: app crashes, hangs, vendor app events | `feeds/win.eventlog.application/` |
 | `win.eventlog.setup` | Windows Update results per update | `feeds/win.eventlog.setup/` |
+| `win.eventlog.platform` | Platform channels: kernel, PnP, boot, power, drivers | `feeds/win.eventlog.platform/` |
+| `win.eventlog.storage` | Storage channels: disks, volumes, NTFS, storage drivers | `feeds/win.eventlog.storage/` |
+| `win.eventlog.network` | Network channels: SMB client and server, DHCP, DNS client, Wi-Fi, firewall | `feeds/win.eventlog.network/` |
+| `win.eventlog.identity_security` | Identity and security channels: code integrity, exploit protection, Group Policy, Entra and TPM | `feeds/win.eventlog.identity_security/` |
+| `win.eventlog.management` | Management channels: Task Scheduler, BITS, WinRM, WMI, Windows Update client | `feeds/win.eventlog.management/` |
+| `win.eventlog.apps` | Apps channels: packaged apps, app model, application compatibility | `feeds/win.eventlog.apps/` |
 | `win.servicing.cbs` | CBS servicing internals: component store, packages | `feeds/win.servicing.cbs/` |
 | `win.servicing.dism` | DISM operations and image health | `feeds/win.servicing.dism/` |
 | `win.defender.eventlog` | Defender: threats, protection state | `feeds/win.defender.eventlog/` |

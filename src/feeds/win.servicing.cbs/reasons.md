@@ -6,39 +6,39 @@
 Open this file and search the reason heading. Do not read the whole file.
 Every section below is from the public reason block only.
 
-| reason | service | severity |
-|---|---|---|
-| `win_component_store_assembly_missing` | `patching` | Notice pin |
-| `win_component_store_corrupt_blocks_package` | `patching` | Warning pin |
-| `win_component_store_corruption_recurrence` | `patching` | Notice pin |
-| `win_component_store_file_repaired` | `patching` | Notice pin |
-| `win_component_store_flag_corruption_suspected` | `patching` | Notice pin |
-| `win_component_store_payload_corrupt` | `patching` | Notice pin |
-| `win_component_store_payload_unrepairable` | `patching` | Warning pin |
-| `win_component_store_repair_completed` | `patching` | Notice pin |
-| `win_component_store_repair_unavailable` | `patching` | Warning pin |
-| `win_component_store_reprojection_failed` | `patching` | Notice pin |
-| `win_component_store_scan_found_corruption` | `patching` | Notice pin |
-| `win_component_store_scan_repaired_corruption` | `patching` | Notice pin |
-| `win_component_store_source_missing` | `patching` | Warning pin |
-| `win_component_store_sxs_corrupt` | `patching` | Warning pin |
-| `win_servicing_commit_skipped_reboot_required` | `patching` | Notice pin |
-| `win_servicing_delta_patch_failed` | `patching` | Notice pin |
-| `win_servicing_duplicate_update_name` | `patching` | Notice pin |
-| `win_servicing_manifest_malformed` | `patching` | Notice pin |
-| `win_servicing_manifest_unparseable` | `patching` | Debug pin |
-| `win_servicing_package_change_reported` | `patching` | Debug pin |
-| `win_servicing_package_stage_failed` | `patching` | Warning pin |
-| `win_servicing_session_finalized` | `patching` | Debug pin |
-| `win_servicing_startup_package_failed` | `patching` | Notice pin |
-| `win_servicing_update_package_create_failed` | `patching` | Warning pin |
-| `win_sfc_repairing_components` | `patching` | Notice pin |
+| reason | service | severity | benign |
+|---|---|---|---|
+| `win_component_store_assembly_missing` | `patching` | Notice |  |
+| `win_component_store_corrupt_blocks_package` | `patching` | Warning |  |
+| `win_component_store_corruption_recurrence` | `patching` | Notice |  |
+| `win_component_store_file_repaired` | `patching` | Notice |  |
+| `win_component_store_flag_corruption_suspected` | `patching` | Notice |  |
+| `win_component_store_payload_corrupt` | `patching` | Notice |  |
+| `win_component_store_payload_unrepairable` | `patching` | Warning |  |
+| `win_component_store_repair_completed` | `patching` | Notice |  |
+| `win_component_store_repair_unavailable` | `patching` | Warning |  |
+| `win_component_store_reprojection_failed` | `patching` | Notice |  |
+| `win_component_store_scan_found_corruption` | `patching` | Notice |  |
+| `win_component_store_scan_repaired_corruption` | `patching` | Notice |  |
+| `win_component_store_source_missing` | `patching` | Warning |  |
+| `win_component_store_sxs_corrupt` | `patching` | Warning |  |
+| `win_servicing_commit_skipped_reboot_required` | `patching` | Notice |  |
+| `win_servicing_delta_patch_failed` | `patching` | Notice |  |
+| `win_servicing_duplicate_update_name` | `patching` | Notice |  |
+| `win_servicing_manifest_malformed` | `patching` | Notice |  |
+| `win_servicing_manifest_unparseable` | `patching` | Debug |  |
+| `win_servicing_package_change_reported` | `patching` | Debug |  |
+| `win_servicing_package_stage_failed` | `patching` | Warning |  |
+| `win_servicing_session_finalized` | `patching` | Debug |  |
+| `win_servicing_startup_package_failed` | `patching` | Notice |  |
+| `win_servicing_update_package_create_failed` | `patching` | Warning |  |
+| `win_sfc_repairing_components` | `patching` | Notice |  |
 
 ## `win_component_store_assembly_missing`
 
 A component assembly is missing from the store.
 
-**Severity:** Notice pin
+**Severity:** Notice
 
 **Impact:** Windows will usually repair this automatically.
 
@@ -46,7 +46,7 @@ A component assembly is missing from the store.
 
 A Windows package failed to apply because the component store is corrupt.
 
-**Severity:** Warning pin
+**Severity:** Warning
 
 **Impact:** Updates will keep failing on this machine until the component store is repaired.
 
@@ -54,7 +54,7 @@ A Windows package failed to apply because the component store is corrupt.
 
 Windows reported how often component-store corruption has been detected.
 
-**Severity:** Notice pin
+**Severity:** Notice
 
 **Impact:** None directly. A rising count suggests the underlying cause is not being fixed.
 
@@ -62,7 +62,7 @@ Windows reported how often component-store corruption has been detected.
 
 Windows repaired a file from its component store or backup.
 
-**Severity:** Notice pin
+**Severity:** Notice
 
 **Impact:** None. The file was restored.
 
@@ -70,7 +70,7 @@ Windows repaired a file from its component store or backup.
 
 Windows suspects component-store file-flag corruption.
 
-**Severity:** Notice pin
+**Severity:** Notice
 
 **Impact:** None established. The event records a suspicion, not a finding.
 
@@ -78,7 +78,7 @@ Windows suspects component-store file-flag corruption.
 
 A payload file in the component store is corrupt.
 
-**Severity:** Notice pin
+**Severity:** Notice
 
 **Impact:** Windows will usually repair this automatically.
 
@@ -86,7 +86,7 @@ A payload file in the component store is corrupt.
 
 Windows could not repair a damaged payload file.
 
-**Severity:** Warning pin
+**Severity:** Warning
 
 **Impact:** Servicing operations needing this payload will fail until it is restored.
 
@@ -94,7 +94,7 @@ Windows could not repair a damaged payload file.
 
 Windows repaired all recorded component-store corruption.
 
-**Severity:** Notice pin
+**Severity:** Notice
 
 **Impact:** None. The store is consistent again.
 
@@ -102,7 +102,7 @@ Windows repaired all recorded component-store corruption.
 
 Windows could not repair a damaged component.
 
-**Severity:** Warning pin
+**Severity:** Warning
 
 **Impact:** Updates touching this component are likely to fail until it is repaired manually.
 
@@ -110,7 +110,7 @@ Windows could not repair a damaged component.
 
 Windows could not reproject a component.
 
-**Severity:** Notice pin
+**Severity:** Notice
 
 **Impact:** Usually none: the operation is normally retried.
 
@@ -118,7 +118,7 @@ Windows could not reproject a component.
 
 A component-store scan detected corruption.
 
-**Severity:** Notice pin
+**Severity:** Notice
 
 **Impact:** Windows updates may fail later if the damage is not repaired. Detection alone does not mean anything is currently broken.
 
@@ -126,7 +126,7 @@ A component-store scan detected corruption.
 
 A component-store scan repaired corruption it found.
 
-**Severity:** Notice pin
+**Severity:** Notice
 
 **Impact:** None. The damage was fixed.
 
@@ -134,7 +134,7 @@ A component-store scan repaired corruption it found.
 
 A servicing operation could not find the source files it needed.
 
-**Severity:** Warning pin
+**Severity:** Warning
 
 **Impact:** Repair or install will keep failing until a valid source is supplied.
 
@@ -142,7 +142,7 @@ A servicing operation could not find the source files it needed.
 
 The side-by-side component store is corrupt.
 
-**Severity:** Warning pin
+**Severity:** Warning
 
 **Impact:** Servicing operations may fail until the store is repaired.
 
@@ -150,7 +150,7 @@ The side-by-side component store is corrupt.
 
 A servicing change was deferred because a reboot is pending.
 
-**Severity:** Notice pin
+**Severity:** Notice
 
 **Impact:** The change applies after the next reboot.
 
@@ -158,7 +158,7 @@ A servicing change was deferred because a reboot is pending.
 
 A component delta patch could not be applied.
 
-**Severity:** Notice pin
+**Severity:** Notice
 
 **Impact:** Usually none: Windows falls back to a full payload.
 
@@ -166,7 +166,7 @@ A component delta patch could not be applied.
 
 Windows found a duplicate update name in a package.
 
-**Severity:** Notice pin
+**Severity:** Notice
 
 **Impact:** None established. It may indicate a store inconsistency.
 
@@ -174,7 +174,7 @@ Windows found a duplicate update name in a package.
 
 A component manifest is malformed.
 
-**Severity:** Notice pin
+**Severity:** Notice
 
 **Impact:** Operations touching that component may fail.
 
@@ -182,7 +182,7 @@ A component manifest is malformed.
 
 Windows could not parse a package manifest.
 
-**Severity:** Debug pin
+**Severity:** Debug
 
 **Impact:** That optional feature may not be installable.
 
@@ -190,7 +190,7 @@ Windows could not parse a package manifest.
 
 A Windows package was added, removed or updated.
 
-**Severity:** Debug pin
+**Severity:** Debug
 
 **Impact:** None on its own.
 
@@ -198,7 +198,7 @@ A Windows package was added, removed or updated.
 
 A Windows package could not be staged for installation.
 
-**Severity:** Warning pin
+**Severity:** Warning
 
 **Impact:** That update will not install until the underlying cause is fixed.
 
@@ -206,7 +206,7 @@ A Windows package could not be staged for installation.
 
 A Windows servicing session started and finished.
 
-**Severity:** Debug pin
+**Severity:** Debug
 
 **Impact:** None. This is a liveness marker.
 
@@ -214,7 +214,7 @@ A Windows servicing session started and finished.
 
 A Windows package failed during startup processing.
 
-**Severity:** Notice pin
+**Severity:** Notice
 
 **Impact:** That package is not installed. Patching status is better read from the update client.
 
@@ -222,7 +222,7 @@ A Windows package failed during startup processing.
 
 Windows could not create an update package.
 
-**Severity:** Warning pin
+**Severity:** Warning
 
 **Impact:** That update will not install until the underlying cause is fixed.
 
@@ -230,6 +230,6 @@ Windows could not create an update package.
 
 System File Checker started repairing components.
 
-**Severity:** Notice pin
+**Severity:** Notice
 
 **Impact:** None on its own.

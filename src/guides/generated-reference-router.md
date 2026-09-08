@@ -113,6 +113,42 @@ say in your findings that you were reading uncurated text.
 - `feeds/win.eventlog.setup/enums.md`: the closed token vocabularies that are safe to group by
 - `feeds/win.eventlog.setup/reasons.md`: what each reason means (public summary, severity, impact)
 
+### `win.eventlog.platform`
+
+- `feeds/win.eventlog.platform/README.md`: feed index: what each artifact answers and the order to read them in
+- `feeds/win.eventlog.platform/fields.md`: what exists at rest, what curates it, and the raw fallback when nothing does
+- `feeds/win.eventlog.platform/enums.md`: the closed token vocabularies that are safe to group by
+
+### `win.eventlog.storage`
+
+- `feeds/win.eventlog.storage/README.md`: feed index: what each artifact answers and the order to read them in
+- `feeds/win.eventlog.storage/fields.md`: what exists at rest, what curates it, and the raw fallback when nothing does
+- `feeds/win.eventlog.storage/enums.md`: the closed token vocabularies that are safe to group by
+
+### `win.eventlog.network`
+
+- `feeds/win.eventlog.network/README.md`: feed index: what each artifact answers and the order to read them in
+- `feeds/win.eventlog.network/fields.md`: what exists at rest, what curates it, and the raw fallback when nothing does
+- `feeds/win.eventlog.network/enums.md`: the closed token vocabularies that are safe to group by
+
+### `win.eventlog.identity_security`
+
+- `feeds/win.eventlog.identity_security/README.md`: feed index: what each artifact answers and the order to read them in
+- `feeds/win.eventlog.identity_security/fields.md`: what exists at rest, what curates it, and the raw fallback when nothing does
+- `feeds/win.eventlog.identity_security/enums.md`: the closed token vocabularies that are safe to group by
+
+### `win.eventlog.management`
+
+- `feeds/win.eventlog.management/README.md`: feed index: what each artifact answers and the order to read them in
+- `feeds/win.eventlog.management/fields.md`: what exists at rest, what curates it, and the raw fallback when nothing does
+- `feeds/win.eventlog.management/enums.md`: the closed token vocabularies that are safe to group by
+
+### `win.eventlog.apps`
+
+- `feeds/win.eventlog.apps/README.md`: feed index: what each artifact answers and the order to read them in
+- `feeds/win.eventlog.apps/fields.md`: what exists at rest, what curates it, and the raw fallback when nothing does
+- `feeds/win.eventlog.apps/enums.md`: the closed token vocabularies that are safe to group by
+
 ### `win.servicing.cbs`
 
 - `feeds/win.servicing.cbs/README.md`: feed index: what each artifact answers and the order to read them in
