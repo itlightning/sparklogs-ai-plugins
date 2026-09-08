@@ -181,7 +181,7 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` (value) or `
 
 **Symptom.** A query comes back with N rows. You count them, or you read the earliest and latest row as the data's start and end, and report from that.
 
-**Why it's wrong.** Responses are capped: a wide fieldset or a big match returns ONE PAGE, and the page looks exactly like a complete short answer. The envelope already tells you otherwise: the summary carries the matched TOTAL, and `last_event_at` (col) carries when data actually stops.
+**Why it's wrong.** Responses are capped: a wide fieldset or a big match returns ONE PAGE, and the page looks exactly like a complete short answer. The response already tells you otherwise: the summary carries the matched TOTAL, and `last_event_at` (col) carries when data actually stops.
 
 **The failure this produces.** An investigation read the first page of a capped result, saw its oldest rows dated four days back, and reported that both monitored systems had been dead for four days. Both were healthy and reporting; the later pages were simply never fetched. The contradicting total was in the same response, unread.
 
@@ -205,7 +205,7 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` (value) or `
 
 ### Retrying refine on `cache_invalidated` (value)
 
-**Symptom.** `refine_query_result` (tool) or `get_query_metadata` (tool) returns a successful envelope with `summary.cache_status` (col) `cache_invalidated` (value), and you call refine again on the same `query_id` (arg), or you treat it as `scope_violation` (value) (a bad org list you passed).
+**Symptom.** `refine_query_result` (tool) or `get_query_metadata` (tool) returns a successful response with `summary.cache_status` (col) `cache_invalidated` (value), and you call refine again on the same `query_id` (arg), or you treat it as `scope_violation` (value) (a bad org list you passed).
 
 **Why it's wrong.** The handle is dead for this token. Retrying refine cannot revive it. It is not a caller-argument error: the original query's org snapshot is no longer usable as-is. A new data-tool call with live scope is the recovery.
 
@@ -225,11 +225,11 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` (value) or `
 
 **Why it's wrong.** Those columns count what ARRIVED. They are consistent with any amount of missing middle, so they cannot establish interior coverage at all. Only a data feed's own report can, and it reaches you as `agent_complete_through` (col) with the advisories beside it on the `resolve_scope` (tool) agent row.
 
-**Recovery.** Read `agent_complete_through` (col). If it reaches the end of your window and advisories are empty, one sentence: "data is complete through <instant>". If it is `"unknown"`, say completeness could not be established, which is a statement about the claim, never a fault and never a claim that data is missing. Then stop; a healthy answer does not earn a section.
+**Recovery.** Read-mode table in the skill corpus block. Read `agent_complete_through` (col). If it reaches the end of your window and advisories are empty, one sentence: "data is complete through <instant>". If it is `"unknown"`, say completeness could not be established, which is a statement about the claim, never a fault and never a claim that data is missing. Then stop; a healthy answer does not earn a section. Full rules: `scope-resolution.md` (Completeness).
 
 ### Writing a completeness statement the question did not need
 
-**Symptom.** An investigation into a recurring failure, or a live RCA on something happening now, carries a paragraph about data completeness, feed health, or agent state that no finding depends on.
+**Symptom.** An investigation into a recurring failure, or a live RCA on something happening now, carries a paragraph about data completeness, feed health, or device health that no finding depends on.
 
 **Why it's wrong.** The events in front of you carry an ongoing issue on their own. Completeness prose that changes no conclusion pushes the finding down the page and reads as padding.
 
@@ -255,15 +255,31 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` (value) or `
 
 **Symptom.** You filter on a curated field (`sparklogs.reason` (LQL), a module-prefixed field), get zero rows back, and conclude the system is healthy or the check passed.
 
-**Why it's wrong.** Most WEL rows have no curated reason. Empty `sparklogs.*` fields on an event mean the event is uncurated (this is not a health finding). Empty means this predicate did not match, never "no problem found" and never "the box is unhealthy." Uncurated native text and sibling providers can still carry the ticket.
+**Why it's wrong.** Most WEL rows have no curated reason. Empty `sparklogs.*` fields on an event mean the event is uncurated (this is not a health finding). Empty means this predicate did not match, never "no problem found" and never "the box is unhealthy." Uncurated raw text and sibling providers can still carry the ticket.
 
-**Recovery.** Drop the curated predicate. Group the host by `subsource` (LQL), then follow `guides/stream-kinds.md`. Use `query_event_counts_by_severity` (tool) on `severity` (LQL) or `pattern` (LQL) for volume. Say in WHAT WAS NOT CHECKED which curated filters you tried.
+**Recovery.** Drop the curated predicate. Group the host by `subsource` (LQL), then follow `guides/stream-kinds.md`. Use `query_event_counts_by_severity` (tool) on `severity` (LQL) or `pattern` (LQL) for volume. Say in WHAT WAS NOT CHECKED which curated filters you tried. Corpus block in skill restates the rule.
+
+### Loading a whole `enums.md` or `reasons.md`
+
+**Symptom.** You opened `feeds/<id>/enums.md` or `reasons.md` and read most of the file into context to decode one code or reason.
+
+**Why it's wrong.** `enums.md` can be hundreds of lines per feed. `reasons.md` is long and the summary table up front is enough to pick the right `##` section. Whole-file reads blow context and duplicate what grep or one-section reads give you.
+
+**Recovery.** `enums.md`: grep the HRESULT, NTSTATUS, MSI code, or `##` heading only. `reasons.md`: skim the summary table (~first 100 lines), then open **one** `##` section. Read-mode table: skill corpus block.
+
+### Using `patterns.md` for "what does this mean?"
+
+**Symptom.** You opened `patterns.md` looking for the meaning of a `pattern_hash` (LQL) or vendor message.
+
+**Why it's wrong.** `patterns.md` is a grammar/decision procedure (expected vs unexpected shape), not a meaning catalog. Semantic questions belong elsewhere.
+
+**Recovery.** `describe_pattern` (tool) first, then grep `reasons.md` or `recipes.md`. Use `patterns.md` only when the question is whether the pack meant to produce that string shape (search one heading).
 
 ### Treating a playbook as the event catalog
 
 **Symptom.** You ran the LQL in `playbooks/<symptom>.md`, got little or nothing, and wrote that there are no relevant events, the host is quiet, or the issue cannot be analyzed.
 
-**Why it's wrong.** A playbook is an incomplete starting recipe for a common shape of that symptom. Its `service` (LQL) / `sparklogs.reason` (LQL) / id filters miss uncurated native text, sibling providers, and channels the file never named. Empty recipe LQL is a miss on the recipe, not proof the ticket has no telemetry.
+**Why it's wrong.** A playbook is an incomplete starting recipe for a common shape of that symptom. Its `service` (LQL) / `sparklogs.reason` (LQL) / id filters miss uncurated raw text, sibling providers, and channels the file never named. Empty recipe LQL is a miss on the recipe, not proof the ticket has no telemetry.
 
 **Recovery.** Confirm the source has data in the window (`list_sources` (tool)). Then drop the recipe's extra predicates and group that host by `subsource` (LQL). Open the kind file in `guides/stream-kinds.md` for that `subsource` (LQL) (WEL classic: `provider_name` (LQL) before `pattern` (LQL); file log: `origin` (LQL); device state: `query_device_health` (tool) / `sparklogs.kind` (LQL)+`sparklogs.topic` (LQL)+`sparklogs.reason` (LQL)). Then group as that ladder says, including `sparklogs.reason` (LQL) when populated. Open `feeds/<id>/` only after a subsource showed up. Pull a narrow raw slice of the dominant groups. If you still cannot speak to the ticket, say which discovery steps you ran and put the rest in WHAT WAS NOT CHECKED. Do not stop at the playbook queries.
 
@@ -271,7 +287,7 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` (value) or `
 
 **Symptom.** You ran `list_fields` (tool), then grouped or filtered on every `sparklogs.data.*` path you saw.
 
-**Why it's wrong.** `list_fields` (tool) is a good catalog call. It names fields; it does not rank what matters. For device state, group `sparklogs.kind` (LQL), `sparklogs.topic` (LQL), `sparklogs.reason` (LQL) first (`guides/stream-kinds/device-state.md`). Discovery omits unstable process-id map paths (`sparklogs.data.processes.<pid>...`). Service and similar instance keys can remain in the catalog; they are names to look up, not the ladder.
+**Why it's wrong.** `list_fields` (tool) is a good catalog call. It names fields; it does not rank what matters. For device state, group `sparklogs.kind` (LQL), `sparklogs.topic` (LQL), `sparklogs.reason` (LQL) first (`guides/stream-kinds/device-state.md`). The catalog lists snapshot payload leaves with their array mark (`sparklogs.data.services[].current_state`); those are names to filter on inside `[]()`, not the ladder.
 
 **Recovery.** Latest-in-window: `query_device_health` (tool). Event stream: group `sparklogs.kind` (LQL) / `sparklogs.topic` (LQL) / `sparklogs.reason` (LQL). Use `list_fields` (tool) when you need a name the rows did not already show.
 
@@ -319,7 +335,7 @@ These don't exist in LQL. Use `:`/`*`/`?`, `:`/`/regex/`, `<field>!`/`NOT <field
 
 ### Wildcard JSON paths
 
-`x.services.*.status = STOPPED` does NOT work: type resolution needs an exact path. Use a promoted field, the message, or a direct keyed lookup when the key is known.
+`x.services.*.status = STOPPED` does NOT work: type resolution needs an exact path. For an array of objects use the element grammar (`x.services[](status=stopped)`). Otherwise use a promoted field or the message.
 
 ### Square brackets for value lists
 
@@ -331,7 +347,7 @@ These don't exist in LQL. Use `:`/`*`/`?`, `:`/`/regex/`, `<field>!`/`NOT <field
 
 ### After 2 retries on broken LQL, surface to user
 
-Don't keep retrying with slightly different broken expressions. If the LQL parser returns errors twice in a row, the issue is fundamental - surface to the engineer rather than burning more tool calls.
+Don't keep retrying with slightly different broken expressions. If the LQL parser returns errors twice in a row, the issue is fundamental - surface to the engineer rather than burning more tool calls. Syntax and common parser messages: `guides/lql-reference.md` (parser-errors section).
 
 ---
 

@@ -45,7 +45,7 @@ findings:
     evidence_query_url: <the query_url passed in, optionally with a refinement param>
 patterns_observed:
   - pattern_hash: <hash>
-    pattern_text: <if known>
+    pattern: <if known>
     count: <int>
 notable_observations:
   - <text>
@@ -89,10 +89,10 @@ with a contract attached: it means fetch-first, whatever the ticket was about.
 ```yaml
 top_patterns:
   - pattern_hash: <hash>
-    pattern_text: <from a query_logs message projection filtered to the pattern_hash>
+    pattern: <from a query_logs message projection filtered to the pattern_hash>
     count: <int>
-    likely_meaning: <if matches a catalog entry, the catalog meaning; else null>
-    catalog_match: <pattern_catalog.md entry name or null>
+    likely_meaning: <plain-language from pattern; use describe_pattern or grep feed reasons.md when needed; else null>
+    reason: <sparklogs.reason if identifiable from curation; else null>
 ```
 
 **Delegation heuristic:** when `query_event_counts_by_severity` (tool) returns 50+ groups and you need the top N enumerated with meanings.
@@ -119,7 +119,7 @@ cluster_interpretations:
     pattern_summary: <plain-language description of what the surround patterns suggest>
     representative_event_t: <ISO>
     contributing_sources: <list>
-    catalog_matches: <pattern_catalog.md matches for the surround patterns>
+    related_reasons: <sparklogs.reason values suggested by surround patterns; else empty>
 ```
 
 **Delegation heuristic:** when cluster_event_contexts returns 4+ clusters with non-trivial pattern_hash sets in surrounds.

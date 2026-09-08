@@ -1,9 +1,9 @@
 // Copyright (C) 2026 IT Lightning, LLC. All rights reserved.
 // See LICENSE.
 
-// Load identifier-sot.yaml and harvest LQL paths / reason slugs / app tokens.
-// Prefer a sibling sparklogs-source-library checkout. GitHub CI has none: harvest
-// the same public identifiers from committed src/feeds + app-vocabulary.md.
+// Load identifier-sot.yaml and harvest LQL paths / reason values / app tokens from committed
+// src/feeds (same as GitHub CI). Optional SPARKLOGS_IDENTIFIER_SOT_INCLUDE_LIBRARY=1 merges
+// identifiers from a sibling sparklogs-source-library checkout for pre-sync authoring.
 
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -11,6 +11,7 @@ import yaml from 'js-yaml';
 import {
   DEFAULT_SOURCE_LIBRARY_DIR,
   GENERATED_DIR,
+  IDENTIFIER_SOT_INCLUDE_LIBRARY_ENV,
   LIBRARY_GENERATED_SUBPATH,
   MODULES,
   SOURCE_LIBRARY_DIR_ENV,
@@ -215,19 +216,30 @@ export function membershipError(file, body, tag, hits) {
   return `${file}: \`${body}\` (${tag}) is not in the ${tag} set${hint}`;
 }
 
+function includeLibraryHarvest() {
+  const raw = process.env[IDENTIFIER_SOT_INCLUDE_LIBRARY_ENV];
+  return raw === '1' || raw === 'true';
+}
+
 export async function loadIdentifierSot(root) {
   const yamlPath = path.join(root, 'scripts', 'identifier-sot.yaml');
   const doc = yaml.load(await fs.readFile(yamlPath, 'utf8'));
   if (!doc || typeof doc !== 'object') throw new Error('identifier-sot.yaml is empty');
-  const { dir, explicit } = libraryDir(root);
-  const libPublic = path.join(dir, LIBRARY_GENERATED_SUBPATH);
   let harvested;
-  if (await exists(libPublic)) {
-    harvested = await harvestLibrary(dir);
-  } else if (explicit) {
-    throw new Error(`${SOURCE_LIBRARY_DIR_ENV} is set to ${dir} but it holds no ${LIBRARY_GENERATED_SUBPATH}`);
+  if (includeLibraryHarvest()) {
+    const { dir, explicit } = libraryDir(root);
+    const libPublic = path.join(dir, LIBRARY_GENERATED_SUBPATH);
+    if (await exists(libPublic)) {
+      console.log(`identifier membership: merging sibling source-library at ${dir}`);
+      harvested = await harvestLibrary(dir);
+    } else if (explicit) {
+      throw new Error(`${SOURCE_LIBRARY_DIR_ENV} is set to ${dir} but it holds no ${LIBRARY_GENERATED_SUBPATH}`);
+    } else {
+      console.log(`identifier membership: ${IDENTIFIER_SOT_INCLUDE_LIBRARY_ENV} set but no checkout at ${dir}; using committed ${GENERATED_DIR}`);
+      harvested = await harvestCommittedPlugin(root);
+    }
   } else {
-    console.log(`identifier membership: no source-library checkout at ${dir}, using committed ${GENERATED_DIR}`);
+    console.log(`identifier membership: using committed ${GENERATED_DIR}`);
     harvested = await harvestCommittedPlugin(root);
   }
   return mergeSot(doc, harvested, MODULES);

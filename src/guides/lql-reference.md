@@ -74,6 +74,8 @@ These rules apply to string fields such as `source` (LQL), `app` (LQL), `subsour
 | `field in ("", a, …)` / `field=("", …)` with `""` in the list | The field is missing, null, empty, or matches any other listed value |
 | `field not in (…)` or a negated list that includes `""` | The opposite of the matching rules in the row above |
 
+`""` is what an absent value RENDERS as, in a TSV cell and in a group key; a JSONL row omits the field instead. Pasting `""` back as `field=""` returns the rows it came from.
+
 **Numbers and other non-string types:** `x.count=0` matches only when the stored value is exactly `0`. It does not match a missing field, and a missing field is not treated as zero. Use `NOT x.count!` to test for absence on numeric fields.
 
 Do not use `field:""` (matches every event) or `field!:""` (matches no events). Use `NOT field!` to test for a missing field. Use `field#s!` when you need to assert JSON type on a custom path.
@@ -100,7 +102,15 @@ Do not use `processes!` (LQL) for array presence when the named parent is not it
 Use `path[]!` (LQL).
 
 Bare terms and `any:` (LQL) are not allowed inside `[]()`.
+
+One `[]` per path. A list of plain values inside an element needs no second `[]`: `sparklogs.data.processes[](services="NcbService")` (LQL) matches the process whose services list contains that name, and the same predicate in `select` (arg) with a leaf (`sparklogs.data.processes[](services="NcbService").image_name`) returns that leaf for the matching elements. `[]` is for lists of objects only.
 Name a field on the element, for example `pid=1234` (LQL).
+
+Two terms inside one `[]()` bind to the SAME element; the same two terms as separate `path[].leaf` (LQL) predicates can be satisfied by two different elements.
+
+A bare term does not reach element values. `any:` (LQL) does, at the usual cost.
+
+In `select` (arg), `[]` is accepted only as a trailing array reading today (`path[]` (LQL)); a mid-path `[]` is refused with a message naming the filter grammar, and naming the array alone returns every element. The next server build accepts `path[](pred)` (LQL), `path[](pred).leaf` (LQL) and `path[].leaf` (LQL) in `select` (arg), returning only the matching elements.
 
 ### No `CONTAINS` / `CONTAINS_ANY` / `CONTAINS_ALL` (array fields use scalar operators directly)
 
@@ -123,12 +133,12 @@ LQL does NOT support `state.services.*.status = STOPPED`. Type resolution requir
 **Workarounds:**
 - Filter on a promoted field instead. Curated sources promote the values worth querying to named paths (`sparklogs.*` and the module-prefixed fields); the generated per-source field schema lists them.
 - Use top-level anomaly fields (`anomaly_max_score` (other), `anomaly_categories` (other)) once they are emitted; nothing in the product writes them today.
-- Use a direct keyed lookup **only when the instance key is already known**. Do not discover instance maps via `list_fields` (tool) on `sparklogs.agent.state` (value) (see `guides/stream-kinds/device-state.md`).
+- For an array of objects, use the element grammar above. `list_fields` (tool) lists those leaves with their array mark, so the catalog spelling tells you which form a path needs (`guides/stream-kinds/device-state.md`).
 
 ```
-x.services.*.status = STOPPED     <- WRONG (wildcard JSON paths not supported)
+x.services.*.status = STOPPED            <- WRONG (wildcard JSON paths not supported)
 sparklogs.reason = service_not_running   <- right (promoted field)
-x.services.spooler.status = STOPPED      <- right only if you already know that key
+x.services[](name=spooler AND status=stopped)   <- right (array of objects)
 ```
 
 ---
@@ -156,6 +166,17 @@ failed                                    <- matches events with "failed" in any
 "timed out"                               <- matches events with "timed out" in any standard string field
 win.servicing.dism                        <- matches events with that subsource (or any standard string field)
 ```
+
+A bare term reaches every standard field listed above. It does not reach payload leaves; `any` (other) does.
+
+**Hash paste widening.** An equality on one of the six base fields whose literal has the hash token shape compiles to base OR twin, so a `*_hash` value pastes into either name:
+
+```
+pattern_hash = "divgfo_9v7cgvjijykp0zu5"       <- the twin
+pattern = "divgfo_9v7cgvjijykp0zu5"            <- same rows; the equality widens
+```
+
+**Permanent aliases.** `t` (LQL) and `ingested_t` (LQL) are the timestamp and the ingest timestamp; `org_id` (LQL) is the organization. They are the same names in responses and the names LQL accepts, in every LQL parameter. Inside an element scope (`[]()`) the same three names are payload keys on the element.
 
 ---
 
@@ -254,13 +275,17 @@ x."custom field"."some \"quoted\" field".final_value   <- components with whites
 Append `#` followed by type letter:
 - `#s` - string
 - `#n` - numeric
-- `#i` - 64-bit integer
+- `#i` - 64-bit integer. Forces an exact integer reading of a payload number whose default double reading loses digits on 64-bit ids, hashes and nanosecond timestamps. A non-integral value reads as null instead of rounding.
 - `#t` - timestamp
 - `#b` - boolean
+- `#severity` - ordered severity enum. Renders as a name (ERROR, WARNING, ...); compare by name (`severity >= error` (LQL)), never by number. No arithmetic aggregate (sum/avg/stddev/percentile) - use `min` (value) or `max` (value) instead, or `group_by` (arg).
+- `#facility` - ordered facility enum (kern, user, ...). Same rules as `#severity`: compare by name, no arithmetic aggregate.
 
 `[]` for array. e.g., `x.my_array#i[]` - array of integers.
 
 Auto-resolves type when omitted. Only use type suffix when the field has multiple types and you need to disambiguate.
+
+In a `refine_query_result` (tool) response, a `severity` (LQL) or `facility` (LQL) column reports its `schema.columns` (col) type as the enum name (severity, facility), not i or n - honest to the enum, not the integer storage.
 
 ---
 
@@ -278,7 +303,7 @@ any: "credit card"                       <- search all fields for "credit card"
 
 - **No JOIN** across event rows. LQL is a row predicate.
 - **No subqueries** in filter expressions.
-- **No COUNT or other aggregations in filter expressions.** `query_event_counts_by_severity` (tool) always returns `event_count` (col) plus the per-band severity counts; there is no aggregation list to pass it. Named aggregates (`{fn, col, as}`) live on `refine_query_result` (tool), over a cached result.
+- **No COUNT or other aggregations in filter expressions.** `query_event_counts_by_severity` (tool) always returns `event_count` (col) plus the per-band severity counts; there is no aggregation list to pass it.
 - **No wildcard JSON paths** (per above).
 - **No `LIKE`, `MATCHES`, `IS NULL`, `CONTAINS_ANY`, `CONTAINS_ALL`** keywords.
 
@@ -286,7 +311,7 @@ any: "credit card"                       <- search all fields for "credit card"
 
 ## Canonical recurring patterns
 
-**Field-availability note.** `sparklogs.*` curated fields exist on events a source pack curated, and only on the surfaces that promote them; module-prefixed fields are narrower still. `anomaly_max_score` (other) / `anomaly_categories` (other) are designed and not emitted anywhere in the product today, so they return empty on every source. An empty result on a curated or module field may mean the source never writes that field, so check what the source carries before reading anything into it, and fall back to `severity` (LQL) / `message` (LQL) / `pattern` (LQL), which every source carries. The retired names event_kind, `SLASnapshot`, `SLAAgentOp`, `event_summary` (other), `snapshot_id` (other) and `state.*` resolve to nothing at all: an empty result there is a spelling problem, not a health signal.
+**Field-availability note.** `sparklogs.*` curated fields exist on events a source pack curated, and only on the streams that carry them; module-prefixed fields are narrower still. `anomaly_max_score` (other) / `anomaly_categories` (other) are designed and not emitted anywhere in the product today, so they return empty on every source. An empty result on a curated or module field may mean the source never writes that field, so check what the source carries before reading anything into it, and fall back to `severity` (LQL) / `message` (LQL) / `pattern` (LQL), which every source carries. The retired names event_kind, `SLASnapshot`, `SLAAgentOp`, `event_summary` (other), `snapshot_id` (other) and `state.*` resolve to nothing at all: an empty result there is a spelling problem, not a health signal.
 
 ### Context-reduction filter (the most common starting filter)
 
@@ -343,12 +368,15 @@ subsource = "win.eventlog.application" AND winlog.event_id = 1000
 provider_name: Microsoft-Windows-Backup*
 ```
 
-### Direct keyed lookup
+### Snapshot payload element
 
 ```
-state.services.spooler.status = STOPPED
-state.vss_writers."Microsoft Exchange Writer".state = "Failed"   <- writer name needs quotes
+sparklogs.data.services[](current_state=stopped AND start_type=auto_delayed)
+sparklogs.data.disk_volumes[](volume_role=os AND free_pct<25)
+sparklogs.data.vss_writers[](writer_present=true AND writer_state_failed=true)
 ```
+
+Host-scoped topics carry no array: `sparklogs.data.performance.commit_pct>55`.
 
 ### Chain walk (one era of state)
 
@@ -396,12 +424,12 @@ t between 2026-04-23T03:00:00Z and 2026-04-23T04:00:00Z
 2. **`MATCHES "regex"` instead of `: /regex/`.** Slash-delimited.
 3. **`IS NULL` / `IS NOT NULL` instead of `NOT field!` / `field!`.** Different syntax.
 4. **`CONTAINS "value"` for arrays instead of `field: value` or `field = value`.** Array fields use scalar operators directly.
-5. **Wildcard JSON paths.** `x.services.*.status = STOPPED` does not work. Use a promoted field or a direct keyed lookup.
+5. **Wildcard JSON paths.** `x.services.*.status = STOPPED` does not work. Use the element grammar or a promoted field.
 6. **Square brackets for value lists.** `severity in [error, critical]` is wrong. Use `severity in (error, critical)` with parentheses.
 7. **Quoting unquoted terms unnecessarily.** `severity = "error"` works but `severity = error` is fine and more readable.
 8. **Forgetting parentheses around OR with implicit AND.** `severity = error OR anomaly_max_score >= 60 source = "x"` parses unexpectedly. Use parentheses: `(severity = error OR anomaly_max_score >= 60) AND source = "x"`.
 9. **Mixing `&&` / `||` with `AND` / `OR` in the same expression.** Both work but consistency reads better.
-10. **Hallucinating field names.** A name nothing has emitted is not refused; it reads as empty, and the response lists it under `schema.fields_with_no_values` (col). That is a normal outcome rather than an error, so treat it as a prompt to check the spelling, not as something to report. Use canonical field names from `mcp-tool-decision-tree.md`, `list_fields` (tool), or `get_query_metadata` (tool) over a cached query. `list_fields` (tool) omits unstable process-id paths; it is still the catalog for names you have not seen (`guides/stream-kinds/device-state.md`).
+10. **Hallucinating field names.** A name nothing has emitted is not refused; it reads as empty, and the response lists it under `schema.empty_requested_columns` (col). That is a normal outcome rather than an error, so treat it as a prompt to check the spelling, not as something to report. Use canonical field names from `mcp-tool-decision-tree.md` or `list_fields` (tool). `list_fields` (tool) omits unstable process-id paths; it is the workspace catalog for names you have not seen (`guides/stream-kinds/device-state.md`).
 11. **Bare terms inside `[]()`.** Name a field on the element (`pid=1234` (LQL)). `processes!` (LQL) is not array presence; use `path[]!` (LQL).
 
 ---

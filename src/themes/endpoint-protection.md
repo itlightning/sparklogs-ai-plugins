@@ -4,7 +4,7 @@ index: Defender
 
 # Endpoint protection
 
-**Data feed:** `win.defender.eventlog` (value). Open `feeds/win.defender.eventlog/README.md`, then one artifact (`reasons.md` for threat / protection-disabled slugs).
+**Data feed:** `win.defender.eventlog` (value). Open `feeds/win.defender.eventlog/README.md`, then one artifact (`reasons.md` for threat / protection-disabled reasons).
 Explore: `guides/stream-kinds/wel-defender.md`.
 
 Security-channel audit is `themes/windows-security-and-audit.md`. Do not mix them.

@@ -10,7 +10,8 @@ import yaml from 'js-yaml';
 import { THEME_FILES } from './dist-layout.mjs';
 import { FEED_WHAT, MODULES } from './generated-references.config.mjs';
 
-export const INDEX_KINDS = ['playbooks', 'themes', 'feeds'];
+export const INDEX_KINDS = ['corpus-navigation', 'playbooks', 'themes', 'feeds'];
+export const CORPUS_NAVIGATION_FILE = path.join('src', 'guides', 'reference-navigation.md');
 export const SHIP_FRONTMATTER_KEYS = new Set([
   'name',
   'description',
@@ -242,6 +243,7 @@ export function renderFeedsTable(modules = MODULES) {
 }
 
 export function renderIndex(kind, catalog) {
+  if (kind === 'corpus-navigation') return catalog.corpusNavigation;
   if (kind === 'playbooks') return renderPlaybooksTable(catalog.playbooks);
   if (kind === 'themes') return renderThemesTable(catalog.themes);
   if (kind === 'feeds') return renderFeedsTable(catalog.modules);
@@ -288,7 +290,15 @@ export async function loadIndexCatalog(root) {
     });
   }
 
-  return { themes, playbooks, modules: MODULES };
+  return { themes, playbooks, modules: MODULES, corpusNavigation: await loadCorpusNavigation(root) };
+}
+
+export async function loadCorpusNavigation(root) {
+  const file = path.join(root, CORPUS_NAVIGATION_FILE);
+  const text = await fs.readFile(file, 'utf8');
+  const { body } = parseFrontmatter(text, file);
+  if (!body.trim()) throw new Error(`${file} is empty`);
+  return body.trimEnd();
 }
 
 export async function listSkillIndexTargets(root) {

@@ -3,7 +3,7 @@
   "source": {
     "repository": "sparklogs-source-library",
     "branch": "main",
-    "commit": "9a35237ede260c10adf522cfd6e5ece27fc5b63e",
+    "commit": "f812bd9669f4523b8cd3345b01d71bf1f8b71782",
     "generatedSubpath": "docs/generated-public"
   },
   "consumption": {
@@ -23,7 +23,7 @@
         },
         {
           "file": "fields.md",
-          "summary": "what exists at rest, which surface writes it, and the raw fallback when nothing does"
+          "summary": "what exists at rest, what curates it, and the raw fallback when nothing does"
         },
         {
           "file": "enums.md",
@@ -31,7 +31,7 @@
         },
         {
           "file": "reasons.md",
-          "summary": "what each reason slug means (public summary, severity, impact)"
+          "summary": "what each reason means (public summary, severity, impact)"
         },
         {
           "file": "patterns.md",
@@ -60,7 +60,7 @@
         },
         {
           "file": "fields.md",
-          "summary": "what exists at rest, which surface writes it, and the raw fallback when nothing does"
+          "summary": "what exists at rest, what curates it, and the raw fallback when nothing does"
         },
         {
           "file": "enums.md",
@@ -68,7 +68,7 @@
         },
         {
           "file": "reasons.md",
-          "summary": "what each reason slug means (public summary, severity, impact)"
+          "summary": "what each reason means (public summary, severity, impact)"
         }
       ]
     },
@@ -81,7 +81,7 @@
         },
         {
           "file": "fields.md",
-          "summary": "what exists at rest, which surface writes it, and the raw fallback when nothing does"
+          "summary": "what exists at rest, what curates it, and the raw fallback when nothing does"
         },
         {
           "file": "enums.md",
@@ -89,7 +89,7 @@
         },
         {
           "file": "reasons.md",
-          "summary": "what each reason slug means (public summary, severity, impact)"
+          "summary": "what each reason means (public summary, severity, impact)"
         }
       ]
     },
@@ -102,7 +102,7 @@
         },
         {
           "file": "fields.md",
-          "summary": "what exists at rest, which surface writes it, and the raw fallback when nothing does"
+          "summary": "what exists at rest, what curates it, and the raw fallback when nothing does"
         },
         {
           "file": "enums.md",
@@ -110,7 +110,109 @@
         },
         {
           "file": "reasons.md",
-          "summary": "what each reason slug means (public summary, severity, impact)"
+          "summary": "what each reason means (public summary, severity, impact)"
+        }
+      ]
+    },
+    {
+      "module": "win.eventlog.platform",
+      "artifacts": [
+        {
+          "file": "README.md",
+          "summary": "feed index: what each artifact answers and the order to read them in"
+        },
+        {
+          "file": "fields.md",
+          "summary": "what exists at rest, what curates it, and the raw fallback when nothing does"
+        },
+        {
+          "file": "enums.md",
+          "summary": "the closed token vocabularies that are safe to group by"
+        }
+      ]
+    },
+    {
+      "module": "win.eventlog.storage",
+      "artifacts": [
+        {
+          "file": "README.md",
+          "summary": "feed index: what each artifact answers and the order to read them in"
+        },
+        {
+          "file": "fields.md",
+          "summary": "what exists at rest, what curates it, and the raw fallback when nothing does"
+        },
+        {
+          "file": "enums.md",
+          "summary": "the closed token vocabularies that are safe to group by"
+        }
+      ]
+    },
+    {
+      "module": "win.eventlog.network",
+      "artifacts": [
+        {
+          "file": "README.md",
+          "summary": "feed index: what each artifact answers and the order to read them in"
+        },
+        {
+          "file": "fields.md",
+          "summary": "what exists at rest, what curates it, and the raw fallback when nothing does"
+        },
+        {
+          "file": "enums.md",
+          "summary": "the closed token vocabularies that are safe to group by"
+        }
+      ]
+    },
+    {
+      "module": "win.eventlog.identity_security",
+      "artifacts": [
+        {
+          "file": "README.md",
+          "summary": "feed index: what each artifact answers and the order to read them in"
+        },
+        {
+          "file": "fields.md",
+          "summary": "what exists at rest, what curates it, and the raw fallback when nothing does"
+        },
+        {
+          "file": "enums.md",
+          "summary": "the closed token vocabularies that are safe to group by"
+        }
+      ]
+    },
+    {
+      "module": "win.eventlog.management",
+      "artifacts": [
+        {
+          "file": "README.md",
+          "summary": "feed index: what each artifact answers and the order to read them in"
+        },
+        {
+          "file": "fields.md",
+          "summary": "what exists at rest, what curates it, and the raw fallback when nothing does"
+        },
+        {
+          "file": "enums.md",
+          "summary": "the closed token vocabularies that are safe to group by"
+        }
+      ]
+    },
+    {
+      "module": "win.eventlog.apps",
+      "artifacts": [
+        {
+          "file": "README.md",
+          "summary": "feed index: what each artifact answers and the order to read them in"
+        },
+        {
+          "file": "fields.md",
+          "summary": "what exists at rest, what curates it, and the raw fallback when nothing does"
+        },
+        {
+          "file": "enums.md",
+          "summary": "the closed token vocabularies that are safe to group by"
         }
       ]
     },
@@ -123,7 +225,7 @@
         },
         {
           "file": "fields.md",
-          "summary": "what exists at rest, which surface writes it, and the raw fallback when nothing does"
+          "summary": "what exists at rest, what curates it, and the raw fallback when nothing does"
         },
         {
           "file": "enums.md",
@@ -131,7 +233,7 @@
         },
         {
           "file": "reasons.md",
-          "summary": "what each reason slug means (public summary, severity, impact)"
+          "summary": "what each reason means (public summary, severity, impact)"
         }
       ]
     },
@@ -144,7 +246,7 @@
         },
         {
           "file": "fields.md",
-          "summary": "what exists at rest, which surface writes it, and the raw fallback when nothing does"
+          "summary": "what exists at rest, what curates it, and the raw fallback when nothing does"
         },
         {
           "file": "enums.md",
@@ -152,7 +254,7 @@
         },
         {
           "file": "reasons.md",
-          "summary": "what each reason slug means (public summary, severity, impact)"
+          "summary": "what each reason means (public summary, severity, impact)"
         }
       ]
     },
@@ -165,7 +267,7 @@
         },
         {
           "file": "fields.md",
-          "summary": "what exists at rest, which surface writes it, and the raw fallback when nothing does"
+          "summary": "what exists at rest, what curates it, and the raw fallback when nothing does"
         },
         {
           "file": "enums.md",
@@ -173,7 +275,7 @@
         },
         {
           "file": "reasons.md",
-          "summary": "what each reason slug means (public summary, severity, impact)"
+          "summary": "what each reason means (public summary, severity, impact)"
         }
       ]
     },
@@ -186,7 +288,7 @@
         },
         {
           "file": "fields.md",
-          "summary": "what exists at rest, which surface writes it, and the raw fallback when nothing does"
+          "summary": "what exists at rest, what curates it, and the raw fallback when nothing does"
         },
         {
           "file": "enums.md",
@@ -194,7 +296,7 @@
         },
         {
           "file": "reasons.md",
-          "summary": "what each reason slug means (public summary, severity, impact)"
+          "summary": "what each reason means (public summary, severity, impact)"
         }
       ]
     },
@@ -207,7 +309,7 @@
         },
         {
           "file": "fields.md",
-          "summary": "what exists at rest, which surface writes it, and the raw fallback when nothing does"
+          "summary": "what exists at rest, what curates it, and the raw fallback when nothing does"
         },
         {
           "file": "enums.md",
@@ -215,7 +317,7 @@
         },
         {
           "file": "reasons.md",
-          "summary": "what each reason slug means (public summary, severity, impact)"
+          "summary": "what each reason means (public summary, severity, impact)"
         }
       ]
     },
@@ -228,7 +330,7 @@
         },
         {
           "file": "fields.md",
-          "summary": "what exists at rest, which surface writes it, and the raw fallback when nothing does"
+          "summary": "what exists at rest, what curates it, and the raw fallback when nothing does"
         },
         {
           "file": "enums.md",
@@ -236,7 +338,7 @@
         },
         {
           "file": "reasons.md",
-          "summary": "what each reason slug means (public summary, severity, impact)"
+          "summary": "what each reason means (public summary, severity, impact)"
         }
       ]
     }

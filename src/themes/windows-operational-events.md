@@ -11,7 +11,7 @@ Application and System channels: service crashes, unexpected shutdowns, disk and
 | `win.eventlog.system` (value) | Disk, SCM, Kernel-Power, clustering, VSS volsnap, DCOM, WAS. |
 | `win.eventlog.application` (value) | App crashes, MSI, IIS worker, GPU TDR sibling. |
 
-Open `feeds/<id>/reasons.md` and search the slug. Same slug on two channels is one fact (example: `iis_worker_crash` (value) System WAS / Application IIS).
+Open `feeds/<id>/reasons.md` and search for the reason. Same reason on two channels is one fact (example: `iis_worker_crash` (value) System WAS / Application IIS).
 Explore: `guides/stream-kinds/wel-classic.md` (`subsource` (LQL), then `provider_name` (LQL)).
 
 **Pivots.** Service will not stay up: `service_crashed` (value), `service_start_failed` (value), `service_hang` (value). Disk filling is state (`themes/device-health-and-state.md`) plus these disk reasons if the stream shows IO faults.

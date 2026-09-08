@@ -148,10 +148,7 @@ async function validatePackage(host) {
     if (!await exists(path.join(ROOT, ASSETS_DIR, asset))) throw new Error(`Missing source asset ${ASSETS_DIR}/${asset}`);
     if (!await exists(path.join(base, 'assets', asset))) throw new Error(`${host} missing rendered asset ${asset}`);
   }
-  // Claude cites the corpus from the package root; every other host carries it inside each skill.
-  const feedProbe = host === 'claude'
-    ? path.join(base, 'feeds', 'win.eventlog.security', 'README.md')
-    : path.join(base, 'skills', 'sparklogs-ask', 'references', 'feeds', 'win.eventlog.security', 'README.md');
+  const feedProbe = path.join(base, 'skills', 'sparklogs-ask', 'references', 'feeds', 'win.eventlog.security', 'README.md');
   if (!await exists(feedProbe)) {
     throw new Error(`${host} missing ${path.relative(base, feedProbe)}`);
   }

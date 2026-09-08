@@ -13,6 +13,9 @@
 // exist so that a regression there fails here instead of shipping.
 
 export const SOURCE_LIBRARY_DIR_ENV = 'SPARKLOGS_SOURCE_LIBRARY_DIR';
+// Identifier lint membership defaults to committed src/feeds (what CI ships). Set to 1 while
+// authoring against a sibling library checkout before sync lands those identifiers in the repo.
+export const IDENTIFIER_SOT_INCLUDE_LIBRARY_ENV = 'SPARKLOGS_IDENTIFIER_SOT_INCLUDE_LIBRARY';
 export const DEFAULT_SOURCE_LIBRARY_DIR = '../sparklogs-source-library';
 export const LIBRARY_GENERATED_SUBPATH = 'docs/generated-public';
 export const GENERATED_DIR = 'src/feeds';
@@ -25,11 +28,18 @@ export const ROUTER_END = '<!-- END GENERATED INVENTORY -->';
 // here is not synced; a module listed here that the library does not produce is a sync failure.
 // Order is curated investigation salience (highest-signal feeds first); the sync logic does not
 // depend on it.
+// win.powershell.eventlog is deliberately excluded here: see HELD_BACK_MODULES below.
 export const MODULES = [
   'win.eventlog.security',
   'win.eventlog.system',
   'win.eventlog.application',
   'win.eventlog.setup',
+  'win.eventlog.platform',
+  'win.eventlog.storage',
+  'win.eventlog.network',
+  'win.eventlog.identity_security',
+  'win.eventlog.management',
+  'win.eventlog.apps',
   'win.servicing.cbs',
   'win.servicing.dism',
   'win.defender.eventlog',
@@ -45,12 +55,26 @@ export const FEED_WHAT = {
   'win.eventlog.system': 'System channel: services, drivers, kernel, VSS, storage',
   'win.eventlog.application': 'Application channel: app crashes, hangs, vendor app events',
   'win.eventlog.setup': 'Windows Update results per update',
+  'win.eventlog.platform': 'Platform channels: kernel, PnP, boot, power, drivers',
+  'win.eventlog.storage': 'Storage channels: disks, volumes, NTFS, storage drivers',
+  'win.eventlog.network': 'Network channels: SMB client and server, DHCP, DNS client, Wi-Fi, firewall',
+  'win.eventlog.identity_security': 'Identity and security channels: code integrity, exploit protection, Group Policy, Entra and TPM',
+  'win.eventlog.management': 'Management channels: Task Scheduler, BITS, WinRM, WMI, Windows Update client',
+  'win.eventlog.apps': 'Apps channels: packaged apps, app model, application compatibility',
   'win.servicing.cbs': 'CBS servicing internals: component store, packages',
   'win.servicing.dism': 'DISM operations and image health',
   'win.defender.eventlog': 'Defender: threats, protection state',
   'sparklogs.agent.state': 'Device health and state snapshots: CPU, RAM, disk, installed software, monitors',
   'sparklogs.agent.vector': 'Collector debug only: data collector internals',
   'sparklogs.agent.log': 'Collector debug only: agent supervisor log',
+};
+
+// Modules the library produces but this repo deliberately does not carry, keyed by module id with
+// the reason. Distinct from a module simply missing from MODULES (a sync failure): an entry here is
+// a standing decision, checked so the reason travels with the exclusion instead of living only in a
+// commit message.
+export const EXCLUDED_MODULES = {
+  'win.powershell.eventlog': 'source.yaml declares ship: false; the fleet has never been measured on these channels, so it does not ship in the built pack',
 };
 
 // A declared-but-absent or present-but-undeclared row here is a defect the moment it happens,
@@ -60,6 +84,8 @@ export const FEED_WHAT = {
   if (missing.length) throw new Error(`FEED_WHAT missing a what for: ${missing.join(', ')}`);
   const extra = Object.keys(FEED_WHAT).filter((id) => !MODULES.includes(id));
   if (extra.length) throw new Error(`FEED_WHAT has entries not in MODULES: ${extra.join(', ')}`);
+  const overlap = Object.keys(EXCLUDED_MODULES).filter((id) => MODULES.includes(id));
+  if (overlap.length) throw new Error(`EXCLUDED_MODULES overlaps MODULES: ${overlap.join(', ')}`);
 }
 
 // Floor every feed must carry. Optional artifacts ride when the library emits them.
@@ -84,9 +110,9 @@ export const INTERNAL_ARTIFACTS = [];
 // One-line reader summary per artifact, used to build the router inventory block.
 export const ARTIFACT_SUMMARY = {
   'README.md': 'feed index: what each artifact answers and the order to read them in',
-  'fields.md': 'what exists at rest, which surface writes it, and the raw fallback when nothing does',
+  'fields.md': 'what exists at rest, what curates it, and the raw fallback when nothing does',
   'enums.md': 'the closed token vocabularies that are safe to group by',
-  'reasons.md': 'what each reason slug means (public summary, severity, impact)',
+  'reasons.md': 'what each reason means (public summary, severity, impact)',
   'patterns.md': 'the decision procedure for whether a rendered pattern is expected, unexpected, or uncurated',
   'recipes.md': 'worked pivots, each resolving against the field schema',
   'mapping-ecs.md': 'ECS anchors for a query written against another taxonomy',

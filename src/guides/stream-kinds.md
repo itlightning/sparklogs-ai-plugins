@@ -9,7 +9,7 @@ Several feeds share a kind (Application and System are the same ladder).
 Kind is the explore shape, not a 1:1 map to `subsource` (LQL).
 
 `feeds/<id>/fields.md` answers a different question: which promoted fields that module writes.
-Envelope keys (`provider_name` (LQL), `winlog.event_id` (LQL), `origin` (LQL)) often live only on the kind ladder.
+`provider_name` (LQL), `winlog.event_id` (LQL) and `origin` (LQL) often live only on the kind ladder, not in `fields.md`.
 
 Product tokens on `app` (LQL): `guides/app-vocabulary.md`.
 
@@ -44,4 +44,4 @@ Absence is a missing promotion, not a missing event.
 
 "What is on the box / open condition in this window" is `query_device_health` (tool) (latest event per episode that emitted in the window, not a time series).
 The event stream of the same feed is `query_logs` (tool) scoped to `subsource` (LQL) `=` `"sparklogs.agent.state"`.
-MCP column names (`kind` (col), `instance` (col), `episode_replaced_id` (col)) are not LQL paths. Wire LQL uses dotted `sparklogs.*`. Detail: `guides/device-state-fields.md`.
+MCP column names (`sparklogs.kind` (col), `sparklogs.instance` (col), `sparklogs.episode.replaced_id` (col)) are the same dotted `sparklogs.*` spelling as the LQL path. Detail: `guides/device-state-fields.md`.
