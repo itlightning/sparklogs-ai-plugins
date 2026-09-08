@@ -38,24 +38,23 @@ This module populates no portable family.
 Presence is per curated surface, from what its author declared under `promotions`: a field reaches this row only when the surface's own arm or shape names it, never from a text scan of classify guessing which branch a write belongs to.
 A row lists what the surface CAN write, not what every event of it carries: a field whose value the payload does not supply stays unset, which is why absence of a field is never by itself evidence that a condition did not happen.
 A surface that promotes nothing says so: an empty row is a stated fact, not an omission.
+The last column is different in kind: it is the author's account of the row or evidence fields an event of that surface carries, declared per arm and compared to nothing, so read it as documentation rather than as a checked contract. An empty cell means the arm declares none, not that the event carries none.
 
-| Surface | Event ids | Fields set |
-|---|---|---|
-| `data_collection_settings_invalid` / `default` | n/a | **fields: none** |
-| `sparklogs_agent_emission_capped` / `default` | n/a | **fields: none** |
-| `sparklogs_agent_ingest_drop` / `default` | n/a | **fields: none** |
-| `sparklogs_agent_spool_drop` / `default` | n/a | **fields: none** |
-| `sparklogs_agent_spool_expire` / `default` | n/a | **fields: none** |
-| `sparklogs_agent_spool_truncate` / `default` | n/a | **fields: none** |
+| Surface | Event ids | Fields set | Row fields |
+|---|---|---|---|
+| `sparklogs_agent_config_rejected` / `default` | n/a | **fields: none** |  |
+| `sparklogs_agent_emission_capped` / `default` | n/a | **fields: none** |  |
+| `sparklogs_agent_spool_drop` / `default` | n/a | **fields: none** |  |
+| `sparklogs_agent_spool_expire` / `default` | n/a | **fields: none** |  |
+| `sparklogs_agent_spool_truncate` / `default` | n/a | **fields: none** |  |
 
 ### Surfaces that promote nothing
 
 These carry class, reason and message text only.
 A predicate over them uses the reason, the class, or the retained payload; there is no promoted field to filter on.
 
-- `data_collection_settings_invalid` / `default`
+- `sparklogs_agent_config_rejected` / `default`
 - `sparklogs_agent_emission_capped` / `default`
-- `sparklogs_agent_ingest_drop` / `default`
 - `sparklogs_agent_spool_drop` / `default`
 - `sparklogs_agent_spool_expire` / `default`
 - `sparklogs_agent_spool_truncate` / `default`

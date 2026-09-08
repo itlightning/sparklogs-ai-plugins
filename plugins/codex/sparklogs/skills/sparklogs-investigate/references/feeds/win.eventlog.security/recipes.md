@@ -119,7 +119,7 @@ Who touched the group, what direction, and who joined or left: three identity fa
    sparklogs.target.kind = "group" AND sparklogs.target.id = "S-1-5-32-544"
    ```
 
-2. Direction rides the reason, never the config-change action: group_member_added and group_member_removed are the membership directions, and group_membership_changed is the create/delete/change lifecycle (whose config_change.action carries created/deleted/updated).
+2. Direction rides the reason, never the config-change action: group_member_added and group_member_removed are the membership directions, and security_group_created, security_group_deleted and security_group_changed are the group lifecycle (whose config_change.action carries created/deleted/updated to match).
 
    ```
    sparklogs.reason = "group_member_removed"

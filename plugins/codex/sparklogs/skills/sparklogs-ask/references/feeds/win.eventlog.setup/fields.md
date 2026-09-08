@@ -46,9 +46,10 @@ This module populates no portable family.
 Presence is per curated surface, from what its author declared under `promotions`: a field reaches this row only when the surface's own arm or shape names it, never from a text scan of classify guessing which branch a write belongs to.
 A row lists what the surface CAN write, not what every event of it carries: a field whose value the payload does not supply stays unset, which is why absence of a field is never by itself evidence that a condition did not happen.
 A surface that promotes nothing says so: an empty row is a stated fact, not an omission.
+The last column is different in kind: it is the author's account of the row or evidence fields an event of that surface carries, declared per arm and compared to nothing, so read it as documentation rather than as a checked contract. An empty cell means the arm declares none, not that the event carries none.
 
-| Surface | Event ids | Fields set |
-|---|---|---|
-| `patch_servicing_failed` / `default` | 3 | `win.eventlog.setup.client` `win.eventlog.setup.error_code` `win.eventlog.setup.package` `win.eventlog.setup.target_state` |
-| `store_corruption` / `detection_only` | 1014, 1015 | `win.eventlog.setup.corruption_repaired` `win.eventlog.setup.corruption_total` `win.eventlog.setup.detection_only` `win.eventlog.setup.error_code` |
-| `store_corruption` / `unrepaired` | 1014, 1015 | `win.eventlog.setup.corruption_repaired` `win.eventlog.setup.corruption_total` `win.eventlog.setup.detection_only` `win.eventlog.setup.error_code` |
+| Surface | Event ids | Fields set | Row fields |
+|---|---|---|---|
+| `win_component_store_scan_found_corruption` / `detection_only` | 1014, 1015 | `win.eventlog.setup.corruption_repaired` `win.eventlog.setup.corruption_total` `win.eventlog.setup.detection_only` `win.eventlog.setup.error_code` |  |
+| `win_component_store_scan_found_corruption` / `unrepaired` | 1014, 1015 | `win.eventlog.setup.corruption_repaired` `win.eventlog.setup.corruption_total` `win.eventlog.setup.detection_only` `win.eventlog.setup.error_code` |  |
+| `win_servicing_package_state_change_failed` / `default` | 3 | `win.eventlog.setup.client` `win.eventlog.setup.error_code` `win.eventlog.setup.package` `win.eventlog.setup.target_state` |  |

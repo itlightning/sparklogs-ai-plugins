@@ -6,19 +6,19 @@
 Open this file and search the reason heading. Do not read the whole file.
 Every section below is from the public reason block only.
 
-| reason | service | severity |
-|---|---|---|
-| `win_dism_command_failed` | `patching` | Info pin |
-| `win_dism_feature_change_failed` | `patching` | Info pin |
-| `win_dism_health_command` | `patching` | Info pin |
-| `win_dism_reboot_required` | `patching` | Info pin |
-| `win_dism_source_files_missing` | `patching` | Notice pin |
+| reason | service | severity | benign |
+|---|---|---|---|
+| `win_dism_command_failed` | `patching` | Info |  |
+| `win_dism_feature_change_failed` | `patching` | Info |  |
+| `win_dism_health_command_run` | `patching` | Info |  |
+| `win_dism_reboot_required` | `patching` | Info |  |
+| `win_dism_source_files_missing` | `patching` | Notice |  |
 
 ## `win_dism_command_failed`
 
 A DISM command reported failure.
 
-**Severity:** Info pin
+**Severity:** Info
 
 **Impact:** Depends on the command. Read the servicing outcome from CBS rather than from the tool exit.
 
@@ -26,15 +26,15 @@ A DISM command reported failure.
 
 A Windows optional feature could not be enabled or disabled.
 
-**Severity:** Info pin
+**Severity:** Info
 
 **Impact:** That feature is not in the requested state.
 
-## `win_dism_health_command`
+## `win_dism_health_command_run`
 
 A DISM health or repair command was run on this machine.
 
-**Severity:** Info pin
+**Severity:** Info
 
 **Impact:** None. This records an action, not a fault.
 
@@ -42,7 +42,7 @@ A DISM health or repair command was run on this machine.
 
 A DISM change needs a reboot to take effect.
 
-**Severity:** Info pin
+**Severity:** Info
 
 **Impact:** The change applies after the next reboot.
 
@@ -50,6 +50,6 @@ A DISM change needs a reboot to take effect.
 
 A DISM operation could not find the source files it needed.
 
-**Severity:** Notice pin
+**Severity:** Notice
 
 **Impact:** Repair or install will keep failing until a valid source is supplied.

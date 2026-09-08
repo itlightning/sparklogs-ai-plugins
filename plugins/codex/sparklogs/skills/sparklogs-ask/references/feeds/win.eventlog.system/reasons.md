@@ -6,96 +6,83 @@
 Open this file and search the reason heading. Do not read the whole file.
 Every section below is from the public reason block only.
 
-| reason | service | severity |
-|---|---|---|
-| `app_popup_error` | `app_stability` | Minor |
-| `av_unsigned_code_blocked` | `endpoint_protection` | Serious |
-| `bugcheck` | `os_stability` | Serious (server or unknown) / Error (workstation) |
-| `cluster_csv_unavailable` | `clustering` | Severe |
-| `cluster_node_removed` | `clustering` | Serious |
-| `cluster_quorum_loss` | `clustering` | Severe |
-| `cluster_resource_failed` | `clustering` | Serious |
-| `cluster_resource_hang` | `clustering` | Serious |
-| `cluster_rhs_crash` | `clustering` | Serious |
-| `cluster_service_down` | `clustering` | Severe |
-| `dcom_activation_timeout` | `app_stability` | Minor |
-| `dcom_register_timeout` | `app_stability` | Minor |
-| `dcom_start_error` | `app_stability` | Minor |
-| `dirty_shutdown` | `os_stability` | Error (server or unknown) / Warning (workstation) |
-| `disk_bad_block` | `storage` | Serious pin |
-| `disk_controller_error` | `storage` | Error |
-| `disk_corruption` | `storage` | Critical |
-| `disk_io_retried` | `storage` | Warning |
-| `disk_paging_error` | `storage` | Warning |
-| `disk_surprise_removal` | `storage` | Warning |
-| `driver_load_failed` | `hardware` | Warning |
-| `ephemeral_port_alloc_failed` | `networking` | Notice |
-| `gpu_driver_reset` | `hardware` | Notice |
-| `hardware_error_corrected` | `hardware` | Notice |
-| `hardware_error_uncorrected` | `hardware` | Error |
-| `http_ssl_binding_created` | `certificates` | Notice |
-| `http_ssl_binding_deleted` | `certificates` | Notice |
-| `http_ssl_config_failed` | `certificates` | Error |
-| `iis_apppool_disabled` | `web` | Serious (server or unknown) / Warning (workstation) |
-| `iis_apppool_failure` | `web` | Error or Warning |
-| `iis_worker_crash` | `web` | Warning |
-| `kerberos_cert_domain_unresolved` | `auth` | Info (capped) |
-| `kerberos_etype_unsupported` | `auth` | Warning |
-| `kerberos_pac_verify_failed` | `auth` | Warning |
-| `kerberos_smartcard_cert_missing` | `auth` | Warning |
-| `kerberos_weak_krbtgt_key` | `auth` | Warning |
-| `nic_driver_fault` | `networking` | Error (driver could not load) / Warning (adapter or driver fault) |
-| `nic_link_down` | `networking` | Warning |
-| `nic_link_up` | `networking` | Info |
-| `ntfs_corruption` | `storage` | Critical (corrupted MFT record, MFT torn write, volume cannot be corrected) / Serious (corruption in a directory index or another structure) / Error (torn write on a data file) / Warning (repair completed, repair posting throttled) |
-| `ntfs_delayed_write_lost` | `storage` | Serious (path on the system volume) / Error (path anywhere else) |
-| `ntfs_transaction_log_error` | `storage` | Warning (flush failed on a live volume, recovery error, metadata reset) / Notice (flush failed on a volume that no longer exists) / Error (resource manager could not start) |
-| `patch_install_failed` | `patching` | Minor for a failed install; Info or Verbose when the install did not run |
-| `platform_integrity_indicator` | `endpoint_protection` | Error (detection completed) / Warning (partial, still under observation) |
-| `rds_license_server_unactivated` | `licensing` | Warning |
-| `rds_license_tracking_failed` | `licensing` | Warning |
-| `rds_licensing_service_failed` | `licensing` | Error |
-| `secure_boot_cert_update_pending` | `hardware` | Warning |
-| `security_agent_service_start_failed` | `endpoint_protection` | Warning |
-| `security_agent_service_terminated` | `endpoint_protection` | Minor |
-| `service_crashed` | `app_stability` | Error |
-| `service_exited_error` | `app_stability` | Error |
-| `service_hang` | `app_stability` | Error |
-| `service_installed` | `security_audit` | Notice |
-| `service_start_failed` | `app_stability` | Error |
-| `service_start_timeout` | `app_stability` | Error |
-| `smb_delayed_write_lost` | `storage` | Error pin |
-| `smb_server_transport_bind_failed` | `networking` | Warning (server) / Info (workstation) |
-| `smb_share_recreate_failed` | `storage` | Warning pin |
-| `storage_controller_reset` | `storage` | Error |
-| `time_sync_failed` | `time_sync` | Warning |
-| `tls_cert_expired` | `certificates` | Error |
-| `tls_cert_name_mismatch` | `certificates` | Error |
-| `tls_cert_untrusted_ca` | `certificates` | Error |
-| `tls_cipher_mismatch` | `certificates` | Warning |
-| `tls_client_credential_failed` | `certificates` | Error (server) / Warning (workstation) |
-| `tls_server_credential_failed` | `certificates` | Error |
-| `tpm_attestation_failed` | `security_audit` | Error |
-| `unexpected_shutdown` | `os_stability` | Serious (server or unknown) / Warning (workstation) |
-| `vpn_connected` | `vpn` | Notice |
-| `vss_shadow_aborted` | `backup` | Error (aborted or not created) / Warning (shadow storage could not grow) |
-| `vss_shadow_lost` | `backup` | Error |
-| `vswitch_config_restore_failed` | `virtualization` | Error or Warning (server or unknown) / Info (workstation) |
-| `winre_servicing_failed` | `patching` | Error |
-| `wlan_limited_connectivity` | `networking` | Warning |
-
-## `app_popup_error`
-
-An application error popup was recorded.
-
-**Severity:** Minor
-
-**Impact:** A foreground or service application may have failed and required user or operator attention.
-
-**Consider:**
-
-- Read the popup text in the raw message.
-- Look for nearby application crash records.
+| reason | service | severity | benign |
+|---|---|---|---|
+| `av_unsigned_code_blocked` | `endpoint_protection` | Serious |  |
+| `bugcheck` | `os_stability` | Serious (server or unknown) / Error (workstation) |  |
+| `cluster_csv_unavailable` | `clustering` | Severe |  |
+| `cluster_node_removed` | `clustering` | Serious |  |
+| `cluster_quorum_loss` | `clustering` | Severe |  |
+| `cluster_resource_failed` | `clustering` | Serious |  |
+| `cluster_resource_hang` | `clustering` | Serious |  |
+| `cluster_rhs_crash` | `clustering` | Serious |  |
+| `cluster_service_down` | `clustering` | Severe |  |
+| `dcom_activation_timeout` | `app_stability` | Minor |  |
+| `dcom_register_timeout` | `app_stability` | Minor |  |
+| `dcom_start_error` | `app_stability` | Minor |  |
+| `disk_bad_block` | `storage` | Serious |  |
+| `disk_controller_error` | `storage` | Error |  |
+| `disk_corruption` | `storage` | Critical |  |
+| `disk_io_retried` | `storage` | Warning |  |
+| `disk_paging_error` | `storage` | Warning |  |
+| `disk_surprise_removal` | `storage` | Warning |  |
+| `driver_load_failed` | `hardware` | Warning |  |
+| `ephemeral_port_alloc_failed` | `networking` | Notice |  |
+| `firmware_attack_indicator_reported` | `endpoint_protection` | Error or Warning |  |
+| `gpu_driver_reset` | `hardware` | Notice |  |
+| `hardware_error_corrected` | `hardware` | Notice |  |
+| `hardware_error_uncorrected` | `hardware` | Error |  |
+| `http_ssl_binding_created` | `certificates` | Notice |  |
+| `http_ssl_binding_deleted` | `certificates` | Notice |  |
+| `http_ssl_config_failed` | `certificates` | Error |  |
+| `iis_apppool_disabled` | `web` | Serious (server or unknown) / Warning (workstation) |  |
+| `iis_apppool_failed` | `web` | Error or Warning |  |
+| `iis_worker_crash` | `web` | Warning |  |
+| `kerberos_cert_domain_unresolved` | `auth` | Info (capped) |  |
+| `kerberos_etype_unsupported` | `auth` | Warning |  |
+| `kerberos_pac_verify_failed` | `auth` | Warning |  |
+| `kerberos_smartcard_cert_missing` | `auth` | Warning |  |
+| `kerberos_weak_krbtgt_key` | `auth` | Warning |  |
+| `nic_driver_fault_reported` | `networking` | Warning |  |
+| `nic_driver_load_failed` | `networking` | Error |  |
+| `nic_link_down` | `networking` | Warning |  |
+| `nic_link_up` | `networking` | Info |  |
+| `ntfs_corruption` | `storage` | Critical (corrupted MFT record, MFT torn write, volume cannot be corrected) / Serious (corruption in a directory index or another structure) / Error (torn write on a data file) / Warning (repair completed, repair posting throttled) |  |
+| `ntfs_delayed_write_lost` | `storage` | Serious (path on the system volume) / Error (path anywhere else) |  |
+| `ntfs_transaction_log_error` | `storage` | Warning (flush failed on a live volume, recovery error, metadata reset) / Notice (flush failed on a volume that no longer exists) / Error (resource manager could not start) |  |
+| `patch_install_failed` | `patching` | Minor, Info or Verbose | benign possible |
+| `rds_license_server_unactivated` | `licensing` | Warning |  |
+| `rds_license_tracking_failed` | `licensing` | Warning |  |
+| `rds_licensing_service_failed` | `licensing` | Error |  |
+| `secure_boot_cert_update_pending` | `hardware` | Warning |  |
+| `security_agent_service_start_failed` | `endpoint_protection` | Warning |  |
+| `security_agent_service_terminated` | `endpoint_protection` | Minor |  |
+| `service_crashed` | `app_stability` | Error |  |
+| `service_exited_error` | `app_stability` | Error |  |
+| `service_hang` | `app_stability` | Error |  |
+| `service_installed` | `security_audit` | Notice |  |
+| `service_start_failed` | `app_stability` | Error |  |
+| `service_start_timeout` | `app_stability` | Error |  |
+| `smb_delayed_write_lost` | `storage` | Error |  |
+| `smb_server_transport_bind_failed` | `networking` | Warning (server) / Info (workstation) |  |
+| `smb_share_recreate_failed` | `storage` | Warning |  |
+| `storage_controller_reset` | `storage` | Error |  |
+| `time_sync_failed` | `time_sync` | Warning |  |
+| `tls_cert_expired` | `certificates` | Error |  |
+| `tls_cert_name_mismatch` | `certificates` | Error |  |
+| `tls_cert_untrusted_ca` | `certificates` | Error |  |
+| `tls_cipher_mismatch` | `certificates` | Warning |  |
+| `tls_client_credential_failed` | `certificates` | Error (server) / Warning (workstation) |  |
+| `tls_server_credential_failed` | `certificates` | Error |  |
+| `tpm_attestation_failed` | `hardware` | Error |  |
+| `unexpected_shutdown` | `os_stability` | Serious or Error on a server or an unknown host class, depending on which record reports it and what level that record carried; Warning on a workstation. |  |
+| `vpn_connected` | `vpn` | Notice |  |
+| `vss_shadow_aborted` | `backup` | Error or Warning |  |
+| `vss_shadow_lost` | `backup` | Error |  |
+| `vswitch_config_restore_failed` | `virtualization` | Error or Warning (server or unknown) / Info (workstation) |  |
+| `win_app_error_dialog_shown` | `app_stability` | Minor |  |
+| `winre_servicing_failed` | `patching` | Error |  |
+| `wlan_limited_connectivity` | `networking` | Warning |  |
 
 ## `av_unsigned_code_blocked`
 
@@ -254,24 +241,11 @@ DCOM failed while starting an application or service.
 - Identify the named service or server from the event body.
 - Check SCM errors for the same service.
 
-## `dirty_shutdown`
-
-The host restarted after an unclean shutdown.
-
-**Severity:** Error (server or unknown) / Warning (workstation)
-
-**Impact:** Unclean shutdown can interrupt workloads, lose in-memory state, and leave storage or applications needing recovery.
-
-**Consider:**
-
-- Correlate with bugcheck and unexpected_shutdown in the same boot gap.
-- Inspect BugcheckCode when present.
-
 ## `disk_bad_block`
 
 A disk reported a bad block.
 
-**Severity:** Serious pin
+**Severity:** Serious
 
 **Impact:** Data in the affected block may be unreadable, and the drive is consuming its spare-block reserve.
 
@@ -373,6 +347,20 @@ A local port could not be allocated from the ephemeral port range.
 
 A single occurrence is common and self-correcting. The actionable form is a sustained rate on one device.
 
+## `firmware_attack_indicator_reported`
+
+A firmware-security agent reported an Indicator of Attack against this machine platform.
+
+**Severity:** Error or Warning
+
+**Impact:** The platform is in the state the indicator names, which normally means a firmware protection is disabled or the chassis was opened. Where the indicator completed, the agent considers its pattern met.
+
+**Consider:**
+
+- Read the Category and the listed events from the message: they name what was matched.
+- Check whether a deliberate BIOS change or a hardware service visit explains it.
+- Where nothing explains it, treat the named firmware settings as the thing to put back.
+
 ## `gpu_driver_reset`
 
 The NVIDIA display driver reset.
@@ -469,7 +457,7 @@ An IIS application pool was disabled by rapid-fail protection.
 - Identify the application pool.
 - Check preceding worker crashes or startup failures.
 
-## `iis_apppool_failure`
+## `iis_apppool_failed`
 
 IIS reported an application pool worker, configuration, or mapping failure.
 
@@ -563,19 +551,31 @@ The domain ticket-granting account has no strong encryption key, so Kerberos tic
 - The remedy is a password update on the ticket-granting account, performed the documented way.
 - Plan it before legacy encryption types are refused outright.
 
-## `nic_driver_fault`
+## `nic_driver_fault_reported`
 
-A wireless network adapter driver reported a fault in the adapter or in itself.
+A loaded wireless network adapter driver reported a fault in the adapter or in itself.
 
-**Severity:** Error (driver could not load) / Warning (adapter or driver fault)
+**Severity:** Warning
 
-**Impact:** Wireless connectivity on that adapter is lost or unreliable. Where the adapter did not load at all, the adapter is absent from the network stack until it is fixed.
+**Impact:** Wireless connectivity on that adapter is lost or unreliable for as long as the fault lasts. The driver normally resets and reloads itself without anyone acting.
 
 **Consider:**
 
 - Check whether the driver wrote an initialization record afterwards, which means it recovered.
 - Repeats on one host point at the adapter, its firmware or the driver version.
+
+## `nic_driver_load_failed`
+
+A wireless network adapter driver could not load, normally because of a resource conflict.
+
+**Severity:** Error
+
+**Impact:** The adapter is absent from the network stack until it is fixed. Nothing on the host retries the load.
+
+**Consider:**
+
 - A driver that could not load is normally a resource conflict, a disabled device or a bad install.
+- Check whether the host has another adapter carrying its traffic.
 
 ## `nic_link_down`
 
@@ -646,7 +646,7 @@ The NTFS transaction log on a volume could not be written, replayed, or brought 
 
 Windows Update reports the outcome of an update install attempt on this device.
 
-**Severity:** Minor for a failed install; Info or Verbose when the install did not run
+**Severity:** Minor, Info or Verbose
 
 **Impact:** On a failure the device stays on the previous version of that update until a later attempt succeeds, and repeated failures on the same update mean the device is falling behind on patching. On the deferred and did-not-run outcomes nothing changed and the update is offered again.
 
@@ -657,20 +657,6 @@ Windows Update reports the outcome of an update install attempt on this device.
 - Group by the result code to separate one failure cause from another.
 
 A single failure is common and usually self-correcting. Recurrence across cycles on the same update is the actionable pattern. The update title and the result code ride the message tail, and the normalized code and its space ride the shared error fields.
-
-## `platform_integrity_indicator`
-
-A firmware-security agent reported an Indicator of Attack against this machine platform.
-
-**Severity:** Error (detection completed) / Warning (partial, still under observation)
-
-**Impact:** The platform is in the state the indicator names, which normally means a firmware protection is disabled or the chassis was opened. Where the indicator completed, the agent considers its pattern met.
-
-**Consider:**
-
-- Read the Category and the listed events from the message: they name what was matched.
-- Check whether a deliberate BIOS change or a hardware service visit explains it.
-- Where nothing explains it, treat the named firmware settings as the thing to put back.
 
 ## `rds_license_server_unactivated`
 
@@ -834,7 +820,7 @@ A Windows service did not connect before the startup timeout.
 
 Windows could not save cached file data to a network share and the data was lost.
 
-**Severity:** Error pin
+**Severity:** Error
 
 **Impact:** Data an application believed it had written to a share was discarded. The application is not told. Repeated occurrences point at the link to the file server.
 
@@ -860,7 +846,7 @@ The Windows file-sharing service could not bind to a network transport.
 
 A file share could not be recreated because the folder it points at no longer exists.
 
-**Severity:** Warning pin
+**Severity:** Warning
 
 **Impact:** Clients and scripts using that share name fail to connect until the folder is restored or the share definition is removed.
 
@@ -988,15 +974,16 @@ TPM attestation failed for a critical component.
 
 ## `unexpected_shutdown`
 
-Windows recorded that the previous shutdown was unexpected.
+The previous shutdown was not clean: the host stopped without shutting down and came back on the next start.
 
-**Severity:** Serious (server or unknown) / Warning (workstation)
+**Severity:** Serious or Error on a server or an unknown host class, depending on which record reports it and what level that record carried; Warning on a workstation.
 
-**Impact:** The host did not complete a clean shutdown, which can interrupt services and complicate incident timelines.
+**Impact:** Unclean shutdown can interrupt workloads, lose in-memory state, and leave storage or applications needing recovery. It also complicates incident timelines.
 
 **Consider:**
 
-- Use as the third leg of the 41, 1001, and 6008 crash triangle.
+- Use with bugcheck as the crash triangle around one boot gap.
+- Inspect bugcheck_code when present: a nonzero value separates a crash from a power loss.
 - Check the nearest clean shutdown and boot markers.
 
 ## `vpn_connected`
@@ -1014,7 +1001,7 @@ A remote-access connection was established.
 
 A volume shadow-copy operation was aborted by shadow storage limits.
 
-**Severity:** Error (aborted or not created) / Warning (shadow storage could not grow)
+**Severity:** Error or Warning
 
 **Impact:** A backup or restore-point operation may have lost its usable snapshot.
 
@@ -1048,6 +1035,19 @@ Hyper-V virtual switch failed to restore port configuration.
 
 - Check the virtual switch or port name in the raw event.
 - On servers, correlate with VM connectivity complaints.
+
+## `win_app_error_dialog_shown`
+
+An application error popup was recorded.
+
+**Severity:** Minor
+
+**Impact:** A foreground or service application may have failed and required user or operator attention.
+
+**Consider:**
+
+- Read the popup text in the raw message.
+- Look for nearby application crash records.
 
 ## `winre_servicing_failed`
 

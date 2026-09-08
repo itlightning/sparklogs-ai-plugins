@@ -6,7 +6,7 @@ Windows Server Backup all emit `service = "backup"`), so fleet-wide analysis spa
 `app` (LQL) is the complementary axis (product identity): `app-vocabulary.md`. A vendor spans services and a
 service spans vendors; neither nests in the other.
 
-Values are snake_case and drawn from a closed, registry-gated vocabulary. The set is additive-only:
+Values are snake_case and drawn from a closed vocabulary. The set is additive-only:
 values are never renamed and never removed, so a query written against one keeps working. The table
 below is the whole vocabulary.
 
@@ -22,7 +22,7 @@ channel carry `service = "email"`).
 | `storage` | Disk/NTFS/controller/StorPort/Storage Spaces events, SMART, chkdsk. Storage-related hardware lives here, not in `hardware`. |
 | `patching` | OS and software updates AND installs (CBS/DISM/Windows Update/MSI/Setup channel/OEM and browser updaters). Install-vs-update rides `service_detail` where extractable. |
 | `auth` | Identity and logon lifecycle: Kerberos/NTLM/lockout/LAPS/Winlogon/MFA brokers/NPS. |
-| `security_audit` | Audit infrastructure, object/registry/file-share access auditing, audit policy and tamper, persistence signals (including the SCM 7045 service-install family). Deliberately evidence-flavored; the consumer is investigations, not a ticket queue. NOT the complete audit surface: see the demarcation list below. |
+| `security_audit` | Audit infrastructure, object/registry/file-share access auditing, audit policy and tamper, persistence signals (including the SCM 7045 service-install family). Deliberately evidence-flavored; the consumer is investigations, not a ticket queue. NOT the complete set of audit-related events: see the demarcation list below. |
 | `networking` | DHCP/DNS client, WLAN, NCSI, firewall. |
 | `vpn` | RasClient, GlobalProtect/FortiClient/WARP, ZTNA clients. |
 | `file_sharing` | SMB client/server, mapped drives, NAS/SharePoint access. |
@@ -53,7 +53,7 @@ channel carry `service = "email"`).
 
 ## Audit-adjacent events homed elsewhere (demarcation list)
 
-`service = "security_audit"` is **not** the complete audit surface. An event gets exactly one
+`service = "security_audit"` is **not** the complete set of audit-related events. An event gets exactly one
 `service` (LQL): the ticket class it is evidence for. Security-channel evidence whose consequence belongs
 to a ticket class is homed under that class; the security/forensic angle is carried by `sparklogs.reason` (LQL),
 channel, and `category` (LQL), never duplicated into a second event or a second service.
@@ -67,7 +67,7 @@ Maintained list (grows as Windows Event Log modules land):
 - The same homing rule applies to auth lifecycle (-> `auth`), CA events (-> `certificates`), and
   directory object changes (-> `directory_services`) as those rows ship.
 
-**Rule for forensic/audit sweeps: pivot on reason slugs, channel (`subsource` (LQL)), and `category` (LQL),
+**Rule for forensic/audit sweeps: pivot on `sparklogs.reason` (LQL), channel (`subsource` (LQL)), and `category` (LQL),
 never on `service = "security_audit"` alone.**
 
 ## Coverage

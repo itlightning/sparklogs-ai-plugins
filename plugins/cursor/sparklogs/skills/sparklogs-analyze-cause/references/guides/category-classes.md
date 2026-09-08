@@ -47,7 +47,7 @@ An open monitor (a holding episode) is an interesting signal, not automatically 
 must act on.
 
 - Problemhood rides **severity** plus the MSP's own policy, never "there is an open monitor".
-- Do not treat `open_monitors_count` (col) or a dump of open episodes as the finding list.
+- Do not treat `sparklogs.open_monitors_count` (col) or a dump of open episodes as the finding list.
 - `ELEVATED` + Info can be normal forever on a large share of a fleet (busy CPU, SQL memory
   dominance, crash dumps disabled on desktops) and still matter as RCA context.
 
@@ -80,8 +80,7 @@ projects to nothing and says so.
 Group by `sparklogs.reason` (LQL) to collapse a lifecycle into one finding. Treating the three as three
 findings triples the apparent problem count.
 
-**Say reason, not slug.** Older material calls this field a slug. It is `sparklogs.reason` (LQL), and MSPs
-read it, so the word in your output is "reason".
+**Use reason.** The field is `sparklogs.reason` (LQL); MSP-facing copy names these values **reasons**.
 
 ## Severity
 
@@ -126,7 +125,7 @@ to the coarser grain; it stays exact on `max_severity` (col).
 The nine bands are defined by one sentence, which the tools repeat verbatim so there is only ever one
 spelling to trust:
 
-Severity bands are the same on every tool here: cnt_debug_or_below (severity 6 and below), cnt_verbose (7-8), cnt_info_or_notice (9-12), cnt_warning (13-15), cnt_minor (16), cnt_error (17), cnt_serious (18), cnt_severe (19), cnt_critical_plus (20 and above). Listings of what is wrong carry the failure side only (cnt_warning and above); tools that count all traffic carry every band.
+Severity bands, same on every tool: cnt_debug_or_below (severity 6 and below), cnt_verbose (7-8), cnt_info_or_notice (9-12), cnt_warning (13-15), cnt_minor (16), cnt_error (17), cnt_serious (18), cnt_severe (19), cnt_critical_plus (20 and above). Listings of problems carry the failure side only (cnt_warning and above). Tools that count all traffic carry every band.
 
 `summary.severity_histogram` (col) is an ORDERED list of `{band, count}` over those bands, worst-last,
 carrying only the bands that occurred: a band missing from it is a band that response never saw.
@@ -156,7 +155,7 @@ vendor's taxonomy. A curated pack re-grades by consequence.
 `config_change`, `malformed`. It is a different question from class and from severity.
 
 `malformed` marks a row that did not parse cleanly, and it does not stand alone: a row can keep a
-valid `sparklogs.kind` (LQL) and still carry `malformed_event=true`, so a `kind=malformed` filter by itself misses
+valid `sparklogs.kind` (LQL) and still carry `sparklogs.malformed_event=true`, so a `sparklogs.kind=malformed` filter by itself misses
 those. Read the pair. A kind outside this list is possible and is not a bug: a newer agent may emit
 one, and it is deliberately not dropped, so an unfamiliar `sparklogs.kind` (LQL) is a real row rather than noise.
 

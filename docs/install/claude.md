@@ -55,15 +55,17 @@ For Claude Teams and Enterprises, additional configuration is required: [Connect
 
 The plugin package lives at `plugins/claude/sparklogs/` on the
 `dist` branch (the repo's default branch) and contains skills,
-commands, subagents, the reference corpus (`guides/`, `playbooks/`,
-`themes/`, `feeds/`), `.mcp.json`, and plugin metadata. The marketplace
-manifest is at `.claude-plugin/marketplace.json` on the same branch.
+commands, subagents, `.mcp.json`, and plugin metadata. Each skill
+carries the reference corpus it cites under its own `references/`
+tree (`guides/`, `playbooks/`, `themes/`, `feeds/`), so Claude Desktop
+(which mounts only `skills/`) can still resolve those citations. The
+marketplace manifest is at `.claude-plugin/marketplace.json` on the
+same branch.
 
 `.mcp.json` declares `"type": "http"`. Claude drops an MCP server entry
 that has a `url` and no `type`, so that field is not optional.
-Skill, command, and subagent markdown cites the corpus through
-`${CLAUDE_PLUGIN_ROOT}`, which Claude expands to the installed plugin
-directory.
+Skill markdown cites the corpus with paths relative to that skill's
+`references/` directory.
 
 # Security
 

@@ -20,7 +20,7 @@ SCOPE CHECKED
 - Org(s): [list]
 - Time window: [start UTC] to [end UTC]
 - Data sources queried: [list - subsources, channels, helpers]
-- WHAT WAS NOT CHECKED: [list - investigation-specific; see ${CLAUDE_PLUGIN_ROOT}/guides/off-endpoint-causes.md]
+- WHAT WAS NOT CHECKED: [list - investigation-specific; see guides/off-endpoint-causes.md]
 
 OBSERVED CONDITIONS
 
@@ -96,7 +96,7 @@ Absolute UTC timestamps for the investigation's data window. Not relative ("last
 The subsources and helper outputs you actually queried. Be specific; e.g., `win.eventlog.application`, `win.eventlog.system`, `sparklogs.agent.state` (`query_device_health`), `win.defender.eventlog`.
 
 ### WHAT WAS NOT CHECKED
-Investigation-specific list of off-endpoint sources and conditions you couldn't check. Per-investigation-type reference: `${CLAUDE_PLUGIN_ROOT}/guides/off-endpoint-causes.md`. Examples:
+Investigation-specific list of off-endpoint sources and conditions you couldn't check. Per-investigation-type reference: `guides/off-endpoint-causes.md`. Examples:
 - "Backup target NAS-01 was not checked (it does not run a SparkLogs Agent). Recommend checking NAS-01 health logs directly."
 - "Cloud identity audit logs (Azure AD / Entra) are outside SparkLogs ingestion. Sign-in failures from cloud-side conditional access policies would not appear in this investigation."
 - "EDR cloud audit (SentinelOne) is outside SparkLogs ingestion. EDR-side blocks of VSS operations would not appear in on-endpoint state."

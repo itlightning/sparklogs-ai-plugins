@@ -15,7 +15,7 @@ findings:
     confidence: high | medium | low | insufficient_evidence
 notable_patterns:
   - pattern_hash: <hash or null>
-    pattern_text: <text or null>
+    pattern: <text or null>
     count: <integer or null>
 limits:
   - <what you could not determine from the provided input>

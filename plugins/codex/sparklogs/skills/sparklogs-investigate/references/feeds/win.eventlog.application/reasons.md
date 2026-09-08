@@ -6,56 +6,78 @@
 Open this file and search the reason heading. Do not read the whole file.
 Every section below is from the public reason block only.
 
-| reason | service | severity |
-|---|---|---|
-| `app_crash` | `app_stability` | Error |
-| `app_crash_report` | `app_stability` | Notice |
-| `app_hang` | `app_stability` | Error |
-| `aspnet_compilation_failed` | `web` | Error |
-| `aspnet_unhandled_exception` | `web` | Minor |
-| `ca_chain_fail` | `certificates` | Error |
-| `ca_crl_fail` | `certificates` | Error |
-| `cert_enroll_fail` | `certificates` | Warning, or Verbose for the retired-endpoint shape |
-| `cert_expiring` | `certificates` | Warning |
-| `db_corruption` | `database` | Critical (824) / Error (823) / Warning (825) |
-| `dotnet_unhandled` | `app_stability` | Error |
-| `e2e_test_event` | `rmm` | Info cap |
-| `entra_password_hash_sync_failed` | `directory_services` | Error |
-| `entra_sync_run_failed` | `directory_services` | Error |
-| `entra_sync_scheduler_aborted` | `directory_services` | Error |
-| `esent_corruption` | `os_stability` | Error |
-| `gpu_driver_error` | `hardware` | Notice at most; native level decides below |
-| `group_policy_cse_apply_failed` | `device_management` | Minor |
-| `group_policy_drive_map_failed` | `device_management` | Warning |
-| `group_policy_pref_item_failed` | `device_management` | Warning / Minor for a refused stored credential |
-| `install_error` | `patching` | Warning / Info cap for retry-later |
-| `install_failed` | `patching` | Minor / Notice when blocked / Info cap for retry-later |
-| `mfa_login_succeeded` | `auth` | Info |
-| `mfa_not_configured` | `auth` | Warning |
-| `mfa_unavailable_access_granted` | `auth` | Error |
-| `mfa_user_not_enrolled` | `auth` | Notice |
-| `office_subscription_licensing_failed` | `licensing` | Warning |
-| `profile_load_fail` | `user_profiles` | Serious |
-| `remote_assist_session_started` | `remote_access` | Notice |
-| `restart_blocked` | `patching` | Info cap |
-| `security_agent_config_fetch_failed` | `endpoint_protection` | Error |
-| `security_agent_host_isolated` | `endpoint_protection` | Serious (isolated) / Notice (released) |
-| `shadowstorage_exhausted` | `backup` | Error |
-| `vendor_svc_fail` | `app_stability` | Error |
-| `vpn_dial_failed` | `vpn` | Minor |
-| `vss_call_failed_during_shutdown` | `backup` | Info |
-| `vss_data_integrity_writer_failed` | `backup` | Error |
-| `vss_process_image_name_handle_invalid` | `backup` | Info |
-| `vss_provider_class_not_registered` | `backup` | Error |
-| `vss_snapshot_call_failed` | `backup` | Warning |
-| `vss_snapshot_optimization_incomplete` | `backup` | Debug |
-| `vss_system_writer_driver_unreadable` | `backup` | Info cap |
-| `vss_writer_callback_access_denied` | `backup` | Info |
-| `wcf_request_failed` | `web` | Minor |
-| `win_msi_product_install_succeeded` | `patching` | Notice |
-| `win_msi_product_reconfigure_succeeded` | `patching` | Notice |
-| `win_msi_product_removal_succeeded` | `patching` | Notice |
-| `wmi_provider_registered_as_localsystem` | `inventory` | Info cap |
+| reason | service | severity | benign |
+|---|---|---|---|
+| `adcs_ca_chain_failed` | `certificates` | Error |  |
+| `adcs_crl_publish_failed` | `certificates` | Error |  |
+| `app_crash` | `app_stability` | Error |  |
+| `app_crash_report` | `app_stability` | Notice |  |
+| `app_hang` | `app_stability` | Error |  |
+| `aspnet_compilation_failed` | `web` | Error |  |
+| `aspnet_unhandled_exception` | `web` | Minor |  |
+| `cert_enroll_failed` | `certificates` | Warning or Verbose | benign possible |
+| `cert_expiring` | `certificates` | Warning |  |
+| `dotnet_unhandled_exception` | `app_stability` | Error |  |
+| `entra_password_hash_sync_failed` | `directory_services` | Error |  |
+| `entra_sync_run_failed` | `directory_services` | Error |  |
+| `entra_sync_scheduler_aborted` | `directory_services` | Error |  |
+| `esent_db_corruption` | `database` | Error |  |
+| `gpu_driver_error` | `hardware` | Notice at most; native level decides below |  |
+| `group_policy_cse_apply_failed` | `device_management` | Minor |  |
+| `group_policy_drive_map_failed` | `device_management` | Warning |  |
+| `group_policy_pref_item_failed` | `device_management` | Minor or Warning |  |
+| `mfa_login_succeeded` | `auth` | Info |  |
+| `mfa_not_configured` | `auth` | Warning |  |
+| `mfa_unavailable_access_granted` | `auth` | Error |  |
+| `mfa_user_not_enrolled` | `auth` | Notice |  |
+| `mssql_db_corruption` | `database` | Critical, Error or Warning |  |
+| `office_subscription_licensing_failed` | `licensing` | Warning |  |
+| `remote_assist_session_started` | `remote_access` | Notice |  |
+| `restart_manager_app_pending` | `patching` | Info cap | benign |
+| `security_agent_config_fetch_failed` | `endpoint_protection` | Error |  |
+| `security_agent_host_isolated` | `endpoint_protection` | Serious or Notice |  |
+| `vpn_dial_failed` | `vpn` | Minor |  |
+| `vss_data_integrity_writer_failed` | `backup` | Error |  |
+| `vss_legacy_driver_scan` | `backup` | Info cap | benign |
+| `vss_optimization_time_budget_reached` | `backup` | Debug | benign |
+| `vss_provider_class_not_registered` | `backup` | Error |  |
+| `vss_snapshot_call_failed` | `backup` | Warning on the refused calls, Info on the harmless ones | benign possible |
+| `vss_snapshots_failing_for_space` | `backup` | Error |  |
+| `vss_writer_callback_query` | `backup` | Info | benign |
+| `wcf_request_failed` | `web` | Minor |  |
+| `win_msi_install_error` | `patching` | Warning / Info cap for retry-later | benign possible |
+| `win_msi_operation_failed` | `patching` | Minor / Notice when blocked / Info cap for retry-later | benign possible |
+| `win_msi_product_install_succeeded` | `patching` | Notice |  |
+| `win_msi_product_reconfigure_succeeded` | `patching` | Notice |  |
+| `win_msi_product_removal_succeeded` | `patching` | Notice |  |
+| `win_user_profile_load_failed` | `user_profiles` | Serious |  |
+| `wmi_provider_registered_as_localsystem` | `inventory` | Info cap | benign |
+
+## `adcs_ca_chain_failed`
+
+Active Directory Certificate Services reported a CA chain or publication failure family event.
+
+**Severity:** Error
+
+**Impact:** Certificate trust or revocation publishing may be unhealthy until the CA issue is corrected.
+
+**Consider:**
+
+- Check CA chain, CRL, and distribution-point health together.
+- Read adjacent CertificationAuthority events before assuming the exact sub-family.
+
+## `adcs_crl_publish_failed`
+
+Active Directory Certificate Services reported a CRL publication failure.
+
+**Severity:** Error
+
+**Impact:** Revocation checks may fail or use stale data once the published CRL expires.
+
+**Consider:**
+
+- Check the CA, CRL distribution point, and CRL freshness.
+- Read adjacent CertificationAuthority events before assuming the exact sub-family.
 
 ## `app_crash`
 
@@ -127,37 +149,11 @@ A web application on this host raised an unhandled exception while serving a req
 - A count that jumps after a deployment points at the deployment.
 - A steady low rate is normal for most web applications.
 
-## `ca_chain_fail`
-
-Active Directory Certificate Services reported a CA chain or publication failure family event.
-
-**Severity:** Error
-
-**Impact:** Certificate trust or revocation publishing may be unhealthy until the CA issue is corrected.
-
-**Consider:**
-
-- Check CA chain, CRL, and distribution-point health together.
-- Read adjacent CertificationAuthority events before assuming the exact sub-family.
-
-## `ca_crl_fail`
-
-Active Directory Certificate Services reported a CRL publication failure.
-
-**Severity:** Error
-
-**Impact:** Revocation checks may fail or use stale data once the published CRL expires.
-
-**Consider:**
-
-- Check the CA, CRL distribution point, and CRL freshness.
-- Read adjacent CertificationAuthority events before assuming the exact sub-family.
-
-## `cert_enroll_fail`
+## `cert_enroll_failed`
 
 A Windows certificate enrollment failed or did not complete. Enrollment against a Microsoft attestation-identity endpoint that no longer serves requests is labeled separately as expected noise.
 
-**Severity:** Warning, or Verbose for the retired-endpoint shape
+**Severity:** Warning or Verbose
 
 **Impact:** Certificate-dependent authentication, attestation, or device trust workflows may fail later.
 
@@ -183,20 +179,7 @@ A certificate held by this machine is about to expire or has already expired, an
 - Confirm the machine can reach a domain controller and the certification authority.
 - Check the certificate template's autoenrollment permissions for the machine account.
 
-## `db_corruption`
-
-SQL Server reported database I/O failure, logical page corruption, or a read retry warning.
-
-**Severity:** Critical (824) / Error (823) / Warning (825)
-
-**Impact:** A SQL database may have corrupted pages or an unreliable storage path; affected data or application workloads can be at risk.
-
-**Consider:**
-
-- Identify the database, file, page, and storage path named in the event.
-- Treat 824 as confirmed corruption and 825 as early storage warning.
-
-## `dotnet_unhandled`
+## `dotnet_unhandled_exception`
 
 A .NET application terminated because of an unhandled managed exception.
 
@@ -208,18 +191,6 @@ A .NET application terminated because of an unhandled managed exception.
 
 - Inspect the exception type and application name in the event message.
 - Correlate with deploy, update, and dependency changes.
-
-## `e2e_test_event`
-
-A SparkLogs end-to-end test marker was emitted.
-
-**Severity:** Info cap
-
-**Consider:**
-
-- Treat as test or verification traffic unless unexpected in production data.
-
-This reason exists so test emissions stay queryable without being mistaken for endpoint trouble.
 
 ## `entra_password_hash_sync_failed`
 
@@ -261,7 +232,7 @@ The directory synchronization scheduler stopped, so no further synchronization c
 - Read the exception in the message: memory exhaustion points at the host rather than at the product.
 - Confirm whether this server is the active one or is in staging mode.
 
-## `esent_corruption`
+## `esent_db_corruption`
 
 ESENT reported embedded database corruption or a corruption-adjacent failure.
 
@@ -321,7 +292,7 @@ A Group Policy drive mapping did not complete on this host.
 
 A Group Policy preference item did not apply on this host. A refused stored credential is held one rung higher, because no later refresh can improve on it.
 
-**Severity:** Warning / Minor for a refused stored credential
+**Severity:** Minor or Warning
 
 **Impact:** The configured item is missing for the affected user or machine. The rest of the policy object applied normally.
 
@@ -331,41 +302,6 @@ A Group Policy preference item did not apply on this host. A refused stored cred
 - Access denied and file-not-found on a preference item usually mean the source path or its permissions changed.
 - An item failing at every refresh will not clear itself.
 - A refused stored credential repeats against the target on every refresh and can lock the account out.
-
-## `install_error`
-
-Windows Installer reported an install or configuration error. If the installer status says another install is already running, the same event is treated as retry-later context.
-
-**Severity:** Warning / Info cap for retry-later
-
-**Impact:** Software installation, update, or repair may not have completed successfully.
-
-**Consider:**
-
-- Check MSI status and nearby install outcome events.
-- Separate retry-later status from product or privilege failures.
-
-The id set spans multiple installer templates, so the promoted fields are the ones every template
-carries; the rest stays in the raw payload.
-
-## `install_failed`
-
-A Windows Installer operation did not complete. If the installer status says another install is already running, the same event is treated as retry-later context, and an operation refused for want of administrator rights or blocked by an open file is recorded as blocked rather than failed.
-
-**Severity:** Minor / Notice when blocked / Info cap for retry-later
-
-**Impact:** The product may be absent or partially configured until the install is retried or repaired.
-
-**Consider:**
-
-- The decoded installer error in the tail says which condition it was, and it reads the same on a machine whose text is not English.
-- A blocked record means the operation never ran: elevate it, or find what keeps attempting it unelevated.
-- Check product name and MSI status when present.
-- Look for nearby 11707 success or repeated 11708 failures.
-- Compare against the completed installs of the same product to see whether it landed later.
-
-Retry-later detection reads the installer status value rather than the message text, so it
-behaves the same on a non-English system.
 
 ## `mfa_login_succeeded`
 
@@ -418,6 +354,19 @@ A sign-in was refused because the account is not enrolled with the multi-factor 
 - Enrol the account, or place it in the exclusion the policy intends.
 - Service accounts appearing here usually need a policy exclusion rather than an enrolment.
 
+## `mssql_db_corruption`
+
+SQL Server reported database I/O failure, logical page corruption, or a read retry warning.
+
+**Severity:** Critical, Error or Warning
+
+**Impact:** A SQL database may have corrupted pages or an unreliable storage path; affected data or application workloads can be at risk.
+
+**Consider:**
+
+- Identify the database, file, page, and storage path named in the event.
+- Treat 824 as confirmed corruption and 825 as early storage warning.
+
 ## `office_subscription_licensing_failed`
 
 The subscription licensing check for the installed office suite failed.
@@ -431,19 +380,6 @@ The subscription licensing check for the installed office suite failed.
 - Check whether the same host reports it repeatedly, or only around periods of being offline.
 - Confirm the signed-in account still holds a licence in the tenant.
 - Check outbound access to the licensing endpoints from that machine.
-
-## `profile_load_fail`
-
-Windows could not load a user profile, or loaded a temporary profile.
-
-**Severity:** Serious
-
-**Impact:** The user cannot work normally on that machine: they log on with missing settings, missing data paths, or a temporary profile until the profile issue is fixed.
-
-**Consider:**
-
-- Identify the affected user profile from the event message.
-- Check profile service errors, disk space, permissions, and roaming or FSLogix state.
 
 ## `remote_assist_session_started`
 
@@ -459,7 +395,7 @@ A remote assistance session started on this host and a remote party could see th
 - Compare the time against the helpdesk record for that user.
 - Unexpected sessions on a workstation are the shape support-desk impersonation leaves.
 
-## `restart_blocked`
+## `restart_manager_app_pending`
 
 Restart Manager could not shut down or restart an app during an update session.
 
@@ -489,7 +425,7 @@ A security agent could not retrieve its configuration because its credentials we
 
 An endpoint detection agent isolated this host from the network, or later released it.
 
-**Severity:** Serious (isolated) / Notice (released)
+**Severity:** Serious or Notice
 
 **Impact:** While isolated the host cannot reach the network, so the user cannot work and the machine's other telemetry may stop arriving.
 
@@ -498,33 +434,6 @@ An endpoint detection agent isolated this host from the network, or later releas
 - Confirm from the vendor console whether the isolation was automatic or triggered by an analyst.
 - Pair the isolation with its release before judging how long the host was off the network.
 - The event names no threat: read the detection that preceded it in the vendor console.
-
-## `shadowstorage_exhausted`
-
-Shadow copy storage is full, so restore points are being deleted or no longer created.
-
-**Severity:** Error
-
-**Impact:** Snapshot-based backups and System Restore lose history or stop working on the affected volume. A backup job may still report success while protecting less than it appears to.
-
-**Consider:**
-
-- Check the shadow storage association and maximum size for the affected volume.
-- Verify the oldest surviving restore point against the retention the customer expects.
-- Free space or raise the cap; the condition recurs until the allocation changes.
-
-## `vendor_svc_fail`
-
-A vendor service launcher reported a failure.
-
-**Severity:** Error
-
-**Impact:** The related vendor application, device helper, or background service may not start or may lose functionality.
-
-**Consider:**
-
-- Identify the vendor service and any code-signing or launch error in the event message.
-- Check whether the vendor app still starts and whether the failure recurs.
 
 ## `vpn_dial_failed`
 
@@ -540,18 +449,6 @@ A remote-access dial attempt failed.
 - Check whether the same profile connected successfully soon afterwards.
 - The same profile failing across many hosts points at the concentrator, not the users.
 
-## `vss_call_failed_during_shutdown`
-
-A shadow copy operation was abandoned because the computer was shutting down.
-
-**Severity:** Info
-
-**Impact:** None. The operation is retried on the next run; nothing on the machine is broken by it.
-
-**Consider:**
-
-- Treat as a finding only if it appears without a matching restart on the same host and window.
-
 ## `vss_data_integrity_writer_failed`
 
 A backup writer for a database, mail store, virtual machine host, or directory service reported a failure during shadow copy creation.
@@ -566,17 +463,30 @@ A backup writer for a database, mail store, virtual machine host, or directory s
 - Check the application's own logs in the same window; the writer failure usually has a cause recorded there.
 - Recurring failures for the same writer mean the protected data has no verified recent backup.
 
-## `vss_process_image_name_handle_invalid`
+## `vss_legacy_driver_scan`
 
-The Volume Shadow Copy Service looked up a process that had already exited during a snapshot.
+The VSS System Writer could not read a driver binary while enumerating for a snapshot.
 
-**Severity:** Info
+**Severity:** Info cap
 
-**Impact:** None. The shadow copy proceeds.
+**Impact:** None on its own. Snapshot enumeration continues and this event does not indicate a failed backup.
 
 **Consider:**
 
-- Other event 8193 messages are not this condition; read the routine named in the message.
+- Do not treat this line as evidence that a backup or snapshot failed.
+- Confirm backup outcomes from the backup product's own job result, never from writer state.
+
+## `vss_optimization_time_budget_reached`
+
+Shadow copy optimization did not finish excluding temporary files within its time budget.
+
+**Severity:** Debug
+
+**Impact:** The shadow copy is larger than it would otherwise be. Backup correctness is unaffected.
+
+**Consider:**
+
+- Persistent occurrences on a host with tight free space are worth a disk-space check, not a backup investigation.
 
 ## `vss_provider_class_not_registered`
 
@@ -594,44 +504,35 @@ A component the Volume Shadow Copy Service needs is not registered, so shadow co
 
 ## `vss_snapshot_call_failed`
 
-The Volume Shadow Copy Service was refused a control call it makes while working with shadow copies on a volume.
+A call the Volume Shadow Copy Service makes while working with shadow copies did not complete.
 
-**Severity:** Warning
+**Severity:** Warning on the refused calls, Info on the harmless ones
 
-**Impact:** Shadow copy handling on the affected volume is constrained: the storage area cannot be resized, or a snapshot phase did not complete as asked. Backups may still succeed, so this is context for a backup problem rather than proof of one.
+**Impact:** On the refused calls, shadow copy handling on the affected volume is constrained: the storage area cannot be resized, or a snapshot phase did not complete as asked. Backups may still succeed, so this is context for a backup problem rather than proof of one. On the harmless calls there is no impact at all: the snapshot is taken again on the next run, or it proceeds unaffected.
 
 **Consider:**
 
+- Read the class first: the harmless calls carry BENIGN and the refused ones do not.
 - Check the permissions on the volume and its shadow storage association for the resize refusal.
 - Check the storage driver and any third-party shadow copy provider for the parameter rejections.
+- Treat a shutdown-interrupted call as a finding only without a matching restart on the same host and window.
 - Confirm the backup job outcome separately; this line does not report it.
 
-## `vss_snapshot_optimization_incomplete`
+## `vss_snapshots_failing_for_space`
 
-Shadow copy optimization did not finish excluding temporary files within its time budget.
+Shadow copy storage is full, so restore points are being deleted or no longer created.
 
-**Severity:** Debug
+**Severity:** Error
 
-**Impact:** The shadow copy is larger than it would otherwise be. Backup correctness is unaffected.
-
-**Consider:**
-
-- Persistent occurrences on a host with tight free space are worth a disk-space check, not a backup investigation.
-
-## `vss_system_writer_driver_unreadable`
-
-The VSS System Writer could not read a driver binary while enumerating for a snapshot.
-
-**Severity:** Info cap
-
-**Impact:** None on its own. Snapshot enumeration continues and this event does not indicate a failed backup.
+**Impact:** Snapshot-based backups and System Restore lose history or stop working on the affected volume. A backup job may still report success while protecting less than it appears to.
 
 **Consider:**
 
-- Do not treat this line as evidence that a backup or snapshot failed.
-- Confirm backup outcomes from the backup product's own job result, never from writer state.
+- Check the shadow storage association and maximum size for the affected volume.
+- Verify the oldest surviving restore point against the retention the customer expects.
+- Free space or raise the cap; the condition recurs until the allocation changes.
 
-## `vss_writer_callback_access_denied`
+## `vss_writer_callback_query`
 
 The Volume Shadow Copy Service could not read a writer's callback interface because of process permissions, and continued.
 
@@ -656,6 +557,41 @@ A hosted service on this machine could not process a request.
 - Read the endpoint path from the message: an endpoint that does not exist usually means a caller pointed at the wrong address or a deployment that did not land.
 - Compare the count against the web server's own request log for the same window.
 - The same endpoint failing across several hosts points at the deployment rather than at a client.
+
+## `win_msi_install_error`
+
+Windows Installer reported an install or configuration error. If the installer status says another install is already running, the same event is treated as retry-later context.
+
+**Severity:** Warning / Info cap for retry-later
+
+**Impact:** Software installation, update, or repair may not have completed successfully.
+
+**Consider:**
+
+- Check MSI status and nearby install outcome events.
+- Separate retry-later status from product or privilege failures.
+
+The id set spans multiple installer templates, so the promoted fields are the ones every template
+carries; the rest stays in the raw payload.
+
+## `win_msi_operation_failed`
+
+A Windows Installer operation did not complete. If the installer status says another install is already running, the same event is treated as retry-later context, and an operation refused for want of administrator rights or blocked by an open file is recorded as blocked rather than failed.
+
+**Severity:** Minor / Notice when blocked / Info cap for retry-later
+
+**Impact:** The product may be absent or partially configured until the install is retried or repaired.
+
+**Consider:**
+
+- The decoded installer error in the tail says which condition it was, and it reads the same on a machine whose text is not English.
+- A blocked record means the operation never ran: elevate it, or find what keeps attempting it unelevated.
+- Check product name and MSI status when present.
+- Look for nearby 11707 success or repeated 11708 failures.
+- Compare against the completed installs of the same product to see whether it landed later.
+
+Retry-later detection reads the installer status value rather than the message text, so it
+behaves the same on a non-English system.
 
 ## `win_msi_product_install_succeeded`
 
@@ -704,6 +640,19 @@ A Windows Installer product removal completed successfully.
 
 The outcome is read from the installer error code the event id carries rather than from the
 message text, so it behaves the same on a non-English system.
+
+## `win_user_profile_load_failed`
+
+Windows could not load a user profile, or loaded a temporary profile.
+
+**Severity:** Serious
+
+**Impact:** The user cannot work normally on that machine: they log on with missing settings, missing data paths, or a temporary profile until the profile issue is fixed.
+
+**Consider:**
+
+- Identify the affected user profile from the event message.
+- Check profile service errors, disk space, permissions, and roaming or FSLogix state.
 
 ## `wmi_provider_registered_as_localsystem`
 

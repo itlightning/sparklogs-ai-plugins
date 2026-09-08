@@ -8,7 +8,7 @@ These sets are closed: a value outside them leaves its field unset rather than b
 
 ## `win_status_codes`
 
-26 row(s).
+148 row(s), 50 carrying a token.
 
 | Code | Token | Meaning | Constant |
 |---|---|---|---|
@@ -20,6 +20,7 @@ These sets are closed: a value outside them leaves its field unset rather than b
 | `0xc0000070` | `workstation_not_authorized` | account not permitted to log on from this workstation | `STATUS_INVALID_WORKSTATION` |
 | `0xc0000071` | `password_expired` | the password has expired | `STATUS_PASSWORD_EXPIRED` |
 | `0xc0000072` | `account_disabled` | the account is disabled | `STATUS_ACCOUNT_DISABLED` |
+| `0xc0000073` | `name_translation_failed` | none of the supplied account names or identifiers could be translated to a security identifier | `STATUS_NONE_MAPPED` |
 | `0xc0000133` | `clock_skew` | client and domain controller clocks differ too much | `STATUS_TIME_DIFFERENCE_AT_DC` |
 | `0xc0000193` | `account_expired` | the account has expired | `STATUS_ACCOUNT_EXPIRED` |
 | `0xc0000224` | `password_must_change` | the password must change before logon succeeds | `STATUS_PASSWORD_MUST_CHANGE` |
@@ -38,6 +39,29 @@ These sets are closed: a value outside them leaves its field unset rather than b
 | `0x8009030d` | `unknown_credentials` | the credentials supplied were not recognized by the package | `SEC_E_UNKNOWN_CREDENTIALS` |
 | `0xc0000380` | `smartcard_wrong_pin` | the smart card PIN entered was wrong | `STATUS_SMARTCARD_WRONG_PIN` |
 | `0xc000014d` | `registry_io_failed` | an I/O operation on a registry hive file failed, so the registry could not read, write or flush that file | `STATUS_REGISTRY_IO_FAILED` |
+| `0x800f0805` | `servicing_package_invalid` | the update package was rejected as invalid, usually download or metadata corruption | `CBS_E_INVALID_PACKAGE` |
+| `0x800f080d` | `component_manifest_invalid_item` | a component manifest in the store holds an entry the servicing stack cannot read | `CBS_E_MANIFEST_INVALID_ITEM` |
+| `0x800f081f` | `component_store_source_missing` | the payload the operation needs is not in the store and no repair source supplied it | `CBS_E_SOURCE_MISSING` |
+| `0x800f0821` | `servicing_transaction_aborted` | the servicing transaction was aborted, typically after the servicing watchdog timeout expired | `CBS_E_ABORT` |
+| `0x800f0823` | `newer_servicing_stack_required` | the package requires a newer servicing stack than the one installed on this machine | `CBS_E_NEW_SERVICING_STACK_REQUIRED` |
+| `0x800f0825` | `package_cannot_be_uninstalled` | the package cannot be uninstalled, usually because a component is stuck part installed | `CBS_E_CANNOT_UNINSTALL` |
+| `0x800f0830` | `image_unserviceable` | the Windows image is too damaged to service and repair in place is not expected to work | `CBS_E_IMAGE_UNSERVICEABLE` |
+| `0x800f0831` | `component_store_corrupt` | the component store is corrupt, which blocks the package from being applied | `CBS_E_STORE_CORRUPTION` |
+| `0x800f0900` | `servicing_xml_parse_failed` | the servicing stack could not parse servicing XML | `CBS_E_XML_PARSER_FAILURE` |
+| `0x800f0904` | `more_than_one_active_edition` | the edition metadata names more than one active edition, which is not a valid configuration | `CBS_E_MORE_THAN_ONE_ACTIVE_EDITION` |
+| `0x800f0905` | `no_active_edition` | the edition metadata names no active edition | `CBS_E_NO_ACTIVE_EDITION` |
+| `0x800f0906` | `servicing_content_download_failed` | content for a Feature on Demand or an inbox corruption repair failed to download | `CBS_E_DOWNLOAD_FAILURE` |
+| `0x800f0911` | `package_source_modified` | the package sources were moved or changed since a previous session and have to be downloaded again | `CBS_E_SOURCE_MODIFIED` |
+| `0x800f0920` | `servicing_hang_detected` | the servicing stack stopped responding while processing the operation | `CBS_E_HANG_DETECTED` |
+| `0x800f0922` | `advanced_installers_failed` | the advanced installers and generic commands stage of the update failed | `CBS_E_INSTALLERS_FAILED` |
+| `0x800f0982` | `hydration_component_not_found` | no matching component could be identified to hydrate the payload from | `PSFX_E_MATCHING_COMPONENT_NOT_FOUND` |
+| `0x800f0984` | `hydration_binary_missing` | the matching component directory exists but the binary hydration needs is missing | `PSFX_E_MATCHING_BINARY_MISSING` |
+| `0x800f0985` | `reverse_delta_apply_failed` | applying a reverse delta failed, usually a missing manifest or payload | `PSFX_E_APPLY_REVERSE_DELTA_FAILED` |
+| `0x800f0986` | `forward_delta_apply_failed` | applying a forward delta failed | `PSFX_E_APPLY_FORWARD_DELTA_FAILED` |
+| `0x800f0987` | `null_delta_hydration_failed` | hydrating a component from a null delta failed | `PSFX_E_NULL_DELTA_HYDRATION_FAILED` |
+| `0x800f0988` | `invalid_delta_combination` | the deltas selected for the component cannot be combined | `PSFX_E_INVALID_DELTA_COMBINATION` |
+| `0x800f0989` | `reverse_delta_missing` | the reverse delta the operation needs is absent from the store | `PSFX_E_REVERSE_DELTA_MISSING` |
+| `0x800f0991` | `payload_file_missing` | a payload file the package depends on is missing | `PSFX_E_MISSING_PAYLOAD_FILE` |
 
 ## `kerberos`
 

@@ -57,17 +57,18 @@ Each key names one field; that field is where the value is queried.
 Presence is per curated surface, from what its author declared under `promotions`: a field reaches this row only when the surface's own arm or shape names it, never from a text scan of classify guessing which branch a write belongs to.
 A row lists what the surface CAN write, not what every event of it carries: a field whose value the payload does not supply stays unset, which is why absence of a field is never by itself evidence that a condition did not happen.
 A surface that promotes nothing says so: an empty row is a stated fact, not an omission.
+The last column is different in kind: it is the author's account of the row or evidence fields an event of that surface carries, declared per arm and compared to nothing, so read it as documentation rather than as a checked contract. An empty cell means the arm declares none, not that the event carries none.
 
-| Surface | Event ids | Fields set |
-|---|---|---|
-| `data_collection_feed_not_collecting` / `default` | n/a | `sparklogs.agent.vector.channel` `sparklogs.agent.vector.component_id` `sparklogs.agent.vector.skip_cause` |
-| `data_collection_feed_unavailable` / `feed_scoped` | n/a | `sparklogs.agent.vector.component_id` |
-| `data_collection_feed_unavailable` / `onset` | n/a | `sparklogs.agent.vector.component_id` |
-| `data_collection_feed_unavailable` / `recovered` | n/a | `sparklogs.agent.vector.component_id` |
-| `data_collection_feed_unavailable` / `reminder` | n/a | `sparklogs.agent.vector.component_id` |
-| `data_collection_read_failed` / `default` | n/a | `sparklogs.agent.vector.component_id` |
-| `data_collection_restarted_from_oldest` / `default` | n/a | `sparklogs.agent.vector.component_id` |
-| `data_collection_skipped_records_overwritten` / `default` | n/a | `sparklogs.agent.vector.channel` `sparklogs.agent.vector.component_id` `sparklogs.agent.vector.missing_records` `sparklogs.agent.vector.previous_record_id` `sparklogs.agent.vector.record_id` |
-| `data_collection_skipped_to_recover` / `default` | n/a | `sparklogs.agent.vector.channel` `sparklogs.agent.vector.component_id` `sparklogs.agent.vector.missing_records` `sparklogs.agent.vector.resume_rung` |
-| `data_collection_stream_not_started` / `default` | n/a | `sparklogs.agent.vector.component_id` |
-| `data_delivery_failed` / `default` | n/a | `sparklogs.agent.vector.component_id` |
+| Surface | Event ids | Fields set | Row fields |
+|---|---|---|---|
+| `sparklogs_collector_delivery_failed` / `default` | n/a | `sparklogs.agent.vector.component_id` |  |
+| `sparklogs_collector_feed_not_collecting` / `default` | n/a | `sparklogs.agent.vector.channel` `sparklogs.agent.vector.component_id` `sparklogs.agent.vector.skip_cause` |  |
+| `sparklogs_collector_feed_unavailable` / `feed_scoped` | n/a | `sparklogs.agent.vector.component_id` |  |
+| `sparklogs_collector_feed_unavailable` / `onset` | n/a | `sparklogs.agent.vector.component_id` |  |
+| `sparklogs_collector_feed_unavailable` / `recovered` | n/a | `sparklogs.agent.vector.component_id` |  |
+| `sparklogs_collector_feed_unavailable` / `reminder` | n/a | `sparklogs.agent.vector.component_id` |  |
+| `sparklogs_collector_read_failed` / `default` | n/a | `sparklogs.agent.vector.component_id` |  |
+| `sparklogs_collector_restarted_from_oldest` / `default` | n/a | `sparklogs.agent.vector.component_id` |  |
+| `sparklogs_collector_skipped_records_overwritten` / `default` | n/a | `sparklogs.agent.vector.channel` `sparklogs.agent.vector.component_id` `sparklogs.agent.vector.missing_records` `sparklogs.agent.vector.previous_record_id` `sparklogs.agent.vector.record_id` |  |
+| `sparklogs_collector_skipped_to_recover` / `default` | n/a | `sparklogs.agent.vector.channel` `sparklogs.agent.vector.component_id` `sparklogs.agent.vector.missing_records` `sparklogs.agent.vector.resume_rung` |  |
+| `sparklogs_collector_stream_not_started` / `default` | n/a | `sparklogs.agent.vector.component_id` |  |

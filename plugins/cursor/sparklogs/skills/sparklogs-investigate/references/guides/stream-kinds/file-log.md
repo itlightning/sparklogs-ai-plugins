@@ -17,7 +17,7 @@ No `provider_name` (LQL) and no `winlog.event_id` (LQL). Do not copy a WEL ladde
 | `win.servicing.dism` | DISM operations and image health | `<os>/logs/dism/dism.log` |
 
 Theme for those two: `../../themes/windows-updates-and-patching.md`.
-WU Setup (WEL) and WU **agent state** are different surfaces (`../stream-kinds.md` table).
+WU Setup (WEL) and the Windows Update **device health** topic are different streams (`../stream-kinds.md` table).
 
 ## Explore
 

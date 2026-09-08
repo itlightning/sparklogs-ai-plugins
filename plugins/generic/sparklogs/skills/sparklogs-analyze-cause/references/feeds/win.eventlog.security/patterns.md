@@ -29,7 +29,7 @@ Its rendered text cannot survive pattern derivation, so a string that appears to
 
 An unexpected pattern is one of three things, in falling order of likelihood: a curated surface this catalog does not list, a vocabulary that gained a value, or a token rendered from something that is not a closed vocabulary at all. The third is the one that matters.
 
-This module has 66 curated surface(s) and a legal-pattern language of 25094 strings.
+This module has 68 curated surface(s) and a legal-pattern language of 25799 strings.
 That number is why this file is a procedure and not a list.
 
 ## Surfaces
@@ -221,14 +221,6 @@ Most of those cannot physically occur; the count is a bound on the language, not
 
 **Slots:** none. This surface renders exactly one pattern.
 
-### `group_membership_changed` / `default`
-
-**Renders:** `group_membership_changed: NOTABLE: security group created, deleted, or changed`
-
-**Event ids:** 4727, 4730, 4731, 4734, 4735, 4737, 4754, 4755, 4758, 4764
-
-**Slots:** none. This surface renders exactly one pattern.
-
 ### `guest_account_sign_in` / `default`
 
 **Renders:** `guest_account_sign_in: NOTABLE: guest account signed in`
@@ -325,12 +317,12 @@ Most of those cannot physically occur; the count is a bound on the language, not
 
 | # | Slot | Legal values |
 |---|---|---|
-| 1 | `cause` | `unknown_username` `bad_password` `bad_username_or_auth` `account_restriction` `outside_logon_hours` `workstation_not_authorized` `password_expired` `account_disabled` `clock_skew` `account_expired` `password_must_change` `account_locked_out` `logon_right_not_granted` `netlogon_not_started` `no_logon_servers` `auth_firewall_blocked` `no_local_secret` `no_credentials_available` `invalid_token` `unknown_target` `no_authenticating_authority` `untrusted_root` `function_unsupported` `unknown_credentials` `smartcard_wrong_pin` `registry_io_failed` |
+| 1 | `cause` | `unknown_username` `bad_password` `bad_username_or_auth` `account_restriction` `outside_logon_hours` `workstation_not_authorized` `password_expired` `account_disabled` `name_translation_failed` `clock_skew` `account_expired` `password_must_change` `account_locked_out` `logon_right_not_granted` `netlogon_not_started` `no_logon_servers` `auth_firewall_blocked` `no_local_secret` `no_credentials_available` `invalid_token` `unknown_target` `no_authenticating_authority` `untrusted_root` `function_unsupported` `unknown_credentials` `smartcard_wrong_pin` `registry_io_failed` |
 | 2 | `logon_type` | `logon_interactive` `logon_network` `logon_batch` `logon_service` `logon_unlock` `logon_network_cleartext` `logon_new_credentials` `logon_remote_interactive` `logon_cached_interactive` `logon_system` `logon_cached_remote_interactive` `logon_cached_unlock` |
 | 3 | `subject_kind` | `by_account` `by_machine` `by_system` `by_service` `by_local_service` `by_network_service` `by_anonymous` `by_group` |
 | 4 | `auth_package` | `auth_kerberos` `auth_ntlm` `auth_negotiate` `auth_negoextender` |
 
-Legal pattern count for this surface: 15795 (every slot independently present or absent).
+Legal pattern count for this surface: 16380 (every slot independently present or absent).
 Most of those cannot physically occur; the count is a bound on the language, not a prediction.
 
 ### `logon_failed` / `sspi_probe`
@@ -343,11 +335,11 @@ Most of those cannot physically occur; the count is a bound on the language, not
 
 | # | Slot | Legal values |
 |---|---|---|
-| 1 | `cause` | `unknown_username` `bad_password` `bad_username_or_auth` `account_restriction` `outside_logon_hours` `workstation_not_authorized` `password_expired` `account_disabled` `clock_skew` `account_expired` `password_must_change` `account_locked_out` `logon_right_not_granted` `netlogon_not_started` `no_logon_servers` `auth_firewall_blocked` `no_local_secret` `no_credentials_available` `invalid_token` `unknown_target` `no_authenticating_authority` `untrusted_root` `function_unsupported` `unknown_credentials` `smartcard_wrong_pin` `registry_io_failed` |
+| 1 | `cause` | `unknown_username` `bad_password` `bad_username_or_auth` `account_restriction` `outside_logon_hours` `workstation_not_authorized` `password_expired` `account_disabled` `name_translation_failed` `clock_skew` `account_expired` `password_must_change` `account_locked_out` `logon_right_not_granted` `netlogon_not_started` `no_logon_servers` `auth_firewall_blocked` `no_local_secret` `no_credentials_available` `invalid_token` `unknown_target` `no_authenticating_authority` `untrusted_root` `function_unsupported` `unknown_credentials` `smartcard_wrong_pin` `registry_io_failed` |
 | 2 | `logon_type` | `logon_interactive` `logon_network` `logon_batch` `logon_service` `logon_unlock` `logon_network_cleartext` `logon_new_credentials` `logon_remote_interactive` `logon_cached_interactive` `logon_system` `logon_cached_remote_interactive` `logon_cached_unlock` |
 | 3 | `subject_kind` | `by_account` `by_machine` `by_system` `by_service` `by_local_service` `by_network_service` `by_anonymous` `by_group` |
 
-Legal pattern count for this surface: 3159 (every slot independently present or absent).
+Legal pattern count for this surface: 3276 (every slot independently present or absent).
 Most of those cannot physically occur; the count is a bound on the language, not a prediction.
 
 ### `logon_right_granted` / `default`
@@ -425,9 +417,9 @@ Most of those cannot physically occur; the count is a bound on the language, not
 
 | # | Slot | Legal values |
 |---|---|---|
-| 1 | `cause` | `unknown_username` `bad_password` `bad_username_or_auth` `account_restriction` `outside_logon_hours` `workstation_not_authorized` `password_expired` `account_disabled` `clock_skew` `account_expired` `password_must_change` `account_locked_out` `logon_right_not_granted` `netlogon_not_started` `no_logon_servers` `auth_firewall_blocked` `no_local_secret` `no_credentials_available` `invalid_token` `unknown_target` `no_authenticating_authority` `untrusted_root` `function_unsupported` `unknown_credentials` `smartcard_wrong_pin` `registry_io_failed` |
+| 1 | `cause` | `unknown_username` `bad_password` `bad_username_or_auth` `account_restriction` `outside_logon_hours` `workstation_not_authorized` `password_expired` `account_disabled` `name_translation_failed` `clock_skew` `account_expired` `password_must_change` `account_locked_out` `logon_right_not_granted` `netlogon_not_started` `no_logon_servers` `auth_firewall_blocked` `no_local_secret` `no_credentials_available` `invalid_token` `unknown_target` `no_authenticating_authority` `untrusted_root` `function_unsupported` `unknown_credentials` `smartcard_wrong_pin` `registry_io_failed` |
 
-Legal pattern count for this surface: 27 (every slot independently present or absent).
+Legal pattern count for this surface: 28 (every slot independently present or absent).
 Most of those cannot physically occur; the count is a bound on the language, not a prediction.
 
 ### `principal_renamed` / `default`
@@ -448,6 +440,30 @@ Most of those cannot physically occur; the count is a bound on the language, not
 **Renders:** `psdirect_handshake_probe: BENIGN: Hyper-V PowerShell Direct handshake, not a sign-in`
 
 **Event ids:** 4625
+
+**Slots:** none. This surface renders exactly one pattern.
+
+### `security_group_changed` / `default`
+
+**Renders:** `security_group_changed: NOTABLE: security group changed`
+
+**Event ids:** 4735, 4737, 4755, 4764
+
+**Slots:** none. This surface renders exactly one pattern.
+
+### `security_group_created` / `default`
+
+**Renders:** `security_group_created: NOTABLE: security group created`
+
+**Event ids:** 4727, 4731, 4754
+
+**Slots:** none. This surface renders exactly one pattern.
+
+### `security_group_deleted` / `default`
+
+**Renders:** `security_group_deleted: NOTABLE: security group deleted`
+
+**Event ids:** 4730, 4734, 4758
 
 **Slots:** none. This surface renders exactly one pattern.
 

@@ -9,36 +9,92 @@ Answer this question from SparkLogs telemetry. This is a conversation with the d
 
 **WEL** means Windows Event Log.
 
-No output template. No WHAT WAS NOT CHECKED catalog. You may go as deep as the question needs. Follow-up queries are expected.
+No output template. No WHAT WAS NOT CHECKED catalog. Go as deep as the question needs. Follow-ups expected.
 
-`sparklogs-investigate` is the written pass: a cited system-condition summary they can put on a ticket. Offer it when they want that artifact. Do not switch to it just because the chat went deep.
+`sparklogs-investigate` is a cited system-condition summary with findings; offer when they want a written report. `sparklogs-analyze-cause` only after a summary exists.
+
+## Investigation discipline
+
+1. **Bounded discovery first:** capped structure tools before event payloads (`list_sources`, `query_scope_activity`, `describe_pattern`).
+2. **Aggregate before detail:** counts and rank before `query_logs`.
+3. **Cache before re-query:** `refine_query_result` on the cached slice when it already covers the question.
+
+Tool decision tree and recipes: `references/guides/mcp-tool-decision-tree.md`.
 
 ## How to answer
 
-Answer first, then stop talking, never mid-query. Hedge precisely: "not in this window", "not checked", "insufficient evidence". Suggest likely causes and practical next steps when the evidence supports them.
+Answer first, then stop. Hedge precisely ("not in this window", "not checked", "insufficient evidence"). Cite `query_url` (col) on facts. Reuse a short `external_investigation_id` (arg) until the topic changes.
 
-- Empty `sparklogs.*` fields on an event mean the event is uncurated (this is not a health finding). A field this feed does not write is not "no problem" and not a problem.
-- If org/host/window is not obvious, `resolve_scope`. Ask only if identity is fuzzy: tied org or host matches, weak `match_kind` (col), or zero hits. Many devices under one resolved org is normal; keep them. Do not guess.
-- Funnel: coverage before claims. `list_sources` for what arrived in the window (any source type). `query_device_health` when SparkLogs Agents are in scope and the question is standing state, inventory, or silence. `query_scope_activity` for what combinations exist. Pattern mining: `query_event_counts_by_severity` and `describe_pattern`. `query_logs` last. `list_fields` rare.
-- Completeness claims need `agent_complete_through` (col) / feed reports, never first/last event bounds.
-- Cite a `query_url` (col) on factual claims.
-- Default to the named scope (one org, one host, or the set they named). Do not scan the whole fleet unprompted. If a finding looks serious or shared (same `pattern_hash` (LQL), `service` (LQL), or reason; ransomware-class, backup-wide, identity), suggest a fleet hunt and wait unless they already asked. Fleet hunt: climb the scope ladder and pattern counts first (`query_scope_activity`, `query_event_counts_by_severity` with `group_by` (arg), `describe_pattern`). `query_logs` only after that list is narrow.
-- Prefer coverage, then `query_device_health` or counts, over `query_logs`. Prefer `refine_query_result` on a cached slice over a new scan. If refine returns `cache_invalidated`, issue a new tool call; do not retry that `query_id` (arg).
-- Every data-access call needs `external_investigation_id` (arg). Pick a short id that names the topic and reuse it across follow-ups until the topic clearly changes.
+**Questions that pick the path:** (e.g., what is on the box? what happened and when? one host or fleet? which symptom domain? is collection trustworthy?)
 
-## Which tool
+**Principles:** empty `sparklogs.*` fields = uncurated (not a health finding); completeness from feed reports only (`agent_complete_through` (col)); default to named scope; ask only on fuzzy identity (`match_kind` (col) ties, weak match, zero hits). Fleet hunt only when serious/shared and they agree.
 
-- "What is on the box / CPU / RAM / disk / installed / open condition" → `query_device_health` (`fieldset=rca` for one host).
-- Named backup product (Veeam, Datto, Axcient, Acronis, MSP360, Cove, Slide) → `query_device_health` first for what is installed, then counts for a timeline. Vendor channels are collected, queryable; events carry the job verdict, not VSS. Application `reasons.md` skips vendor products; query events directly.
-- "What happened / how many / when" → `query_event_counts_by_severity` (pattern mining) or `query_scope_activity` first; `query_logs` only for a narrow slice.
-- Collector debug only → `sparklogs.agent.vector` / `sparklogs.agent.log`. Not the headline for device health.
+Funnel, scope, LQL errors: `references/guides/mcp-tool-decision-tree.md`, `references/guides/scope-resolution.md`, `references/guides/lql-reference.md`. Stuck: `references/guides/common-mistakes.md`, `references/guides/stream-kinds.md`.
 
-Load a guide when you are stuck on that topic (`references/guides/scope-resolution.md`, `references/guides/mcp-tool-decision-tree.md`, `references/guides/lql-reference.md`, `references/guides/common-mistakes.md`, `references/guides/stream-kinds.md`). Open the one you need, never the whole set.
+## Which tool (quick route)
+
+- Standing state (e.g., CPU/RAM/IO) / inventory (e.g., installed apps and services, device drivers, volume map, processes) / open conditions → `query_device_health` (`fieldset` (arg) `rca` for one host)
+- Counts, patterns, when → `query_event_counts_by_severity`, `describe_pattern`, `query_scope_activity`
+- Named backup product installed → `query_device_health` first; job verdict in events, not VSS alone
+- Raw event lines → `query_logs` last, then refine
+- Collector debug → `sparklogs.agent.vector` / `sparklogs.agent.log` only
 
 ## Where to look
 
-You may open the matching playbook for domain facts and starter LQL. Do not emit the investigation report from it.
-Playbooks are incomplete. Empty recipe LQL is not "nothing happened": widen by `subsource` (LQL), then that kind's explore ladder (`references/guides/stream-kinds.md`), then raw logs, before you say you cannot answer.
+## Curated data (read this before opening reference files)
+
+- **`subsource` (LQL) = feed id.** Scope ladder before `query_logs`: `service` (LQL) → `app` (LQL) → `subsource` (LQL) → `category` (LQL) → `pattern_hash` (LQL).
+- **Curated events** carry `sparklogs.reason` (LQL), `sparklogs.class` (LQL), and module fields. Empty `sparklogs.*` on an event means **uncurated** (not a collection-health finding).
+- **Reason** (`sparklogs.reason` (LQL)) = our curated vocabulary. **Vendor code** = NTSTATUS, HRESULT, MSI exit, Kerberos result, etc. **pattern_hash** (LQL) = stable shape id on every event.
+- **Device row** (`query_device_health`, feed health, `agent_complete_through` (col)) is authoritative for collection and completeness. Event volume is not coverage.
+- **Playbooks** = symptom recipes. **Themes** = investigation topic bundles (not customer marketing themes).
+
+## What is in the pack
+
+`playbooks/`, `themes/`, `references/feeds/<id>/` (`README.md`, `reasons.md`, `enums.md`, `fields.md`, `recipes.md`, `patterns.md` where present), `guides/`. Artifact choice detail: `references/guides/generated-reference-router.md`.
+
+## After you pick a `subsource` (LQL)
+
+1. Open `references/feeds/<id>/README.md` (short index).
+2. **Stream kind** and explore ladder: `references/guides/stream-kinds.md`. Classic WEL: `provider_name` (LQL) before `pattern` (LQL); device state: `query_device_health` with `sparklogs.kind` (LQL) / `sparklogs.topic` (LQL) / `sparklogs.reason` (LQL).
+3. Open **one** artifact (read-mode table below). Rich feeds (especially `win.eventlog.security`) often need `recipes.md` or `reasons.md` first, not only `fields.md` or `enums.md`. Security also carries `patterns.md` and `mapping-ecs.md` / `mapping-ocsf.md` when shape or external taxonomy is the question.
+
+**Reason meaning:** the `sparklogs.reason` (LQL) value and the event `message` (col) together; grep `reasons.md` for the matching `##` heading (summary table first, one section only).
+
+## Decode tables (`enums.md`)
+
+Per-feed closed vocabularies. **Grep** the code, constant, or `##` heading; never load a whole file.
+
+| Kind | Typical feed | Use when |
+|---|---|---|
+| NTSTATUS / security status | `win.eventlog.security` | Logon/auth failure codes |
+| Win32 / HRESULT | `win.eventlog.application`, `win.eventlog.system`, `win.eventlog.setup` | Servicing, app, VSS errors |
+| MSI exit codes | `win.eventlog.application` | Installer failures |
+| Logon types, WU result codes | `win.eventlog.security`, `win.eventlog.application` | Discriminate 4625/4624, update errors |
+
+## How much to read
+
+| Material | When | How |
+|---|---|---|
+| Playbook | Symptom matches index below | One file, whole |
+| Theme | Investigation topic matches index | One file, whole |
+| Feed `README.md` | You picked a `subsource` (LQL) | Whole (short index) |
+| `reasons.md` | Need what a reason means | Skim summary table (~first 100 lines), then **one** `##` section |
+| `enums.md` | Vendor/status code | **Search only** |
+| `fields.md` | Filter/group on a field | Search for field name |
+| `recipes.md` | Worked pivot for this feed | One section |
+| `patterns.md` | Is this pattern string expected? | Search one heading (grammar/drift, not meaning) |
+| Guides | Cross-cutting stuck point | One file from skill when→file table |
+
+## Unfamiliar `pattern_hash` (LQL)
+
+1. `describe_pattern` for text, examples, fleet spread.
+2. Grep `references/feeds/<id>/reasons.md` or `recipes.md` if a reason or pivot is the question.
+3. `patterns.md` only when the question is whether the pack meant to produce that string shape.
+
+Routing indexes below. Open one file when the step needs it.
+
+Playbooks are incomplete recipes. If a recipe LQL produces empty results: widen by `subsource` (LQL), then `references/guides/stream-kinds.md`, then raw logs.
 
 **Playbooks** (symptom recipes):
 
@@ -56,7 +112,7 @@ Playbooks are incomplete. Empty recipe LQL is not "nothing happened": widen by `
 | Windows Update / patch failure | `references/playbooks/windows-update-failure.md` |
 | VSS / shadow copies / backup plumbing | `references/playbooks/windows-vss.md` |
 
-**Themes** (domain, feeds that join):
+**Themes** (domain context):
 
 | Topic | File |
 |---|---|
@@ -67,7 +123,7 @@ Playbooks are incomplete. Empty recipe LQL is not "nothing happened": widen by `
 | CPU, RAM, disk, installed software, monitors | `references/themes/device-health-and-state.md` |
 | Named backup product (Veeam etc.): installed products. Not operational events. | `references/themes/device-health-and-state.md` |
 
-**Data feeds** (`subsource` (LQL) = directory name). Kind (how to explore): `references/guides/stream-kinds.md`. Then `references/feeds/<id>/README.md` and one artifact (`fields.md`, `enums.md`, `reasons.md`). Search `reasons.md` for the `##` heading that matches the reason slug. Do not read the whole file.
+**Data feeds** (`subsource` (LQL) = directory name). Follow **After you pick a `subsource` (LQL)** in the corpus block above.
 
 | Feed | What | Path |
 |---|---|---|
@@ -75,6 +131,12 @@ Playbooks are incomplete. Empty recipe LQL is not "nothing happened": widen by `
 | `win.eventlog.system` | System channel: services, drivers, kernel, VSS, storage | `references/feeds/win.eventlog.system/` |
 | `win.eventlog.application` | Application channel: app crashes, hangs, vendor app events | `references/feeds/win.eventlog.application/` |
 | `win.eventlog.setup` | Windows Update results per update | `references/feeds/win.eventlog.setup/` |
+| `win.eventlog.platform` | Platform channels: kernel, PnP, boot, power, drivers | `references/feeds/win.eventlog.platform/` |
+| `win.eventlog.storage` | Storage channels: disks, volumes, NTFS, storage drivers | `references/feeds/win.eventlog.storage/` |
+| `win.eventlog.network` | Network channels: SMB client and server, DHCP, DNS client, Wi-Fi, firewall | `references/feeds/win.eventlog.network/` |
+| `win.eventlog.identity_security` | Identity and security channels: code integrity, exploit protection, Group Policy, Entra and TPM | `references/feeds/win.eventlog.identity_security/` |
+| `win.eventlog.management` | Management channels: Task Scheduler, BITS, WinRM, WMI, Windows Update client | `references/feeds/win.eventlog.management/` |
+| `win.eventlog.apps` | Apps channels: packaged apps, app model, application compatibility | `references/feeds/win.eventlog.apps/` |
 | `win.servicing.cbs` | CBS servicing internals: component store, packages | `references/feeds/win.servicing.cbs/` |
 | `win.servicing.dism` | DISM operations and image health | `references/feeds/win.servicing.dism/` |
 | `win.defender.eventlog` | Defender: threats, protection state | `references/feeds/win.defender.eventlog/` |
@@ -82,8 +144,6 @@ Playbooks are incomplete. Empty recipe LQL is not "nothing happened": widen by `
 | `sparklogs.agent.vector` | Collector debug only: data collector internals | `references/feeds/sparklogs.agent.vector/` |
 | `sparklogs.agent.log` | Collector debug only: agent supervisor log | `references/feeds/sparklogs.agent.log/` |
 
-## Written investigation
+## Escalation
 
-Name the matching playbook when you offer `sparklogs-investigate` and the table fits.
-
-Cause hypotheses: `sparklogs-analyze-cause` only after an investigation summary exists.
+Offer `sparklogs-investigate` for an in-depth written report (name the matching playbook from the table when it fits). `sparklogs-analyze-cause` only after that report exists.

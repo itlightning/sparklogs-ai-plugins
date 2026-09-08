@@ -6,7 +6,7 @@ Neither path is exhausted by the file: playbooks are incomplete recipes, not a c
 A playbook query that returns nothing (or too little) is a miss on that recipe, not proof the host is quiet and not permission to say the issue cannot be analyzed.
 Widen: what subsources this host actually emits (`query_scope_activity` / counts grouped by `subsource` (LQL)), then the explore ladder for that stream kind (`../guides/stream-kinds.md`), then raw `query_logs`.
 WEL classic: `provider_name` (LQL) before `pattern` (LQL). File logs: `origin` (LQL). Device state: `query_device_health` for latest-in-window; logs group `sparklogs.kind` (LQL) / `sparklogs.topic` (LQL) / `sparklogs.reason` (LQL).
-Curated `service` (LQL) / `sparklogs.reason` (LQL) filters miss uncurated native text and sibling providers; look there before you stop.
+Curated `service` (LQL) / `sparklogs.reason` (LQL) filters miss uncurated raw text and sibling providers; look there before you stop.
 Playbooks assume MCP fluency: LQL, field meaning, and claim strength, not tool walkthroughs.
 
 | Symptom | File |

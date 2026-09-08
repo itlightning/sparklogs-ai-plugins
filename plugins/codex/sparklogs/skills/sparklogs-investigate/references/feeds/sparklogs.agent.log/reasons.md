@@ -6,16 +6,15 @@
 Open this file and search the reason heading. Do not read the whole file.
 Every section below is from the public reason block only.
 
-| reason | service | severity |
-|---|---|---|
-| `data_collection_settings_invalid` | `rmm` | Error |
-| `sparklogs_agent_emission_capped` | `rmm` | Error |
-| `sparklogs_agent_ingest_drop` | `rmm` | Error |
-| `sparklogs_agent_spool_drop` | `rmm` | Error |
-| `sparklogs_agent_spool_expire` | `rmm` | Error |
-| `sparklogs_agent_spool_truncate` | `rmm` | Warning |
+| reason | service | severity | benign |
+|---|---|---|---|
+| `sparklogs_agent_config_rejected` | `rmm` | Error |  |
+| `sparklogs_agent_emission_capped` | `rmm` | Error |  |
+| `sparklogs_agent_spool_drop` | `rmm` | Error |  |
+| `sparklogs_agent_spool_expire` | `rmm` | Error |  |
+| `sparklogs_agent_spool_truncate` | `rmm` | Warning |  |
 
-## `data_collection_settings_invalid`
+## `sparklogs_agent_config_rejected`
 
 The data collection settings sent to this device were invalid, so the previous ones stayed active.
 
@@ -30,14 +29,6 @@ The agent suppressed further events for one category after it hit its emission c
 **Severity:** Error
 
 **Impact:** Some events for that category in that window were not sent; treat gaps in it as suppression, not absence.
-
-## `sparklogs_agent_ingest_drop`
-
-The agent dropped events after ingest retries were exhausted.
-
-**Severity:** Error
-
-**Impact:** Telemetry from this host has a known data-loss gap.
 
 ## `sparklogs_agent_spool_drop`
 

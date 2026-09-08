@@ -35,270 +35,157 @@ This module populates no portable family.
 Presence is per curated surface, from what its author declared under `promotions`: a field reaches this row only when the surface's own arm or shape names it, never from a text scan of classify guessing which branch a write belongs to.
 A row lists what the surface CAN write, not what every event of it carries: a field whose value the payload does not supply stays unset, which is why absence of a field is never by itself evidence that a condition did not happen.
 A surface that promotes nothing says so: an empty row is a stated fact, not an omission.
+The last column is different in kind: it is the author's account of the row or evidence fields an event of that surface carries, declared per arm and compared to nothing, so read it as documentation rather than as a checked contract. An empty cell means the arm declares none, not that the event carries none.
 
-| Surface | Event ids | Fields set |
-|---|---|---|
-| `agent_handle_leak_trend` / `held` | n/a | **fields: none** |
-| `agent_handle_leak_trend` / `onset` | n/a | **fields: none** |
-| `agent_handle_leak_trend` / `recovered` | n/a | **fields: none** |
-| `agent_memory_leak_trend` / `held` | n/a | **fields: none** |
-| `agent_memory_leak_trend` / `onset` | n/a | **fields: none** |
-| `agent_memory_leak_trend` / `recovered` | n/a | **fields: none** |
-| `agent_memory_over_budget` / `held` | n/a | **fields: none** |
-| `agent_memory_over_budget` / `onset` | n/a | **fields: none** |
-| `agent_memory_over_budget` / `recovered` | n/a | **fields: none** |
-| `agent_over_budget` / `held` | n/a | **fields: none** |
-| `agent_over_budget` / `onset` | n/a | **fields: none** |
-| `agent_over_budget` / `recovered` | n/a | **fields: none** |
-| `agent_restart_flapping` / `held` | n/a | **fields: none** |
-| `agent_restart_flapping` / `onset` | n/a | **fields: none** |
-| `agent_restart_flapping` / `recovered` | n/a | **fields: none** |
-| `auto_service_not_running` / `held` | n/a | **fields: none** |
-| `auto_service_not_running` / `onset` | n/a | **fields: none** |
-| `auto_service_not_running` / `recovered` | n/a | **fields: none** |
-| `bitlocker_protection_dropped` / `held` | n/a | **fields: none** |
-| `bitlocker_protection_dropped` / `onset` | n/a | **fields: none** |
-| `bitlocker_protection_dropped` / `recovered` | n/a | **fields: none** |
-| `bsod_recurring` / `default` | n/a | **fields: none** |
-| `clock_drift` / `held` | n/a | **fields: none** |
-| `clock_drift` / `onset` | n/a | **fields: none** |
-| `clock_drift` / `recovered` | n/a | **fields: none** |
-| `cloud_unreachable` / `held` | n/a | **fields: none** |
-| `cloud_unreachable` / `onset` | n/a | **fields: none** |
-| `cloud_unreachable` / `recovered` | n/a | **fields: none** |
-| `cpu_busy_sustained` / `default` | n/a | **fields: none** |
-| `cpu_runaway_process` / `held` | n/a | **fields: none** |
-| `cpu_runaway_process` / `onset` | n/a | **fields: none** |
-| `cpu_runaway_process` / `recovered` | n/a | **fields: none** |
-| `cpu_saturated_queueing` / `held` | n/a | **fields: none** |
-| `cpu_saturated_queueing` / `onset` | n/a | **fields: none** |
-| `cpu_saturated_queueing` / `recovered` | n/a | **fields: none** |
-| `crash_dump_disabled` / `default` | n/a | **fields: none** |
-| `crash_dump_new` / `default` | n/a | **fields: none** |
-| `data_volume_space_low` / `held` | n/a | **fields: none** |
-| `data_volume_space_low` / `onset` | n/a | **fields: none** |
-| `data_volume_space_low` / `recovered` | n/a | **fields: none** |
-| `dump_pagefile_too_small` / `default` | n/a | **fields: none** |
-| `fill_rate_high` / `default` | n/a | **fields: none** |
-| `handle_leak_suspected` / `held` | n/a | **fields: none** |
-| `handle_leak_suspected` / `onset` | n/a | **fields: none** |
-| `handle_leak_suspected` / `recovered` | n/a | **fields: none** |
-| `ingest_lag` / `held` | n/a | **fields: none** |
-| `ingest_lag` / `onset` | n/a | **fields: none** |
-| `ingest_lag` / `recovered` | n/a | **fields: none** |
-| `io_elevated` / `default` | n/a | **fields: none** |
-| `io_latency_severe` / `held` | n/a | **fields: none** |
-| `io_latency_severe` / `onset` | n/a | **fields: none** |
-| `io_latency_severe` / `recovered` | n/a | **fields: none** |
-| `io_saturated` / `held` | n/a | **fields: none** |
-| `io_saturated` / `onset` | n/a | **fields: none** |
-| `io_saturated` / `recovered` | n/a | **fields: none** |
-| `memory_elevated` / `default` | n/a | **fields: none** |
-| `memory_leak_suspected` / `held` | n/a | **fields: none** |
-| `memory_leak_suspected` / `onset` | n/a | **fields: none** |
-| `memory_leak_suspected` / `recovered` | n/a | **fields: none** |
-| `memory_thrashing` / `held` | n/a | **fields: none** |
-| `memory_thrashing` / `onset` | n/a | **fields: none** |
-| `memory_thrashing` / `recovered` | n/a | **fields: none** |
-| `os_volume_space_exhausting` / `held` | n/a | **fields: none** |
-| `os_volume_space_exhausting` / `onset` | n/a | **fields: none** |
-| `os_volume_space_exhausting` / `recovered` | n/a | **fields: none** |
-| `os_volume_space_low` / `held` | n/a | **fields: none** |
-| `os_volume_space_low` / `onset` | n/a | **fields: none** |
-| `os_volume_space_low` / `recovered` | n/a | **fields: none** |
-| `process_handles_high` / `held` | n/a | **fields: none** |
-| `process_handles_high` / `onset` | n/a | **fields: none** |
-| `process_handles_high` / `recovered` | n/a | **fields: none** |
-| `product_category_conflict` / `held` | n/a | **fields: none** |
-| `product_category_conflict` / `onset` | n/a | **fields: none** |
-| `product_category_conflict` / `recovered` | n/a | **fields: none** |
-| `reboot_pending` / `held` | n/a | **fields: none** |
-| `reboot_pending` / `onset` | n/a | **fields: none** |
-| `reboot_pending` / `recovered` | n/a | **fields: none** |
-| `rmm_agent_removed` / `default` | n/a | **fields: none** |
-| `service_disabled` / `held` | n/a | **fields: none** |
-| `service_disabled` / `onset` | n/a | **fields: none** |
-| `service_disabled` / `recovered` | n/a | **fields: none** |
-| `service_flapping` / `held` | n/a | **fields: none** |
-| `service_flapping` / `onset` | n/a | **fields: none** |
-| `service_flapping` / `recovered` | n/a | **fields: none** |
-| `service_restarts_elevated` / `default` | n/a | **fields: none** |
-| `service_stuck_pending` / `held` | n/a | **fields: none** |
-| `service_stuck_pending` / `onset` | n/a | **fields: none** |
-| `service_stuck_pending` / `recovered` | n/a | **fields: none** |
-| `shadowstorage_exhausted` / `held` | n/a | **fields: none** |
-| `shadowstorage_exhausted` / `onset` | n/a | **fields: none** |
-| `shadowstorage_exhausted` / `recovered` | n/a | **fields: none** |
-| `shadowstorage_near_cap` / `held` | n/a | **fields: none** |
-| `shadowstorage_near_cap` / `onset` | n/a | **fields: none** |
-| `shadowstorage_near_cap` / `recovered` | n/a | **fields: none** |
-| `single_process_memory_dominant` / `default` | n/a | **fields: none** |
-| `spool_growth_runaway` / `held` | n/a | **fields: none** |
-| `spool_growth_runaway` / `onset` | n/a | **fields: none** |
-| `spool_growth_runaway` / `recovered` | n/a | **fields: none** |
-| `stack_cpu_elevated` / `default` | n/a | **fields: none** |
-| `vector_restart_flapping` / `held` | n/a | **fields: none** |
-| `vector_restart_flapping` / `onset` | n/a | **fields: none** |
-| `vector_restart_flapping` / `recovered` | n/a | **fields: none** |
-| `volume_full_projected_24h` / `held` | n/a | **fields: none** |
-| `volume_full_projected_24h` / `onset` | n/a | **fields: none** |
-| `volume_full_projected_24h` / `recovered` | n/a | **fields: none** |
-| `volume_full_projected_7d` / `held` | n/a | **fields: none** |
-| `volume_full_projected_7d` / `onset` | n/a | **fields: none** |
-| `volume_full_projected_7d` / `recovered` | n/a | **fields: none** |
-| `volume_lost` / `held` | n/a | **fields: none** |
-| `volume_lost` / `onset` | n/a | **fields: none** |
-| `volume_lost` / `recovered` | n/a | **fields: none** |
-| `wmi_side_cost_elevated` / `default` | n/a | **fields: none** |
-| `working_set_elevated` / `default` | n/a | **fields: none** |
-| `writer_failed` / `held` | n/a | **fields: none** |
-| `writer_failed` / `onset` | n/a | **fields: none** |
-| `writer_failed` / `recovered` | n/a | **fields: none** |
-| `writer_missing` / `held` | n/a | **fields: none** |
-| `writer_missing` / `onset` | n/a | **fields: none** |
-| `writer_missing` / `recovered` | n/a | **fields: none** |
-| `writer_retries` / `default` | n/a | **fields: none** |
-| `wu_paused` / `held` | n/a | **fields: none** |
-| `wu_paused` / `onset` | n/a | **fields: none** |
-| `wu_paused` / `recovered` | n/a | **fields: none** |
-| `wu_scan_stale` / `held` | n/a | **fields: none** |
-| `wu_scan_stale` / `onset` | n/a | **fields: none** |
-| `wu_scan_stale` / `recovered` | n/a | **fields: none** |
-| `wu_service_disabled` / `held` | n/a | **fields: none** |
-| `wu_service_disabled` / `onset` | n/a | **fields: none** |
-| `wu_service_disabled` / `recovered` | n/a | **fields: none** |
+| Surface | Event ids | Fields set | Row fields |
+|---|---|---|---|
+| `agent_cpu_over_budget` / `held` | n/a | **fields: none** |  |
+| `agent_cpu_over_budget` / `onset` | n/a | **fields: none** |  |
+| `agent_cpu_over_budget` / `recovered` | n/a | **fields: none** |  |
+| `agent_ram_over_budget` / `held` | n/a | **fields: none** |  |
+| `agent_ram_over_budget` / `onset` | n/a | **fields: none** |  |
+| `agent_ram_over_budget` / `recovered` | n/a | **fields: none** |  |
+| `cpu_busy` / `default` | n/a | **fields: none** |  |
+| `disk_latency_degraded` / `held` | n/a | **fields: none** |  |
+| `disk_latency_degraded` / `onset` | n/a | **fields: none** |  |
+| `disk_latency_degraded` / `recovered` | n/a | **fields: none** |  |
+| `os_bsod_recurring` / `default` | n/a | **fields: none** |  |
+| `os_clock_drift` / `held` | n/a | **fields: none** |  |
+| `os_clock_drift` / `onset` | n/a | **fields: none** |  |
+| `os_clock_drift` / `recovered` | n/a | **fields: none** |  |
+| `os_crash_dump_new` / `default` | n/a | **fields: none** |  |
+| `os_dump_pagefile_too_small` / `default` | n/a | **fields: none** |  |
+| `patch_scan_stale` / `held` | n/a | **fields: none** |  |
+| `patch_scan_stale` / `onset` | n/a | **fields: none** |  |
+| `patch_scan_stale` / `recovered` | n/a | **fields: none** |  |
+| `patch_updates_paused` / `held` | n/a | **fields: none** |  |
+| `patch_updates_paused` / `onset` | n/a | **fields: none** |  |
+| `patch_updates_paused` / `recovered` | n/a | **fields: none** |  |
+| `proc_cpu_runaway` / `held` | n/a | **fields: none** |  |
+| `proc_cpu_runaway` / `onset` | n/a | **fields: none** |  |
+| `proc_cpu_runaway` / `recovered` | n/a | **fields: none** |  |
+| `proc_handle_count_high` / `held` | n/a | **fields: none** |  |
+| `proc_handle_count_high` / `onset` | n/a | **fields: none** |  |
+| `proc_handle_count_high` / `recovered` | n/a | **fields: none** |  |
+| `ram_commit_high` / `default` | n/a | **fields: none** |  |
+| `ram_growth_sustained` / `held` | n/a | **fields: none** | `ws_growth_monotonic_snapshots` `working_set_bytes` `working_set_pct_ram` |
+| `ram_growth_sustained` / `onset` | n/a | **fields: none** | `ws_growth_monotonic_snapshots` `working_set_bytes` `working_set_pct_ram` |
+| `ram_growth_sustained` / `recovered` | n/a | **fields: none** |  |
+| `ram_hard_fault_storm` / `held` | n/a | **fields: none** |  |
+| `ram_hard_fault_storm` / `onset` | n/a | **fields: none** |  |
+| `ram_hard_fault_storm` / `recovered` | n/a | **fields: none** |  |
+| `svc_auto_not_running` / `held` | n/a | **fields: none** |  |
+| `svc_auto_not_running` / `onset` | n/a | **fields: none** |  |
+| `svc_auto_not_running` / `recovered` | n/a | **fields: none** |  |
+| `svc_flapping` / `held` | n/a | **fields: none** |  |
+| `svc_flapping` / `onset` | n/a | **fields: none** |  |
+| `svc_flapping` / `recovered` | n/a | **fields: none** |  |
+| `svc_stuck_pending` / `held` | n/a | **fields: none** |  |
+| `svc_stuck_pending` / `onset` | n/a | **fields: none** |  |
+| `svc_stuck_pending` / `recovered` | n/a | **fields: none** |  |
+| `vol_bitlocker_dropped` / `held` | n/a | **fields: none** |  |
+| `vol_bitlocker_dropped` / `onset` | n/a | **fields: none** |  |
+| `vol_bitlocker_dropped` / `recovered` | n/a | **fields: none** |  |
+| `vol_data_space_exhausting` / `held` | n/a | **fields: none** |  |
+| `vol_data_space_exhausting` / `onset` | n/a | **fields: none** |  |
+| `vol_data_space_exhausting` / `recovered` | n/a | **fields: none** |  |
+| `vol_data_space_low` / `held` | n/a | **fields: none** |  |
+| `vol_data_space_low` / `onset` | n/a | **fields: none** |  |
+| `vol_data_space_low` / `recovered` | n/a | **fields: none** |  |
+| `vol_fill_rate_high` / `default` | n/a | **fields: none** |  |
+| `vol_os_space_exhausting` / `held` | n/a | **fields: none** |  |
+| `vol_os_space_exhausting` / `onset` | n/a | **fields: none** |  |
+| `vol_os_space_exhausting` / `recovered` | n/a | **fields: none** |  |
+| `vol_os_space_low` / `held` | n/a | **fields: none** |  |
+| `vol_os_space_low` / `onset` | n/a | **fields: none** |  |
+| `vol_os_space_low` / `recovered` | n/a | **fields: none** |  |
+| `vol_unreadable` / `held` | n/a | **fields: none** |  |
+| `vol_unreadable` / `onset` | n/a | **fields: none** |  |
+| `vol_unreadable` / `recovered` | n/a | **fields: none** |  |
+| `vss_shadowstorage_near_cap` / `held` | n/a | **fields: none** |  |
+| `vss_shadowstorage_near_cap` / `onset` | n/a | **fields: none** |  |
+| `vss_shadowstorage_near_cap` / `recovered` | n/a | **fields: none** |  |
+| `vss_snapshots_failing_for_space` / `held` | n/a | **fields: none** |  |
+| `vss_snapshots_failing_for_space` / `onset` | n/a | **fields: none** |  |
+| `vss_snapshots_failing_for_space` / `recovered` | n/a | **fields: none** |  |
+| `vss_writer_failed` / `held` | n/a | **fields: none** |  |
+| `vss_writer_failed` / `onset` | n/a | **fields: none** |  |
+| `vss_writer_failed` / `recovered` | n/a | **fields: none** |  |
 
 ### Surfaces that promote nothing
 
 These carry class, reason and message text only.
 A predicate over them uses the reason, the class, or the retained payload; there is no promoted field to filter on.
 
-- `agent_handle_leak_trend` / `held`
-- `agent_handle_leak_trend` / `onset`
-- `agent_handle_leak_trend` / `recovered`
-- `agent_memory_leak_trend` / `held`
-- `agent_memory_leak_trend` / `onset`
-- `agent_memory_leak_trend` / `recovered`
-- `agent_memory_over_budget` / `held`
-- `agent_memory_over_budget` / `onset`
-- `agent_memory_over_budget` / `recovered`
-- `agent_over_budget` / `held`
-- `agent_over_budget` / `onset`
-- `agent_over_budget` / `recovered`
-- `agent_restart_flapping` / `held`
-- `agent_restart_flapping` / `onset`
-- `agent_restart_flapping` / `recovered`
-- `auto_service_not_running` / `held`
-- `auto_service_not_running` / `onset`
-- `auto_service_not_running` / `recovered`
-- `bitlocker_protection_dropped` / `held`
-- `bitlocker_protection_dropped` / `onset`
-- `bitlocker_protection_dropped` / `recovered`
-- `bsod_recurring` / `default`
-- `clock_drift` / `held`
-- `clock_drift` / `onset`
-- `clock_drift` / `recovered`
-- `cloud_unreachable` / `held`
-- `cloud_unreachable` / `onset`
-- `cloud_unreachable` / `recovered`
-- `cpu_busy_sustained` / `default`
-- `cpu_runaway_process` / `held`
-- `cpu_runaway_process` / `onset`
-- `cpu_runaway_process` / `recovered`
-- `cpu_saturated_queueing` / `held`
-- `cpu_saturated_queueing` / `onset`
-- `cpu_saturated_queueing` / `recovered`
-- `crash_dump_disabled` / `default`
-- `crash_dump_new` / `default`
-- `data_volume_space_low` / `held`
-- `data_volume_space_low` / `onset`
-- `data_volume_space_low` / `recovered`
-- `dump_pagefile_too_small` / `default`
-- `fill_rate_high` / `default`
-- `handle_leak_suspected` / `held`
-- `handle_leak_suspected` / `onset`
-- `handle_leak_suspected` / `recovered`
-- `ingest_lag` / `held`
-- `ingest_lag` / `onset`
-- `ingest_lag` / `recovered`
-- `io_elevated` / `default`
-- `io_latency_severe` / `held`
-- `io_latency_severe` / `onset`
-- `io_latency_severe` / `recovered`
-- `io_saturated` / `held`
-- `io_saturated` / `onset`
-- `io_saturated` / `recovered`
-- `memory_elevated` / `default`
-- `memory_leak_suspected` / `held`
-- `memory_leak_suspected` / `onset`
-- `memory_leak_suspected` / `recovered`
-- `memory_thrashing` / `held`
-- `memory_thrashing` / `onset`
-- `memory_thrashing` / `recovered`
-- `os_volume_space_exhausting` / `held`
-- `os_volume_space_exhausting` / `onset`
-- `os_volume_space_exhausting` / `recovered`
-- `os_volume_space_low` / `held`
-- `os_volume_space_low` / `onset`
-- `os_volume_space_low` / `recovered`
-- `process_handles_high` / `held`
-- `process_handles_high` / `onset`
-- `process_handles_high` / `recovered`
-- `product_category_conflict` / `held`
-- `product_category_conflict` / `onset`
-- `product_category_conflict` / `recovered`
-- `reboot_pending` / `held`
-- `reboot_pending` / `onset`
-- `reboot_pending` / `recovered`
-- `rmm_agent_removed` / `default`
-- `service_disabled` / `held`
-- `service_disabled` / `onset`
-- `service_disabled` / `recovered`
-- `service_flapping` / `held`
-- `service_flapping` / `onset`
-- `service_flapping` / `recovered`
-- `service_restarts_elevated` / `default`
-- `service_stuck_pending` / `held`
-- `service_stuck_pending` / `onset`
-- `service_stuck_pending` / `recovered`
-- `shadowstorage_exhausted` / `held`
-- `shadowstorage_exhausted` / `onset`
-- `shadowstorage_exhausted` / `recovered`
-- `shadowstorage_near_cap` / `held`
-- `shadowstorage_near_cap` / `onset`
-- `shadowstorage_near_cap` / `recovered`
-- `single_process_memory_dominant` / `default`
-- `spool_growth_runaway` / `held`
-- `spool_growth_runaway` / `onset`
-- `spool_growth_runaway` / `recovered`
-- `stack_cpu_elevated` / `default`
-- `vector_restart_flapping` / `held`
-- `vector_restart_flapping` / `onset`
-- `vector_restart_flapping` / `recovered`
-- `volume_full_projected_24h` / `held`
-- `volume_full_projected_24h` / `onset`
-- `volume_full_projected_24h` / `recovered`
-- `volume_full_projected_7d` / `held`
-- `volume_full_projected_7d` / `onset`
-- `volume_full_projected_7d` / `recovered`
-- `volume_lost` / `held`
-- `volume_lost` / `onset`
-- `volume_lost` / `recovered`
-- `wmi_side_cost_elevated` / `default`
-- `working_set_elevated` / `default`
-- `writer_failed` / `held`
-- `writer_failed` / `onset`
-- `writer_failed` / `recovered`
-- `writer_missing` / `held`
-- `writer_missing` / `onset`
-- `writer_missing` / `recovered`
-- `writer_retries` / `default`
-- `wu_paused` / `held`
-- `wu_paused` / `onset`
-- `wu_paused` / `recovered`
-- `wu_scan_stale` / `held`
-- `wu_scan_stale` / `onset`
-- `wu_scan_stale` / `recovered`
-- `wu_service_disabled` / `held`
-- `wu_service_disabled` / `onset`
-- `wu_service_disabled` / `recovered`
+- `agent_cpu_over_budget` / `held`
+- `agent_cpu_over_budget` / `onset`
+- `agent_cpu_over_budget` / `recovered`
+- `agent_ram_over_budget` / `held`
+- `agent_ram_over_budget` / `onset`
+- `agent_ram_over_budget` / `recovered`
+- `cpu_busy` / `default`
+- `disk_latency_degraded` / `held`
+- `disk_latency_degraded` / `onset`
+- `disk_latency_degraded` / `recovered`
+- `os_bsod_recurring` / `default`
+- `os_clock_drift` / `held`
+- `os_clock_drift` / `onset`
+- `os_clock_drift` / `recovered`
+- `os_crash_dump_new` / `default`
+- `os_dump_pagefile_too_small` / `default`
+- `patch_scan_stale` / `held`
+- `patch_scan_stale` / `onset`
+- `patch_scan_stale` / `recovered`
+- `patch_updates_paused` / `held`
+- `patch_updates_paused` / `onset`
+- `patch_updates_paused` / `recovered`
+- `proc_cpu_runaway` / `held`
+- `proc_cpu_runaway` / `onset`
+- `proc_cpu_runaway` / `recovered`
+- `proc_handle_count_high` / `held`
+- `proc_handle_count_high` / `onset`
+- `proc_handle_count_high` / `recovered`
+- `ram_commit_high` / `default`
+- `ram_growth_sustained` / `held`
+- `ram_growth_sustained` / `onset`
+- `ram_growth_sustained` / `recovered`
+- `ram_hard_fault_storm` / `held`
+- `ram_hard_fault_storm` / `onset`
+- `ram_hard_fault_storm` / `recovered`
+- `svc_auto_not_running` / `held`
+- `svc_auto_not_running` / `onset`
+- `svc_auto_not_running` / `recovered`
+- `svc_flapping` / `held`
+- `svc_flapping` / `onset`
+- `svc_flapping` / `recovered`
+- `svc_stuck_pending` / `held`
+- `svc_stuck_pending` / `onset`
+- `svc_stuck_pending` / `recovered`
+- `vol_bitlocker_dropped` / `held`
+- `vol_bitlocker_dropped` / `onset`
+- `vol_bitlocker_dropped` / `recovered`
+- `vol_data_space_exhausting` / `held`
+- `vol_data_space_exhausting` / `onset`
+- `vol_data_space_exhausting` / `recovered`
+- `vol_data_space_low` / `held`
+- `vol_data_space_low` / `onset`
+- `vol_data_space_low` / `recovered`
+- `vol_fill_rate_high` / `default`
+- `vol_os_space_exhausting` / `held`
+- `vol_os_space_exhausting` / `onset`
+- `vol_os_space_exhausting` / `recovered`
+- `vol_os_space_low` / `held`
+- `vol_os_space_low` / `onset`
+- `vol_os_space_low` / `recovered`
+- `vol_unreadable` / `held`
+- `vol_unreadable` / `onset`
+- `vol_unreadable` / `recovered`
+- `vss_shadowstorage_near_cap` / `held`
+- `vss_shadowstorage_near_cap` / `onset`
+- `vss_shadowstorage_near_cap` / `recovered`
+- `vss_snapshots_failing_for_space` / `held`
+- `vss_snapshots_failing_for_space` / `onset`
+- `vss_snapshots_failing_for_space` / `recovered`
+- `vss_writer_failed` / `held`
+- `vss_writer_failed` / `onset`
+- `vss_writer_failed` / `recovered`

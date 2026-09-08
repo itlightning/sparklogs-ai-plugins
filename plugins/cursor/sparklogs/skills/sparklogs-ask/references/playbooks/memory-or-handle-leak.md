@@ -5,7 +5,7 @@
 **Accuracy.** There is no per-process working-set trajectory.
 You can establish the consequence trail: crashes, hangs, resource-exhaustion errors, and whether an open resource-pressure condition exists *now*.
 A leak trajectory is an inference from that, not a measurement.
-Read `sparklogs.reason` (LQL) with `episode_age_basis` (col): `observed` means already true when the agent first looked ("for at least N days" is the strongest claim); `unknown_ongoing` means you may not render a duration.
+Read `sparklogs.reason` (LQL) with `sparklogs.episode.age_basis` (col): `observed` means already true when the agent first looked ("for at least N days" is the strongest claim); `unknown_ongoing` means you may not render a duration.
 Do not straddle a source-pack release when comparing pattern hashes; identity is recomputed at that boundary.
 
 **Queries.**
