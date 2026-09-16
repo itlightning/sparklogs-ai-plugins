@@ -3,9 +3,9 @@
 
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
-| `sparklogs.kind` | string |  | What shape of row this is: `inventory` for a full table, `delta` for what changed, `monitor` for one condition on one subject, `occurrence` for a dated fact that cannot reverse. |
+| `sparklogs.kind` | string |  | The event category that selects its row contract and downstream handling. Producers define additive values; consumers must not infer a closed vocabulary from this field. |
 | `sparklogs.topic` | string |  | Which state topic the row belongs to, and the namespace its readings sit in under `sparklogs.data`. |
-| `sparklogs.reason` | string |  | Which condition this monitor row is about. A closed, additive vocabulary, and globally unique: the name alone says what happened, with no topic needed to disambiguate it. |
+| `sparklogs.reason` | string |  | The stable reason code naming why the event was emitted or how a curated event was classified. It is globally unique, so the reason code alone identifies the meaning without a topic or kind qualifier. |
 | `sparklogs.instance` | string |  | The opaque id of the subject this row is about, led by its subject type. Omitted entirely for a condition about the whole host, never filled with a sentinel. |
 | `sparklogs.open_monitors_count` | integer | count | How many conditions this topic currently holds open, stamped on the full table so a reader who has only the inventory knows whether to expect monitor rows. |
 | `sparklogs.window_partial` | bool |  | The measurement window behind these readings was not fully populated, so a rate or a percentile over it rests on fewer samples than usual. Absent when the window was whole. |
