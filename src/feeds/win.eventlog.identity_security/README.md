@@ -8,3 +8,4 @@ Read in this order when investigating the channel for the first time.
 
 - [`fields.md`](fields.md): what exists at rest and what writes it
 - [`enums.md`](enums.md): the closed token vocabularies to group by
+- [`reasons.md`](reasons.md): what each reason code means (public summary, severity, impact)

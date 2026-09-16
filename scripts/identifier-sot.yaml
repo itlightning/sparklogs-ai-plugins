@@ -313,7 +313,7 @@ values:
   episode_transition:
     - severity_raised
     - severity_lowered
-  # sparklogs.topic values observed on sparklogs.agent.state in a live workspace.
+  # sparklogs.topic values observed on sparklogs.device.state in a live workspace.
   topics:
     - agent_overhead
     - agent_pipeline

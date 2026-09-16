@@ -15,6 +15,8 @@ Every section below is from the public reason block only.
 
 Windows servicing reported unrepaired component-store corruption.
 
+**Also reported by:** `win.servicing.cbs`
+
 **Severity:** Warning or Notice
 
 **Impact:** Future Windows servicing operations may fail until the component store is repaired.

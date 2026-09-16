@@ -6,6 +6,7 @@
 
 export const SRC_DIR = 'src';
 export const FEEDS_DIR = 'src/feeds';
+export const FIELDS_DIR = 'src/fields';
 export const GUIDES_DIR = 'src/guides';
 export const THEMES_DIR = 'src/themes';
 export const PLAYBOOKS_DIR = 'src/playbooks';
@@ -88,12 +89,12 @@ export const MAX_SRC_FILE_BYTES = 128 * 1024;
 // Every host materializes the corpus inside each skill. Claude additionally ships agents/ at the
 // package root. Cap is sized for corpus times skill count plus commands and assets.
 export const MAX_PACKAGE_BYTES = 4 * 1024 * 1024;
-export const MAX_DIST_BYTES = 12 * 1024 * 1024;
+export const MAX_DIST_BYTES = 20 * 1024 * 1024;
 
 export const DOCS_URL = 'https://sparklogs.com/docs/it-fleet-intelligence';
 
 const SRC_TOP = new Set([
-  'skills', 'commands', 'agents', 'rules', 'guides', 'feeds',
+  'skills', 'commands', 'agents', 'rules', 'guides', 'feeds', 'fields',
   'playbooks', 'themes', 'assets', 'metadata',
 ]);
 
@@ -161,7 +162,7 @@ export function extraFeedDirs(dirNames, modules) {
 
 const PACKAGE_TOP_FILES = new Set(['README.md', 'LICENSE', 'mcp.json', '.mcp.json', 'plugin.json']);
 const PACKAGE_TOP_DIRS = new Set([
-  'skills', 'commands', 'agents', 'rules', 'themes', 'feeds',
+  'skills', 'commands', 'agents', 'rules', 'themes', 'feeds', 'fields',
   'playbooks', 'guides', 'assets',
   '.claude-plugin', '.cursor-plugin', '.codex-plugin',
 ]);

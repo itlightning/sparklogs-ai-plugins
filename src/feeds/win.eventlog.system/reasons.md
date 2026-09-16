@@ -28,7 +28,6 @@ Every section below is from the public reason block only.
 | `disk_surprise_removal` | `storage` | Warning |  |
 | `driver_load_failed` | `hardware` | Warning |  |
 | `ephemeral_port_alloc_failed` | `networking` | Notice |  |
-| `firmware_attack_indicator_reported` | `endpoint_protection` | Error or Warning |  |
 | `gpu_driver_reset` | `hardware` | Notice |  |
 | `hardware_error_corrected` | `hardware` | Notice |  |
 | `hardware_error_uncorrected` | `hardware` | Error |  |
@@ -51,6 +50,7 @@ Every section below is from the public reason block only.
 | `ntfs_delayed_write_lost` | `storage` | Serious (path on the system volume) / Error (path anywhere else) |  |
 | `ntfs_transaction_log_error` | `storage` | Warning (flush failed on a live volume, recovery error, metadata reset) / Notice (flush failed on a volume that no longer exists) / Error (resource manager could not start) |  |
 | `patch_install_failed` | `patching` | Minor, Info or Verbose | benign possible |
+| `platform_tamper_indicator_reported` | `endpoint_protection` | Error or Warning |  |
 | `rds_license_server_unactivated` | `licensing` | Warning |  |
 | `rds_license_tracking_failed` | `licensing` | Warning |  |
 | `rds_licensing_service_failed` | `licensing` | Error |  |
@@ -66,7 +66,7 @@ Every section below is from the public reason block only.
 | `smb_delayed_write_lost` | `storage` | Error |  |
 | `smb_server_transport_bind_failed` | `networking` | Warning (server) / Info (workstation) |  |
 | `smb_share_recreate_failed` | `storage` | Warning |  |
-| `storage_controller_reset` | `storage` | Error |  |
+| `storage_controller_reset` | `storage` | Warning |  |
 | `time_sync_failed` | `time_sync` | Warning |  |
 | `tls_cert_expired` | `certificates` | Error |  |
 | `tls_cert_name_mismatch` | `certificates` | Error |  |
@@ -245,6 +245,8 @@ DCOM failed while starting an application or service.
 
 A disk reported a bad block.
 
+**Also reported by:** `win.eventlog.storage`
+
 **Severity:** Serious
 
 **Impact:** Data in the affected block may be unreadable, and the drive is consuming its spare-block reserve.
@@ -297,6 +299,8 @@ A disk IO operation had to be retried.
 
 Windows reported a disk error during a paging operation.
 
+**Also reported by:** `win.eventlog.storage`
+
 **Severity:** Warning
 
 **Impact:** The affected device may be slow, unstable, or disconnecting under IO pressure.
@@ -309,6 +313,8 @@ Windows reported a disk error during a paging operation.
 ## `disk_surprise_removal`
 
 A disk disappeared without an orderly removal path.
+
+**Also reported by:** `win.eventlog.storage`
 
 **Severity:** Warning
 
@@ -346,20 +352,6 @@ A local port could not be allocated from the ephemeral port range.
 - Look for an application leaking sockets, or a port range narrowed by configuration.
 
 A single occurrence is common and self-correcting. The actionable form is a sustained rate on one device.
-
-## `firmware_attack_indicator_reported`
-
-A firmware-security agent reported an Indicator of Attack against this machine platform.
-
-**Severity:** Error or Warning
-
-**Impact:** The platform is in the state the indicator names, which normally means a firmware protection is disabled or the chassis was opened. Where the indicator completed, the agent considers its pattern met.
-
-**Consider:**
-
-- Read the Category and the listed events from the message: they name what was matched.
-- Check whether a deliberate BIOS change or a hardware service visit explains it.
-- Where nothing explains it, treat the named firmware settings as the thing to put back.
 
 ## `gpu_driver_reset`
 
@@ -605,6 +597,8 @@ A network adapter reported that its link came up.
 
 NTFS found damage in the structures on a volume, or reported repairing it.
 
+**Also reported by:** `win.eventlog.storage`
+
 **Severity:** Critical (corrupted MFT record, MFT torn write, volume cannot be corrected) / Serious (corruption in a directory index or another structure) / Error (torn write on a data file) / Warning (repair completed, repair posting throttled)
 
 **Impact:** Volume integrity is at risk; applications and files on that volume may be affected until repair is complete. Damage to the Master File Table reaches every file on the volume, because it holds the record of where each of them lives.
@@ -657,6 +651,22 @@ Windows Update reports the outcome of an update install attempt on this device.
 - Group by the result code to separate one failure cause from another.
 
 A single failure is common and usually self-correcting. Recurrence across cycles on the same update is the actionable pattern. The update title and the result code ride the message tail, and the normalized code and its space ride the shared error fields.
+
+## `platform_tamper_indicator_reported`
+
+A platform-security agent reported a tamper indicator against this machine.
+
+**Also reported by:** `win.eventlog.platform`
+
+**Severity:** Error or Warning
+
+**Impact:** The agent names the category it matched and the firmware or chassis events it built the indicator from. An indicator names what the agent matched; read the named settings to see what the machine is actually set to.
+
+**Consider:**
+
+- Read the Category and the listed events from the message: they name what was matched.
+- Check whether a deliberate BIOS change or a hardware service visit explains it.
+- Where nothing explains it, treat the named firmware settings as the thing to put back.
 
 ## `rds_license_server_unactivated`
 
@@ -781,6 +791,8 @@ A Windows service stopped responding to a control transaction.
 
 A Windows service was installed.
 
+**Also reported by:** `win.eventlog.security`
+
 **Severity:** Notice
 
 **Impact:** Unexpected service creation can establish persistence or run code under a privileged account.
@@ -859,7 +871,9 @@ A file share could not be recreated because the folder it points at no longer ex
 
 The AHCI storage controller reported a reset or timeout condition.
 
-**Severity:** Error
+**Also reported by:** `win.eventlog.storage`
+
+**Severity:** Warning
 
 **Impact:** A controller reset can stall storage IO and may indicate a failing device, cable, controller, or driver path.
 

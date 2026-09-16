@@ -53,6 +53,7 @@ Every section below is from the public reason block only.
 | `nps_request_discarded` | `auth` | Warning |  |
 | `ntlm_validation_failed` | `auth` | Warning (account state) / Notice (wrong password, unknown username, undecoded) |  |
 | `principal_renamed` | `security_audit` | Notice for a rename that changed the name; Debug when the old and new names are identical |  |
+| `process_exited_abnormally` | `security_audit` | Notice |  |
 | `psdirect_handshake_probe` | `auth` | Debug | benign |
 | `registry_value_changed` | `security_audit` | Warning |  |
 | `replay_attack_detected` | `auth` | Error |  |
@@ -83,8 +84,8 @@ An attribute on an existing user or computer account was modified.
 - The id can fire without a visible attribute change; treat one occurrence as weak evidence
 
 The target is the principal that was edited and the actor is the principal that edited it.
-config_change.target stays unset on this reason: the object of the change is a principal, which
-rides the target family instead.
+config_change.target names the same account again, as the identity of what changed rather than
+as a principal join key; the two answer different questions and both are populated.
 
 ## `account_created`
 
@@ -367,8 +368,8 @@ A directory service object was created, modified, moved, or deleted. Typical on 
 - Pivot on ObjectDN and AttributeLDAPDisplayName; do not expect AttributeValue in curated fields
 - Confirm the change Subject against approved admin or sync tooling
 
-config_change.action reads updated on the modification id and created or deleted on the ids that
-name those directions, so pivot on the action rather than assuming one value.
+config_change.action names the direction the event recorded, so pivot on the action rather
+than assuming one value.
 
 ## `directory_replication_access_requested`
 
@@ -472,6 +473,8 @@ on the reason and read the calling process, rather than filtering by severity.
 
 A Windows Firewall rule or related policy was created, changed, deleted, enabled, or disabled. This Security-channel copy fires when that audit subcategory is enabled.
 
+**Also reported by:** `win.eventlog.network`
+
 **Severity:** Warning
 
 **Impact:** What traffic is allowed or blocked can change. Unexpected opens can expose services; unexpected closes can break apps.
@@ -479,6 +482,7 @@ A Windows Firewall rule or related policy was created, changed, deleted, enabled
 **Consider:**
 
 - Pivot on RuleName / RuleId and Subject
+- The change action names the direction: created, updated, deleted, enabled, or disabled
 - Prefer the Firewall operational channel when Security auditing is off
 
 ## `firewall_service_stopped`
@@ -727,6 +731,21 @@ A security principal was renamed. The identifier is unchanged, so events before 
 The id covers any SAM principal, groups included, so read the principal class off the event
 rather than assuming a user account.
 
+## `process_exited_abnormally`
+
+A process was stopped by Windows part way through something it could not execute, such as a bad memory access or a corrupted heap. The program did not exit on its own terms.
+
+**Severity:** Notice
+
+**Impact:** Whatever the process was doing did not finish. One row does not say anything is still wrong: a crash and a missing library both end a process this way, and most of them are background work that simply started again.
+
+**Consider:**
+
+- Look for an app_crash row on the same host and minute, then read the application log around it
+- The exit status names the kind of crash: the result code and its constant name ride the event
+- One abnormal exit is ordinary; the same image ending this way again and again, or across many hosts, is the shape to chase
+- Join to the process creation record on the host to see what started it and with what arguments
+
 ## `psdirect_handshake_probe`
 
 Hyper-V opened a PowerShell Direct channel to a guest virtual machine. The legacy handshake negotiates through the sign-in path, so Windows records it as a failed sign-in, but no account was involved and no action is needed.
@@ -754,6 +773,7 @@ An audited registry value was created, modified, or deleted. These events appear
 **Consider:**
 
 - Use ObjectName, ObjectValueName, and ProcessName
+- The change action names the direction: created, updated, or deleted
 - Do not expect Old/New value contents in curated fields
 
 ## `replay_attack_detected`
@@ -873,6 +893,8 @@ A security group was deleted. Deletion of a privileged group (Administrators, Do
 ## `service_installed`
 
 A Windows service was installed. This Security-channel event appears when service-install auditing is enabled; the System channel often carries the same fact by default.
+
+**Also reported by:** `win.eventlog.system`
 
 **Severity:** Notice
 

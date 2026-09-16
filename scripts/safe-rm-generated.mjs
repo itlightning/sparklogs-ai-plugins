@@ -67,3 +67,16 @@ export async function safeRmFeedModule(moduleId, options = {}) {
   await assertNoSymlinkInExistingPath(resolvedTarget, root);
   await fs.rm(resolvedTarget, { recursive: true, force: true });
 }
+
+// Wipe the generated field-reference tree only. Never another src/ directory.
+export async function safeRmFieldReferences(options = {}) {
+  const root = options.root ?? process.cwd();
+  const resolvedRoot = path.resolve(root);
+  const resolvedTarget = path.resolve(resolvedRoot, 'src', 'fields');
+  const relative = path.relative(resolvedRoot, resolvedTarget);
+  if (relative !== path.join('src', 'fields')) {
+    throw new Error(`Refusing to remove non-field-reference path: ${relative}`);
+  }
+  await assertNoSymlinkInExistingPath(resolvedTarget, root);
+  await fs.rm(resolvedTarget, { recursive: true, force: true });
+}

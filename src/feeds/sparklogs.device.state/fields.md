@@ -1,14 +1,14 @@
 <!-- GENERATED reference. Do not hand-edit. -->
 <!-- Public reference tree: field meaning and usage. All example values are synthetic. -->
 
-# Field schema: `sparklogs.agent.state`
+# Field schema: `sparklogs.device.state`
 
 Generated from the module registries at pack-render time.
 Hand edits are lost.
 
 ## Contract
 
-Read every row below as a query contract, the same way a reason slug is read.
+Read every row below as a query contract, the same way a reason code is read.
 
 - **Additive only.** Fields and vocabulary tokens are added, never renamed or repurposed, without a documented migration.
 - **Misses are honest.** An unlisted code leaves its decoded field unset and the raw value promoted; a meaning is never invented.
@@ -21,7 +21,7 @@ A value that is not promoted here lives in the retained message text and nowhere
 
 ## Module fields
 
-Stored flat under the `sparklogs.agent.state.` prefix.
+Stored flat under the `sparklogs.device.state.` prefix.
 
 | LQL path | Type | Meaning |
 |---|---|---|
@@ -42,13 +42,31 @@ The last column is different in kind: it is the author's account of the row or e
 | `agent_cpu_over_budget` / `held` | n/a | **fields: none** |  |
 | `agent_cpu_over_budget` / `onset` | n/a | **fields: none** |  |
 | `agent_cpu_over_budget` / `recovered` | n/a | **fields: none** |  |
+| `agent_handle_over_budget` / `held` | n/a | **fields: none** |  |
+| `agent_handle_over_budget` / `onset` | n/a | **fields: none** |  |
+| `agent_handle_over_budget` / `recovered` | n/a | **fields: none** |  |
 | `agent_ram_over_budget` / `held` | n/a | **fields: none** |  |
 | `agent_ram_over_budget` / `onset` | n/a | **fields: none** |  |
 | `agent_ram_over_budget` / `recovered` | n/a | **fields: none** |  |
 | `cpu_busy` / `default` | n/a | **fields: none** |  |
+| `cpu_interrupt_storm` / `held` | n/a | **fields: none** |  |
+| `cpu_interrupt_storm` / `onset` | n/a | **fields: none** |  |
+| `cpu_interrupt_storm` / `recovered` | n/a | **fields: none** |  |
+| `cpu_kernel_dominated` / `held` | n/a | **fields: none** |  |
+| `cpu_kernel_dominated` / `onset` | n/a | **fields: none** |  |
+| `cpu_kernel_dominated` / `recovered` | n/a | **fields: none** |  |
+| `cpu_throttled_under_load` / `held` | n/a | **fields: none** |  |
+| `cpu_throttled_under_load` / `onset` | n/a | **fields: none** |  |
+| `cpu_throttled_under_load` / `recovered` | n/a | **fields: none** |  |
 | `disk_latency_degraded` / `held` | n/a | **fields: none** |  |
 | `disk_latency_degraded` / `onset` | n/a | **fields: none** |  |
 | `disk_latency_degraded` / `recovered` | n/a | **fields: none** |  |
+| `disk_saturated` / `held` | n/a | **fields: none** |  |
+| `disk_saturated` / `onset` | n/a | **fields: none** |  |
+| `disk_saturated` / `recovered` | n/a | **fields: none** |  |
+| `disk_unresponsive` / `held` | n/a | **fields: none** |  |
+| `disk_unresponsive` / `onset` | n/a | **fields: none** |  |
+| `disk_unresponsive` / `recovered` | n/a | **fields: none** |  |
 | `os_bsod_recurring` / `default` | n/a | **fields: none** |  |
 | `os_clock_drift` / `held` | n/a | **fields: none** |  |
 | `os_clock_drift` / `onset` | n/a | **fields: none** |  |
@@ -120,13 +138,31 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `agent_cpu_over_budget` / `held`
 - `agent_cpu_over_budget` / `onset`
 - `agent_cpu_over_budget` / `recovered`
+- `agent_handle_over_budget` / `held`
+- `agent_handle_over_budget` / `onset`
+- `agent_handle_over_budget` / `recovered`
 - `agent_ram_over_budget` / `held`
 - `agent_ram_over_budget` / `onset`
 - `agent_ram_over_budget` / `recovered`
 - `cpu_busy` / `default`
+- `cpu_interrupt_storm` / `held`
+- `cpu_interrupt_storm` / `onset`
+- `cpu_interrupt_storm` / `recovered`
+- `cpu_kernel_dominated` / `held`
+- `cpu_kernel_dominated` / `onset`
+- `cpu_kernel_dominated` / `recovered`
+- `cpu_throttled_under_load` / `held`
+- `cpu_throttled_under_load` / `onset`
+- `cpu_throttled_under_load` / `recovered`
 - `disk_latency_degraded` / `held`
 - `disk_latency_degraded` / `onset`
 - `disk_latency_degraded` / `recovered`
+- `disk_saturated` / `held`
+- `disk_saturated` / `onset`
+- `disk_saturated` / `recovered`
+- `disk_unresponsive` / `held`
+- `disk_unresponsive` / `onset`
+- `disk_unresponsive` / `recovered`
 - `os_bsod_recurring` / `default`
 - `os_clock_drift` / `held`
 - `os_clock_drift` / `onset`

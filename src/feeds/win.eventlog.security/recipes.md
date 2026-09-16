@@ -131,7 +131,7 @@ Who touched the group, what direction, and who joined or left: three identity fa
    sparklogs.member.id = "S-1-5-21-1111111111-2222222222-3333333333-1001"
    ```
 
-4. Generic "recent configuration changes" views read TWO paths: a configured PRINCIPAL rides sparklogs.target.name and a configured RESOURCE rides sparklogs.config_change.target, never both on one event, so coalesce the two for a single what-changed column.
+4. Generic "recent configuration changes" views read ONE path for what changed: sparklogs.config_change.target names the changed object on every change row that carries an identity for it. sparklogs.target.name is the principal join key, which on an account or group change names the same principal again for a different question.
 
 ## Chase lateral movement through explicit credential use
 
@@ -145,7 +145,7 @@ A process presenting credentials that are not its own is how lateral movement lo
 
 2. Group by sparklogs.target.name and sparklogs.process.path. One account presented from many paths, or one unusual path across many endpoints, is the shape.
 
-3. The machine the credential was presented TO is sparklogs.destination.host, populated only when it names a machine other than the reporting host, so a non-empty destination IS the off-box claim; the provider form (localhost included) stays on win.eventlog.security.target_server.
+3. The machine the credential was presented TO is sparklogs.destination.host, carrying the server the event named, the routine localhost form included; the provider spelling of the same value stays on win.eventlog.security.target_server. Filter localhost out to get the off-box presentations.
 
 4. Drop self-refresh, where the presented account is the caller's own. A predicate compares a field to a literal, never to another field, so pin the caller under scrutiny by name (synthetic example: j.doe) and exclude that same name as the presented account.
 

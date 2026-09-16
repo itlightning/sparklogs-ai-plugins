@@ -19,6 +19,10 @@ export const IDENTIFIER_SOT_INCLUDE_LIBRARY_ENV = 'SPARKLOGS_IDENTIFIER_SOT_INCL
 export const DEFAULT_SOURCE_LIBRARY_DIR = '../sparklogs-source-library';
 export const LIBRARY_GENERATED_SUBPATH = 'docs/generated-public';
 export const GENERATED_DIR = 'src/feeds';
+export const FIELD_SOURCE_DIR = 'fields';
+export const FIELD_GENERATED_DIR = 'src/fields';
+// Consolidated website tables are generated beside modules but are not AI-plugin inputs.
+export const WEBSITE_REFERENCE_DIR = 'reference';
 export const MANIFEST_FILE = 'scripts/generated-SYNC-MANIFEST.json';
 export const ROUTER_FILE = 'src/guides/generated-reference-router.md';
 export const ROUTER_BEGIN = '<!-- BEGIN GENERATED INVENTORY -->';
@@ -43,7 +47,7 @@ export const MODULES = [
   'win.servicing.cbs',
   'win.servicing.dism',
   'win.defender.eventlog',
-  'sparklogs.agent.state',
+  'sparklogs.device.state',
   'sparklogs.agent.vector',
   'sparklogs.agent.log',
 ];
@@ -64,7 +68,7 @@ export const FEED_WHAT = {
   'win.servicing.cbs': 'CBS servicing internals: component store, packages',
   'win.servicing.dism': 'DISM operations and image health',
   'win.defender.eventlog': 'Defender: threats, protection state',
-  'sparklogs.agent.state': 'Device health and state snapshots: CPU, RAM, disk, installed software, monitors',
+  'sparklogs.device.state': 'Device health and state snapshots: CPU, RAM, disk, installed software, monitors',
   'sparklogs.agent.vector': 'Collector debug only: data collector internals',
   'sparklogs.agent.log': 'Collector debug only: agent supervisor log',
 };

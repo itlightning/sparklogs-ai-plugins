@@ -15,4 +15,4 @@ Few publishers. `provider_name` (LQL) is optional confirmation, not the first sp
 
 ## Accuracy
 
-Setup is per-update results. It is not CBS component-store internals and not the Windows Update **device health** topic on `sparklogs.agent.state` (value).
+Setup is per-update results. It is not CBS component-store internals and not the Windows Update **device health** topic on `sparklogs.device.state` (value).

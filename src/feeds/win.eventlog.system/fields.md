@@ -8,7 +8,7 @@ Hand edits are lost.
 
 ## Contract
 
-Read every row below as a query contract, the same way a reason slug is read.
+Read every row below as a query contract, the same way a reason code is read.
 
 - **Additive only.** Fields and vocabulary tokens are added, never renamed or repurposed, without a documented migration.
 - **Misses are honest.** An unlisted code leaves its decoded field unset and the raw value promoted; a meaning is never invented.
@@ -61,9 +61,9 @@ Prefer these over the per-feed fields for anything that spans feeds.
 
 | LQL path | Family means |
 |---|---|
-| `sparklogs.config_change.type` | What configuration changed, in what direction, on what. |
-| `sparklogs.config_change.action` | What configuration changed, in what direction, on what. |
-| `sparklogs.config_change.target` | What configuration changed, in what direction, on what. |
+| `sparklogs.config_change.type` | The kind of object that changed, from a closed set of object nouns. |
+| `sparklogs.config_change.action` | What was done to that object, from a closed set of verbs. |
+| `sparklogs.config_change.target` | Which object it was: its own identity within its kind, as a name, a path or an id. A different field from the principal a change acted on, and a change acting on a principal carries both. |
 
 ## Tail keys and where the value is queryable
 
@@ -108,8 +108,6 @@ The last column is different in kind: it is the author's account of the row or e
 | `disk_surprise_removal` / `default` | 157 | **fields: none** |  |
 | `driver_load_failed` / `default` | 219 | `win.eventlog.system.device_instance` `win.eventlog.system.driver_name` `win.eventlog.system.ntstatus` |  |
 | `ephemeral_port_alloc_failed` / `default` | 4231, 4266 | **fields: none** |  |
-| `firmware_attack_indicator_reported` / `escalated` | 11, 12 | **fields: none** |  |
-| `firmware_attack_indicator_reported` / `partial` | 11, 12 | **fields: none** |  |
 | `gpu_driver_reset` / `default` | 153 | **fields: none** |  |
 | `hardware_error_corrected` / `default` | 17, 19 | `win.eventlog.system.device_instance` `win.eventlog.system.error_source` |  |
 | `hardware_error_uncorrected` / `default` | 18, 20 | `win.eventlog.system.device_instance` `win.eventlog.system.error_source` |  |
@@ -142,6 +140,10 @@ The last column is different in kind: it is the author's account of the row or e
 | `patch_install_failed` / `interrupted` | 20 | `win.eventlog.system.update_title` |  |
 | `patch_install_failed` / `packages_in_use` | 20 | `win.eventlog.system.update_title` |  |
 | `patch_install_failed` / `retry_later` | 20 | `win.eventlog.system.update_title` |  |
+| `platform_tamper_indicator_reported` / `detected` | 11, 12 | **fields: none** |  |
+| `platform_tamper_indicator_reported` / `escalated` | 11, 12 | **fields: none** |  |
+| `platform_tamper_indicator_reported` / `partial` | 11, 12 | **fields: none** |  |
+| `platform_tamper_indicator_reported` / `reported` | 11, 12 | **fields: none** |  |
 | `rds_license_server_unactivated` / `default` | 18 | **fields: none** |  |
 | `rds_license_tracking_failed` / `default` | 4105 | **fields: none** |  |
 | `rds_licensing_service_failed` / `database_error` | 37, 44, 4097 | **fields: none** |  |
@@ -202,8 +204,6 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `disk_paging_error` / `default`
 - `disk_surprise_removal` / `default`
 - `ephemeral_port_alloc_failed` / `default`
-- `firmware_attack_indicator_reported` / `escalated`
-- `firmware_attack_indicator_reported` / `partial`
 - `gpu_driver_reset` / `default`
 - `http_ssl_binding_created` / `default`
 - `http_ssl_binding_deleted` / `default`
@@ -220,6 +220,10 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `nic_driver_load_failed` / `default`
 - `nic_link_down` / `default`
 - `nic_link_up` / `default`
+- `platform_tamper_indicator_reported` / `detected`
+- `platform_tamper_indicator_reported` / `escalated`
+- `platform_tamper_indicator_reported` / `partial`
+- `platform_tamper_indicator_reported` / `reported`
 - `rds_license_server_unactivated` / `default`
 - `rds_license_tracking_failed` / `default`
 - `rds_licensing_service_failed` / `database_error`

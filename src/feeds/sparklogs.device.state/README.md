@@ -1,11 +1,12 @@
 <!-- GENERATED reference. Do not hand-edit. -->
 <!-- Public reference tree: field meaning and usage. All example values are synthetic. -->
 
-# AI reference set: `sparklogs.agent.state`
+# AI reference set: `sparklogs.device.state`
 
 Generated reference for this module.
 Read in this order when investigating the channel for the first time.
 
 - [`fields.md`](fields.md): what exists at rest and what writes it
 - [`enums.md`](enums.md): the closed token vocabularies to group by
-- [`reasons.md`](reasons.md): what each reason slug means (public summary, severity, impact)
+- [`reasons.md`](reasons.md): what each reason code means (public summary, severity, impact)
+- [`patterns.md`](patterns.md): which rendered patterns are expected, and how to decide

@@ -34,6 +34,9 @@ See "What silence does and does not tell you" below before any conclusion rests 
 
 ## Reading device-health rows
 
+For exact field types, units, and meanings, start with `fields/INDEX.md` and open the one family or
+topic table it points to.
+
 A few rows read wrong if you go by the column name alone:
 
 - **`sparklogs.malformed_event` (col) is independent of `sparklogs.kind` (col).** A row can keep a valid `sparklogs.kind` (col) and still carry
@@ -125,16 +128,9 @@ and a device absent from every list is `unknown` (value) rather than healthy.
 Curated events carry cross-source identity families, so a query written against one source transfers
 to another. These live on the events, not on device-health rows.
 
-| Family | Means |
-|---|---|
-| `sparklogs.actor.*` | the INITIATOR. Who wanted the thing done |
-| `sparklogs.running_as.*` | the execution context: the account the performing process runs as. Populated only when it differs from the actor, so its presence is itself the signal |
-| `sparklogs.target.*` | the principal the action was done TO. A group acted upon is this family with `kind=group` |
-| `sparklogs.member.*` | the principal whose membership in the target changed |
-| `sparklogs.process.*` | the process the event is about |
-| `sparklogs.origin.*` | the initiating network endpoint, populated only when it names a machine other than the reporting host |
-| `sparklogs.destination.*` | the receiving network endpoint, same gating |
-| `sparklogs.error.*` | the failure code the source reported, plus its number space |
+Open `fields/INDEX.md` first, then the one `fields/family-*.md` table for the family in the query.
+Those generated tables define the actor, execution principal, target, member, process, network
+endpoint, configuration change, and result families without duplicating their field lists here.
 
 **Actor semantics changed at pack 1.2.1.** On a failed sign-in the account that tried is the actor;
 on a lockout the locked account is the target. Do not carry an older mental model, and do not trust a

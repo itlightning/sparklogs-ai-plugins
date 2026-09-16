@@ -12,7 +12,7 @@ Join these data feeds when the ticket is patches that did not land, or landed an
 | `win.servicing.cbs` (value) | CBS.log: realized store corruption, servicing operations. |
 | `win.servicing.dism` (value) | DISM.log: repair and image servicing. |
 
-Windows Update agent snapshot: `sparklogs.agent.state` (value) topic `windows_update_agent_state` (value). Open `feeds/sparklogs.agent.state/` only after this theme. That is inventory/state, not the Setup channel.
+Windows Update agent snapshot: `sparklogs.device.state` (value) topic `windows_update_agent_state` (value). Open `feeds/sparklogs.device.state/` only after this theme. That is inventory/state, not the Setup channel.
 Explore Setup vs CBS/DISM vs state: `guides/stream-kinds.md`.
 
 **Join.** `win_component_store_scan_found_corruption` (value) is the same fact on Setup and CBS. Pivot `sparklogs.reason = win_component_store_scan_found_corruption` across those feeds; do not treat two rows as two incidents.

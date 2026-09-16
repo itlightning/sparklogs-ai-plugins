@@ -5,12 +5,13 @@ Columns: the response `schema.columns` (col) or the tool description. Episode an
 A row is the latest event of each episode that emitted inside the requested window.
 That is not a time series.
 
-**Event stream:** `query_logs` (tool) on `subsource` (LQL) `=` `"sparklogs.agent.state"`.
+**Event stream:** `query_logs` (tool) on `subsource` (LQL) `=` `"sparklogs.device.state"`.
 Group `sparklogs.kind` (LQL), `sparklogs.topic` (LQL), `sparklogs.reason` (LQL).
 
 No `provider_name` (LQL). Do not explore this feed like WEL.
-Generated `feeds/sparklogs.agent.state/fields.md` lists module promotions only.
-The snapshot payload lives under `sparklogs.data` (LQL) and is absent from that file, so `list_fields` (tool) is where you read its names.
+Generated `feeds/sparklogs.device.state/fields.md` lists module promotions only.
+The snapshot payload lives under `sparklogs.data` (LQL).
+Start at `fields/INDEX.md`, then open the topic table for its exact names, types, units, and meanings.
 
 ## Latest-in-window vs event stream
 
@@ -20,7 +21,7 @@ The snapshot payload lives under `sparklogs.data` (LQL) and is absent from that 
 | How it changed, every snapshot, hour by hour | `query_logs` (tool) on this `subsource` (LQL). Group `sparklogs.kind` (LQL), `sparklogs.topic` (LQL), `sparklogs.reason` (LQL) |
 
 MCP column names paste straight into LQL now: `sparklogs.kind` (col) on a device-health row is `sparklogs.kind` (LQL) in logs, same spelling.
-`subsource` (col) on health rows is the feed id `sparklogs.agent.state` (value), the same stamp as logs.
+`subsource` (col) on health rows is the feed id `sparklogs.device.state` (value), the same stamp as logs.
 `sparklogs.topic` (col) is the subject family (`disk_volumes` (value), `processes` (value), `services` (value)).
 
 ## Event kinds (logs)
@@ -32,7 +33,7 @@ MCP column names paste straight into LQL now: `sparklogs.kind` (col) on a device
 Cross-tab the two axes before reading any payload:
 
 ```
-group_by: ["sparklogs.topic", "sparklogs.kind"]     lql: subsource="sparklogs.agent.state"
+group_by: ["sparklogs.topic", "sparklogs.kind"]     lql: subsource="sparklogs.device.state"
 ```
 
 That one call tells you which topics this fleet emits, at what volume, and whether a topic sends full inventories, deltas, or both. Topic cadence differs by more than a hundred to one: performance samples land every few minutes, drivers and installed software land about once a day.

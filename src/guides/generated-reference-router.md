@@ -14,6 +14,8 @@ the wrong one.
 
 | The question you are holding | Artifact | Read mode | What you get |
 |---|---|---|---|
+| "Which event family carries X?" | `fields/INDEX.md`, then one `fields/family-*.md` | Index, then one table | the stable path, type, unit, and meaning for each envelope field |
+| "Which state topic carries X?" | `fields/INDEX.md`, then one `fields/topic-*.md` | Index, then one table | the stable path, type, unit, and meaning for each topic reading |
 | "Which field carries X on this source, and what happens when it is missing?" | `fields.md` | Search field name | every promoted field, what curates it, and the raw provider fallback when nothing does |
 | "What values can this token take, and is it safe to group by?" | `enums.md` | **Grep only** (code or `##`) | the closed vocabularies, with what each token means |
 | "What does this status/HRESULT/MSI/constant mean?" | `enums.md` | **Grep only** | same as above; pick the feed from the event `subsource` (LQL) |
@@ -58,10 +60,8 @@ say in your findings that you were reading uncurated text.
 
 ## What this content is not
 
-- **Not the device-health column names.** Generated artifacts describe the event schema: the
-  `sparklogs.*` and module-prefixed JSON paths you filter on with `query_logs` (tool). The device-health
-  tool renders those same fields as its column names (`sparklogs.kind` (col), `sparklogs.reason` (col),
-  `sparklogs.instance` (col), `sparklogs.episode.replaced_id` (col), and the rest): the same spelling in both responses.
+- **Not separate device-health column names.** The generated field reference uses the same paths as
+  `query_device_health` (tool) columns and `query_logs` (tool) filters.
 - **Not a severity table.** Severity is a shared ladder across every source and is documented once,
   in `category-classes.md`. A module never defines its own bands.
 - **Not exhaustive about what exists at rest.** A field is listed once curation promotes
@@ -118,36 +118,42 @@ say in your findings that you were reading uncurated text.
 - `feeds/win.eventlog.platform/README.md`: feed index: what each artifact answers and the order to read them in
 - `feeds/win.eventlog.platform/fields.md`: what exists at rest, what curates it, and the raw fallback when nothing does
 - `feeds/win.eventlog.platform/enums.md`: the closed token vocabularies that are safe to group by
+- `feeds/win.eventlog.platform/reasons.md`: what each reason means (public summary, severity, impact)
 
 ### `win.eventlog.storage`
 
 - `feeds/win.eventlog.storage/README.md`: feed index: what each artifact answers and the order to read them in
 - `feeds/win.eventlog.storage/fields.md`: what exists at rest, what curates it, and the raw fallback when nothing does
 - `feeds/win.eventlog.storage/enums.md`: the closed token vocabularies that are safe to group by
+- `feeds/win.eventlog.storage/reasons.md`: what each reason means (public summary, severity, impact)
 
 ### `win.eventlog.network`
 
 - `feeds/win.eventlog.network/README.md`: feed index: what each artifact answers and the order to read them in
 - `feeds/win.eventlog.network/fields.md`: what exists at rest, what curates it, and the raw fallback when nothing does
 - `feeds/win.eventlog.network/enums.md`: the closed token vocabularies that are safe to group by
+- `feeds/win.eventlog.network/reasons.md`: what each reason means (public summary, severity, impact)
 
 ### `win.eventlog.identity_security`
 
 - `feeds/win.eventlog.identity_security/README.md`: feed index: what each artifact answers and the order to read them in
 - `feeds/win.eventlog.identity_security/fields.md`: what exists at rest, what curates it, and the raw fallback when nothing does
 - `feeds/win.eventlog.identity_security/enums.md`: the closed token vocabularies that are safe to group by
+- `feeds/win.eventlog.identity_security/reasons.md`: what each reason means (public summary, severity, impact)
 
 ### `win.eventlog.management`
 
 - `feeds/win.eventlog.management/README.md`: feed index: what each artifact answers and the order to read them in
 - `feeds/win.eventlog.management/fields.md`: what exists at rest, what curates it, and the raw fallback when nothing does
 - `feeds/win.eventlog.management/enums.md`: the closed token vocabularies that are safe to group by
+- `feeds/win.eventlog.management/reasons.md`: what each reason means (public summary, severity, impact)
 
 ### `win.eventlog.apps`
 
 - `feeds/win.eventlog.apps/README.md`: feed index: what each artifact answers and the order to read them in
 - `feeds/win.eventlog.apps/fields.md`: what exists at rest, what curates it, and the raw fallback when nothing does
 - `feeds/win.eventlog.apps/enums.md`: the closed token vocabularies that are safe to group by
+- `feeds/win.eventlog.apps/reasons.md`: what each reason means (public summary, severity, impact)
 
 ### `win.servicing.cbs`
 
@@ -170,12 +176,13 @@ say in your findings that you were reading uncurated text.
 - `feeds/win.defender.eventlog/enums.md`: the closed token vocabularies that are safe to group by
 - `feeds/win.defender.eventlog/reasons.md`: what each reason means (public summary, severity, impact)
 
-### `sparklogs.agent.state`
+### `sparklogs.device.state`
 
-- `feeds/sparklogs.agent.state/README.md`: feed index: what each artifact answers and the order to read them in
-- `feeds/sparklogs.agent.state/fields.md`: what exists at rest, what curates it, and the raw fallback when nothing does
-- `feeds/sparklogs.agent.state/enums.md`: the closed token vocabularies that are safe to group by
-- `feeds/sparklogs.agent.state/reasons.md`: what each reason means (public summary, severity, impact)
+- `feeds/sparklogs.device.state/README.md`: feed index: what each artifact answers and the order to read them in
+- `feeds/sparklogs.device.state/fields.md`: what exists at rest, what curates it, and the raw fallback when nothing does
+- `feeds/sparklogs.device.state/enums.md`: the closed token vocabularies that are safe to group by
+- `feeds/sparklogs.device.state/reasons.md`: what each reason means (public summary, severity, impact)
+- `feeds/sparklogs.device.state/patterns.md`: the decision procedure for whether a rendered pattern is expected, unexpected, or uncurated
 
 ### `sparklogs.agent.vector`
 
@@ -190,5 +197,47 @@ say in your findings that you were reading uncurated text.
 - `feeds/sparklogs.agent.log/fields.md`: what exists at rest, what curates it, and the raw fallback when nothing does
 - `feeds/sparklogs.agent.log/enums.md`: the closed token vocabularies that are safe to group by
 - `feeds/sparklogs.agent.log/reasons.md`: what each reason means (public summary, severity, impact)
+
+### Field reference
+
+- `fields/INDEX.md`
+- `fields/family-event.md`
+- `fields/family-sparklogs-actor.md`
+- `fields/family-sparklogs-capture.md`
+- `fields/family-sparklogs-config-change.md`
+- `fields/family-sparklogs-data.md`
+- `fields/family-sparklogs-delta.md`
+- `fields/family-sparklogs-destination.md`
+- `fields/family-sparklogs-episode.md`
+- `fields/family-sparklogs-epoch.md`
+- `fields/family-sparklogs-inventory.md`
+- `fields/family-sparklogs-member.md`
+- `fields/family-sparklogs-occurrence.md`
+- `fields/family-sparklogs-origin.md`
+- `fields/family-sparklogs-process.md`
+- `fields/family-sparklogs-result.md`
+- `fields/family-sparklogs-running-as.md`
+- `fields/family-sparklogs-target.md`
+- `fields/family-sparklogs.md`
+- `fields/topic-agent-overhead.md`
+- `fields/topic-agent-pipeline.md`
+- `fields/topic-collector-health.md`
+- `fields/topic-crash-dump-config.md`
+- `fields/topic-disk-volumes.md`
+- `fields/topic-drivers.md`
+- `fields/topic-feed-health.md`
+- `fields/topic-installed-products-summary.md`
+- `fields/topic-installed-products.md`
+- `fields/topic-performance.md`
+- `fields/topic-processes.md`
+- `fields/topic-services.md`
+- `fields/topic-storage-device-io.md`
+- `fields/topic-storage-devices.md`
+- `fields/topic-storage-io.md`
+- `fields/topic-system-info.md`
+- `fields/topic-volume-map.md`
+- `fields/topic-vss-shadowstorage.md`
+- `fields/topic-vss-writers.md`
+- `fields/topic-windows-update-agent-state.md`
 
 <!-- END GENERATED INVENTORY -->

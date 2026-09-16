@@ -8,7 +8,7 @@ Hand edits are lost.
 
 ## Contract
 
-Read every row below as a query contract, the same way a reason slug is read.
+Read every row below as a query contract, the same way a reason code is read.
 
 - **Additive only.** Fields and vocabulary tokens are added, never renamed or repurposed, without a documented migration.
 - **Misses are honest.** An unlisted code leaves its decoded field unset and the raw value promoted; a meaning is never invented.

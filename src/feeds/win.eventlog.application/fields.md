@@ -8,7 +8,7 @@ Hand edits are lost.
 
 ## Contract
 
-Read every row below as a query contract, the same way a reason slug is read.
+Read every row below as a query contract, the same way a reason code is read.
 
 - **Additive only.** Fields and vocabulary tokens are added, never renamed or repurposed, without a documented migration.
 - **Misses are honest.** An unlisted code leaves its decoded field unset and the raw value promoted; a meaning is never invented.
@@ -29,6 +29,7 @@ Stored flat under the `win.eventlog.application.` prefix.
 |---|---|---|
 | `win.eventlog.application.event_name` | string | WER report EventName from Windows Error Reporting 1001 (APPCRASH \| AppHangB1 \| BEX \| BlueScreen \| StoreAgentInstall* \| ...). The discriminator of the heterogeneous 1001 id; the recognition pivot for crash-report queries. |
 | `win.eventlog.application.fault_bucket` | string | WER fault bucket id from Windows Error Reporting 1001. The dedup/recurrence key: same bucket = same crash signature. |
+| `win.eventlog.application.appx_app_id` | string | Packaged-application identity reported by an activation record, the package family plus the application id. The same key the packaged-apps feed promotes, so one application reads the same way on both feeds. |
 | `win.eventlog.application.app_name` | string | Application the crash/hang record is about: WER 1001 (P1), Application Error 1000, Application Hang 1002. The cross-family crash-recurrence join key. |
 | `win.eventlog.application.module_name` | string | Faulting module from Application Error 1000. Pins the crash to a DLL. |
 | `win.eventlog.application.exception_code` | string | Exception code from Application Error 1000 (e.g. 0xc0000005), as logged. |
@@ -102,6 +103,8 @@ The last column is different in kind: it is the author's account of the row or e
 | `app_crash` / `default` | 1000 | `win.eventlog.application.app_name` `win.eventlog.application.exception_code` `win.eventlog.application.module_name` `win.eventlog.application.report_id` |  |
 | `app_crash_report` / `default` | 1001 | `win.eventlog.application.app_name` `win.eventlog.application.event_name` `win.eventlog.application.fault_bucket` `win.eventlog.application.report_id` |  |
 | `app_hang` / `default` | 1002 | `win.eventlog.application.app_name` `win.eventlog.application.hang_type` `win.eventlog.application.report_id` |  |
+| `appx_app_activation_failed` / `administrator_token` | 5973 | `win.eventlog.application.appx_app_id` |  |
+| `appx_app_activation_failed` / `other_failure` | 5973 | `win.eventlog.application.appx_app_id` |  |
 | `aspnet_compilation_failed` / `default` | 1310 | **fields: none** |  |
 | `aspnet_unhandled_exception` / `default` | 1309 | **fields: none** |  |
 | `cert_enroll_failed` / `autoenroll_cycle_failed` | 1, 6, 86, 87 | **fields: none** |  |

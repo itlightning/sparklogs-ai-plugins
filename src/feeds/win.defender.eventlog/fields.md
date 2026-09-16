@@ -8,7 +8,7 @@ Hand edits are lost.
 
 ## Contract
 
-Read every row below as a query contract, the same way a reason slug is read.
+Read every row below as a query contract, the same way a reason code is read.
 
 - **Additive only.** Fields and vocabulary tokens are added, never renamed or repurposed, without a documented migration.
 - **Misses are honest.** An unlisted code leaves its decoded field unset and the raw value promoted; a meaning is never invented.
@@ -58,8 +58,9 @@ Prefer these over the per-feed fields for anything that spans feeds.
 
 | LQL path | Family means |
 |---|---|
-| `sparklogs.config_change.type` | What configuration changed, in what direction, on what. |
-| `sparklogs.config_change.action` | What configuration changed, in what direction, on what. |
+| `sparklogs.config_change.type` | The kind of object that changed, from a closed set of object nouns. |
+| `sparklogs.config_change.action` | What was done to that object, from a closed set of verbs. |
+| `sparklogs.config_change.target` | Which object it was: its own identity within its kind, as a name, a path or an id. A different field from the principal a change acted on, and a change acting on a principal carries both. |
 
 ## What sets each field
 

@@ -1,7 +1,7 @@
 <!-- GENERATED reference. Do not hand-edit. -->
 <!-- Public reference tree: field meaning and usage. All example values are synthetic. -->
 
-# Reasons: `sparklogs.agent.state`
+# Reasons: `sparklogs.device.state`
 
 Open this file and search the reason heading. Do not read the whole file.
 Every section below is from the public reason block only.
@@ -9,9 +9,15 @@ Every section below is from the public reason block only.
 | reason | service | severity | benign |
 |---|---|---|---|
 | `agent_cpu_over_budget` | `rmm` |  |  |
+| `agent_handle_over_budget` | `rmm` |  |  |
 | `agent_ram_over_budget` | `rmm` |  |  |
 | `cpu_busy` | `performance` |  |  |
+| `cpu_interrupt_storm` | `performance` |  |  |
+| `cpu_kernel_dominated` | `performance` |  |  |
+| `cpu_throttled_under_load` | `performance` |  |  |
 | `disk_latency_degraded` | `storage` |  |  |
+| `disk_saturated` | `storage` |  |  |
+| `disk_unresponsive` | `storage` |  |  |
 | `os_bsod_recurring` | `os_stability` |  |  |
 | `os_clock_drift` | `performance` |  |  |
 | `os_crash_dump_new` | `os_stability` |  |  |
@@ -43,6 +49,12 @@ The agent stack is over CPU budget.
 
 **Impact:** Monitoring overhead may be higher than expected on this host.
 
+## `agent_handle_over_budget`
+
+The agent stack is over its handle budget.
+
+**Impact:** Monitoring overhead may be higher than expected on this host.
+
 ## `agent_ram_over_budget`
 
 The agent stack is over memory budget.
@@ -53,11 +65,41 @@ The agent stack is over memory budget.
 
 CPU is busy.
 
+## `cpu_interrupt_storm`
+
+CPU time is dominated by interrupt and DPC handling.
+
+**Impact:** Device or driver interrupt load can starve ordinary work on the host.
+
+## `cpu_kernel_dominated`
+
+Busy CPU time is mostly kernel time rather than application work.
+
+**Impact:** Application throughput can be lower than the busy figure alone suggests.
+
+## `cpu_throttled_under_load`
+
+The CPU is running below its rated frequency while under load.
+
+**Impact:** Work takes longer than the hardware would otherwise allow; thermal, power or firmware limits are the usual cause.
+
 ## `disk_latency_degraded`
 
 Storage latency is severe while the disk is busy.
 
 **Impact:** Workloads above the storage stack may stall or time out.
+
+## `disk_saturated`
+
+The disk is busy, queueing and slow to respond.
+
+**Impact:** Workloads above the storage stack may wait on IO.
+
+## `disk_unresponsive`
+
+A storage device is busy but moving almost no data.
+
+**Impact:** IO to this device may be stalled, and a writeable volume on it can stop responding.
 
 ## `os_bsod_recurring`
 
@@ -68,6 +110,8 @@ The host is bugchecking repeatedly.
 ## `os_clock_drift`
 
 The host clock is drifting from reference time.
+
+**Also reported by:** `win.eventlog.platform`
 
 **Impact:** Kerberos, certificates, log ordering, and scheduled work can fail when drift is large.
 
@@ -110,6 +154,8 @@ A process has a very high handle count.
 ## `ram_commit_high`
 
 Committed memory is high.
+
+**Also reported by:** `win.eventlog.platform`
 
 ## `ram_growth_sustained`
 
@@ -192,6 +238,8 @@ Shadow storage is near capacity.
 ## `vss_snapshots_failing_for_space`
 
 Shadow copies are failing for want of space, so restore points are being lost.
+
+**Also reported by:** `win.eventlog.application`
 
 **Impact:** Older restore points are being trimmed; backups themselves may still succeed, but restore history depth shrinks.
 

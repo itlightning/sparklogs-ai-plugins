@@ -24,7 +24,7 @@ Product tokens on `app` (LQL): `guides/app-vocabulary.md`.
 | `win.defender.eventlog` (value) | WEL Defender | `guides/stream-kinds/wel-defender.md` |
 | `win.servicing.cbs` (value) | File log | `guides/stream-kinds/file-log.md` |
 | `win.servicing.dism` (value) | File log | `guides/stream-kinds/file-log.md` |
-| `sparklogs.agent.state` (value) | Device state | `guides/stream-kinds/device-state.md` |
+| `sparklogs.device.state` (value) | Device state | `guides/stream-kinds/device-state.md` |
 | `sparklogs.agent.vector` (value) | Collector debug | `guides/stream-kinds/collector-debug.md` |
 | `sparklogs.agent.log` (value) | Collector debug | `guides/stream-kinds/collector-debug.md` |
 
@@ -43,5 +43,5 @@ Absence is a missing promotion, not a missing event.
 ## Device state vs events
 
 "What is on the box / open condition in this window" is `query_device_health` (tool) (latest event per episode that emitted in the window, not a time series).
-The event stream of the same feed is `query_logs` (tool) scoped to `subsource` (LQL) `=` `"sparklogs.agent.state"`.
+The event stream of the same feed is `query_logs` (tool) scoped to `subsource` (LQL) `=` `"sparklogs.device.state"`.
 MCP column names (`sparklogs.kind` (col), `sparklogs.instance` (col), `sparklogs.episode.replaced_id` (col)) are the same dotted `sparklogs.*` spelling as the LQL path. Detail: `guides/device-state-fields.md`.

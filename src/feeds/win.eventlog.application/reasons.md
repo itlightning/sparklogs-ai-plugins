@@ -13,6 +13,7 @@ Every section below is from the public reason block only.
 | `app_crash` | `app_stability` | Error |  |
 | `app_crash_report` | `app_stability` | Notice |  |
 | `app_hang` | `app_stability` | Error |  |
+| `appx_app_activation_failed` | `app_stability` | Info when Windows declines to run the application under the built-in Administrator account, Notice otherwise | benign possible |
 | `aspnet_compilation_failed` | `web` | Error |  |
 | `aspnet_unhandled_exception` | `web` | Minor |  |
 | `cert_enroll_failed` | `certificates` | Warning or Verbose | benign possible |
@@ -121,6 +122,21 @@ A Windows application stopped responding and was closed.
 - Group by app name, report id, and hang type.
 - Check whether hangs cluster around updates, add-ins, or file paths.
 
+## `appx_app_activation_failed`
+
+A packaged application did not start.
+
+**Also reported by:** `win.eventlog.apps`
+
+**Severity:** Info when Windows declines to run the application under the built-in Administrator account, Notice otherwise
+
+**Impact:** The user sees the application fail to open. Where the code is the built-in Administrator refusal, nothing is broken: Windows does not run packaged applications under that account.
+
+**Consider:**
+
+- Read the application identity and the error code.
+- Check whether the launch came from an automated task running as the built-in Administrator.
+
 ## `aspnet_compilation_failed`
 
 A web application on this host could not be compiled and is not serving requests.
@@ -167,6 +183,8 @@ The retired-endpoint shape needs no action: the endpoint no longer serves reques
 ## `cert_expiring`
 
 A certificate held by this machine is about to expire or has already expired, and has not been replaced.
+
+**Also reported by:** `win.eventlog.identity_security`
 
 **Severity:** Warning
 
@@ -264,6 +282,8 @@ This reason names a provider-level driver-error family, not a specific mechanism
 ## `group_policy_cse_apply_failed`
 
 A Group Policy preference extension could not apply the settings from a policy object.
+
+**Also reported by:** `win.eventlog.identity_security`
 
 **Severity:** Minor
 
@@ -522,6 +542,8 @@ A call the Volume Shadow Copy Service makes while working with shadow copies did
 
 Shadow copy storage is full, so restore points are being deleted or no longer created.
 
+**Also reported by:** `vss-shadowstorage`
+
 **Severity:** Error
 
 **Impact:** Snapshot-based backups and System Restore lose history or stop working on the affected volume. A backup job may still report success while protecting less than it appears to.
@@ -547,6 +569,8 @@ The Volume Shadow Copy Service could not read a writer's callback interface beca
 ## `wcf_request_failed`
 
 A hosted service on this machine could not process a request.
+
+**Also reported by:** `win.eventlog.apps`
 
 **Severity:** Minor
 

@@ -148,7 +148,7 @@ Playbooks are incomplete recipes. If a recipe LQL produces empty results: widen 
 | `win.servicing.cbs` | CBS servicing internals: component store, packages | `feeds/win.servicing.cbs/` |
 | `win.servicing.dism` | DISM operations and image health | `feeds/win.servicing.dism/` |
 | `win.defender.eventlog` | Defender: threats, protection state | `feeds/win.defender.eventlog/` |
-| `sparklogs.agent.state` | Device health and state snapshots: CPU, RAM, disk, installed software, monitors | `feeds/sparklogs.agent.state/` |
+| `sparklogs.device.state` | Device health and state snapshots: CPU, RAM, disk, installed software, monitors | `feeds/sparklogs.device.state/` |
 | `sparklogs.agent.vector` | Collector debug only: data collector internals | `feeds/sparklogs.agent.vector/` |
 | `sparklogs.agent.log` | Collector debug only: agent supervisor log | `feeds/sparklogs.agent.log/` |
 <!-- END GENERATED INDEX:feeds -->

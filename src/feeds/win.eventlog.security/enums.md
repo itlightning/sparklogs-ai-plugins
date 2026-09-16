@@ -8,37 +8,22 @@ These sets are closed: a value outside them leaves its field unset rather than b
 
 ## `win_status_codes`
 
-148 row(s), 50 carrying a token.
+314 row(s), 63 carrying a token.
 
 | Code | Token | Meaning | Constant |
 |---|---|---|---|
-| `0xc0000064` | `unknown_username` | no account exists with that name | `STATUS_NO_SUCH_USER` |
-| `0xc000006a` | `bad_password` | account exists and the password was wrong | `STATUS_WRONG_PASSWORD` |
-| `0xc000006d` | `bad_username_or_auth` | generic logon failure with the cause not disclosed | `STATUS_LOGON_FAILURE` |
-| `0xc000006e` | `account_restriction` | an account restriction blocked the logon | `STATUS_ACCOUNT_RESTRICTION` |
-| `0xc000006f` | `outside_logon_hours` | logon attempted outside the permitted hours | `STATUS_INVALID_LOGON_HOURS` |
-| `0xc0000070` | `workstation_not_authorized` | account not permitted to log on from this workstation | `STATUS_INVALID_WORKSTATION` |
-| `0xc0000071` | `password_expired` | the password has expired | `STATUS_PASSWORD_EXPIRED` |
-| `0xc0000072` | `account_disabled` | the account is disabled | `STATUS_ACCOUNT_DISABLED` |
-| `0xc0000073` | `name_translation_failed` | none of the supplied account names or identifiers could be translated to a security identifier | `STATUS_NONE_MAPPED` |
-| `0xc0000133` | `clock_skew` | client and domain controller clocks differ too much | `STATUS_TIME_DIFFERENCE_AT_DC` |
-| `0xc0000193` | `account_expired` | the account has expired | `STATUS_ACCOUNT_EXPIRED` |
-| `0xc0000224` | `password_must_change` | the password must change before logon succeeds | `STATUS_PASSWORD_MUST_CHANGE` |
-| `0xc0000234` | `account_locked_out` | the account is locked out | `STATUS_ACCOUNT_LOCKED_OUT` |
-| `0xc000015b` | `logon_right_not_granted` | account lacks the requested logon right | `STATUS_LOGON_TYPE_NOT_GRANTED` |
-| `0xc0000192` | `netlogon_not_started` | the Netlogon service is not running | `STATUS_NETLOGON_NOT_STARTED` |
-| `0xc000005e` | `no_logon_servers` | no logon server was available for the request | `STATUS_NO_LOGON_SERVERS` |
-| `0xc0000413` | `auth_firewall_blocked` | an authentication firewall policy blocked the account | `STATUS_AUTHENTICATION_FIREWALL_FAILED` |
-| `0xc0000371` | `no_local_secret` | the local secret store holds no secret for the account | `STATUS_NO_SECRETS` |
-| `0x8009030e` | `no_credentials_available` | the security package had no credentials to present | `SEC_E_NO_CREDENTIALS` |
-| `0x80090308` | `invalid_token` | the security token supplied to the package is invalid | `SEC_E_INVALID_TOKEN` |
+| `0x8009000b` | `bad_key_state` | the key is not in a state that allows this operation | `NTE_BAD_KEY_STATE` |
+| `0x80090010` | `permission_denied` | the cryptographic provider refused the operation | `NTE_PERM` |
+| `0x80090016` | `keyset_absent` | the named keyset does not exist in that provider | `NTE_BAD_KEYSET` |
+| `0x80090030` | `device_not_ready` | the cryptographic device or TPM is not ready | `NTE_DEVICE_NOT_READY` |
+| `0x80090036` | `user_cancelled` | the user cancelled a cryptographic prompt | `NTE_USER_CANCELLED` |
+| `0x80090302` | `function_unsupported` | the requested security function is not supported | `SEC_E_UNSUPPORTED_FUNCTION` |
 | `0x80090303` | `unknown_target` | the target of the security context is unknown or unreachable | `SEC_E_TARGET_UNKNOWN` |
+| `0x80090308` | `invalid_token` | the security token supplied to the package is invalid | `SEC_E_INVALID_TOKEN` |
+| `0x8009030d` | `unknown_credentials` | the credentials supplied were not recognized by the package | `SEC_E_UNKNOWN_CREDENTIALS` |
+| `0x8009030e` | `no_credentials_available` | the security package had no credentials to present | `SEC_E_NO_CREDENTIALS` |
 | `0x80090311` | `no_authenticating_authority` | no authority could be reached to authenticate | `SEC_E_NO_AUTHENTICATING_AUTHORITY` |
 | `0x80090325` | `untrusted_root` | the certificate chain ends in an untrusted root | `SEC_E_UNTRUSTED_ROOT` |
-| `0x80090302` | `function_unsupported` | the requested security function is not supported | `SEC_E_UNSUPPORTED_FUNCTION` |
-| `0x8009030d` | `unknown_credentials` | the credentials supplied were not recognized by the package | `SEC_E_UNKNOWN_CREDENTIALS` |
-| `0xc0000380` | `smartcard_wrong_pin` | the smart card PIN entered was wrong | `STATUS_SMARTCARD_WRONG_PIN` |
-| `0xc000014d` | `registry_io_failed` | an I/O operation on a registry hive file failed, so the registry could not read, write or flush that file | `STATUS_REGISTRY_IO_FAILED` |
 | `0x800f0805` | `servicing_package_invalid` | the update package was rejected as invalid, usually download or metadata corruption | `CBS_E_INVALID_PACKAGE` |
 | `0x800f080d` | `component_manifest_invalid_item` | a component manifest in the store holds an entry the servicing stack cannot read | `CBS_E_MANIFEST_INVALID_ITEM` |
 | `0x800f081f` | `component_store_source_missing` | the payload the operation needs is not in the store and no repair source supplied it | `CBS_E_SOURCE_MISSING` |
@@ -62,6 +47,34 @@ These sets are closed: a value outside them leaves its field unset rather than b
 | `0x800f0988` | `invalid_delta_combination` | the deltas selected for the component cannot be combined | `PSFX_E_INVALID_DELTA_COMBINATION` |
 | `0x800f0989` | `reverse_delta_missing` | the reverse delta the operation needs is absent from the store | `PSFX_E_REVERSE_DELTA_MISSING` |
 | `0x800f0991` | `payload_file_missing` | a payload file the package depends on is missing | `PSFX_E_MISSING_PAYLOAD_FILE` |
+| `0xc000000e` | `no_such_device` | no device is present at the address the request named | `STATUS_NO_SUCH_DEVICE` |
+| `0xc0000017` | `no_memory` | not enough memory was available to complete the operation | `STATUS_NO_MEMORY` |
+| `0xc0000034` | `object_name_not_found` | the named object does not exist | `STATUS_OBJECT_NAME_NOT_FOUND` |
+| `0xc000005e` | `no_logon_servers` | no logon server was available for the request | `STATUS_NO_LOGON_SERVERS` |
+| `0xc0000064` | `unknown_username` | no account exists with that name | `STATUS_NO_SUCH_USER` |
+| `0xc000006a` | `bad_password` | account exists and the password was wrong | `STATUS_WRONG_PASSWORD` |
+| `0xc000006d` | `bad_username_or_auth` | generic logon failure with the cause not disclosed | `STATUS_LOGON_FAILURE` |
+| `0xc000006e` | `account_restriction` | an account restriction blocked the logon | `STATUS_ACCOUNT_RESTRICTION` |
+| `0xc000006f` | `outside_logon_hours` | logon attempted outside the permitted hours | `STATUS_INVALID_LOGON_HOURS` |
+| `0xc0000070` | `workstation_not_authorized` | account not permitted to log on from this workstation | `STATUS_INVALID_WORKSTATION` |
+| `0xc0000071` | `password_expired` | the password has expired | `STATUS_PASSWORD_EXPIRED` |
+| `0xc0000072` | `account_disabled` | the account is disabled | `STATUS_ACCOUNT_DISABLED` |
+| `0xc0000073` | `name_translation_failed` | none of the supplied account names or identifiers could be translated to a security identifier | `STATUS_NONE_MAPPED` |
+| `0xc000009a` | `insufficient_resources` | the operation ran out of a system resource and can be retried | `STATUS_INSUFFICIENT_RESOURCES` |
+| `0xc000009c` | `device_data_error` | the device returned a data error instead of the data the read or write asked for | `STATUS_DEVICE_DATA_ERROR` |
+| `0xc000012d` | `commit_limit_reached` | the system commit limit was reached, so no more memory could be committed | `STATUS_COMMITMENT_LIMIT` |
+| `0xc0000133` | `clock_skew` | client and domain controller clocks differ too much | `STATUS_TIME_DIFFERENCE_AT_DC` |
+| `0xc000014d` | `registry_io_failed` | an I/O operation on a registry hive file failed, so the registry could not read, write or flush that file | `STATUS_REGISTRY_IO_FAILED` |
+| `0xc000015b` | `logon_right_not_granted` | account lacks the requested logon right | `STATUS_LOGON_TYPE_NOT_GRANTED` |
+| `0xc0000192` | `netlogon_not_started` | the Netlogon service is not running | `STATUS_NETLOGON_NOT_STARTED` |
+| `0xc0000193` | `account_expired` | the account has expired | `STATUS_ACCOUNT_EXPIRED` |
+| `0xc0000224` | `password_must_change` | the password must change before logon succeeds | `STATUS_PASSWORD_MUST_CHANGE` |
+| `0xc0000234` | `account_locked_out` | the account is locked out | `STATUS_ACCOUNT_LOCKED_OUT` |
+| `0xc0000371` | `no_local_secret` | the local secret store holds no secret for the account | `STATUS_NO_SECRETS` |
+| `0xc0000380` | `smartcard_wrong_pin` | the smart card PIN entered was wrong | `STATUS_SMARTCARD_WRONG_PIN` |
+| `0xc0000413` | `auth_firewall_blocked` | an authentication firewall policy blocked the account | `STATUS_AUTHENTICATION_FIREWALL_FAILED` |
+| `0xc0000428` | `image_hash_invalid` | the image hash is not valid, so the file carries no signature the loader will accept | `STATUS_INVALID_IMAGE_HASH` |
+| `0xc0000603` | `image_certificate_revoked` | the certificate that signed the image has been revoked | `STATUS_IMAGE_CERT_REVOKED` |
 
 ## `kerberos`
 
@@ -213,7 +226,7 @@ Library-wide closed sets, so the same token means the same thing on every data f
 
 - `kerberos`: Kerberos protocol result code (KDC_ERR_*), a protocol space of its own, not an NTSTATUS
 - `ntstatus`: Windows NTSTATUS code (kernel and security subsystem)
-- `sspi`: Windows SSPI security result (SEC_E_*/SEC_I_*), the space the security packages report in
+- `sspi`: Windows SSPI security result (SEC_E_*/SEC_I_*), the security-package half of HRESULT facility 9
 
 ### `sparklogs.running_as.kind`
 

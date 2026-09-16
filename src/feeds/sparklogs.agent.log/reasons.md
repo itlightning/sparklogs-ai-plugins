@@ -8,17 +8,17 @@ Every section below is from the public reason block only.
 
 | reason | service | severity | benign |
 |---|---|---|---|
-| `sparklogs_agent_config_rejected` | `rmm` | Error |  |
-| `sparklogs_agent_emission_capped` | `rmm` | Error |  |
-| `sparklogs_agent_spool_drop` | `rmm` | Error |  |
-| `sparklogs_agent_spool_expire` | `rmm` | Error |  |
+| `sparklogs_agent_config_rejected` | `rmm` | Warning |  |
+| `sparklogs_agent_emission_capped` | `rmm` | Warning |  |
+| `sparklogs_agent_spool_drop` | `rmm` | Warning |  |
+| `sparklogs_agent_spool_expire` | `rmm` | Warning |  |
 | `sparklogs_agent_spool_truncate` | `rmm` | Warning |  |
 
 ## `sparklogs_agent_config_rejected`
 
 The data collection settings sent to this device were invalid, so the previous ones stayed active.
 
-**Severity:** Error
+**Severity:** Warning
 
 **Impact:** Collection keeps running under the previous settings, so any collection or routing change the new settings were meant to make has not taken effect on this device until they are corrected.
 
@@ -26,7 +26,7 @@ The data collection settings sent to this device were invalid, so the previous o
 
 The agent suppressed further events for one category after it hit its emission cap.
 
-**Severity:** Error
+**Severity:** Warning
 
 **Impact:** Some events for that category in that window were not sent; treat gaps in it as suppression, not absence.
 
@@ -34,7 +34,7 @@ The agent suppressed further events for one category after it hit its emission c
 
 The agent dropped sealed spool data to stay under its disk cap.
 
-**Severity:** Error
+**Severity:** Warning
 
 **Impact:** Older buffered telemetry from this host is no longer recoverable.
 
@@ -42,7 +42,7 @@ The agent dropped sealed spool data to stay under its disk cap.
 
 The agent deleted spooled data that aged out before it could be sent.
 
-**Severity:** Error
+**Severity:** Warning
 
 **Impact:** Telemetry from this host covering that period is no longer recoverable.
 

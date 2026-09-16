@@ -118,6 +118,8 @@ Windows could not reproject a component.
 
 A component-store scan detected corruption.
 
+**Also reported by:** `win.eventlog.setup`
+
 **Severity:** Notice
 
 **Impact:** Windows updates may fail later if the damage is not repaired. Detection alone does not mean anything is currently broken.

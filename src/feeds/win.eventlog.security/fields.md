@@ -8,7 +8,7 @@ Hand edits are lost.
 
 ## Contract
 
-Read every row below as a query contract, the same way a reason slug is read.
+Read every row below as a query contract, the same way a reason code is read.
 
 - **Additive only.** Fields and vocabulary tokens are added, never renamed or repurposed, without a documented migration.
 - **Misses are honest.** An unlisted code leaves its decoded field unset and the raw value promoted; a meaning is never invented.
@@ -26,7 +26,7 @@ The rendered `key=value` tail exists to be READ, not re-parsed: its values are n
 
 ## Reconstruction guarantee
 
-68 curated surface(s) drop the vendor body text below the synthesized first line.
+69 curated surface(s) drop the vendor body text below the synthesized first line.
 That is never data loss: the provider payload is retained at rest, so a dropped body can be reconstructed from it.
 What the body said is derivable; what it cost to ship it repeatedly is not.
 
@@ -43,8 +43,8 @@ Stored flat under the `win.eventlog.security.` prefix.
 | `win.eventlog.security.lm_package` | string | LAN Manager package variant on 4624/4625 as the provider names it (for example NTLM V2): the NTLM downgrade inventory. Not a curated vocabulary, so it stays a raw value. |
 | `win.eventlog.security.token_elevated` | bool | Whether the sign-in minted a full-privilege token on 4624, decoded from the message-catalog reference. False is stored as false, so a negative is distinguishable from an event that states nothing; an unrecognized reference leaves this unset. Same name as the pattern token that renders when this is true. |
 | `win.eventlog.security.privileges` | array | Sensitive privileges assigned to the new session on 4672, as the list of literal Se* constants the provider named. Locale-invariant, so unknown privileges pass through verbatim and no decode table applies. |
-| `win.eventlog.security.workstation` | string | Source machine name of the attempt in the provider NetBIOS form (WorkstationName on 4624/4625, Workstation on 4776/4777/4794), on the succeeding rows as well as the failing ones. Kept verbatim on every row; the portable origin host is gated to values naming a machine other than the reporting host. |
-| `win.eventlog.security.caller_computer` | string | Machine the bad attempts came from in the provider NetBIOS form (CallerComputerName on 4740): the lockout-source forensic pivot, the highest-ticket-value field in the channel. Kept verbatim on every row; the portable origin host is gated to values naming a machine other than the reporting host. |
+| `win.eventlog.security.workstation` | string | Source machine name of the attempt in the provider NetBIOS form (WorkstationName on 4624/4625, Workstation on 4776/4777/4794), on the succeeding rows as well as the failing ones. Kept verbatim in the provider spelling; the portable origin host carries the same end as the cross-feed join key. |
+| `win.eventlog.security.caller_computer` | string | Machine the bad attempts came from in the provider NetBIOS form (CallerComputerName on 4740): the lockout-source forensic pivot, the highest-ticket-value field in the channel. Kept verbatim in the provider spelling; the portable origin host carries the same end as the cross-feed join key. |
 | `win.eventlog.security.status` | string | Failure code as logged, downcased hex: NTSTATUS on 4625/4776/4777, Kerberos result code on 4768/4769/4770/4771. The raw code is the classify key and the provider fidelity; the portable error code carries the normalized value and its number space. |
 | `win.eventlog.security.substatus` | string | Detailed NTSTATUS on 4625 (usually the real cause; 0x0 means the Status field carries it). |
 | `win.eventlog.security.status_meaning` | string | Bounded meaning token decoded from the status code (NTSTATUS and SSPI causes on 4625/4776/4777, Kerberos result codes on 4768/4769/4770/4771). Also rendered as a bare inline token on those arms, so the cause forms part of the pattern instead of variabilizing away. An undecoded code leaves this unset; a meaning is never invented. Not a synonym of the portable sparklogs.result.code_name, which carries the VENDOR constant name (STATUS_WRONG_PASSWORD) decoded from the same table row: two vocabularies with different owners and different jobs, so both exist. This one is ours and is chosen for the message head; that one is the published name an engineer searches for and transfers to every source speaking the space. |
@@ -52,9 +52,9 @@ Stored flat under the `win.eventlog.security.` prefix.
 | `win.eventlog.security.kerberos_target` | string | Service principal the Kerberos request named (ServiceName, casefolded) on 4768/4769/4770/4771: which service a ticket was asked for, and the kerberoast target join on 4769. |
 | `win.eventlog.security.ticket_encryption_type` | string | Kerberos ticket encryption type (hex enum) on every ticket row of 4768/4769/4770 that states one; 0x17 RC4-HMAC and 0x18 RC4-HMAC-EXP are the downgrade pair the RC4 arm labels. |
 | `win.eventlog.security.etype_meaning` | string | Decoded encryption-type token (rc4_hmac, rc4_hmac_exp): the meaning behind ticket_encryption_type. Only the RC4 pair decodes, so every other encryption type leaves this unset and the raw enum answers instead. |
-| `win.eventlog.security.target_server` | string | Server the explicit credential was presented to (TargetServerName on 4648), kept verbatim on every row including the routine localhost form; the portable destination host carries the same value only when it names a machine other than the reporting host. |
+| `win.eventlog.security.target_server` | string | Server the explicit credential was presented to (TargetServerName on 4648), kept verbatim in the provider spelling; the portable destination host carries the same end as the cross-feed join key, the routine localhost form included. |
 | `win.eventlog.security.audit_subcategory_guid` | string | Audit subcategory GUID from 4719/4912 (SubcategoryGuid): the locale-invariant key of WHICH audit policy changed. |
-| `win.eventlog.security.new_process_id` | string | Created process id from 4688 in the hex form the provider logged; equals the ProcessId of the matching 4689 exit, so this is the join key at rest. The portable process id carries the same number in decimal. |
+| `win.eventlog.security.new_process_id` | string | Created process id from 4688 in the hex form the provider logged. Where a matching 4689 exit is stored it carries the same hex in ProcessId, so this is the join key at rest; exits are stored only when the process ended on a non-zero status, so most creations have no exit to join to. The portable process id carries the same number in decimal. |
 | `win.eventlog.security.uac_token_type` | string | UAC split of the created process token on 4688, decoded from TokenElevationType (unsplit, full, limited). unsplit is TokenElevationTypeDefault: UAC produced no filtered pair. full is TokenElevationTypeFull (type 2), not Default. An unrecognized reference leaves this unset. |
 | `win.eventlog.security.integrity_level` | string | MIC integrity level of the created process token on 4688, decoded from MandatoryLabel (untrusted, low, medium, high, system). An unrecognized SID leaves this unset and stamps the raw SID on integrity_level_sid. |
 | `win.eventlog.security.integrity_level_sid` | string | Raw MandatoryLabel SID from 4688, kept beside the decoded token so an unrecognized integrity SID remains queryable. |
@@ -63,6 +63,7 @@ Stored flat under the `win.eventlog.security.` prefix.
 | `win.eventlog.security.service_image_path` | string | Installed service IMAGE path from 4697, with the arguments of the ServiceFileName command line removed. Unset where the image cannot be split off unambiguously (an unterminated quote, or an unquoted path containing spaces), so the value is always a path and never a command line. |
 | `win.eventlog.security.service_account` | string | Account the installed service runs as, from 4697 (blank in the event means LocalSystem; stored only when present). |
 | `win.eventlog.security.task_name` | string | Scheduled task path from 4698/4699/4701/4702. The task XML blob is not promoted. |
+| `win.eventlog.security.exit_status` | string | Exit status a process returned on 4689, verbatim from the provider (Status), on the rows whose value is non-zero and is not one of the named crash statuses. A value only the program that returned it, or the kernel outcome it ended on, can interpret. |
 | `win.eventlog.security.object_name` | string | Audited object path (ObjectName): the registry key the audited value lives under on 4657, and the object whose auditing settings changed on 4907. |
 | `win.eventlog.security.object_type` | string | Kind of object whose auditing settings changed on 4907 (ObjectType: File, Key, and the other object-server types), verbatim from the provider. |
 | `win.eventlog.security.object_value_name` | string | Registry value name that was created/modified/deleted (4657 ObjectValueName). Old/new DATA are not promoted (credential hazard). |
@@ -72,8 +73,10 @@ Stored flat under the `win.eventlog.security.` prefix.
 | `win.eventlog.security.insecure_boot_flags` | string | Comma-joined boot-chain weaknesses found true on 4826 (TestSigning, KernelDebug, DisableIntegrityChecks): which setting makes the boot chain accept unsigned or debugger-attached kernel code. |
 | `win.eventlog.security.rule_name` | string | Firewall rule display name from the MPSSVC rule-change family. |
 | `win.eventlog.security.rule_id` | string | Firewall rule id from the MPSSVC rule-change family (stable across renames). |
-| `win.eventlog.security.share_name` | string | Network share name from 5142 (share added). |
-| `win.eventlog.security.share_path` | string | Local filesystem path backing the added share (5142 ShareLocalPath); a system-root share is a higher-concern surface. |
+| `win.eventlog.security.share_name` | string | Network share name, from 5142 (share added) and from the write-class 5145 access checks. |
+| `win.eventlog.security.share_path` | string | Local filesystem path backing the share (5142 and 5145 ShareLocalPath); a system-root share is a higher-concern surface. |
+| `win.eventlog.security.share_relative_target` | string | Path of the object inside the share that a 5145 access check was made against (RelativeTargetName): what was written, renamed, deleted or re-permissioned. |
+| `win.eventlog.security.share_access_mask` | string | Access requested on a 5145 check, as the hex string the provider logged. The keep rule reads the same value as bits and stores no reading of it, so this is what a query pivots on and what lets the keep decision be re-derived from the row. |
 | `win.eventlog.security.old_target_user` | string | Account name before a rename (4781). |
 | `win.eventlog.security.new_target_user` | string | Account name after a rename (4781). |
 | `win.eventlog.security.object_dn` | string | Directory object distinguished name from 5136-5141 (ObjectDN). Attribute VALUES are not promoted (sensitive directory data). |
@@ -83,6 +86,10 @@ Stored flat under the `win.eventlog.security.` prefix.
 | `win.eventlog.security.nps_policy` | string | Network policy that matched the NPS request (NetworkPolicyName on 6273/6274): the pivot a RADIUS ticket needs, since a denial reads differently depending on which policy decided it. |
 | `win.eventlog.security.publisher_id` | string | Provider whose event the logging service failed to process (Eventlog 1108): which audit source is silently losing records. |
 | `win.eventlog.security.pua_count` | int | Number of entries in the per-user audit policy table built at boot (4902 PuaCount). Zero means this host has no per-user audit policy at all; any other value means auditing is aimed at named principals. |
+| `win.eventlog.security.wfp_direction` | string | Which way the refused connection was going (5157 Direction): inbound or outbound. An unrecognized message-catalog reference leaves this unset. |
+| `win.eventlog.security.wfp_dest_address` | string | Peer address the refused connection was aimed at (5157 DestAddress), verbatim, on every kept row including loopback and same-host refusals. `sparklogs.destination.*` carries the same endpoint when it names a machine other than the reporting host. |
+| `win.eventlog.security.wfp_dest_port` | int | Peer port the refused connection was aimed at (5157 DestPort), on every kept row including loopback and same-host refusals. `sparklogs.destination.*` carries the same endpoint when it names a machine other than the reporting host. Unset when the provider value is not a number. |
+| `win.eventlog.security.wfp_protocol` | int | IANA protocol number of the refused connection (5157 Protocol), 6 for TCP and 17 for UDP. Unset when the provider value is not a number. |
 | `win.eventlog.security.dropped_count` | int | Number of audit records the event log transport discarded before they reached the log (Eventlog 1101). Zero means nothing was lost. Read from the message tail on the known template, and left unset on any other template. |
 
 ## Portable families
@@ -92,9 +99,10 @@ Prefer these over the per-feed fields for anything that spans feeds.
 
 | LQL path | Family means |
 |---|---|
-| `sparklogs.config_change.type` | What configuration changed, in what direction, on what. |
-| `sparklogs.config_change.action` | What configuration changed, in what direction, on what. |
-| `sparklogs.config_change.target` | What configuration changed, in what direction, on what. |
+| `sparklogs.throttle.window_s` |  |
+| `sparklogs.config_change.type` | The kind of object that changed, from a closed set of object nouns. |
+| `sparklogs.config_change.action` | What was done to that object, from a closed set of verbs. |
+| `sparklogs.config_change.target` | Which object it was: its own identity within its kind, as a name, a path or an id. A different field from the principal a change acted on, and a change acting on a principal carries both. |
 | `sparklogs.actor.id` | The initiator. Who wanted the thing done. |
 | `sparklogs.actor.name` | The initiator. Who wanted the thing done. |
 | `sparklogs.actor.type` | The initiator. Who wanted the thing done. |
@@ -118,10 +126,12 @@ Prefer these over the per-feed fields for anything that spans feeds.
 | `sparklogs.process.id` | The process the event is about. |
 | `sparklogs.process.path` | The process the event is about. |
 | `sparklogs.process.name` | The process the event is about. |
-| `sparklogs.origin.ip` | The initiating network endpoint. Populated only when the value names a machine other than the reporting host, which is what makes the populated side the direction. |
-| `sparklogs.origin.host` | The initiating network endpoint. Populated only when the value names a machine other than the reporting host, which is what makes the populated side the direction. |
-| `sparklogs.origin.port` | The initiating network endpoint. Populated only when the value names a machine other than the reporting host, which is what makes the populated side the direction. |
-| `sparklogs.destination.host` | The receiving network endpoint. |
+| `sparklogs.origin.ip` | Where the connection or request came from. Both are present when the event names both ends. On sign-in events only the other machine is named, because the reporting machine is the near end. |
+| `sparklogs.origin.host` | Where the connection or request came from. Both are present when the event names both ends. On sign-in events only the other machine is named, because the reporting machine is the near end. |
+| `sparklogs.origin.port` | Where the connection or request came from. Both are present when the event names both ends. On sign-in events only the other machine is named, because the reporting machine is the near end. |
+| `sparklogs.destination.ip` | Where it was going. Both are present when the event names both ends. On sign-in events only the other machine is named, because the reporting machine is the near end. |
+| `sparklogs.destination.host` | Where it was going. Both are present when the event names both ends. On sign-in events only the other machine is named, because the reporting machine is the near end. |
+| `sparklogs.destination.port` | Where it was going. Both are present when the event names both ends. On sign-in events only the other machine is named, because the reporting machine is the near end. |
 | `sparklogs.result.code` | The main result code the source reported, the number space it belongs to, the constant name that space gives it, and whether that code is a failure. The name is a DECODE of the first two, present only where the source pack holds a decode table for that space. `failed` is a marker: presence means failure, absence of the field means success, and it is never false. |
 | `sparklogs.result.code_space` | The main result code the source reported, the number space it belongs to, the constant name that space gives it, and whether that code is a failure. The name is a DECODE of the first two, present only where the source pack holds a decode table for that space. `failed` is a marker: presence means failure, absence of the field means success, and it is never false. |
 | `sparklogs.result.code_name` | The main result code the source reported, the number space it belongs to, the constant name that space gives it, and whether that code is a failure. The name is a DECODE of the first two, present only where the source pack holds a decode table for that space. `failed` is a marker: presence means failure, absence of the field means success, and it is never false. |
@@ -197,14 +207,20 @@ The last column is different in kind: it is the author's account of the row or e
 | `audit_policy_changed` / `default` | 4715, 4719, 4912 | `win.eventlog.security.audit_subcategory_guid` |  |
 | `crypto_selftest_failed` / `default` | 6418 | **fields: none** |  |
 | `directory_object_access_denied` / `default` | 4662 | **fields: none** |  |
-| `directory_object_changed` / `default` | 5136, 5137, 5138, 5139, 5141 | `win.eventlog.security.attribute_name` `win.eventlog.security.object_dn` |  |
+| `directory_object_changed` / `created` | 5137, 5138 | `win.eventlog.security.attribute_name` `win.eventlog.security.object_dn` |  |
+| `directory_object_changed` / `deleted` | 5141 | `win.eventlog.security.attribute_name` `win.eventlog.security.object_dn` |  |
+| `directory_object_changed` / `updated` | 5136, 5139 | `win.eventlog.security.attribute_name` `win.eventlog.security.object_dn` |  |
 | `directory_replication_access_requested` / `default` | 4662 | **fields: none** |  |
 | `domain_policy_changed` / `default` | 4739 | **fields: none** |  |
 | `dsrm_password_change_failed` / `default` | 4794 | `win.eventlog.security.workstation` |  |
 | `dsrm_password_changed` / `default` | 4794 | `win.eventlog.security.workstation` |  |
 | `event_logging_stopped` / `default` | 1100 | **fields: none** |  |
 | `explicit_credential_use` / `default` | 4648 | `win.eventlog.security.target_server` |  |
-| `firewall_rule_changed` / `default` | 4946, 4947, 4948, 4950, 4954, 4956, 4957 | `win.eventlog.security.rule_id` `win.eventlog.security.rule_name` |  |
+| `firewall_rule_changed` / `created` | 4946 | `win.eventlog.security.rule_id` `win.eventlog.security.rule_name` |  |
+| `firewall_rule_changed` / `deleted` | 4948 | `win.eventlog.security.rule_id` `win.eventlog.security.rule_name` |  |
+| `firewall_rule_changed` / `disabled` | 4954 | `win.eventlog.security.rule_id` `win.eventlog.security.rule_name` |  |
+| `firewall_rule_changed` / `enabled` | 4956 | `win.eventlog.security.rule_id` `win.eventlog.security.rule_name` |  |
+| `firewall_rule_changed` / `updated` | 4947, 4950, 4957 | `win.eventlog.security.rule_id` `win.eventlog.security.rule_name` |  |
 | `firewall_service_stopped` / `default` | 5025, 5034 | **fields: none** |  |
 | `group_member_added` / `default` | 4728, 4732, 4756 | **fields: none** |  |
 | `group_member_removed` / `default` | 4729, 4733, 4757 | **fields: none** |  |
@@ -225,8 +241,11 @@ The last column is different in kind: it is the author's account of the row or e
 | `nps_request_discarded` / `default` | 6274 | `win.eventlog.security.nps_policy` `win.eventlog.security.nps_reason_code` `win.eventlog.security.nps_reason_meaning` |  |
 | `ntlm_validation_failed` / `default` | 4776, 4777 | `win.eventlog.security.status` `win.eventlog.security.status_meaning` `win.eventlog.security.workstation` |  |
 | `principal_renamed` / `default` | 4781 | `win.eventlog.security.new_target_user` `win.eventlog.security.old_target_user` |  |
+| `process_exited_abnormally` / `default` | 4689 | **fields: none** |  |
 | `psdirect_handshake_probe` / `default` | 4625 | `win.eventlog.security.auth_package` `win.eventlog.security.lm_package` `win.eventlog.security.logon_type` `win.eventlog.security.logon_type_name` `win.eventlog.security.psdirect_handshake` `win.eventlog.security.status` `win.eventlog.security.status_meaning` `win.eventlog.security.substatus` `win.eventlog.security.workstation` |  |
-| `registry_value_changed` / `default` | 4657 | `win.eventlog.security.object_name` `win.eventlog.security.object_value_name` `win.eventlog.security.operation_meaning` |  |
+| `registry_value_changed` / `created` | 4657 | `win.eventlog.security.object_name` `win.eventlog.security.object_value_name` `win.eventlog.security.operation_meaning` |  |
+| `registry_value_changed` / `deleted` | 4657 | `win.eventlog.security.object_name` `win.eventlog.security.object_value_name` `win.eventlog.security.operation_meaning` |  |
+| `registry_value_changed` / `updated` | 4657 | `win.eventlog.security.object_name` `win.eventlog.security.object_value_name` `win.eventlog.security.operation_meaning` |  |
 | `replay_attack_detected` / `default` | 4649 | **fields: none** |  |
 | `scheduled_task_created` / `default` | 4698 | `win.eventlog.security.task_name` |  |
 | `scheduled_task_deleted` / `default` | 4699 | `win.eventlog.security.task_name` |  |
@@ -247,25 +266,33 @@ The last column is different in kind: it is the author's account of the row or e
 | `audit_subsystem_started` | 4608 | **fields: none** |  |
 | `boot_configuration_loaded` | 4826 | **fields: none** |  |
 | `credman_credentials_read` | 5379, 5381, 5382 | **fields: none** |  |
+| `critical_group_membership_enumerated` | 4799 | **fields: none** |  |
 | `crypto_operation` | 5061 | **fields: none** |  |
 | `fips_selftest_passed` | 6417 | **fields: none** |  |
 | `firewall_driver_started` | 5033 | **fields: none** |  |
+| `firewall_packet_blocked` | 5152 | `win.eventlog.security.wfp_dest_address` `win.eventlog.security.wfp_dest_port` `win.eventlog.security.wfp_direction` `win.eventlog.security.wfp_protocol` |  |
 | `firewall_service_started` | 5024 | **fields: none** |  |
 | `group_membership_enumerated` | 4799 | **fields: none** |  |
+| `inbound_connection_blocked` | 5157 | `win.eventlog.security.wfp_dest_address` `win.eventlog.security.wfp_dest_port` `win.eventlog.security.wfp_direction` `win.eventlog.security.wfp_protocol` |  |
 | `key_file_operation` | 5058 | **fields: none** |  |
 | `key_migration_operation` | 5059 | **fields: none** |  |
 | `non_account_sign_out` | 4647 | **fields: none** |  |
 | `ntlm_credentials_validated` | 4776 | `win.eventlog.security.workstation` |  |
 | `object_audit_settings_changed` | 4907 | `win.eventlog.security.object_name` `win.eventlog.security.object_type` |  |
+| `outbound_connection_blocked` | 5157 | `win.eventlog.security.wfp_dest_address` `win.eventlog.security.wfp_dest_port` `win.eventlog.security.wfp_direction` `win.eventlog.security.wfp_protocol` |  |
 | `per_user_audit_policy_table_created` | 4902 | `win.eventlog.security.pua_count` |  |
 | `platform_privileges_assigned` | 4672 | `win.eventlog.security.privileges` |  |
 | `primary_token_assigned` | 4696 | **fields: none** |  |
+| `privilege_use_refused` | 4673, 4674 | **fields: none** |  |
 | `privileges_assigned_unclaimed_principal` | 4672 | `win.eventlog.security.privileges` |  |
 | `process_created` | 4688 | `command_line` `win.eventlog.security.integrity_level` `win.eventlog.security.integrity_level_sid` `win.eventlog.security.new_process_id` `win.eventlog.security.parent_process_name` `win.eventlog.security.uac_token_type` |  |
+| `process_exited_with_error` | 4689 | `win.eventlog.security.exit_status` |  |
 | `routine_token_refresh` | 4648 | `win.eventlog.security.target_server` |  |
+| `sensitive_privilege_used` | 4673, 4674 | **fields: none** |  |
 | `service_or_machine_sign_in` | 4624 | `win.eventlog.security.auth_package` `win.eventlog.security.lm_package` `win.eventlog.security.logon_guid` `win.eventlog.security.logon_type` `win.eventlog.security.logon_type_name` `win.eventlog.security.token_elevated` `win.eventlog.security.workstation` |  |
 | `service_ticket_issued` | 4769 | `win.eventlog.security.etype_meaning` `win.eventlog.security.kerberos_target` `win.eventlog.security.logon_guid` `win.eventlog.security.ticket_encryption_type` |  |
 | `session_ended` | 4634 | `win.eventlog.security.logon_type` `win.eventlog.security.logon_type_name` |  |
+| `share_object_written` | 5145 | `win.eventlog.security.share_access_mask` `win.eventlog.security.share_name` `win.eventlog.security.share_path` `win.eventlog.security.share_relative_target` |  |
 | `sign_in_unclaimed_principal` | 4624 | `win.eventlog.security.auth_package` `win.eventlog.security.lm_package` `win.eventlog.security.logon_guid` `win.eventlog.security.logon_type` `win.eventlog.security.logon_type_name` `win.eventlog.security.token_elevated` `win.eventlog.security.workstation` |  |
 | `tgt_issued` | 4768 | `win.eventlog.security.etype_meaning` `win.eventlog.security.kerberos_target` `win.eventlog.security.logon_guid` `win.eventlog.security.ticket_encryption_type` |  |
 | `ticket_renewed` | 4770 | `win.eventlog.security.etype_meaning` `win.eventlog.security.kerberos_target` `win.eventlog.security.ticket_encryption_type` |  |
@@ -301,6 +328,7 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `group_member_removed` / `default`
 - `logon_right_granted` / `default`
 - `logon_right_removed` / `default`
+- `process_exited_abnormally` / `default`
 - `replay_attack_detected` / `default`
 - `security_group_changed` / `default`
 - `security_group_created` / `default`
@@ -312,6 +340,7 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `audit_subsystem_started`
 - `boot_configuration_loaded`
 - `credman_credentials_read`
+- `critical_group_membership_enumerated`
 - `crypto_operation`
 - `fips_selftest_passed`
 - `firewall_driver_started`
@@ -321,5 +350,7 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `key_migration_operation`
 - `non_account_sign_out`
 - `primary_token_assigned`
+- `privilege_use_refused`
+- `sensitive_privilege_used`
 - `user_group_membership_enumerated`
 - `user_signed_out`
