@@ -16,9 +16,30 @@ events. Ask device health before writing "nothing was found" or "the problem sta
 
 ## `query_device_health` (tool)
 
-Returns the latest curated state per device: monitor rows for conditions, inventory rows for what is
-on the box. Column names, `fieldset` (arg) contents, and `kinds` (arg) / `reasons` (arg) / `group_by_reason` (arg)
-mechanics are in the tool description; read that for the parameter shape.
+Three readings of the same tool.
+Parameter names, defaults, fieldsets, and kinds live in the live tool description; follow that, not this file.
+
+**Omit `view` (arg) (the default).**
+One row per episode or occurrence: that row is the latest event in the window.
+`min_severity` (arg) `warning` (value) means the latest event is still warning or worse.
+
+**`view` (arg) `latest_state` (value).**
+Newest event of each subject at or before `end` (arg).
+`min_severity` (arg) applies to that newest event.
+
+**`view` (arg) `timeline` (value).**
+Series and RCA reading: every matching row, oldest first.
+`min_severity` (arg) includes every in-window event of episodes whose peak in the window meets the floor.
+Rows with no `sparklogs.episode.id` (col) still filter per event.
+
+**Which reading to use:**
+
+| Question | How |
+|---|---|
+| Latest event of each episode (warning+ means that latest event is still warning+) | omit `view` (arg), `min_severity` (arg) `warning` (value) |
+| What is on the box / how it last read | `view` (arg) `latest_state` (value). Newest event of each subject, not of each episode |
+| Series of those episodes | `view` (arg) `timeline` (value), same `min_severity` (arg). Fieldset `fleet` (value) when duration / `sparklogs.episode.cleared_ts` (col) / `sparklogs.class` (col) matter |
+| Repeating change points | `view` (arg) `timeline` (value) plus opt-in kinds (`config_change` (value), and `delta` (value) when those are the points). Per-event floor. Omit `view` (arg) is one row per occurrence at its latest event; five change points are five timeline events. `sparklogs.episode.occurrence` (col) is a recurrence counter on one episode, not those points |
 
 **Fieldset choice is a judgment call, not just a size choice.** Use `rca` (value) when reasoning about one
 device or a handful, `fleet` (value) when the question is how many and which, `minimal` (value) for a flat listing

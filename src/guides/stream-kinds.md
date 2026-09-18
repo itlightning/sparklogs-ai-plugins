@@ -42,6 +42,8 @@ Absence is a missing promotion, not a missing event.
 
 ## Device state vs events
 
-"What is on the box / open condition in this window" is `query_device_health` (tool) (latest event per episode that emitted in the window, not a time series).
+"Latest event of each episode in this window" is `query_device_health` (tool) with `view` (arg) omitted.
+"What is on the box / how it last read" is the same tool with `view` (arg) `latest_state` (value).
+Episode series, or repeating change points, is the same tool with `view` (arg) `timeline` (value).
 The event stream of the same feed is `query_logs` (tool) scoped to `subsource` (LQL) `=` `"sparklogs.device.state"`.
 MCP column names (`sparklogs.kind` (col), `sparklogs.instance` (col), `sparklogs.episode.replaced_id` (col)) are the same dotted `sparklogs.*` spelling as the LQL path. Detail: `guides/device-state-fields.md`.

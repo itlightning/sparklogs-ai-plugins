@@ -1,9 +1,10 @@
 # Kind: device state
 
-**Latest in a window:** `query_device_health` (tool) (`fieldset` (arg) = `rca` (value) for one host).
+**Standing / latest of each episode:** `query_device_health` (tool), omit `view` (arg) (`fieldset` (arg) = `rca` (value) for one host).
 Columns: the response `schema.columns` (col) or the tool description. Episode and honesty interpretation: `guides/device-state-fields.md`.
-A row is the latest event of each episode that emitted inside the requested window.
-That is not a time series.
+A default-view row is the latest event of each episode that emitted inside the requested window, not the latest event of each subject.
+What is on the box is `view` (arg) `latest_state` (value).
+Series / RCA: `view` (arg) `timeline` (value) on the same tool.
 
 **Event stream:** `query_logs` (tool) on `subsource` (LQL) `=` `"sparklogs.device.state"`.
 Group `sparklogs.kind` (LQL), `sparklogs.topic` (LQL), `sparklogs.reason` (LQL).
@@ -13,11 +14,13 @@ Generated `feeds/sparklogs.device.state/fields.md` lists module promotions only.
 The snapshot payload lives under `sparklogs.data` (LQL).
 Start at `fields/INDEX.md`, then open the topic table for its exact names, types, units, and meanings.
 
-## Latest-in-window vs event stream
+## Which reading
 
 | Question | Tool |
 |---|---|
-| What is on the box / open condition in this window (episode-collapsed) | `query_device_health` (tool) (`fieldset` (arg) = `rca` (value) for one host). Episode and honesty interpretation: `guides/device-state-fields.md` |
+| Standing conditions / latest event of each episode in this window | `query_device_health` (tool), omit `view` (arg) (`fieldset` (arg) = `rca` (value) for one host). Episode and honesty interpretation: `guides/device-state-fields.md` |
+| What is on the box / how it last read | `query_device_health` (tool), `view` (arg) `latest_state` (value) |
+| Series of those episodes, or repeating change points | `query_device_health` (tool) `view` (arg) `timeline` (value). Same `min_severity` (arg) as the default view: peak in the window, then every in-window event of those episodes. Fieldset `fleet` (value) when duration / `sparklogs.episode.cleared_ts` (col) / `sparklogs.class` (col) matter |
 | How it changed, every snapshot, hour by hour | `query_logs` (tool) on this `subsource` (LQL). Group `sparklogs.kind` (LQL), `sparklogs.topic` (LQL), `sparklogs.reason` (LQL) |
 
 MCP column names paste straight into LQL now: `sparklogs.kind` (col) on a device-health row is `sparklogs.kind` (LQL) in logs, same spelling.

@@ -289,7 +289,15 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` (value) or `
 
 **Why it's wrong.** `list_fields` (tool) is a good catalog call. It names fields; it does not rank what matters. For device state, group `sparklogs.kind` (LQL), `sparklogs.topic` (LQL), `sparklogs.reason` (LQL) first (`guides/stream-kinds/device-state.md`). The catalog lists snapshot payload leaves with their array mark (`sparklogs.data.services[].current_state`); those are names to filter on inside `[]()`, not the ladder.
 
-**Recovery.** Latest-in-window: `query_device_health` (tool). Event stream: group `sparklogs.kind` (LQL) / `sparklogs.topic` (LQL) / `sparklogs.reason` (LQL). Use `list_fields` (tool) when you need a name the rows did not already show.
+**Recovery.** Standing / latest of each episode: `query_device_health` (tool), omit `view` (arg). Inventory / what is on the box: same tool, `view` (arg) `latest_state` (value). Series / RCA: same tool, `view` (arg) `timeline` (value). Event stream: group `sparklogs.kind` (LQL) / `sparklogs.topic` (LQL) / `sparklogs.reason` (LQL). Use `list_fields` (tool) when you need a name the rows did not already show.
+
+### Mixing the default view with timeline
+
+**Symptom.** You omitted `view` (arg) on `query_device_health` (tool) and treated it as a series. Or you used `view` (arg) `timeline` (value) and expected only events at or above `min_severity` (arg).
+
+**Why it's wrong.** Omit `view` (arg) judges the latest event of each episode. `latest_state` (value) judges the latest event of each subject. Timeline includes every in-window event of episodes whose peak in the window meets `min_severity` (arg).
+
+**Recovery.** Latest-of-episode read: omit `view` (arg), `min_severity` (arg) `warning` (value). What is on the box: `view` (arg) `latest_state` (value). Series of those episodes: `view` (arg) `timeline` (value), same `min_severity` (arg), fieldset `fleet` (value) when duration / `sparklogs.episode.cleared_ts` (col) / `sparklogs.class` (col) matter. Repeating change points are timeline events with opt-in kinds, not `sparklogs.episode.occurrence` (col).
 
 ### Failing to check that the source has data in the investigation window
 
