@@ -78,7 +78,8 @@ projects to nothing and says so.
 **One reason spans a lifecycle.** Onset, hold and closure of one condition share a single reason:
 `….<reason>.NOTABLE` at onset, `….<reason>.ELEVATED` while held, `….<reason>.RECOVERED` at clearance.
 Group by `sparklogs.reason` (LQL) to collapse a lifecycle into one finding. Treating the three as three
-findings triples the apparent problem count.
+findings triples the apparent problem count. To find the recovery of a fault, query the same
+`sparklogs.reason` (LQL) with `sparklogs.class = RECOVERED` (LQL).
 
 **Use reason.** The field is `sparklogs.reason` (LQL); MSP-facing copy names these values **reasons**.
 
