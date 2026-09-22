@@ -3,7 +3,7 @@
   "source": {
     "repository": "sparklogs-source-library",
     "branch": "pack-1.6.3",
-    "commit": "74cdaf2cd8c2e77efdf09692802320b4c8cec30a",
+    "commit": "2b6dadb19ff4a06c74a8c498126cbcb873a9f363",
     "generatedSubpath": "docs/generated-public"
   },
   "consumption": {

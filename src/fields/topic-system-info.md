@@ -16,7 +16,8 @@
 | `sparklogs.data.system_info.tpm_version` | string |  | Which TPM specification the module implements. |
 | `sparklogs.data.system_info.os_edition` | string |  | The installed Windows edition. |
 | `sparklogs.data.system_info.os_display_version` | string |  | The feature-update version Windows shows to a user. |
-| `sparklogs.data.system_info.os_build` | string |  | The build and revision the OS is at, which is what a patch level is actually read from. |
+| `sparklogs.data.system_info.os_build` | integer |  | The Windows `CurrentBuildNumber` as an integer. |
+| `sparklogs.data.system_info.os_revision` | integer |  | The Windows Update Build Revision (`UBR`). Omitted when unreadable. |
 | `sparklogs.data.system_info.os_install_date` | string | timestamp | When this Windows installation was first set up. |
 | `sparklogs.data.system_info.domain_joined` | bool |  | Whether the machine is joined to a domain rather than in a workgroup. |
 | `sparklogs.data.system_info.domain_or_workgroup` | string |  | The domain the machine is joined to, or the workgroup it is in. |
@@ -30,7 +31,7 @@
 | `sparklogs.data.system_info.page_file_config` | string |  | How the page file is configured, in the spelling Windows stores: path, initial size and maximum size. |
 | `sparklogs.data.system_info.crash_dump_type` | string |  | What the machine is configured to write on a bugcheck, carried here as a posture fact beside the rest of the machine's identity. The same spelling `crash_dump_config` uses, so the two topics cannot disagree. |
 | `sparklogs.data.system_info.last_boot_time` | string | timestamp | When the machine last started. Always present. |
-| `sparklogs.data.system_info.uptime_d` | float | days | How long the machine has been up. Always present. |
+| `sparklogs.data.system_info.uptime_s` | integer | seconds | How long the machine has been up, in whole seconds. Always present. |
 | `sparklogs.data.system_info.reboot_pending` | bool |  | Whether the machine is waiting on a restart to finish applying something. Always present. |
 | `sparklogs.data.system_info.reboot_pending_since` | string | timestamp | When the pending restart was first witnessed. Present only while one is outstanding. |
 | `sparklogs.data.system_info.reboot_pending_reasons` | string_array |  | What is waiting on the restart, from a closed vocabulary: `cbs` for servicing, `wu` for Windows Update, `file_rename` for a queued file replacement, `rename` for a computer rename. Always present, and empty when nothing is pending. |

@@ -20,7 +20,7 @@
 | `sparklogs.data.performance.logical_core_count` | integer | count | How many logical processors the host has, which the per-core queue reading is divided by. |
 | `sparklogs.data.performance.commit_pct` | float | percent | The current commit charge as a percentage of the commit limit. |
 | `sparklogs.data.performance.commit_pct_max_window` | float | percent | The highest commit charge percentage the window observed. |
-| `sparklogs.data.performance.hard_fault_rate` | float | per_second | The current rate of hard page faults. |
+| `sparklogs.data.performance.hard_faults_per_s` | float | per_second | Hard page faults per second, latest 10s sample. |
 | `sparklogs.data.performance.ram_pct_time_in_hard_fault_storm` | float | percent | Percent of the window's time spent in a hard-fault storm. |
 | `sparklogs.data.performance.cpu_busy_age_basis` | string |  | Whether the age beside it was measured from a witnessed onset (`onset`), from when the condition was first seen already true (`observed`), or is a posture with no meaningful onset (`unknown_ongoing`). An age without this is a duration a reader cannot weigh. |
 | `sparklogs.data.performance.cpu_busy_age_h` | float | hours | How long this condition has been open, in hours. |

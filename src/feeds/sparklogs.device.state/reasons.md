@@ -27,7 +27,6 @@ Every section below is from the public reason block only.
 | `proc_cpu_runaway` | `performance` |  |  |
 | `proc_handle_count_high` | `performance` |  |  |
 | `ram_commit_high` | `performance` |  |  |
-| `ram_growth_sustained` | `performance` |  |  |
 | `ram_hard_fault_storm` | `performance` |  |  |
 | `svc_auto_not_running` | `app_stability` |  |  |
 | `svc_flapping` | `app_stability` |  |  |
@@ -156,12 +155,6 @@ A process has a very high handle count.
 Committed memory is high.
 
 **Also reported by:** `win.eventlog.platform`
-
-## `ram_growth_sustained`
-
-A process may be leaking memory: its working set grew at every sample of a consecutive run and is now large in absolute bytes or as a share of host RAM.
-
-**Impact:** The process can eventually exhaust memory or destabilize its workload.
 
 ## `ram_hard_fault_storm`
 

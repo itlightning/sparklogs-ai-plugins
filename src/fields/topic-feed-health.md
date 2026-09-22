@@ -10,6 +10,8 @@
 | `sparklogs.data.feed_health.lag_value` | integer |  | How far this module is behind the head, in whatever `lag_unit` names. |
 | `sparklogs.data.feed_health.lag_unit` | string |  | What `lag_value` counts: `records` (an estimate that can undershoot) or `bytes` (an exact measure). |
 | `sparklogs.data.feed_health.data_skips` | integer | count | How many spans of permanently lost events this module has recorded: a deliberate discard to escape a poisoned resume position, never an ordinary delay. |
+| `sparklogs.data.feed_health.withholding` | object_array |  | The bound channels holding this module back, worst first, each with the channel `name`, `why` (`skipped`, `unavailable`, `never_drained` or `no_record`), `since`, and where known the `channel_type` and the last win32 `last_error`. Absent when the module is withholding on nothing. |
+| `sparklogs.data.feed_health.withholding_omitted` | integer | count | How many withheld channels did not fit the list. Absent when the list is complete. |
 | `sparklogs.data.feed_health.files_discovered` | integer | count | How many files this module's file source has discovered. Present for file sources only. |
 | `sparklogs.data.feed_health.files_unreadable` | integer | count | How many of the discovered files could not be read. Present for file sources only. |
 | `sparklogs.data.feed_health.delta_rate_limited` | bool |  | Present and `true` when this row's transition was debounced against a rate limit rather than reported the instant it happened. |

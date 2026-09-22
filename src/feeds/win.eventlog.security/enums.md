@@ -8,7 +8,7 @@ These sets are closed: a value outside them leaves its field unset rather than b
 
 ## `win_status_codes`
 
-314 row(s), 63 carrying a token.
+315 row(s), 63 carrying a token.
 
 | Code | Token | Meaning | Constant |
 |---|---|---|---|

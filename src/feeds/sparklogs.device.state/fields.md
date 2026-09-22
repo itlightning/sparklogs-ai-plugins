@@ -48,7 +48,9 @@ The last column is different in kind: it is the author's account of the row or e
 | `agent_ram_over_budget` / `held` | n/a | **fields: none** |  |
 | `agent_ram_over_budget` / `onset` | n/a | **fields: none** |  |
 | `agent_ram_over_budget` / `recovered` | n/a | **fields: none** |  |
-| `cpu_busy` / `default` | n/a | **fields: none** |  |
+| `cpu_busy` / `held` | n/a | **fields: none** |  |
+| `cpu_busy` / `onset` | n/a | **fields: none** |  |
+| `cpu_busy` / `recovered` | n/a | **fields: none** |  |
 | `cpu_interrupt_storm` / `held` | n/a | **fields: none** |  |
 | `cpu_interrupt_storm` / `onset` | n/a | **fields: none** |  |
 | `cpu_interrupt_storm` / `recovered` | n/a | **fields: none** |  |
@@ -67,12 +69,16 @@ The last column is different in kind: it is the author's account of the row or e
 | `disk_unresponsive` / `held` | n/a | **fields: none** |  |
 | `disk_unresponsive` / `onset` | n/a | **fields: none** |  |
 | `disk_unresponsive` / `recovered` | n/a | **fields: none** |  |
-| `os_bsod_recurring` / `default` | n/a | **fields: none** |  |
+| `os_bsod_recurring` / `held` | n/a | **fields: none** |  |
+| `os_bsod_recurring` / `onset` | n/a | **fields: none** |  |
+| `os_bsod_recurring` / `recovered` | n/a | **fields: none** |  |
 | `os_clock_drift` / `held` | n/a | **fields: none** |  |
 | `os_clock_drift` / `onset` | n/a | **fields: none** |  |
 | `os_clock_drift` / `recovered` | n/a | **fields: none** |  |
 | `os_crash_dump_new` / `default` | n/a | **fields: none** |  |
-| `os_dump_pagefile_too_small` / `default` | n/a | **fields: none** |  |
+| `os_dump_pagefile_too_small` / `held` | n/a | **fields: none** |  |
+| `os_dump_pagefile_too_small` / `onset` | n/a | **fields: none** |  |
+| `os_dump_pagefile_too_small` / `recovered` | n/a | **fields: none** |  |
 | `patch_scan_stale` / `held` | n/a | **fields: none** |  |
 | `patch_scan_stale` / `onset` | n/a | **fields: none** |  |
 | `patch_scan_stale` / `recovered` | n/a | **fields: none** |  |
@@ -85,10 +91,9 @@ The last column is different in kind: it is the author's account of the row or e
 | `proc_handle_count_high` / `held` | n/a | **fields: none** |  |
 | `proc_handle_count_high` / `onset` | n/a | **fields: none** |  |
 | `proc_handle_count_high` / `recovered` | n/a | **fields: none** |  |
-| `ram_commit_high` / `default` | n/a | **fields: none** |  |
-| `ram_growth_sustained` / `held` | n/a | **fields: none** | `ws_growth_monotonic_snapshots` `working_set_bytes` `working_set_pct_ram` |
-| `ram_growth_sustained` / `onset` | n/a | **fields: none** | `ws_growth_monotonic_snapshots` `working_set_bytes` `working_set_pct_ram` |
-| `ram_growth_sustained` / `recovered` | n/a | **fields: none** |  |
+| `ram_commit_high` / `held` | n/a | **fields: none** |  |
+| `ram_commit_high` / `onset` | n/a | **fields: none** |  |
+| `ram_commit_high` / `recovered` | n/a | **fields: none** |  |
 | `ram_hard_fault_storm` / `held` | n/a | **fields: none** |  |
 | `ram_hard_fault_storm` / `onset` | n/a | **fields: none** |  |
 | `ram_hard_fault_storm` / `recovered` | n/a | **fields: none** |  |
@@ -144,7 +149,9 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `agent_ram_over_budget` / `held`
 - `agent_ram_over_budget` / `onset`
 - `agent_ram_over_budget` / `recovered`
-- `cpu_busy` / `default`
+- `cpu_busy` / `held`
+- `cpu_busy` / `onset`
+- `cpu_busy` / `recovered`
 - `cpu_interrupt_storm` / `held`
 - `cpu_interrupt_storm` / `onset`
 - `cpu_interrupt_storm` / `recovered`
@@ -163,12 +170,16 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `disk_unresponsive` / `held`
 - `disk_unresponsive` / `onset`
 - `disk_unresponsive` / `recovered`
-- `os_bsod_recurring` / `default`
+- `os_bsod_recurring` / `held`
+- `os_bsod_recurring` / `onset`
+- `os_bsod_recurring` / `recovered`
 - `os_clock_drift` / `held`
 - `os_clock_drift` / `onset`
 - `os_clock_drift` / `recovered`
 - `os_crash_dump_new` / `default`
-- `os_dump_pagefile_too_small` / `default`
+- `os_dump_pagefile_too_small` / `held`
+- `os_dump_pagefile_too_small` / `onset`
+- `os_dump_pagefile_too_small` / `recovered`
 - `patch_scan_stale` / `held`
 - `patch_scan_stale` / `onset`
 - `patch_scan_stale` / `recovered`
@@ -181,10 +192,9 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `proc_handle_count_high` / `held`
 - `proc_handle_count_high` / `onset`
 - `proc_handle_count_high` / `recovered`
-- `ram_commit_high` / `default`
-- `ram_growth_sustained` / `held`
-- `ram_growth_sustained` / `onset`
-- `ram_growth_sustained` / `recovered`
+- `ram_commit_high` / `held`
+- `ram_commit_high` / `onset`
+- `ram_commit_high` / `recovered`
 - `ram_hard_fault_storm` / `held`
 - `ram_hard_fault_storm` / `onset`
 - `ram_hard_fault_storm` / `recovered`

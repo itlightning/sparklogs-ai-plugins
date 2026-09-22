@@ -20,7 +20,7 @@
 | `sparklogs.data.disk_volumes.bitlocker_protection` | string |  | The volume's BitLocker posture: `on`, `off`, `suspended`, or `n_a` when BitLocker is not in use on this volume. Absent when the provider could not answer. |
 | `sparklogs.data.disk_volumes.bitlocker_dropped` | bool |  | Whether BitLocker protection is off or suspended. Absent, never `false`, when the provider did not answer: a volume whose protection could not be read has not been shown to be unprotected. |
 | `sparklogs.data.disk_volumes.bitlocker_off_age_min` | float | minutes | How long BitLocker protection has been off or suspended. |
-| `sparklogs.data.disk_volumes.fill_rate_bytes_per_h` | float | bytes_per_hour | How fast the volume's free space is shrinking, fitted from its recent readings. Absent until there are enough spread readings to fit a slope. |
+| `sparklogs.data.disk_volumes.fill_rate_bytes_per_h` | float | bytes_per_hour | How fast the volume's free space is shrinking: the sustained p25 of five-minute free-space intervals over the last hour, gated on the last ~10 min still filling. Absent until that hour exists. |
 | `sparklogs.data.disk_volumes.fill_slope_sustained_h` | float | hours | How long the current fill trend has held. |
 | `sparklogs.data.disk_volumes.projected_full_eta_h` | float | hours | The raw projected time until the volume fills, from the fill rate alone. |
 | `sparklogs.data.disk_volumes.exhaustion_eta_h` | float | hours | The projected time until the volume fills, after the ceiling guard: a volume already at its ceiling reads zero time remaining rather than the infinite time a stalled fill rate would otherwise project. This is the figure the exhaustion conditions grade. |

@@ -72,3 +72,4 @@ The last column is different in kind: it is the author's account of the row or e
 | `sparklogs_collector_skipped_records_overwritten` / `default` | n/a | `sparklogs.agent.vector.channel` `sparklogs.agent.vector.component_id` `sparklogs.agent.vector.missing_records` `sparklogs.agent.vector.previous_record_id` `sparklogs.agent.vector.record_id` |  |
 | `sparklogs_collector_skipped_to_recover` / `default` | n/a | `sparklogs.agent.vector.channel` `sparklogs.agent.vector.component_id` `sparklogs.agent.vector.missing_records` `sparklogs.agent.vector.resume_rung` |  |
 | `sparklogs_collector_stream_not_started` / `default` | n/a | `sparklogs.agent.vector.component_id` |  |
+| `wel_resume_ladder_bookmark_dead` | n/a | `sparklogs.agent.vector.channel` `sparklogs.agent.vector.component_id` `sparklogs.agent.vector.resume_rung` |  |
