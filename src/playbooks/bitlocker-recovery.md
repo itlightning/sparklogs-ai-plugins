@@ -21,6 +21,6 @@ source = "<host>" AND sparklogs.kind = config_change
 Group by `sparklogs.config_change.type` (col), `sparklogs.config_change.target` (col).
 
 Patching and firmware in the same window: servicing as in `playbooks/windows-update-failure.md`.
-Boot integrity on Security: `sparklogs.reason = insecure_boot_config`; flags in `win.eventlog.security.insecure_boot_flags` (LQL).
+Boot integrity on Security: `sparklogs.reason = win_insecure_boot_config`; flags in `win.eventlog.security.insecure_boot_flags` (LQL).
 
 **Off-endpoint** (HM6): key escrow in the directory or RMM, vendor firmware update, hardware change by hand.
