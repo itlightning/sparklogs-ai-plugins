@@ -245,7 +245,7 @@ Before deep investigation: resolve org / sources / time window, then confirm dat
 
 **Questions before deep work:** (e.g., which org/host? is data present? is collection trustworthy? one machine or fleet? critical+ in scope?)
 
-**Resolution in brief:** explicit UUID or name via `resolve_scope` (tool); host-first when they name a device; ranked by `match_kind` (col) (`exact` (value) proceeds; ties or weak-only matches: ask). Read `agent_status` (col), collection group, `advisories` (col), `agent_complete_through` (col) on agent rows. Default `include_sub_orgs: true` (arg); reuse `external_investigation_id` (arg) when scope expands.
+**Resolution in brief:** explicit UUID or name via `resolve_scope` (tool); host-first when they name a device; ranked by `match_kind` (col) (`exact` (value) proceeds; ties or weak-only matches: ask). Read `agent_status` (col), collection group, `advisories` (col), `agent_complete_through` (col) on agent rows. Reuse `external_investigation_id` (arg) when scope expands.
 
 **Operational gates (skill-local):**
 - **Critical+ fetch-first:** non-zero `cnt_critical_plus` (col) in scope means read those events before proceeding (`guides/category-classes.md`).
