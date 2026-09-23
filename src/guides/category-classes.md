@@ -121,7 +121,7 @@ bridge; everything else about severity in this doc set points here.
 **A cell and a digest speak different vocabularies on purpose.** A row's `severity` (LQL) reports ONE
 observation, so it names the exact rung, down to `WARN3`. A histogram breaks down a POPULATION, so it
 speaks the nine bands and nothing finer: `critical_plus` (value), never `CRITICAL`. Peak severity is not lost
-to the coarser grain; it stays exact on `max_severity` (col).
+to the coarser bands; it stays exact on `max_severity` (col).
 
 The nine bands are defined by one sentence, which the tools repeat verbatim so there is only ever one
 spelling to trust:
