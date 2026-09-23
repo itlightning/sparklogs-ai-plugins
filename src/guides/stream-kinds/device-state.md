@@ -167,7 +167,7 @@ The row filter and the projection are independent: the filter picks the events, 
 
 ## Aggregate across devices
 
-Element leaves group and aggregate: `group_by` (arg) on `sparklogs.data.services[].current_state` makes every element a row, so each count is a count of elements. Row columns aggregate the same way; pull one cache and refine it.
+Item leaves group and aggregate: `group_by` (arg) on `sparklogs.data.services[].current_state` makes every item a row, so each count is a count of items. Row columns aggregate the same way; pull one cache and refine it.
 
 ```
 1. query_logs   lql: sparklogs.topic="performance"
@@ -205,14 +205,17 @@ Each item carries `image_name`, `services`, `pid`, `instance`, `cpu_busy_pct_avg
                 order_by:  [{col: "cpu_total", dir: "desc"}]   limit: 8
 3. refine_query_result on the same query_id: the series for those images
                 group_by:  [{time_bucket: {col: "observed_at", bucket_usec: 300000000}, as: "t5m"},
-                            "sparklogs.data.top_processes[](image_name in (\"a.exe\", \"b.exe\", \"(other processes)\")).image_name"]
-                aggregate: [{fn: sum, col: "sparklogs.data.top_processes[](image_name in (\"a.exe\", \"b.exe\", \"(other processes)\")).cpu_busy_pct_avg", as: cpu}]
+                            "sparklogs.data.top_processes[](image_name in (\"a.exe\", \"b.exe\", \"(other processes)\", \"(hardware interrupts)\", \"(deferred procedure calls)\")).image_name"]
+                aggregate: [{fn: sum, col: "sparklogs.data.top_processes[](image_name in (\"a.exe\", \"b.exe\", \"(other processes)\", \"(hardware interrupts)\", \"(deferred procedure calls)\")).cpu_busy_pct_avg", as: cpu}]
 ```
 
 Rank before charting: a series over every image that ever made the top ten is dozens of thin lines, and the ranking names the few worth a color.
 Put the ranked images in the KEY's condition, not in `filter_lql` (arg): a filter keeps whole events holding one matching item, and every item of those events is then grouped.
-Keep `(other processes)` in the stack so the areas still add up to the machine.
-A 5-minute bucket holds one sample, so `sum` (value) over an image's items (one per pid) is that image's CPU, and the stack of images is the machine's.
+Keep `(other processes)` and the two system rows, `(hardware interrupts)` and `(deferred procedure calls)`, in the stack: `row_kind` (LQL) tells the three kinds apart, and only with all three does the stack sum to the machine's busy time, not just the named processes.
+Samples land exactly on wall-clock 5-minute boundaries, and each one's `observed_at` (col) is the end of the window it covers, so a 5-minute bucket holds exactly one sample and is labeled with that window's end (the 10:05 bucket covers 10:00 to 10:05).
+`sum` (value) over an image's items (one per pid) is then that image's CPU, and the stack of every row is the machine's busy time, not 100: an interrupt-heavy or DPC-heavy window shows up as its own band rather than vanishing into `(other processes)`.
+A window the agent only partly watched (it had just started, or the machine woke from sleep) carries `sparklogs.window_coverage_pct` (LQL) below 100.
+A window it did not watch at all emits nothing, which shows as a gap in every line, not a zero.
 For a wider bucket, sum the same way and divide by the samples in the bucket: the `(other processes)` item is in every sample, so its per-bucket count is the divisor.
 A process that drops out of the top ten leaves a gap in its line, not a zero: it was still running, just not among the busiest.
 When the handle's kinds include inventory plus another kind (the default is inventory and monitor), a grouped refine reads inventory rows only, because a monitor row repeats the inventory sample it fired on; `summary.scope` (col) says so, and naming `sparklogs.kind` (LQL) in `filter_lql` (arg) chooses the kinds yourself.
