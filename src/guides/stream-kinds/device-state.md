@@ -194,8 +194,8 @@ For a fleet count of one condition, `query_event_counts_by_severity` (tool) with
 
 Any device-state value becomes a series the same way: a `timeline` (value) handle, then one refine with a `time_bucket`, an item key when the value sits in a list, and an aggregate.
 The worked example is a stacked area of CPU per process image on one device, from the `top_processes` (value) topic, an inventory topic.
-It lands every 5 minutes as the list `sparklogs.data.top_processes[]` (LQL): the ten busiest processes by CPU, RAM, IO read and IO write, plus one `(other processes)` item (`is_remainder` (LQL) true) holding the rest, so a stack of every item adds up to the machine total.
-Each item carries `image_name`, `services`, `pid`, `instance`, `cpu_busy_pct_avg` (percent of the whole machine over the 5 minutes), `cpu_busy_pct_max_1m`, `working_set_bytes`, `working_set_pct_ram`, `read_bytes_5m`, `write_bytes_5m`, `read_mb_per_s_avg`, `write_mb_per_s_avg`, `is_remainder` and `top_by`.
+It lands every 5 minutes as the list `sparklogs.data.top_processes[]` (LQL): the ten busiest processes by CPU, RAM, IO read and IO write, plus two system rows (`(hardware interrupts)`, `(deferred procedure calls)`) and one `(other processes)` remainder item, told apart by `row_kind` (LQL) (`process`, `system`, `remainder`). The remainder's CPU is machine busy time minus every other row, floored at 0, so the stack tracks the machine's busy time; a small overshoot from sampling timing is possible, and it is never exactly 100.
+Each item carries `image_name`, `services`, `pid`, `instance`, `cpu_busy_pct_avg` (percent of the whole machine over the 5 minutes), `cpu_busy_pct_max_1m`, `working_set_bytes`, `working_set_pct_ram`, `read_bytes_5m`, `write_bytes_5m`, `read_mb_per_s_avg`, `write_mb_per_s_avg`, `row_kind` and `top_by`. IO stays the per-process sum; the system rows carry CPU fields only.
 
 ```
 1. query_device_health   view: timeline   topics: ["top_processes"]   agent_ids: ["<agent_id>"]
