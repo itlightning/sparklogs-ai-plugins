@@ -50,6 +50,6 @@ The last column is different in kind: it is the author's account of the row or e
 
 | Surface | Event ids | Fields set | Row fields |
 |---|---|---|---|
-| `win_component_store_scan_found_corruption` / `detection_only` | 1014, 1015 | `win.eventlog.setup.corruption_repaired` `win.eventlog.setup.corruption_total` `win.eventlog.setup.detection_only` `win.eventlog.setup.error_code` |  |
-| `win_component_store_scan_found_corruption` / `unrepaired` | 1014, 1015 | `win.eventlog.setup.corruption_repaired` `win.eventlog.setup.corruption_total` `win.eventlog.setup.detection_only` `win.eventlog.setup.error_code` |  |
-| `win_servicing_package_state_change_failed` / `default` | 3 | `win.eventlog.setup.client` `win.eventlog.setup.error_code` `win.eventlog.setup.package` `win.eventlog.setup.target_state` |  |
+| `patch_install_failed` / `default` | 3 | `win.eventlog.setup.client` `win.eventlog.setup.error_code` `win.eventlog.setup.package` `win.eventlog.setup.target_state` |  |
+| `win_component_store_corruption` / `detection_only` | 1014, 1015 | `win.eventlog.setup.corruption_repaired` `win.eventlog.setup.corruption_total` `win.eventlog.setup.detection_only` `win.eventlog.setup.error_code` |  |
+| `win_component_store_corruption` / `unrepaired` | 1014, 1015 | `win.eventlog.setup.corruption_repaired` `win.eventlog.setup.corruption_total` `win.eventlog.setup.detection_only` `win.eventlog.setup.error_code` |  |

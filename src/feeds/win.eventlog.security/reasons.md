@@ -20,31 +20,33 @@ Every section below is from the public reason block only.
 | `adcs_audit_evidence_tampered` | `certificates` | Serious |  |
 | `adcs_config_changed` | `certificates` | Error |  |
 | `adcs_request_failed` | `certificates` | Warning |  |
-| `anonymous_remote_logon` | `auth` | Notice |  |
+| `anonymous_remote_sign_in` | `auth` | Notice |  |
+| `audit_event_processing_failed` | `security_audit` | Warning |  |
 | `audit_events_dropped` | `security_audit` | Error when records were discarded; Debug when the count is zero |  |
 | `audit_log_cleared` | `security_audit` | Critical (non-system clearer) / Error |  |
 | `audit_log_full` | `security_audit` | Serious |  |
-| `audit_pipeline_error` | `security_audit` | Warning |  |
 | `audit_policy_changed` | `security_audit` | Warning |  |
 | `crypto_selftest_failed` | `os_stability` | Error |  |
 | `directory_object_access_denied` | `directory_services` | Notice |  |
 | `directory_object_changed` | `directory_services` | Warning |  |
+| `directory_object_created` | `directory_services` | Warning |  |
+| `directory_object_deleted` | `directory_services` | Warning |  |
 | `directory_replication_access_requested` | `directory_services` | Warning (any other account) / Info (a domain controller, a platform identity, or a directory-sync connector under its default name) |  |
 | `domain_policy_changed` | `security_audit` | Warning; Debug for the platform writing a new machine's own setup policy |  |
 | `dsrm_password_change_failed` | `security_audit` | Error |  |
 | `dsrm_password_changed` | `security_audit` | Serious |  |
 | `event_logging_stopped` | `security_audit` | Info |  |
-| `explicit_credential_use` | `auth` | Info |  |
+| `explicit_credential_used` | `auth` | Info |  |
 | `firewall_rule_changed` | `networking` | Warning |  |
-| `firewall_service_stopped` | `networking` | Warning |  |
+| `firewall_rule_created` | `networking` | Warning |  |
+| `firewall_rule_deleted` | `networking` | Warning |  |
+| `firewall_service_stopped` | `networking` | Warning or Info |  |
 | `group_member_added` | `security_audit` | Error (privileged group) / Notice (any other security group) |  |
 | `group_member_removed` | `security_audit` | Warning (privileged group) / Notice (any other security group) |  |
 | `guest_account_sign_in` | `auth` | Notice |  |
-| `insecure_boot_config` | `hardware` | Warning |  |
 | `kerberos_preauth_failed` | `auth` | Warning (account state or broken infrastructure) / Notice (wrong password, unknown client, undecoded) |  |
-| `kerberos_rc4_ticket` | `auth` | Warning |  |
+| `kerberos_rc4_ticket_issued` | `auth` | Warning |  |
 | `kerberos_ticket_failed` | `auth` | Warning (account state or broken infrastructure) / Notice (wrong password, unknown principal, expired, undecoded) |  |
-| `logon_failed` | `auth` | Warning (account-state) / Notice (other) / Verbose (credential-less probe) | benign possible |
 | `logon_right_granted` | `security_audit` | Notice |  |
 | `logon_right_removed` | `security_audit` | Notice |  |
 | `network_share_added` | `file_sharing` | Warning |  |
@@ -55,7 +57,6 @@ Every section below is from the public reason block only.
 | `principal_renamed` | `security_audit` | Notice for a rename that changed the name; Debug when the old and new names are identical |  |
 | `process_exited_abnormally` | `security_audit` | Notice |  |
 | `psdirect_handshake_probe` | `auth` | Debug | benign |
-| `registry_value_changed` | `security_audit` | Warning |  |
 | `replay_attack_detected` | `auth` | Error |  |
 | `scheduled_task_created` | `scheduled_tasks` | Warning |  |
 | `scheduled_task_deleted` | `scheduled_tasks` | Warning |  |
@@ -67,8 +68,13 @@ Every section below is from the public reason block only.
 | `service_installed` | `security_audit` | Notice |  |
 | `sid_history_add_failed` | `security_audit` | Error |  |
 | `sid_history_added` | `security_audit` | Serious |  |
-| `special_group_logon` | `security_audit` | Warning |  |
+| `sign_in_failed` | `auth` | Warning (account-state) / Notice (other) / Verbose (credential-less probe) | benign possible |
+| `special_group_sign_in` | `security_audit` | Warning |  |
 | `system_time_changed` | `time_sync` | Warning (non-time-service) / Debug (routine time service) |  |
+| `win_insecure_boot_config` | `security_audit` | Warning |  |
+| `win_registry_value_changed` | `security_audit` | Warning |  |
+| `win_registry_value_created` | `security_audit` | Warning |  |
+| `win_registry_value_deleted` | `security_audit` | Warning |  |
 
 ## `account_changed`
 
@@ -242,7 +248,7 @@ A certification authority denied or failed a certificate request.
 - Confirm whether the denial matches intended enrollment policy
 - Absence of these events does not prove quiet CA activity (auditing is double-gated)
 
-## `anonymous_remote_logon`
+## `anonymous_remote_sign_in`
 
 A sign-in succeeded with no identity, from a machine other than this one. Windows uses anonymous logons routinely for its own local plumbing, but those name no source machine; this one did.
 
@@ -255,6 +261,19 @@ A sign-in succeeded with no identity, from a machine other than this one. Window
 - Check whether the named endpoint is expected to reach this machine at all
 - Confirm whether a share or pipe on this host is deliberately open to anonymous access
 - Pivot on the endpoint to see what else it did in the same window
+
+## `audit_event_processing_failed`
+
+The Windows logging service failed to process an incoming audit event. Some security events may not have been recorded.
+
+**Severity:** Warning
+
+**Impact:** Audit coverage has holes for the failed publisher/event window. Gaps can hide activity that would otherwise appear in the Security log.
+
+**Consider:**
+
+- Use PublisherID when present to see which source failed
+- Correlate with Event Log service health and disk errors
 
 ## `audit_events_dropped`
 
@@ -302,19 +321,6 @@ The Security log is full. This usually means retention is set to do-not-overwrit
 - Check log size and retention (do-not-overwrite vs overwrite-as-needed)
 - Expand capacity or archive before clearing if forensics matter
 
-## `audit_pipeline_error`
-
-The Windows logging service failed to process an incoming audit event. Some security events may not have been recorded.
-
-**Severity:** Warning
-
-**Impact:** Audit coverage has holes for the failed publisher/event window. Gaps can hide activity that would otherwise appear in the Security log.
-
-**Consider:**
-
-- Use PublisherID when present to see which source failed
-- Correlate with Event Log service health and disk errors
-
 ## `audit_policy_changed`
 
 Local audit policy changed (system, object security descriptor, or per-user). These events are dependable even when other audit subcategories are off.
@@ -357,11 +363,11 @@ Something asked for access to a directory service object and was refused. Window
 
 ## `directory_object_changed`
 
-A directory service object was created, modified, moved, or deleted. Typical on domain controllers when Directory Service Changes auditing is enabled for the object.
+A directory service object was modified or moved. Typical on domain controllers when Directory Service Changes auditing is enabled for the object.
 
 **Severity:** Warning
 
-**Impact:** Directory state that apps and auth depend on may have changed. Unexpected object or attribute edits can alter access control or break dependent services.
+**Impact:** Directory state that apps and auth depend on may have changed. Unexpected attribute edits or moves can alter access control or break dependent services.
 
 **Consider:**
 
@@ -370,6 +376,32 @@ A directory service object was created, modified, moved, or deleted. Typical on 
 
 config_change.action names the direction the event recorded, so pivot on the action rather
 than assuming one value.
+
+## `directory_object_created`
+
+A directory service object was created. Typical on domain controllers when Directory Service Changes auditing is enabled for the object.
+
+**Severity:** Warning
+
+**Impact:** Directory state that apps and auth depend on may have changed. An unexpected new object can alter access control or break dependent services.
+
+**Consider:**
+
+- Pivot on ObjectDN and AttributeLDAPDisplayName; do not expect AttributeValue in curated fields
+- Confirm the change Subject against approved admin or sync tooling
+
+## `directory_object_deleted`
+
+A directory service object was deleted.
+
+**Severity:** Warning
+
+**Impact:** Directory state that apps and auth depend on has changed. Dependent grants, policy links, or lookups may now resolve to nothing.
+
+**Consider:**
+
+- Pivot on ObjectDN and AttributeLDAPDisplayName; do not expect AttributeValue in curated fields
+- Confirm the change Subject against approved admin or sync tooling
 
 ## `directory_replication_access_requested`
 
@@ -453,7 +485,7 @@ The Windows event logging service stopped, which is what a clean shutdown or res
 
 This row describes the HOST event log service, not the SparkLogs collector.
 
-## `explicit_credential_use`
+## `explicit_credential_used`
 
 A process used another account's credentials to sign on (explicit credential use), and the caller was not a routine OS component. Often runas, remote tools, or lateral movement.
 
@@ -471,7 +503,7 @@ on the reason and read the calling process, rather than filtering by severity.
 
 ## `firewall_rule_changed`
 
-A Windows Firewall rule or related policy was created, changed, deleted, enabled, or disabled. This Security-channel copy fires when that audit subcategory is enabled.
+A Windows Firewall rule or related policy was modified, enabled, or disabled. This Security-channel copy fires when that audit subcategory is enabled.
 
 **Also reported by:** `win.eventlog.network`
 
@@ -482,14 +514,44 @@ A Windows Firewall rule or related policy was created, changed, deleted, enabled
 **Consider:**
 
 - Pivot on RuleName / RuleId and Subject
-- The change action names the direction: created, updated, deleted, enabled, or disabled
+- The change action names the direction: updated, enabled, or disabled
+- Prefer the Firewall operational channel when Security auditing is off
+
+## `firewall_rule_created`
+
+A Windows Firewall rule was added to the exception list. This Security-channel copy fires when that audit subcategory is enabled.
+
+**Also reported by:** `win.eventlog.network`
+
+**Severity:** Warning
+
+**Impact:** What traffic is allowed can change. Unexpected opens can expose services.
+
+**Consider:**
+
+- Pivot on RuleName / RuleId and Subject
+- Prefer the Firewall operational channel when Security auditing is off
+
+## `firewall_rule_deleted`
+
+A Windows Firewall rule was deleted from the exception list. This Security-channel copy fires when that audit subcategory is enabled.
+
+**Also reported by:** `win.eventlog.network`
+
+**Severity:** Warning
+
+**Impact:** What traffic is allowed or blocked can change. Unexpected closes can break apps.
+
+**Consider:**
+
+- Pivot on RuleName / RuleId and Subject
 - Prefer the Firewall operational channel when Security auditing is off
 
 ## `firewall_service_stopped`
 
-The Windows Firewall service or driver stopped. Host network filtering may be down until it recovers.
+The Windows Firewall service or driver stopped, or came back (RECOVERED).
 
-**Severity:** Warning
+**Severity:** Warning or Info
 
 **Impact:** Packet filtering and some connection protections are unavailable while stopped. Unexpected stops can expose the host or hide lateral movement.
 
@@ -543,21 +605,6 @@ Guest is a real account with a fixed allocation, and it is not the anonymous wel
 that the identity-less sign-in surfaces cover: those name the absence of a principal, this names
 a principal that exists and is normally switched off.
 
-## `insecure_boot_config`
-
-The host booted with insecure Boot Configuration Data flags (test signing, kernel debug, or integrity checks disabled). The boot chain may accept unsigned or debugger-attached code.
-
-**Severity:** Warning
-
-**Impact:** Kernel integrity guarantees are weakened until the flags are cleared and the host reboots cleanly. Treat as a standing security-posture issue, not a one-shot exploit proof.
-
-**Consider:**
-
-- Confirm whether test-signing or kernel debugging is expected on that host class
-- Remediate BCD flags, then verify on next boot
-
-Flag names ride the message kv tail (InsecureBootFlags) when labeled.
-
 ## `kerberos_preauth_failed`
 
 Kerberos pre-authentication failed at the domain controller. The decoded reason is on the line, so a wrong password reads differently from a disabled account or a clock that has drifted.
@@ -571,7 +618,7 @@ Kerberos pre-authentication failed at the domain controller. The decoded reason 
 - Join IpAddress to lockout CallerComputerName when both fire
 - Group by the cause token before reading volume: one cause is usually most of it
 
-## `kerberos_rc4_ticket`
+## `kerberos_rc4_ticket_issued`
 
 A Kerberos service ticket used weak RC4 encryption for a user-backed service principal. Often a credential-theft / downgrade signal when unexpected.
 
@@ -597,26 +644,6 @@ A Kerberos ticket request, service-ticket request or renewal was denied. The rea
 - Group by the cause token first: one cause is usually most of the volume
 - On the service-ticket variant, group by the service principal: a decommissioned service shows up as one name repeating
 - Confirm the host is a domain controller or ticket-issuing authority before over-weighting volume
-
-## `logon_failed`
-
-A sign-in attempt failed. Account-state failures (disabled, locked, expired, denied by policy) are more actionable than a single bad password.
-
-**Severity:** Warning (account-state) / Notice (other) / Verbose (credential-less probe)
-
-**Impact:** User or service may be unable to authenticate. Repeated failures can precede lockout; source IP and workstation identify where attempts originate.
-
-**Consider:**
-
-- Decode Status/SubStatus for the failure cause
-- Pivot on TargetUserName, IpAddress, and WorkstationName
-- A lone mistyped password is common; look for bursts before treating as attack
-
-Auth semantics: the interesting principal is the Target (who failed to authenticate),
-not the Subject (often NULL/SYSTEM on network failures). The Target is therefore the
-curated actor on this id; when the Subject names a real account it is the calling
-context and rides running_as, so its presence says the attempt came from somewhere
-other than the failing principal.
 
 ## `logon_right_granted`
 
@@ -761,20 +788,6 @@ Hyper-V opened a PowerShell Direct channel to a guest virtual machine. The legac
 
 The account name on these rows is a fixed protocol constant, not a principal, and the domain
 field carries handshake bytes rather than a domain name. Neither is a value to pivot on.
-
-## `registry_value_changed`
-
-An audited registry value was created, modified, or deleted. These events appear only where a SACL and the registry audit subcategory are aimed at that object.
-
-**Severity:** Warning
-
-**Impact:** Host configuration under that key changed. Persistence, policy, and credential material can live in registry values; unexpected edits deserve review of ObjectName and value name.
-
-**Consider:**
-
-- Use ObjectName, ObjectValueName, and ProcessName
-- The change action names the direction: created, updated, or deleted
-- Do not expect Old/New value contents in curated fields
 
 ## `replay_attack_detected`
 
@@ -937,7 +950,27 @@ SID History was added to an account. Rare outside migrations; often a privilege-
 One event is enough to act on. The event proves the SID History write; it does not show that the
 inherited rights were used.
 
-## `special_group_logon`
+## `sign_in_failed`
+
+A sign-in attempt failed. Account-state failures (disabled, locked, expired, denied by policy) are more actionable than a single bad password.
+
+**Severity:** Warning (account-state) / Notice (other) / Verbose (credential-less probe)
+
+**Impact:** User or service may be unable to authenticate. Repeated failures can precede lockout; source IP and workstation identify where attempts originate.
+
+**Consider:**
+
+- Decode Status/SubStatus for the failure cause
+- Pivot on TargetUserName, IpAddress, and WorkstationName
+- A lone mistyped password is common; look for bursts before treating as attack
+
+Auth semantics: the interesting principal is the Target (who failed to authenticate),
+not the Subject (often NULL/SYSTEM on network failures). The Target is therefore the
+curated actor on this id; when the Subject names a real account it is the calling
+context and rides running_as, so its presence says the attempt came from somewhere
+other than the failing principal.
+
+## `special_group_sign_in`
 
 A logon matched an administrator-configured special-groups watchlist. These events exist only where that watchlist is enabled.
 
@@ -962,3 +995,57 @@ The system clock was changed. Routine time-service adjustments are quiet; change
 
 - Inspect the process path and the actor together
 - previous_time and new_time carry the decoded before and after clock values in UTC
+
+## `win_insecure_boot_config`
+
+The host booted with insecure Boot Configuration Data flags (test signing, kernel debug, or integrity checks disabled). The boot chain may accept unsigned or debugger-attached code.
+
+**Severity:** Warning
+
+**Impact:** Kernel integrity guarantees are weakened until the flags are cleared and the host reboots cleanly. Treat as a standing security-posture issue, not a one-shot exploit proof.
+
+**Consider:**
+
+- Confirm whether test-signing or kernel debugging is expected on that host class
+- Remediate BCD flags, then verify on next boot
+
+Flag names ride the message kv tail (InsecureBootFlags) when labeled.
+
+## `win_registry_value_changed`
+
+An audited registry value was modified. These events appear only where a SACL and the registry audit subcategory are aimed at that object.
+
+**Severity:** Warning
+
+**Impact:** Host configuration under that key changed. Persistence, policy, and credential material can live in registry values; unexpected edits deserve review of ObjectName and value name.
+
+**Consider:**
+
+- Use ObjectName, ObjectValueName, and ProcessName
+- Do not expect Old/New value contents in curated fields
+
+## `win_registry_value_created`
+
+An audited registry value was created. These events appear only where a SACL and the registry audit subcategory are aimed at that object.
+
+**Severity:** Warning
+
+**Impact:** Host configuration under that key changed. Persistence, policy, and credential material can live in registry values; unexpected new values deserve review of ObjectName and value name.
+
+**Consider:**
+
+- Use ObjectName, ObjectValueName, and ProcessName
+- Do not expect Old/New value contents in curated fields
+
+## `win_registry_value_deleted`
+
+An audited registry value was deleted. These events appear only where a SACL and the registry audit subcategory are aimed at that object.
+
+**Severity:** Warning
+
+**Impact:** Host configuration under that key changed. A removed value can reopen a default that was deliberately overridden; unexpected deletions deserve review of ObjectName and value name.
+
+**Consider:**
+
+- Use ObjectName, ObjectValueName, and ProcessName
+- Do not expect Old/New value contents in curated fields

@@ -39,15 +39,6 @@ The last column is different in kind: it is the author's account of the row or e
 
 | Surface | Event ids | Fields set | Row fields |
 |---|---|---|---|
-| `agent_cpu_over_budget` / `held` | n/a | **fields: none** |  |
-| `agent_cpu_over_budget` / `onset` | n/a | **fields: none** |  |
-| `agent_cpu_over_budget` / `recovered` | n/a | **fields: none** |  |
-| `agent_handle_over_budget` / `held` | n/a | **fields: none** |  |
-| `agent_handle_over_budget` / `onset` | n/a | **fields: none** |  |
-| `agent_handle_over_budget` / `recovered` | n/a | **fields: none** |  |
-| `agent_ram_over_budget` / `held` | n/a | **fields: none** |  |
-| `agent_ram_over_budget` / `onset` | n/a | **fields: none** |  |
-| `agent_ram_over_budget` / `recovered` | n/a | **fields: none** |  |
 | `cpu_busy` / `held` | n/a | **fields: none** |  |
 | `cpu_busy` / `onset` | n/a | **fields: none** |  |
 | `cpu_busy` / `recovered` | n/a | **fields: none** |  |
@@ -60,6 +51,12 @@ The last column is different in kind: it is the author's account of the row or e
 | `cpu_throttled_under_load` / `held` | n/a | **fields: none** |  |
 | `cpu_throttled_under_load` / `onset` | n/a | **fields: none** |  |
 | `cpu_throttled_under_load` / `recovered` | n/a | **fields: none** |  |
+| `data_volume_space_exhausting` / `held` | n/a | **fields: none** |  |
+| `data_volume_space_exhausting` / `onset` | n/a | **fields: none** |  |
+| `data_volume_space_exhausting` / `recovered` | n/a | **fields: none** |  |
+| `data_volume_space_low` / `held` | n/a | **fields: none** |  |
+| `data_volume_space_low` / `onset` | n/a | **fields: none** |  |
+| `data_volume_space_low` / `recovered` | n/a | **fields: none** |  |
 | `disk_latency_degraded` / `held` | n/a | **fields: none** |  |
 | `disk_latency_degraded` / `onset` | n/a | **fields: none** |  |
 | `disk_latency_degraded` / `recovered` | n/a | **fields: none** |  |
@@ -75,56 +72,59 @@ The last column is different in kind: it is the author's account of the row or e
 | `os_clock_drift` / `held` | n/a | **fields: none** |  |
 | `os_clock_drift` / `onset` | n/a | **fields: none** |  |
 | `os_clock_drift` / `recovered` | n/a | **fields: none** |  |
-| `os_crash_dump_new` / `default` | n/a | **fields: none** |  |
+| `os_crash_dump_created` / `default` | n/a | **fields: none** |  |
 | `os_dump_pagefile_too_small` / `held` | n/a | **fields: none** |  |
 | `os_dump_pagefile_too_small` / `onset` | n/a | **fields: none** |  |
 | `os_dump_pagefile_too_small` / `recovered` | n/a | **fields: none** |  |
+| `os_volume_space_exhausting` / `held` | n/a | **fields: none** |  |
+| `os_volume_space_exhausting` / `onset` | n/a | **fields: none** |  |
+| `os_volume_space_exhausting` / `recovered` | n/a | **fields: none** |  |
+| `os_volume_space_low` / `held` | n/a | **fields: none** |  |
+| `os_volume_space_low` / `onset` | n/a | **fields: none** |  |
+| `os_volume_space_low` / `recovered` | n/a | **fields: none** |  |
 | `patch_scan_stale` / `held` | n/a | **fields: none** |  |
 | `patch_scan_stale` / `onset` | n/a | **fields: none** |  |
 | `patch_scan_stale` / `recovered` | n/a | **fields: none** |  |
 | `patch_updates_paused` / `held` | n/a | **fields: none** |  |
 | `patch_updates_paused` / `onset` | n/a | **fields: none** |  |
 | `patch_updates_paused` / `recovered` | n/a | **fields: none** |  |
-| `proc_cpu_runaway` / `held` | n/a | **fields: none** |  |
-| `proc_cpu_runaway` / `onset` | n/a | **fields: none** |  |
-| `proc_cpu_runaway` / `recovered` | n/a | **fields: none** |  |
-| `proc_handle_count_high` / `held` | n/a | **fields: none** |  |
-| `proc_handle_count_high` / `onset` | n/a | **fields: none** |  |
-| `proc_handle_count_high` / `recovered` | n/a | **fields: none** |  |
-| `ram_commit_high` / `held` | n/a | **fields: none** |  |
-| `ram_commit_high` / `onset` | n/a | **fields: none** |  |
-| `ram_commit_high` / `recovered` | n/a | **fields: none** |  |
+| `process_cpu_high` / `held` | n/a | **fields: none** |  |
+| `process_cpu_high` / `onset` | n/a | **fields: none** |  |
+| `process_cpu_high` / `recovered` | n/a | **fields: none** |  |
+| `process_handle_count_high` / `held` | n/a | **fields: none** |  |
+| `process_handle_count_high` / `onset` | n/a | **fields: none** |  |
+| `process_handle_count_high` / `recovered` | n/a | **fields: none** |  |
+| `ram_commit_near_cap` / `held` | n/a | **fields: none** |  |
+| `ram_commit_near_cap` / `onset` | n/a | **fields: none** |  |
+| `ram_commit_near_cap` / `recovered` | n/a | **fields: none** |  |
 | `ram_hard_fault_storm` / `held` | n/a | **fields: none** |  |
 | `ram_hard_fault_storm` / `onset` | n/a | **fields: none** |  |
 | `ram_hard_fault_storm` / `recovered` | n/a | **fields: none** |  |
-| `svc_auto_not_running` / `held` | n/a | **fields: none** |  |
-| `svc_auto_not_running` / `onset` | n/a | **fields: none** |  |
-| `svc_auto_not_running` / `recovered` | n/a | **fields: none** |  |
-| `svc_flapping` / `held` | n/a | **fields: none** |  |
-| `svc_flapping` / `onset` | n/a | **fields: none** |  |
-| `svc_flapping` / `recovered` | n/a | **fields: none** |  |
-| `svc_stuck_pending` / `held` | n/a | **fields: none** |  |
-| `svc_stuck_pending` / `onset` | n/a | **fields: none** |  |
-| `svc_stuck_pending` / `recovered` | n/a | **fields: none** |  |
-| `vol_bitlocker_dropped` / `held` | n/a | **fields: none** |  |
-| `vol_bitlocker_dropped` / `onset` | n/a | **fields: none** |  |
-| `vol_bitlocker_dropped` / `recovered` | n/a | **fields: none** |  |
-| `vol_data_space_exhausting` / `held` | n/a | **fields: none** |  |
-| `vol_data_space_exhausting` / `onset` | n/a | **fields: none** |  |
-| `vol_data_space_exhausting` / `recovered` | n/a | **fields: none** |  |
-| `vol_data_space_low` / `held` | n/a | **fields: none** |  |
-| `vol_data_space_low` / `onset` | n/a | **fields: none** |  |
-| `vol_data_space_low` / `recovered` | n/a | **fields: none** |  |
-| `vol_fill_rate_high` / `default` | n/a | **fields: none** |  |
-| `vol_os_space_exhausting` / `held` | n/a | **fields: none** |  |
-| `vol_os_space_exhausting` / `onset` | n/a | **fields: none** |  |
-| `vol_os_space_exhausting` / `recovered` | n/a | **fields: none** |  |
-| `vol_os_space_low` / `held` | n/a | **fields: none** |  |
-| `vol_os_space_low` / `onset` | n/a | **fields: none** |  |
-| `vol_os_space_low` / `recovered` | n/a | **fields: none** |  |
-| `vol_unreadable` / `held` | n/a | **fields: none** |  |
-| `vol_unreadable` / `onset` | n/a | **fields: none** |  |
-| `vol_unreadable` / `recovered` | n/a | **fields: none** |  |
+| `service_auto_not_running` / `held` | n/a | **fields: none** |  |
+| `service_auto_not_running` / `onset` | n/a | **fields: none** |  |
+| `service_auto_not_running` / `recovered` | n/a | **fields: none** |  |
+| `service_flapping` / `held` | n/a | **fields: none** |  |
+| `service_flapping` / `onset` | n/a | **fields: none** |  |
+| `service_flapping` / `recovered` | n/a | **fields: none** |  |
+| `service_stuck_pending` / `held` | n/a | **fields: none** |  |
+| `service_stuck_pending` / `onset` | n/a | **fields: none** |  |
+| `service_stuck_pending` / `recovered` | n/a | **fields: none** |  |
+| `sparklogs_agent_cpu_over_budget` / `held` | n/a | **fields: none** |  |
+| `sparklogs_agent_cpu_over_budget` / `onset` | n/a | **fields: none** |  |
+| `sparklogs_agent_cpu_over_budget` / `recovered` | n/a | **fields: none** |  |
+| `sparklogs_agent_handle_over_budget` / `held` | n/a | **fields: none** |  |
+| `sparklogs_agent_handle_over_budget` / `onset` | n/a | **fields: none** |  |
+| `sparklogs_agent_handle_over_budget` / `recovered` | n/a | **fields: none** |  |
+| `sparklogs_agent_memory_over_budget` / `held` | n/a | **fields: none** |  |
+| `sparklogs_agent_memory_over_budget` / `onset` | n/a | **fields: none** |  |
+| `sparklogs_agent_memory_over_budget` / `recovered` | n/a | **fields: none** |  |
+| `volume_bitlocker_dropped` / `held` | n/a | **fields: none** |  |
+| `volume_bitlocker_dropped` / `onset` | n/a | **fields: none** |  |
+| `volume_bitlocker_dropped` / `recovered` | n/a | **fields: none** |  |
+| `volume_fill_rate_high` / `default` | n/a | **fields: none** |  |
+| `volume_unreadable` / `held` | n/a | **fields: none** |  |
+| `volume_unreadable` / `onset` | n/a | **fields: none** |  |
+| `volume_unreadable` / `recovered` | n/a | **fields: none** |  |
 | `vss_shadowstorage_near_cap` / `held` | n/a | **fields: none** |  |
 | `vss_shadowstorage_near_cap` / `onset` | n/a | **fields: none** |  |
 | `vss_shadowstorage_near_cap` / `recovered` | n/a | **fields: none** |  |
@@ -140,15 +140,6 @@ The last column is different in kind: it is the author's account of the row or e
 These carry class, reason and message text only.
 A predicate over them uses the reason, the class, or the retained payload; there is no promoted field to filter on.
 
-- `agent_cpu_over_budget` / `held`
-- `agent_cpu_over_budget` / `onset`
-- `agent_cpu_over_budget` / `recovered`
-- `agent_handle_over_budget` / `held`
-- `agent_handle_over_budget` / `onset`
-- `agent_handle_over_budget` / `recovered`
-- `agent_ram_over_budget` / `held`
-- `agent_ram_over_budget` / `onset`
-- `agent_ram_over_budget` / `recovered`
 - `cpu_busy` / `held`
 - `cpu_busy` / `onset`
 - `cpu_busy` / `recovered`
@@ -161,6 +152,12 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `cpu_throttled_under_load` / `held`
 - `cpu_throttled_under_load` / `onset`
 - `cpu_throttled_under_load` / `recovered`
+- `data_volume_space_exhausting` / `held`
+- `data_volume_space_exhausting` / `onset`
+- `data_volume_space_exhausting` / `recovered`
+- `data_volume_space_low` / `held`
+- `data_volume_space_low` / `onset`
+- `data_volume_space_low` / `recovered`
 - `disk_latency_degraded` / `held`
 - `disk_latency_degraded` / `onset`
 - `disk_latency_degraded` / `recovered`
@@ -176,56 +173,59 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `os_clock_drift` / `held`
 - `os_clock_drift` / `onset`
 - `os_clock_drift` / `recovered`
-- `os_crash_dump_new` / `default`
+- `os_crash_dump_created` / `default`
 - `os_dump_pagefile_too_small` / `held`
 - `os_dump_pagefile_too_small` / `onset`
 - `os_dump_pagefile_too_small` / `recovered`
+- `os_volume_space_exhausting` / `held`
+- `os_volume_space_exhausting` / `onset`
+- `os_volume_space_exhausting` / `recovered`
+- `os_volume_space_low` / `held`
+- `os_volume_space_low` / `onset`
+- `os_volume_space_low` / `recovered`
 - `patch_scan_stale` / `held`
 - `patch_scan_stale` / `onset`
 - `patch_scan_stale` / `recovered`
 - `patch_updates_paused` / `held`
 - `patch_updates_paused` / `onset`
 - `patch_updates_paused` / `recovered`
-- `proc_cpu_runaway` / `held`
-- `proc_cpu_runaway` / `onset`
-- `proc_cpu_runaway` / `recovered`
-- `proc_handle_count_high` / `held`
-- `proc_handle_count_high` / `onset`
-- `proc_handle_count_high` / `recovered`
-- `ram_commit_high` / `held`
-- `ram_commit_high` / `onset`
-- `ram_commit_high` / `recovered`
+- `process_cpu_high` / `held`
+- `process_cpu_high` / `onset`
+- `process_cpu_high` / `recovered`
+- `process_handle_count_high` / `held`
+- `process_handle_count_high` / `onset`
+- `process_handle_count_high` / `recovered`
+- `ram_commit_near_cap` / `held`
+- `ram_commit_near_cap` / `onset`
+- `ram_commit_near_cap` / `recovered`
 - `ram_hard_fault_storm` / `held`
 - `ram_hard_fault_storm` / `onset`
 - `ram_hard_fault_storm` / `recovered`
-- `svc_auto_not_running` / `held`
-- `svc_auto_not_running` / `onset`
-- `svc_auto_not_running` / `recovered`
-- `svc_flapping` / `held`
-- `svc_flapping` / `onset`
-- `svc_flapping` / `recovered`
-- `svc_stuck_pending` / `held`
-- `svc_stuck_pending` / `onset`
-- `svc_stuck_pending` / `recovered`
-- `vol_bitlocker_dropped` / `held`
-- `vol_bitlocker_dropped` / `onset`
-- `vol_bitlocker_dropped` / `recovered`
-- `vol_data_space_exhausting` / `held`
-- `vol_data_space_exhausting` / `onset`
-- `vol_data_space_exhausting` / `recovered`
-- `vol_data_space_low` / `held`
-- `vol_data_space_low` / `onset`
-- `vol_data_space_low` / `recovered`
-- `vol_fill_rate_high` / `default`
-- `vol_os_space_exhausting` / `held`
-- `vol_os_space_exhausting` / `onset`
-- `vol_os_space_exhausting` / `recovered`
-- `vol_os_space_low` / `held`
-- `vol_os_space_low` / `onset`
-- `vol_os_space_low` / `recovered`
-- `vol_unreadable` / `held`
-- `vol_unreadable` / `onset`
-- `vol_unreadable` / `recovered`
+- `service_auto_not_running` / `held`
+- `service_auto_not_running` / `onset`
+- `service_auto_not_running` / `recovered`
+- `service_flapping` / `held`
+- `service_flapping` / `onset`
+- `service_flapping` / `recovered`
+- `service_stuck_pending` / `held`
+- `service_stuck_pending` / `onset`
+- `service_stuck_pending` / `recovered`
+- `sparklogs_agent_cpu_over_budget` / `held`
+- `sparklogs_agent_cpu_over_budget` / `onset`
+- `sparklogs_agent_cpu_over_budget` / `recovered`
+- `sparklogs_agent_handle_over_budget` / `held`
+- `sparklogs_agent_handle_over_budget` / `onset`
+- `sparklogs_agent_handle_over_budget` / `recovered`
+- `sparklogs_agent_memory_over_budget` / `held`
+- `sparklogs_agent_memory_over_budget` / `onset`
+- `sparklogs_agent_memory_over_budget` / `recovered`
+- `volume_bitlocker_dropped` / `held`
+- `volume_bitlocker_dropped` / `onset`
+- `volume_bitlocker_dropped` / `recovered`
+- `volume_fill_rate_high` / `default`
+- `volume_unreadable` / `held`
+- `volume_unreadable` / `onset`
+- `volume_unreadable` / `recovered`
 - `vss_shadowstorage_near_cap` / `held`
 - `vss_shadowstorage_near_cap` / `onset`
 - `vss_shadowstorage_near_cap` / `recovered`

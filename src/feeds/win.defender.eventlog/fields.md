@@ -33,7 +33,6 @@ Stored flat under the `win.defender.eventlog.` prefix.
 | `win.defender.eventlog.category_id` | int | Numeric threat category from 1116/1006 (`Category ID`). |
 | `win.defender.eventlog.category_name` | string | Rendered threat category text from 1116/1006 (`Category Name`). |
 | `win.defender.eventlog.threat_path` | string | File/object path the threat/rule acted on: 1116-1119 (legacy 1006-1008), 1015 (`Path`), 1121 ASR block (`Path`). |
-| `win.defender.eventlog.process_name` | string | Process associated with the detection/rule: 1116-1119 (legacy 1006-1008), 1015, 1121 (`Process Name`). |
 | `win.defender.eventlog.detection_origin` | string | Where the detection originated, from 1116/1006 (`Detection Origin`). |
 | `win.defender.eventlog.detection_type` | string | Detection mechanism kind, from 1116/1006 (`Detection Type`). |
 | `win.defender.eventlog.detection_source` | string | Detection source engine/component, from 1116/1006 (`Detection Source`). |
@@ -61,6 +60,8 @@ Prefer these over the per-feed fields for anything that spans feeds.
 | `sparklogs.config_change.type` | The kind of object that changed, from a closed set of object nouns. |
 | `sparklogs.config_change.action` | What was done to that object, from a closed set of verbs. |
 | `sparklogs.config_change.target` | Which object it was: its own identity within its kind, as a name, a path or an id. A different field from the principal a change acted on, and a change acting on a principal carries both. |
+| `sparklogs.process.path` | The process the event is about. |
+| `sparklogs.process.name` | The process the event is about. |
 
 ## What sets each field
 
@@ -77,15 +78,15 @@ The last column is different in kind: it is the author's account of the row or e
 | `av_protection_disabled` / `disabled` | 5000, 5001, 5009, 5010, 5011, 5012 | **fields: none** |  |
 | `av_protection_disabled` / `enabled` | 5000, 5001, 5009, 5010, 5011, 5012 | **fields: none** |  |
 | `av_scan_failed` / `default` | 1005 | `win.defender.eventlog.scan_id` `win.defender.eventlog.status` |  |
-| `av_suspicious_behavior_detected` / `default` | 1015 | `win.defender.eventlog.process_name` `win.defender.eventlog.threat_name` `win.defender.eventlog.threat_path` |  |
+| `av_suspicious_behavior_detected` / `default` | 1015 | `win.defender.eventlog.threat_name` `win.defender.eventlog.threat_path` |  |
 | `av_tamper_blocked` / `default` | 5013 | **fields: none** |  |
-| `av_threat_detected` / `high_severity` | 1006, 1116 | `win.defender.eventlog.category_id` `win.defender.eventlog.category_name` `win.defender.eventlog.detection_origin` `win.defender.eventlog.detection_source` `win.defender.eventlog.detection_type` `win.defender.eventlog.process_name` `win.defender.eventlog.severity_id` `win.defender.eventlog.severity_name` `win.defender.eventlog.threat_name` `win.defender.eventlog.threat_path` `win.defender.eventlog.user` |  |
-| `av_threat_detected` / `standard` | 1006, 1116 | `win.defender.eventlog.category_id` `win.defender.eventlog.category_name` `win.defender.eventlog.detection_origin` `win.defender.eventlog.detection_source` `win.defender.eventlog.detection_type` `win.defender.eventlog.process_name` `win.defender.eventlog.severity_id` `win.defender.eventlog.severity_name` `win.defender.eventlog.threat_name` `win.defender.eventlog.threat_path` `win.defender.eventlog.user` |  |
-| `av_threat_not_remediated` / `default` | 1007, 1117 | `win.defender.eventlog.action_id` `win.defender.eventlog.action_name` `win.defender.eventlog.process_name` `win.defender.eventlog.status` `win.defender.eventlog.threat_name` `win.defender.eventlog.threat_path` `win.defender.eventlog.user` |  |
-| `av_threat_remediated` / `default` | 1007, 1117 | `win.defender.eventlog.action_id` `win.defender.eventlog.action_name` `win.defender.eventlog.process_name` `win.defender.eventlog.status` `win.defender.eventlog.threat_name` `win.defender.eventlog.threat_path` `win.defender.eventlog.user` |  |
+| `av_threat_detected` / `high_severity` | 1006, 1116 | `win.defender.eventlog.category_id` `win.defender.eventlog.category_name` `win.defender.eventlog.detection_origin` `win.defender.eventlog.detection_source` `win.defender.eventlog.detection_type` `win.defender.eventlog.severity_id` `win.defender.eventlog.severity_name` `win.defender.eventlog.threat_name` `win.defender.eventlog.threat_path` `win.defender.eventlog.user` |  |
+| `av_threat_detected` / `standard` | 1006, 1116 | `win.defender.eventlog.category_id` `win.defender.eventlog.category_name` `win.defender.eventlog.detection_origin` `win.defender.eventlog.detection_source` `win.defender.eventlog.detection_type` `win.defender.eventlog.severity_id` `win.defender.eventlog.severity_name` `win.defender.eventlog.threat_name` `win.defender.eventlog.threat_path` `win.defender.eventlog.user` |  |
+| `av_threat_not_remediated` / `default` | 1007, 1117 | `win.defender.eventlog.action_id` `win.defender.eventlog.action_name` `win.defender.eventlog.status` `win.defender.eventlog.threat_name` `win.defender.eventlog.threat_path` `win.defender.eventlog.user` |  |
+| `av_threat_remediated` / `default` | 1007, 1117 | `win.defender.eventlog.action_id` `win.defender.eventlog.action_name` `win.defender.eventlog.status` `win.defender.eventlog.threat_name` `win.defender.eventlog.threat_path` `win.defender.eventlog.user` |  |
 | `av_threat_remediation_failed` / `default` | 1008, 1118, 1119 | `win.defender.eventlog.status` `win.defender.eventlog.threat_name` `win.defender.eventlog.threat_path` |  |
-| `defender_asr_block` / `default` | 1121 | `win.defender.eventlog.process_name` `win.defender.eventlog.rule_id` `win.defender.eventlog.threat_path` |  |
-| `defender_network_protection_block` / `default` | 1126 | **fields: none** |  |
+| `defender_asr_blocked` / `default` | 1121 | `win.defender.eventlog.rule_id` `win.defender.eventlog.threat_path` |  |
+| `defender_network_protection_blocked` / `default` | 1126 | **fields: none** |  |
 
 ### Surfaces that promote nothing
 
@@ -95,4 +96,4 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `av_protection_disabled` / `disabled`
 - `av_protection_disabled` / `enabled`
 - `av_tamper_blocked` / `default`
-- `defender_network_protection_block` / `default`
+- `defender_network_protection_blocked` / `default`

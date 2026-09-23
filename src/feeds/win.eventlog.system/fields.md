@@ -46,10 +46,10 @@ Stored flat under the `win.eventlog.system.` prefix.
 | `win.eventlog.system.report_id` | string | WER report id (GUID) from WER-SystemErrorReporting 1001; joins to the WER report store. |
 | `win.eventlog.system.driver_name` | string | Driver that failed to load, from Kernel-PnP 219 (FailureName, e.g. \Driver\WUDFRd). |
 | `win.eventlog.system.device_instance` | string | Device instance path the event is about: Kernel-PnP 219, WHEA-Logger 17-20 (PrimaryDeviceName), UserPnp 20003, DriverFrameworks-UserMode driver installs. |
-| `win.eventlog.system.ntstatus` | string | NTSTATUS code as logged (decimal string on modern providers): Kernel-PnP 219, Hyper-V-VmSwitch 15. |
 | `win.eventlog.system.error_source` | string | WHEA error source enum from WHEA-Logger 17-20 (ErrorSource; numeric string, locale-stable). |
 | `win.eventlog.system.framework_version` | string | UMDF framework version from DriverFrameworks-UserMode install narration. |
 | `win.eventlog.system.volume` | string | Volume the storage event is about: Ntfs 55/130 (DriveName/VolumeName), Volsnap 25/36 (VolumeName). |
+| `win.eventlog.system.filesystem` | string | Filesystem type the filesystem_* reasons name (ntfs, refs, fat32), read from the provider that raised the event. A constant per provider, not a decoded field: this fleet has never carried a non-NTFS provider for these reasons. |
 | `win.eventlog.system.clsid` | string | COM server CLSID from DistributedCOM 10010. |
 | `win.eventlog.system.time_peer` | string | Configured NTP peer from Time-Service 134 (DomainPeer). |
 | `win.eventlog.system.update_title` | string | Update the WindowsUpdateClient 20 install outcome is about (updateTitle). The fleet pivot for separating a bad update from a bad device. |
@@ -89,34 +89,45 @@ The last column is different in kind: it is the author's account of the row or e
 | Surface | Event ids | Fields set | Row fields |
 |---|---|---|---|
 | `av_unsigned_code_blocked` / `default` | 514 | **fields: none** |  |
-| `bugcheck` / `default` | 1001 | `win.eventlog.system.bugcheck_text` `win.eventlog.system.dump_file` `win.eventlog.system.report_id` |  |
-| `cluster_csv_unavailable` / `default` | 5120, 5142 | **fields: none** |  |
-| `cluster_node_removed` / `default` | 1135 | **fields: none** |  |
-| `cluster_quorum_loss` / `default` | 1561 | **fields: none** |  |
-| `cluster_resource_failed` / `default` | 1069 | **fields: none** |  |
-| `cluster_resource_hang` / `default` | 1230 | **fields: none** |  |
-| `cluster_rhs_crash` / `default` | 1146 | **fields: none** |  |
-| `cluster_service_down` / `default` | 1006, 1073, 1177 | **fields: none** |  |
 | `dcom_activation_timeout` / `default` | 10029 | **fields: none** |  |
 | `dcom_register_timeout` / `default` | 10010 | `win.eventlog.system.clsid` |  |
-| `dcom_start_error` / `default` | 10005 | **fields: none** |  |
+| `dcom_start_failed` / `default` | 10005 | **fields: none** |  |
 | `disk_bad_block` / `default` | 7 | **fields: none** |  |
 | `disk_controller_error` / `default` | 11 | **fields: none** |  |
-| `disk_corruption` / `default` | 55 | **fields: none** |  |
 | `disk_io_retried` / `default` | 153 | **fields: none** |  |
 | `disk_paging_error` / `default` | 51 | **fields: none** |  |
 | `disk_surprise_removal` / `default` | 157 | **fields: none** |  |
-| `driver_load_failed` / `default` | 219 | `win.eventlog.system.device_instance` `win.eventlog.system.driver_name` `win.eventlog.system.ntstatus` |  |
+| `driver_load_failed` / `default` | 219 | `win.eventlog.system.device_instance` `win.eventlog.system.driver_name` |  |
 | `ephemeral_port_alloc_failed` / `default` | 4231, 4266 | **fields: none** |  |
+| `failover_cluster_csv_unavailable` / `default` | 5120, 5142 | **fields: none** |  |
+| `failover_cluster_node_removed` / `default` | 1135 | **fields: none** |  |
+| `failover_cluster_quorum_loss` / `default` | 1561 | **fields: none** |  |
+| `failover_cluster_resource_failed` / `default` | 1069 | **fields: none** |  |
+| `failover_cluster_resource_hang` / `default` | 1230 | **fields: none** |  |
+| `failover_cluster_resource_host_crash` / `default` | 1146 | **fields: none** |  |
+| `failover_cluster_service_down` / `default` | 1006, 1073, 1177 | **fields: none** |  |
+| `filesystem_corruption` / `correction_required` | 7, 55, 130, 131, 132, 133 | `win.eventlog.system.filesystem` `win.eventlog.system.volume` |  |
+| `filesystem_corruption` / `corruption_discovered` | 7, 55, 130, 131, 132, 133 | `win.eventlog.system.filesystem` `win.eventlog.system.volume` |  |
+| `filesystem_corruption` / `disk` | 7, 55, 130, 131, 132, 133 | **fields: none** |  |
+| `filesystem_corruption` / `repair_activity` | 7, 55, 130, 131, 132, 133 | `win.eventlog.system.filesystem` `win.eventlog.system.volume` |  |
+| `filesystem_corruption` / `repair_posting_throttled` | 7, 55, 130, 131, 132, 133 | `win.eventlog.system.filesystem` `win.eventlog.system.volume` |  |
+| `filesystem_corruption` / `torn_write_detected` | 7, 55, 130, 131, 132, 133 | `win.eventlog.system.filesystem` `win.eventlog.system.volume` |  |
+| `filesystem_delayed_write_lost` / `default` | 50 | `win.eventlog.system.filesystem` `win.eventlog.system.volume` |  |
+| `filesystem_transaction_log_operation_failed` / `flush_failed` | 134, 136, 137, 140 | `win.eventlog.system.filesystem` `win.eventlog.system.volume` |  |
+| `filesystem_transaction_log_operation_failed` / `metadata_reset` | 134, 136, 137, 140 | `win.eventlog.system.filesystem` `win.eventlog.system.volume` |  |
+| `filesystem_transaction_log_operation_failed` / `recovery_error` | 134, 136, 137, 140 | `win.eventlog.system.filesystem` `win.eventlog.system.volume` |  |
+| `filesystem_transaction_log_operation_failed` / `start_failed` | 134, 136, 137, 140 | `win.eventlog.system.filesystem` `win.eventlog.system.volume` |  |
 | `gpu_driver_reset` / `default` | 153 | **fields: none** |  |
 | `hardware_error_corrected` / `default` | 17, 19 | `win.eventlog.system.device_instance` `win.eventlog.system.error_source` |  |
 | `hardware_error_uncorrected` / `default` | 18, 20 | `win.eventlog.system.device_instance` `win.eventlog.system.error_source` |  |
 | `http_ssl_binding_created` / `default` | 120, 15301 | **fields: none** |  |
 | `http_ssl_binding_deleted` / `default` | 119, 15300 | **fields: none** |  |
 | `http_ssl_config_failed` / `default` | 15021 | **fields: none** |  |
+| `hyperv_vswitch_config_restore_failed` / `default` | 15 | **fields: none** |  |
 | `iis_apppool_disabled` / `default` | 5002 | **fields: none** |  |
-| `iis_apppool_failed` / `default` | 5009, 5021, 5057, 5059 | **fields: none** |  |
-| `iis_worker_crash` / `default` | 5011 | **fields: none** |  |
+| `iis_apppool_identity_invalid` / `default` | 5021, 5057 | **fields: none** |  |
+| `iis_apppool_worker_start_failed` / `default` | 5059 | **fields: none** |  |
+| `iis_worker_crash` / `default` | 5009, 5011 | **fields: none** |  |
 | `kerberos_cert_domain_unresolved` / `default` | 11 | **fields: none** |  |
 | `kerberos_etype_unsupported` / `default` | 16, 203 | **fields: none** |  |
 | `kerberos_pac_verify_failed` / `default` | 18 | **fields: none** |  |
@@ -124,22 +135,13 @@ The last column is different in kind: it is the author's account of the row or e
 | `kerberos_weak_krbtgt_key` / `default` | 42 | **fields: none** |  |
 | `nic_driver_fault_reported` / `default` | 5002, 5005 | **fields: none** |  |
 | `nic_driver_load_failed` / `default` | 5000 | **fields: none** |  |
-| `nic_link_down` / `default` | 2, 27 | **fields: none** |  |
-| `nic_link_up` / `default` | 9, 14, 32 | **fields: none** |  |
-| `ntfs_corruption` / `correction_required` | 7, 55, 130, 131, 132, 133 | `win.eventlog.system.volume` |  |
-| `ntfs_corruption` / `corruption_discovered` | 7, 55, 130, 131, 132, 133 | `win.eventlog.system.volume` |  |
-| `ntfs_corruption` / `repair_activity` | 7, 55, 130, 131, 132, 133 | `win.eventlog.system.volume` |  |
-| `ntfs_corruption` / `repair_posting_throttled` | 7, 55, 130, 131, 132, 133 | `win.eventlog.system.volume` |  |
-| `ntfs_corruption` / `torn_write_detected` | 7, 55, 130, 131, 132, 133 | `win.eventlog.system.volume` |  |
-| `ntfs_delayed_write_lost` / `default` | 50 | `win.eventlog.system.volume` |  |
-| `ntfs_transaction_log_error` / `flush_failed` | 134, 136, 137, 140 | `win.eventlog.system.volume` |  |
-| `ntfs_transaction_log_error` / `metadata_reset` | 134, 136, 137, 140 | `win.eventlog.system.volume` |  |
-| `ntfs_transaction_log_error` / `recovery_error` | 134, 136, 137, 140 | `win.eventlog.system.volume` |  |
-| `ntfs_transaction_log_error` / `start_failed` | 134, 136, 137, 140 | `win.eventlog.system.volume` |  |
+| `nic_link_down` / `down` | 2, 27 | **fields: none** |  |
+| `nic_link_down` / `recovered` | 2, 27 | **fields: none** |  |
+| `os_bsod` / `default` | 1001 | `win.eventlog.system.bugcheck_text` `win.eventlog.system.dump_file` `win.eventlog.system.report_id` |  |
+| `patch_install_deferred` / `packages_in_use` | 20 | `win.eventlog.system.update_title` |  |
+| `patch_install_deferred` / `retry_later` | 20 | `win.eventlog.system.update_title` |  |
 | `patch_install_failed` / `failed` | 20 | `win.eventlog.system.update_title` |  |
 | `patch_install_failed` / `interrupted` | 20 | `win.eventlog.system.update_title` |  |
-| `patch_install_failed` / `packages_in_use` | 20 | `win.eventlog.system.update_title` |  |
-| `patch_install_failed` / `retry_later` | 20 | `win.eventlog.system.update_title` |  |
 | `platform_tamper_indicator_reported` / `detected` | 11, 12 | **fields: none** |  |
 | `platform_tamper_indicator_reported` / `escalated` | 11, 12 | **fields: none** |  |
 | `platform_tamper_indicator_reported` / `partial` | 11, 12 | **fields: none** |  |
@@ -152,7 +154,7 @@ The last column is different in kind: it is the author's account of the row or e
 | `security_agent_service_start_failed` / `default` | 6 | **fields: none** |  |
 | `security_agent_service_terminated` / `default` | 5 | **fields: none** |  |
 | `service_crashed` / `default` | 7031, 7034 | `win.eventlog.system.crash_count` `win.eventlog.system.service_name` |  |
-| `service_exited_error` / `default` | 7023, 7024 | `win.eventlog.system.service_error` `win.eventlog.system.service_name` |  |
+| `service_exited_with_error` / `default` | 7023, 7024 | `win.eventlog.system.service_error` `win.eventlog.system.service_name` |  |
 | `service_hang` / `default` | 7011 | `win.eventlog.system.service_name` |  |
 | `service_installed` / `default` | 7045 | `command_line` `win.eventlog.system.account_name` `win.eventlog.system.image_path` `win.eventlog.system.service_name` `win.eventlog.system.service_type` `win.eventlog.system.start_type` |  |
 | `service_start_failed` / `default` | 7000 | `win.eventlog.system.service_error` `win.eventlog.system.service_name` |  |
@@ -175,8 +177,7 @@ The last column is different in kind: it is the author's account of the row or e
 | `vss_shadow_aborted` / `abort_on_failure` | 13, 14, 15, 16, 20, 23, 24, 27, 28, 29, 32, 35, 36 | `win.eventlog.system.volume` |  |
 | `vss_shadow_aborted` / `storage_growth_failed` | 13, 14, 15, 16, 20, 23, 24, 27, 28, 29, 32, 35, 36 | `win.eventlog.system.volume` |  |
 | `vss_shadow_aborted` / `storage_limit_reached` | 13, 14, 15, 16, 20, 23, 24, 27, 28, 29, 32, 35, 36 | `win.eventlog.system.volume` |  |
-| `vss_shadow_lost` / `default` | 25 | `win.eventlog.system.volume` |  |
-| `vswitch_config_restore_failed` / `default` | 15 | `win.eventlog.system.ntstatus` |  |
+| `vss_snapshots_failing_for_space` / `default` | 25 | `win.eventlog.system.volume` |  |
 | `win_app_error_dialog_shown` / `default` | 26 | **fields: none** |  |
 | `winre_servicing_failed` / `default` | 4502 | **fields: none** |  |
 | `wlan_limited_connectivity` / `default` | 4003 | **fields: none** |  |
@@ -188,28 +189,30 @@ These carry class, reason and message text only.
 A predicate over them uses the reason, the class, or the retained payload; there is no promoted field to filter on.
 
 - `av_unsigned_code_blocked` / `default`
-- `cluster_csv_unavailable` / `default`
-- `cluster_node_removed` / `default`
-- `cluster_quorum_loss` / `default`
-- `cluster_resource_failed` / `default`
-- `cluster_resource_hang` / `default`
-- `cluster_rhs_crash` / `default`
-- `cluster_service_down` / `default`
 - `dcom_activation_timeout` / `default`
-- `dcom_start_error` / `default`
+- `dcom_start_failed` / `default`
 - `disk_bad_block` / `default`
 - `disk_controller_error` / `default`
-- `disk_corruption` / `default`
 - `disk_io_retried` / `default`
 - `disk_paging_error` / `default`
 - `disk_surprise_removal` / `default`
 - `ephemeral_port_alloc_failed` / `default`
+- `failover_cluster_csv_unavailable` / `default`
+- `failover_cluster_node_removed` / `default`
+- `failover_cluster_quorum_loss` / `default`
+- `failover_cluster_resource_failed` / `default`
+- `failover_cluster_resource_hang` / `default`
+- `failover_cluster_resource_host_crash` / `default`
+- `failover_cluster_service_down` / `default`
+- `filesystem_corruption` / `disk`
 - `gpu_driver_reset` / `default`
 - `http_ssl_binding_created` / `default`
 - `http_ssl_binding_deleted` / `default`
 - `http_ssl_config_failed` / `default`
+- `hyperv_vswitch_config_restore_failed` / `default`
 - `iis_apppool_disabled` / `default`
-- `iis_apppool_failed` / `default`
+- `iis_apppool_identity_invalid` / `default`
+- `iis_apppool_worker_start_failed` / `default`
 - `iis_worker_crash` / `default`
 - `kerberos_cert_domain_unresolved` / `default`
 - `kerberos_etype_unsupported` / `default`
@@ -218,8 +221,8 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `kerberos_weak_krbtgt_key` / `default`
 - `nic_driver_fault_reported` / `default`
 - `nic_driver_load_failed` / `default`
-- `nic_link_down` / `default`
-- `nic_link_up` / `default`
+- `nic_link_down` / `down`
+- `nic_link_down` / `recovered`
 - `platform_tamper_indicator_reported` / `detected`
 - `platform_tamper_indicator_reported` / `escalated`
 - `platform_tamper_indicator_reported` / `partial`

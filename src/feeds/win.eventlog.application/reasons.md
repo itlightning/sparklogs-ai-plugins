@@ -11,9 +11,8 @@ Every section below is from the public reason block only.
 | `adcs_ca_chain_failed` | `certificates` | Error |  |
 | `adcs_crl_publish_failed` | `certificates` | Error |  |
 | `app_crash` | `app_stability` | Error |  |
-| `app_crash_report` | `app_stability` | Notice |  |
 | `app_hang` | `app_stability` | Error |  |
-| `appx_app_activation_failed` | `app_stability` | Info when Windows declines to run the application under the built-in Administrator account, Notice otherwise | benign possible |
+| `appx_activation_failed` | `app_stability` | Info when Windows declines to run the application under the built-in Administrator account, Notice otherwise | benign possible |
 | `aspnet_compilation_failed` | `web` | Error |  |
 | `aspnet_unhandled_exception` | `web` | Minor |  |
 | `cert_enroll_failed` | `certificates` | Warning or Verbose | benign possible |
@@ -24,29 +23,29 @@ Every section below is from the public reason block only.
 | `entra_sync_scheduler_aborted` | `directory_services` | Error |  |
 | `esent_db_corruption` | `database` | Error |  |
 | `gpu_driver_error` | `hardware` | Notice at most; native level decides below |  |
-| `group_policy_cse_apply_failed` | `device_management` | Minor |  |
 | `group_policy_drive_map_failed` | `device_management` | Warning |  |
-| `group_policy_pref_item_failed` | `device_management` | Minor or Warning |  |
-| `mfa_login_succeeded` | `auth` | Info |  |
+| `group_policy_extension_apply_failed` | `device_management` | Minor |  |
+| `group_policy_preference_item_failed` | `device_management` | Minor or Warning |  |
 | `mfa_not_configured` | `auth` | Warning |  |
+| `mfa_sign_in_succeeded` | `auth` | Info |  |
 | `mfa_unavailable_access_granted` | `auth` | Error |  |
 | `mfa_user_not_enrolled` | `auth` | Notice |  |
-| `mssql_db_corruption` | `database` | Critical, Error or Warning |  |
+| `mssql_db_io_failed` | `database` | Error |  |
+| `mssql_db_page_corruption` | `database` | Critical |  |
+| `mssql_db_read_retried` | `database` | Warning |  |
 | `office_subscription_licensing_failed` | `licensing` | Warning |  |
 | `remote_assist_session_started` | `remote_access` | Notice |  |
 | `restart_manager_app_pending` | `patching` | Info cap | benign |
 | `security_agent_config_fetch_failed` | `endpoint_protection` | Error |  |
 | `security_agent_host_isolated` | `endpoint_protection` | Serious or Notice |  |
 | `vpn_dial_failed` | `vpn` | Minor |  |
-| `vss_data_integrity_writer_failed` | `backup` | Error |  |
-| `vss_legacy_driver_scan` | `backup` | Info cap | benign |
 | `vss_optimization_time_budget_reached` | `backup` | Debug | benign |
 | `vss_provider_class_not_registered` | `backup` | Error |  |
-| `vss_snapshot_call_failed` | `backup` | Warning on the refused calls, Info on the harmless ones | benign possible |
+| `vss_snapshot_call_failed` | `backup` | Warning |  |
 | `vss_snapshots_failing_for_space` | `backup` | Error |  |
 | `vss_writer_callback_query` | `backup` | Info | benign |
+| `vss_writer_failed` | `backup` | Error |  |
 | `wcf_request_failed` | `web` | Minor |  |
-| `win_msi_install_error` | `patching` | Warning / Info cap for retry-later | benign possible |
 | `win_msi_operation_failed` | `patching` | Minor / Notice when blocked / Info cap for retry-later | benign possible |
 | `win_msi_product_install_succeeded` | `patching` | Notice |  |
 | `win_msi_product_reconfigure_succeeded` | `patching` | Notice |  |
@@ -56,16 +55,15 @@ Every section below is from the public reason block only.
 
 ## `adcs_ca_chain_failed`
 
-Active Directory Certificate Services reported a CA chain or publication failure family event.
+Active Directory Certificate Services reported a chain-certificate expiry.
 
 **Severity:** Error
 
-**Impact:** Certificate trust or revocation publishing may be unhealthy until the CA issue is corrected.
+**Impact:** Certificate trust may be unhealthy until the CA chain issue is corrected.
 
 **Consider:**
 
-- Check CA chain, CRL, and distribution-point health together.
-- Read adjacent CertificationAuthority events before assuming the exact sub-family.
+- Check CA chain and certificate expiry together.
 
 ## `adcs_crl_publish_failed`
 
@@ -93,22 +91,6 @@ A Windows application process crashed.
 - Group by app name, faulting module, exception code, and report id.
 - Check for recurrence after updates or driver changes.
 
-## `app_crash_report`
-
-Windows Error Reporting recorded a crash or hang report.
-
-**Severity:** Notice
-
-**Impact:** The report can join crash recurrence by bucket, app name, and report id even when the primary crash event is missing.
-
-**Consider:**
-
-- Use EventName to separate crash reports from unrelated WER report types.
-- Group by fault bucket and report id for recurrence.
-
-Event id 1001 also carries BlueScreen, PnP, Store install, and other report families. The reason
-only applies to crash-shaped EventName values.
-
 ## `app_hang`
 
 A Windows application stopped responding and was closed.
@@ -122,7 +104,7 @@ A Windows application stopped responding and was closed.
 - Group by app name, report id, and hang type.
 - Check whether hangs cluster around updates, add-ins, or file paths.
 
-## `appx_app_activation_failed`
+## `appx_activation_failed`
 
 A packaged application did not start.
 
@@ -279,21 +261,6 @@ The NVIDIA display stack reported a warning-or-worse driver error.
 
 This reason names a provider-level driver-error family, not a specific mechanism.
 
-## `group_policy_cse_apply_failed`
-
-A Group Policy preference extension could not apply the settings from a policy object.
-
-**Also reported by:** `win.eventlog.identity_security`
-
-**Severity:** Minor
-
-**Impact:** None of that policy object's preference items were delivered to the affected user or machine on this refresh.
-
-**Consider:**
-
-- A network path error normally means the host could not reach the policy share at that moment.
-- Repeated failures on the same host are the shape worth investigating, not one occurrence.
-
 ## `group_policy_drive_map_failed`
 
 A Group Policy drive mapping did not complete on this host.
@@ -308,7 +275,22 @@ A Group Policy drive mapping did not complete on this host.
 - A rejected stored credential repeats against the share at every refresh and can lock the account out.
 - The drive letter and the share ride the event as fields, so the same share failing across many hosts is one query.
 
-## `group_policy_pref_item_failed`
+## `group_policy_extension_apply_failed`
+
+A Group Policy preference extension could not apply the settings from a policy object.
+
+**Also reported by:** `win.eventlog.identity_security`
+
+**Severity:** Minor
+
+**Impact:** None of that policy object's preference items were delivered to the affected user or machine on this refresh.
+
+**Consider:**
+
+- A network path error normally means the host could not reach the policy share at that moment.
+- Repeated failures on the same host are the shape worth investigating, not one occurrence.
+
+## `group_policy_preference_item_failed`
 
 A Group Policy preference item did not apply on this host. A refused stored credential is held one rung higher, because no later refresh can improve on it.
 
@@ -323,17 +305,6 @@ A Group Policy preference item did not apply on this host. A refused stored cred
 - An item failing at every refresh will not clear itself.
 - A refused stored credential repeats against the target on every refresh and can lock the account out.
 
-## `mfa_login_succeeded`
-
-A sign-in completed with its second factor verified.
-
-**Severity:** Info
-
-**Consider:**
-
-- Read these beside the fail-open rows on the same host: the ratio is what says how long a gap lasted.
-- The absence of these on a host that has the product installed is itself the finding.
-
 ## `mfa_not_configured`
 
 A multi-factor logon agent is installed on this host but holds no configuration, so it enforces no second factor.
@@ -346,6 +317,17 @@ A multi-factor logon agent is installed on this host but holds no configuration,
 
 - Confirm whether this host is inside the intended rollout scope.
 - Compare against hosts of the same group that do enforce, to see whether the gap is deliberate.
+
+## `mfa_sign_in_succeeded`
+
+A sign-in completed with its second factor verified.
+
+**Severity:** Info
+
+**Consider:**
+
+- Read these beside the fail-open rows on the same host: the ratio is what says how long a gap lasted.
+- The absence of these on a host that has the product installed is itself the finding.
 
 ## `mfa_unavailable_access_granted`
 
@@ -374,18 +356,43 @@ A sign-in was refused because the account is not enrolled with the multi-factor 
 - Enrol the account, or place it in the exclusion the policy intends.
 - Service accounts appearing here usually need a policy exclusion rather than an enrolment.
 
-## `mssql_db_corruption`
+## `mssql_db_io_failed`
 
-SQL Server reported database I/O failure, logical page corruption, or a read retry warning.
+SQL Server reported an I/O error on a database file.
 
-**Severity:** Critical, Error or Warning
+**Severity:** Error
 
-**Impact:** A SQL database may have corrupted pages or an unreliable storage path; affected data or application workloads can be at risk.
+**Impact:** A SQL database may have an unreliable storage path; affected data or application workloads can be at risk.
 
 **Consider:**
 
-- Identify the database, file, page, and storage path named in the event.
-- Treat 824 as confirmed corruption and 825 as early storage warning.
+- Identify the database, file, and storage path named in the event.
+
+## `mssql_db_page_corruption`
+
+SQL Server confirmed logical page corruption in a database.
+
+**Severity:** Critical
+
+**Impact:** The database has confirmed corrupted pages; affected data or application workloads can be at risk, and the condition does not self-heal.
+
+**Consider:**
+
+- Identify the database, file, and page named in the event.
+- Treat this as confirmed corruption, not a suspicion.
+
+## `mssql_db_read_retried`
+
+SQL Server retried a database read after it failed, and the retry succeeded.
+
+**Severity:** Warning
+
+**Impact:** Not confirmed corruption, but an early-warning signal for the storage path a database sits on.
+
+**Consider:**
+
+- Identify the database, file, and storage path named in the event.
+- Treat this as an early warning, not confirmed corruption.
 
 ## `office_subscription_licensing_failed`
 
@@ -469,33 +476,6 @@ A remote-access dial attempt failed.
 - Check whether the same profile connected successfully soon afterwards.
 - The same profile failing across many hosts points at the concentrator, not the users.
 
-## `vss_data_integrity_writer_failed`
-
-A backup writer for a database, mail store, virtual machine host, or directory service reported a failure during shadow copy creation.
-
-**Severity:** Error
-
-**Impact:** The backup of that data store may be incomplete or inconsistent, even if the backup job itself reported success.
-
-**Consider:**
-
-- Identify the named writer and verify the most recent restore point for that store.
-- Check the application's own logs in the same window; the writer failure usually has a cause recorded there.
-- Recurring failures for the same writer mean the protected data has no verified recent backup.
-
-## `vss_legacy_driver_scan`
-
-The VSS System Writer could not read a driver binary while enumerating for a snapshot.
-
-**Severity:** Info cap
-
-**Impact:** None on its own. Snapshot enumeration continues and this event does not indicate a failed backup.
-
-**Consider:**
-
-- Do not treat this line as evidence that a backup or snapshot failed.
-- Confirm backup outcomes from the backup product's own job result, never from writer state.
-
 ## `vss_optimization_time_budget_reached`
 
 Shadow copy optimization did not finish excluding temporary files within its time budget.
@@ -524,25 +504,23 @@ A component the Volume Shadow Copy Service needs is not registered, so shadow co
 
 ## `vss_snapshot_call_failed`
 
-A call the Volume Shadow Copy Service makes while working with shadow copies did not complete.
+A call the Volume Shadow Copy Service makes while working with shadow copies was refused or rejected.
 
-**Severity:** Warning on the refused calls, Info on the harmless ones
+**Severity:** Warning
 
-**Impact:** On the refused calls, shadow copy handling on the affected volume is constrained: the storage area cannot be resized, or a snapshot phase did not complete as asked. Backups may still succeed, so this is context for a backup problem rather than proof of one. On the harmless calls there is no impact at all: the snapshot is taken again on the next run, or it proceeds unaffected.
+**Impact:** Shadow copy handling on the affected volume is constrained: the storage area cannot be resized, or a snapshot phase did not complete as asked. Backups may still succeed, so this is context for a backup problem rather than proof of one.
 
 **Consider:**
 
-- Read the class first: the harmless calls carry BENIGN and the refused ones do not.
 - Check the permissions on the volume and its shadow storage association for the resize refusal.
 - Check the storage driver and any third-party shadow copy provider for the parameter rejections.
-- Treat a shutdown-interrupted call as a finding only without a matching restart on the same host and window.
 - Confirm the backup job outcome separately; this line does not report it.
 
 ## `vss_snapshots_failing_for_space`
 
 Shadow copy storage is full, so restore points are being deleted or no longer created.
 
-**Also reported by:** `vss-shadowstorage`
+**Also reported by:** `win.eventlog.system`, `vss-shadowstorage`
 
 **Severity:** Error
 
@@ -566,6 +544,22 @@ The Volume Shadow Copy Service could not read a writer's callback interface beca
 
 - Treat as a real finding only alongside a failed backup on the same host and window.
 
+## `vss_writer_failed`
+
+A backup writer for a database, mail store, virtual machine host, or directory service reported a failure during shadow copy creation.
+
+**Also reported by:** `vss-writers`
+
+**Severity:** Error
+
+**Impact:** The backup of that data store may be incomplete or inconsistent, even if the backup job itself reported success.
+
+**Consider:**
+
+- Identify the named writer and verify the most recent restore point for that store.
+- Check the application's own logs in the same window; the writer failure usually has a cause recorded there.
+- Recurring failures for the same writer mean the protected data has no verified recent backup.
+
 ## `wcf_request_failed`
 
 A hosted service on this machine could not process a request.
@@ -581,22 +575,6 @@ A hosted service on this machine could not process a request.
 - Read the endpoint path from the message: an endpoint that does not exist usually means a caller pointed at the wrong address or a deployment that did not land.
 - Compare the count against the web server's own request log for the same window.
 - The same endpoint failing across several hosts points at the deployment rather than at a client.
-
-## `win_msi_install_error`
-
-Windows Installer reported an install or configuration error. If the installer status says another install is already running, the same event is treated as retry-later context.
-
-**Severity:** Warning / Info cap for retry-later
-
-**Impact:** Software installation, update, or repair may not have completed successfully.
-
-**Consider:**
-
-- Check MSI status and nearby install outcome events.
-- Separate retry-later status from product or privilege failures.
-
-The id set spans multiple installer templates, so the promoted fields are the ones every template
-carries; the rest stays in the raw payload.
 
 ## `win_msi_operation_failed`
 

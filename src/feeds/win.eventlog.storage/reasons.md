@@ -12,10 +12,10 @@ Every section below is from the public reason block only.
 | `disk_failure_predicted` | `storage` | Warning |  |
 | `disk_paging_error` | `storage` | Error when the device returned a data error, which is the medium failing. Warning otherwise. |  |
 | `disk_surprise_removal` | `storage` | Warning |  |
-| `ntfs_corruption` | `storage` | Error |  |
+| `filesystem_corruption` | `storage` | Error |  |
 | `storage_controller_reset` | `storage` | Error when the device is the one the machine boots from, Warning otherwise. |  |
 | `storage_device_command_failed` | `storage` | Info when the device is announcing a change to itself, Notice otherwise. One occurrence claims no fault. |  |
-| `vol_mount_failed` | `storage` | Warning or Info | benign possible |
+| `volume_mount_failed` | `storage` | Warning or Info | benign possible |
 
 ## `disk_bad_block`
 
@@ -77,7 +77,7 @@ A device disappeared without an orderly removal.
 - Check removable and surprise_removal_ok. A device with both false vanished through a path failure, not a user action.
 - Check what was writing to it.
 
-## `ntfs_corruption`
+## `filesystem_corruption`
 
 NTFS moved this machine's global corruption-handling state off nominal.
 
@@ -125,7 +125,7 @@ A storage device did not complete a command, and reported sense data saying why.
 
 Sense data is the device's own account of a failure, so it is the one place a drive's answer is recorded rather than inferred. Empty removable slots and unsupported-command probes are not kept.
 
-## `vol_mount_failed`
+## `volume_mount_failed`
 
 NTFS could not mount a volume.
 
@@ -136,4 +136,4 @@ NTFS could not mount a volume.
 **Consider:**
 
 - Read the resolved status code. If the device is offline or has no medium, look at whether a removable bay, card reader or mounted image is being polled.
-- If the status is anything else, treat the volume as unavailable and pivot to the device-state stream's vol_unreadable for whether it stayed that way.
+- If the status is anything else, treat the volume as unavailable and pivot to the device-state stream's volume_unreadable for whether it stayed that way.

@@ -9,33 +9,36 @@ Every section below is from the public reason block only.
 | reason | service | severity | benign |
 |---|---|---|---|
 | `av_unsigned_code_blocked` | `endpoint_protection` | Serious |  |
-| `bugcheck` | `os_stability` | Serious (server or unknown) / Error (workstation) |  |
-| `cluster_csv_unavailable` | `clustering` | Severe |  |
-| `cluster_node_removed` | `clustering` | Serious |  |
-| `cluster_quorum_loss` | `clustering` | Severe |  |
-| `cluster_resource_failed` | `clustering` | Serious |  |
-| `cluster_resource_hang` | `clustering` | Serious |  |
-| `cluster_rhs_crash` | `clustering` | Serious |  |
-| `cluster_service_down` | `clustering` | Severe |  |
 | `dcom_activation_timeout` | `app_stability` | Minor |  |
 | `dcom_register_timeout` | `app_stability` | Minor |  |
-| `dcom_start_error` | `app_stability` | Minor |  |
+| `dcom_start_failed` | `app_stability` | Minor |  |
 | `disk_bad_block` | `storage` | Serious |  |
 | `disk_controller_error` | `storage` | Error |  |
-| `disk_corruption` | `storage` | Critical |  |
 | `disk_io_retried` | `storage` | Warning |  |
 | `disk_paging_error` | `storage` | Warning |  |
 | `disk_surprise_removal` | `storage` | Warning |  |
 | `driver_load_failed` | `hardware` | Warning |  |
 | `ephemeral_port_alloc_failed` | `networking` | Notice |  |
+| `failover_cluster_csv_unavailable` | `clustering` | Severe |  |
+| `failover_cluster_node_removed` | `clustering` | Serious |  |
+| `failover_cluster_quorum_loss` | `clustering` | Severe |  |
+| `failover_cluster_resource_failed` | `clustering` | Serious |  |
+| `failover_cluster_resource_hang` | `clustering` | Serious |  |
+| `failover_cluster_resource_host_crash` | `clustering` | Serious |  |
+| `failover_cluster_service_down` | `clustering` | Severe |  |
+| `filesystem_corruption` | `storage` | Critical (corrupted MFT record, MFT torn write, volume cannot be corrected, disk-provider corruption marker) / Serious (corruption in a directory index or another structure) / Error (torn write on a data file) / Warning (repair completed, repair posting throttled) |  |
+| `filesystem_delayed_write_lost` | `storage` | Serious (path on the system volume) / Error (path anywhere else) |  |
+| `filesystem_transaction_log_operation_failed` | `storage` | Warning (flush failed on a live volume, recovery error, metadata reset) / Notice (flush failed on a volume that no longer exists) / Error (resource manager could not start) |  |
 | `gpu_driver_reset` | `hardware` | Notice |  |
 | `hardware_error_corrected` | `hardware` | Notice |  |
 | `hardware_error_uncorrected` | `hardware` | Error |  |
 | `http_ssl_binding_created` | `certificates` | Notice |  |
 | `http_ssl_binding_deleted` | `certificates` | Notice |  |
 | `http_ssl_config_failed` | `certificates` | Error |  |
+| `hyperv_vswitch_config_restore_failed` | `virtualization` | Error or Warning (server or unknown) / Info (workstation) |  |
 | `iis_apppool_disabled` | `web` | Serious (server or unknown) / Warning (workstation) |  |
-| `iis_apppool_failed` | `web` | Error or Warning |  |
+| `iis_apppool_identity_invalid` | `web` | Error or Warning |  |
+| `iis_apppool_worker_start_failed` | `web` | Error or Warning |  |
 | `iis_worker_crash` | `web` | Warning |  |
 | `kerberos_cert_domain_unresolved` | `auth` | Info (capped) |  |
 | `kerberos_etype_unsupported` | `auth` | Warning |  |
@@ -44,12 +47,10 @@ Every section below is from the public reason block only.
 | `kerberos_weak_krbtgt_key` | `auth` | Warning |  |
 | `nic_driver_fault_reported` | `networking` | Warning |  |
 | `nic_driver_load_failed` | `networking` | Error |  |
-| `nic_link_down` | `networking` | Warning |  |
-| `nic_link_up` | `networking` | Info |  |
-| `ntfs_corruption` | `storage` | Critical (corrupted MFT record, MFT torn write, volume cannot be corrected) / Serious (corruption in a directory index or another structure) / Error (torn write on a data file) / Warning (repair completed, repair posting throttled) |  |
-| `ntfs_delayed_write_lost` | `storage` | Serious (path on the system volume) / Error (path anywhere else) |  |
-| `ntfs_transaction_log_error` | `storage` | Warning (flush failed on a live volume, recovery error, metadata reset) / Notice (flush failed on a volume that no longer exists) / Error (resource manager could not start) |  |
-| `patch_install_failed` | `patching` | Minor, Info or Verbose | benign possible |
+| `nic_link_down` | `networking` | Warning or Info |  |
+| `os_bsod` | `os_stability` | Serious (server or unknown) / Error (workstation) |  |
+| `patch_install_deferred` | `patching` | Info or Verbose | benign |
+| `patch_install_failed` | `patching` | Minor or Info | benign possible |
 | `platform_tamper_indicator_reported` | `endpoint_protection` | Error or Warning |  |
 | `rds_license_server_unactivated` | `licensing` | Warning |  |
 | `rds_license_tracking_failed` | `licensing` | Warning |  |
@@ -58,7 +59,7 @@ Every section below is from the public reason block only.
 | `security_agent_service_start_failed` | `endpoint_protection` | Warning |  |
 | `security_agent_service_terminated` | `endpoint_protection` | Minor |  |
 | `service_crashed` | `app_stability` | Error |  |
-| `service_exited_error` | `app_stability` | Error |  |
+| `service_exited_with_error` | `app_stability` | Error |  |
 | `service_hang` | `app_stability` | Error |  |
 | `service_installed` | `security_audit` | Notice |  |
 | `service_start_failed` | `app_stability` | Error |  |
@@ -78,8 +79,7 @@ Every section below is from the public reason block only.
 | `unexpected_shutdown` | `os_stability` | Serious or Error on a server or an unknown host class, depending on which record reports it and what level that record carried; Warning on a workstation. |  |
 | `vpn_connected` | `vpn` | Notice |  |
 | `vss_shadow_aborted` | `backup` | Error or Warning |  |
-| `vss_shadow_lost` | `backup` | Error |  |
-| `vswitch_config_restore_failed` | `virtualization` | Error or Warning (server or unknown) / Info (workstation) |  |
+| `vss_snapshots_failing_for_space` | `backup` | Error |  |
 | `win_app_error_dialog_shown` | `app_stability` | Minor |  |
 | `winre_servicing_failed` | `patching` | Error |  |
 | `wlan_limited_connectivity` | `networking` | Warning |  |
@@ -97,110 +97,6 @@ A security agent blocked a process whose image contained unsigned or corrupted c
 - Identify the named executable and confirm whether it is expected on this host.
 - Check whether the same executable appears on other hosts in the fleet.
 - A legitimate application with a stripped or broken signature produces this line too.
-
-## `bugcheck`
-
-Windows rebooted from a bugcheck.
-
-**Severity:** Serious (server or unknown) / Error (workstation)
-
-**Impact:** The host crashed and rebooted; the dump may be needed for driver, hardware, or kernel analysis.
-
-**Consider:**
-
-- Preserve the dump path and bugcheck code.
-- Correlate with Kernel-Power 41 and EventLog 6008.
-
-## `cluster_csv_unavailable`
-
-A Cluster Shared Volume became unavailable or paused.
-
-**Severity:** Severe
-
-**Impact:** Clustered workloads using the CSV may lose storage access or degrade until the volume recovers.
-
-**Consider:**
-
-- Identify the CSV and owning node.
-- Check storage, network, and redirected-access state.
-
-## `cluster_node_removed`
-
-A failover cluster node was removed from active membership.
-
-**Severity:** Serious
-
-**Impact:** Cluster capacity or availability may be reduced, and workloads may fail over or become degraded.
-
-**Consider:**
-
-- Identify the node and reason in the event body.
-- Check network, heartbeat, and quorum events around the removal.
-
-## `cluster_quorum_loss`
-
-The failover cluster lost quorum or its quorum resource.
-
-**Severity:** Severe
-
-**Impact:** The cluster may stop services or be unable to make safe failover decisions.
-
-**Consider:**
-
-- Review quorum configuration, including the quorum resource.
-- Check node and network reachability.
-
-## `cluster_resource_failed`
-
-A failover cluster resource failed.
-
-**Severity:** Serious
-
-**Impact:** A clustered workload or dependency may be offline, failed over, or degraded.
-
-**Consider:**
-
-- Identify the resource and group.
-- Check whether the resource recovered or failed over.
-
-## `cluster_resource_hang`
-
-A clustered resource became unresponsive and was terminated.
-
-**Severity:** Serious
-
-**Impact:** The workload can become unavailable or fail over while the cluster recovers the resource.
-
-**Consider:**
-
-- Identify the resource and owning node.
-- Check whether termination was followed by successful restart or failover.
-
-## `cluster_rhs_crash`
-
-The cluster Resource Hosting Subsystem crashed.
-
-**Severity:** Serious
-
-**Impact:** Cluster resource monitoring or hosting may be disrupted, causing dependent resources to fail or restart.
-
-**Consider:**
-
-- Check resource DLLs and the resource hosted by RHS.
-- Look for paired resource failure events.
-
-## `cluster_service_down`
-
-The cluster service stopped or was forced down.
-
-**Severity:** Severe
-
-**Impact:** Cluster coordination may be unavailable, risking workload outage or preventing failover.
-
-**Consider:**
-
-- Check quorum state and node membership.
-- Correlate with node removal and quorum-loss events.
 
 ## `dcom_activation_timeout`
 
@@ -228,7 +124,7 @@ A DCOM server did not register in time.
 - Use the CLSID to identify the application.
 - Check adjacent service start or application error events.
 
-## `dcom_start_error`
+## `dcom_start_failed`
 
 DCOM failed while starting an application or service.
 
@@ -268,19 +164,6 @@ A disk controller error was reported for a storage device.
 
 - Check whether the device path maps to a fixed disk or removable media.
 - Correlate with disk_io_retried, disk_paging_error, and NTFS corruption on the same device.
-
-## `disk_corruption`
-
-The disk provider reported file-system corruption.
-
-**Severity:** Critical
-
-**Impact:** Data integrity is at risk; repair may require chkdsk, restore, or storage replacement work.
-
-**Consider:**
-
-- Prioritize volume identification and recent backup state.
-- Correlate with ntfs_corruption and unexpected shutdown records.
 
 ## `disk_io_retried`
 
@@ -335,7 +218,7 @@ A device driver failed to load.
 
 **Consider:**
 
-- Review driver_name, device_instance, and ntstatus.
+- Review driver_name, device_instance, and the result code.
 - Check Device Manager or driver updates for the same device instance.
 
 ## `ephemeral_port_alloc_failed`
@@ -352,6 +235,140 @@ A local port could not be allocated from the ephemeral port range.
 - Look for an application leaking sockets, or a port range narrowed by configuration.
 
 A single occurrence is common and self-correcting. The actionable form is a sustained rate on one device.
+
+## `failover_cluster_csv_unavailable`
+
+A Cluster Shared Volume became unavailable or paused.
+
+**Severity:** Severe
+
+**Impact:** Clustered workloads using the CSV may lose storage access or degrade until the volume recovers.
+
+**Consider:**
+
+- Identify the CSV and owning node.
+- Check storage, network, and redirected-access state.
+
+## `failover_cluster_node_removed`
+
+A failover cluster node was removed from active membership.
+
+**Severity:** Serious
+
+**Impact:** Cluster capacity or availability may be reduced, and workloads may fail over or become degraded.
+
+**Consider:**
+
+- Identify the node and reason in the event body.
+- Check network, heartbeat, and quorum events around the removal.
+
+## `failover_cluster_quorum_loss`
+
+The failover cluster lost quorum or its quorum resource.
+
+**Severity:** Severe
+
+**Impact:** The cluster may stop services or be unable to make safe failover decisions.
+
+**Consider:**
+
+- Review quorum configuration, including the quorum resource.
+- Check node and network reachability.
+
+## `failover_cluster_resource_failed`
+
+A failover cluster resource failed.
+
+**Severity:** Serious
+
+**Impact:** A clustered workload or dependency may be offline, failed over, or degraded.
+
+**Consider:**
+
+- Identify the resource and group.
+- Check whether the resource recovered or failed over.
+
+## `failover_cluster_resource_hang`
+
+A clustered resource became unresponsive and was terminated.
+
+**Severity:** Serious
+
+**Impact:** The workload can become unavailable or fail over while the cluster recovers the resource.
+
+**Consider:**
+
+- Identify the resource and owning node.
+- Check whether termination was followed by successful restart or failover.
+
+## `failover_cluster_resource_host_crash`
+
+The cluster Resource Hosting Subsystem crashed.
+
+**Severity:** Serious
+
+**Impact:** Cluster resource monitoring or hosting may be disrupted, causing dependent resources to fail or restart.
+
+**Consider:**
+
+- Check resource DLLs and the resource hosted by RHS.
+- Look for paired resource failure events.
+
+## `failover_cluster_service_down`
+
+The cluster service stopped or was forced down.
+
+**Severity:** Severe
+
+**Impact:** Cluster coordination may be unavailable, risking workload outage or preventing failover.
+
+**Consider:**
+
+- Check quorum state and node membership.
+- Correlate with node removal and quorum-loss events.
+
+## `filesystem_corruption`
+
+The filesystem found damage in the structures on a volume, or the disk layer confirmed corruption directly, or NTFS reported repairing it.
+
+**Also reported by:** `win.eventlog.storage`
+
+**Severity:** Critical (corrupted MFT record, MFT torn write, volume cannot be corrected, disk-provider corruption marker) / Serious (corruption in a directory index or another structure) / Error (torn write on a data file) / Warning (repair completed, repair posting throttled)
+
+**Impact:** Volume integrity is at risk; applications and files on that volume may be affected until repair is complete. Damage to the Master File Table reaches every file on the volume, because it holds the record of where each of them lives.
+
+**Consider:**
+
+- Identify the volume from structured fields or message text, and read which structure the message names.
+- For Master File Table damage or a volume that cannot be corrected, plan an offline chkdsk and check backup state first.
+- Check whether chkdsk or storage diagnostics completed after the event.
+- Read the rate as well as the instance: repeated repairs on one volume point at the device.
+
+## `filesystem_delayed_write_lost`
+
+Windows could not save cached file data to the volume and the data was lost.
+
+**Severity:** Serious (path on the system volume) / Error (path anywhere else)
+
+**Impact:** Data an application believed it had written was discarded. The application is not told. Repeated occurrences point at the connection to the storage device rather than at the file system.
+
+**Consider:**
+
+- Check the path to the device: cabling, controller, and for network or removable volumes the link.
+- Read the rate rather than one instance: a steady stream means the storage path is still failing.
+
+## `filesystem_transaction_log_operation_failed`
+
+The NTFS transaction log on a volume could not be written, replayed, or brought up.
+
+**Severity:** Warning (flush failed on a live volume, recovery error, metadata reset) / Notice (flush failed on a volume that no longer exists) / Error (resource manager could not start)
+
+**Impact:** NTFS uses the transaction log to undo changes that did not finish. While it is unavailable, a change interrupted on that volume may be left half applied.
+
+**Consider:**
+
+- Identify the volume, and check whether it is still present on the host.
+- For a live volume, check the path to the device and whether the host was under memory pressure.
 
 ## `gpu_driver_reset`
 
@@ -436,6 +453,19 @@ An HTTPS listener endpoint on this host could not use its SSL configuration.
 - Check whether the bound certificate is still in the store and still valid.
 - Check that the service account can read the private key of the bound certificate.
 
+## `hyperv_vswitch_config_restore_failed`
+
+Hyper-V virtual switch failed to restore port configuration.
+
+**Severity:** Error or Warning (server or unknown) / Info (workstation)
+
+**Impact:** Virtual networking may not restore correctly for a VM, vNIC, WSL switch, or host virtual adapter.
+
+**Consider:**
+
+- Check the virtual switch or port name in the raw event.
+- On servers, correlate with VM connectivity complaints.
+
 ## `iis_apppool_disabled`
 
 An IIS application pool was disabled by rapid-fail protection.
@@ -449,17 +479,30 @@ An IIS application pool was disabled by rapid-fail protection.
 - Identify the application pool.
 - Check preceding worker crashes or startup failures.
 
-## `iis_apppool_failed`
+## `iis_apppool_identity_invalid`
 
-IIS reported an application pool worker, configuration, or mapping failure.
+IIS reported that an application pool's configured identity is invalid or cannot be resolved.
 
 **Severity:** Error or Warning
 
-**Impact:** The affected web application may fail to start, serve requests, or map correctly.
+**Impact:** The affected application pool may fail to start or serve requests under its configured identity.
 
 **Consider:**
 
-- Resolve the exact WAS event id and message.
+- Verify the app pool's configured credentials or identity.
+- Correlate with IIS worker crashes and HTTP 503 reports.
+
+## `iis_apppool_worker_start_failed`
+
+IIS reported that an application pool's worker process failed to start.
+
+**Severity:** Error or Warning
+
+**Impact:** The affected application pool may fail to serve requests until the worker starts successfully.
+
+**Consider:**
+
+- Check recent configuration or credential changes to the app pool.
 - Correlate with IIS worker crashes and HTTP 503 reports.
 
 ## `iis_worker_crash`
@@ -571,9 +614,9 @@ A wireless network adapter driver could not load, normally because of a resource
 
 ## `nic_link_down`
 
-A network adapter reported that its link went down.
+A network adapter reported that its link went down, or reported the link back (RECOVERED).
 
-**Severity:** Warning
+**Severity:** Warning or Info
 
 **Impact:** Traffic on that adapter stops until the link returns. A host with another working adapter stays reachable; a host with only this one is offline for the duration.
 
@@ -582,67 +625,43 @@ A network adapter reported that its link went down.
 - Look for the matching link-up record and read the gap between them.
 - Repeated drop-and-return cycles on one adapter point at the cable, the port or the switch.
 
-## `nic_link_up`
+## `os_bsod`
 
-A network adapter reported that its link came up.
+Windows rebooted from a bugcheck.
 
-**Severity:** Info
+**Severity:** Serious (server or unknown) / Error (workstation)
 
-**Consider:**
-
-- Read it beside the matching link-down record to size the outage on that adapter.
-- A negotiated rate below the port capability is worth a look at the cable and the switch port.
-
-## `ntfs_corruption`
-
-NTFS found damage in the structures on a volume, or reported repairing it.
-
-**Also reported by:** `win.eventlog.storage`
-
-**Severity:** Critical (corrupted MFT record, MFT torn write, volume cannot be corrected) / Serious (corruption in a directory index or another structure) / Error (torn write on a data file) / Warning (repair completed, repair posting throttled)
-
-**Impact:** Volume integrity is at risk; applications and files on that volume may be affected until repair is complete. Damage to the Master File Table reaches every file on the volume, because it holds the record of where each of them lives.
+**Impact:** The host crashed and rebooted; the dump may be needed for driver, hardware, or kernel analysis.
 
 **Consider:**
 
-- Identify the volume from structured fields or message text, and read which structure the message names.
-- For Master File Table damage or a volume that cannot be corrected, plan an offline chkdsk and check backup state first.
-- Check whether chkdsk or storage diagnostics completed after the event.
-- Read the rate as well as the instance: repeated repairs on one volume point at the device.
+- Preserve the dump path and bugcheck code.
+- Correlate with Kernel-Power 41 and EventLog 6008.
 
-## `ntfs_delayed_write_lost`
+## `patch_install_deferred`
 
-Windows could not save cached file data to the volume and the data was lost.
+Windows Update deferred an install attempt on this device; nothing failed.
 
-**Severity:** Serious (path on the system volume) / Error (path anywhere else)
+**Severity:** Info or Verbose
 
-**Impact:** Data an application believed it had written was discarded. The application is not told. Repeated occurrences point at the connection to the storage device rather than at the file system.
+**Impact:** The update is retried automatically on a later cycle. No durable state changed.
 
 **Consider:**
 
-- Check the path to the device: cabling, controller, and for network or removable volumes the link.
-- Read the rate rather than one instance: a steady stream means the storage path is still failing.
+- No action needed on a single instance; the client retries automatically.
+- Group by update title across the fleet if one update defers repeatedly.
 
-## `ntfs_transaction_log_error`
-
-The NTFS transaction log on a volume could not be written, replayed, or brought up.
-
-**Severity:** Warning (flush failed on a live volume, recovery error, metadata reset) / Notice (flush failed on a volume that no longer exists) / Error (resource manager could not start)
-
-**Impact:** NTFS uses the transaction log to undo changes that did not finish. While it is unavailable, a change interrupted on that volume may be left half applied.
-
-**Consider:**
-
-- Identify the volume, and check whether it is still present on the host.
-- For a live volume, check the path to the device and whether the host was under memory pressure.
+The raw result code and update title ride the message tail; the normalized code and its space ride the shared error fields.
 
 ## `patch_install_failed`
 
-Windows Update reports the outcome of an update install attempt on this device.
+Windows Update reports an install attempt on this device that stopped or failed.
 
-**Severity:** Minor, Info or Verbose
+**Also reported by:** `win.eventlog.setup`
 
-**Impact:** On a failure the device stays on the previous version of that update until a later attempt succeeds, and repeated failures on the same update mean the device is falling behind on patching. On the deferred and did-not-run outcomes nothing changed and the update is offered again.
+**Severity:** Minor or Info
+
+**Impact:** On a failure the device stays on the previous version of that update until a later attempt succeeds, and repeated failures on the same update mean the device is falling behind on patching. On the interrupted outcome nothing changed and the update is offered again.
 
 **Consider:**
 
@@ -761,7 +780,7 @@ A Windows service crashed or terminated unexpectedly.
 - Group by service_name and crash_count.
 - Look for vendor service names that point to backup, RMM, security, or line-of-business software.
 
-## `service_exited_error`
+## `service_exited_with_error`
 
 A Windows service exited with an error.
 
@@ -996,7 +1015,7 @@ The previous shutdown was not clean: the host stopped without shutting down and 
 
 **Consider:**
 
-- Use with bugcheck as the crash triangle around one boot gap.
+- Use with os_bsod as the crash triangle around one boot gap.
 - Inspect bugcheck_code when present: a nonzero value separates a crash from a power loss.
 - Check the nearest clean shutdown and boot markers.
 
@@ -1024,9 +1043,11 @@ A volume shadow-copy operation was aborted by shadow storage limits.
 - Confirm whether the backup job retried or fell back successfully.
 - Review shadow storage sizing and churn.
 
-## `vss_shadow_lost`
+## `vss_snapshots_failing_for_space`
 
 Volume shadow copies were deleted because shadow storage could not grow.
+
+**Also reported by:** `win.eventlog.application`, `vss-shadowstorage`
 
 **Severity:** Error
 
@@ -1036,19 +1057,6 @@ Volume shadow copies were deleted because shadow storage could not grow.
 
 - Check backup job outcomes near the event time.
 - Review shadow storage limits for the affected volume.
-
-## `vswitch_config_restore_failed`
-
-Hyper-V virtual switch failed to restore port configuration.
-
-**Severity:** Error or Warning (server or unknown) / Info (workstation)
-
-**Impact:** Virtual networking may not restore correctly for a VM, vNIC, WSL switch, or host virtual adapter.
-
-**Consider:**
-
-- Check the virtual switch or port name in the raw event.
-- On servers, correlate with VM connectivity complaints.
 
 ## `win_app_error_dialog_shown`
 

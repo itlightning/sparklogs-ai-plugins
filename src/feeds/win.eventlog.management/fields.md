@@ -85,6 +85,14 @@ The last column is different in kind: it is the author's account of the row or e
 | `hyperv_replication_failed` / `retrying` | 32315 | `win.eventlog.management.replica_retry_minutes` `win.eventlog.management.vm_name` |  |
 | `hyperv_replication_failed` / `state_conflict` | 33676 | `win.eventlog.management.vm_name` |  |
 | `hyperv_replication_failed` / `unreachable` | 29292, 29312, 32022, 32552 | `win.eventlog.management.vm_name` |  |
+| `hyperv_vm_backup_checkpoint_failed` / `checkpoint_failed` | 3280, 4093, 10150, 10172, 18012 | `win.eventlog.management.vm_name` |  |
+| `hyperv_vm_backup_checkpoint_failed` / `guest_writer_failed` | 3280, 4093, 10150, 10172, 18012 | `win.eventlog.management.vm_name` |  |
+| `hyperv_vm_backup_checkpoint_failed` / `integration_service_disabled` | 3280, 4093, 10150, 10172, 18012 | `win.eventlog.management.vm_name` |  |
+| `hyperv_vm_backup_checkpoint_failed` / `serialisation_wait` | 3280, 4093, 10150, 10172, 18012 | `win.eventlog.management.vm_name` |  |
+| `hyperv_vm_start_failed` / `default` | 3050, 3122, 15130, 15500 | `win.eventlog.management.vm_name` |  |
+| `hyperv_vm_storage_request_slow` / `default` | 9 | `win.eventlog.management.vm_storage_opcode` `win.eventlog.management.vm_storage_request_ms` `win.eventlog.management.vm_storage_transfer_bytes` |  |
+| `hyperv_vm_vhd_chain_corrupted` / `chain_broken` | 7, 16370, 19100 | `win.eventlog.management.vhd_parent_guid_actual` `win.eventlog.management.vhd_parent_guid_expected` `win.eventlog.management.vm_name` |  |
+| `hyperv_vm_vhd_chain_corrupted` / `file_in_use` | 7, 16370, 19100 | `win.eventlog.management.vm_name` |  |
 | `mdm_policy_apply_failed` / `access_denied` | 201, 404, 454, 806, 821, 4022 | `win.eventlog.management.mdm_csp_uri` `win.eventlog.management.mdm_policy_area` `win.eventlog.management.mdm_policy_name` |  |
 | `mdm_policy_apply_failed` / `node_absent` | 201, 404, 454, 806, 821, 4022 | `win.eventlog.management.mdm_csp_uri` |  |
 | `mdm_policy_apply_failed` / `other_result` | 201, 404, 454, 806, 821, 4022 | `win.eventlog.management.mdm_csp_uri` |  |
@@ -99,18 +107,10 @@ The last column is different in kind: it is the author's account of the row or e
 | `scheduled_task_engine_failed` / `engine_unavailable` | 311 | `win.eventlog.management.task_engine_command` `win.eventlog.management.task_error_description` |  |
 | `scheduled_task_engine_failed` / `no_user_session` | 311 | `win.eventlog.management.task_engine_command` `win.eventlog.management.task_error_description` |  |
 | `scheduled_task_load_failed` / `default` | 146, 151 | `win.eventlog.management.task_name` |  |
-| `scheduled_task_logon_failed` / `default` | 104 | `win.eventlog.management.task_error_description` |  |
+| `scheduled_task_sign_in_failed` / `default` | 104 | `win.eventlog.management.task_error_description` |  |
 | `scheduled_task_start_failed` / `access_denied` | 101, 103, 202, 203 | `win.eventlog.management.task_name` |  |
 | `scheduled_task_start_failed` / `missing_action` | 101, 103, 202, 203 | `win.eventlog.management.task_name` |  |
 | `scheduled_task_start_failed` / `other_failure` | 101, 103, 202, 203 | `win.eventlog.management.task_name` |  |
-| `vm_backup_checkpoint_failed` / `checkpoint_failed` | 3280, 4093, 10150, 10172, 18012 | `win.eventlog.management.vm_name` |  |
-| `vm_backup_checkpoint_failed` / `guest_writer_failed` | 3280, 4093, 10150, 10172, 18012 | `win.eventlog.management.vm_name` |  |
-| `vm_backup_checkpoint_failed` / `integration_service_disabled` | 3280, 4093, 10150, 10172, 18012 | `win.eventlog.management.vm_name` |  |
-| `vm_backup_checkpoint_failed` / `serialisation_wait` | 3280, 4093, 10150, 10172, 18012 | `win.eventlog.management.vm_name` |  |
-| `vm_start_failed` / `default` | 3050, 3122, 15130, 15500 | `win.eventlog.management.vm_name` |  |
-| `vm_storage_request_slow` / `default` | 9 | `win.eventlog.management.vm_storage_opcode` `win.eventlog.management.vm_storage_request_ms` `win.eventlog.management.vm_storage_transfer_bytes` |  |
-| `vm_vhd_chain_corrupted` / `chain_broken` | 7, 16370, 19100 | `win.eventlog.management.vhd_parent_guid_actual` `win.eventlog.management.vhd_parent_guid_expected` `win.eventlog.management.vm_name` |  |
-| `vm_vhd_chain_corrupted` / `file_in_use` | 7, 16370, 19100 | `win.eventlog.management.vm_name` |  |
 | `win_locale_registry_read_failed` / `default` | 1001 | `win.eventlog.management.locale_registry_key` |  |
 | `wmi_query_failed` | 5858 | **fields: none** |  |
 

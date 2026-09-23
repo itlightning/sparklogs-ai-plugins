@@ -22,6 +22,11 @@
 | `sparklogs.data.performance.commit_pct_max_window` | float | percent | The highest commit charge percentage the window observed. |
 | `sparklogs.data.performance.hard_faults_per_s` | float | per_second | Hard page faults per second, latest 10s sample. |
 | `sparklogs.data.performance.ram_pct_time_in_hard_fault_storm` | float | percent | Percent of the window's time spent in a hard-fault storm. |
+| `sparklogs.data.performance.ram_total_bytes` | integer | bytes | Installed physical RAM, the same figure `system_info` reports, at the end of the window. |
+| `sparklogs.data.performance.ram_available_bytes` | integer | bytes | Physical RAM available to new allocations (free, zeroed and standby pages) at the end of the window. |
+| `sparklogs.data.performance.ram_standby_bytes` | integer | bytes | RAM holding cached pages the memory manager can repurpose (the standby list, all priorities) at the end of the window. Part of available. |
+| `sparklogs.data.performance.ram_modified_bytes` | integer | bytes | RAM holding dirty pages waiting to be written out (the modified list) at the end of the window. |
+| `sparklogs.data.performance.ram_compressed_bytes` | integer | bytes | RAM the memory-compression store holds resident at the end of the window. Absent where memory compression is off. |
 | `sparklogs.data.performance.cpu_busy_age_basis` | string |  | Whether the age beside it was measured from a witnessed onset (`onset`), from when the condition was first seen already true (`observed`), or is a posture with no meaningful onset (`unknown_ongoing`). An age without this is a duration a reader cannot weigh. |
 | `sparklogs.data.performance.cpu_busy_age_h` | float | hours | How long this condition has been open, in hours. |
 | `sparklogs.data.performance.cpu_interrupt_storm_age_basis` | string |  | Whether the age beside it was measured from a witnessed onset (`onset`), from when the condition was first seen already true (`observed`), or is a posture with no meaningful onset (`unknown_ongoing`). An age without this is a duration a reader cannot weigh. |
@@ -30,7 +35,7 @@
 | `sparklogs.data.performance.cpu_kernel_dominated_age_h` | float | hours | How long this condition has been open, in hours. |
 | `sparklogs.data.performance.cpu_throttled_under_load_age_basis` | string |  | Whether the age beside it was measured from a witnessed onset (`onset`), from when the condition was first seen already true (`observed`), or is a posture with no meaningful onset (`unknown_ongoing`). An age without this is a duration a reader cannot weigh. |
 | `sparklogs.data.performance.cpu_throttled_under_load_age_h` | float | hours | How long this condition has been open, in hours. |
-| `sparklogs.data.performance.ram_commit_high_age_basis` | string |  | Whether the age beside it was measured from a witnessed onset (`onset`), from when the condition was first seen already true (`observed`), or is a posture with no meaningful onset (`unknown_ongoing`). An age without this is a duration a reader cannot weigh. |
-| `sparklogs.data.performance.ram_commit_high_age_h` | float | hours | How long this condition has been open, in hours. |
+| `sparklogs.data.performance.ram_commit_near_cap_age_basis` | string |  | Whether the age beside it was measured from a witnessed onset (`onset`), from when the condition was first seen already true (`observed`), or is a posture with no meaningful onset (`unknown_ongoing`). An age without this is a duration a reader cannot weigh. |
+| `sparklogs.data.performance.ram_commit_near_cap_age_h` | float | hours | How long this condition has been open, in hours. |
 | `sparklogs.data.performance.ram_hard_fault_storm_age_basis` | string |  | Whether the age beside it was measured from a witnessed onset (`onset`), from when the condition was first seen already true (`observed`), or is a posture with no meaningful onset (`unknown_ongoing`). An age without this is a duration a reader cannot weigh. |
 | `sparklogs.data.performance.ram_hard_fault_storm_age_h` | float | hours | How long this condition has been open, in hours. |

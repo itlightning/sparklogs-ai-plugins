@@ -19,8 +19,8 @@ Every section below is from the public reason block only.
 | `av_threat_not_remediated` | `endpoint_protection` | Serious |  |
 | `av_threat_remediated` | `endpoint_protection` | Warning |  |
 | `av_threat_remediation_failed` | `endpoint_protection` | Error |  |
-| `defender_asr_block` | `endpoint_protection` | Warning |  |
-| `defender_network_protection_block` | `endpoint_protection` | Warning |  |
+| `defender_asr_blocked` | `endpoint_protection` | Warning |  |
+| `defender_network_protection_blocked` | `endpoint_protection` | Warning |  |
 
 ## `av_config_changed`
 
@@ -165,7 +165,7 @@ Microsoft Defender tried to remediate a detected threat and failed.
 - Review Error Code and the affected Path.
 - Run follow-up scan or manual cleanup if the threat is still present.
 
-## `defender_asr_block`
+## `defender_asr_blocked`
 
 Microsoft Defender Attack Surface Reduction blocked an operation.
 
@@ -178,7 +178,7 @@ Microsoft Defender Attack Surface Reduction blocked an operation.
 - Review rule ID, Path, and Process Name.
 - Distinguish enforce-mode blocks from audit-mode would-block records.
 
-## `defender_network_protection_block`
+## `defender_network_protection_blocked`
 
 Microsoft Defender Network Protection blocked a connection.
 

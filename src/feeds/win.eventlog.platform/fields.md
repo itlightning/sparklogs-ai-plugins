@@ -77,7 +77,6 @@ Stored flat under the `win.eventlog.platform.` prefix.
 | `win.eventlog.platform.font_load_blocked` | bool | Whether Windows blocked the font load. |
 | `win.eventlog.platform.font_source_type` | int | Font source type reported by Windows. |
 | `win.eventlog.platform.font_file` | string | Font filename without its source path. |
-| `win.eventlog.platform.source_process` | string | Process filename without its source path. |
 | `win.eventlog.platform.thermal_zone` | string | ACPI thermal zone object reported by firmware. |
 | `win.eventlog.platform.thermal_temperature_k` | float | Thermal zone temperature reported in Kelvin. |
 | `win.eventlog.platform.thermal_active_trip_k` | float | Active cooling trip point reported in Kelvin. |
@@ -99,7 +98,12 @@ Stored flat under the `win.eventlog.platform.` prefix.
 
 ## Portable families
 
-This module populates no portable family.
+Cross-feed families: the same path means the same thing on every data feed that populates it, so a query written against one channel transfers.
+Prefer these over the per-feed fields for anything that spans feeds.
+
+| LQL path | Family means |
+|---|---|
+| `sparklogs.process.name` | The process the event is about. |
 
 ## Tail keys and where the value is queryable
 
@@ -119,14 +123,12 @@ The last column is different in kind: it is the author's account of the row or e
 
 | Surface | Event ids | Fields set | Row fields |
 |---|---|---|---|
-| `boot_integrity_measurement_failed` / `measured_boot` | 208, 235 | `win.eventlog.platform.boot_measure_init_state` `win.eventlog.platform.boot_measure_reason_code` |  |
-| `boot_integrity_measurement_failed` / `tpm_initialization` | 208, 235 | `win.eventlog.platform.tpm_init_position` |  |
 | `device_install_reboot_pending` / `default` | 8000 | `win.eventlog.platform.device_class` |  |
 | `device_removal_vetoed` / `default` | 1000 | `win.eventlog.platform.device_class` `win.eventlog.platform.pnp_veto_holder` `win.eventlog.platform.pnp_veto_type` `win.eventlog.platform.pnp_veto_type_name` |  |
 | `device_removed_after_failure` / `default` | 1011 | `win.eventlog.platform.device_class` `win.eventlog.platform.device_count` |  |
-| `device_security_assessment_reported` / `failed` | 14, 15 | `win.eventlog.platform.security_assessment_failed_areas` `win.eventlog.platform.security_assessment_result` `win.eventlog.platform.security_assessment_score` |  |
-| `device_security_assessment_reported` / `other_assessment` | 14, 15 | `win.eventlog.platform.security_assessment_failed_areas` `win.eventlog.platform.security_assessment_result` `win.eventlog.platform.security_assessment_score` |  |
-| `device_security_assessment_reported` / `passed_with_warnings` | 14, 15 | `win.eventlog.platform.security_assessment_failed_areas` `win.eventlog.platform.security_assessment_result` `win.eventlog.platform.security_assessment_score` |  |
+| `device_security_assessment_failed` / `default` | 14, 15 | `win.eventlog.platform.security_assessment_failed_areas` `win.eventlog.platform.security_assessment_result` `win.eventlog.platform.security_assessment_score` |  |
+| `device_security_assessment_passed` / `other_assessment` | 14, 15 | `win.eventlog.platform.security_assessment_failed_areas` `win.eventlog.platform.security_assessment_result` `win.eventlog.platform.security_assessment_score` |  |
+| `device_security_assessment_passed` / `passed_with_warnings` | 14, 15 | `win.eventlog.platform.security_assessment_failed_areas` `win.eventlog.platform.security_assessment_result` `win.eventlog.platform.security_assessment_score` |  |
 | `device_software_install_failed` / `install_failed` | 121, 151, 152, 163, 164, 172, 191 | `win.eventlog.platform.device_class` `win.eventlog.platform.device_software_exit_code` `win.eventlog.platform.device_software_name` |  |
 | `device_software_install_failed` / `removal_failed` | 121, 151, 152, 163, 164, 172, 191 | `win.eventlog.platform.device_class` `win.eventlog.platform.device_software_exit_code` `win.eventlog.platform.device_software_name` |  |
 | `device_software_install_failed` / `transient` | 121, 151, 152, 163, 164, 172, 191 | `win.eventlog.platform.device_class` `win.eventlog.platform.device_software_exit_code` `win.eventlog.platform.device_software_name` |  |
@@ -137,10 +139,11 @@ The last column is different in kind: it is the author's account of the row or e
 | `firmware_verification_scan_failed` / `unreachable` | 2, 20, 42, 43, 47 | `win.eventlog.platform.firmware_scan_name` `win.eventlog.platform.firmware_scan_result` `win.eventlog.platform.firmware_scan_result_code` |  |
 | `firmware_verification_scan_failed` / `unsupported` | 2, 20, 42, 43, 47 | `win.eventlog.platform.firmware_scan_name` `win.eventlog.platform.firmware_scan_result` `win.eventlog.platform.firmware_scan_result_code` |  |
 | `firmware_verification_scan_failed` / `verification_failed` | 2, 20, 42, 43, 47 | `win.eventlog.platform.firmware_scan_name` `win.eventlog.platform.firmware_scan_result` `win.eventlog.platform.firmware_scan_result_code` |  |
-| `font_load_blocked` / `allowed` | 260 | `win.eventlog.platform.font_file` `win.eventlog.platform.font_load_blocked` `win.eventlog.platform.font_source_type` `win.eventlog.platform.source_process` |  |
-| `font_load_blocked` / `blocked` | 260 | `win.eventlog.platform.font_file` `win.eventlog.platform.font_load_blocked` `win.eventlog.platform.font_source_type` `win.eventlog.platform.source_process` |  |
-| `gpu_resource_contention` / `default` | 500 | `win.eventlog.platform.gpu_contention_scenario` `win.eventlog.platform.gpu_memory_bandwidth` `win.eventlog.platform.gpu_memory_bytes` |  |
+| `font_load_allowed` / `default` | 260 | `win.eventlog.platform.font_file` `win.eventlog.platform.font_load_blocked` `win.eventlog.platform.font_source_type` |  |
+| `font_load_blocked` / `default` | 260 | `win.eventlog.platform.font_file` `win.eventlog.platform.font_load_blocked` `win.eventlog.platform.font_source_type` |  |
+| `gpu_resources_saturated` / `default` | 500 | `win.eventlog.platform.gpu_contention_scenario` `win.eventlog.platform.gpu_memory_bandwidth` `win.eventlog.platform.gpu_memory_bytes` |  |
 | `live_kernel_dump_requested` / `default` | 1001, 1002 | `win.eventlog.platform.live_dump_component` `win.eventlog.platform.live_dump_granted_policy` `win.eventlog.platform.live_dump_requested_policy` `win.eventlog.platform.live_dump_throttled` |  |
+| `measured_boot_failed` / `default` | 208 | `win.eventlog.platform.boot_measure_init_state` `win.eventlog.platform.boot_measure_reason_code` |  |
 | `os_boot_duration_high` / `component` | 100, 101, 103, 107, 108 | `win.eventlog.platform.startup_component` `win.eventlog.platform.startup_component_degradation_ms` `win.eventlog.platform.startup_component_total_ms` |  |
 | `os_boot_duration_high` / `whole_boot` | 100, 101, 103, 107, 108 | `win.eventlog.platform.boot_duration_ms` `win.eventlog.platform.boot_is_degradation` `win.eventlog.platform.boot_main_path_ms` `win.eventlog.platform.boot_post_boot_ms` `win.eventlog.platform.boot_startup_app_count` |  |
 | `os_clock_drift` / `default` | 282 | `win.eventlog.platform.clock_drift_seconds_per_day` `win.eventlog.platform.clock_freq_error_ppm` `win.eventlog.platform.clock_measure_window_minutes` |  |
@@ -154,13 +157,14 @@ The last column is different in kind: it is the author's account of the row or e
 | `platform_tamper_indicator_reported` / `partial` | 10, 11, 12 | `win.eventlog.platform.firmware_indicator_category` `win.eventlog.platform.firmware_indicator_events` |  |
 | `platform_tamper_indicator_reported` / `reported` | 10, 11, 12 | `win.eventlog.platform.firmware_indicator_category` `win.eventlog.platform.firmware_indicator_events` |  |
 | `portable_device_unresponsive` / `default` | 1006, 1007, 1008 | `win.eventlog.platform.mtp_operation_code` |  |
-| `ram_commit_high` / `allocation_failed` | 1003, 1007, 1008 | **fields: none** |  |
-| `ram_commit_high` / `diagnosis_failed` | 1003, 1007, 1008 | **fields: none** |  |
-| `ram_commit_high` / `notified` | 1003, 1007, 1008 | `win.eventlog.platform.mem_commit_bytes` `win.eventlog.platform.mem_commit_limit_bytes` `win.eventlog.platform.mem_commit_ratio` |  |
+| `ram_commit_exhausted` / `allocation_failed` | 1003, 1007, 1008 | **fields: none** |  |
+| `ram_commit_exhausted` / `diagnosis_failed` | 1003, 1007, 1008 | **fields: none** |  |
+| `ram_commit_exhausted` / `notified` | 1003, 1007, 1008 | `win.eventlog.platform.mem_commit_bytes` `win.eventlog.platform.mem_commit_limit_bytes` `win.eventlog.platform.mem_commit_ratio` |  |
 | `secure_boot_revocation_update_failed` / `default` | 292 | `win.eventlog.platform.secure_boot_sbat_failure_point` `win.eventlog.platform.secure_boot_sbat_firmware_level` `win.eventlog.platform.secure_boot_sbat_update_status` |  |
 | `thermal_cooling_engaged` / `active` | 114, 116 | `win.eventlog.platform.thermal_active_trip_k` `win.eventlog.platform.thermal_min_throttle` `win.eventlog.platform.thermal_passive_trip_k` `win.eventlog.platform.thermal_temperature_k` `win.eventlog.platform.thermal_zone` |  |
 | `thermal_cooling_engaged` / `disengaged` | 114, 116 | `win.eventlog.platform.thermal_active_trip_k` `win.eventlog.platform.thermal_min_throttle` `win.eventlog.platform.thermal_passive_trip_k` `win.eventlog.platform.thermal_temperature_k` `win.eventlog.platform.thermal_zone` |  |
 | `thermal_cooling_engaged` / `passive` | 114, 116 | `win.eventlog.platform.thermal_active_trip_k` `win.eventlog.platform.thermal_min_throttle` `win.eventlog.platform.thermal_passive_trip_k` `win.eventlog.platform.thermal_temperature_k` `win.eventlog.platform.thermal_zone` |  |
+| `tpm_initialization_failed` / `default` | 235 | `win.eventlog.platform.tpm_init_position` |  |
 | `usb_controller_error` / `default` | 1, 50, 62 | `win.eventlog.platform.usb_error_reason` `win.eventlog.platform.usb_failure_subtype` `win.eventlog.platform.usb_failure_type` `win.eventlog.platform.usb_ucsi_command` |  |
 | `win_trace_session_failed` / `already_running` | 0, 1, 2, 3, 4, 28 | `win.eventlog.platform.trace_session_name` |  |
 | `win_trace_session_failed` / `disk_full` | 0, 1, 2, 3, 4, 28 | `win.eventlog.platform.trace_session_name` |  |
@@ -174,5 +178,5 @@ These carry class, reason and message text only.
 A predicate over them uses the reason, the class, or the retained payload; there is no promoted field to filter on.
 
 - `os_crash_dump_unavailable` / `default`
-- `ram_commit_high` / `allocation_failed`
-- `ram_commit_high` / `diagnosis_failed`
+- `ram_commit_exhausted` / `allocation_failed`
+- `ram_commit_exhausted` / `diagnosis_failed`

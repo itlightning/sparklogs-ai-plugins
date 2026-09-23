@@ -44,9 +44,9 @@ The last column is different in kind: it is the author's account of the row or e
 |---|---|---|---|
 | `sparklogs_agent_config_rejected` / `default` | n/a | **fields: none** |  |
 | `sparklogs_agent_emission_capped` / `default` | n/a | **fields: none** |  |
-| `sparklogs_agent_spool_drop` / `default` | n/a | **fields: none** |  |
-| `sparklogs_agent_spool_expire` / `default` | n/a | **fields: none** |  |
-| `sparklogs_agent_spool_truncate` / `default` | n/a | **fields: none** |  |
+| `sparklogs_agent_event_truncated` / `default` | n/a | **fields: none** |  |
+| `sparklogs_agent_spool_dropped` / `default` | n/a | **fields: none** |  |
+| `sparklogs_agent_spool_expired` / `default` | n/a | **fields: none** |  |
 
 ### Surfaces that promote nothing
 
@@ -55,6 +55,6 @@ A predicate over them uses the reason, the class, or the retained payload; there
 
 - `sparklogs_agent_config_rejected` / `default`
 - `sparklogs_agent_emission_capped` / `default`
-- `sparklogs_agent_spool_drop` / `default`
-- `sparklogs_agent_spool_expire` / `default`
-- `sparklogs_agent_spool_truncate` / `default`
+- `sparklogs_agent_event_truncated` / `default`
+- `sparklogs_agent_spool_dropped` / `default`
+- `sparklogs_agent_spool_expired` / `default`

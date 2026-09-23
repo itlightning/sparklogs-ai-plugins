@@ -9,28 +9,30 @@ Every section below is from the public reason block only.
 | reason | service | severity | benign |
 |---|---|---|---|
 | `applocker_audit_would_block` | `security_audit` | Notice |  |
-| `applocker_component_unavailable` | `security_audit` | Notice |  |
-| `bitlocker_recovery_key_backup_failed` |  | Error or Info | benign possible |
-| `bitlocker_secure_boot_unavailable` |  | Notice |  |
+| `applocker_unsupported_windows_edition` | `security_audit` | Notice |  |
+| `bitlocker_recovery_key_backup_failed` | `encryption` | Error or Info | benign possible |
+| `bitlocker_secure_boot_unavailable` | `encryption` | Notice |  |
 | `cert_expired` | `certificates` | Warning |  |
 | `cert_expiring` | `certificates` | Warning |  |
 | `code_integrity_catalog_load_failed` | `security_audit` | Notice or Info | benign possible |
 | `code_integrity_driver_revoked` | `security_audit` | Warning |  |
 | `code_integrity_image_hash_missing` | `security_audit` | Warning or Notice |  |
-| `code_integrity_load_blocked_signing_level` | `security_audit` | Warning |  |
-| `code_integrity_policy_block` | `security_audit` | Warning or Notice |  |
+| `code_integrity_policy_audit_would_block` | `security_audit` | Notice |  |
+| `code_integrity_policy_blocked` | `security_audit` | Warning |  |
+| `code_integrity_signing_level_blocked` | `security_audit` | Warning |  |
 | `crypto_key_operation_failed` | `certificates` | Notice or Debug | benign possible |
 | `defender_sensor_connection_failed` | `endpoint_protection` | Warning or Info | benign possible |
-| `device_encryption_enable_failed` |  | Warning |  |
+| `device_encryption_enable_failed` | `encryption` | Warning |  |
 | `device_registration_failed` | `device_management` | Warning or Notice |  |
 | `dpapi_unprotect_failed` | `certificates` | Notice |  |
 | `entra_device_certificate_update_failed` | `device_management` | Warning |  |
-| `entra_logon_failed` | `auth` | Notice for a wrong credential or an unreachable service, Warning for a refusal the event does not explain. |  |
+| `entra_sign_in_failed` | `auth` | Notice for a wrong credential or an unreachable service, Warning for a refusal the event does not explain. |  |
 | `entra_token_acquisition_failed` | `auth` | Info where the library is asking for a sign-in, Notice for a transport failure, Warning where a tenant setting refused the request. | benign possible |
-| `exploit_mitigation_block` | `security_audit` | Notice, Info or Verbose | benign possible |
+| `exploit_mitigation_audit_would_block` | `security_audit` | Info | benign |
+| `exploit_mitigation_blocked` | `security_audit` | Notice or Verbose | benign possible |
 | `exploit_mitigation_shadow_stack_mismatch` | `security_audit` | Notice on the documented compatibility path, Warning where nothing on the event explains the mismatch. |  |
-| `group_policy_cse_apply_failed` | `device_management` | Minor or Info | benign possible |
 | `group_policy_domain_controller_unresolved` | `device_management` | Warning or Notice |  |
+| `group_policy_extension_apply_failed` | `device_management` | Minor or Info | benign possible |
 | `group_policy_file_share_unhardened` | `device_management` | Notice |  |
 | `group_policy_processing_failed` | `device_management` | Notice on a device that moves and loses the corporate network, Warning otherwise. |  |
 | `laps_password_backup_failed` | `auth` | Warning |  |
@@ -53,7 +55,7 @@ An application-control policy running in audit mode would have blocked this file
 - Together they form the work list for moving an application-control policy from audit to enforced.
 - One instance alone tells an engineer nothing.
 
-## `applocker_component_unavailable`
+## `applocker_unsupported_windows_edition`
 
 An application-control policy reached a device whose Windows edition cannot enforce it.
 
@@ -165,7 +167,33 @@ Windows found no signature on a file it was asked to load, so it could not verif
 - A kernel driver with an unverifiable hash is worth a ticket.
 - A user-mode scanning library reflects the vendor's packaging and needs no action.
 
-## `code_integrity_load_blocked_signing_level`
+## `code_integrity_policy_audit_would_block`
+
+A configured Code Integrity policy recorded that enforcement would have refused a file, under audit mode.
+
+**Severity:** Notice
+
+**Impact:** Nothing was denied; the file ran. An engineer moving this policy to enforcement needs this record to know what enforcement would then refuse.
+
+**Consider:**
+
+- Read the policy name first.
+- This is a heads-up: nothing failed on this device.
+
+## `code_integrity_policy_blocked`
+
+A configured Code Integrity policy refused a file under enforcement.
+
+**Severity:** Warning
+
+**Impact:** The file did not load, so whatever needs it is broken now.
+
+**Consider:**
+
+- Read the policy name first.
+- The driver failed to load, so whatever needs that driver is broken now.
+
+## `code_integrity_signing_level_blocked`
 
 An application-control policy or a code-signing requirement on this device blocked a file from loading.
 
@@ -180,20 +208,6 @@ An application-control policy or a code-signing requirement on this device block
 - If it does not, treat the load attempt as unwanted software.
 
 Not collected: Windows also logs this event when one of its own protected system processes refuses a third-party library (requested levels 7, 8, 12 and 14). Only Microsoft-signed code can pass that check, the vendor cannot obtain that signature, nothing is broken and no setting changes it, so those rows are dropped before collection.
-
-## `code_integrity_policy_block`
-
-A configured Code Integrity policy refused a file, or recorded that enforcement would have refused it.
-
-**Severity:** Warning or Notice
-
-**Impact:** Under enforcement the file did not load, so whatever needs it is broken now. In audit mode the file ran and nothing was denied.
-
-**Consider:**
-
-- Read the policy name first.
-- An audit-mode hit warns what enforcement would do.
-- An enforced hit means the driver failed to load, so whatever needs that driver is broken now.
 
 ## `crypto_key_operation_failed`
 
@@ -279,7 +293,7 @@ The device failed to refresh the certificate that proves its identity to the dir
 - Check whether its key still exists in the trusted platform module.
 - This shape precedes a device silently dropping out of compliance.
 
-## `entra_logon_failed`
+## `entra_sign_in_failed`
 
 The cloud authentication plugin refused a sign-in on this device.
 
@@ -308,11 +322,22 @@ The device failed to get a token for a cloud resource.
 - A grant or consent error points to a tenant configuration problem, and no work on the device fixes that.
 - An interaction-required message reports normal sign-in flow.
 
-## `exploit_mitigation_block`
+## `exploit_mitigation_audit_would_block`
 
-Exploit protection stopped a process from an action its policy forbids, or recorded that enforcement would have stopped it.
+Exploit protection recorded that enforcement would have stopped a process, under audit mode.
 
-**Severity:** Notice, Info or Verbose
+**Severity:** Info
+
+**Consider:**
+
+- This is a heads-up: nothing was denied on this device.
+- An engineer moving this mitigation to enforcement needs this record to know what it would hit.
+
+## `exploit_mitigation_blocked`
+
+Exploit protection stopped a process from an action its policy forbids, under enforcement.
+
+**Severity:** Notice or Verbose
 
 **Consider:**
 
@@ -336,7 +361,21 @@ A process returned to a different address from the one the hardware shadow stack
 - A recognized application with a known compatibility reason is the ordinary case.
 - The same reason on a process with no business rewriting return addresses is worth investigating.
 
-## `group_policy_cse_apply_failed`
+## `group_policy_domain_controller_unresolved`
+
+The machine could not find or could not reach a domain controller.
+
+**Severity:** Warning or Notice
+
+**Impact:** Everything downstream of that step fails: no policy applies, and the device cannot register either.
+
+**Consider:**
+
+- A no-such-domain code means the domain itself failed to resolve, which is a name-resolution or connectivity problem.
+- An access-denied code means the machine account is the problem.
+- Read this alongside device registration: a device that cannot find a controller cannot register either.
+
+## `group_policy_extension_apply_failed`
 
 A Group Policy client-side extension could not apply the settings from a policy object.
 
@@ -351,20 +390,6 @@ A Group Policy client-side extension could not apply the settings from a policy 
 - Read the extension name and the code together.
 - A network path error on the drive-maps or folder-redirection extension means the machine could not reach the policy share.
 - An access-denied error on the security extension means the policy object itself has a permissions problem.
-
-## `group_policy_domain_controller_unresolved`
-
-The machine could not find or could not reach a domain controller.
-
-**Severity:** Warning or Notice
-
-**Impact:** Everything downstream of that step fails: no policy applies, and the device cannot register either.
-
-**Consider:**
-
-- A no-such-domain code means the domain itself failed to resolve, which is a name-resolution or connectivity problem.
-- An access-denied code means the machine account is the problem.
-- Read this alongside device registration: a device that cannot find a controller cannot register either.
 
 ## `group_policy_file_share_unhardened`
 

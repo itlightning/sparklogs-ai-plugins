@@ -14,6 +14,10 @@ Every section below is from the public reason block only.
 | `dfsr_replication_stopped` | `directory_services` | Serious or Warning |  |
 | `dfsr_sysvol_initial_sync_pending` | `directory_services` | Warning |  |
 | `hyperv_replication_failed` | `virtualization` | Warning or Notice |  |
+| `hyperv_vm_backup_checkpoint_failed` | `virtualization` | Warning, Notice or Info | benign possible |
+| `hyperv_vm_start_failed` | `virtualization` | Warning |  |
+| `hyperv_vm_storage_request_slow` | `virtualization` | Warning for a slow request. Minor where the request took more than thirty seconds. |  |
+| `hyperv_vm_vhd_chain_corrupted` | `virtualization` | Serious or Info | benign possible |
 | `mdm_policy_apply_failed` | `device_management` | Warning, Notice or Info | benign possible |
 | `patch_download_failed` | `patching` | Warning |  |
 | `patch_scan_failed` | `patching` | Warning or Info | benign possible |
@@ -21,12 +25,8 @@ Every section below is from the public reason block only.
 | `printer_driver_install_failed` | `printing` | Warning where an add or an import failed. Notice where the spooler was only asking the driver store whether it already held the driver. |  |
 | `scheduled_task_engine_failed` | `scheduled_tasks` | Warning or Info | benign possible |
 | `scheduled_task_load_failed` | `scheduled_tasks` | Warning |  |
-| `scheduled_task_logon_failed` | `scheduled_tasks` | Warning |  |
+| `scheduled_task_sign_in_failed` | `scheduled_tasks` | Warning |  |
 | `scheduled_task_start_failed` | `scheduled_tasks` | Warning where a named automation stopped running. Lower where the task ships with Windows and the program it points at was removed by Windows. |  |
-| `vm_backup_checkpoint_failed` | `virtualization` | Warning, Notice or Info | benign possible |
-| `vm_start_failed` | `virtualization` | Warning |  |
-| `vm_storage_request_slow` | `virtualization` | Warning for a slow request. Minor where the request took more than thirty seconds. |  |
-| `vm_vhd_chain_corrupted` | `virtualization` | Serious or Info | benign possible |
 | `win_locale_registry_read_failed` | `user_profiles` | Warning |  |
 
 ## `bitlocker_policy_noncompliant`
@@ -118,6 +118,67 @@ Hyper-V could not replicate a virtual machine to its replica server.
 - A stated retry means the host will try again on its own. Repeated unreachable records are the ones that matter.
 
 The machine keeps running throughout, so nobody finds out the copy is stale until they need it.
+
+## `hyperv_vm_backup_checkpoint_failed`
+
+A backup of a virtual machine did not take a consistent snapshot.
+
+**Severity:** Warning, Notice or Info
+
+**Impact:** The backup either did not run or ran without being application-consistent, so the restore point it produced is weaker than it looks.
+
+**Consider:**
+
+- Read the result code: a snapshot set already in progress is two jobs overlapping and is fixed by scheduling.
+- A file-already-exists result is a stale checkpoint file left behind by an earlier failure.
+- The integration-service line is a per-machine setting rather than a failure of this run.
+
+A failed guest writer still usually leaves a crash-consistent copy, which is not the same as no backup at all.
+
+## `hyperv_vm_start_failed`
+
+A virtual machine, or the worker process that runs one, did not start.
+
+**Severity:** Warning
+
+**Impact:** A workload that was supposed to be running is not, and on the memory ids the host did not have room for it.
+
+**Consider:**
+
+- Check the host's free memory when the worker ids are the ones reporting.
+- The machine name is the pivot: one machine failing every start is a different ticket from a host that is full.
+
+These templates carry no result code, so the machine name and the id are what the row offers.
+
+## `hyperv_vm_storage_request_slow`
+
+A storage request a virtualization host made for one of its guests took longer than expected to complete.
+
+**Severity:** Warning for a slow request. Minor where the request took more than thirty seconds.
+
+**Impact:** Every guest on that host shares the same storage path, so a steady rate of these degrades all of them.
+
+**Consider:**
+
+- Read the rate before the duration: one slow request is a flake.
+- The virtual disk the request was against is named in the message text.
+
+The duration measures one request rather than how long a condition has held.
+
+## `hyperv_vm_vhd_chain_corrupted`
+
+A differencing virtual disk and its parent disagree on the parent identity, so the disk chain cannot be merged or checkpointed.
+
+**Severity:** Serious or Info
+
+**Impact:** Checkpoints and backups of that machine are not usable, and the chain grows while the merge keeps failing.
+
+**Consider:**
+
+- Stop taking checkpoints of that machine and repair the chain before anything merges it.
+- Watch the volume the chain lives on: a merge that keeps failing is how it fills.
+
+The machine keeps running while this holds, so nothing else reports it until a restore is attempted.
 
 ## `mdm_policy_apply_failed`
 
@@ -224,7 +285,7 @@ A scheduled task definition could not be read at service start, so the task is n
 
 The two event ids report one load attempt twice, so they arrive as a pair for the same task.
 
-## `scheduled_task_logon_failed`
+## `scheduled_task_sign_in_failed`
 
 Task Scheduler could not log on as the account a scheduled task stores, so the task did not run.
 
@@ -254,67 +315,6 @@ A scheduled task did not run, and the result code says whether the program was m
 - Pivot on the task path to see whether one task fails every time it is triggered.
 
 The four event ids report one launch from four places, so a single failed run can produce more than one of them.
-
-## `vm_backup_checkpoint_failed`
-
-A backup of a virtual machine did not take a consistent snapshot.
-
-**Severity:** Warning, Notice or Info
-
-**Impact:** The backup either did not run or ran without being application-consistent, so the restore point it produced is weaker than it looks.
-
-**Consider:**
-
-- Read the result code: a snapshot set already in progress is two jobs overlapping and is fixed by scheduling.
-- A file-already-exists result is a stale checkpoint file left behind by an earlier failure.
-- The integration-service line is a per-machine setting rather than a failure of this run.
-
-A failed guest writer still usually leaves a crash-consistent copy, which is not the same as no backup at all.
-
-## `vm_start_failed`
-
-A virtual machine, or the worker process that runs one, did not start.
-
-**Severity:** Warning
-
-**Impact:** A workload that was supposed to be running is not, and on the memory ids the host did not have room for it.
-
-**Consider:**
-
-- Check the host's free memory when the worker ids are the ones reporting.
-- The machine name is the pivot: one machine failing every start is a different ticket from a host that is full.
-
-These templates carry no result code, so the machine name and the id are what the row offers.
-
-## `vm_storage_request_slow`
-
-A storage request a virtualization host made for one of its guests took longer than expected to complete.
-
-**Severity:** Warning for a slow request. Minor where the request took more than thirty seconds.
-
-**Impact:** Every guest on that host shares the same storage path, so a steady rate of these degrades all of them.
-
-**Consider:**
-
-- Read the rate before the duration: one slow request is a flake.
-- The virtual disk the request was against is named in the message text.
-
-The duration measures one request rather than how long a condition has held.
-
-## `vm_vhd_chain_corrupted`
-
-A differencing virtual disk and its parent disagree on the parent identity, so the disk chain cannot be merged or checkpointed.
-
-**Severity:** Serious or Info
-
-**Impact:** Checkpoints and backups of that machine are not usable, and the chain grows while the merge keeps failing.
-
-**Consider:**
-
-- Stop taking checkpoints of that machine and repair the chain before anything merges it.
-- Watch the volume the chain lives on: a merge that keeps failing is how it fills.
-
-The machine keeps running while this holds, so nothing else reports it until a restore is attempted.
 
 ## `win_locale_registry_read_failed`
 

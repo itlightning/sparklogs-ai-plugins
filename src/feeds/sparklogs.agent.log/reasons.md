@@ -10,9 +10,9 @@ Every section below is from the public reason block only.
 |---|---|---|---|
 | `sparklogs_agent_config_rejected` | `rmm` | Warning |  |
 | `sparklogs_agent_emission_capped` | `rmm` | Warning |  |
-| `sparklogs_agent_spool_drop` | `rmm` | Warning |  |
-| `sparklogs_agent_spool_expire` | `rmm` | Warning |  |
-| `sparklogs_agent_spool_truncate` | `rmm` | Warning |  |
+| `sparklogs_agent_event_truncated` | `rmm` | Warning |  |
+| `sparklogs_agent_spool_dropped` | `rmm` | Warning |  |
+| `sparklogs_agent_spool_expired` | `rmm` | Warning |  |
 
 ## `sparklogs_agent_config_rejected`
 
@@ -30,7 +30,15 @@ The agent suppressed further events for one category after it hit its emission c
 
 **Impact:** Some events for that category in that window were not sent; treat gaps in it as suppression, not absence.
 
-## `sparklogs_agent_spool_drop`
+## `sparklogs_agent_event_truncated`
+
+The agent truncated an oversized event.
+
+**Severity:** Warning
+
+**Impact:** The event remains present but some detail is missing.
+
+## `sparklogs_agent_spool_dropped`
 
 The agent dropped sealed spool data to stay under its disk cap.
 
@@ -38,18 +46,10 @@ The agent dropped sealed spool data to stay under its disk cap.
 
 **Impact:** Older buffered telemetry from this host is no longer recoverable.
 
-## `sparklogs_agent_spool_expire`
+## `sparklogs_agent_spool_expired`
 
 The agent deleted spooled data that aged out before it could be sent.
 
 **Severity:** Warning
 
 **Impact:** Telemetry from this host covering that period is no longer recoverable.
-
-## `sparklogs_agent_spool_truncate`
-
-The agent truncated an oversized event.
-
-**Severity:** Warning
-
-**Impact:** The event remains present but some detail is missing.

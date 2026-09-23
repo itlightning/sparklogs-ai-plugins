@@ -13,20 +13,20 @@ Most failed-sign-in volume on an endpoint is a process probing for credentials i
 1. The credential-less probe is its own curated shape and is already banded down, so the reason plus the class separates it in one predicate.
 
    ```
-   sparklogs.reason = "logon_failed" AND sparklogs.class = "NOTABLE"
+   sparklogs.reason = "sign_in_failed" AND sparklogs.class = "NOTABLE"
    ```
 
 2. Group the survivors by cause. The decoded cause is what separates a mistype from enumeration from an account-state problem, and it reads without opening a body.
 
    ```
-   sparklogs.reason = "logon_failed"
+   sparklogs.reason = "sign_in_failed"
      AND win.eventlog.security.status_meaning != "no_credentials_available"
    ```
 
 3. Attribute what is left to the calling process. One dominant path (a backup or management agent) confirms noise; a spread of paths does not. Presence of the path field is the filter, and presence is its own predicate form.
 
    ```
-   sparklogs.reason = "logon_failed" AND sparklogs.process.path!
+   sparklogs.reason = "sign_in_failed" AND sparklogs.process.path!
    ```
 
 A failure whose code is not in the decode table leaves the cause unset and renders no cause token. Those rows keep the raw code in the tail and in the field, so they stay countable.
@@ -38,7 +38,7 @@ Both look like a pile of failures. The difference is the fan-out, and one groupi
 1. Restrict to ordinary accounts first, so machine-account churn does not dominate the counts.
 
    ```
-   sparklogs.reason = "logon_failed" AND sparklogs.actor.kind = "account"
+   sparklogs.reason = "sign_in_failed" AND sparklogs.actor.kind = "account"
      AND win.eventlog.security.status_meaning IN ("bad_password", "unknown_username")
    ```
 
@@ -69,7 +69,7 @@ The single highest-value pivot in this channel. A locked account is a ticket; th
 3. Pull that machine's failures for the same account, filtering on its display name as mapped above.
 
    ```
-   source = "WKSTN-042" AND sparklogs.reason = "logon_failed"
+   source = "WKSTN-042" AND sparklogs.reason = "sign_in_failed"
      AND sparklogs.actor.name = "j.doe"
    ```
 
@@ -140,7 +140,7 @@ A process presenting credentials that are not its own is how lateral movement lo
 1. Only the non-routine arm carries a reason, so the reason alone is the filter.
 
    ```
-   sparklogs.reason = "explicit_credential_use"
+   sparklogs.reason = "explicit_credential_used"
    ```
 
 2. Group by sparklogs.target.name and sparklogs.process.path. One account presented from many paths, or one unusual path across many endpoints, is the shape.
@@ -150,7 +150,7 @@ A process presenting credentials that are not its own is how lateral movement lo
 4. Drop self-refresh, where the presented account is the caller's own. A predicate compares a field to a literal, never to another field, so pin the caller under scrutiny by name (synthetic example: j.doe) and exclude that same name as the presented account.
 
    ```
-   sparklogs.reason = "explicit_credential_use"
+   sparklogs.reason = "explicit_credential_used"
      AND sparklogs.actor.name = "j.doe"
      AND sparklogs.target.name != "j.doe"
    ```

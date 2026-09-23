@@ -17,10 +17,10 @@
 | `sparklogs.data.storage_io.read_iops_max_10s` | float | iops | The highest 10-second read rate the window observed. |
 | `sparklogs.data.storage_io.write_iops_avg` | float | iops | The average write rate over the window. |
 | `sparklogs.data.storage_io.write_iops_max_10s` | float | iops | The highest 10-second write rate the window observed. |
-| `sparklogs.data.storage_io.read_mb_per_s_avg` | float | megabytes_per_second | The average read throughput over the window. |
-| `sparklogs.data.storage_io.read_mb_per_s_max_10s` | float | megabytes_per_second | The highest 10-second read throughput the window observed. |
-| `sparklogs.data.storage_io.write_mb_per_s_avg` | float | megabytes_per_second | The average write throughput over the window. |
-| `sparklogs.data.storage_io.write_mb_per_s_max_10s` | float | megabytes_per_second | The highest 10-second write throughput the window observed. |
+| `sparklogs.data.storage_io.read_mb_per_s_avg` | float | megabytes_per_second | The average read throughput over the window, in 1024-based MB per second. |
+| `sparklogs.data.storage_io.read_mb_per_s_max_10s` | float | megabytes_per_second | The highest 10-second read throughput the window observed, in 1024-based MB per second. |
+| `sparklogs.data.storage_io.write_mb_per_s_avg` | float | megabytes_per_second | The average write throughput over the window, in 1024-based MB per second. |
+| `sparklogs.data.storage_io.write_mb_per_s_max_10s` | float | megabytes_per_second | The highest 10-second write throughput the window observed, in 1024-based MB per second. |
 | `sparklogs.data.storage_io.read_latency_ms_avg` | float | milliseconds | The count-weighted average read latency over the window. |
 | `sparklogs.data.storage_io.write_latency_ms_avg` | float | milliseconds | The count-weighted average write latency over the window. |
 | `sparklogs.data.storage_io.latency_ms_p90_10s` | float | milliseconds | The 90th percentile, across the window's 10-second mean-latency samples, of latency. Chosen over a per-IO percentile because the tail matters and a median converges on the mean. |

@@ -8,43 +8,32 @@ Every section below is from the public reason block only.
 
 | reason | service | severity | benign |
 |---|---|---|---|
-| `boot_integrity_measurement_failed` | `os_stability` | Warning |  |
 | `device_install_reboot_pending` | `hardware` | Notice |  |
 | `device_removal_vetoed` | `hardware` | Notice |  |
 | `device_removed_after_failure` | `hardware` | Warning |  |
-| `device_security_assessment_reported` | `hardware` | Notice or Info |  |
+| `device_security_assessment_failed` | `hardware` | Notice |  |
+| `device_security_assessment_passed` | `hardware` | Notice or Info |  |
 | `device_software_install_failed` | `hardware` | Warning when a vendor installer exit code is present, Notice otherwise; Info for retry or stopped-update cases | benign possible |
 | `device_start_failed` | `hardware` | Warning |  |
 | `firmware_event_store_unavailable` | `hardware` | Warning or Notice |  |
 | `firmware_verification_scan_failed` | `hardware` | Notice or Info | benign possible |
-| `font_load_blocked` | `os_stability` | Notice or Info | benign possible |
-| `gpu_resource_contention` | `performance` | Notice |  |
+| `font_load_allowed` | `os_stability` | Info | benign |
+| `font_load_blocked` | `os_stability` | Notice |  |
+| `gpu_resources_saturated` | `performance` | Notice |  |
 | `live_kernel_dump_requested` | `os_stability` | Notice |  |
+| `measured_boot_failed` | `os_stability` | Warning |  |
 | `os_boot_duration_high` | `performance` | Warning for whole boot at 120 s or with BootIsDegradation; Notice for component degradation at 30 s or whole boot at 60 s |  |
 | `os_clock_drift` | `time_sync` | Notice |  |
 | `os_crash_dump_unavailable` | `os_stability` | Warning |  |
 | `os_shutdown_duration_high` | `performance` | Warning when ShutdownIsDegradation is true; Notice for long shutdown or slow service |  |
 | `platform_tamper_indicator_reported` | `endpoint_protection` | Error, Warning or Notice |  |
 | `portable_device_unresponsive` | `hardware` | Info |  |
-| `ram_commit_high` | `performance` | Warning at or above 95% commit ratio, Notice for diagnosis failure or lower ratio |  |
+| `ram_commit_exhausted` | `performance` | Warning at or above 95% commit ratio, Notice for diagnosis failure or lower ratio |  |
 | `secure_boot_revocation_update_failed` | `os_stability` | Info |  |
 | `thermal_cooling_engaged` | `hardware` | Notice or Info |  |
+| `tpm_initialization_failed` | `os_stability` | Warning |  |
 | `usb_controller_error` | `hardware` | Notice |  |
 | `win_trace_session_failed` | `os_stability` | Warning or Info | benign possible |
-
-## `boot_integrity_measurement_failed`
-
-Windows reported a boot-measurement library failure or a TPM initialization failure during boot.
-
-**Severity:** Warning
-
-**Impact:** These events identify a boot-measurement or TPM initialization problem. They do not establish TPM absence, BitLocker behavior, attestation results, or a boot-chain attack.
-
-**Consider:**
-
-- Read the event id and status from the promoted fields.
-- Check TPM readiness, Secure Boot state, firmware state, and related Windows boot records on the affected host.
-- Apply the vendor or Windows remediation for the reported status before changing TPM state.
 
 ## `device_install_reboot_pending`
 
@@ -87,11 +76,11 @@ A device dropped off its bus while the driver was still reporting it as failing.
 - Treat internal storage or network removal as a hardware ticket.
 - For USB peripherals, check cable, hub, and port when it repeats.
 
-## `device_security_assessment_reported`
+## `device_security_assessment_failed`
 
-A Dell security assessment scored this machine's platform posture.
+A Dell security assessment reported a failing result for this machine's platform posture.
 
-**Severity:** Notice or Info
+**Severity:** Notice
 
 **Impact:** The result and risk-area lines name settings an administrator controls. The score alone does not say what to fix.
 
@@ -100,6 +89,18 @@ A Dell security assessment scored this machine's platform posture.
 - Read the risk-area lines, not just the score.
 - Fix FAIL or HIGH areas such as missing BIOS password or disk encryption.
 - Treat UNAVAILABLE areas as scans that did not run; see firmware verification scan failures.
+
+## `device_security_assessment_passed`
+
+A Dell security assessment reported a passing result (with or without warnings) for this machine's platform posture.
+
+**Severity:** Notice or Info
+
+**Impact:** The result and risk-area lines name settings an administrator controls.
+
+**Consider:**
+
+- Read the risk-area lines even on a pass, if warnings are present.
 
 ## `device_software_install_failed`
 
@@ -157,20 +158,31 @@ A vendor firmware verification scan did not finish.
 - Open the proxy or firewall path when the result names a network error.
 - Ignore unsupported-platform results; the check never applies to that model.
 
-## `font_load_blocked`
+## `font_load_allowed`
 
-A process tried to load a font while a font-loading restriction was in force.
+A process loaded a font under an audit-mode font-loading policy.
 
-**Severity:** Notice or Info
+**Severity:** Info
 
-**Impact:** When Blocked is true, the named application renders or prints text incorrectly until the font is installed system-wide or the app is exempted.
+**Impact:** Audit-only context; nothing was refused.
 
 **Consider:**
 
-- Install the font system-wide or exempt the application when Blocked is true.
-- Treat Blocked false rows as audit-only context, not a user failure.
+- Treat this as audit-only context, not a user failure.
 
-## `gpu_resource_contention`
+## `font_load_blocked`
+
+A process tried to load a font while a font-loading restriction was in force, and Windows refused it.
+
+**Severity:** Notice
+
+**Impact:** The named application renders or prints text incorrectly until the font is installed system-wide or the app is exempted.
+
+**Consider:**
+
+- Install the font system-wide or exempt the application.
+
+## `gpu_resources_saturated`
 
 The desktop compositor ran short of graphics memory or bandwidth.
 
@@ -195,6 +207,20 @@ A kernel component requested a live kernel dump and Windows completed the reques
 
 - Read the component name from the promoted fields.
 - Update the driver behind a network or power watchdog when it repeats daily on one host.
+
+## `measured_boot_failed`
+
+Windows reported a boot-measurement library failure during boot.
+
+**Severity:** Warning
+
+**Impact:** This event identifies a boot-measurement problem. It does not establish TPM absence, BitLocker behavior, attestation results, or a boot-chain attack.
+
+**Consider:**
+
+- Read the event id and status from the promoted fields.
+- Check TPM readiness, Secure Boot state, firmware state, and related Windows boot records on the affected host.
+- Apply the vendor or Windows remediation for the reported status before changing TPM state.
 
 ## `os_boot_duration_high`
 
@@ -277,11 +303,9 @@ A phone, camera, or media player on USB stopped answering.
 
 - Have the user unplug the device, unlock it, and plug it back in.
 
-## `ram_commit_high`
+## `ram_commit_exhausted`
 
 Committed memory on this host reached its limit.
-
-**Also reported by:** `performance`
 
 **Severity:** Warning at or above 95% commit ratio, Notice for diagnosis failure or lower ratio
 
@@ -317,6 +341,20 @@ The platform reached a temperature trip point and engaged cooling.
 
 - Take no action for a single active-cooling event.
 - Clean fans or improve airflow when passive cooling runs for hours on one host.
+
+## `tpm_initialization_failed`
+
+Windows reported a TPM initialization failure during boot.
+
+**Severity:** Warning
+
+**Impact:** This event identifies a TPM initialization problem. It does not establish TPM absence, BitLocker behavior, attestation results, or a boot-chain attack.
+
+**Consider:**
+
+- Read the event id and status from the promoted fields.
+- Check TPM readiness, Secure Boot state, firmware state, and related Windows boot records on the affected host.
+- Apply the vendor or Windows remediation for the reported status before changing TPM state.
 
 ## `usb_controller_error`
 

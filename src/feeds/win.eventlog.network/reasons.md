@@ -13,6 +13,8 @@ Every section below is from the public reason block only.
 | `dhcp_lease_failed` | `networking` | Warning |  |
 | `dns_client_resolution_timed_out` | `networking` | Warning |  |
 | `firewall_rule_changed` | `networking` | Notice |  |
+| `firewall_rule_created` | `networking` | Notice |  |
+| `firewall_rule_deleted` | `networking` | Notice |  |
 | `offline_files_slow_link_transition_blocked` | `file_sharing` | Warning |  |
 | `offline_files_sync_failed` | `file_sharing` | Warning |  |
 | `rds_redirected_printer_setup_failed` | `printing` | Warning |  |
@@ -87,7 +89,37 @@ A DNS client query timed out.
 
 ## `firewall_rule_changed`
 
-The Windows Firewall service reported that a rule was added, modified, or deleted. The payload identifies the rule and selected properties.
+The Windows Firewall service reported that a rule was modified. The payload identifies the rule and selected properties.
+
+**Also reported by:** `win.eventlog.security`
+
+**Severity:** Notice
+
+**Impact:** This record describes firewall configuration activity. It does not prove effective enforcement or network exposure.
+
+**Consider:**
+
+- Use the event to identify the rule change and its actor or source where available.
+- Inspect the resulting firewall policy and test the relevant traffic path before deciding whether the change altered effective access.
+
+## `firewall_rule_created`
+
+The Windows Firewall service reported that a rule was added. The payload identifies the rule and selected properties.
+
+**Also reported by:** `win.eventlog.security`
+
+**Severity:** Notice
+
+**Impact:** This record describes firewall configuration activity. It does not prove effective enforcement or network exposure.
+
+**Consider:**
+
+- Use the event to identify the rule change and its actor or source where available.
+- Inspect the resulting firewall policy and test the relevant traffic path before deciding whether the change altered effective access.
+
+## `firewall_rule_deleted`
+
+The Windows Firewall service reported that a rule was deleted. The payload identifies the rule and selected properties.
 
 **Also reported by:** `win.eventlog.security`
 

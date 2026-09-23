@@ -26,7 +26,7 @@ The rendered `key=value` tail exists to be READ, not re-parsed: its values are n
 
 ## Reconstruction guarantee
 
-69 curated surface(s) drop the vendor body text below the synthesized first line.
+70 curated surface(s) drop the vendor body text below the synthesized first line.
 That is never data loss: the provider payload is retained at rest, so a dropped body can be reconstructed from it.
 What the body said is derivable; what it cost to ship it repeatedly is not.
 
@@ -199,40 +199,38 @@ The last column is different in kind: it is the author's account of the row or e
 | `adcs_audit_evidence_tampered` / `default` | 4885, 4896 | **fields: none** |  |
 | `adcs_config_changed` / `default` | 4882, 4890 | **fields: none** |  |
 | `adcs_request_failed` / `default` | 4888 | **fields: none** |  |
-| `anonymous_remote_logon` / `default` | 4624 | `win.eventlog.security.auth_package` `win.eventlog.security.lm_package` `win.eventlog.security.logon_guid` `win.eventlog.security.logon_type` `win.eventlog.security.logon_type_name` `win.eventlog.security.token_elevated` `win.eventlog.security.workstation` |  |
+| `anonymous_remote_sign_in` / `default` | 4624 | `win.eventlog.security.auth_package` `win.eventlog.security.lm_package` `win.eventlog.security.logon_guid` `win.eventlog.security.logon_type` `win.eventlog.security.logon_type_name` `win.eventlog.security.token_elevated` `win.eventlog.security.workstation` |  |
+| `audit_event_processing_failed` / `default` | 1108 | `win.eventlog.security.publisher_id` |  |
 | `audit_events_dropped` / `default` | 1101 | `win.eventlog.security.dropped_count` |  |
 | `audit_log_cleared` / `default` | 1102 | **fields: none** |  |
 | `audit_log_full` / `default` | 1104 | **fields: none** |  |
-| `audit_pipeline_error` / `default` | 1108 | `win.eventlog.security.publisher_id` |  |
 | `audit_policy_changed` / `default` | 4715, 4719, 4912 | `win.eventlog.security.audit_subcategory_guid` |  |
 | `crypto_selftest_failed` / `default` | 6418 | **fields: none** |  |
 | `directory_object_access_denied` / `default` | 4662 | **fields: none** |  |
-| `directory_object_changed` / `created` | 5137, 5138 | `win.eventlog.security.attribute_name` `win.eventlog.security.object_dn` |  |
-| `directory_object_changed` / `deleted` | 5141 | `win.eventlog.security.attribute_name` `win.eventlog.security.object_dn` |  |
-| `directory_object_changed` / `updated` | 5136, 5139 | `win.eventlog.security.attribute_name` `win.eventlog.security.object_dn` |  |
+| `directory_object_changed` / `default` | 5136, 5139 | `win.eventlog.security.attribute_name` `win.eventlog.security.object_dn` |  |
+| `directory_object_created` / `default` | 5137, 5138 | `win.eventlog.security.attribute_name` `win.eventlog.security.object_dn` |  |
+| `directory_object_deleted` / `default` | 5141 | `win.eventlog.security.attribute_name` `win.eventlog.security.object_dn` |  |
 | `directory_replication_access_requested` / `default` | 4662 | **fields: none** |  |
 | `domain_policy_changed` / `default` | 4739 | **fields: none** |  |
 | `dsrm_password_change_failed` / `default` | 4794 | `win.eventlog.security.workstation` |  |
 | `dsrm_password_changed` / `default` | 4794 | `win.eventlog.security.workstation` |  |
 | `event_logging_stopped` / `default` | 1100 | **fields: none** |  |
-| `explicit_credential_use` / `default` | 4648 | `win.eventlog.security.target_server` |  |
-| `firewall_rule_changed` / `created` | 4946 | `win.eventlog.security.rule_id` `win.eventlog.security.rule_name` |  |
-| `firewall_rule_changed` / `deleted` | 4948 | `win.eventlog.security.rule_id` `win.eventlog.security.rule_name` |  |
+| `explicit_credential_used` / `default` | 4648 | `win.eventlog.security.target_server` |  |
 | `firewall_rule_changed` / `disabled` | 4954 | `win.eventlog.security.rule_id` `win.eventlog.security.rule_name` |  |
 | `firewall_rule_changed` / `enabled` | 4956 | `win.eventlog.security.rule_id` `win.eventlog.security.rule_name` |  |
 | `firewall_rule_changed` / `updated` | 4947, 4950, 4957 | `win.eventlog.security.rule_id` `win.eventlog.security.rule_name` |  |
-| `firewall_service_stopped` / `default` | 5025, 5034 | **fields: none** |  |
+| `firewall_rule_created` / `default` | 4946 | `win.eventlog.security.rule_id` `win.eventlog.security.rule_name` |  |
+| `firewall_rule_deleted` / `default` | 4948 | `win.eventlog.security.rule_id` `win.eventlog.security.rule_name` |  |
+| `firewall_service_stopped` / `recovered` | 5024, 5025, 5033, 5034 | **fields: none** |  |
+| `firewall_service_stopped` / `stopped` | 5024, 5025, 5033, 5034 | **fields: none** |  |
 | `group_member_added` / `default` | 4728, 4732, 4756 | **fields: none** |  |
 | `group_member_removed` / `default` | 4729, 4733, 4757 | **fields: none** |  |
 | `guest_account_sign_in` / `default` | 4624 | `win.eventlog.security.auth_package` `win.eventlog.security.lm_package` `win.eventlog.security.logon_guid` `win.eventlog.security.logon_type` `win.eventlog.security.logon_type_name` `win.eventlog.security.token_elevated` `win.eventlog.security.workstation` |  |
-| `insecure_boot_config` / `default` | 4826 | `win.eventlog.security.insecure_boot_flags` |  |
 | `kerberos_preauth_failed` / `default` | 4771 | `win.eventlog.security.kerberos_target` `win.eventlog.security.status` `win.eventlog.security.status_meaning` |  |
-| `kerberos_rc4_ticket` / `default` | 4769 | `win.eventlog.security.etype_meaning` `win.eventlog.security.kerberos_target` `win.eventlog.security.ticket_encryption_type` |  |
+| `kerberos_rc4_ticket_issued` / `default` | 4769 | `win.eventlog.security.etype_meaning` `win.eventlog.security.kerberos_target` `win.eventlog.security.ticket_encryption_type` |  |
 | `kerberos_ticket_failed` / `service_ticket` | 4768, 4769, 4770 | `win.eventlog.security.kerberos_target` `win.eventlog.security.status` `win.eventlog.security.status_meaning` |  |
 | `kerberos_ticket_failed` / `tgt_request` | 4768, 4769, 4770 | `win.eventlog.security.kerberos_target` `win.eventlog.security.status` `win.eventlog.security.status_meaning` |  |
 | `kerberos_ticket_failed` / `ticket_renewal` | 4768, 4769, 4770 | `win.eventlog.security.kerberos_target` `win.eventlog.security.status` `win.eventlog.security.status_meaning` |  |
-| `logon_failed` / `account_attempt` | 4625 | `win.eventlog.security.auth_package` `win.eventlog.security.lm_package` `win.eventlog.security.logon_type` `win.eventlog.security.logon_type_name` `win.eventlog.security.status` `win.eventlog.security.status_meaning` `win.eventlog.security.substatus` `win.eventlog.security.workstation` |  |
-| `logon_failed` / `sspi_probe` | 4625 | `win.eventlog.security.auth_package` `win.eventlog.security.lm_package` `win.eventlog.security.logon_type` `win.eventlog.security.logon_type_name` `win.eventlog.security.status` `win.eventlog.security.status_meaning` `win.eventlog.security.substatus` `win.eventlog.security.workstation` |  |
 | `logon_right_granted` / `default` | 4717 | **fields: none** |  |
 | `logon_right_removed` / `default` | 4718 | **fields: none** |  |
 | `network_share_added` / `default` | 5142 | `win.eventlog.security.share_name` `win.eventlog.security.share_path` |  |
@@ -243,9 +241,6 @@ The last column is different in kind: it is the author's account of the row or e
 | `principal_renamed` / `default` | 4781 | `win.eventlog.security.new_target_user` `win.eventlog.security.old_target_user` |  |
 | `process_exited_abnormally` / `default` | 4689 | **fields: none** |  |
 | `psdirect_handshake_probe` / `default` | 4625 | `win.eventlog.security.auth_package` `win.eventlog.security.lm_package` `win.eventlog.security.logon_type` `win.eventlog.security.logon_type_name` `win.eventlog.security.psdirect_handshake` `win.eventlog.security.status` `win.eventlog.security.status_meaning` `win.eventlog.security.substatus` `win.eventlog.security.workstation` |  |
-| `registry_value_changed` / `created` | 4657 | `win.eventlog.security.object_name` `win.eventlog.security.object_value_name` `win.eventlog.security.operation_meaning` |  |
-| `registry_value_changed` / `deleted` | 4657 | `win.eventlog.security.object_name` `win.eventlog.security.object_value_name` `win.eventlog.security.operation_meaning` |  |
-| `registry_value_changed` / `updated` | 4657 | `win.eventlog.security.object_name` `win.eventlog.security.object_value_name` `win.eventlog.security.operation_meaning` |  |
 | `replay_attack_detected` / `default` | 4649 | **fields: none** |  |
 | `scheduled_task_created` / `default` | 4698 | `win.eventlog.security.task_name` |  |
 | `scheduled_task_deleted` / `default` | 4699 | `win.eventlog.security.task_name` |  |
@@ -257,25 +252,31 @@ The last column is different in kind: it is the author's account of the row or e
 | `service_installed` / `default` | 4697 | `command_line` `win.eventlog.security.service_account` `win.eventlog.security.service_image_path` `win.eventlog.security.service_name` |  |
 | `sid_history_add_failed` / `default` | 4766 | **fields: none** |  |
 | `sid_history_added` / `default` | 4765 | **fields: none** |  |
-| `special_group_logon` / `default` | 4964 | **fields: none** |  |
+| `sign_in_failed` / `account_attempt` | 4625 | `win.eventlog.security.auth_package` `win.eventlog.security.lm_package` `win.eventlog.security.logon_type` `win.eventlog.security.logon_type_name` `win.eventlog.security.status` `win.eventlog.security.status_meaning` `win.eventlog.security.substatus` `win.eventlog.security.workstation` |  |
+| `sign_in_failed` / `sspi_probe` | 4625 | `win.eventlog.security.auth_package` `win.eventlog.security.lm_package` `win.eventlog.security.logon_type` `win.eventlog.security.logon_type_name` `win.eventlog.security.status` `win.eventlog.security.status_meaning` `win.eventlog.security.substatus` `win.eventlog.security.workstation` |  |
+| `special_group_sign_in` / `default` | 4964 | **fields: none** |  |
 | `system_time_changed` / `other_caller` | 4616 | `win.eventlog.security.new_time` `win.eventlog.security.previous_time` |  |
 | `system_time_changed` / `routine_time_service` | 4616 | `win.eventlog.security.new_time` `win.eventlog.security.previous_time` |  |
+| `win_insecure_boot_config` / `default` | 4826 | `win.eventlog.security.insecure_boot_flags` |  |
+| `win_registry_value_changed` / `default` | 4657 | `win.eventlog.security.object_name` `win.eventlog.security.object_value_name` `win.eventlog.security.operation_meaning` |  |
+| `win_registry_value_created` / `default` | 4657 | `win.eventlog.security.object_name` `win.eventlog.security.object_value_name` `win.eventlog.security.operation_meaning` |  |
+| `win_registry_value_deleted` / `default` | 4657 | `win.eventlog.security.object_name` `win.eventlog.security.object_value_name` `win.eventlog.security.operation_meaning` |  |
 | `admin_session_started` | 4672 | `win.eventlog.security.privileges` |  |
 | `anonymous_sign_in` | 4624 | `win.eventlog.security.auth_package` `win.eventlog.security.lm_package` `win.eventlog.security.logon_guid` `win.eventlog.security.logon_type` `win.eventlog.security.logon_type_name` `win.eventlog.security.token_elevated` `win.eventlog.security.workstation` |  |
 | `anonymous_sign_out` | 4647 | **fields: none** |  |
 | `audit_subsystem_started` | 4608 | **fields: none** |  |
 | `boot_configuration_loaded` | 4826 | **fields: none** |  |
 | `credman_credentials_read` | 5379, 5381, 5382 | **fields: none** |  |
-| `critical_group_membership_enumerated` | 4799 | **fields: none** |  |
 | `crypto_operation` | 5061 | **fields: none** |  |
+| `crypto_operation_succeeded` | 5061 | **fields: none** |  |
 | `fips_selftest_passed` | 6417 | **fields: none** |  |
-| `firewall_driver_started` | 5033 | **fields: none** |  |
 | `firewall_packet_blocked` | 5152 | `win.eventlog.security.wfp_dest_address` `win.eventlog.security.wfp_dest_port` `win.eventlog.security.wfp_direction` `win.eventlog.security.wfp_protocol` |  |
-| `firewall_service_started` | 5024 | **fields: none** |  |
 | `group_membership_enumerated` | 4799 | **fields: none** |  |
 | `inbound_connection_blocked` | 5157 | `win.eventlog.security.wfp_dest_address` `win.eventlog.security.wfp_dest_port` `win.eventlog.security.wfp_direction` `win.eventlog.security.wfp_protocol` |  |
 | `key_file_operation` | 5058 | **fields: none** |  |
+| `key_file_operation_succeeded` | 5058 | **fields: none** |  |
 | `key_migration_operation` | 5059 | **fields: none** |  |
+| `key_migration_operation_succeeded` | 5059 | **fields: none** |  |
 | `non_account_sign_out` | 4647 | **fields: none** |  |
 | `ntlm_credentials_validated` | 4776 | `win.eventlog.security.workstation` |  |
 | `object_audit_settings_changed` | 4907 | `win.eventlog.security.object_name` `win.eventlog.security.object_type` |  |
@@ -284,6 +285,7 @@ The last column is different in kind: it is the author's account of the row or e
 | `platform_privileges_assigned` | 4672 | `win.eventlog.security.privileges` |  |
 | `primary_token_assigned` | 4696 | **fields: none** |  |
 | `privilege_use_refused` | 4673, 4674 | **fields: none** |  |
+| `privileged_group_membership_enumerated` | 4799 | **fields: none** |  |
 | `privileges_assigned_unclaimed_principal` | 4672 | `win.eventlog.security.privileges` |  |
 | `process_created` | 4688 | `command_line` `win.eventlog.security.integrity_level` `win.eventlog.security.integrity_level_sid` `win.eventlog.security.new_process_id` `win.eventlog.security.parent_process_name` `win.eventlog.security.uac_token_type` |  |
 | `process_exited_with_error` | 4689 | `win.eventlog.security.exit_status` |  |
@@ -323,7 +325,8 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `directory_replication_access_requested` / `default`
 - `domain_policy_changed` / `default`
 - `event_logging_stopped` / `default`
-- `firewall_service_stopped` / `default`
+- `firewall_service_stopped` / `recovered`
+- `firewall_service_stopped` / `stopped`
 - `group_member_added` / `default`
 - `group_member_removed` / `default`
 - `logon_right_granted` / `default`
@@ -335,22 +338,23 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `security_group_deleted` / `default`
 - `sid_history_add_failed` / `default`
 - `sid_history_added` / `default`
-- `special_group_logon` / `default`
+- `special_group_sign_in` / `default`
 - `anonymous_sign_out`
 - `audit_subsystem_started`
 - `boot_configuration_loaded`
 - `credman_credentials_read`
-- `critical_group_membership_enumerated`
 - `crypto_operation`
+- `crypto_operation_succeeded`
 - `fips_selftest_passed`
-- `firewall_driver_started`
-- `firewall_service_started`
 - `group_membership_enumerated`
 - `key_file_operation`
+- `key_file_operation_succeeded`
 - `key_migration_operation`
+- `key_migration_operation_succeeded`
 - `non_account_sign_out`
 - `primary_token_assigned`
 - `privilege_use_refused`
+- `privileged_group_membership_enumerated`
 - `sensitive_privilege_used`
 - `user_group_membership_enumerated`
 - `user_signed_out`

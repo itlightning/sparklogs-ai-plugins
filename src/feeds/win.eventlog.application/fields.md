@@ -36,7 +36,7 @@ Stored flat under the `win.eventlog.application.` prefix.
 | `win.eventlog.application.report_id` | string | WER report GUID: Windows Error Reporting 1001, Application Error 1000, Application Hang 1002. Joins the crash event to its report record and the local WER archive. |
 | `win.eventlog.application.hang_type` | string | Hang type from Application Hang 1002; often Unknown. |
 | `win.eventlog.application.product` | string | Product name from MsiInstaller 1033. |
-| `win.eventlog.application.msi_status` | string | Windows Installer result code from the MsiInstaller 1033 status insert (0 = success, 1603 = fatal, 1618 = another install in progress, ...). The retry-later codes read as an install that will come back rather than as a failure. |
+| `win.eventlog.application.msi_status` | string | Retry-later Windows Installer code an installer failure record carries among its inserts (1618, or its HRESULT form 0x80070652): an install that will come back rather than a failure. The MsiInstaller 1033 outcome code rides the portable result family instead. |
 | `win.eventlog.application.rm_session_id` | string | Restart Manager session id from the RestartManager 100xx family. Joins the shutdown/restart narration around one install operation. |
 | `win.eventlog.application.blocked_app` | string | Display name of the app that could not be shut down/restarted, from RestartManager 10006/10007 (user_data DisplayName). |
 | `win.eventlog.application.blocked_app_path` | string | Full binary path of the blocking app, from RestartManager 10006/10007 (user_data FullPath). |
@@ -101,10 +101,9 @@ The last column is different in kind: it is the author's account of the row or e
 | `adcs_ca_chain_failed` / `default` | 58, 65, 66 | **fields: none** |  |
 | `adcs_crl_publish_failed` / `default` | 74 | **fields: none** |  |
 | `app_crash` / `default` | 1000 | `win.eventlog.application.app_name` `win.eventlog.application.exception_code` `win.eventlog.application.module_name` `win.eventlog.application.report_id` |  |
-| `app_crash_report` / `default` | 1001 | `win.eventlog.application.app_name` `win.eventlog.application.event_name` `win.eventlog.application.fault_bucket` `win.eventlog.application.report_id` |  |
 | `app_hang` / `default` | 1002 | `win.eventlog.application.app_name` `win.eventlog.application.hang_type` `win.eventlog.application.report_id` |  |
-| `appx_app_activation_failed` / `administrator_token` | 5973 | `win.eventlog.application.appx_app_id` |  |
-| `appx_app_activation_failed` / `other_failure` | 5973 | `win.eventlog.application.appx_app_id` |  |
+| `appx_activation_failed` / `administrator_token` | 5973 | `win.eventlog.application.appx_app_id` |  |
+| `appx_activation_failed` / `other_failure` | 5973 | `win.eventlog.application.appx_app_id` |  |
 | `aspnet_compilation_failed` / `default` | 1310 | **fields: none** |  |
 | `aspnet_unhandled_exception` / `default` | 1309 | **fields: none** |  |
 | `cert_enroll_failed` / `autoenroll_cycle_failed` | 1, 6, 86, 87 | **fields: none** |  |
@@ -118,21 +117,21 @@ The last column is different in kind: it is the author's account of the row or e
 | `entra_sync_scheduler_aborted` / `default` | 906 | **fields: none** |  |
 | `esent_db_corruption` / `default` | 447, 448, 474 | **fields: none** |  |
 | `gpu_driver_error` / `default` | n/a | **fields: none** |  |
-| `group_policy_cse_apply_failed` / `default` | 8194 | **fields: none** |  |
 | `group_policy_drive_map_failed` / `credential_rejected` | 4117 | `win.eventlog.application.drive` `win.eventlog.application.share` |  |
 | `group_policy_drive_map_failed` / `letter_in_use` | 4117 | `win.eventlog.application.drive` `win.eventlog.application.share` |  |
 | `group_policy_drive_map_failed` / `network_name_invalid` | 4117 | `win.eventlog.application.drive` `win.eventlog.application.share` |  |
 | `group_policy_drive_map_failed` / `other_error` | 4117 | `win.eventlog.application.drive` `win.eventlog.application.share` |  |
 | `group_policy_drive_map_failed` / `share_unreachable` | 4117 | `win.eventlog.application.drive` `win.eventlog.application.share` |  |
-| `group_policy_pref_item_failed` / `credential_rejected` | 4098 | **fields: none** |  |
-| `group_policy_pref_item_failed` / `other_error` | 4098 | **fields: none** |  |
-| `mfa_login_succeeded` / `default` | 0 | **fields: none** |  |
+| `group_policy_extension_apply_failed` / `default` | 8194 | **fields: none** |  |
+| `group_policy_preference_item_failed` / `credential_rejected` | 4098 | **fields: none** |  |
+| `group_policy_preference_item_failed` / `other_error` | 4098 | **fields: none** |  |
 | `mfa_not_configured` / `default` | 0 | **fields: none** |  |
+| `mfa_sign_in_succeeded` / `default` | 0 | **fields: none** |  |
 | `mfa_unavailable_access_granted` / `default` | 0 | **fields: none** |  |
 | `mfa_user_not_enrolled` / `default` | 0 | **fields: none** |  |
-| `mssql_db_corruption` / `io_error` | 823, 824, 825 | **fields: none** |  |
-| `mssql_db_corruption` / `logical_corruption` | 823, 824, 825 | **fields: none** |  |
-| `mssql_db_corruption` / `read_retry` | 823, 824, 825 | **fields: none** |  |
+| `mssql_db_io_failed` / `default` | 823 | **fields: none** |  |
+| `mssql_db_page_corruption` / `default` | 824 | **fields: none** |  |
+| `mssql_db_read_retried` / `default` | 825 | **fields: none** |  |
 | `office_subscription_licensing_failed` / `default` | 0 | **fields: none** |  |
 | `remote_assist_session_started` / `default` | 0 | **fields: none** |  |
 | `restart_manager_app_pending` / `default` | 10006, 10007 | `win.eventlog.application.blocked_app` `win.eventlog.application.blocked_app_path` `win.eventlog.application.rm_session_id` `win.eventlog.application.rm_status` |  |
@@ -140,33 +139,33 @@ The last column is different in kind: it is the author's account of the row or e
 | `security_agent_host_isolated` / `isolated` | 1, 2 | **fields: none** |  |
 | `security_agent_host_isolated` / `released` | 1, 2 | **fields: none** |  |
 | `vpn_dial_failed` / `default` | 20227 | **fields: none** |  |
-| `vss_data_integrity_writer_failed` / `default` | 8193, 24581, 24582, 24583 | `win.eventlog.application.vss_execution_context` `win.eventlog.application.vss_operation_call` `win.eventlog.application.vss_operation_intent` `win.eventlog.application.vss_routine` `win.eventlog.application.vss_writer` |  |
-| `vss_legacy_driver_scan` / `default` | 513 | **fields: none** |  |
 | `vss_optimization_time_budget_reached` / `default` | 8219, 8220, 8226 | `win.eventlog.application.vss_execution_context` `win.eventlog.application.vss_operation_call` `win.eventlog.application.vss_operation_intent` `win.eventlog.application.vss_writer` |  |
 | `vss_provider_class_not_registered` / `default` | 22, 8193, 12292 | `win.eventlog.application.vss_execution_context` `win.eventlog.application.vss_operation_call` `win.eventlog.application.vss_operation_intent` `win.eventlog.application.vss_routine` `win.eventlog.application.vss_snapshot_attrs` `win.eventlog.application.vss_snapshot_context` |  |
 | `vss_snapshot_call_failed` / `diff_area_resize_denied` | 12289 | `win.eventlog.application.vss_execution_context` `win.eventlog.application.vss_operation_call` `win.eventlog.application.vss_operation_intent` `win.eventlog.application.vss_routine` `win.eventlog.application.vss_snapshot_attrs` `win.eventlog.application.vss_snapshot_context` |  |
 | `vss_snapshot_call_failed` / `phase_parameter_rejected` | 12289 | `win.eventlog.application.vss_execution_context` `win.eventlog.application.vss_operation_call` `win.eventlog.application.vss_operation_intent` `win.eventlog.application.vss_routine` `win.eventlog.application.vss_snapshot_attrs` `win.eventlog.application.vss_snapshot_context` |  |
-| `vss_snapshot_call_failed` / `process_exited` | 8193 | `win.eventlog.application.vss_operation_call` `win.eventlog.application.vss_operation_intent` `win.eventlog.application.vss_routine` `win.eventlog.application.vss_state` |  |
-| `vss_snapshot_call_failed` / `shutdown_in_progress` | 13, 8193 | `win.eventlog.application.vss_execution_context` `win.eventlog.application.vss_operation_call` `win.eventlog.application.vss_operation_intent` `win.eventlog.application.vss_routine` `win.eventlog.application.vss_snapshot_attrs` `win.eventlog.application.vss_snapshot_context` |  |
-| `vss_snapshots_failing_for_space` / `default` | 8193 | **fields: none** |  |
+| `vss_snapshots_failing_for_space` / `default` | 25, 8193 | **fields: none** |  |
 | `vss_writer_callback_query` / `default` | 8194 | `win.eventlog.application.vss_operation_call` `win.eventlog.application.vss_operation_intent` `win.eventlog.application.vss_routine` `win.eventlog.application.vss_writer` |  |
+| `vss_writer_failed` / `default` | 8193, 24581, 24582, 24583 | `win.eventlog.application.vss_execution_context` `win.eventlog.application.vss_operation_call` `win.eventlog.application.vss_operation_intent` `win.eventlog.application.vss_routine` `win.eventlog.application.vss_writer` |  |
 | `wcf_request_failed` / `default` | 3 | **fields: none** |  |
-| `win_msi_install_error` / `error` | 1013, 1032, 10005 | **fields: none** |  |
-| `win_msi_install_error` / `retry_later` | 1013, 1032, 10005 | `win.eventlog.application.msi_status` |  |
-| `win_msi_operation_failed` / `failed` | 1033, 11306, 11321, 11500, 11708, 11714, 11729, 11730 | `win.eventlog.application.msi_code_meaning` `win.eventlog.application.product` |  |
-| `win_msi_operation_failed` / `file_in_use` | 1033, 11306, 11321, 11500, 11708, 11714, 11729, 11730 | `win.eventlog.application.msi_code_meaning` `win.eventlog.application.product` |  |
-| `win_msi_operation_failed` / `outcome_failed` | 1033, 11306, 11321, 11500, 11708, 11714, 11729, 11730 | `win.eventlog.application.msi_status` `win.eventlog.application.product` |  |
-| `win_msi_operation_failed` / `privilege_refused` | 1033, 11306, 11321, 11500, 11708, 11714, 11729, 11730 | `win.eventlog.application.msi_code_meaning` `win.eventlog.application.product` |  |
-| `win_msi_operation_failed` / `retry_later` | 1033, 11306, 11321, 11500, 11708, 11714, 11729, 11730 | `win.eventlog.application.msi_code_meaning` `win.eventlog.application.msi_status` `win.eventlog.application.product` |  |
-| `win_msi_product_install_succeeded` / `default` | 1033, 11707 | `win.eventlog.application.msi_code_meaning` `win.eventlog.application.msi_status` `win.eventlog.application.product` |  |
+| `win_msi_operation_failed` / `failed` | 1013, 1032, 1033, 10005, 11306, 11321, 11500, 11708, 11714, 11729, 11730 | `win.eventlog.application.msi_code_meaning` `win.eventlog.application.product` |  |
+| `win_msi_operation_failed` / `file_in_use` | 1013, 1032, 1033, 10005, 11306, 11321, 11500, 11708, 11714, 11729, 11730 | `win.eventlog.application.msi_code_meaning` `win.eventlog.application.product` |  |
+| `win_msi_operation_failed` / `install_error` | 1013, 1032, 1033, 10005, 11306, 11321, 11500, 11708, 11714, 11729, 11730 | **fields: none** |  |
+| `win_msi_operation_failed` / `outcome_failed` | 1013, 1032, 1033, 10005, 11306, 11321, 11500, 11708, 11714, 11729, 11730 | `win.eventlog.application.product` |  |
+| `win_msi_operation_failed` / `privilege_refused` | 1013, 1032, 1033, 10005, 11306, 11321, 11500, 11708, 11714, 11729, 11730 | `win.eventlog.application.msi_code_meaning` `win.eventlog.application.product` |  |
+| `win_msi_operation_failed` / `retry_later` | 1013, 1032, 1033, 10005, 11306, 11321, 11500, 11708, 11714, 11729, 11730 | `win.eventlog.application.msi_code_meaning` `win.eventlog.application.msi_status` `win.eventlog.application.product` |  |
+| `win_msi_product_install_succeeded` / `default` | 1033, 11707 | `win.eventlog.application.msi_code_meaning` `win.eventlog.application.product` |  |
 | `win_msi_product_reconfigure_succeeded` / `default` | 11728 | `win.eventlog.application.msi_code_meaning` `win.eventlog.application.product` |  |
 | `win_msi_product_removal_succeeded` / `default` | 11724 | `win.eventlog.application.msi_code_meaning` `win.eventlog.application.product` |  |
 | `win_user_profile_load_failed` / `default` | 1511, 1542 | **fields: none** |  |
 | `wmi_provider_registered_as_localsystem` / `default` | 63 | **fields: none** |  |
+| `app_crash_report` | 1001 | `win.eventlog.application.app_name` `win.eventlog.application.event_name` `win.eventlog.application.fault_bucket` `win.eventlog.application.report_id` |  |
 | `vss_account_resolve_failed` | 8230 | `command_line` `win.eventlog.application.vss_execution_context` `win.eventlog.application.vss_operation_call` `win.eventlog.application.vss_operation_intent` `win.eventlog.application.vss_snapshot_attrs` `win.eventlog.application.vss_snapshot_context` `win.eventlog.application.vss_state` `win.eventlog.application.vss_writer` |  |
 | `vss_flush_writes_timeout` | 12297 | `command_line` `win.eventlog.application.vss_execution_context` `win.eventlog.application.vss_operation_call` `win.eventlog.application.vss_operation_intent` `win.eventlog.application.vss_snapshot_attrs` `win.eventlog.application.vss_snapshot_context` `win.eventlog.application.vss_state` `win.eventlog.application.vss_writer` |  |
 | `vss_hold_writes_timeout` | 12298 | `command_line` `win.eventlog.application.vss_execution_context` `win.eventlog.application.vss_operation_call` `win.eventlog.application.vss_operation_intent` `win.eventlog.application.vss_snapshot_attrs` `win.eventlog.application.vss_snapshot_context` `win.eventlog.application.vss_state` `win.eventlog.application.vss_writer` |  |
+| `vss_legacy_driver_scan` | 513 | **fields: none** |  |
 | `vss_snapshot_creation_initiated` | 8231 | `command_line` `win.eventlog.application.vss_snapshot_set` |  |
+| `vss_snapshot_process_exited` | 8193 | `command_line` `win.eventlog.application.vss_execution_context` `win.eventlog.application.vss_operation_call` `win.eventlog.application.vss_operation_intent` `win.eventlog.application.vss_routine` `win.eventlog.application.vss_snapshot_attrs` `win.eventlog.application.vss_snapshot_context` `win.eventlog.application.vss_state` `win.eventlog.application.vss_writer` |  |
+| `vss_snapshot_shutdown_in_progress` | 13, 8193 | `command_line` `win.eventlog.application.vss_execution_context` `win.eventlog.application.vss_operation_call` `win.eventlog.application.vss_operation_intent` `win.eventlog.application.vss_routine` `win.eventlog.application.vss_snapshot_attrs` `win.eventlog.application.vss_snapshot_context` `win.eventlog.application.vss_state` `win.eventlog.application.vss_writer` |  |
 | `vss_writer_rejected_event` | 8229 | `command_line` `win.eventlog.application.vss_execution_context` `win.eventlog.application.vss_operation_call` `win.eventlog.application.vss_operation_intent` `win.eventlog.application.vss_snapshot_attrs` `win.eventlog.application.vss_snapshot_context` `win.eventlog.application.vss_state` `win.eventlog.application.vss_writer` |  |
 
 ### Surfaces that promote nothing
@@ -189,25 +188,25 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `entra_sync_scheduler_aborted` / `default`
 - `esent_db_corruption` / `default`
 - `gpu_driver_error` / `default`
-- `group_policy_cse_apply_failed` / `default`
-- `group_policy_pref_item_failed` / `credential_rejected`
-- `group_policy_pref_item_failed` / `other_error`
-- `mfa_login_succeeded` / `default`
+- `group_policy_extension_apply_failed` / `default`
+- `group_policy_preference_item_failed` / `credential_rejected`
+- `group_policy_preference_item_failed` / `other_error`
 - `mfa_not_configured` / `default`
+- `mfa_sign_in_succeeded` / `default`
 - `mfa_unavailable_access_granted` / `default`
 - `mfa_user_not_enrolled` / `default`
-- `mssql_db_corruption` / `io_error`
-- `mssql_db_corruption` / `logical_corruption`
-- `mssql_db_corruption` / `read_retry`
+- `mssql_db_io_failed` / `default`
+- `mssql_db_page_corruption` / `default`
+- `mssql_db_read_retried` / `default`
 - `office_subscription_licensing_failed` / `default`
 - `remote_assist_session_started` / `default`
 - `security_agent_config_fetch_failed` / `default`
 - `security_agent_host_isolated` / `isolated`
 - `security_agent_host_isolated` / `released`
 - `vpn_dial_failed` / `default`
-- `vss_legacy_driver_scan` / `default`
 - `vss_snapshots_failing_for_space` / `default`
 - `wcf_request_failed` / `default`
-- `win_msi_install_error` / `error`
+- `win_msi_operation_failed` / `install_error`
 - `win_user_profile_load_failed` / `default`
 - `wmi_provider_registered_as_localsystem` / `default`
+- `vss_legacy_driver_scan`

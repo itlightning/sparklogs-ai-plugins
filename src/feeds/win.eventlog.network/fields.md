@@ -59,7 +59,6 @@ Stored flat under the `win.eventlog.network.` prefix.
 | `win.eventlog.network.smb_reason_code` | int | SMB provider reason code. |
 | `win.eventlog.network.smb_resilient_handle` | bool | Whether the SMB handle was resilient. |
 | `win.eventlog.network.smb_retry_count` | int | SMB retry count. |
-| `win.eventlog.network.smb_server_name` | string | Host name of the remote SMB server, with any UNC leader and share suffix removed, so the same host reads the same way on every id that names one. |
 | `win.eventlog.network.smb_session_id` | string | SMB session identifier. |
 | `win.eventlog.network.smb_setting_default` | int | Shipped default for an SMB security setting. |
 | `win.eventlog.network.smb_setting_name` | string | SMB security setting name. |
@@ -78,7 +77,12 @@ Stored flat under the `win.eventlog.network.` prefix.
 
 ## Portable families
 
-This module populates no portable family.
+Cross-feed families: the same path means the same thing on every data feed that populates it, so a query written against one channel transfers.
+Prefer these over the per-feed fields for anything that spans feeds.
+
+| LQL path | Family means |
+|---|---|
+| `sparklogs.destination.host` | Where it was going. Both are present when the event names both ends. On sign-in events only the other machine is named, because the reporting machine is the near end. |
 
 ## What sets each field
 
@@ -93,9 +97,9 @@ The last column is different in kind: it is the author's account of the row or e
 | `dhcp_lease_denied` / `default` | 1002 | **fields: none** |  |
 | `dhcp_lease_failed` / `default` | 1001, 1003 | **fields: none** |  |
 | `dns_client_resolution_timed_out` / `default` | 1013, 1015 | `win.eventlog.network.dns_query_name` |  |
-| `firewall_rule_changed` / `added` | 2004, 2005, 2006, 2052, 2097, 2099 | `win.eventlog.network.firewall_rule_action` `win.eventlog.network.firewall_rule_direction` `win.eventlog.network.firewall_rule_origin` `win.eventlog.network.firewall_rule_profiles` `win.eventlog.network.rule_id` `win.eventlog.network.rule_name` |  |
-| `firewall_rule_changed` / `deleted` | 2004, 2005, 2006, 2052, 2097, 2099 | `win.eventlog.network.firewall_rule_action` `win.eventlog.network.firewall_rule_direction` `win.eventlog.network.firewall_rule_origin` `win.eventlog.network.firewall_rule_profiles` `win.eventlog.network.rule_id` `win.eventlog.network.rule_name` |  |
-| `firewall_rule_changed` / `modified` | 2004, 2005, 2006, 2052, 2097, 2099 | `win.eventlog.network.firewall_rule_action` `win.eventlog.network.firewall_rule_direction` `win.eventlog.network.firewall_rule_origin` `win.eventlog.network.firewall_rule_profiles` `win.eventlog.network.rule_id` `win.eventlog.network.rule_name` |  |
+| `firewall_rule_changed` / `default` | 2005, 2099 | `win.eventlog.network.firewall_rule_action` `win.eventlog.network.firewall_rule_direction` `win.eventlog.network.firewall_rule_origin` `win.eventlog.network.firewall_rule_profiles` `win.eventlog.network.rule_id` `win.eventlog.network.rule_name` |  |
+| `firewall_rule_created` / `default` | 2004, 2097 | `win.eventlog.network.firewall_rule_action` `win.eventlog.network.firewall_rule_direction` `win.eventlog.network.firewall_rule_origin` `win.eventlog.network.firewall_rule_profiles` `win.eventlog.network.rule_id` `win.eventlog.network.rule_name` |  |
+| `firewall_rule_deleted` / `default` | 2006, 2052 | `win.eventlog.network.firewall_rule_action` `win.eventlog.network.firewall_rule_direction` `win.eventlog.network.firewall_rule_origin` `win.eventlog.network.firewall_rule_profiles` `win.eventlog.network.rule_id` `win.eventlog.network.rule_name` |  |
 | `offline_files_slow_link_transition_blocked` / `default` | 1008 | `win.eventlog.network.offline_files_path` |  |
 | `offline_files_sync_failed` / `default` | 1006 | `win.eventlog.network.offline_files_failed_count` `win.eventlog.network.offline_files_path` |  |
 | `rds_redirected_printer_setup_failed` / `config_not_restored` | 1108, 1109 | `win.eventlog.network.printer_name` |  |
@@ -103,35 +107,35 @@ The last column is different in kind: it is the author's account of the row or e
 | `smb_anonymous_access_denied` / `server` | 1007, 1009 | `win.eventlog.network.smb_session_id` |  |
 | `smb_anonymous_access_denied` / `share` | 1007, 1009 | `win.eventlog.network.smb_share_name` |  |
 | `smb_anonymous_access_enabled` / `default` | 1025 | **fields: none** |  |
-| `smb_client_auth_context_failed` / `logon_denied` | 30801, 31000, 31001, 31002 | `win.eventlog.network.smb_logon_id` `win.eventlog.network.smb_reason_code` `win.eventlog.network.smb_server_name` |  |
-| `smb_client_auth_context_failed` / `no_authority` | 30801, 31000, 31001, 31002 | `win.eventlog.network.smb_logon_id` `win.eventlog.network.smb_reason_code` `win.eventlog.network.smb_server_name` |  |
-| `smb_client_auth_context_failed` / `other` | 30801, 31000, 31001, 31002 | `win.eventlog.network.smb_logon_id` `win.eventlog.network.smb_reason_code` `win.eventlog.network.smb_server_name` |  |
-| `smb_client_auth_context_failed` / `wrong_principal` | 30801, 31000, 31001, 31002 | `win.eventlog.network.smb_logon_id` `win.eventlog.network.smb_reason_code` `win.eventlog.network.smb_server_name` |  |
-| `smb_client_mutual_auth_lost` / `default` | 31019 | `win.eventlog.network.smb_auth_protocol_new` `win.eventlog.network.smb_auth_protocol_old` `win.eventlog.network.smb_mutual_auth_lost` `win.eventlog.network.smb_server_name` |  |
+| `smb_client_auth_context_failed` / `logon_denied` | 30801, 31000, 31001, 31002 | `win.eventlog.network.smb_logon_id` `win.eventlog.network.smb_reason_code` |  |
+| `smb_client_auth_context_failed` / `no_authority` | 30801, 31000, 31001, 31002 | `win.eventlog.network.smb_logon_id` `win.eventlog.network.smb_reason_code` |  |
+| `smb_client_auth_context_failed` / `other` | 30801, 31000, 31001, 31002 | `win.eventlog.network.smb_logon_id` `win.eventlog.network.smb_reason_code` |  |
+| `smb_client_auth_context_failed` / `wrong_principal` | 30801, 31000, 31001, 31002 | `win.eventlog.network.smb_logon_id` `win.eventlog.network.smb_reason_code` |  |
+| `smb_client_mutual_auth_lost` / `default` | 31019 | `win.eventlog.network.smb_auth_protocol_new` `win.eventlog.network.smb_auth_protocol_old` `win.eventlog.network.smb_mutual_auth_lost` |  |
 | `smb_client_security_call_slow` / `default` | 30955 | `win.eventlog.network.smb_call_duration_secs` `win.eventlog.network.smb_call_function` `win.eventlog.network.smb_call_threshold_secs` |  |
-| `smb_connect_failed` / `access_denied` | 30803, 30809, 30816, 30823, 31010 | `win.eventlog.network.smb_connection_type` `win.eventlog.network.smb_elapsed_ms` `win.eventlog.network.smb_reason_code` `win.eventlog.network.smb_retry_count` `win.eventlog.network.smb_server_name` `win.eventlog.network.smb_share_name` |  |
-| `smb_connect_failed` / `connection_failed` | 30803, 30809, 30816, 30823, 31010 | `win.eventlog.network.smb_connection_type` `win.eventlog.network.smb_elapsed_ms` `win.eventlog.network.smb_reason_code` `win.eventlog.network.smb_retry_count` `win.eventlog.network.smb_server_name` `win.eventlog.network.smb_share_name` |  |
-| `smb_connect_failed` / `timeout` | 30803, 30809, 30816, 30823, 31010 | `win.eventlog.network.smb_connection_type` `win.eventlog.network.smb_elapsed_ms` `win.eventlog.network.smb_reason_code` `win.eventlog.network.smb_retry_count` `win.eventlog.network.smb_server_name` `win.eventlog.network.smb_share_name` |  |
-| `smb_insecure_guest_allowed` / `default` | 31022 | `win.eventlog.network.smb_server_name` |  |
-| `smb_insecure_guest_rejected` / `default` | 31017 | `win.eventlog.network.smb_server_name` |  |
+| `smb_connect_failed` / `access_denied` | 30803, 30809, 30816, 30823, 31010 | `win.eventlog.network.smb_connection_type` `win.eventlog.network.smb_elapsed_ms` `win.eventlog.network.smb_reason_code` `win.eventlog.network.smb_retry_count` `win.eventlog.network.smb_share_name` |  |
+| `smb_connect_failed` / `connection_failed` | 30803, 30809, 30816, 30823, 31010 | `win.eventlog.network.smb_connection_type` `win.eventlog.network.smb_elapsed_ms` `win.eventlog.network.smb_reason_code` `win.eventlog.network.smb_retry_count` `win.eventlog.network.smb_share_name` |  |
+| `smb_connect_failed` / `timeout` | 30803, 30809, 30816, 30823, 31010 | `win.eventlog.network.smb_connection_type` `win.eventlog.network.smb_elapsed_ms` `win.eventlog.network.smb_reason_code` `win.eventlog.network.smb_retry_count` `win.eventlog.network.smb_share_name` |  |
+| `smb_insecure_guest_allowed` / `default` | 31022 | **fields: none** |  |
+| `smb_insecure_guest_rejected` / `default` | 31017 | **fields: none** |  |
 | `smb_legacy_dialect_rejected` / `default` | 1001 | **fields: none** |  |
 | `smb_security_setting_nondefault` / `guest_auth` | 1021, 31003, 31016, 31018 | `win.eventlog.network.smb_setting_name` `win.eventlog.network.smb_setting_value` |  |
 | `smb_security_setting_nondefault` / `lm_compatibility` | 1021, 31003, 31016, 31018 | `win.eventlog.network.smb_setting_default` `win.eventlog.network.smb_setting_name` `win.eventlog.network.smb_setting_value` |  |
 | `smb_security_setting_nondefault` / `signing` | 1021, 31003, 31016, 31018 | `win.eventlog.network.smb_setting_name` `win.eventlog.network.smb_setting_value` |  |
-| `smb_server_name_unresolved` / `default` | 30800 | `win.eventlog.network.smb_reason_code` `win.eventlog.network.smb_server_name` |  |
+| `smb_server_name_unresolved` / `default` | 30800 | `win.eventlog.network.smb_reason_code` |  |
 | `smb_server_operation_slow` / `filesystem` | 1020, 1047, 1054 | `win.eventlog.network.smb_operation_duration` `win.eventlog.network.smb_operation_threshold` `win.eventlog.network.smb_share_name` |  |
 | `smb_server_operation_slow` / `network` | 1020, 1047, 1054 | `win.eventlog.network.smb_operation_duration` `win.eventlog.network.smb_operation_threshold` `win.eventlog.network.smb_share_name` |  |
 | `smb_server_operation_slow` / `session_setup` | 1020, 1047, 1054 | `win.eventlog.network.smb_operation_duration` `win.eventlog.network.smb_operation_threshold` `win.eventlog.network.smb_share_name` |  |
 | `smb_session_auth_failed` / `anonymous_refused` | 551 | `win.eventlog.network.smb_reason_code` `win.eventlog.network.smb_session_id` `win.eventlog.network.smb_spn_validation_policy` |  |
 | `smb_session_auth_failed` / `credential_refused` | 551 | `win.eventlog.network.smb_reason_code` `win.eventlog.network.smb_session_id` `win.eventlog.network.smb_spn_validation_policy` |  |
-| `smb_session_lost` / `lost` | 30805, 30806 | `win.eventlog.network.smb_server_name` `win.eventlog.network.smb_session_id` |  |
-| `smb_session_lost` / `recovered` | 30805, 30806 | `win.eventlog.network.smb_server_name` `win.eventlog.network.smb_session_id` |  |
+| `smb_session_lost` / `lost` | 30805, 30806 | `win.eventlog.network.smb_session_id` |  |
+| `smb_session_lost` / `recovered` | 30805, 30806 | `win.eventlog.network.smb_session_id` |  |
 | `smb_session_reopen_failed` / `default` | 1016 | `win.eventlog.network.smb_durable_handle` `win.eventlog.network.smb_persistent_handle` `win.eventlog.network.smb_reason_code` `win.eventlog.network.smb_resilient_handle` `win.eventlog.network.smb_session_id` `win.eventlog.network.smb_share_name` |  |
 | `smb_share_access_denied` / `default` | 1006 | `win.eventlog.network.smb_granted_access` `win.eventlog.network.smb_mapped_access` `win.eventlog.network.smb_share_name` |  |
-| `smb_share_connection_lost` / `lost` | 30807, 30808 | `win.eventlog.network.smb_server_name` `win.eventlog.network.smb_session_id` `win.eventlog.network.smb_share_name` `win.eventlog.network.smb_tree_id` |  |
-| `smb_share_connection_lost` / `recovered` | 30807, 30808 | `win.eventlog.network.smb_encryption_used` `win.eventlog.network.smb_server_name` `win.eventlog.network.smb_session_id` `win.eventlog.network.smb_share_name` `win.eventlog.network.smb_signing_used` `win.eventlog.network.smb_tree_id` |  |
-| `smb_signing_validation_failed` / `encryption` | 31013, 31014 | `win.eventlog.network.smb_command` `win.eventlog.network.smb_message_id` `win.eventlog.network.smb_server_name` `win.eventlog.network.smb_session_id` `win.eventlog.network.smb_tree_id` |  |
-| `smb_signing_validation_failed` / `signing` | 31013, 31014 | `win.eventlog.network.smb_command` `win.eventlog.network.smb_message_id` `win.eventlog.network.smb_server_name` `win.eventlog.network.smb_session_id` `win.eventlog.network.smb_tree_id` |  |
+| `smb_share_connection_lost` / `lost` | 30807, 30808 | `win.eventlog.network.smb_session_id` `win.eventlog.network.smb_share_name` `win.eventlog.network.smb_tree_id` |  |
+| `smb_share_connection_lost` / `recovered` | 30807, 30808 | `win.eventlog.network.smb_encryption_used` `win.eventlog.network.smb_session_id` `win.eventlog.network.smb_share_name` `win.eventlog.network.smb_signing_used` `win.eventlog.network.smb_tree_id` |  |
+| `smb_signing_validation_failed` / `encryption` | 31013, 31014 | `win.eventlog.network.smb_command` `win.eventlog.network.smb_message_id` `win.eventlog.network.smb_session_id` `win.eventlog.network.smb_tree_id` |  |
+| `smb_signing_validation_failed` / `signing` | 31013, 31014 | `win.eventlog.network.smb_command` `win.eventlog.network.smb_message_id` `win.eventlog.network.smb_session_id` `win.eventlog.network.smb_tree_id` |  |
 | `wfp_transaction_watchdog_timeout` / `default` | 5150 | **fields: none** |  |
 | `wlan_connect_failed` / `join_failed` | 8002 | `win.eventlog.network.wlan_adapter` `win.eventlog.network.wlan_bss_type` `win.eventlog.network.wlan_connection_mode` `win.eventlog.network.wlan_failure_reason` `win.eventlog.network.wlan_profile_name` `win.eventlog.network.wlan_reason_code` |  |
 | `wlan_connect_failed` / `not_visible` | 8002 | `win.eventlog.network.wlan_adapter` `win.eventlog.network.wlan_bss_type` `win.eventlog.network.wlan_connection_mode` `win.eventlog.network.wlan_failure_reason` `win.eventlog.network.wlan_profile_name` `win.eventlog.network.wlan_reason_code` |  |
@@ -146,5 +150,7 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `dhcp_lease_denied` / `default`
 - `dhcp_lease_failed` / `default`
 - `smb_anonymous_access_enabled` / `default`
+- `smb_insecure_guest_allowed` / `default`
+- `smb_insecure_guest_rejected` / `default`
 - `smb_legacy_dialect_rejected` / `default`
 - `wfp_transaction_watchdog_timeout` / `default`

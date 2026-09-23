@@ -44,4 +44,4 @@ The last column is different in kind: it is the author's account of the row or e
 | `win_dism_feature_change_failed` / `default` | n/a | `win.servicing.dism.component` |  |
 | `win_dism_health_command_run` / `default` | n/a | `win.servicing.dism.component` |  |
 | `win_dism_reboot_required` / `default` | n/a | `win.servicing.dism.component` |  |
-| `win_dism_source_files_missing` / `default` | n/a | `win.servicing.dism.component` |  |
+| `win_servicing_source_files_missing` / `default` | n/a | `win.servicing.dism.component` |  |

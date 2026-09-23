@@ -27,6 +27,7 @@ Stored flat under the `win.eventlog.storage.` prefix.
 
 | LQL path | Type | Meaning |
 |---|---|---|
+| `win.eventlog.storage.filesystem` | string | Filesystem type the filesystem_corruption reason names (ntfs, refs, fat32), read from the provider that raised the event. A constant per provider: today the provider is always Microsoft-Windows-Ntfs, so the value is always ntfs. |
 | `win.eventlog.storage.sense_key` | int | SCSI sense key the device returned on a failed command, from Storage-ClassPnP 507 (SenseKey). The top-level classification of what the device is reporting, and the grouping key for a drive answering the same way repeatedly. |
 | `win.eventlog.storage.additional_sense_code` | int | SCSI additional sense code from Storage-ClassPnP 507 (AdditionalSenseCode). Read together with the sense key: the pair is what names the specific condition. |
 | `win.eventlog.storage.additional_sense_code_qualifier` | int | SCSI additional sense code qualifier from Storage-ClassPnP 507 (AdditionalSenseCodeQualifier). The third element of the sense triple. |
@@ -91,9 +92,9 @@ The last column is different in kind: it is the author's account of the row or e
 | `disk_failure_predicted` / `default` | 539, 542, 543 | `win.eventlog.storage.endurance_threshold_pct` `win.eventlog.storage.health_flag_name` `win.eventlog.storage.health_flag_value` `win.eventlog.storage.percentage_used_pct` |  |
 | `disk_paging_error` / `default` | 502, 503 | `win.eventlog.storage.device_number` `win.eventlog.storage.lba` `win.eventlog.storage.nv_cache_priority` `win.eventlog.storage.paging_priority` `win.eventlog.storage.transfer_bytes` |  |
 | `disk_surprise_removal` / `default` | 103, 551 | `win.eventlog.storage.device_state` `win.eventlog.storage.device_type` `win.eventlog.storage.lun` `win.eventlog.storage.miniport_name` `win.eventlog.storage.port_number` `win.eventlog.storage.removable` `win.eventlog.storage.surprise_removal_ok` |  |
-| `ntfs_corruption` / `state_error` | 100 | `win.eventlog.storage.hc_stateid` |  |
-| `ntfs_corruption` / `state_warning` | 100 | `win.eventlog.storage.hc_stateid` |  |
+| `filesystem_corruption` / `state_error` | 100 | `win.eventlog.storage.filesystem` `win.eventlog.storage.hc_stateid` |  |
+| `filesystem_corruption` / `state_warning` | 100 | `win.eventlog.storage.filesystem` `win.eventlog.storage.hc_stateid` |  |
 | `storage_controller_reset` / `default` | 500, 501, 550 | `win.eventlog.storage.boot_device` `win.eventlog.storage.bus_reset_reason` `win.eventlog.storage.bus_type` `win.eventlog.storage.bus_type_name` `win.eventlog.storage.failed_io_count` `win.eventlog.storage.lun` `win.eventlog.storage.miniport_name` `win.eventlog.storage.path_id` `win.eventlog.storage.port_number` `win.eventlog.storage.reset_status` `win.eventlog.storage.reset_type` `win.eventlog.storage.srb_timeout_s` `win.eventlog.storage.target_id` |  |
 | `storage_device_command_failed` / `default` | 507 | `win.eventlog.storage.additional_sense_code` `win.eventlog.storage.additional_sense_code_qualifier` `win.eventlog.storage.cdb_bytes` `win.eventlog.storage.scsi_status` `win.eventlog.storage.sense_key` `win.eventlog.storage.srb_status` `win.eventlog.storage.srb_status_code` |  |
-| `vol_mount_failed` / `device_offline` | 305 | `win.eventlog.storage.volume_guid` `win.eventlog.storage.volume_name` |  |
-| `vol_mount_failed` / `mount_failed` | 305 | `win.eventlog.storage.volume_guid` `win.eventlog.storage.volume_name` |  |
+| `volume_mount_failed` / `device_offline` | 305 | `win.eventlog.storage.volume_guid` `win.eventlog.storage.volume_name` |  |
+| `volume_mount_failed` / `mount_failed` | 305 | `win.eventlog.storage.volume_guid` `win.eventlog.storage.volume_name` |  |

@@ -12,7 +12,7 @@ Every section below is from the public reason block only.
 | `win_dism_feature_change_failed` | `patching` | Info |  |
 | `win_dism_health_command_run` | `patching` | Info |  |
 | `win_dism_reboot_required` | `patching` | Info |  |
-| `win_dism_source_files_missing` | `patching` | Notice |  |
+| `win_servicing_source_files_missing` | `patching` | Notice |  |
 
 ## `win_dism_command_failed`
 
@@ -46,9 +46,11 @@ A DISM change needs a reboot to take effect.
 
 **Impact:** The change applies after the next reboot.
 
-## `win_dism_source_files_missing`
+## `win_servicing_source_files_missing`
 
 A DISM operation could not find the source files it needed.
+
+**Also reported by:** `win.servicing.cbs`
 
 **Severity:** Notice
 

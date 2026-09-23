@@ -8,31 +8,43 @@ Every section below is from the public reason block only.
 
 | reason | service | severity | benign |
 |---|---|---|---|
-| `appid_certificate_store_verification_failed` | `security_audit` | Info or Debug |  |
-| `appx_app_activation_failed` | `app_stability` | Notice or Info | benign possible |
+| `appid_certificate_store_verification_failed` | `security_audit` | Debug |  |
+| `appid_certificate_store_verified` | `security_audit` | Info |  |
+| `appx_activation_failed` | `app_stability` | Notice or Info | benign possible |
 | `appx_cleanup_residue` | `patching` | Debug | benign possible |
 | `appx_deployment_failed` | `patching` | Notice, Info or Verbose | benign possible |
 | `appx_deployment_requeued` | `patching` | Verbose |  |
 | `appx_package_runtime_corrupt` | `app_stability` | Warning or Notice |  |
 | `appx_provisioning_failed` | `app_stability` | Notice or Info | benign possible |
 | `appx_service_start_failed` | `patching` | Notice or Info | benign possible |
-| `office_alert` | `app_stability` | Notice or Display |  |
 | `perf_counter_provider_failed` | `app_stability` | Debug |  |
 | `wcf_request_failed` | `app_stability` | Minor |  |
 
 ## `appid_certificate_store_verification_failed`
 
-The AppID service reported a certificate-store verification result.
+The AppID service reported a certificate-store verification failure.
 
-**Severity:** Info or Debug
+**Severity:** Debug
 
-**Impact:** A failed result is AppID context until AppLocker records establish an enforcement impact.
+**Impact:** This is AppID context until AppLocker records establish an enforcement impact.
 
 **Consider:**
 
 - Compare the result with AppLocker records before treating it as a rule-evaluation failure.
 
-## `appx_app_activation_failed`
+## `appid_certificate_store_verified`
+
+The AppID service reported a successful certificate-store verification.
+
+**Severity:** Info
+
+**Impact:** Retained as context for nearby failures; does not by itself establish enforcement.
+
+**Consider:**
+
+- Read this as the denominator beside nearby verification failures.
+
+## `appx_activation_failed`
 
 A packaged application did not start.
 
@@ -122,18 +134,6 @@ The packaged-app deployment client could not start or reach a service.
 **Consider:**
 
 - Read the error code before treating a restart race as a service failure.
-
-## `office_alert`
-
-Office displayed a dialog to a user.
-
-**Severity:** Notice or Display
-
-**Impact:** One dialog is an operator-visible event; repeated dialogs can identify an application problem.
-
-**Consider:**
-
-- For repeated alerts, inspect the surrounding application records.
 
 ## `perf_counter_provider_failed`
 

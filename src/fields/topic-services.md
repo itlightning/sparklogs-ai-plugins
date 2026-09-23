@@ -26,8 +26,8 @@
 | `sparklogs.data.services.svc_crash_truncated` | bool |  | Whether the crash count hit its cap: more crashes happened than the counter kept individually. |
 | `sparklogs.data.services.svc_crash_unresolved_count` | integer | count | How many crash records could not be attributed to a specific service. |
 | `sparklogs.data.services.svc_crash_measured_at` | string | timestamp | When this row's crash counts were measured. |
-| `sparklogs.data.services.svc_auto_not_running_age_basis` | string |  | Whether the age beside it was measured from a witnessed onset (`onset`), from when the condition was first seen already true (`observed`), or is a posture with no meaningful onset (`unknown_ongoing`). An age without this is a duration a reader cannot weigh. |
-| `sparklogs.data.services.svc_auto_not_running_age_h` | float | hours | How long this condition has been open, in hours. |
-| `sparklogs.data.services.svc_flapping_age_basis` | string |  | Whether the age beside it was measured from a witnessed onset (`onset`), from when the condition was first seen already true (`observed`), or is a posture with no meaningful onset (`unknown_ongoing`). An age without this is a duration a reader cannot weigh. |
-| `sparklogs.data.services.svc_flapping_age_h` | float | hours | How long this condition has been open, in hours. |
-| `sparklogs.data.services.svc_stuck_pending_age_min` | float | minutes | How long this condition has been open, in minutes. |
+| `sparklogs.data.services.service_auto_not_running_age_basis` | string |  | Whether the age beside it was measured from a witnessed onset (`onset`), from when the condition was first seen already true (`observed`), or is a posture with no meaningful onset (`unknown_ongoing`). An age without this is a duration a reader cannot weigh. |
+| `sparklogs.data.services.service_auto_not_running_age_h` | float | hours | How long this condition has been open, in hours. |
+| `sparklogs.data.services.service_flapping_age_basis` | string |  | Whether the age beside it was measured from a witnessed onset (`onset`), from when the condition was first seen already true (`observed`), or is a posture with no meaningful onset (`unknown_ongoing`). An age without this is a duration a reader cannot weigh. |
+| `sparklogs.data.services.service_flapping_age_h` | float | hours | How long this condition has been open, in hours. |
+| `sparklogs.data.services.service_stuck_pending_age_min` | float | minutes | How long this condition has been open, in minutes. |

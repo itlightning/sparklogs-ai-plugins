@@ -34,7 +34,7 @@
 | `sparklogs.data.disk_volumes.presence_tracked_d` | float | days | How long this volume has been tracked for its presence baseline. |
 | `sparklogs.data.disk_volumes.observed_at` | string | timestamp | When this row's reading was taken. |
 | `sparklogs.data.disk_volumes.stale` | bool |  | Whether this row is a held reading from a probe that could not complete rather than a fresh one. Diffed: a row going stale, or fresh again, is an honesty change a consumer must see. |
-| `sparklogs.data.disk_volumes.vol_space_low_age_basis` | string |  | Whether the age beside it was measured from a witnessed onset (`onset`), from when the condition was first seen already true (`observed`), or is a posture with no meaningful onset (`unknown_ongoing`). An age without this is a duration a reader cannot weigh. |
-| `sparklogs.data.disk_volumes.vol_space_low_age_h` | float | hours | How long this condition has been open, in hours. |
-| `sparklogs.data.disk_volumes.vol_unreadable_age_basis` | string |  | Whether the age beside it was measured from a witnessed onset (`onset`), from when the condition was first seen already true (`observed`), or is a posture with no meaningful onset (`unknown_ongoing`). An age without this is a duration a reader cannot weigh. |
-| `sparklogs.data.disk_volumes.vol_unreadable_age_h` | float | hours | How long this condition has been open, in hours. |
+| `sparklogs.data.disk_volumes.volume_space_low_age_basis` | string |  | Whether the age beside it was measured from a witnessed onset (`onset`), from when the condition was first seen already true (`observed`), or is a posture with no meaningful onset (`unknown_ongoing`). An age without this is a duration a reader cannot weigh. |
+| `sparklogs.data.disk_volumes.volume_space_low_age_h` | float | hours | How long this condition has been open, in hours. |
+| `sparklogs.data.disk_volumes.volume_unreadable_age_basis` | string |  | Whether the age beside it was measured from a witnessed onset (`onset`), from when the condition was first seen already true (`observed`), or is a posture with no meaningful onset (`unknown_ongoing`). An age without this is a duration a reader cannot weigh. |
+| `sparklogs.data.disk_volumes.volume_unreadable_age_h` | float | hours | How long this condition has been open, in hours. |
