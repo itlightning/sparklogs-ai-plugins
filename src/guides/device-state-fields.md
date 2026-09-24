@@ -27,8 +27,8 @@ One row per episode or occurrence: that row is the latest event in the window.
 Newest event of each subject at or before `end` (arg).
 `min_severity` (arg) applies to that newest event.
 
-**`view` (arg) `timeline` (value).**
-Series and RCA reading: every matching row, oldest first.
+**`view` (arg) `event_timeline` (value).**
+RCA reading: every matching row, oldest first. For a device-state value over time, use `view` (arg) `series` (value) with `topics` (arg).
 `min_severity` (arg) includes every in-window event of episodes whose peak in the window meets the floor.
 Rows with no `sparklogs.episode.id` (col) still filter per event.
 
@@ -38,8 +38,8 @@ Rows with no `sparklogs.episode.id` (col) still filter per event.
 |---|---|
 | Latest event of each episode (warning+ means that latest event is still warning+) | omit `view` (arg), `min_severity` (arg) `warning` (value) |
 | What is on the box / how it last read | `view` (arg) `latest_state` (value). Newest event of each subject, not of each episode |
-| Series of those episodes | `view` (arg) `timeline` (value), same `min_severity` (arg). Fieldset `fleet` (value) when duration / `sparklogs.episode.cleared_ts` (col) / `sparklogs.class` (col) matter |
-| Repeating change points | `view` (arg) `timeline` (value) plus opt-in kinds (`config_change` (value), and `delta` (value) when those are the points). Per-event floor. Omit `view` (arg) is one row per occurrence at its latest event; five change points are five timeline events. `sparklogs.episode.occurrence` (col) is a recurrence counter on one episode, not those points |
+| Series of those episodes | `view` (arg) `event_timeline` (value), same `min_severity` (arg). Fieldset `fleet` (value) when duration / `sparklogs.episode.cleared_ts` (col) / `sparklogs.class` (col) matter |
+| Repeating change points | `view` (arg) `event_timeline` (value) plus opt-in kinds (`config_change` (value), and `delta` (value) when those are the points). Per-event floor. Omit `view` (arg) is one row per occurrence at its latest event; five change points are five event_timeline events. `sparklogs.episode.occurrence` (col) is a recurrence counter on one episode, not those points |
 
 **Fieldset choice is a judgment call, not just a size choice.** Use `rca` (value) when reasoning about one
 device or a handful, `fleet` (value) when the question is how many and which, `minimal` (value) for a flat listing

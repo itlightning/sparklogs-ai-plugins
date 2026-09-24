@@ -36,7 +36,8 @@ Funnel, scope, LQL errors: `guides/mcp-tool-decision-tree.md`, `guides/scope-res
 
 - Standing / latest event of each episode → `query_device_health` (tool), omit `view` (arg) (`fieldset` (arg) `rca` (value) for one host; `min_severity` (arg) `warning` (value) means that latest event is still warning or worse)
 - Inventory / what is on the box → same tool, `view` (arg) `latest_state` (value)
-- Series / RCA → same tool, `view` (arg) `timeline` (value), same `min_severity` (arg); peak in the window, then every in-window event of those episodes
+- A device-state value over time (CPU, memory, disk, per-process use) → same tool, `view` (arg) `series` (value) with `topics` (arg); `view` (arg) `topics` (value) lists them
+- Episode series / RCA → same tool, `view` (arg) `event_timeline` (value), same `min_severity` (arg); peak in the window, then every in-window event of those episodes
 - Counts, patterns, when → `query_event_counts_by_severity` (tool), `describe_pattern` (tool), `query_scope_activity` (tool)
 - Named backup product installed → `query_device_health` (tool) first; job verdict in events, not VSS alone
 - Raw event lines → `query_logs` (tool) last, then refine
