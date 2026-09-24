@@ -17,6 +17,8 @@ tools:
   - query_event_counts_by_severity
   - refine_query_result
   - send_sparklogs_feedback
+  - describe_tables
+  - query_table
 
 args:
   - add_fields

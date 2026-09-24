@@ -6,7 +6,7 @@ The MCP server instructions define every term used here, in learning order. This
 
 **Parameters and columns:** names, defaults, and response columns live in the live MCP tool description and JSON schema only. This guide does not duplicate them; an old plugin with a new server must follow what the server advertises.
 
-There are **twelve** tools: `resolve_scope` (tool), `list_sources` (tool), `query_scope_activity` (tool), `query_device_health` (tool), `describe_pattern` (tool), `list_fields` (tool), `query_event_counts_by_severity` (tool), `query_logs` (tool), `refine_query_result` (tool), `get_query_metadata` (tool), `send_sparklogs_feedback` (tool), `server_info` (tool). Three differential tools (`query_period_diff` (other), `compare_populations` (other), `cluster_event_contexts` (other)) are fast-follow; see the bottom of this file for v1 equivalents.
+There are **fourteen** tools: `resolve_scope` (tool), `list_sources` (tool), `query_scope_activity` (tool), `query_device_health` (tool), `describe_pattern` (tool), `list_fields` (tool), `query_event_counts_by_severity` (tool), `query_logs` (tool), `refine_query_result` (tool), `get_query_metadata` (tool), `send_sparklogs_feedback` (tool), `server_info` (tool), `describe_tables` (tool), `query_table` (tool). Three differential tools (`query_period_diff` (other), `compare_populations` (other), `cluster_event_contexts` (other)) are fast-follow; see the bottom of this file for v1 equivalents.
 
 **Cross-cutting (full detail in MCP server instructions):**
 
@@ -47,6 +47,8 @@ One trigger per tool. After coverage, it is almost always a
 | `list_fields` (tool) | A field name you have not seen yet. Catalog, not a first-pass tool. |
 | `send_sparklogs_feedback` (tool) | The engineer wants to send session feedback to SparkLogs, or accepted a one-time offer. Run `sparklogs-feedback` first; not part of the query funnel. |
 | `server_info` (tool) | A call failed and you need to know whether region, transport or auth is the problem. |
+| `describe_tables` (tool) | Lists what `query_table` (tool) can read and names the specialized tool that answers a shape better. Reach for it before inventing a general scan. |
+| `query_table` (tool) | General grammar over one table, last, when no specialized tool has the shape. |
 
 **Two honest demotions.** Both tools below exist and work; neither is where you should start.
 
