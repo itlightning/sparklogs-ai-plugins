@@ -7,6 +7,8 @@ Emitted every 5 minutes on clock boundaries; each row covers the window ending a
 |---|---|---|---|
 | `sparklogs.data.storage_io.volume` | string |  | The volume's stable identity (its GUID), the same identity `disk_volumes` uses. |
 | `sparklogs.data.storage_io.display_name` | string |  | The volume's drive letter or mount path, for display. |
+| `sparklogs.data.storage_io.volume_role` | string |  | What this volume is for, the same value `disk_volumes` writes: `os`, `fixed_data`, or `removable`. Absent when the volume has no role. |
+| `sparklogs.data.storage_io.volume_role_code` | integer |  | `volume_role` as the numeric code `disk_volumes` uses for the same role. |
 | `sparklogs.data.storage_io.device_class` | string |  | The latency class of the volume's backing device: `hdd` or `flash`. Absent when the backing device is not fully resolved. |
 | `sparklogs.data.storage_io.device_class_code` | float |  | `device_class` as the number the latency rules compare. |
 | `sparklogs.data.storage_io.latency_warn_ms` | float | milliseconds | The latency bar, chosen by device class and host class, at or above which this volume's latency reads as degraded. |

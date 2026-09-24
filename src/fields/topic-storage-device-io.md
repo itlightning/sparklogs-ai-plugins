@@ -13,6 +13,7 @@ Emitted every 5 minutes on clock boundaries; each row covers the window ending a
 | `sparklogs.data.storage_device_io.total_mb_per_s_avg` | float | megabytes_per_second | The average combined read-plus-write throughput over the window, in 1024-based MB per second. |
 | `sparklogs.data.storage_device_io.bus_permanent` | bool |  | Whether this device sits on a permanent bus (not USB): the first half of the blast radius `disk_unresponsive`'s rungs read. |
 | `sparklogs.data.storage_device_io.carries_writeable_volume` | bool |  | Whether this device backs at least one mounted, writeable volume: the second half of the blast radius `disk_unresponsive`'s rungs read. |
+| `sparklogs.data.storage_device_io.carries_os_volume` | bool |  | Whether this device backs the volume Windows runs from. False when it does not, including when that volume's role was not established. |
 | `sparklogs.data.storage_device_io.busy_pct_avg` | float | percent | The average share of the window this device spent busy. |
 | `sparklogs.data.storage_device_io.busy_pct_p90_10s` | float | percent | The 90th percentile, across the window's 10-second samples, of busy share. |
 | `sparklogs.data.storage_device_io.busy_pct_max_10s` | float | percent | The highest 10-second busy share the window observed. |

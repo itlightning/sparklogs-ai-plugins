@@ -6,6 +6,8 @@ Emitted every 15 minutes on clock boundaries; each row covers the window ending 
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
 | `sparklogs.data.agent_overhead.row` | string |  | Which component this row is: `agent` for the agent process itself, `vector` for its Vector child. |
+| `sparklogs.data.agent_overhead.agent_version` | string |  | The agent version, plain semver, without build metadata. |
+| `sparklogs.data.agent_overhead.agent_build` | string |  | The agent build: semver plus the commit this binary was built from. `.dirty` means the tree was modified. |
 | `sparklogs.data.agent_overhead.cpu_cycles_delta` | integer |  | How many CPU cycles this process burned since the previous capture in the ring: frequency-independent, unlike the percent-of-one-core figures. |
 | `sparklogs.data.agent_overhead.user_time_delta_ms` | float | milliseconds | How much user-mode CPU time this process spent since the previous capture in the ring. |
 | `sparklogs.data.agent_overhead.kernel_time_delta_ms` | float | milliseconds | How much kernel-mode CPU time this process spent since the previous capture in the ring. |

@@ -5,6 +5,8 @@ Full inventory on its own schedule; changes are reported as they happen.
 
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
+| `sparklogs.data.agent_pipeline.agent_version` | string |  | The agent version, plain semver, without build metadata. |
+| `sparklogs.data.agent_pipeline.agent_build` | string |  | The agent build: semver plus the commit this binary was built from. `.dirty` means the tree was modified. |
 | `sparklogs.data.agent_pipeline.cpu_pct_of_one_core_avg` | float | percent | This process's average share of one CPU core over the window, from its CPU time over the wall time elapsed: exact, and needs no frequency reference. |
 | `sparklogs.data.agent_pipeline.cpu_pct_of_one_core_p95` | float | percent | The 95th percentile of this process's share of one CPU core, across the per-tick readings the window holds. |
 | `sparklogs.data.agent_pipeline.working_set_avg_mb` | float | megabytes | This process's average working set over the window. |

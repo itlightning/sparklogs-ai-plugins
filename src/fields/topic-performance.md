@@ -18,9 +18,11 @@ Emitted every 5 minutes on clock boundaries; each row covers the window ending a
 | `sparklogs.data.performance.cpu_dpc_pct_avg` | float | percent | The average share of busy CPU time spent in deferred procedure calls. |
 | `sparklogs.data.performance.cpu_dpc_pct_max_10s` | float | percent | The highest 10-second DPC share the window observed. |
 | `sparklogs.data.performance.cpu_interrupt_dpc_pct_avg` | float | percent | The average combined interrupt and DPC share: what the interrupt-storm condition grades. |
-| `sparklogs.data.performance.cpu_frequency_pct_avg` | float | percent | The average CPU clock as a share of its nominal frequency. Reads over 100 under turbo, unlike every other `_pct` field on this row. |
-| `sparklogs.data.performance.run_queue_p90_10s` | float |  | The 90th percentile, across the window's 10-second samples, of how many threads were ready to run but waiting for a core. |
-| `sparklogs.data.performance.run_queue_per_core_p90_10s` | float |  | `run_queue_p90_10s` divided by the logical core count, so a deep queue on a big server and a shallow one on a laptop are judged on the same scale. |
+| `sparklogs.data.performance.cpu_clock_pct_of_base_avg` | float | percent | The average CPU clock as a share of its rated non-turbo base. Reads over 100 under turbo, unlike every other `_pct` field on this row. |
+| `sparklogs.data.performance.cpu_base_clock_mhz` | integer |  | The rated non-turbo base clock, in MHz. Absent when the host did not report one. |
+| `sparklogs.data.performance.cpu_clock_mhz_avg` | float |  | The average effective clock in MHz: the rated base times `cpu_clock_pct_of_base_avg`. Absent without a base. |
+| `sparklogs.data.performance.run_queue_p90_10s` | float |  | The 90th percentile, across the window's 10-second samples, of how many threads were ready to run but waiting for a core. On a virtual machine the queue can be threads waiting on host dispatch, which the guest does not count as busy. |
+| `sparklogs.data.performance.run_queue_per_core_p90_10s` | float |  | `run_queue_p90_10s` divided by the logical core count, so a deep queue on a big server and a shallow one on a laptop are judged on the same scale. On a virtual machine the queue can be threads waiting on host dispatch, which the guest does not count as busy. |
 | `sparklogs.data.performance.logical_core_count` | integer | count | How many logical processors the host has, which the per-core queue reading is divided by. |
 | `sparklogs.data.performance.commit_pct` | float | percent | The current commit charge as a percentage of the commit limit. |
 | `sparklogs.data.performance.commit_pct_max_window` | float | percent | The highest commit charge percentage the window observed. |
@@ -30,7 +32,7 @@ Emitted every 5 minutes on clock boundaries; each row covers the window ending a
 | `sparklogs.data.performance.ram_available_bytes` | integer | bytes | Physical RAM available to new allocations (free, zeroed and standby pages) at the end of the window. |
 | `sparklogs.data.performance.ram_standby_bytes` | integer | bytes | RAM holding cached pages the memory manager can repurpose (the standby list, all priorities) at the end of the window. Part of available. |
 | `sparklogs.data.performance.ram_modified_bytes` | integer | bytes | RAM holding dirty pages waiting to be written out (the modified list) at the end of the window. |
-| `sparklogs.data.performance.ram_compressed_bytes` | integer | bytes | RAM the memory-compression store holds resident at the end of the window. Absent where memory compression is off. |
+| `sparklogs.data.performance.ram_compressed_bytes` | integer | bytes | RAM the memory-compression store holds resident at the end of the window. 0 when memory compression is off (no Memory Compression process running, the default on Server); absent only when the counter could not be read. |
 | `sparklogs.data.performance.cpu_busy_age_basis` | string |  | Whether the age beside it was measured from a witnessed onset (`onset`), from when the condition was first seen already true (`observed`), or is a posture with no meaningful onset (`unknown_ongoing`). An age without this is a duration a reader cannot weigh. |
 | `sparklogs.data.performance.cpu_busy_age_h` | float | hours | How long this condition has been open, in hours. |
 | `sparklogs.data.performance.cpu_interrupt_storm_age_basis` | string |  | Whether the age beside it was measured from a witnessed onset (`onset`), from when the condition was first seen already true (`observed`), or is a posture with no meaningful onset (`unknown_ongoing`). An age without this is a duration a reader cannot weigh. |
