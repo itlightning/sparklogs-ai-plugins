@@ -1,6 +1,8 @@
 <!-- GENERATED reference. Do not hand-edit. -->
 # VSS writers fields
 
+Full inventory every 6 hours; changes are reported as they happen.
+
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
 | `sparklogs.data.vss_writers.writer` | string |  | The VSS writer's name, lowercased so it joins with the string a failure message names it by. |

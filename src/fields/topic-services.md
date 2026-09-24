@@ -1,6 +1,8 @@
 <!-- GENERATED reference. Do not hand-edit. -->
 # Windows services fields
 
+Full inventory every 6 hours; changes are reported as they happen.
+
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
 | `sparklogs.data.services.name` | string |  | The service's name. |

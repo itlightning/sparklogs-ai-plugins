@@ -1,6 +1,8 @@
 <!-- GENERATED reference. Do not hand-edit. -->
 # Storage devices fields
 
+Full inventory every hour; changes are reported as they happen.
+
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
 | `sparklogs.data.storage_devices.device` | string |  | The device's stable identity. |

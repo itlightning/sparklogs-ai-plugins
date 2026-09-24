@@ -1,6 +1,8 @@
 <!-- GENERATED reference. Do not hand-edit. -->
 # Feed health fields
 
+Full inventory every 2 hours; changes are reported as they happen.
+
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
 | `sparklogs.data.feed_health.module` | string |  | Which data-feed module this row reports on (the pack module id). |

@@ -1,6 +1,8 @@
 <!-- GENERATED reference. Do not hand-edit. -->
 # Volume map fields
 
+Full inventory every hour; changes are reported as they happen.
+
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
 | `sparklogs.data.volume_map.volume` | string |  | The volume's stable identity, the same identity `disk_volumes` uses. |

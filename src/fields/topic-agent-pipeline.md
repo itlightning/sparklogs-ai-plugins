@@ -1,6 +1,8 @@
 <!-- GENERATED reference. Do not hand-edit. -->
 # Agent pipeline fields
 
+Full inventory on its own schedule; changes are reported as they happen.
+
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
 | `sparklogs.data.agent_pipeline.cpu_pct_of_one_core_avg` | float | percent | This process's average share of one CPU core over the window, from its CPU time over the wall time elapsed: exact, and needs no frequency reference. |

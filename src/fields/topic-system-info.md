@@ -1,6 +1,8 @@
 <!-- GENERATED reference. Do not hand-edit. -->
 # System information fields
 
+Full inventory every hour; changes are reported as they happen.
+
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
 | `sparklogs.data.system_info.manufacturer` | string |  | Who made the machine, from SMBIOS. |

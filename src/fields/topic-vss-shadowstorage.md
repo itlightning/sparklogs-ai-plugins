@@ -1,6 +1,8 @@
 <!-- GENERATED reference. Do not hand-edit. -->
 # VSS shadow storage fields
 
+Full inventory every 6 hours; changes are reported as they happen.
+
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
 | `sparklogs.data.vss_shadowstorage.display_name` | string |  | The volume's drive letter or mount path, for display. |

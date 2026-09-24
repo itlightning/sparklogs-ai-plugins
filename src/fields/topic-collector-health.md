@@ -1,6 +1,8 @@
 <!-- GENERATED reference. Do not hand-edit. -->
 # Collector health fields
 
+Full inventory every 2 hours; changes are reported as they happen.
+
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
 | `sparklogs.data.collector_health.topic` | string |  | Which state topic this row reports on. |

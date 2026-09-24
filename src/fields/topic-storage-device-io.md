@@ -1,6 +1,8 @@
 <!-- GENERATED reference. Do not hand-edit. -->
 # Storage device IO fields
 
+Emitted every 5 minutes on clock boundaries; each row covers the window ending at `t`; a partly watched window carries `sparklogs.window_coverage_pct` below 100; chart with buckets at least 5 minutes wide.
+
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
 | `sparklogs.data.storage_device_io.device` | string |  | The device's stable identity, the same identity `storage_devices` uses. |

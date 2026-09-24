@@ -1,6 +1,8 @@
 <!-- GENERATED reference. Do not hand-edit. -->
 # Crash dump configuration fields
 
+Full inventory every 8 hours; changes are reported as they happen.
+
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
 | `sparklogs.data.crash_dump_config.dump_type` | string |  | What this host is configured to write on a bugcheck: `none`, `mini`, `kernel`, `full` or `automatic`. Absent when the setting could not be read, which is not the same answer as `none`. |

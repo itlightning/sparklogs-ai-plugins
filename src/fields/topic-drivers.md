@@ -1,6 +1,8 @@
 <!-- GENERATED reference. Do not hand-edit. -->
 # Device drivers fields
 
+Full inventory every day; changes are reported as they happen.
+
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
 | `sparklogs.data.drivers.package` | string |  | The package's stable identity: setup class, INF and provider, lowercased and joined. |

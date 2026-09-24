@@ -1,6 +1,8 @@
 <!-- GENERATED reference. Do not hand-edit. -->
 # Windows Update agent state fields
 
+Full inventory every 6 hours; changes are reported as they happen.
+
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
 | `sparklogs.data.windows_update_agent_state.updates_paused` | bool |  | Whether Windows Update is currently paused on this host. |

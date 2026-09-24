@@ -1,6 +1,8 @@
 <!-- GENERATED reference. Do not hand-edit. -->
 # Disk volumes fields
 
+Full inventory every 15 minutes; changes are reported as they happen.
+
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
 | `sparklogs.data.disk_volumes.volume` | string |  | The volume's stable identity (its GUID), lowercased. Episode continuity keys off this, never the drive letter. |

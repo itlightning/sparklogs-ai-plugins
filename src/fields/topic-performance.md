@@ -1,11 +1,15 @@
 <!-- GENERATED reference. Do not hand-edit. -->
 # Host performance fields
 
+Emitted every 5 minutes on clock boundaries; each row covers the window ending at `t`; a partly watched window carries `sparklogs.window_coverage_pct` below 100; chart with buckets at least 5 minutes wide.
+
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
 | `sparklogs.data.performance.cpu_pct_time_over_90` | float | percent | Percent of the window's sample pairs with CPU busy over 90%. |
 | `sparklogs.data.performance.cpu_pct_time_over_70` | float | percent | Percent of the window's sample pairs with CPU busy over 70%. |
 | `sparklogs.data.performance.cpu_busy_pct_avg` | float | percent | The host's average CPU busy share over the window, core-normalized. |
+| `sparklogs.data.performance.cpu_busy_pct_max_10s` | float | percent | The highest 10-second CPU busy share the window observed, core-normalized: the burst the average hides. |
+| `sparklogs.data.performance.cpu_busy_pct_p90_10s` | float | percent | The 90th percentile, across the window's 10-second samples, of the CPU busy share, core-normalized. |
 | `sparklogs.data.performance.cpu_kernel_pct_of_busy_avg` | float | percent | The average share of busy CPU time spent in kernel mode. |
 | `sparklogs.data.performance.cpu_user_pct_of_busy_avg` | float | percent | The average share of busy CPU time spent in user mode. |
 | `sparklogs.data.performance.cpu_kernel_excl_drivers_pct_of_busy_avg` | float | percent | The average share of busy CPU time spent in kernel mode, excluding interrupt and DPC time attributed to drivers: what the kernel-dominated condition grades. |

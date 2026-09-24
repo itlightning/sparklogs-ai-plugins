@@ -1,6 +1,8 @@
 <!-- GENERATED reference. Do not hand-edit. -->
 # Storage IO fields
 
+Emitted every 5 minutes on clock boundaries; each row covers the window ending at `t`; a partly watched window carries `sparklogs.window_coverage_pct` below 100; chart with buckets at least 5 minutes wide.
+
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
 | `sparklogs.data.storage_io.volume` | string |  | The volume's stable identity (its GUID), the same identity `disk_volumes` uses. |

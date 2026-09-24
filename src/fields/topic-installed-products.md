@@ -1,6 +1,8 @@
 <!-- GENERATED reference. Do not hand-edit. -->
 # Installed products fields
 
+Full inventory every day; changes are reported as they happen.
+
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
 | `sparklogs.data.installed_products.name` | string |  | The product's display name, as the Uninstall registry names it. |

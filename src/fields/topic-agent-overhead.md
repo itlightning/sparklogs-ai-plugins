@@ -1,6 +1,8 @@
 <!-- GENERATED reference. Do not hand-edit. -->
 # Agent overhead fields
 
+Emitted every 15 minutes on clock boundaries; each row covers the window ending at `t`; a partly watched window carries `sparklogs.window_coverage_pct` below 100; chart with buckets at least 15 minutes wide.
+
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
 | `sparklogs.data.agent_overhead.row` | string |  | Which component this row is: `agent` for the agent process itself, `vector` for its Vector child. |

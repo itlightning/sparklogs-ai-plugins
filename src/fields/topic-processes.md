@@ -1,6 +1,8 @@
 <!-- GENERATED reference. Do not hand-edit. -->
 # Processes fields
 
+Full inventory every hour; changes are reported as they happen.
+
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
 | `sparklogs.data.processes.pid` | integer |  | The process id. Not itself a stable identity: Windows reuses pids, so `create_time_raw` beside it pins which incarnation this row is about. |
