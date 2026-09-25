@@ -1,7 +1,7 @@
 <!-- GENERATED reference. Do not hand-edit. -->
 # Installed product summary fields
 
-Full inventory on its own schedule; changes are reported as they happen.
+Full inventory on its own schedule. Supported changes are reported when the agent observes them.
 
 | Field | Type | Unit | Meaning |
 |---|---|---|---|

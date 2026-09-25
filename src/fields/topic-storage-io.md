@@ -1,7 +1,7 @@
 <!-- GENERATED reference. Do not hand-edit. -->
 # Storage IO fields
 
-Emitted every 5 minutes on clock boundaries; each row covers the window ending at `t`; a partly watched window carries `sparklogs.window_coverage_pct` below 100; chart with buckets at least 5 minutes wide.
+Reported every 5 minutes on clock boundaries for the window ending at `t`. `sparklogs.window_coverage_pct` is below 100 when collection covered only part of the window. Use chart buckets at least 5 minutes wide.
 
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
@@ -11,8 +11,8 @@ Emitted every 5 minutes on clock boundaries; each row covers the window ending a
 | `sparklogs.data.storage_io.volume_role_code` | integer |  | `volume_role` as the numeric code `disk_volumes` uses for the same role. |
 | `sparklogs.data.storage_io.device_class` | string |  | The latency class of the volume's backing device: `hdd` or `flash`. Absent when the backing device is not fully resolved. |
 | `sparklogs.data.storage_io.device_class_code` | float |  | `device_class` as the number the latency rules compare. |
-| `sparklogs.data.storage_io.latency_warn_ms` | float | milliseconds | The latency bar, chosen by device class and host class, at or above which this volume's latency reads as degraded. |
-| `sparklogs.data.storage_io.latency_error_ms` | float | milliseconds | The latency bar at or above which this volume's latency reads as severely degraded. |
+| `sparklogs.data.storage_io.latency_warn_ms` | float | milliseconds | Latency threshold in milliseconds for degraded performance, chosen by device class and host class. |
+| `sparklogs.data.storage_io.latency_error_ms` | float | milliseconds | Latency threshold in milliseconds at or above which this volume is considered severely degraded. |
 | `sparklogs.data.storage_io.latency_recover_ms` | float | milliseconds | The latency this volume must fall back under before a latency episode is considered closed. |
 | `sparklogs.data.storage_io.busy_pct_avg` | float | percent | The average share of the window this volume's backing store spent busy. |
 | `sparklogs.data.storage_io.busy_pct_p90_10s` | float | percent | The 90th percentile, across the window's 10-second samples, of busy share. |
@@ -35,7 +35,7 @@ Emitted every 5 minutes on clock boundaries; each row covers the window ending a
 | `sparklogs.data.storage_io.queue_depth_max_10s` | float |  | The highest 10-second queue depth the window observed. |
 | `sparklogs.data.storage_io.topology_segment_count` | integer | count | How many distinct topology signatures the window's samples held. More than two in one window marks `topology_mixed` and holds until every sample shares one topology again. |
 | `sparklogs.data.storage_io.topology_mixed` | bool |  | Whether the topology changed too many times within one window to trust a single reduction. Absent when the topology held steady. |
-| `sparklogs.data.storage_io.disk_latency_degraded_age_basis` | string |  | Whether the age beside it was measured from a witnessed onset (`onset`), from when the condition was first seen already true (`observed`), or is a posture with no meaningful onset (`unknown_ongoing`). An age without this is a duration a reader cannot weigh. |
+| `sparklogs.data.storage_io.disk_latency_degraded_age_basis` | string |  | `onset`: witnessed start. `observed`: already present when first seen, making age a lower bound. `unknown_ongoing`: no meaningful onset time. |
 | `sparklogs.data.storage_io.disk_latency_degraded_age_h` | float | hours | How long this condition has been open, in hours. |
-| `sparklogs.data.storage_io.disk_saturated_age_basis` | string |  | Whether the age beside it was measured from a witnessed onset (`onset`), from when the condition was first seen already true (`observed`), or is a posture with no meaningful onset (`unknown_ongoing`). An age without this is a duration a reader cannot weigh. |
+| `sparklogs.data.storage_io.disk_saturated_age_basis` | string |  | `onset`: witnessed start. `observed`: already present when first seen, making age a lower bound. `unknown_ongoing`: no meaningful onset time. |
 | `sparklogs.data.storage_io.disk_saturated_age_h` | float | hours | How long this condition has been open, in hours. |

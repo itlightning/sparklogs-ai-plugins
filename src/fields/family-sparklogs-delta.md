@@ -4,4 +4,4 @@
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
 | `sparklogs.delta.id` | string |  | This change event's own id. |
-| `sparklogs.delta.prev_id` | string |  | The previous change event within this era, so the chain can be walked in order and a missing link detected. Absent on the first change after a full table. |
+| `sparklogs.delta.prev_id` | string |  | Previous change ID in this epoch. Use it to detect gaps in the change chain. Absent on the first change after an inventory. |

@@ -1,13 +1,13 @@
 <!-- GENERATED reference. Do not hand-edit. -->
 # VSS shadow storage fields
 
-Full inventory every 6 hours; changes are reported as they happen.
+Full inventory every 6 hours. Supported changes are reported when the agent observes them.
 
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
 | `sparklogs.data.vss_shadowstorage.display_name` | string |  | The volume's drive letter or mount path, for display. |
 | `sparklogs.data.vss_shadowstorage.volume` | string |  | The volume's stable identity, the same identity `disk_volumes` and `volume_map` use. Falls back to the raw lowercased `vssadmin` string when the volume could not be resolved to that identity. |
-| `sparklogs.data.vss_shadowstorage.volume_resolution` | string |  | Present as `unresolved` when this row's key is the raw `vssadmin` string rather than the shared volume identity, so a consumer never mistakes an unjoinable key for a joinable one. |
+| `sparklogs.data.vss_shadowstorage.volume_resolution` | string |  | `unresolved` when the volume key is the raw `vssadmin` value and cannot be joined to the shared volume identity. |
 | `sparklogs.data.vss_shadowstorage.shadowstorage_used_pct` | float | percent | How much of the volume's shadow-storage allocation is used. |
 | `sparklogs.data.vss_shadowstorage.shadowstorage_at_cap` | bool |  | Whether shadow-storage usage is at or above its maximum allocation. |
 | `sparklogs.data.vss_shadowstorage.shadow_snapshots_deleted_delta` | integer | count | Restore points lost since the prior facts pass, when that could be derived. Normally absent: the underlying commands do not enumerate shadows, so this lights up only when a source happens to supply it. |
@@ -20,5 +20,5 @@ Full inventory every 6 hours; changes are reported as they happen.
 | `sparklogs.data.vss_shadowstorage.snap_fail_truncated` | bool |  | Whether the snapshot failure count hit its cap: more failures happened than the counter kept individually. |
 | `sparklogs.data.vss_shadowstorage.snap_fail_unresolved_count` | integer | count | How many snapshot failure records could not be attributed to a specific volume. |
 | `sparklogs.data.vss_shadowstorage.snap_fail_measured_at` | string | timestamp | When this row's snapshot failure counts were measured. |
-| `sparklogs.data.vss_shadowstorage.vss_shadowstorage_age_basis` | string |  | Whether the age beside it was measured from a witnessed onset (`onset`), from when the condition was first seen already true (`observed`), or is a posture with no meaningful onset (`unknown_ongoing`). An age without this is a duration a reader cannot weigh. |
+| `sparklogs.data.vss_shadowstorage.vss_shadowstorage_age_basis` | string |  | `onset`: witnessed start. `observed`: already present when first seen, making age a lower bound. `unknown_ongoing`: no meaningful onset time. |
 | `sparklogs.data.vss_shadowstorage.vss_shadowstorage_age_h` | float | hours | How long this condition has been open, in hours. |

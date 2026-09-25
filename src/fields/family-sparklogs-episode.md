@@ -3,19 +3,19 @@
 
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
-| `sparklogs.episode.id` | string |  | This episode's id. Never recycled, so it is safe to key on forever. |
+| `sparklogs.episode.id` | string |  | Unique episode ID, retained throughout the condition's lifecycle. |
 | `sparklogs.episode.event_seq` | integer | count | Counts this episode's events from 1. Survives an agent restart, so a consumer can tell whether an event is newer than what it holds without trusting a clock. |
 | `sparklogs.episode.occurrence` | integer | count | Which time this is that the condition has opened on this subject on this agent. Counted locally and kept across a reinstall; a wiped host resets it. |
 | `sparklogs.episode.phase` | string |  | Where the episode stands: `onset`, `held`, `recovering`, `recovered` or `ended`. |
-| `sparklogs.episode.transition` | string |  | What just changed: `opened`, `recovering`, `relapsed`, `closed`, `ended`, `severity_raised` or `severity_lowered`. Present if and only if something did. |
+| `sparklogs.episode.transition` | string |  | Lifecycle change: `opened`, `recovering`, `relapsed`, `closed`, `ended`, `severity_raised` or `severity_lowered`. Absent without a transition. |
 | `sparklogs.episode.first_observed_ts` | string | timestamp | When the episode opened. |
-| `sparklogs.episode.age_basis` | string |  | What the episode's age may be trusted to mean: `onset` for a witnessed start, `observed` for one already true when first seen, which makes the age a lower bound, and `unknown_ongoing` for a posture with no meaningful start. |
+| `sparklogs.episode.age_basis` | string |  | `onset`: witnessed start. `observed`: already present when first seen, making age a lower bound. `unknown_ongoing`: no meaningful onset time. |
 | `sparklogs.episode.last_confirmed_ts` | string | timestamp | The last time the condition was seen still true. |
-| `sparklogs.episode.max_observation_gap_s` | integer | seconds | The longest stretch during this episode where the agent was not watching. How much of a long episode is measurement rather than inference. |
-| `sparklogs.episode.post_gap_s` | integer | seconds | How long the blind window was that this event immediately follows. Present only on the first event after one. |
-| `sparklogs.episode.presence_seen_count` | integer | count | How many samples this subject's row was actually present in over its tracked life. Rides with its denominator or not at all: a numerator alone is not a ratio. |
-| `sparklogs.episode.presence_observed_count` | integer | count | How many samples this subject could have been seen in, present or not. The denominator of the presence ratio. |
-| `sparklogs.episode.recovery_attempts` | integer | count | How many times the episode has started recovering. The last one is the successful one, so more than one means the subject has been unstable rather than simply broken. |
+| `sparklogs.episode.max_observation_gap_s` | integer | seconds | Longest observation gap during the episode, in seconds. |
+| `sparklogs.episode.post_gap_s` | integer | seconds | Duration of the observation gap preceding this event, in seconds. Present only on the first event after a gap. |
+| `sparklogs.episode.presence_seen_count` | integer | count | Samples containing this subject during its tracked lifetime. Present only with `presence_observed_count`, the denominator. |
+| `sparklogs.episode.presence_observed_count` | integer | count | Samples in which this subject could have been observed. Denominator for `presence_seen_count`. |
+| `sparklogs.episode.recovery_attempts` | integer | count | Number of recovery attempts during this episode. An attempt does not establish that recovery completed. |
 | `sparklogs.episode.recovering_total_s` | integer | seconds | How long, in total observed time, the episode has spent recovering. |
 | `sparklogs.episode.last_transition_ts` | string | timestamp | When this episode last emitted a transition, whatever it was. Answers how long it has been at this severity without scanning its other events. |
 | `sparklogs.episode.peak_severity` | string |  | The highest severity this episode has carried, so one closing event can say it peaked here and lasted this long. |

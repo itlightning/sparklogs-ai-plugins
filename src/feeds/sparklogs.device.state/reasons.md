@@ -54,7 +54,7 @@ CPU time is dominated by interrupt and DPC handling.
 
 ## `cpu_kernel_dominated`
 
-Busy CPU time is mostly kernel time rather than application work.
+Busy CPU time is mostly kernel work, excluding interrupts and deferred procedure calls.
 
 **Impact:** Application throughput can be lower than the busy figure alone suggests.
 
@@ -112,7 +112,7 @@ The host clock is drifting from reference time.
 
 A new crash dump appeared.
 
-**Impact:** The host recently bugchecked.
+**Impact:** The dump may help investigate a Windows crash. Check its timestamp to place the crash in the incident timeline.
 
 ## `os_dump_pagefile_too_small`
 
@@ -162,9 +162,9 @@ Committed memory is high.
 
 ## `ram_hard_fault_storm`
 
-The host is thrashing memory.
+High hard-page-fault activity persists.
 
-**Impact:** Paging pressure can degrade every workload on the host.
+**Impact:** Memory-related disk reads may slow workloads.
 
 ## `service_auto_not_running`
 
@@ -174,7 +174,7 @@ An automatic service is not running.
 
 ## `service_flapping`
 
-A Windows service is flapping.
+A Windows service keeps crashing and restarting.
 
 **Impact:** The service may be unstable, unavailable between restarts, or masking a crash loop.
 
@@ -186,19 +186,19 @@ A Windows service is stuck pending.
 
 ## `sparklogs_agent_cpu_over_budget`
 
-The agent stack is over CPU budget.
+SparkLogs Agent CPU usage exceeds its budget.
 
 **Impact:** Monitoring overhead may be higher than expected on this host.
 
 ## `sparklogs_agent_handle_over_budget`
 
-The agent stack is over its handle budget.
+SparkLogs Agent handle usage exceeds its budget.
 
 **Impact:** Monitoring overhead may be higher than expected on this host.
 
 ## `sparklogs_agent_memory_over_budget`
 
-The agent stack is over memory budget.
+Combined SparkLogs Agent and Vector memory usage exceeds its budget.
 
 **Impact:** Monitoring overhead may be higher than expected on this host.
 

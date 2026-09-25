@@ -1,7 +1,7 @@
 <!-- GENERATED reference. Do not hand-edit. -->
 # Feed health fields
 
-Full inventory every 2 hours; changes are reported as they happen.
+Full inventory every 2 hours. Supported changes are reported when the agent observes them.
 
 | Field | Type | Unit | Meaning |
 |---|---|---|---|

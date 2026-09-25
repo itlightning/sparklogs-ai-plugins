@@ -1,7 +1,7 @@
 <!-- GENERATED reference. Do not hand-edit. -->
 # Storage device IO fields
 
-Emitted every 5 minutes on clock boundaries; each row covers the window ending at `t`; a partly watched window carries `sparklogs.window_coverage_pct` below 100; chart with buckets at least 5 minutes wide.
+Reported every 5 minutes on clock boundaries for the window ending at `t`. `sparklogs.window_coverage_pct` is below 100 when collection covered only part of the window. Use chart buckets at least 5 minutes wide.
 
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
@@ -9,10 +9,10 @@ Emitted every 5 minutes on clock boundaries; each row covers the window ending a
 | `sparklogs.data.storage_device_io.display_name` | string |  | The device's friendly name, for display. |
 | `sparklogs.data.storage_device_io.transport` | string |  | The bus this device is attached over. |
 | `sparklogs.data.storage_device_io.media` | string |  | The device's media: `hdd` or `ssd`. Omitted when not read. |
-| `sparklogs.data.storage_device_io.total_iops_avg` | float | iops | The average combined read-plus-write rate over the window: a device writing nothing while it reads is not wedged, so the two directions are summed into one made-progress reading. |
+| `sparklogs.data.storage_device_io.total_iops_avg` | float | iops | Average combined read and write operations per second over the window. |
 | `sparklogs.data.storage_device_io.total_mb_per_s_avg` | float | megabytes_per_second | The average combined read-plus-write throughput over the window, in 1024-based MB per second. |
-| `sparklogs.data.storage_device_io.bus_permanent` | bool |  | Whether this device sits on a permanent bus (not USB): the first half of the blast radius `disk_unresponsive`'s rungs read. |
-| `sparklogs.data.storage_device_io.carries_writeable_volume` | bool |  | Whether this device backs at least one mounted, writeable volume: the second half of the blast radius `disk_unresponsive`'s rungs read. |
+| `sparklogs.data.storage_device_io.bus_permanent` | bool |  | Whether this device uses a permanent bus, excluding USB. |
+| `sparklogs.data.storage_device_io.carries_writeable_volume` | bool |  | Whether this device backs at least one mounted volume that allows writes. |
 | `sparklogs.data.storage_device_io.carries_os_volume` | bool |  | Whether this device backs the volume Windows runs from. False when it does not, including when that volume's role was not established. |
 | `sparklogs.data.storage_device_io.busy_pct_avg` | float | percent | The average share of the window this device spent busy. |
 | `sparklogs.data.storage_device_io.busy_pct_p90_10s` | float | percent | The 90th percentile, across the window's 10-second samples, of busy share. |
@@ -35,5 +35,5 @@ Emitted every 5 minutes on clock boundaries; each row covers the window ending a
 | `sparklogs.data.storage_device_io.queue_depth_max_10s` | float |  | The highest 10-second queue depth the window observed. |
 | `sparklogs.data.storage_device_io.topology_segment_count` | integer | count | How many distinct topology signatures the window's samples held. More than two in one window marks `topology_mixed` and holds until every sample shares one topology again. |
 | `sparklogs.data.storage_device_io.topology_mixed` | bool |  | Whether the topology changed too many times within one window to trust a single reduction. Absent when the topology held steady. |
-| `sparklogs.data.storage_device_io.disk_unresponsive_age_basis` | string |  | Whether the age beside it was measured from a witnessed onset (`onset`), from when the condition was first seen already true (`observed`), or is a posture with no meaningful onset (`unknown_ongoing`). An age without this is a duration a reader cannot weigh. |
+| `sparklogs.data.storage_device_io.disk_unresponsive_age_basis` | string |  | `onset`: witnessed start. `observed`: already present when first seen, making age a lower bound. `unknown_ongoing`: no meaningful onset time. |
 | `sparklogs.data.storage_device_io.disk_unresponsive_age_h` | float | hours | How long this condition has been open, in hours. |

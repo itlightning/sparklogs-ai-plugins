@@ -1,7 +1,7 @@
 <!-- GENERATED reference. Do not hand-edit. -->
 # Volume map fields
 
-Full inventory every hour; changes are reported as they happen.
+Full inventory every hour. Supported changes are reported when the agent observes them.
 
 | Field | Type | Unit | Meaning |
 |---|---|---|---|

@@ -1,7 +1,7 @@
 <!-- GENERATED reference. Do not hand-edit. -->
 # Device drivers fields
 
-Full inventory every day; changes are reported as they happen.
+Full inventory every day. Supported changes are reported when the agent observes them.
 
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
