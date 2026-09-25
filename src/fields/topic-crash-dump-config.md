@@ -6,8 +6,9 @@ Full inventory every 8 hours; changes are reported as they happen.
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
 | `sparklogs.data.crash_dump_config.dump_type` | string |  | What this host is configured to write on a bugcheck: `none`, `mini`, `kernel`, `full` or `automatic`. Absent when the setting could not be read, which is not the same answer as `none`. |
-| `sparklogs.data.crash_dump_config.pagefile_max_bytes` | integer | bytes | The page file's configured maximum size, which is the room a dump has to be written into. |
-| `sparklogs.data.crash_dump_config.pagefile_required_bytes` | integer | bytes | The page-file room the configured dump type needs. Absent for a dump type that asks for none. |
+| `sparklogs.data.crash_dump_config.pagefile_sizing` | string |  | How the page file is sized: `off`, `system_managed`, `fixed`, or `unknown`. One system-managed line among fixed lines makes the whole set `unknown`. |
+| `sparklogs.data.crash_dump_config.pagefile_max_bytes` | integer | bytes | The page file's configured maximum size, which is the room a dump has to be written into when no dedicated dump file is set. Present for `off` (zero) and `fixed`; absent for `system_managed` and `unknown`. |
+| `sparklogs.data.crash_dump_config.pagefile_required_bytes` | integer | bytes | The dump-backing room the configured dump type needs. Absent for `none`, `mini`, `system_managed`, `unknown`, a Windows-chosen dedicated dump file, or a complete dump when physical RAM could not be read. |
 | `sparklogs.data.crash_dump_config.pagefile_shortfall_pct` | float | percent | How far the page file falls short of what the dump type needs, as a percentage of the requirement. Zero when nothing was asked for, which is a definite answer; absent only when the dump type or the cap could not be read. |
 | `sparklogs.data.crash_dump_config.minidump_count_7d` | integer | count | Minidump files written in the last seven days. |
 | `sparklogs.data.crash_dump_config.minidump_count_30d` | integer | count | Minidump files written in the last thirty days. |

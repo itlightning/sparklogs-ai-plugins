@@ -16,7 +16,8 @@ Full inventory every 6 hours; changes are reported as they happen.
 | `sparklogs.data.services.stopped_with_an_error` | bool |  | Whether the service's last stop carried a non-zero exit code. |
 | `sparklogs.data.services.stopped_exit_code` | integer |  | The Win32 exit code the service last stopped with. Absent while the service is not stopped. |
 | `sparklogs.data.services.is_critical_category` | bool |  | Whether the enrichment store's product-category inventory marks this service critical (for example an RMM agent). Absent when that inventory is stale or has not run. |
-| `sparklogs.data.services.service_is_important` | bool |  | Whether the pack's service class table marks this service's tier `important`. `false` for a service the table does not classify, which keeps a host running no table on the ordinary bars instead of dark. |
+| `sparklogs.data.services.service_is_important` | bool |  | Whether the pack's service class table marks this service's tier `important`. `false` when the table does not classify the service or marks it ordinary or suppress. |
+| `sparklogs.data.services.service_is_classified` | bool |  | Whether the pack's service class table has a row for this service. `false` for a table miss, which is how the stalled ladder tells an unclassified service from an ordinary one. |
 | `sparklogs.data.services.service_class` | string |  | The pack's service class for this service (`backup`, `edr_av`, `database`, `mail`, `directory`, `virtualization`, `profiles`, `rmm`, or `platform`). Omitted for a service the table does not mention. |
 | `sparklogs.data.services.service_class_code` | integer |  | `service_class` as the number a ladder compares against a set of classes. |
 | `sparklogs.data.services.service_role_on_host` | bool |  | Whether this host IS the thing the service provides: `false` when the class names no role, when the host does not hold it, and when role detection never ran. |

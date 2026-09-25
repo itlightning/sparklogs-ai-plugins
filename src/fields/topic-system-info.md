@@ -11,7 +11,7 @@ Full inventory every hour; changes are reported as they happen.
 | `sparklogs.data.system_info.serial_number` | string |  | The machine's serial number: asset-audit data that identifies hardware, never a person. |
 | `sparklogs.data.system_info.chassis_type` | string |  | What kind of enclosure the machine is in, such as `desktop`, `laptop` or `server`. |
 | `sparklogs.data.system_info.bios_version` | string |  | The firmware version string, as the machine reports it. |
-| `sparklogs.data.system_info.bios_date` | string |  | The firmware's release date, in the spelling SMBIOS gives it. |
+| `sparklogs.data.system_info.bios_date` | string |  | The firmware's release date. SMBIOS `MM/DD/YYYY` or `MM/DD/YY` (two-digit years are 19xx) is stored as `YYYY-MM-DD`; any other spelling is kept as the firmware wrote it. |
 | `sparklogs.data.system_info.boot_mode` | string |  | How the machine boots: `uefi`, or `legacy` for a BIOS or compatibility-mode boot. |
 | `sparklogs.data.system_info.secure_boot` | bool |  | Whether Secure Boot is enabled. |
 | `sparklogs.data.system_info.tpm_present` | bool |  | Whether the machine has a TPM available. |
