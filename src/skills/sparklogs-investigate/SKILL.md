@@ -62,9 +62,16 @@ Tool decision tree and recipes: `guides/mcp-tool-decision-tree.md`.
 ## Section 3b. Where to look next
 
 <!-- BEGIN GENERATED INDEX:corpus-navigation -->
+## Live tool reference
+
+If server instructions are missing or terminology is unclear, call `server_info` (tool) with `include_instructions: true`.
+For detailed views, fieldsets, aggregation or paging, call it with `describe_tool` (arg) naming the tool.
+Use these references when the visible description leaves a question, not on every call.
+Process charts use `query_device_health` (tool) with `view` (arg) `top_processes_over_time` (value).
+
 ## Curated data (read this before opening reference files)
 
-- **`subsource` (LQL) = feed id.** Scope ladder before `query_logs` (tool): `service` (LQL) → `app` (LQL) → `subsource` (LQL) → `category` (LQL) → `pattern_hash` (LQL).
+- **`subsource` (LQL) = feed id.** Scope filters before `query_logs` (tool): `service` (LQL) → `app` (LQL) → `subsource` (LQL) → `category` (LQL) → `pattern_hash` (LQL).
 - **Curated events** carry `sparklogs.reason` (LQL), `sparklogs.class` (LQL), and module fields. Empty `sparklogs.*` on an event means **uncurated** (not a collection-health finding).
 - **Reason** (`sparklogs.reason` (LQL)) = our curated vocabulary. **Vendor code** = NTSTATUS, HRESULT, MSI exit, Kerberos result, etc. **pattern_hash** (LQL) = stable shape id on every event.
 - **Device row** (`query_device_health` (tool), feed health, `agent_complete_through` (col)) is authoritative for collection and completeness. Event volume is not coverage.
@@ -77,7 +84,7 @@ Tool decision tree and recipes: `guides/mcp-tool-decision-tree.md`.
 ## After you pick a `subsource` (LQL)
 
 1. Open `feeds/<id>/README.md` (short index).
-2. **Stream kind** and explore ladder: `guides/stream-kinds.md`. Classic WEL: `provider_name` (LQL) before `pattern` (LQL); device state: `query_device_health` (tool) with `sparklogs.kind` (LQL) / `sparklogs.topic` (LQL) / `sparklogs.reason` (LQL).
+2. **Stream kind** and exploration order: `guides/stream-kinds.md`. Classic WEL: `provider_name` (LQL) before `pattern` (LQL); device state: `query_device_health` (tool) with `sparklogs.kind` (LQL) / `sparklogs.topic` (LQL) / `sparklogs.reason` (LQL).
 3. Open **one** artifact (read-mode table below). Rich feeds (especially `win.eventlog.security` (value)) often need `recipes.md` or `reasons.md` first, not only `fields.md` or `enums.md`. Security also carries `patterns.md` and `mapping-ecs.md` / `mapping-ocsf.md` when shape or external taxonomy is the question.
 
 **Reason meaning:** the `sparklogs.reason` (LQL) value and the event `message` (col) together; grep `reasons.md` for the matching `##` heading (summary table first, one section only).
@@ -276,7 +283,7 @@ Fresh report → re-render per Section 4 with all Findings so far. Explore furth
 
 ## Section 14. Error handling - recover gracefully
 
-**Cache expired on `refine_query_result` (tool):** a cold `query_logs` (tool) cache regenerates automatically under the SAME `query_id` (arg) when you refine it (`summary.cache_status` (col) reflects it). A grouped result is not refinable (re-run the grouped call). If `summary.cache_status` (col) is `cache_invalidated` (value), issue a new data-tool call rather than retrying refine on this id. If the server reports the cache cannot be restored (`expired` (value)), re-issue the original backing query.
+**Cache expired on `refine_query_result` (tool):** a cold `query_logs` (tool) cache regenerates automatically under the SAME `query_id` (arg) when you refine it (`summary.cache_status` (col) reflects it). Grouped handles can be refined within their returned shape; use a raw-event query when the question needs underlying events. If `summary.cache_status` (col) is `cache_invalidated` (value), issue a new data-tool call rather than retrying refine on this id. If the server reports the cache cannot be restored (`expired` (value)), re-issue the original backing query.
 
 **Rate or capacity errors:** if a tool call fails with a retryable server error, retry up to 2x with a brief backoff, then surface to the engineer rather than hammering the same call.
 
@@ -284,7 +291,7 @@ Fresh report → re-render per Section 4 with all Findings so far. Explore furth
 
 **Field name you requested returned nothing:** not an error. The response names it under `schema.empty_requested_columns` (col); see `guides/lql-reference.md` (hallucinating field names).
 
-**Partial page (`page.next` (col) present, or a trailing hint line):** the page hit a limit. Follow `page.next` (col) for the next page via `refine_query_result(offset=...)`, or narrow the filter for fewer rows.
+**Partial page:** read the header counts and `page.next` (col). Prefer one refine with `offset: 0` and the desired total limit, or follow the next-page call. See `guides/mcp-tool-decision-tree.md` before combining pages.
 
 **Source has been emitting `sparklogs.kind = agent_op` rows during your window:** your evidence is incomplete. Read what they say was not collected, suppressed or truncated, flag it explicitly in WHAT WAS NOT CHECKED, and qualify the findings that depended on the affected window. An EMPTY `agent_op` (value) result is inconclusive rather than reassuring - see Section 8 (before "no evidence").
 

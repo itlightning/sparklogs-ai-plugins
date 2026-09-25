@@ -2,9 +2,12 @@
 
 Decision tree for which tool to use when, plus judgment the live tool descriptions do not carry.
 
-The MCP server instructions define every term used here, in learning order. This file adds per-tool mechanics on top of them rather than restating them.
+Use the live server contract for parameter names, limits and result semantics.
+If your host omitted server instructions or a term is unclear, call `server_info` (tool) with `include_instructions: true`.
+For view selection, fieldset membership, aggregation or paging details missing from the short description, use `describe_tool` (arg) with that tool name.
+Retrieve the reference when needed, not before every call.
 
-**Parameters and columns:** names, defaults, and response columns live in the live MCP tool description and JSON schema only. This guide does not duplicate them; an old plugin with a new server must follow what the server advertises.
+**Parameters and columns:** follow the live description, input schema and optional detailed reference when they differ from a saved recipe.
 
 There are **fourteen** tools: `resolve_scope` (tool), `list_sources` (tool), `query_scope_activity` (tool), `query_device_health` (tool), `describe_pattern` (tool), `list_fields` (tool), `query_event_counts_by_severity` (tool), `query_logs` (tool), `refine_query_result` (tool), `get_query_metadata` (tool), `send_sparklogs_feedback` (tool), `server_info` (tool), `describe_tables` (tool), `query_table` (tool). Three differential tools (`query_period_diff` (other), `compare_populations` (other), `cluster_event_contexts` (other)) are fast-follow; see the bottom of this file for v1 equivalents.
 
@@ -13,7 +16,7 @@ There are **fourteen** tools: `resolve_scope` (tool), `list_sources` (tool), `qu
 - **Funnel:** coverage before claims (`resolve_scope` (tool) → `list_sources` (tool) → health/activity when needed → counts/patterns → `query_logs` (tool) last).
 - **`external_investigation_id` (arg):** required on every scoped/data call except `server_info` (tool); reuse within one investigation, mint fresh for a new one.
 - **Time windows:** flat `start` (arg) / `end` (arg) in RFC3339 UTC; no relative shorthand.
-- **Scope ladder:** service → app → subsource → category → pattern; an empty rung is not a finding.
+- **Scope filters:** service → app → subsource → category → pattern; an empty rung is not a finding.
 - **Prohibitions:** volume and first/last bounds never prove interior coverage; absence of a feed report is not evidence.
 
 ## Investigation discipline (tool order)
@@ -22,7 +25,8 @@ Three principles for scalable analysis at fleet scale. Shape picks the tool; the
 
 1. **Bounded discovery first:** `list_sources` (tool), `query_scope_activity` (tool), `describe_pattern` (tool) return capped, pre-aggregated rows; learn what is in scope without pulling event payloads.
 2. **Aggregate before detail:** `query_event_counts_by_severity` (tool) ranks and time-series the matched population before `query_logs` (tool); count and rank before reading messages.
-3. **Cache before re-query:** `refine_query_result` (tool) on an existing cached slice; issue a new `query_logs` (tool) only when the cache does not cover the question.
+3. **Reuse result handles:** `refine_query_result` (tool) pages, filters and aggregates an existing result.
+   Cached handles use stored rows; live handles re-run the parent query against current data.
 
 See **Server instructions** at the end of this file for the full vocabulary walkthrough.
 
@@ -30,29 +34,28 @@ See **Server instructions** at the end of this file for the full vocabulary walk
 
 ## Reach for this when
 
-One trigger per tool. After coverage, it is almost always a
-`query_event_counts_by_severity` (tool) / `describe_pattern` (tool) question.
+Choose by the question: device state, process trends, event counts or raw evidence.
 
 | Tool | Reach for it when |
 |---|---|
 | `resolve_scope` (tool) | You have a name (client, host, ticket) and need an `org_id` (col). Always first. Collection/completeness live here. Multiple rows at the same best `match_kind` (col): confirm with the engineer before proceeding, don't guess. |
 | `list_sources` (tool) | Before concluding anything from an absence: did this source send data in THIS window? Any source type, including ingest keys. Any non-zero `cnt_critical_plus` (col) in scope: fetch those events before proceeding, whatever the investigation topic. |
-| `query_device_health` (tool) | SparkLogs Agents in scope, and you need standing condition, what is installed or mounted, or which devices reported no device-health data. Omit `view` (arg) for the latest event of each episode, not a sequence. `view` (arg) `latest_state` (value) is what is on the box and how it last read (newest event of each subject). `view` (arg) `event_timeline` (value) is the RCA reading of the same tool (every in-window event of episodes whose peak meets `min_severity` (arg); repeating change points). `view` (arg) `series` (value) with `topics` (arg) charts a device-state value over time; `view` (arg) `topics` (value) lists the topics. Not the first tool for ingest-key-only streams. `group_by_reason: true` takes no `fieldset` (arg) or `add_fields` (arg): passing either alongside it is an error. Rows are JSONL by default with absent fields omitted; `format: tsv` gives a fixed column layout. `group_by_reason: true` always renders TSV. |
+| `query_device_health` (tool) | Device conditions, inventories and trends. Process charts: `view` (arg) `top_processes_over_time` (value). Raw samples: `series` (value). Topic discovery: `topics` (value). Latest inventory: `latest_state` (value). Episode history: `event_timeline` (value). Omit the view for the latest event per episode or occurrence. See `guides/device-state-fields.md` for interpretation. |
 | `query_scope_activity` (tool) | You do not know what this client HAS: which apps, services and subsources exist at all. Orientation on an unfamiliar estate. |
 | `query_event_counts_by_severity` (tool) | "What is going on here", at any altitude. The default mid-tier tool. `group_by=["reason"]` or `["pattern_hash"]`; pass two fields when the question has two nouns in it. |
 | `describe_pattern` (tool) | You are about to cite a pattern and need its text and spread. Pass `pattern_hashes` (arg) (a list). Required before citing any teaser pattern. Mid-tier with counts. |
 | `query_logs` (tool) | The grouping pointed somewhere specific and you now need the actual events. Last resort, over a narrowed filter. |
-| `refine_query_result` (tool) | You already pulled a slice and want a different view of it. Free; never re-scans the source. |
+| `refine_query_result` (tool) | Page, filter or aggregate an existing result handle. Read the response for whether the handle is cached or live. |
 | `get_query_metadata` (tool) | A cached result behaved oddly and you need its filter or cache status (bookkeeping only). |
 | `list_fields` (tool) | A field name you have not seen yet. Catalog, not a first-pass tool. |
 | `send_sparklogs_feedback` (tool) | The engineer wants to send session feedback to SparkLogs, or accepted a one-time offer. Run `sparklogs-feedback` first; not part of the query funnel. |
-| `server_info` (tool) | A call failed and you need to know whether region, transport or auth is the problem. |
+| `server_info` (tool) | Check server identity and reachability, retrieve omitted server instructions, or request a tool description, schema and detailed reference. |
 | `describe_tables` (tool) | Lists what `query_table` (tool) can read and names the specialized tool that answers a shape better. Reach for it before inventing a general scan. |
 | `query_table` (tool) | General grammar over one table, last, when no specialized tool has the shape. |
 
-**Two honest demotions.** Both tools below exist and work; neither is where you should start.
+**Use these for specific gaps in the information you have.**
 
-- **`list_fields` (tool) is the workspace catalog, not the explore ladder.**
+- **`list_fields` (tool) is the workspace catalog, not the exploration order.**
   `query_event_counts_by_severity` (tool) on `sparklogs.reason` (LQL) or `pattern_hash` (LQL) tells you what the source is SAYING.
   Reach for `list_fields` (tool) when you need a name the data you have already seen did not surface.
   Snapshot payload leaves are listed with their array mark (`sparklogs.data.processes[].image_name`);
@@ -85,18 +88,27 @@ Every rendered cell is meant to go back into a filter unchanged.
 - **Hash twins paste into either name.** A `*_hash` value works as `pattern_hash` (LQL) `= "<hash>"` and as `pattern` (LQL) `= "<hash>"`; an equality on the base field whose literal has the hash token shape widens to cover both. The twins are listed by `list_fields` (tool) because they are meant to be pasted.
 - **`t` (LQL), `ingested_t` (LQL) and `org_id` (LQL) are filter names.** They are the names in every response and the names LQL accepts, in `lql` (arg) and in `filter_lql` (arg). Inside an element scope they are payload keys, not the standard fields.
 - **A rendered severity name is a filter literal.** `severity >= warning` is the readable form; prefer the name over the number.
-- **An element leaf is not a row column.** A value read out of an array of objects pastes back inside `path[](leaf=value)`, and `group_by` (arg) on that leaf is refused.
+- **Array items need item-aligned expressions.** Use `path[](leaf=value)` to filter items and the documented item grammar to group their leaves. A whole-event filter can retain other items in the same event.
 - **String equality ignores case** on resident columns and on payload leaves alike.
 - **A bare 15 or 16 digit integer can be a timestamp.** Known datetime fields render as RFC3339; a leftover digit string that long, quoted or not, may be epoch microseconds UTC. Do not treat other numbers as times.
 
 ## When the response is large
 
-- **The first `query_logs` (tool) page is small on purpose.** It carries the minted `query_id` (arg), so it is budgeted well under the other tools to keep the handle out of a client-side spill. Read `summary.total_count` (col) for the population and `page.rows_cached` (col) for what the cache holds.
-- **Page the cache, do not re-scan.** `refine_query_result` (tool) with the SAME arguments and a new `offset` (arg); `page.next` (col) hands back the literal next call. Refine pages carry `rows_matched` (col) (how many cached rows match this refine) and no `total_count` (col), because a derived page has no matched population of its own.
-- **`full_length_values` (arg) recovers one cut value.** Cut values end with `…[truncated:N]` and are named in `page.truncated_fields` (col). Narrow with `filter_lql` (arg) to the one row first; the response may then reach 1 MB.
-- **Project the array, not the row.** On a wide inventory event, `select` (arg) the one array you need. When the filtered element projection ships, project the matching elements instead and the page shrinks by the ratio of matches to elements.
-- **`format` (arg) when a fixed parser is on the other end.** TSV refuses whenever a column is array- or object-typed. Raw event rows from `query_logs` (tool) are always JSONL and refuse TSV even with a scalar-only `select` (arg); refine the cache when you want those same rows as TSV.
-- **A cache regenerates once, then dies.** A cold `query_id` (arg) (roughly a day old) regenerates automatically the next time you refine it. `summary.cache_status` (col) `cache_invalidated` (value) means the handle is dead: issue a new data-tool call, don't retry refine. `expired` (value) means re-issue the original query instead.
+- Prefer one `refine_query_result` (tool) call with `offset: 0` and the desired total `limit` (arg), up to the advertised ceiling.
+  This often lets the host save one complete response to a file.
+- If paging is needed, follow `page.next` (col) with the same query arguments.
+  Merge each page's `lookups` (col), and keep only the first TSV column-header row when combining bodies.
+- Read `page.rows_returned` (col), result counts and continuation metadata before treating a report or trend as complete.
+  A page ending inside a series is incomplete delivery, not a collection outage.
+  Live data can change between calls.
+- Use `full_length_values` (arg) for a clipped value after narrowing to the needed row or field.
+  Whole structured cells can be replaced by a truncation marker; do not parse a clipped cell as complete data.
+- JSONL topic rows carry native field arrays and example objects; TSV carries escaped JSON in those cells.
+  Other tools may refuse TSV for array or object columns. Follow the returned format and schema.
+- If the host reports truncation, inspect the saved output or retrieve a smaller response.
+  Do not count lines after every call.
+- A handle marked `cache_invalidated` (value) cannot be refined again. Reissue the original data query.
+
 
 ---
 
@@ -106,9 +118,9 @@ Every rendered cell is meant to go back into a filter unchanged.
 
 **Skipping `list_sources` (tool).** Source might not have data in the investigation's window. Always confirm with `list_sources` (tool) scoped to the investigation's `start` (arg)/`end` (arg).
 
-**Refining a grouped result.** `query_event_counts_by_severity` (tool) output is not refinable; it returns `cache_invalidated` (value). Read it directly or pull raw events with `query_logs` (tool).
+**Refining beyond the result shape.** A grouped handle contains grouped rows. Refine can page or analyze those rows, but cannot recover their raw events. Use `query_logs` (tool) for the underlying evidence.
 
-**Re-scanning instead of refining.** After ONE broad `query_logs` (tool) slice, use `refine_query_result` (tool) for other views - it's a cache lookup, not a fresh scan.
+**Repeating a raw query unnecessarily.** Reuse the cached `query_logs` (tool) handle while it contains the rows needed for the question.
 
 **Showing a `*_hash` with no resolved text.** Resolve via the response's `lookups` (col) (and `describe_pattern` (tool) for `pattern_hash` (LQL)) first.
 
@@ -126,4 +138,4 @@ If you find yourself reaching for one of these, use the substitute:
 
 ## Server instructions
 
-The MCP server instructions loaded with the session are the canonical cross-cutting contract: scope, data model, agent and feed health, completeness, funnel order, scope ladder, LQL basics, event fields, and the three prohibitions. The live tool descriptions carry per-tool mechanics and response shape. This guide adds only the decision tree, paste-back rules, large-response handling, and failure modes on top. On cross-cutting facts, server instructions win; on parameters or response shape for a specific call, the live tool description and schema win.
+The MCP server instructions loaded with the session are the canonical cross-cutting contract: scope, data model, agent and feed health, completeness, funnel order, scope filters, LQL basics, event fields, and the three prohibitions. The live tool descriptions carry per-tool mechanics and response shape. This guide adds only the decision tree, paste-back rules, large-response handling, and failure modes on top. On cross-cutting facts, server instructions win; on parameters or response shape for a specific call, the live tool description and schema win.

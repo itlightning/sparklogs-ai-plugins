@@ -7,15 +7,21 @@ aliases:
 
 # Device health and state
 
-What is on the box and what is holding or changing: CPU, RAM, disk, installed software, monitors, episodes, deltas.
+Use `query_device_health` (tool) for agent-reported conditions, inventories and measurements from `sparklogs.device.state` (value).
 
-**Primary data feed:** `sparklogs.device.state` (value). Tool: `query_device_health` (tool) (kinds and fieldsets). Use this as the **headline** when the question is device state.
-Explore this feed as device state, not WEL: `guides/stream-kinds/device-state.md`.
+- Process charts: `view` (arg) `top_processes_over_time` (value), with `rank_by` (arg).
+- Installed software and latest subject readings: `latest_state` (value).
+- Raw performance, memory and storage samples: `series` (value).
+- Available topics and sampled fields: `topics` (value).
+- Episode history: `event_timeline` (value). Omit the view for the latest event of each episode or occurrence.
 
-`sparklogs.agent.vector` (value) and `sparklogs.agent.log` (value) are collector-debug only. Use them when diagnosing SparkLogs collection, not as the answer to "is the disk filling."
+Read `guides/device-state-fields.md` for inventory observation time, multipart identity and limits on absence claims.
+Use `guides/stream-kinds/device-state.md` for chart and field-query recipes.
+If the visible tool description omits details you need, `server_info` (tool) with `describe_tool: "query_device_health"` returns the full reference.
 
-Inventory and snapshot fieldsets on `query_device_health` (tool) carry the device state (performance, storage_io, disk_volumes, processes, services, agent_self_resource, pending_reboot, installed products, crash dump config, VSS writers, the Windows Update topic).
+Collection status and `agent_complete_through` (col) qualify coverage.
+An open condition alone does not establish a problem; read its severity and lifecycle.
+Use `query_logs` (tool) for underlying application or system events.
+A VSS writer failure does not establish a backup job's outcome: follow `playbooks/backup-failure.md` for that investigation.
 
-**Honesty (supporting).** `agent_complete_through` (col) and collection liveness decide what you may say about a gap. Open monitor ≠ problem (`guides/category-classes.md`). Duration and clear time: `guides/device-state-fields.md` (`sparklogs.episode.age_basis` (col), `sparklogs.episode.clear_time_basis` (col)). Episode shape over time is `view` (arg) `event_timeline` (value), not the default.
-
-**Pivots.** Disk filling: omit `view` (arg) first; episode shape over time is `view` (arg) `event_timeline` (value) on the same tool; `query_logs` (tool) for the underlying log event and any source-emitted fields not on the health row. Named backup product: `view` (arg) `latest_state` (value) for what is installed; writer-failed is not the job verdict. Full walk: `playbooks/backup-failure.md`.
+Use `sparklogs.agent.vector` (value) and `sparklogs.agent.log` (value) when diagnosing SparkLogs collection.

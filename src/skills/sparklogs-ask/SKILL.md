@@ -36,7 +36,8 @@ Funnel, scope, LQL errors: `guides/mcp-tool-decision-tree.md`, `guides/scope-res
 
 - Standing / latest event of each episode → `query_device_health` (tool), omit `view` (arg) (`fieldset` (arg) `rca` (value) for one host; `min_severity` (arg) `warning` (value) means that latest event is still warning or worse)
 - Inventory / what is on the box → same tool, `view` (arg) `latest_state` (value)
-- A device-state value over time (CPU, memory, disk, per-process use) → same tool, `view` (arg) `series` (value) with `topics` (arg); `view` (arg) `topics` (value) lists them
+- Process CPU, memory or I/O trends → same tool, `view` (arg) `top_processes_over_time` (value), with `rank_by` (arg)
+- Raw device measurements over time → same tool, `view` (arg) `series` (value) with `topics` (arg); `view` (arg) `topics` (value) discovers available topics and fields
 - Episode series / RCA → same tool, `view` (arg) `event_timeline` (value), same `min_severity` (arg); peak in the window, then every in-window event of those episodes
 - Counts, patterns, when → `query_event_counts_by_severity` (tool), `describe_pattern` (tool), `query_scope_activity` (tool)
 - Named backup product installed → `query_device_health` (tool) first; job verdict in events, not VSS alone
@@ -46,9 +47,16 @@ Funnel, scope, LQL errors: `guides/mcp-tool-decision-tree.md`, `guides/scope-res
 ## Where to look
 
 <!-- BEGIN GENERATED INDEX:corpus-navigation -->
+## Live tool reference
+
+If server instructions are missing or terminology is unclear, call `server_info` (tool) with `include_instructions: true`.
+For detailed views, fieldsets, aggregation or paging, call it with `describe_tool` (arg) naming the tool.
+Use these references when the visible description leaves a question, not on every call.
+Process charts use `query_device_health` (tool) with `view` (arg) `top_processes_over_time` (value).
+
 ## Curated data (read this before opening reference files)
 
-- **`subsource` (LQL) = feed id.** Scope ladder before `query_logs` (tool): `service` (LQL) → `app` (LQL) → `subsource` (LQL) → `category` (LQL) → `pattern_hash` (LQL).
+- **`subsource` (LQL) = feed id.** Scope filters before `query_logs` (tool): `service` (LQL) → `app` (LQL) → `subsource` (LQL) → `category` (LQL) → `pattern_hash` (LQL).
 - **Curated events** carry `sparklogs.reason` (LQL), `sparklogs.class` (LQL), and module fields. Empty `sparklogs.*` on an event means **uncurated** (not a collection-health finding).
 - **Reason** (`sparklogs.reason` (LQL)) = our curated vocabulary. **Vendor code** = NTSTATUS, HRESULT, MSI exit, Kerberos result, etc. **pattern_hash** (LQL) = stable shape id on every event.
 - **Device row** (`query_device_health` (tool), feed health, `agent_complete_through` (col)) is authoritative for collection and completeness. Event volume is not coverage.
@@ -61,7 +69,7 @@ Funnel, scope, LQL errors: `guides/mcp-tool-decision-tree.md`, `guides/scope-res
 ## After you pick a `subsource` (LQL)
 
 1. Open `feeds/<id>/README.md` (short index).
-2. **Stream kind** and explore ladder: `guides/stream-kinds.md`. Classic WEL: `provider_name` (LQL) before `pattern` (LQL); device state: `query_device_health` (tool) with `sparklogs.kind` (LQL) / `sparklogs.topic` (LQL) / `sparklogs.reason` (LQL).
+2. **Stream kind** and exploration order: `guides/stream-kinds.md`. Classic WEL: `provider_name` (LQL) before `pattern` (LQL); device state: `query_device_health` (tool) with `sparklogs.kind` (LQL) / `sparklogs.topic` (LQL) / `sparklogs.reason` (LQL).
 3. Open **one** artifact (read-mode table below). Rich feeds (especially `win.eventlog.security` (value)) often need `recipes.md` or `reasons.md` first, not only `fields.md` or `enums.md`. Security also carries `patterns.md` and `mapping-ecs.md` / `mapping-ocsf.md` when shape or external taxonomy is the question.
 
 **Reason meaning:** the `sparklogs.reason` (LQL) value and the event `message` (col) together; grep `reasons.md` for the matching `##` heading (summary table first, one section only).
