@@ -6,9 +6,9 @@ Reported every 5 minutes on clock boundaries for the window ending at `t`. `spar
 
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
-| `sparklogs.data.top_processes.pid` | integer |  | Process ID. Together with `create_time_ts`, identifies the process on this device. System and remainder rows use 0. |
-| `sparklogs.data.top_processes.create_time_ts` | string | timestamp | Process creation time in RFC3339 UTC, converted from Windows FILETIME. Synthetic rows use fixed times: Unix epoch for `(other processes)`, one second later for `(hardware interrupts)`, two seconds later for `(deferred procedure calls)`. |
-| `sparklogs.data.top_processes.image_name` | string |  | The process's executable file name; `(hardware interrupts)` or `(deferred procedure calls)` on a system row, `(other processes)` on the remainder row. |
+| `sparklogs.data.top_processes.pid` | integer |  | Process ID. Together with `create_time_ts`, identifies a process row. Absent on system and remainder rows. |
+| `sparklogs.data.top_processes.create_time_ts` | string | timestamp | Process creation time in RFC3339 UTC, converted from Windows FILETIME. Absent on system and remainder rows, which are not processes. |
+| `sparklogs.data.top_processes.image_name` | string |  | The process's executable file name. On a system or remainder row this label is the row's identity, because those rows have no pid or creation time: `(hardware interrupts)`, `(deferred procedure calls)`, or `(other processes)`. |
 | `sparklogs.data.top_processes.image_path` | string |  | Normalized executable path, if read while this process identity was alive. Absent when unresolved and on system and remainder rows. Command-line arguments are not collected. |
 | `sparklogs.data.top_processes.services` | string_array |  | The services this process hosts, sorted. Absent when it hosts none. |
 | `sparklogs.data.top_processes.entry_kind` | string |  | `process`: a selected process. `system`: hardware interrupt or deferred procedure call CPU, with no memory or I/O fields. `remainder`: unlisted-process I/O and memory. Its CPU is machine busy time minus the other rows, floored at zero. If machine counters are unavailable or their processor count differs from the host inventory, system rows are omitted and remainder CPU sums unlisted processes instead. |

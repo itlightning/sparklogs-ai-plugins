@@ -32,7 +32,7 @@ Reported every 5 minutes on clock boundaries for the window ending at `t`. `spar
 | `sparklogs.data.performance.ram_available_bytes` | integer | bytes | Physical RAM available to new allocations (free, zeroed and standby pages) at the end of the window. |
 | `sparklogs.data.performance.ram_standby_bytes` | integer | bytes | RAM holding cached pages the memory manager can repurpose (the standby list, all priorities) at the end of the window. Part of available. |
 | `sparklogs.data.performance.ram_modified_bytes` | integer | bytes | RAM holding dirty pages waiting to be written out (the modified list) at the end of the window. |
-| `sparklogs.data.performance.ram_compressed_bytes` | integer | bytes | Resident memory held by the memory-compression store at the end of the window. Zero when compression is off. Absent when the counter could not be read. |
+| `sparklogs.data.performance.ram_compressed_bytes` | integer | bytes | Resident memory held by the memory-compression store, from the latest successful process enumeration (at most one process-table generation old). Zero when compression is off. Absent until the first successful enumeration, or when no process-table topic is collected. |
 | `sparklogs.data.performance.cpu_busy_age_basis` | string |  | `onset`: witnessed start. `observed`: already present when first seen, making age a lower bound. `unknown_ongoing`: no meaningful onset time. |
 | `sparklogs.data.performance.cpu_busy_age_h` | float | hours | How long this condition has been open, in hours. |
 | `sparklogs.data.performance.cpu_interrupt_storm_age_basis` | string |  | `onset`: witnessed start. `observed`: already present when first seen, making age a lower bound. `unknown_ongoing`: no meaningful onset time. |
