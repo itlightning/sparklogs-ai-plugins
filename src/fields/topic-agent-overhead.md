@@ -29,7 +29,7 @@ Reported every 15 minutes on clock boundaries for the window ending at `t`. `spa
 | `sparklogs.data.agent_overhead.uptime_s` | integer | seconds | How long this process has been running. |
 | `sparklogs.data.agent_overhead.combined_working_set_avg_mb` | float | megabytes | Sum of the agent and Vector mean working sets in MiB (1,048,576 bytes), reported on the agent row and used to assess the RAM budget. |
 | `sparklogs.data.agent_overhead.private_bytes_monotonic_windows` | integer | count | How many consecutive windows this process's private memory has risen without a drop. |
-| `sparklogs.data.agent_overhead.private_bytes_slope_mb_per_h` | float | megabytes_per_hour | This process's private-memory growth rate in MiB (1,048,576 bytes) per hour, present once a rising run holds enough readings to fit a slope. |
+| `sparklogs.data.agent_overhead.private_bytes_slope_mb_per_h` | float | megabytes_per_hour | This process's private-memory growth rate in MiB (1,048,576 bytes) per hour, fitted from its recent readings. Present once two readings at different times exist, whether memory rose or not. |
 | `sparklogs.data.agent_overhead.handle_monotonic_windows` | integer | count | How many consecutive windows this process's handle count has risen without a drop. |
 | `sparklogs.data.agent_overhead.sparklogs_agent_cpu_over_budget_age_basis` | string |  | `onset`: witnessed start. `observed`: already present when first seen, making age a lower bound. `unknown_ongoing`: no meaningful onset time. |
 | `sparklogs.data.agent_overhead.sparklogs_agent_cpu_over_budget_age_h` | float | hours | How long this condition has been open, in hours. |

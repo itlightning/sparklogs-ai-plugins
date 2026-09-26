@@ -31,7 +31,7 @@ Full inventory every hour. Supported changes are reported when the agent observe
 | `sparklogs.data.system_info.cpu_model` | string |  | The processor's model name. |
 | `sparklogs.data.system_info.logical_cores` | integer | count | How many logical processors the machine has, which is what a per-core figure elsewhere is divided by. |
 | `sparklogs.data.system_info.page_file_config` | string |  | How the page file is configured, in the spelling Windows stores: path, initial size and maximum size. |
-| `sparklogs.data.system_info.crash_dump_type` | string |  | Configured bugcheck dump type, using the same values as `crash_dump_config`. |
+| `sparklogs.data.system_info.crash_dump_type` | string |  | Configured bugcheck dump type, using the same values as `crash_dump_config`. Absent when the setting could not be read, which is not the same answer as `none`. |
 | `sparklogs.data.system_info.last_boot_time` | string | timestamp | When the machine last started. Always present. |
 | `sparklogs.data.system_info.uptime_s` | integer | seconds | How long the machine has been up, in whole seconds. Always present. |
 | `sparklogs.data.system_info.reboot_pending` | bool |  | Whether the machine is waiting on a restart to finish applying something. Always present. |

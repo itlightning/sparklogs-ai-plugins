@@ -16,9 +16,9 @@ Full inventory every 15 minutes. Supported changes are reported when the agent o
 | `sparklogs.data.disk_volumes.free_pct` | float | percent | Free space as a percentage of the volume's total. |
 | `sparklogs.data.disk_volumes.used_pct` | float | percent | Space used as a percentage of the volume's total (100 minus `free_pct`), carried on the row because the exhaustion floors are written against the used share. |
 | `sparklogs.data.disk_volumes.writeable` | bool |  | Whether the filesystem reports that writes are allowed. Absent when the filesystem did not answer. |
-| `sparklogs.data.disk_volumes.mount_state` | string |  | Whether the volume is `mounted`, `unmounted`, `raw`, or `unreadable`. |
+| `sparklogs.data.disk_volumes.mount_state` | string |  | Whether the volume is `mounted`, `unmounted`, `raw`, or `unreadable`. Absent when the volume's filesystem query did not answer this read. |
 | `sparklogs.data.disk_volumes.mount_state_code` | integer |  | Numeric code for `mount_state`. |
-| `sparklogs.data.disk_volumes.filesystem` | string |  | The volume's filesystem, lowercased. |
+| `sparklogs.data.disk_volumes.filesystem` | string |  | The volume's filesystem, lowercased. Absent when the volume's filesystem query did not answer this read. |
 | `sparklogs.data.disk_volumes.bitlocker_protection` | string |  | The volume's BitLocker posture: `on`, `off`, `suspended`, or `n_a` when BitLocker is not in use on this volume. Absent when the provider could not answer. |
 | `sparklogs.data.disk_volumes.bitlocker_dropped` | bool |  | Whether BitLocker protection is off or suspended. Absent when protection status could not be read. |
 | `sparklogs.data.disk_volumes.bitlocker_off_age_min` | float | minutes | How long BitLocker protection has been off or suspended. |

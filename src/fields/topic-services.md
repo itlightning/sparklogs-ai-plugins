@@ -22,7 +22,7 @@ Full inventory every 6 hours. Supported changes are reported when the agent obse
 | `sparklogs.data.services.service_class_code` | integer |  | Numeric code for `service_class`. |
 | `sparklogs.data.services.service_role_on_host` | bool |  | Whether this device has the role associated with the service class. False if the class has no role, the device lacks it, or role detection has not run. |
 | `sparklogs.data.services.svc_stopped_age_min` | float | minutes | Minutes the service has been stopped. Absent while running or within its boot grace period. |
-| `sparklogs.data.services.svc_crash_count_24h` | integer | count | How many times this service has crashed in the last 24 hours. Zero when the count ran and found none, never absent. |
+| `sparklogs.data.services.svc_crash_count_24h` | integer | count | How many times this service has crashed in the last 24 hours. Absent until the event-log crash scan has first run after a start, or while its reading is stale; zero when the scan ran and found none. |
 | `sparklogs.data.services.svc_crash_count_24h_by_id` | object |  | The same 24-hour crash count broken out by the Windows Event Log id that recorded each crash. |
 | `sparklogs.data.services.svc_crash_first_seen_ts` | string | timestamp | When the oldest crash counted in the current window was recorded. |
 | `sparklogs.data.services.svc_crash_last_seen_ts` | string | timestamp | When the newest crash counted in the current window was recorded. |
