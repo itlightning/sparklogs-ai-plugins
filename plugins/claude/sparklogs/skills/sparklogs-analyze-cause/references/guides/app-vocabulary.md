@@ -16,6 +16,7 @@ Other `app` (LQL) values can still arrive from non-pack senders; those are real 
 |---|---|
 | `acronis` | Acronis Cyber Protect backup agent |
 | `atera` | Atera RMM agent |
+| `axcient` | Axcient x360Recover backup agents |
 | `bitdefender` | Bitdefender Endpoint Security |
 | `connectwise` | ConnectWise products (Automate agent) |
 | `crowdstrike` | CrowdStrike Falcon sensor |
@@ -33,8 +34,10 @@ Other `app` (LQL) values can still arrive from non-pack senders; those are real 
 | `mysql` | MySQL Server |
 | `nable` | N-able products (Cove Data Protection backup, N-central agent) |
 | `ninjaone` | NinjaOne RMM agent |
+| `office` | Microsoft Office applications |
 | `postgresql` | PostgreSQL Server |
 | `sentinelone` | SentinelOne endpoint agent |
+| `slide` | Slide backup agent |
 | `sparklogs_agent` | The SparkLogs Agent (self-log, collector log, state snapshots, agent event markers) |
 | `veeam` | Veeam backup products (Backup and Replication, Agent for Windows) |
 | `webroot` | Webroot SecureAnywhere endpoint agent |

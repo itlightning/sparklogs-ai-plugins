@@ -1,38 +1,44 @@
 # Kind: device state
 
-**Latest in a window:** `query_device_health` (`fieldset` (arg) = `rca` for one host).
-Columns: the response `schema.columns` (col) or the tool description. Episode and honesty interpretation: `../device-state-fields.md`.
-A row is the latest event of each episode that emitted inside the requested window.
-That is not a time series.
+**Standing / latest of each episode:** `query_device_health`, omit `view` (arg) (`fieldset` (arg) = `rca` for one host).
+Columns: the response `schema.columns` (col) or the tool description. Episode and observation limits: `../device-state-fields.md`.
+A default-view row is the latest event of each episode that emitted inside the requested window, not the latest event of each subject.
+What is on the box is `view` (arg) `latest_state`.
+Process charts: `view` (arg) `top_processes_over_time`. Raw measurements: `series` with `topics` (arg). RCA: `view` (arg) `event_timeline` on the same tool.
 
-**Event stream:** `query_logs` on `subsource` (LQL) `=` `"sparklogs.agent.state"`.
+**Event stream:** `query_logs` on `subsource` (LQL) `=` `"sparklogs.device.state"`.
 Group `sparklogs.kind` (LQL), `sparklogs.topic` (LQL), `sparklogs.reason` (LQL).
 
 No `provider_name` (LQL). Do not explore this feed like WEL.
-Generated `../../feeds/sparklogs.agent.state/fields.md` lists module promotions only.
-The snapshot payload lives under `sparklogs.data` (LQL) and is absent from that file, so `list_fields` is where you read its names.
+Generated `../../feeds/sparklogs.device.state/fields.md` lists module promotions only.
+The snapshot payload lives under `sparklogs.data` (LQL).
+Start at `../../fields/INDEX.md`, then open the topic table for its exact names, types, units, and meanings.
 
-## Latest-in-window vs event stream
+## Which reading
 
 | Question | Tool |
 |---|---|
-| What is on the box / open condition in this window (episode-collapsed) | `query_device_health` (`fieldset` (arg) = `rca` for one host). Episode and honesty interpretation: `../device-state-fields.md` |
-| How it changed, every snapshot, hour by hour | `query_logs` on this `subsource` (LQL). Group `sparklogs.kind` (LQL), `sparklogs.topic` (LQL), `sparklogs.reason` (LQL) |
+| Standing conditions / latest event of each episode in this window | `query_device_health`, omit `view` (arg) (`fieldset` (arg) = `rca` for one host). Episode and observation limits: `../device-state-fields.md` |
+| What is on the box / how it last read | `query_device_health`, `view` (arg) `latest_state` |
+| Process CPU, memory or I/O trends | `query_device_health`, `view` (arg) `top_processes_over_time`. See the chart recipe below. |
+| Raw device measurements over time | `query_device_health`, `view` (arg) `series` with `topics` (arg). Use `topics` to discover topics and sampled fields. |
+| Series of those episodes, or repeating change points | `query_device_health` `view` (arg) `event_timeline`. `min_severity` (arg) filters by the episode peak, then returns every in-window event of those episodes. Fieldset `fleet` when duration / `sparklogs.episode.cleared_ts` (col) / `sparklogs.class` (col) matter |
+| Underlying log events and fields outside the health projection | `query_logs` on this `subsource` (LQL). |
 
 MCP column names paste straight into LQL now: `sparklogs.kind` (col) on a device-health row is `sparklogs.kind` (LQL) in logs, same spelling.
-`subsource` (col) on health rows is the feed id `sparklogs.agent.state`, the same stamp as logs.
+`subsource` (col) on health rows is the feed id `sparklogs.device.state`, the same stamp as logs.
 `sparklogs.topic` (col) is the subject family (`disk_volumes`, `processes`, `services`).
 
 ## Event kinds (logs)
 
-**inventory** is the full list of what is on the box for that topic.
+**inventory** reports the full list for a topic, possibly split across several events.
 **delta** carries only the elements that changed, each with a delta_old sibling holding the previous reading.
 **monitor** is an open condition and is where `sparklogs.reason` (LQL) is dense.
 
 Cross-tab the two axes before reading any payload:
 
 ```
-group_by: ["sparklogs.topic", "sparklogs.kind"]     lql: subsource="sparklogs.agent.state"
+group_by: ["sparklogs.topic", "sparklogs.kind"]     lql: subsource="sparklogs.device.state"
 ```
 
 That one call tells you which topics this fleet emits, at what volume, and whether a topic sends full inventories, deltas, or both. Topic cadence differs by more than a hundred to one: performance samples land every few minutes, drivers and installed software land about once a day.
@@ -63,7 +69,7 @@ Both spellings are discoverable. No topic is keyed by process id, and LQL map wi
 `list_fields` with `path_prefix` (arg) narrows to one topic; `path_match` (arg) is an RE2 regex over the remaining names and combines with it. Standard columns lead the response and neither argument filters them.
 
 ```
-list_fields  path_prefix: sparklogs.data.processes   path_match: image|pid|working_set
+list_fields  path_prefix: sparklogs.data.processes   path_match: image|pid|resident
 ```
 
 Live rows, trimmed:
@@ -73,7 +79,7 @@ field                                          type  event_count
 sparklogs.data.processes[].image_name          s     673
 sparklogs.data.processes[].image_path          s     673
 sparklogs.data.processes[].pid                 n     673
-sparklogs.data.processes[].working_set_bytes   n     346
+sparklogs.data.processes[].resident_bytes   n     346
 sparklogs.data.processes[].delta_old.pid       n     336
 ```
 
@@ -130,8 +136,8 @@ Two terms inside one `[]()` bind to the SAME element. The same two terms written
 
 | Query | Means |
 |---|---|
-| `sparklogs.data.processes[](image_name="svchost.exe" AND working_set_bytes>200000000)` | one svchost process is over 200 MB |
-| `sparklogs.data.processes[].image_name="svchost.exe" AND sparklogs.data.processes[].working_set_bytes>200000000` | the box runs svchost, and something on the box is over 200 MB |
+| `sparklogs.data.processes[](image_name="svchost.exe" AND resident_bytes>200000000)` | one svchost process is over 200 MB |
+| `sparklogs.data.processes[].image_name="svchost.exe" AND sparklogs.data.processes[].resident_bytes>200000000` | the box runs svchost, and something on the box is over 200 MB |
 
 On a two-device dev fleet over 30 hours the bound form matched 0 events and the uncorrelated form matched 56. The same pair on services (stopped with auto_delayed) gave 76 bound against 94 uncorrelated. Reporting the uncorrelated count as the bound one overstates by whatever that gap happens to be.
 
@@ -163,7 +169,7 @@ The row filter and the projection are independent: the filter picks the events, 
 
 ## Aggregate across devices
 
-Element leaves cannot be grouped or aggregated: `group_by` (arg) on `sparklogs.data.services[].current_state` is refused. Aggregation works on ROW columns, so pull one cache and refine it.
+Item leaves group and aggregate: `group_by` (arg) on `sparklogs.data.services[].current_state` makes every item a row, so each count is a count of items. Row columns aggregate the same way; pull one cache and refine it.
 
 ```
 1. query_logs   lql: sparklogs.topic="performance"
@@ -185,6 +191,74 @@ summit-app01-s01    12       0.129166  48.65
 `select` (arg) on step 1 shrinks the response only. The cache keeps every column, so step 2 can aggregate the commit_pct path even though step 1 never returned it.
 
 For a fleet count of one condition, `query_event_counts_by_severity` with the element filter and `group_by: ["source"]` answers in one call and needs no cache.
+
+## Chart process CPU, memory or I/O
+
+Use `query_device_health` with `view` (arg) `top_processes_over_time`.
+The view selects a stable set of processes per device for the requested window and calculates their bucketed metrics.
+After resolving scope, add the returned scope, device IDs and the requested start/end to this call:
+
+```json
+{
+  "view": "top_processes_over_time",
+  "rank_by": "cpu",
+  "top_n": 10,
+  "grouping": "executable",
+  "bucket": "30m"
+}
+```
+
+Choose CPU, resident RAM, read bytes or write bytes as the ranking metric.
+The process count defaults to 10 and can reach 500 per device.
+Executable grouping combines same-named processes within each sample.
+Instance grouping separates PID and creation time on each device; paths are optional metadata.
+System CPU and the unselected-process remainder have separate series outside the selected count.
+A brief spike may remain in the remainder when ranking over a long window. Narrow the window to investigate it.
+
+- CPU is duration-weighted attributed usage across all logical cores. Unreported process activity can make it a lower bound.
+- Resident RAM averages and maxima use closing snapshots. Shared pages can be counted in several processes.
+  Private resident and private commit readings are separate metrics and can be unavailable.
+  RAM ranking uses peak resident memory; a high-commit process with low residency may remain in the remainder.
+- Process I/O includes traffic that does not reach physical storage. Use storage-device measurements for disk load.
+- A bucket with no topic samples has absent metrics. Unknowns stay unknown, not zero.
+  Fetch the complete result before presenting a complete trend; a response limit is not a collection gap.
+- Buckets use UTC boundaries but respect the requested start/end. Edge buckets can be shorter.
+  Compare averages or rates across unequal periods; align the requested window when comparing full-period totals.
+
+For metric definitions or fleet aggregation choices, retrieve this tool's detailed reference through `server_info` with `describe_tool: "query_device_health"`.
+Refine can aggregate the returned device-level trend rows across the fleet, but only selected identities remain available.
+Include contributing-device counts when optional metrics are missing, and state how averages are weighted.
+
+## Other measurements over time
+
+Use `view` (arg) `topics` for topic discovery, then `series` for raw inventory samples.
+Topic field lists and examples are native arrays and objects in JSONL, escaped JSON cells in TSV.
+Keep devices and topics separate, and choose buckets at least as wide as the reporting interval.
+For multipart inventories, count distinct epochs before expanding item arrays when you need a sample denominator.
+Count item rows only when the question is about items.
+Use the field reference to distinguish interval totals, rates, percentiles and closing snapshots before aggregating.
+An average of reported percentiles is not the percentile of all underlying observations.
+Series handles read live data again when refined.
+
+### The OS volume across a fleet
+
+Each `storage_io` item identifies its volume role, as in `disk_volumes`.
+Each `storage_device_io` item identifies whether it backs the OS volume.
+Use the full paths in the example below.
+Select the OS volume by role, never by drive letter: the OS volume is usually `C:` but not always.
+Devices whose OS volume latency p90 went above 50 ms (omit `agent_ids` (arg) for the whole scope):
+
+```
+query_device_health   view: series   topics: ["storage_io"]
+refine_query_result on that query_id
+                filter_lql: sparklogs.data.storage_io[](volume_role = "os" AND latency_ms_p90_10s > 50)
+                group_by:   ["agent_id"]
+                aggregate:  [{fn: max, col: "sparklogs.data.storage_io[](volume_role = \"os\").latency_ms_p90_10s", as: os_p90_max},
+                             {fn: count, as: samples_over}]
+                order_by:   [{col: "os_p90_max", dir: "desc"}]
+```
+
+The filter keeps samples whose OS volume crossed the bar; the aggregate's condition reads only the OS volume's item, so another volume's latency never counts.
 
 ## Accuracy
 

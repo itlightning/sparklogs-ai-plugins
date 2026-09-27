@@ -41,7 +41,9 @@ OCSF nests entities under the event actor. Anchors below name the object path, n
 | `sparklogs.origin.ip` | `src_endpoint.ip` |
 | `sparklogs.origin.host` | `src_endpoint.hostname` |
 | `sparklogs.origin.port` | `src_endpoint.port` |
+| `sparklogs.destination.ip` | `dst_endpoint.ip` |
 | `sparklogs.destination.host` | `dst_endpoint.hostname` |
+| `sparklogs.destination.port` | `dst_endpoint.port` |
 | `sparklogs.result.code` | `status_code` |
 | `sparklogs.result.code_space` |  |
 | `sparklogs.result.code_name` |  |
@@ -57,10 +59,10 @@ OCSF nests entities under the event actor. Anchors below name the object path, n
 - **`target`**: The principal the action was done TO. A group acted upon is this family with kind=group, because a group is a principal here rather than a separate object. OCSF group-management carries the group as its first-class `group` object, so target(kind=group) is the anchor for OCSF `group`, while an account target anchors the per-class affected user.
 - **`process`**: The process the event is about.
 - **`member`**: The principal whose membership in the target changed. A member is only ever a member, so no role collision is possible; group-in-group nesting reads member kind=group. OCSF group-management carries the group as `group` and the member as `user`. Our shape inverts nothing: target holds the group with kind=group, member holds the principal, and the anchor names where OCSF puts the same fact.
-- **`origin`**: The initiating network endpoint. Populated only when the value names a machine other than the reporting host, which is what makes the populated side the direction. Anchors `src_endpoint`, whichever class the event belongs to.
-- **`destination`**: The receiving network endpoint.
+- **`origin`**: Where the connection or request came from. Both are present when the event names both ends. On sign-in events only the other machine is named, because the reporting machine is the near end. Anchors `src_endpoint`, whichever class the event belongs to.
+- **`destination`**: Where it was going. Both are present when the event names both ends. On sign-in events only the other machine is named, because the reporting machine is the near end.
 - **`result`**: The main result code the source reported, the number space it belongs to, the constant name that space gives it, and whether that code is a failure. The name is a DECODE of the first two, present only where the source pack holds a decode table for that space. `failed` is a marker: presence means failure, absence of the field means success, and it is never false.
-- **`config_change`**: What configuration changed, in what direction, on what.
+- **`config_change`**: Three answers about one durable change: the KIND OF OBJECT that changed, the VERB applied to it, and that object's own identity within its type. The identity is a different axis from the principal join family, so a change acting on a principal names it in both.
 
 ## Module fields
 
@@ -93,6 +95,7 @@ OCSF nests entities under the event actor. Anchors below name the object path, n
 | `win.eventlog.security.service_image_path` | `file.path` |
 | `win.eventlog.security.service_account` | `user.name` |
 | `win.eventlog.security.task_name` | `job.name` |
+| `win.eventlog.security.exit_status` |  |
 | `win.eventlog.security.object_name` |  |
 | `win.eventlog.security.object_type` |  |
 | `win.eventlog.security.object_value_name` | `reg_value.name` |
@@ -104,6 +107,8 @@ OCSF nests entities under the event actor. Anchors below name the object path, n
 | `win.eventlog.security.rule_id` | `firewall_rule.uid` |
 | `win.eventlog.security.share_name` | `share.name` |
 | `win.eventlog.security.share_path` | `share.path` |
+| `win.eventlog.security.share_relative_target` | `file.path` |
+| `win.eventlog.security.share_access_mask` |  |
 | `win.eventlog.security.old_target_user` | `user.name` |
 | `win.eventlog.security.new_target_user` | `user.name` |
 | `win.eventlog.security.object_dn` |  |
@@ -113,4 +118,8 @@ OCSF nests entities under the event actor. Anchors below name the object path, n
 | `win.eventlog.security.nps_policy` | `policy.name` |
 | `win.eventlog.security.publisher_id` | `metadata.product.name` |
 | `win.eventlog.security.pua_count` |  |
+| `win.eventlog.security.wfp_direction` | `connection_info.direction` |
+| `win.eventlog.security.wfp_dest_address` | `dst_endpoint.ip` |
+| `win.eventlog.security.wfp_dest_port` | `dst_endpoint.port` |
+| `win.eventlog.security.wfp_protocol` | `connection_info.protocol_num` |
 | `win.eventlog.security.dropped_count` |  |

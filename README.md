@@ -75,7 +75,7 @@ This branch is generated from the `source` branch, so pull requests land on `sou
 
 ---
 
-Version: 1.6.0
+Version: 1.7.0
 
 License: Apache-2.0, see [LICENSE](LICENSE).
 

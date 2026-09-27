@@ -8,7 +8,7 @@ Hand edits are lost.
 
 ## Contract
 
-Read every row below as a query contract, the same way a reason slug is read.
+Read every row below as a query contract, the same way a reason code is read.
 
 - **Additive only.** Fields and vocabulary tokens are added, never renamed or repurposed, without a documented migration.
 - **Misses are honest.** An unlisted code leaves its decoded field unset and the raw value promoted; a meaning is never invented.
@@ -44,4 +44,4 @@ The last column is different in kind: it is the author's account of the row or e
 | `win_dism_feature_change_failed` / `default` | n/a | `win.servicing.dism.component` |  |
 | `win_dism_health_command_run` / `default` | n/a | `win.servicing.dism.component` |  |
 | `win_dism_reboot_required` / `default` | n/a | `win.servicing.dism.component` |  |
-| `win_dism_source_files_missing` / `default` | n/a | `win.servicing.dism.component` |  |
+| `win_servicing_source_files_missing` / `default` | n/a | `win.servicing.dism.component` |  |

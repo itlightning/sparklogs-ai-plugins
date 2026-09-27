@@ -61,7 +61,7 @@ The mistakes are grouped by the operating principle they violate.
 
 **Why it's wrong.** Misrepresentation is worse than absent citation - engineer assumes you've supported the claim and won't double-check.
 
-**Recovery.** When you write a Finding, ask: "If the engineer clicks this URL and looks at the data, will they see what I'm asserting?" If unsure, refine the cached query (`refine_query_result` with `filter_lql` (arg) to narrow) so the URL points to the specific evidence subset.
+**Recovery.** Verify the finding against the returned rows. Copy the response URL verbatim and retain its query ID and parameters: the URL opens the org and time scope, and need not reproduce every filter. Refine when you need a narrower evidence subset.
 
 ### Executive Summary makes claims not in any Finding
 
@@ -201,7 +201,7 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` or `low`.
 
 **Why it's wrong.** Level 3 returns far more data than Level 1 or 2. Default should be Level 1 (triage) -> Level 2 (assess) -> Level 3 only when ground truth is needed.
 
-**Recovery.** Always set `select` (arg) explicitly. Use the level-recipes from `mcp-tool-decision-tree.md`. Field-length caps are SERVER-ENFORCED - there is no client override. If a capped field is truncating data you need, narrow the query (tighter `lql` (arg), fewer subsources) or project a smaller field set with `select` (arg), then page or refine to reach the specific rows.
+**Recovery.** Select the fields needed for the question. If a value is clipped, narrow to its row or field and request `full_length_values` (arg). Result-row and response-byte limits still apply. See `mcp-tool-decision-tree.md` for retrieval options.
 
 ### Retrying refine on `cache_invalidated`
 
@@ -281,15 +281,23 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` or `low`.
 
 **Why it's wrong.** A playbook is an incomplete starting recipe for a common shape of that symptom. Its `service` (LQL) / `sparklogs.reason` (LQL) / id filters miss uncurated raw text, sibling providers, and channels the file never named. Empty recipe LQL is a miss on the recipe, not proof the ticket has no telemetry.
 
-**Recovery.** Confirm the source has data in the window (`list_sources`). Then drop the recipe's extra predicates and group that host by `subsource` (LQL). Open the kind file in `stream-kinds.md` for that `subsource` (LQL) (WEL classic: `provider_name` (LQL) before `pattern` (LQL); file log: `origin` (LQL); device state: `query_device_health` / `sparklogs.kind` (LQL)+`sparklogs.topic` (LQL)+`sparklogs.reason` (LQL)). Then group as that ladder says, including `sparklogs.reason` (LQL) when populated. Open `../feeds/<id>/` only after a subsource showed up. Pull a narrow raw slice of the dominant groups. If you still cannot speak to the ticket, say which discovery steps you ran and put the rest in WHAT WAS NOT CHECKED. Do not stop at the playbook queries.
+**Recovery.** Confirm the source has data in the window (`list_sources`). Then drop the recipe's extra predicates and group that host by `subsource` (LQL). Open the kind file in `stream-kinds.md` for that `subsource` (LQL) (WEL classic: `provider_name` (LQL) before `pattern` (LQL); file log: `origin` (LQL); device state: `query_device_health` / `sparklogs.kind` (LQL)+`sparklogs.topic` (LQL)+`sparklogs.reason` (LQL)). Then group as that guide directs, including `sparklogs.reason` (LQL) when populated. Open `../feeds/<id>/` only after a subsource showed up. Pull a narrow raw slice of the dominant groups. If you still cannot speak to the ticket, say which discovery steps you ran and put the rest in WHAT WAS NOT CHECKED. Do not stop at the playbook queries.
 
-### Treating `list_fields` as the device-state explore ladder
+### Treating `list_fields` as the device-state exploration order
 
 **Symptom.** You ran `list_fields`, then grouped or filtered on every `sparklogs.data.*` path you saw.
 
-**Why it's wrong.** `list_fields` is a good catalog call. It names fields; it does not rank what matters. For device state, group `sparklogs.kind` (LQL), `sparklogs.topic` (LQL), `sparklogs.reason` (LQL) first (`stream-kinds/device-state.md`). The catalog lists snapshot payload leaves with their array mark (`sparklogs.data.services[].current_state`); those are names to filter on inside `[]()`, not the ladder.
+**Why it's wrong.** `list_fields` is a good catalog call. It names fields; it does not rank what matters. For device state, group `sparklogs.kind` (LQL), `sparklogs.topic` (LQL), `sparklogs.reason` (LQL) first (`stream-kinds/device-state.md`). The catalog lists snapshot payload leaves with their array mark (`sparklogs.data.services[].current_state`); those are names to filter on inside `[]()`, not a ranking of importance.
 
-**Recovery.** Latest-in-window: `query_device_health`. Event stream: group `sparklogs.kind` (LQL) / `sparklogs.topic` (LQL) / `sparklogs.reason` (LQL). Use `list_fields` when you need a name the rows did not already show.
+**Recovery.** Standing / latest of each episode: `query_device_health`, omit `view` (arg). Inventory / what is on the box: same tool, `view` (arg) `latest_state`. Process trends: same tool, `view` (arg) `top_processes_over_time`. Raw measurements: `view` (arg) `series` with `topics` (arg). RCA: same tool, `view` (arg) `event_timeline`. Event stream: group `sparklogs.kind` (LQL) / `sparklogs.topic` (LQL) / `sparklogs.reason` (LQL). Use `list_fields` when you need a name the rows did not already show.
+
+### Mixing the default view with event_timeline
+
+**Symptom.** You omitted `view` (arg) on `query_device_health` and treated it as a series. Or you used `view` (arg) `event_timeline` and expected only events at or above `min_severity` (arg).
+
+**Why it's wrong.** Omit `view` (arg) judges the latest event of each episode. `latest_state` judges the latest event of each subject. Timeline includes every in-window event of episodes whose peak in the window meets `min_severity` (arg).
+
+**Recovery.** Latest-of-episode read: omit `view` (arg), `min_severity` (arg) `warning`. What is on the box: `view` (arg) `latest_state`. Series of those episodes: `view` (arg) `event_timeline`, same `min_severity` (arg), fieldset `fleet` when duration / `sparklogs.episode.cleared_ts` (col) / `sparklogs.class` (col) matter. Repeating change points are event_timeline events with opt-in kinds, not `sparklogs.episode.occurrence` (col).
 
 ### Failing to check that the source has data in the investigation window
 

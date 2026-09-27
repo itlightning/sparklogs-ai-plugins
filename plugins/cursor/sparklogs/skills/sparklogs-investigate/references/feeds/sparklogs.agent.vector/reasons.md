@@ -8,28 +8,16 @@ Every section below is from the public reason block only.
 
 | reason | service | severity | benign |
 |---|---|---|---|
-| `sparklogs_collector_delivery_failed` | `rmm` | Warning |  |
-| `sparklogs_collector_feed_not_collecting` | `rmm` | Warning when the channel exists and something stops us reading it; everyday when the channel is simply absent on this host; Debug when the platform does not permit subscription |  |
-| `sparklogs_collector_feed_unavailable` | `rmm` | Warning, Notice or Debug |  |
-| `sparklogs_collector_read_failed` | `rmm` | Warning |  |
-| `sparklogs_collector_restarted_from_oldest` | `rmm` | Notice |  |
-| `sparklogs_collector_skipped_records_overwritten` | `rmm` | Error |  |
-| `sparklogs_collector_skipped_to_recover` | `rmm` | Error, or Warning when the collector gave up only a single record or boundary tick |  |
-| `sparklogs_collector_stream_not_started` | `rmm` | Error |  |
+| `log_collection_feed_not_collecting` | `rmm` | Warning when the channel exists and something stops us reading it; everyday when the channel is simply absent on this host; Debug when the platform does not permit subscription |  |
+| `log_collection_feed_unavailable` | `rmm` | Warning, Notice or Debug |  |
+| `log_collection_read_failed` | `rmm` | Warning |  |
+| `log_collection_restarted_from_oldest` | `rmm` | Notice |  |
+| `log_collection_skipped_records_overwritten` | `rmm` | Error |  |
+| `log_collection_skipped_to_recover` | `rmm` | Error, or Warning when the collector gave up only a single record or boundary tick |  |
+| `log_collection_stream_not_started` | `rmm` | Error |  |
+| `log_delivery_failed` | `rmm` | Warning |  |
 
-## `sparklogs_collector_delivery_failed`
-
-The collector failed to deliver data from this device, so recent events may be missing or delayed.
-
-**Severity:** Warning
-
-**Impact:** Data from this device may arrive late or, if buffering is exhausted, not at all. Absence of recent events for this device may reflect delivery rather than the device being idle.
-
-**Consider:**
-
-- Check whether this device has recent events at all, and whether the agent also reported spool pressure.
-
-## `sparklogs_collector_feed_not_collecting`
+## `log_collection_feed_not_collecting`
 
 A Windows Event Log channel on this device's collection list is not being collected, and the cause says why.
 
@@ -45,7 +33,7 @@ A Windows Event Log channel on this device's collection list is not being collec
 This row is about subscription, not about records: nothing that reached the collector is missing
 because of it.
 
-## `sparklogs_collector_feed_unavailable`
+## `log_collection_feed_unavailable`
 
 The collector lost access to a Windows Event Log channel it collects from, and keeps retrying.
 
@@ -59,7 +47,7 @@ The collector lost access to a Windows Event Log channel it collects from, and k
 - suppressed_count and first_failure on reminder and recovery events bound the gap window.
 - A product update can re-register its event channel (Windows Defender platform updates are a known trigger); the collector recovers on its own once the channel is readable again.
 
-## `sparklogs_collector_read_failed`
+## `log_collection_read_failed`
 
 The collector failed to read from one of its sources, so some events were not collected.
 
@@ -71,7 +59,7 @@ The collector failed to read from one of its sources, so some events were not co
 
 - Check the component_id on the event and confirm whether that stream has continuous recent data.
 
-## `sparklogs_collector_restarted_from_oldest`
+## `log_collection_restarted_from_oldest`
 
 A channel with a custom event query could not resume from its last position, so the collector read it from the oldest record instead. Nothing was lost.
 
@@ -84,7 +72,7 @@ A channel with a custom event query could not resume from its last position, so 
 - The channel field names the affected log; expect duplicate records on it around this time.
 - Deduplicate on the record identifier before counting events on that channel for the window.
 
-## `sparklogs_collector_skipped_records_overwritten`
+## `log_collection_skipped_records_overwritten`
 
 Records were overwritten in a Windows Event Log channel before the collector read them, so they were never collected.
 
@@ -101,7 +89,7 @@ Records were overwritten in a Windows Event Log channel before the collector rea
 The field names match the per-source collector status file, so an event and a status entry for
 the same channel join directly.
 
-## `sparklogs_collector_skipped_to_recover`
+## `log_collection_skipped_to_recover`
 
 The collector could not resume a Windows Event Log channel from its last position and moved forward past records, which were never collected.
 
@@ -118,7 +106,7 @@ The field names match the per-source collector status file, so an event and a st
 the same channel join directly. The rung vocabulary is separate from the resume path reported on
 channel recovery, even where a spelling looks the same.
 
-## `sparklogs_collector_stream_not_started`
+## `log_collection_stream_not_started`
 
 A collector component failed to start, so one telemetry stream is missing from this device.
 
@@ -129,3 +117,15 @@ A collector component failed to start, so one telemetry stream is missing from t
 **Consider:**
 
 - Check which component_id is named on the event, then confirm whether that stream has any recent data.
+
+## `log_delivery_failed`
+
+The collector failed to deliver data from this device, so recent events may be missing or delayed.
+
+**Severity:** Warning
+
+**Impact:** Data from this device may arrive late or, if buffering is exhausted, not at all. Absence of recent events for this device may reflect delivery rather than the device being idle.
+
+**Consider:**
+
+- Check whether this device has recent events at all, and whether the agent also reported spool pressure.

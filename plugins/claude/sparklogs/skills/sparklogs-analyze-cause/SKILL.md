@@ -71,9 +71,16 @@ Stay in role: candidates with confirm/refute, not a single asserted cause. Stron
 
 **Prerequisite:** prior `sparklogs-investigate` summary (same `external_investigation_id` (arg)); shared investigate guides apply when you query.
 
+## Live tool reference
+
+If server instructions are missing or terminology is unclear, call `server_info` with `include_instructions: true`.
+For detailed views, fieldsets, aggregation or paging, call it with `describe_tool` (arg) naming the tool.
+Use these references when the visible description leaves a question, not on every call.
+Process charts use `query_device_health` with `view` (arg) `top_processes_over_time`.
+
 ## Curated data (read this before opening reference files)
 
-- **`subsource` (LQL) = feed id.** Scope ladder before `query_logs`: `service` (LQL) → `app` (LQL) → `subsource` (LQL) → `category` (LQL) → `pattern_hash` (LQL).
+- **`subsource` (LQL) = feed id.** Scope filters before `query_logs`: `service` (LQL) → `app` (LQL) → `subsource` (LQL) → `category` (LQL) → `pattern_hash` (LQL).
 - **Curated events** carry `sparklogs.reason` (LQL), `sparklogs.class` (LQL), and module fields. Empty `sparklogs.*` on an event means **uncurated** (not a collection-health finding).
 - **Reason** (`sparklogs.reason` (LQL)) = our curated vocabulary. **Vendor code** = NTSTATUS, HRESULT, MSI exit, Kerberos result, etc. **pattern_hash** (LQL) = stable shape id on every event.
 - **Device row** (`query_device_health`, feed health, `agent_complete_through` (col)) is authoritative for collection and completeness. Event volume is not coverage.
@@ -86,7 +93,7 @@ Stay in role: candidates with confirm/refute, not a single asserted cause. Stron
 ## After you pick a `subsource` (LQL)
 
 1. Open `references/feeds/<id>/README.md` (short index).
-2. **Stream kind** and explore ladder: `references/guides/stream-kinds.md`. Classic WEL: `provider_name` (LQL) before `pattern` (LQL); device state: `query_device_health` with `sparklogs.kind` (LQL) / `sparklogs.topic` (LQL) / `sparklogs.reason` (LQL).
+2. **Stream kind** and exploration order: `references/guides/stream-kinds.md`. Classic WEL: `provider_name` (LQL) before `pattern` (LQL); device state: `query_device_health` with `sparklogs.kind` (LQL) / `sparklogs.topic` (LQL) / `sparklogs.reason` (LQL).
 3. Open **one** artifact (read-mode table below). Rich feeds (especially `win.eventlog.security`) often need `recipes.md` or `reasons.md` first, not only `fields.md` or `enums.md`. Security also carries `patterns.md` and `mapping-ecs.md` / `mapping-ocsf.md` when shape or external taxonomy is the question.
 
 **Reason meaning:** the `sparklogs.reason` (LQL) value and the event `message` (col) together; grep `reasons.md` for the matching `##` heading (summary table first, one section only).
@@ -156,7 +163,7 @@ Per-feed closed vocabularies. **Grep** the code, constant, or `##` heading; neve
 | `win.servicing.cbs` | CBS servicing internals: component store, packages | `references/feeds/win.servicing.cbs/` |
 | `win.servicing.dism` | DISM operations and image health | `references/feeds/win.servicing.dism/` |
 | `win.defender.eventlog` | Defender: threats, protection state | `references/feeds/win.defender.eventlog/` |
-| `sparklogs.agent.state` | Device health and state snapshots: CPU, RAM, disk, installed software, monitors | `references/feeds/sparklogs.agent.state/` |
+| `sparklogs.device.state` | Device health and state snapshots: CPU, RAM, disk, installed software, monitors | `references/feeds/sparklogs.device.state/` |
 | `sparklogs.agent.vector` | Collector debug only: data collector internals | `references/feeds/sparklogs.agent.vector/` |
 | `sparklogs.agent.log` | Collector debug only: agent supervisor log | `references/feeds/sparklogs.agent.log/` |
 

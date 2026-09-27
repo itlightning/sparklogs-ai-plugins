@@ -8,7 +8,7 @@ Hand edits are lost.
 
 ## Contract
 
-Read every row below as a query contract, the same way a reason slug is read.
+Read every row below as a query contract, the same way a reason code is read.
 
 - **Additive only.** Fields and vocabulary tokens are added, never renamed or repurposed, without a documented migration.
 - **Misses are honest.** An unlisted code leaves its decoded field unset and the raw value promoted; a meaning is never invented.
@@ -61,14 +61,15 @@ The last column is different in kind: it is the author's account of the row or e
 
 | Surface | Event ids | Fields set | Row fields |
 |---|---|---|---|
-| `sparklogs_collector_delivery_failed` / `default` | n/a | `sparklogs.agent.vector.component_id` |  |
-| `sparklogs_collector_feed_not_collecting` / `default` | n/a | `sparklogs.agent.vector.channel` `sparklogs.agent.vector.component_id` `sparklogs.agent.vector.skip_cause` |  |
-| `sparklogs_collector_feed_unavailable` / `feed_scoped` | n/a | `sparklogs.agent.vector.component_id` |  |
-| `sparklogs_collector_feed_unavailable` / `onset` | n/a | `sparklogs.agent.vector.component_id` |  |
-| `sparklogs_collector_feed_unavailable` / `recovered` | n/a | `sparklogs.agent.vector.component_id` |  |
-| `sparklogs_collector_feed_unavailable` / `reminder` | n/a | `sparklogs.agent.vector.component_id` |  |
-| `sparklogs_collector_read_failed` / `default` | n/a | `sparklogs.agent.vector.component_id` |  |
-| `sparklogs_collector_restarted_from_oldest` / `default` | n/a | `sparklogs.agent.vector.component_id` |  |
-| `sparklogs_collector_skipped_records_overwritten` / `default` | n/a | `sparklogs.agent.vector.channel` `sparklogs.agent.vector.component_id` `sparklogs.agent.vector.missing_records` `sparklogs.agent.vector.previous_record_id` `sparklogs.agent.vector.record_id` |  |
-| `sparklogs_collector_skipped_to_recover` / `default` | n/a | `sparklogs.agent.vector.channel` `sparklogs.agent.vector.component_id` `sparklogs.agent.vector.missing_records` `sparklogs.agent.vector.resume_rung` |  |
-| `sparklogs_collector_stream_not_started` / `default` | n/a | `sparklogs.agent.vector.component_id` |  |
+| `log_collection_feed_not_collecting` / `default` | n/a | `sparklogs.agent.vector.channel` `sparklogs.agent.vector.component_id` `sparklogs.agent.vector.skip_cause` |  |
+| `log_collection_feed_unavailable` / `feed_scoped` | n/a | `sparklogs.agent.vector.component_id` |  |
+| `log_collection_feed_unavailable` / `onset` | n/a | `sparklogs.agent.vector.component_id` |  |
+| `log_collection_feed_unavailable` / `recovered` | n/a | `sparklogs.agent.vector.component_id` |  |
+| `log_collection_feed_unavailable` / `reminder` | n/a | `sparklogs.agent.vector.component_id` |  |
+| `log_collection_read_failed` / `default` | n/a | `sparklogs.agent.vector.component_id` |  |
+| `log_collection_restarted_from_oldest` / `default` | n/a | `sparklogs.agent.vector.component_id` |  |
+| `log_collection_skipped_records_overwritten` / `default` | n/a | `sparklogs.agent.vector.channel` `sparklogs.agent.vector.component_id` `sparklogs.agent.vector.missing_records` `sparklogs.agent.vector.previous_record_id` `sparklogs.agent.vector.record_id` |  |
+| `log_collection_skipped_to_recover` / `default` | n/a | `sparklogs.agent.vector.channel` `sparklogs.agent.vector.component_id` `sparklogs.agent.vector.missing_records` `sparklogs.agent.vector.resume_rung` |  |
+| `log_collection_stream_not_started` / `default` | n/a | `sparklogs.agent.vector.component_id` |  |
+| `log_delivery_failed` / `default` | n/a | `sparklogs.agent.vector.component_id` |  |
+| `wel_resume_ladder_bookmark_dead` | n/a | `sparklogs.agent.vector.channel` `sparklogs.agent.vector.component_id` `sparklogs.agent.vector.resume_rung` |  |
