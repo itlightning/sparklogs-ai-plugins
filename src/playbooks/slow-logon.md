@@ -24,7 +24,7 @@ Failing-then-retrying looks nothing like a slow single `logon_cached_interactive
 Decoded auth failures (`win.eventlog.security.status_meaning` (LQL) is the cause without opening the body):
 
 ```
-sparklogs.reason in (logon_failed, kerberos_preauth_failed, kerberos_ticket_failed, ntlm_validation_failed)
+sparklogs.reason in (sign_in_failed, kerberos_preauth_failed, kerberos_ticket_failed, ntlm_validation_failed)
 AND sparklogs.actor.name = "<account>"
 ```
 

@@ -10,10 +10,11 @@
 Contributor-facing branch guidance is in [CONTRIBUTING.md](../CONTRIBUTING.md).
 Consumer load order (elevations, themes, floor vs full) is in [information-architecture.md](information-architecture.md).
 
-## Generated feed lookups (`src/feeds/`)
+## Generated references (`src/feeds/`, `src/fields/`)
 
 `src/feeds/<id>/` holds the AI lookup set for each data feed: field schema, closed
 vocabularies, and (when present) reasons.
+`src/fields/` holds the merged envelope-family and state-topic field reference.
 Security also carries the expected-pattern decision procedure, worked query recipes, and external-taxonomy
 anchors.
 The content is authored nowhere in this repo.
@@ -31,7 +32,9 @@ Refresh from a sibling source-library checkout (clean tree required):
 SPARKLOGS_SOURCE_LIBRARY_DIR=../sparklogs-source-library yarn sync-generated
 ```
 
-That one command copies `docs/generated-public/` into `src/feeds/` **and** regenerates the `app` token table in `guides/app-vocabulary.md` from `registry.yaml` `app_vocabulary` (`public` strings only).
+That command copies feed directories into `src/feeds/`, copies the merged field reference into
+`src/fields/`, and regenerates the `app` token table in `guides/app-vocabulary.md` from the public
+`registry.yaml` vocabulary.
 
 The environment variable is optional when the checkout sits beside this repo. A path that is set
 but unusable is a hard failure rather than a fallback: a drift guard that quietly reads a different
@@ -42,13 +45,13 @@ Workstation discipline: CI will not catch a stale table by itself (see the drift
 
 `yarn stitch-indexes` is a different command: it rebuilds SKILL / playbook index tables from **this** repo's leaf YAML, not from the library.
 
-Identifier tags (`guides/names.md`): authored `src/` prose backticks that match `[a-z][a-z0-9_.]*` must carry `(arg)`, `(col)`, `(LQL)`, `(tool)`, `(value)`, or `(other)`. Render strips `(tool)`, `(value)`, and `(other)`. Membership is `scripts/identifier-sot.yaml` plus a sibling library harvest. Fenced LQL/JSON is exempt. `src/feeds/` and GENERATED blocks are skipped. `validate-rendered.mjs` scans shipped `.md`: leftover strip-tags fail; each host pack must still contain `(arg)`, `(col)`, and `(LQL)` (empty match is not a pass).
+Identifier tags (`guides/names.md`): authored `src/` prose backticks that match `[a-z][a-z0-9_.]*` must carry `(arg)`, `(col)`, `(LQL)`, `(tool)`, `(value)`, or `(other)`. Render strips `(tool)`, `(value)`, and `(other)`. Membership is `scripts/identifier-sot.yaml` plus a sibling library harvest. Fenced LQL/JSON is exempt. `src/feeds/`, `src/fields/`, and GENERATED blocks are skipped. `validate-rendered.mjs` scans shipped `.md`: leftover strip-tags fail; each host pack must still contain `(arg)`, `(col)`, and `(LQL)` (empty match is not a pass).
 
 Agents run `make precommit` (or `yarn precommit`) before commit. It is fail-closed without a usable sibling library checkout. CI `yarn validate` still SKIPPED-passes drift when the library is absent.
 
 `scripts/generated-SYNC-MANIFEST.json` records the library branch and commit the current content came from.
 It does not ship on `dist`.
-Do not hand-edit anything under `src/feeds/` or the generated table in `src/guides/app-vocabulary.md`:
+Do not hand-edit anything under `src/feeds/`, `src/fields/`, or the generated table in `src/guides/app-vocabulary.md`:
 an edit is reverted by the next sync and fails the drift check in the meantime.
 
 `yarn validate:generated` runs the gates and then the drift check. **They are enforced in different
@@ -142,7 +145,7 @@ running them locally before tagging:
   `claude` CLI is not on `PATH`, which is the normal case in CI. Run it locally, and load the package
   once with `claude --plugin-dir <rendered claude package> plugin details sparklogs` to confirm the
   component inventory and that the MCP server is counted.
-- **The generated-feed drift check** (`sync-generated-references.mjs --check`) compares `src/feeds/`
+- **The generated-reference drift check** (`sync-generated-references.mjs --check`) compares `src/feeds/` and `src/fields/`
   against a sibling `sparklogs-source-library` checkout, found via `SPARKLOGS_SOURCE_LIBRARY_DIR` or
   `../sparklogs-source-library`. Without that checkout there is nothing to compare against, so CI
   skips the check. The snapshot in `scripts/generated-SYNC-MANIFEST.json` is only as current

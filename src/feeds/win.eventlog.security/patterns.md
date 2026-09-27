@@ -29,7 +29,7 @@ Its rendered text cannot survive pattern derivation, so a string that appears to
 
 An unexpected pattern is one of three things, in falling order of likelihood: a curated surface this catalog does not list, a vocabulary that gained a value, or a token rendered from something that is not a closed vocabulary at all. The third is the one that matters.
 
-This module has 68 curated surface(s) and a legal-pattern language of 25799 strings.
+This module has 77 curated surface(s) and a legal-pattern language of 31432 strings.
 That number is why this file is a procedure and not a list.
 
 ## Surfaces
@@ -148,11 +148,11 @@ Most of those cannot physically occur; the count is a bound on the language, not
 Legal pattern count for this surface: 9 (every slot independently present or absent).
 Most of those cannot physically occur; the count is a bound on the language, not a prediction.
 
-### `anonymous_remote_logon` / `default`
+### `anonymous_remote_sign_in` / `default`
 
-**When:** The anonymous well-known SID signed in and the event names an endpoint other than the reporting host
+**When:** The anonymous well-known SID signed in and the event names an endpoint that is another machine
 
-**Renders:** `anonymous_remote_logon: NOTABLE: anonymous sign-in from a remote endpoint`
+**Renders:** `anonymous_remote_sign_in: NOTABLE: anonymous sign-in from a remote endpoint`
 
 **Event ids:** 4624
 
@@ -190,11 +190,11 @@ Most of those cannot physically occur; the count is a bound on the language, not
 
 **Slots:** none. This surface renders exactly one pattern.
 
-### `explicit_credential_use` / `default`
+### `explicit_credential_used` / `default`
 
 **When:** Caller is not one of {lsass, svchost, winlogon, consent, taskhostw} running from the system directory
 
-**Renders:** `explicit_credential_use: NOTABLE: explicit credentials presented`
+**Renders:** `explicit_credential_used: NOTABLE: explicit credentials presented`
 
 **Event ids:** 4648
 
@@ -250,11 +250,11 @@ Most of those cannot physically occur; the count is a bound on the language, not
 Legal pattern count for this surface: 162 (every slot independently present or absent).
 Most of those cannot physically occur; the count is a bound on the language, not a prediction.
 
-### `kerberos_rc4_ticket` / `default`
+### `kerberos_rc4_ticket_issued` / `default`
 
 **When:** 4769 Audit Success, etype RC4 (0x17/0x18), service not machine account or krbtgt
 
-**Renders:** `kerberos_rc4_ticket: NOTABLE: Kerberos service ticket used weak encryption`
+**Renders:** `kerberos_rc4_ticket_issued: NOTABLE: Kerberos service ticket used weak encryption`
 
 **Event ids:** 4769
 
@@ -305,41 +305,6 @@ Most of those cannot physically occur; the count is a bound on the language, not
 | 1 | `kerberos_cause` | `client_unknown` `service_unknown` `principal_not_unique` `null_key` `policy_restriction` `bad_option` `etype_unsupported` `preauth_type_unsupported` `client_revoked` `key_expired` `preauth_failed` `integrity_check_failed` `ticket_expired` `replay_detected` `clock_skew` `message_modified` `generic_error` |
 
 Legal pattern count for this surface: 18 (every slot independently present or absent).
-Most of those cannot physically occur; the count is a bound on the language, not a prediction.
-
-### `logon_failed` / `account_attempt`
-
-**When:** A named account was attempted (anything but the credential-less SSPI probe below)
-
-**Renders:** `logon_failed: NOTABLE: sign-in failed`
-
-**Event ids:** 4625
-
-| # | Slot | Legal values |
-|---|---|---|
-| 1 | `cause` | `unknown_username` `bad_password` `bad_username_or_auth` `account_restriction` `outside_logon_hours` `workstation_not_authorized` `password_expired` `account_disabled` `name_translation_failed` `clock_skew` `account_expired` `password_must_change` `account_locked_out` `logon_right_not_granted` `netlogon_not_started` `no_logon_servers` `auth_firewall_blocked` `no_local_secret` `no_credentials_available` `invalid_token` `unknown_target` `no_authenticating_authority` `untrusted_root` `function_unsupported` `unknown_credentials` `smartcard_wrong_pin` `registry_io_failed` |
-| 2 | `logon_type` | `logon_interactive` `logon_network` `logon_batch` `logon_service` `logon_unlock` `logon_network_cleartext` `logon_new_credentials` `logon_remote_interactive` `logon_cached_interactive` `logon_system` `logon_cached_remote_interactive` `logon_cached_unlock` |
-| 3 | `subject_kind` | `by_account` `by_machine` `by_system` `by_service` `by_local_service` `by_network_service` `by_anonymous` `by_group` |
-| 4 | `auth_package` | `auth_kerberos` `auth_ntlm` `auth_negotiate` `auth_negoextender` |
-
-Legal pattern count for this surface: 16380 (every slot independently present or absent).
-Most of those cannot physically occur; the count is a bound on the language, not a prediction.
-
-### `logon_failed` / `sspi_probe`
-
-**When:** SSPI asked for credentials it was never given: that status, an empty target account, no address
-
-**Renders:** `logon_failed: BENIGN: SSPI probe, no creds supplied`
-
-**Event ids:** 4625
-
-| # | Slot | Legal values |
-|---|---|---|
-| 1 | `cause` | `unknown_username` `bad_password` `bad_username_or_auth` `account_restriction` `outside_logon_hours` `workstation_not_authorized` `password_expired` `account_disabled` `name_translation_failed` `clock_skew` `account_expired` `password_must_change` `account_locked_out` `logon_right_not_granted` `netlogon_not_started` `no_logon_servers` `auth_firewall_blocked` `no_local_secret` `no_credentials_available` `invalid_token` `unknown_target` `no_authenticating_authority` `untrusted_root` `function_unsupported` `unknown_credentials` `smartcard_wrong_pin` `registry_io_failed` |
-| 2 | `logon_type` | `logon_interactive` `logon_network` `logon_batch` `logon_service` `logon_unlock` `logon_network_cleartext` `logon_new_credentials` `logon_remote_interactive` `logon_cached_interactive` `logon_system` `logon_cached_remote_interactive` `logon_cached_unlock` |
-| 3 | `subject_kind` | `by_account` `by_machine` `by_system` `by_service` `by_local_service` `by_network_service` `by_anonymous` `by_group` |
-
-Legal pattern count for this surface: 3276 (every slot independently present or absent).
 Most of those cannot physically occur; the count is a bound on the language, not a prediction.
 
 ### `logon_right_granted` / `default`
@@ -417,9 +382,9 @@ Most of those cannot physically occur; the count is a bound on the language, not
 
 | # | Slot | Legal values |
 |---|---|---|
-| 1 | `cause` | `unknown_username` `bad_password` `bad_username_or_auth` `account_restriction` `outside_logon_hours` `workstation_not_authorized` `password_expired` `account_disabled` `name_translation_failed` `clock_skew` `account_expired` `password_must_change` `account_locked_out` `logon_right_not_granted` `netlogon_not_started` `no_logon_servers` `auth_firewall_blocked` `no_local_secret` `no_credentials_available` `invalid_token` `unknown_target` `no_authenticating_authority` `untrusted_root` `function_unsupported` `unknown_credentials` `smartcard_wrong_pin` `registry_io_failed` |
+| 1 | `cause` | `function_unsupported` `unknown_target` `invalid_token` `unknown_credentials` `no_credentials_available` `no_authenticating_authority` `untrusted_root` `no_such_device` `no_memory` `object_name_not_found` `no_logon_servers` `unknown_username` `bad_password` `bad_username_or_auth` `account_restriction` `outside_logon_hours` `workstation_not_authorized` `password_expired` `account_disabled` `name_translation_failed` `insufficient_resources` `device_data_error` `commit_limit_reached` `clock_skew` `registry_io_failed` `logon_right_not_granted` `netlogon_not_started` `account_expired` `password_must_change` `account_locked_out` `no_local_secret` `smartcard_wrong_pin` `auth_firewall_blocked` `image_hash_invalid` `image_certificate_revoked` |
 
-Legal pattern count for this surface: 28 (every slot independently present or absent).
+Legal pattern count for this surface: 36 (every slot independently present or absent).
 Most of those cannot physically occur; the count is a bound on the language, not a prediction.
 
 ### `principal_renamed` / `default`
@@ -466,6 +431,41 @@ Most of those cannot physically occur; the count is a bound on the language, not
 **Event ids:** 4730, 4734, 4758
 
 **Slots:** none. This surface renders exactly one pattern.
+
+### `sign_in_failed` / `account_attempt`
+
+**When:** A named account was attempted (anything but the credential-less SSPI probe below)
+
+**Renders:** `sign_in_failed: NOTABLE: sign-in failed`
+
+**Event ids:** 4625
+
+| # | Slot | Legal values |
+|---|---|---|
+| 1 | `cause` | `function_unsupported` `unknown_target` `invalid_token` `unknown_credentials` `no_credentials_available` `no_authenticating_authority` `untrusted_root` `no_such_device` `no_memory` `object_name_not_found` `no_logon_servers` `unknown_username` `bad_password` `bad_username_or_auth` `account_restriction` `outside_logon_hours` `workstation_not_authorized` `password_expired` `account_disabled` `name_translation_failed` `insufficient_resources` `device_data_error` `commit_limit_reached` `clock_skew` `registry_io_failed` `logon_right_not_granted` `netlogon_not_started` `account_expired` `password_must_change` `account_locked_out` `no_local_secret` `smartcard_wrong_pin` `auth_firewall_blocked` `image_hash_invalid` `image_certificate_revoked` |
+| 2 | `logon_type` | `logon_interactive` `logon_network` `logon_batch` `logon_service` `logon_unlock` `logon_network_cleartext` `logon_new_credentials` `logon_remote_interactive` `logon_cached_interactive` `logon_system` `logon_cached_remote_interactive` `logon_cached_unlock` |
+| 3 | `subject_kind` | `by_account` `by_machine` `by_system` `by_service` `by_local_service` `by_network_service` `by_anonymous` `by_group` |
+| 4 | `auth_package` | `auth_kerberos` `auth_ntlm` `auth_negotiate` `auth_negoextender` |
+
+Legal pattern count for this surface: 21060 (every slot independently present or absent).
+Most of those cannot physically occur; the count is a bound on the language, not a prediction.
+
+### `sign_in_failed` / `sspi_probe`
+
+**When:** SSPI asked for credentials it was never given: that status, an empty target account, no address
+
+**Renders:** `sign_in_failed: BENIGN: SSPI probe, no creds supplied`
+
+**Event ids:** 4625
+
+| # | Slot | Legal values |
+|---|---|---|
+| 1 | `cause` | `function_unsupported` `unknown_target` `invalid_token` `unknown_credentials` `no_credentials_available` `no_authenticating_authority` `untrusted_root` `no_such_device` `no_memory` `object_name_not_found` `no_logon_servers` `unknown_username` `bad_password` `bad_username_or_auth` `account_restriction` `outside_logon_hours` `workstation_not_authorized` `password_expired` `account_disabled` `name_translation_failed` `insufficient_resources` `device_data_error` `commit_limit_reached` `clock_skew` `registry_io_failed` `logon_right_not_granted` `netlogon_not_started` `account_expired` `password_must_change` `account_locked_out` `no_local_secret` `smartcard_wrong_pin` `auth_firewall_blocked` `image_hash_invalid` `image_certificate_revoked` |
+| 2 | `logon_type` | `logon_interactive` `logon_network` `logon_batch` `logon_service` `logon_unlock` `logon_network_cleartext` `logon_new_credentials` `logon_remote_interactive` `logon_cached_interactive` `logon_system` `logon_cached_remote_interactive` `logon_cached_unlock` |
+| 3 | `subject_kind` | `by_account` `by_machine` `by_system` `by_service` `by_local_service` `by_network_service` `by_anonymous` `by_group` |
+
+Legal pattern count for this surface: 4212 (every slot independently present or absent).
+Most of those cannot physically occur; the count is a bound on the language, not a prediction.
 
 ### `system_time_changed` / `other_caller`
 
@@ -567,7 +567,17 @@ Most of those cannot physically occur; the count is a bound on the language, not
 
 ### `crypto_operation`
 
-**When:** 5061 cryptographic operation, success and failure keywords alike
+**When:** 5061 cryptographic operation, failure keywords or unclear outcome
+
+**Renders:** `cryptographic operation`
+
+**Event ids:** 5061
+
+**Slots:** none. This surface renders exactly one pattern.
+
+### `crypto_operation_succeeded`
+
+**When:** 5061 cryptographic operation, positively tested success keyword
 
 **Renders:** `cryptographic operation`
 
@@ -585,23 +595,13 @@ Most of those cannot physically occur; the count is a bound on the language, not
 
 **Slots:** none. This surface renders exactly one pattern.
 
-### `firewall_driver_started`
+### `firewall_packet_blocked`
 
-**When:** 5033 the Windows Firewall driver started
+**When:** 5152, the filtering platform blocked a packet
 
-**Renders:** `Windows Firewall driver started`
+**Renders:** `packet blocked by the firewall`
 
-**Event ids:** 5033
-
-**Slots:** none. This surface renders exactly one pattern.
-
-### `firewall_service_started`
-
-**When:** 5024 the Windows Firewall service started
-
-**Renders:** `Windows Firewall service started`
-
-**Event ids:** 5024
+**Event ids:** 5152
 
 **Slots:** none. This surface renders exactly one pattern.
 
@@ -615,9 +615,29 @@ Most of those cannot physically occur; the count is a bound on the language, not
 
 **Slots:** none. This surface renders exactly one pattern.
 
+### `inbound_connection_blocked`
+
+**When:** 5157 whose direction decodes as inbound
+
+**Renders:** `inbound connection blocked`
+
+**Event ids:** 5157
+
+**Slots:** none. This surface renders exactly one pattern.
+
 ### `key_file_operation`
 
-**When:** 5058 key file operation, success and failure keywords alike
+**When:** 5058 key file operation, failure keywords or unclear outcome
+
+**Renders:** `cryptographic key file operation`
+
+**Event ids:** 5058
+
+**Slots:** none. This surface renders exactly one pattern.
+
+### `key_file_operation_succeeded`
+
+**When:** 5058 key file operation, positively tested success keyword
 
 **Renders:** `cryptographic key file operation`
 
@@ -627,7 +647,17 @@ Most of those cannot physically occur; the count is a bound on the language, not
 
 ### `key_migration_operation`
 
-**When:** 5059 key migration operation, success and failure keywords alike
+**When:** 5059 key migration operation, failure keywords or unclear outcome
+
+**Renders:** `cryptographic key migration operation`
+
+**Event ids:** 5059
+
+**Slots:** none. This surface renders exactly one pattern.
+
+### `key_migration_operation_succeeded`
+
+**When:** 5059 key migration operation, positively tested success keyword
 
 **Renders:** `cryptographic key migration operation`
 
@@ -670,6 +700,16 @@ Most of those cannot physically occur; the count is a bound on the language, not
 
 **Slots:** none. This surface renders exactly one pattern.
 
+### `outbound_connection_blocked`
+
+**When:** 5157 whose direction decodes as outbound
+
+**Renders:** `outbound connection blocked`
+
+**Event ids:** 5157
+
+**Slots:** none. This surface renders exactly one pattern.
+
 ### `per_user_audit_policy_table_created`
 
 **When:** 4902, the per-user audit policy table the system builds at boot
@@ -682,7 +722,7 @@ Most of those cannot physically occur; the count is a bound on the language, not
 
 ### `platform_privileges_assigned`
 
-**When:** 4672 whose privileged principal is a platform, service or machine identity
+**When:** 4672 whose privileged principal is a service or machine identity, or a platform identity other than LOCAL SYSTEM
 
 **Renders:** `platform privileges assigned`
 
@@ -702,6 +742,26 @@ Most of those cannot physically occur; the count is a bound on the language, not
 **Renders:** `primary token assigned to a process`
 
 **Event ids:** 4696
+
+**Slots:** none. This surface renders exactly one pattern.
+
+### `privilege_use_refused`
+
+**When:** 4673 or 4674 whose audit outcome is a failure
+
+**Renders:** `privilege use refused`
+
+**Event ids:** 4673, 4674
+
+**Slots:** none. This surface renders exactly one pattern.
+
+### `privileged_group_membership_enumerated`
+
+**When:** 4799 the enumerated group is one of the local groups whose membership Microsoft recommends monitoring
+
+**Renders:** `privileged group membership enumerated`
+
+**Event ids:** 4799
 
 **Slots:** none. This surface renders exactly one pattern.
 
@@ -735,6 +795,16 @@ Most of those cannot physically occur; the count is a bound on the language, not
 Legal pattern count for this surface: 4 (every slot independently present or absent).
 Most of those cannot physically occur; the count is a bound on the language, not a prediction.
 
+### `process_exited_with_error`
+
+**When:** 4689 whose exit status parses, is non-zero and is not one of the named crash statuses
+
+**Renders:** `process exited with an error`
+
+**Event ids:** 4689
+
+**Slots:** none. This surface renders exactly one pattern.
+
 ### `routine_token_refresh`
 
 **When:** 4648 from a routine platform caller
@@ -749,6 +819,16 @@ Most of those cannot physically occur; the count is a bound on the language, not
 
 Legal pattern count for this surface: 9 (every slot independently present or absent).
 Most of those cannot physically occur; the count is a bound on the language, not a prediction.
+
+### `sensitive_privilege_used`
+
+**When:** 4673 or 4674 success the gate kept, on a listed right under a sign-in principal or on one of the two rights no principal should exercise
+
+**Renders:** `sensitive privilege used`
+
+**Event ids:** 4673, 4674
+
+**Slots:** none. This surface renders exactly one pattern.
 
 ### `service_or_machine_sign_in`
 
@@ -793,6 +873,16 @@ Most of those cannot physically occur; the count is a bound on the language, not
 
 Legal pattern count for this surface: 117 (every slot independently present or absent).
 Most of those cannot physically occur; the count is a bound on the language, not a prediction.
+
+### `share_object_written`
+
+**When:** 5145 write-class success on a share other than the interprocess pipe
+
+**Renders:** `share object written`
+
+**Event ids:** 5145
+
+**Slots:** none. This surface renders exactly one pattern.
 
 ### `sign_in_unclaimed_principal`
 
@@ -880,4 +970,7 @@ These surfaces share a head and headline, so a pattern matching one is attribute
 
 | Renders | Surfaces |
 |---|---|
+| `cryptographic key file operation` | `key_file_operation`, `key_file_operation_succeeded` |
+| `cryptographic key migration operation` | `key_migration_operation`, `key_migration_operation_succeeded` |
+| `cryptographic operation` | `crypto_operation`, `crypto_operation_succeeded` |
 | `system_time_changed: NOTABLE: system time changed` | `system_time_changed` / `other_caller`, `system_time_changed` / `routine_time_service` |

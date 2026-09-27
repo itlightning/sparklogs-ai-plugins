@@ -17,8 +17,18 @@ tools:
   - query_event_counts_by_severity
   - refine_query_result
   - send_sparklogs_feedback
+  - describe_tables
+  - query_table
 
 args:
+  - describe_tool
+  - include_instructions
+  - include_changes
+  - grouping
+  - rank_by
+  - top_n
+  - topics
+  - view
   - add_fields
   - agent_ids
   - aggregate
@@ -313,7 +323,13 @@ values:
   episode_transition:
     - severity_raised
     - severity_lowered
-  # sparklogs.topic values observed on sparklogs.agent.state in a live workspace.
+  device_health_views:
+    - latest_state
+    - event_timeline
+    - series
+    - topics
+    - top_processes_over_time
+  # sparklogs.topic values observed on sparklogs.device.state in a live workspace.
   topics:
     - agent_overhead
     - agent_pipeline

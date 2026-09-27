@@ -35,7 +35,7 @@ All six are drill-down handles only: values to pass back into a filter, not stri
 service -> app -> subsource -> category -> pattern (finest: pattern_hash)
 ```
 
-**`source` (LQL)** sits beside this ladder as the origin-host dimension (who the event is about), not a finer grain of event shape.
+**`source` (LQL)** sits beside this ladder as the origin-host dimension (who the event is about), not a finer level of event shape.
 Use `source` (LQL) / `source_hash` (LQL) for fleet or host pivots; climb the ladder to localize within a host.
 
 Climb the ladder to localize a problem: group coarse to find the noisy component, narrow one rung at a time, land on the exact recurring `pattern_hash` (LQL).

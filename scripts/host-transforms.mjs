@@ -18,7 +18,7 @@
 
 import path from 'node:path';
 
-export const CORPUS_TOPS = ['guides', 'playbooks', 'themes', 'feeds'];
+export const CORPUS_TOPS = ['guides', 'playbooks', 'themes', 'feeds', 'fields'];
 
 // A corpus citation ends at a `.md` file or a directory slash. Bounding the tail that way keeps a
 // trailing sentence period out of the match, which an open character class would swallow.

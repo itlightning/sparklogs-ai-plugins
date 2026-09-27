@@ -93,7 +93,7 @@ The `org_id` (col)(s) the investigation was scoped to (from `resolve_scope` (too
 Absolute UTC timestamps for the investigation's data window. Not relative ("last 24 hours") - bind to absolute timestamps so the summary remains interpretable when re-read days later.
 
 ### Data sources queried
-The subsources and helper outputs you actually queried. Be specific; e.g., `win.eventlog.application` (value), `win.eventlog.system` (value), `sparklogs.agent.state` (value) (`query_device_health` (tool)), `win.defender.eventlog` (value).
+The subsources and helper outputs you actually queried. Be specific; e.g., `win.eventlog.application` (value), `win.eventlog.system` (value), `sparklogs.device.state` (value) (`query_device_health` (tool)), `win.defender.eventlog` (value).
 
 ### WHAT WAS NOT CHECKED
 Investigation-specific list of off-endpoint sources and conditions you couldn't check. Per-investigation-type reference: `guides/off-endpoint-causes.md`. Examples:
@@ -199,7 +199,7 @@ SCOPE CHECKED
 - Source(s): srv-fileshare01
 - Org(s): org_acme_dental
 - Time window: 2026-04-22 00:00 UTC to 2026-04-23 14:00 UTC
-- Data sources queried: query_device_health; sparklogs.agent.state; win.eventlog.application; win.eventlog.system; sparklogs.kind=agent_op
+- Data sources queried: query_device_health; sparklogs.device.state; win.eventlog.application; win.eventlog.system; sparklogs.kind=agent_op
 - WHAT WAS NOT CHECKED:
   - Backup target NAS-01 (does not run a SparkLogs Agent). Recommend checking NAS-01 health directly
     if the on-endpoint evidence below is insufficient.
@@ -301,7 +301,7 @@ SCOPE CHECKED
 - Source(s): srv-fileshare02
 - Org(s): org_acme_dental
 - Time window: 2026-04-23 06:00 UTC to 2026-04-23 14:30 UTC
-- Data sources queried: query_device_health; sparklogs.agent.state; win.eventlog.system; win.defender.eventlog; sparklogs.kind=agent_op
+- Data sources queried: query_device_health; sparklogs.device.state; win.eventlog.system; win.defender.eventlog; sparklogs.kind=agent_op
 - WHAT WAS NOT CHECKED:
   - User workstations making SMB requests (only the file server is in scope).
   - Network path between user workstations and srv-fileshare02 (switches, APs, firewall).

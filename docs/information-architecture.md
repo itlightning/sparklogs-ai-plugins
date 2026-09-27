@@ -41,11 +41,11 @@ The feed table's row order is curated investigation salience, not alphabetical: 
 
 | Theme file | Feeds | Notes |
 |---|---|---|
-| `themes/windows-updates-and-patching.md` | `win.eventlog.setup`, `win.servicing.cbs`, `win.servicing.dism` | Pointer to the WU slice of `sparklogs.agent.state`. |
+| `themes/windows-updates-and-patching.md` | `win.eventlog.setup`, `win.servicing.cbs`, `win.servicing.dism` | Pointer to the WU slice of `sparklogs.device.state`. |
 | `themes/windows-security-and-audit.md` | `win.eventlog.security` | Change-analysis recipe lives here. Defender is a pointer. |
 | `themes/endpoint-protection.md` | `win.defender.eventlog` | |
 | `themes/windows-operational-events.md` | `win.eventlog.system`, `win.eventlog.application` | |
-| `themes/device-health-and-state.md` | `sparklogs.agent.state`; `sparklogs.agent.vector` and `.log` only for collector debug | CPU/RAM/disk/installed software, monitors, episodes, deltas. |
+| `themes/device-health-and-state.md` | `sparklogs.device.state`; `sparklogs.agent.vector` and `.log` only for collector debug | CPU/RAM/disk/installed software, monitors, episodes, deltas. |
 
 Cross-cutting stays in `guides/`: class/severity, service taxonomy, app vocabulary, LQL, MCP tools, honesty, mistakes, voice, scope-resolution, off-endpoint, stream kinds (`guides/stream-kinds.md`), identifier tags (`guides/names.md`).
 Playbook *authoring* (not runtime): `docs/playbook-authoring.md`.
