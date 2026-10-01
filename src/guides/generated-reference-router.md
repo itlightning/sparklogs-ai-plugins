@@ -223,6 +223,7 @@ say in your findings that you were reading uncurated text.
 - `fields/topic-agent-pipeline.md`
 - `fields/topic-collector-health.md`
 - `fields/topic-crash-dump-config.md`
+- `fields/topic-crashes.md`
 - `fields/topic-disk-volumes.md`
 - `fields/topic-drivers.md`
 - `fields/topic-feed-health.md`

@@ -84,6 +84,15 @@ Prefer these over the per-feed fields for anything that spans feeds.
 |---|---|
 | `sparklogs.destination.host` | Where it was going. Both are present when the event names both ends. On sign-in events only the other machine is named, because the reporting machine is the near end. |
 
+## Tail keys and where the value is queryable
+
+The curated first line renders a `key=value` tail in one canonical order for the whole module, so an omitted key never moves the rest.
+Each key names one field; that field is where the value is queried.
+
+| Tail key | Queryable as |
+|---|---|
+| `component` | not queryable as a field |
+
 ## What sets each field
 
 Presence is per curated surface, from what its author declared under `promotions`: a field reaches this row only when the surface's own arm or shape names it, never from a text scan of classify guessing which branch a write belongs to.
@@ -136,10 +145,12 @@ The last column is different in kind: it is the author's account of the row or e
 | `smb_share_connection_lost` / `recovered` | 30807, 30808 | `win.eventlog.network.smb_encryption_used` `win.eventlog.network.smb_session_id` `win.eventlog.network.smb_share_name` `win.eventlog.network.smb_signing_used` `win.eventlog.network.smb_tree_id` |  |
 | `smb_signing_validation_failed` / `encryption` | 31013, 31014 | `win.eventlog.network.smb_command` `win.eventlog.network.smb_message_id` `win.eventlog.network.smb_session_id` `win.eventlog.network.smb_tree_id` |  |
 | `smb_signing_validation_failed` / `signing` | 31013, 31014 | `win.eventlog.network.smb_command` `win.eventlog.network.smb_message_id` `win.eventlog.network.smb_session_id` `win.eventlog.network.smb_tree_id` |  |
-| `wfp_transaction_watchdog_timeout` / `default` | 5150 | **fields: none** |  |
+| `wfp_transaction_watchdog_timeout` / `default` | 1030, 5150 | **fields: none** |  |
 | `wlan_connect_failed` / `join_failed` | 8002 | `win.eventlog.network.wlan_adapter` `win.eventlog.network.wlan_bss_type` `win.eventlog.network.wlan_connection_mode` `win.eventlog.network.wlan_failure_reason` `win.eventlog.network.wlan_profile_name` `win.eventlog.network.wlan_reason_code` |  |
 | `wlan_connect_failed` / `not_visible` | 8002 | `win.eventlog.network.wlan_adapter` `win.eventlog.network.wlan_bss_type` `win.eventlog.network.wlan_connection_mode` `win.eventlog.network.wlan_failure_reason` `win.eventlog.network.wlan_profile_name` `win.eventlog.network.wlan_reason_code` |  |
 | `wlan_security_handshake_failed` / `default` | 11006 | `win.eventlog.network.wlan_adapter` `win.eventlog.network.wlan_bss_type` `win.eventlog.network.wlan_reason_code` `win.eventlog.network.wlan_reason_text` |  |
+| `firewall_setting_changed` | 2083 | **fields: none** |  |
+| `rdp_client_component_error` | 1033 | **fields: none** |  |
 
 ### Surfaces that promote nothing
 
@@ -154,3 +165,5 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `smb_insecure_guest_rejected` / `default`
 - `smb_legacy_dialect_rejected` / `default`
 - `wfp_transaction_watchdog_timeout` / `default`
+- `firewall_setting_changed`
+- `rdp_client_component_error`
