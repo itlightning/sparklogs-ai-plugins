@@ -10,6 +10,8 @@ Every section below is from the public reason block only.
 |---|---|---|---|
 | `log_collection_feed_not_collecting` | `rmm` | Warning when the channel exists and something stops us reading it; everyday when the channel is simply absent on this host; Debug when the platform does not permit subscription |  |
 | `log_collection_feed_unavailable` | `rmm` | Warning, Notice or Debug |  |
+| `log_collection_query_filter_not_applied` | `rmm` | Notice |  |
+| `log_collection_query_filter_rejected` | `rmm` | Warning |  |
 | `log_collection_read_failed` | `rmm` | Warning |  |
 | `log_collection_restarted_from_oldest` | `rmm` | Notice |  |
 | `log_collection_skipped_records_overwritten` | `rmm` | Error |  |
@@ -46,6 +48,31 @@ The collector lost access to a Windows Event Log channel it collects from, and k
 - The channel field names the affected log; check whether that stream has recent events.
 - suppressed_count and first_failure on reminder and recovery events bound the gap window.
 - A product update can re-register its event channel (Windows Defender platform updates are a known trigger); the collector recovers on its own once the channel is readable again.
+
+## `log_collection_query_filter_not_applied`
+
+The channel's configured event query leaves no place for the filter that keeps out the events this pack always drops, so the collector reads those events and drops them itself.
+
+**Severity:** Notice
+
+**Impact:** Nothing is lost and the stored events are the same. The collector reads records on the named channel that the filter would have kept out of its way.
+
+**Consider:**
+
+- A structured QueryList event query takes no added filter; a plain XPath query does.
+
+## `log_collection_query_filter_rejected`
+
+Windows refused the event log query that filters out the events this pack always drops, so the collector reads those events and drops them itself. Nothing is lost.
+
+**Severity:** Warning
+
+**Impact:** The named channel keeps collecting and the stored events are the same. The collector does more work on that channel until it restarts, which on a busy host can let the channel fall behind.
+
+**Consider:**
+
+- The win32_error field on the event says why Windows refused the query.
+- Restarting the agent retries the filter; a repeat after a restart points at the collector.
 
 ## `log_collection_read_failed`
 

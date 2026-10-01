@@ -40,13 +40,28 @@ Stored flat under the `win.eventlog.system.` prefix.
 | `win.eventlog.system.account_name` | string | Account the installed service runs as, from SCM 7045 (LocalSystem etc.). |
 | `win.eventlog.system.crash_count` | int | How many times the service has terminated unexpectedly, from SCM 7031/7034. The flapping-service recurrence datum. |
 | `win.eventlog.system.service_error` | string | Error the service exited/failed with, from SCM 7000/7023/7024. Stored as logged; may be a %%nnnn message-catalog reference. |
-| `win.eventlog.system.bugcheck_code` | string | BugcheckCode from Kernel-Power 41 (decimal, as logged; 0 = power loss without a crash). Distinguishes crash-driven dirty shutdowns from power-loss ones. |
+| `win.eventlog.system.bugcheck_code` | string | BugcheckCode from Kernel-Power 41 (decimal, as logged). Nonzero: a bug check ended the previous session. 0: no bug check was recorded, and the cause (power loss, a hang, a held power button) is undetermined. |
+| `win.eventlog.system.bugcheck_name` | string | Bug check constant name for the stop code (DRIVER_IRQL_NOT_LESS_OR_EQUAL), from Kernel-Power 41 and WER-SystemErrorReporting 1001. Absent when the code is 0 or not a documented bug check. |
+| `win.eventlog.system.sleep_in_progress` | string | SleepInProgress from Kernel-Power 41, as logged: the sleep state the system was in when the session ended. A number, not a flag; values other than 0 and 1 occur. |
+| `win.eventlog.system.connected_standby_in_progress` | string | ConnectedStandbyInProgress from Kernel-Power 41, as logged (true or false): whether Modern Standby was active when the session ended. |
 | `win.eventlog.system.bugcheck_text` | string | Full bugcheck string from WER-SystemErrorReporting 1001, e.g. "0x0000001e (0x..., ...)". Kept verbatim: the code plus its four parameters are the crash identity. |
 | `win.eventlog.system.dump_file` | string | Memory-dump path from WER-SystemErrorReporting 1001. |
-| `win.eventlog.system.report_id` | string | WER report id (GUID) from WER-SystemErrorReporting 1001; joins to the WER report store. |
+| `win.eventlog.system.report_id` | string | WER report id from WER-SystemErrorReporting 1001; joins to the WER report store. A GUID on current builds; the minidump base name on Windows Server 2012 R2 (build 9600). |
 | `win.eventlog.system.driver_name` | string | Driver that failed to load, from Kernel-PnP 219 (FailureName, e.g. \Driver\WUDFRd). |
 | `win.eventlog.system.device_instance` | string | Device instance path the event is about: Kernel-PnP 219, WHEA-Logger 17-20 (PrimaryDeviceName), UserPnp 20003, DriverFrameworks-UserMode driver installs. |
 | `win.eventlog.system.error_source` | string | WHEA error source enum from WHEA-Logger 17-20 (ErrorSource; numeric string, locale-stable). |
+| `win.eventlog.system.cper_decode` | string | How much of the WHEA-Logger 1 hardware error record decoded: complete, partial (the record carries fewer bytes than it declares, or more sections than are read), or invalid (a signature, the revision, a length, a section range or the timestamp failed validation; no other cper field is set). |
+| `win.eventlog.system.cper_error_ts` | string | Time of the error as the WHEA-Logger 1 record states it (RFC 3339, UTC), as firmware or Windows recorded it and subject to the platform clock. Present only when the record marks its timestamp valid and precise and the timestamp reads as one date. |
+| `win.eventlog.system.cper_revision` | string | Record format revision from the WHEA-Logger 1 error record header, major.minor (2.10). |
+| `win.eventlog.system.cper_severity` | string | Severity the WHEA-Logger 1 error record header states: recoverable (uncorrected but not fatal), fatal, corrected or informational. |
+| `win.eventlog.system.cper_notification` | string | How the WHEA-Logger 1 error was reported (boot, mce, cmc, pcie, nmi, and the other notification types the UEFI error record format defines), or the raw type GUID when it is not a published one. boot means the record was found when Windows started. |
+| `win.eventlog.system.cper_flags` | string | Header flags of the WHEA-Logger 1 error record, comma-separated: previous_error (the error happened in an earlier session), recovered, simulated (deliberately injected); none when no flag is set. |
+| `win.eventlog.system.cper_flags_raw` | string | Header flags of the WHEA-Logger 1 error record as a hex word, including any reserved bits. |
+| `win.eventlog.system.cper_creator` | string | Software that wrote the WHEA-Logger 1 error record: windows, device_driver, or the raw creator GUID. |
+| `win.eventlog.system.cper_section_count` | int | Number of sections the WHEA-Logger 1 error record declares. |
+| `win.eventlog.system.cper_section_types` | string | Type of each section in the WHEA-Logger 1 error record, in record order, comma-separated: firmware_error_record_reference, processor_generic, ia32_x64_mca, platform_memory, pcie, generic, or the raw type GUID. At most the first 16. |
+| `win.eventlog.system.cper_section_severities` | string | Severity of each section in the WHEA-Logger 1 error record, in the same order as cper_section_types. |
+| `win.eventlog.system.cper_firmware_record_types` | string | For each firmware error record reference section of the WHEA-Logger 1 record, the kind of firmware record it points to: ipf_sal, soc_type1, soc_type2, or the raw number. The referenced record itself is held by firmware and is not in the event. |
 | `win.eventlog.system.framework_version` | string | UMDF framework version from DriverFrameworks-UserMode install narration. |
 | `win.eventlog.system.volume` | string | Volume the storage event is about: Ntfs 55/130 (DriveName/VolumeName), Volsnap 25/36 (VolumeName). |
 | `win.eventlog.system.filesystem` | string | Filesystem type the filesystem_* reasons name (ntfs, refs, fat32), read from the provider that raised the event. A constant per provider, not a decoded field: this fleet has never carried a non-NTFS provider for these reasons. |
@@ -74,7 +89,10 @@ Each key names one field; that field is where the value is queried.
 |---|---|
 | `volume` | not queryable as a field |
 | `bugcheck_code` | not queryable as a field |
+| `bugcheck_name` | not queryable as a field |
 | `power_button_timestamp` | not queryable as a field |
+| `error_ts` | not queryable as a field |
+| `cper_decode` | not queryable as a field |
 | `update_title` | not queryable as a field |
 | `error_code` | not queryable as a field |
 | `error_code_name` | not queryable as a field |
@@ -118,8 +136,11 @@ The last column is different in kind: it is the author's account of the row or e
 | `filesystem_transaction_log_operation_failed` / `recovery_error` | 134, 136, 137, 140 | `win.eventlog.system.filesystem` `win.eventlog.system.volume` |  |
 | `filesystem_transaction_log_operation_failed` / `start_failed` | 134, 136, 137, 140 | `win.eventlog.system.filesystem` `win.eventlog.system.volume` |  |
 | `gpu_driver_reset` / `default` | 153 | **fields: none** |  |
-| `hardware_error_corrected` / `default` | 17, 19 | `win.eventlog.system.device_instance` `win.eventlog.system.error_source` |  |
-| `hardware_error_uncorrected` / `default` | 18, 20 | `win.eventlog.system.device_instance` `win.eventlog.system.error_source` |  |
+| `hardware_error_corrected` / `boot_corrected` | 1 | `win.eventlog.system.cper_creator` `win.eventlog.system.cper_decode` `win.eventlog.system.cper_error_ts` `win.eventlog.system.cper_firmware_record_types` `win.eventlog.system.cper_flags` `win.eventlog.system.cper_flags_raw` `win.eventlog.system.cper_notification` `win.eventlog.system.cper_revision` `win.eventlog.system.cper_section_count` `win.eventlog.system.cper_section_severities` `win.eventlog.system.cper_section_types` `win.eventlog.system.cper_severity` |  |
+| `hardware_error_corrected` / `error_source_record` | 17, 19 | `win.eventlog.system.device_instance` `win.eventlog.system.error_source` |  |
+| `hardware_error_uncorrected` / `boot_recoverable` | 1 | `win.eventlog.system.cper_creator` `win.eventlog.system.cper_decode` `win.eventlog.system.cper_error_ts` `win.eventlog.system.cper_firmware_record_types` `win.eventlog.system.cper_flags` `win.eventlog.system.cper_flags_raw` `win.eventlog.system.cper_notification` `win.eventlog.system.cper_revision` `win.eventlog.system.cper_section_count` `win.eventlog.system.cper_section_severities` `win.eventlog.system.cper_section_types` `win.eventlog.system.cper_severity` |  |
+| `hardware_error_uncorrected` / `boot_unrecoverable` | 1 | `win.eventlog.system.cper_creator` `win.eventlog.system.cper_decode` `win.eventlog.system.cper_error_ts` `win.eventlog.system.cper_firmware_record_types` `win.eventlog.system.cper_flags` `win.eventlog.system.cper_flags_raw` `win.eventlog.system.cper_notification` `win.eventlog.system.cper_revision` `win.eventlog.system.cper_section_count` `win.eventlog.system.cper_section_severities` `win.eventlog.system.cper_section_types` `win.eventlog.system.cper_severity` |  |
+| `hardware_error_uncorrected` / `error_source_record` | 18, 20 | `win.eventlog.system.device_instance` `win.eventlog.system.error_source` |  |
 | `http_ssl_binding_created` / `default` | 120, 15301 | **fields: none** |  |
 | `http_ssl_binding_deleted` / `default` | 119, 15300 | **fields: none** |  |
 | `http_ssl_config_failed` / `default` | 15021 | **fields: none** |  |
@@ -137,7 +158,7 @@ The last column is different in kind: it is the author's account of the row or e
 | `nic_driver_load_failed` / `default` | 5000 | **fields: none** |  |
 | `nic_link_down` / `down` | 2, 27 | **fields: none** |  |
 | `nic_link_down` / `recovered` | 2, 27 | **fields: none** |  |
-| `os_bsod` / `default` | 1001 | `win.eventlog.system.bugcheck_text` `win.eventlog.system.dump_file` `win.eventlog.system.report_id` |  |
+| `os_bsod` / `default` | 1001 | `win.eventlog.system.bugcheck_name` `win.eventlog.system.bugcheck_text` `win.eventlog.system.dump_file` `win.eventlog.system.report_id` |  |
 | `patch_install_deferred` / `packages_in_use` | 20 | `win.eventlog.system.update_title` |  |
 | `patch_install_deferred` / `retry_later` | 20 | `win.eventlog.system.update_title` |  |
 | `patch_install_failed` / `failed` | 20 | `win.eventlog.system.update_title` |  |
@@ -172,7 +193,7 @@ The last column is different in kind: it is the author's account of the row or e
 | `tls_server_credential_failed` / `default` | 36870 | **fields: none** |  |
 | `tpm_attestation_failed` / `default` | 1040 | **fields: none** |  |
 | `unexpected_shutdown` / `event_log` | 41, 6008 | **fields: none** |  |
-| `unexpected_shutdown` / `kernel_power` | 41 | `win.eventlog.system.bugcheck_code` |  |
+| `unexpected_shutdown` / `kernel_power` | 41 | `win.eventlog.system.bugcheck_code` `win.eventlog.system.bugcheck_name` `win.eventlog.system.connected_standby_in_progress` `win.eventlog.system.sleep_in_progress` |  |
 | `vpn_connected` / `default` | 20267 | **fields: none** |  |
 | `vss_shadow_aborted` / `abort_on_failure` | 13, 14, 15, 16, 20, 23, 24, 27, 28, 29, 32, 35, 36 | `win.eventlog.system.volume` |  |
 | `vss_shadow_aborted` / `storage_growth_failed` | 13, 14, 15, 16, 20, 23, 24, 27, 28, 29, 32, 35, 36 | `win.eventlog.system.volume` |  |
@@ -182,6 +203,7 @@ The last column is different in kind: it is the author's account of the row or e
 | `winre_servicing_failed` / `default` | 4502 | **fields: none** |  |
 | `wlan_limited_connectivity` / `default` | 4003 | **fields: none** |  |
 | `vss_shadow_copy_reclaimed` | 33, 58, 95 | `win.eventlog.system.volume` |  |
+| `whea_boot_error_record` | 1 | `win.eventlog.system.cper_creator` `win.eventlog.system.cper_decode` `win.eventlog.system.cper_error_ts` `win.eventlog.system.cper_firmware_record_types` `win.eventlog.system.cper_flags` `win.eventlog.system.cper_flags_raw` `win.eventlog.system.cper_notification` `win.eventlog.system.cper_revision` `win.eventlog.system.cper_section_count` `win.eventlog.system.cper_section_severities` `win.eventlog.system.cper_section_types` `win.eventlog.system.cper_severity` |  |
 
 ### Surfaces that promote nothing
 

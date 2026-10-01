@@ -17,15 +17,16 @@ Every section below is from the public reason block only.
 | `disk_latency_degraded` | `storage` |  |  |
 | `disk_saturated` | `storage` |  |  |
 | `disk_unresponsive` | `storage` |  |  |
-| `os_bsod_recurring` | `os_stability` |  |  |
+| `kernel_crash` | `os_stability` |  |  |
+| `kernel_crash_recurring` | `os_stability` |  |  |
 | `os_clock_drift` | `performance` |  |  |
-| `os_crash_dump_created` | `os_stability` |  |  |
 | `os_dump_pagefile_too_small` | `os_stability` |  |  |
 | `os_volume_space_exhausting` | `storage` |  |  |
 | `os_volume_space_low` | `storage` |  |  |
 | `patch_scan_stale` | `patching` |  |  |
 | `patch_updates_paused` | `patching` |  |  |
 | `process_cpu_high` | `performance` |  |  |
+| `process_crash` | `app_stability` |  |  |
 | `process_handle_count_high` | `performance` |  |  |
 | `ram_commit_near_cap` | `performance` |  |  |
 | `ram_hard_fault_storm` | `performance` |  |  |
@@ -94,11 +95,17 @@ A storage device is busy but moving almost no data.
 
 **Impact:** IO to this device may be stalled, and a writeable volume on it can stop responding.
 
-## `os_bsod_recurring`
+## `kernel_crash`
 
-The host is bugchecking repeatedly.
+Windows stopped with a bug check (blue screen).
 
-**Impact:** Repeated bugchecks can interrupt users and services and require crash-dump analysis.
+**Impact:** The host restarted unexpectedly, interrupting every user and service on it. The bug check code, its parameters and any analyzed dump are where the investigation starts.
+
+## `kernel_crash_recurring`
+
+The host is crashing with bug checks (blue screens) repeatedly.
+
+**Impact:** Repeated kernel crashes interrupt every user and service on the host. Compare the bug check codes of the individual crashes to see whether one cause repeats.
 
 ## `os_clock_drift`
 
@@ -107,12 +114,6 @@ The host clock is drifting from reference time.
 **Also reported by:** `win.eventlog.platform`
 
 **Impact:** Kerberos, certificates, log ordering, and scheduled work can fail when drift is large.
-
-## `os_crash_dump_created`
-
-A new crash dump appeared.
-
-**Impact:** The dump may help investigate a Windows crash. Check its timestamp to place the crash in the incident timeline.
 
 ## `os_dump_pagefile_too_small`
 
@@ -149,6 +150,12 @@ Windows Updates are paused for too long.
 A process is consuming CPU continuously.
 
 **Impact:** The process can starve other work or indicate a stuck loop.
+
+## `process_crash`
+
+An application process crashed.
+
+**Impact:** The process stopped on an unhandled exception, and users or services depending on it may have lost work or availability. The exception code, the faulting module and any analyzed dump narrow the cause.
 
 ## `process_handle_count_high`
 

@@ -66,13 +66,13 @@ The last column is different in kind: it is the author's account of the row or e
 | `disk_unresponsive` / `held` | n/a | **fields: none** |  |
 | `disk_unresponsive` / `onset` | n/a | **fields: none** |  |
 | `disk_unresponsive` / `recovered` | n/a | **fields: none** |  |
-| `os_bsod_recurring` / `held` | n/a | **fields: none** |  |
-| `os_bsod_recurring` / `onset` | n/a | **fields: none** |  |
-| `os_bsod_recurring` / `recovered` | n/a | **fields: none** |  |
+| `kernel_crash` / `default` | n/a | **fields: none** |  |
+| `kernel_crash_recurring` / `held` | n/a | **fields: none** |  |
+| `kernel_crash_recurring` / `onset` | n/a | **fields: none** |  |
+| `kernel_crash_recurring` / `recovered` | n/a | **fields: none** |  |
 | `os_clock_drift` / `held` | n/a | **fields: none** |  |
 | `os_clock_drift` / `onset` | n/a | **fields: none** |  |
 | `os_clock_drift` / `recovered` | n/a | **fields: none** |  |
-| `os_crash_dump_created` / `default` | n/a | **fields: none** |  |
 | `os_dump_pagefile_too_small` / `held` | n/a | **fields: none** |  |
 | `os_dump_pagefile_too_small` / `onset` | n/a | **fields: none** |  |
 | `os_dump_pagefile_too_small` / `recovered` | n/a | **fields: none** |  |
@@ -91,6 +91,7 @@ The last column is different in kind: it is the author's account of the row or e
 | `process_cpu_high` / `held` | n/a | **fields: none** |  |
 | `process_cpu_high` / `onset` | n/a | **fields: none** |  |
 | `process_cpu_high` / `recovered` | n/a | **fields: none** |  |
+| `process_crash` / `default` | n/a | **fields: none** |  |
 | `process_handle_count_high` / `held` | n/a | **fields: none** |  |
 | `process_handle_count_high` / `onset` | n/a | **fields: none** |  |
 | `process_handle_count_high` / `recovered` | n/a | **fields: none** |  |
@@ -167,13 +168,13 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `disk_unresponsive` / `held`
 - `disk_unresponsive` / `onset`
 - `disk_unresponsive` / `recovered`
-- `os_bsod_recurring` / `held`
-- `os_bsod_recurring` / `onset`
-- `os_bsod_recurring` / `recovered`
+- `kernel_crash` / `default`
+- `kernel_crash_recurring` / `held`
+- `kernel_crash_recurring` / `onset`
+- `kernel_crash_recurring` / `recovered`
 - `os_clock_drift` / `held`
 - `os_clock_drift` / `onset`
 - `os_clock_drift` / `recovered`
-- `os_crash_dump_created` / `default`
 - `os_dump_pagefile_too_small` / `held`
 - `os_dump_pagefile_too_small` / `onset`
 - `os_dump_pagefile_too_small` / `recovered`
@@ -192,6 +193,7 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `process_cpu_high` / `held`
 - `process_cpu_high` / `onset`
 - `process_cpu_high` / `recovered`
+- `process_crash` / `default`
 - `process_handle_count_high` / `held`
 - `process_handle_count_high` / `onset`
 - `process_handle_count_high` / `recovered`

@@ -258,6 +258,7 @@ Windows could not set up the path it writes a crash dump through.
 
 **Consider:**
 
+- A kernel crash reported without dump analysis after this event is explained by it; the crash itself is still counted once.
 - Check the page file on the system volume.
 - Size the page file for the configured dump type when the status says the file was not found.
 

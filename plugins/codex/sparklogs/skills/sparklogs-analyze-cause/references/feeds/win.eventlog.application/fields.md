@@ -30,9 +30,17 @@ Stored flat under the `win.eventlog.application.` prefix.
 | `win.eventlog.application.event_name` | string | WER report EventName from Windows Error Reporting 1001 (APPCRASH \| AppHangB1 \| BEX \| BlueScreen \| StoreAgentInstall* \| ...). The discriminator of the heterogeneous 1001 id; the recognition pivot for crash-report queries. |
 | `win.eventlog.application.fault_bucket` | string | WER fault bucket id from Windows Error Reporting 1001. The dedup/recurrence key: same bucket = same crash signature. |
 | `win.eventlog.application.appx_app_id` | string | Packaged-application identity reported by an activation record, the package family plus the application id. The same key the packaged-apps feed promotes, so one application reads the same way on both feeds. |
-| `win.eventlog.application.app_name` | string | Application the crash/hang record is about: WER 1001 (P1), Application Error 1000, Application Hang 1002. The cross-family crash-recurrence join key. |
-| `win.eventlog.application.module_name` | string | Faulting module from Application Error 1000. Pins the crash to a DLL. |
-| `win.eventlog.application.exception_code` | string | Exception code from Application Error 1000 (e.g. 0xc0000005), as logged. |
+| `win.eventlog.application.app_name` | string | Application the crash/hang record is about: WER 1001 (P1), Application Error 1000, Application Hang 1002, .NET Runtime 1026. The cross-family crash-recurrence join key. |
+| `win.eventlog.application.app_version` | string | Version of the crashed application: Application Error 1000, and WER 1001 APPCRASH and CLR20r3 reports (P2). |
+| `win.eventlog.application.module_name` | string | Faulting module from Application Error 1000 and the WER 1001 APPCRASH report (P4). The module where the fault was reported, which is not always its cause. |
+| `win.eventlog.application.module_version` | string | Version of the faulting module: Application Error 1000, WER 1001 APPCRASH (P5). |
+| `win.eventlog.application.module_path` | string | Full path of the faulting module from Application Error 1000. |
+| `win.eventlog.application.exception_code` | string | Exception code as logged, eight hex digits (c0000005, or 0xc0000005 on builds that render the prefix): Application Error 1000, WER 1001 APPCRASH (P7). The decoded name rides the result code family. |
+| `win.eventlog.application.fault_offset` | string | Offset of the fault inside the faulting module, hex as logged: Application Error 1000, WER 1001 APPCRASH (P8). With module_name and module_version it locates the instruction. |
+| `win.eventlog.application.process_start_filetime` | string | Creation time of the crashed process from Application Error 1000, as logged: a Windows FILETIME in hex. With the process id it identifies the one process instance that crashed. |
+| `win.eventlog.application.managed_exception_type` | string | Unhandled .NET exception type (System.NullReferenceException): .NET Runtime 1026 and the WER 1001 CLR20r3 report (P9). The type only; the exception message is not promoted. |
+| `win.eventlog.application.bugcheck_name` | string | Bug check constant name (DRIVER_IRQL_NOT_LESS_OR_EQUAL) for the stop code in a WER 1001 BlueScreen report (P1). Absent when the code is not a documented bug check. |
+| `win.eventlog.application.framework_version` | string | .NET runtime version from .NET Runtime 1026 (v4.0.30319). |
 | `win.eventlog.application.report_id` | string | WER report GUID: Windows Error Reporting 1001, Application Error 1000, Application Hang 1002. Joins the crash event to its report record and the local WER archive. |
 | `win.eventlog.application.hang_type` | string | Hang type from Application Hang 1002; often Unknown. |
 | `win.eventlog.application.product` | string | Product name from MsiInstaller 1033. |
@@ -61,6 +69,9 @@ Prefer these over the per-feed fields for anything that spans feeds.
 
 | LQL path | Family means |
 |---|---|
+| `sparklogs.process.id` | The process the event is about. |
+| `sparklogs.process.path` | The process the event is about. |
+| `sparklogs.process.name` | The process the event is about. |
 | `sparklogs.result.code` | The main result code the source reported, the number space it belongs to, the constant name that space gives it, and whether that code is a failure. The name is a DECODE of the first two, present only where the source pack holds a decode table for that space. `failed` is a marker: presence means failure, absence of the field means success, and it is never false. |
 | `sparklogs.result.code_space` | The main result code the source reported, the number space it belongs to, the constant name that space gives it, and whether that code is a failure. The name is a DECODE of the first two, present only where the source pack holds a decode table for that space. `failed` is a marker: presence means failure, absence of the field means success, and it is never false. |
 | `sparklogs.result.code_name` | The main result code the source reported, the number space it belongs to, the constant name that space gives it, and whether that code is a failure. The name is a DECODE of the first two, present only where the source pack holds a decode table for that space. `failed` is a marker: presence means failure, absence of the field means success, and it is never false. |
@@ -100,7 +111,7 @@ The last column is different in kind: it is the author's account of the row or e
 |---|---|---|---|
 | `adcs_ca_chain_failed` / `default` | 58, 65, 66 | **fields: none** |  |
 | `adcs_crl_publish_failed` / `default` | 74 | **fields: none** |  |
-| `app_crash` / `default` | 1000 | `win.eventlog.application.app_name` `win.eventlog.application.exception_code` `win.eventlog.application.module_name` `win.eventlog.application.report_id` |  |
+| `app_crash` / `default` | 1000 | `win.eventlog.application.app_name` `win.eventlog.application.app_version` `win.eventlog.application.exception_code` `win.eventlog.application.fault_offset` `win.eventlog.application.module_name` `win.eventlog.application.module_path` `win.eventlog.application.module_version` `win.eventlog.application.process_start_filetime` `win.eventlog.application.report_id` |  |
 | `app_hang` / `default` | 1002 | `win.eventlog.application.app_name` `win.eventlog.application.hang_type` `win.eventlog.application.report_id` |  |
 | `appx_activation_failed` / `administrator_token` | 5973 | `win.eventlog.application.appx_app_id` |  |
 | `appx_activation_failed` / `other_failure` | 5973 | `win.eventlog.application.appx_app_id` |  |
@@ -110,7 +121,7 @@ The last column is different in kind: it is the author's account of the row or e
 | `cert_enroll_failed` / `failed` | 1, 6, 86, 87 | **fields: none** |  |
 | `cert_enroll_failed` / `retired_aik` | 1, 6, 86, 87 | **fields: none** |  |
 | `cert_expiring` / `default` | 64 | **fields: none** |  |
-| `dotnet_unhandled_exception` / `default` | 1026 | **fields: none** |  |
+| `dotnet_unhandled_exception` / `default` | 1026 | `win.eventlog.application.app_name` `win.eventlog.application.framework_version` `win.eventlog.application.managed_exception_type` |  |
 | `e2e_test_event` / `default` | 777 | **fields: none** |  |
 | `entra_password_hash_sync_failed` / `default` | 611 | **fields: none** |  |
 | `entra_sync_run_failed` / `default` | 6056 | **fields: none** |  |
@@ -158,7 +169,7 @@ The last column is different in kind: it is the author's account of the row or e
 | `win_msi_product_removal_succeeded` / `default` | 11724 | `win.eventlog.application.msi_code_meaning` `win.eventlog.application.product` |  |
 | `win_user_profile_load_failed` / `default` | 1511, 1542 | **fields: none** |  |
 | `wmi_provider_registered_as_localsystem` / `default` | 63 | **fields: none** |  |
-| `app_crash_report` | 1001 | `win.eventlog.application.app_name` `win.eventlog.application.event_name` `win.eventlog.application.fault_bucket` `win.eventlog.application.report_id` |  |
+| `app_crash_report` | 1001 | `win.eventlog.application.app_name` `win.eventlog.application.app_version` `win.eventlog.application.bugcheck_name` `win.eventlog.application.event_name` `win.eventlog.application.exception_code` `win.eventlog.application.fault_bucket` `win.eventlog.application.fault_offset` `win.eventlog.application.managed_exception_type` `win.eventlog.application.module_name` `win.eventlog.application.module_version` `win.eventlog.application.report_id` |  |
 | `vss_account_resolve_failed` | 8230 | `command_line` `win.eventlog.application.vss_execution_context` `win.eventlog.application.vss_operation_call` `win.eventlog.application.vss_operation_intent` `win.eventlog.application.vss_snapshot_attrs` `win.eventlog.application.vss_snapshot_context` `win.eventlog.application.vss_state` `win.eventlog.application.vss_writer` |  |
 | `vss_flush_writes_timeout` | 12297 | `command_line` `win.eventlog.application.vss_execution_context` `win.eventlog.application.vss_operation_call` `win.eventlog.application.vss_operation_intent` `win.eventlog.application.vss_snapshot_attrs` `win.eventlog.application.vss_snapshot_context` `win.eventlog.application.vss_state` `win.eventlog.application.vss_writer` |  |
 | `vss_hold_writes_timeout` | 12298 | `command_line` `win.eventlog.application.vss_execution_context` `win.eventlog.application.vss_operation_call` `win.eventlog.application.vss_operation_intent` `win.eventlog.application.vss_snapshot_attrs` `win.eventlog.application.vss_snapshot_context` `win.eventlog.application.vss_state` `win.eventlog.application.vss_writer` |  |
@@ -181,7 +192,6 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `cert_enroll_failed` / `failed`
 - `cert_enroll_failed` / `retired_aik`
 - `cert_expiring` / `default`
-- `dotnet_unhandled_exception` / `default`
 - `e2e_test_event` / `default`
 - `entra_password_hash_sync_failed` / `default`
 - `entra_sync_run_failed` / `default`

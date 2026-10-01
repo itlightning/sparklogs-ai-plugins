@@ -66,6 +66,8 @@ The last column is different in kind: it is the author's account of the row or e
 | `log_collection_feed_unavailable` / `onset` | n/a | `sparklogs.agent.vector.component_id` |  |
 | `log_collection_feed_unavailable` / `recovered` | n/a | `sparklogs.agent.vector.component_id` |  |
 | `log_collection_feed_unavailable` / `reminder` | n/a | `sparklogs.agent.vector.component_id` |  |
+| `log_collection_query_filter_not_applied` / `default` | n/a | `sparklogs.agent.vector.component_id` |  |
+| `log_collection_query_filter_rejected` / `default` | n/a | `sparklogs.agent.vector.component_id` |  |
 | `log_collection_read_failed` / `default` | n/a | `sparklogs.agent.vector.component_id` |  |
 | `log_collection_restarted_from_oldest` / `default` | n/a | `sparklogs.agent.vector.component_id` |  |
 | `log_collection_skipped_records_overwritten` / `default` | n/a | `sparklogs.agent.vector.channel` `sparklogs.agent.vector.component_id` `sparklogs.agent.vector.missing_records` `sparklogs.agent.vector.previous_record_id` `sparklogs.agent.vector.record_id` |  |

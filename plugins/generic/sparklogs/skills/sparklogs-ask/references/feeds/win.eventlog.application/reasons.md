@@ -88,7 +88,8 @@ A Windows application process crashed.
 
 **Consider:**
 
-- Group by app name, faulting module, exception code, and report id.
+- Group by app name and version, faulting module and version, exception code, and fault offset.
+- The faulting module is where the fault was reported, which is not always its cause.
 - Check for recurrence after updates or driver changes.
 
 ## `app_hang`
@@ -189,7 +190,7 @@ A .NET application terminated because of an unhandled managed exception.
 
 **Consider:**
 
-- Inspect the exception type and application name in the event message.
+- Group by managed_exception_type and app_name.
 - Correlate with deploy, update, and dependency changes.
 
 ## `entra_password_hash_sync_failed`

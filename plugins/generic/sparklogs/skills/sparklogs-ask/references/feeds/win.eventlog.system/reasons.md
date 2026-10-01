@@ -31,7 +31,7 @@ Every section below is from the public reason block only.
 | `filesystem_transaction_log_operation_failed` | `storage` | Warning (flush failed on a live volume, recovery error, metadata reset) / Notice (flush failed on a volume that no longer exists) / Error (resource manager could not start) |  |
 | `gpu_driver_reset` | `hardware` | Notice |  |
 | `hardware_error_corrected` | `hardware` | Notice |  |
-| `hardware_error_uncorrected` | `hardware` | Error |  |
+| `hardware_error_uncorrected` | `hardware` | Error or Minor |  |
 | `http_ssl_binding_created` | `certificates` | Notice |  |
 | `http_ssl_binding_deleted` | `certificates` | Notice |  |
 | `http_ssl_config_failed` | `certificates` | Error |  |
@@ -402,7 +402,7 @@ Windows Hardware Error Architecture reported a CORRECTED hardware error.
 
 Windows Hardware Error Architecture reported an UNCORRECTED hardware error.
 
-**Severity:** Error
+**Severity:** Error or Minor
 
 **Impact:** The fault was not contained: data loss, corruption, or a crash may follow. Treat as a hardware incident, not a log curiosity.
 
@@ -410,6 +410,7 @@ Windows Hardware Error Architecture reported an UNCORRECTED hardware error.
 
 - Track recurrence by error_source and device_instance.
 - Correlate with subsequent bugchecks or disk errors on the same host.
+- A record reported at boot happened in the previous session. When the line says details_in_firmware, the details are in the platform firmware and the vendor's hardware diagnostics read them.
 
 ## `http_ssl_binding_created`
 
@@ -636,6 +637,7 @@ Windows rebooted from a bugcheck.
 **Consider:**
 
 - Preserve the dump path and bugcheck code.
+- Search the bugcheck_name: it is the name Microsoft documents the stop code under.
 - Correlate with Kernel-Power 41 and EventLog 6008.
 
 ## `patch_install_deferred`
@@ -1016,7 +1018,8 @@ The previous shutdown was not clean: the host stopped without shutting down and 
 **Consider:**
 
 - Use with os_bsod as the crash triangle around one boot gap.
-- Inspect bugcheck_code when present: a nonzero value separates a crash from a power loss.
+- Inspect bugcheck_code and bugcheck_name when present: a nonzero code means a bug check ended the session; a zero code leaves the cause undetermined.
+- The row time is the next boot, not the moment the host stopped.
 - Check the nearest clean shutdown and boot markers.
 
 ## `vpn_connected`
