@@ -1,5 +1,5 @@
 <!-- GENERATED reference. Do not hand-edit. -->
-# Configuration change fields
+# Config change fields
 
 | Field | Type | Unit | Meaning |
 |---|---|---|---|

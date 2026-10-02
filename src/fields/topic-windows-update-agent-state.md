@@ -1,5 +1,5 @@
 <!-- GENERATED reference. Do not hand-edit. -->
-# Windows Update agent state fields
+# Update agent state fields
 
 Full inventory every 6 hours. Supported changes are reported when the agent observes them.
 

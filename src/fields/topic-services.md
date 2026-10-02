@@ -18,7 +18,7 @@ Full inventory every 6 hours. Supported changes are reported when the agent obse
 | `sparklogs.data.services.is_critical_category` | bool |  | Whether the enrichment store's product-category inventory marks this service critical (for example an RMM agent). Absent when that inventory is stale or has not run. |
 | `sparklogs.data.services.service_is_important` | bool |  | Whether the pack's service class table marks this service's tier `important`. `false` when the table does not classify the service or marks it ordinary or suppress. |
 | `sparklogs.data.services.service_is_classified` | bool |  | Whether the Data Feed Pack classifies this service. False for an unclassified service. |
-| `sparklogs.data.services.service_class` | string |  | The pack's service class for this service (`backup`, `edr_av`, `database`, `mail`, `directory`, `virtualization`, `profiles`, `rmm`, or `platform`). Omitted for a service the table does not mention. |
+| `sparklogs.data.services.service_class` | string |  | The pack's service class for this service (`backup`, `edr_av`, `database`, `mail`, `directory`, `virtualization`, `profiles`, `rmm`, `platform`, `web_server`, `vpn`, `remote_access`, or `printing`). Omitted for a service the table does not mention. |
 | `sparklogs.data.services.service_class_code` | integer |  | Numeric code for `service_class`. |
 | `sparklogs.data.services.service_role_on_host` | bool |  | Whether this device has the role associated with the service class. False if the class has no role, the device lacks it, or role detection has not run. |
 | `sparklogs.data.services.svc_stopped_age_min` | float | minutes | Minutes the service has been stopped. Absent while running or within its boot grace period. |

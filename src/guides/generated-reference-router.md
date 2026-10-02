@@ -221,6 +221,8 @@ say in your findings that you were reading uncurated text.
 - `fields/family-sparklogs.md`
 - `fields/topic-agent-overhead.md`
 - `fields/topic-agent-pipeline.md`
+- `fields/topic-app-crashes.md`
+- `fields/topic-audit-policy.md`
 - `fields/topic-collector-health.md`
 - `fields/topic-crash-dump-config.md`
 - `fields/topic-crashes.md`
@@ -229,6 +231,7 @@ say in your findings that you were reading uncurated text.
 - `fields/topic-feed-health.md`
 - `fields/topic-installed-products-summary.md`
 - `fields/topic-installed-products.md`
+- `fields/topic-kernel-crashes.md`
 - `fields/topic-performance.md`
 - `fields/topic-processes.md`
 - `fields/topic-services.md`

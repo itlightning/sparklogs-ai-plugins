@@ -8,7 +8,7 @@ These sets are closed: a value outside them leaves its field unset rather than b
 
 ## `win_status_codes`
 
-339 row(s), 63 carrying a token.
+341 row(s), 65 carrying a token.
 
 | Code | Token | Meaning | Constant |
 |---|---|---|---|
@@ -75,6 +75,8 @@ These sets are closed: a value outside them leaves its field unset rather than b
 | `0xc0000413` | `auth_firewall_blocked` | an authentication firewall policy blocked the account | `STATUS_AUTHENTICATION_FIREWALL_FAILED` |
 | `0xc0000428` | `image_hash_invalid` | the image hash is not valid, so the file carries no signature the loader will accept | `STATUS_INVALID_IMAGE_HASH` |
 | `0xc0000603` | `image_certificate_revoked` | the certificate that signed the image has been revoked | `STATUS_IMAGE_CERT_REVOKED` |
+| `0xe0434352` | `clr_managed_exception_escaped` | a managed (.NET) exception escaped the process unhandled; the managed exception type and call stack are in the .NET Runtime provider's event 1026 | `EXCEPTION_COMPLUS` |
+| `0xe06d7363` | `native_cpp_exception_escaped` | a Visual C++ exception escaped the process unhandled | `EXCEPTION_MSVC` |
 
 ## `kerberos`
 

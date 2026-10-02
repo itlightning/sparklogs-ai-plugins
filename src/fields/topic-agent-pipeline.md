@@ -14,3 +14,5 @@ Full inventory on its own schedule. Supported changes are reported when the agen
 | `sparklogs.data.agent_pipeline.spool_pct_of_cap` | float | percent | Spool size as a percentage of its limit. May exceed 100 because the limit is enforced after a write. |
 | `sparklogs.data.agent_pipeline.spool_growth_mb_per_h` | float | megabytes_per_hour | The spool's growth rate in MiB (1,048,576 bytes) per hour, fitted from its recent size readings. |
 | `sparklogs.data.agent_pipeline.spool_last_drained_at` | string | timestamp | The last instant the pipeline was known to be caught up. Absent when no such instant has ever been observed. |
+| `sparklogs.data.agent_pipeline.tables_pct_of_cap_max` | float | percent | The fullest persisted dedupe or throttle table's size as a percentage of its byte limit. A full table drops its oldest rows, so repeats of those keys pass again. Absent when no table is persisted. |
+| `sparklogs.data.agent_pipeline.tables_evictions` | integer | count | Rows dropped from persisted dedupe and throttle tables to stay under their byte limits, summed across tables, since Vector last started. Absent when no table is persisted. |

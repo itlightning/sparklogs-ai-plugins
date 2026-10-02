@@ -1,5 +1,5 @@
 <!-- GENERATED reference. Do not hand-edit. -->
-# SparkLogs event fields
+# SparkLogs fields
 
 | Field | Type | Unit | Meaning |
 |---|---|---|---|

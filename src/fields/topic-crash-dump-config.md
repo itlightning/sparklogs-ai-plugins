@@ -1,5 +1,5 @@
 <!-- GENERATED reference. Do not hand-edit. -->
-# Crash dump configuration fields
+# Crash dump config fields
 
 Full inventory every 8 hours. Supported changes are reported when the agent observes them.
 

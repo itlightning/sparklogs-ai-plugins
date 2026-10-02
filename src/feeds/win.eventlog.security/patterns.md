@@ -29,7 +29,7 @@ Its rendered text cannot survive pattern derivation, so a string that appears to
 
 An unexpected pattern is one of three things, in falling order of likelihood: a curated surface this catalog does not list, a vocabulary that gained a value, or a token rendered from something that is not a closed vocabulary at all. The third is the one that matters.
 
-This module has 77 curated surface(s) and a legal-pattern language of 31432 strings.
+This module has 77 curated surface(s) and a legal-pattern language of 32838 strings.
 That number is why this file is a procedure and not a list.
 
 ## Surfaces
@@ -382,9 +382,9 @@ Most of those cannot physically occur; the count is a bound on the language, not
 
 | # | Slot | Legal values |
 |---|---|---|
-| 1 | `cause` | `function_unsupported` `unknown_target` `invalid_token` `unknown_credentials` `no_credentials_available` `no_authenticating_authority` `untrusted_root` `no_such_device` `no_memory` `object_name_not_found` `no_logon_servers` `unknown_username` `bad_password` `bad_username_or_auth` `account_restriction` `outside_logon_hours` `workstation_not_authorized` `password_expired` `account_disabled` `name_translation_failed` `insufficient_resources` `device_data_error` `commit_limit_reached` `clock_skew` `registry_io_failed` `logon_right_not_granted` `netlogon_not_started` `account_expired` `password_must_change` `account_locked_out` `no_local_secret` `smartcard_wrong_pin` `auth_firewall_blocked` `image_hash_invalid` `image_certificate_revoked` |
+| 1 | `cause` | `function_unsupported` `unknown_target` `invalid_token` `unknown_credentials` `no_credentials_available` `no_authenticating_authority` `untrusted_root` `no_such_device` `no_memory` `object_name_not_found` `no_logon_servers` `unknown_username` `bad_password` `bad_username_or_auth` `account_restriction` `outside_logon_hours` `workstation_not_authorized` `password_expired` `account_disabled` `name_translation_failed` `insufficient_resources` `device_data_error` `commit_limit_reached` `clock_skew` `registry_io_failed` `logon_right_not_granted` `netlogon_not_started` `account_expired` `password_must_change` `account_locked_out` `no_local_secret` `smartcard_wrong_pin` `auth_firewall_blocked` `image_hash_invalid` `image_certificate_revoked` `clr_managed_exception_escaped` `native_cpp_exception_escaped` |
 
-Legal pattern count for this surface: 36 (every slot independently present or absent).
+Legal pattern count for this surface: 38 (every slot independently present or absent).
 Most of those cannot physically occur; the count is a bound on the language, not a prediction.
 
 ### `principal_renamed` / `default`
@@ -442,12 +442,12 @@ Most of those cannot physically occur; the count is a bound on the language, not
 
 | # | Slot | Legal values |
 |---|---|---|
-| 1 | `cause` | `function_unsupported` `unknown_target` `invalid_token` `unknown_credentials` `no_credentials_available` `no_authenticating_authority` `untrusted_root` `no_such_device` `no_memory` `object_name_not_found` `no_logon_servers` `unknown_username` `bad_password` `bad_username_or_auth` `account_restriction` `outside_logon_hours` `workstation_not_authorized` `password_expired` `account_disabled` `name_translation_failed` `insufficient_resources` `device_data_error` `commit_limit_reached` `clock_skew` `registry_io_failed` `logon_right_not_granted` `netlogon_not_started` `account_expired` `password_must_change` `account_locked_out` `no_local_secret` `smartcard_wrong_pin` `auth_firewall_blocked` `image_hash_invalid` `image_certificate_revoked` |
+| 1 | `cause` | `function_unsupported` `unknown_target` `invalid_token` `unknown_credentials` `no_credentials_available` `no_authenticating_authority` `untrusted_root` `no_such_device` `no_memory` `object_name_not_found` `no_logon_servers` `unknown_username` `bad_password` `bad_username_or_auth` `account_restriction` `outside_logon_hours` `workstation_not_authorized` `password_expired` `account_disabled` `name_translation_failed` `insufficient_resources` `device_data_error` `commit_limit_reached` `clock_skew` `registry_io_failed` `logon_right_not_granted` `netlogon_not_started` `account_expired` `password_must_change` `account_locked_out` `no_local_secret` `smartcard_wrong_pin` `auth_firewall_blocked` `image_hash_invalid` `image_certificate_revoked` `clr_managed_exception_escaped` `native_cpp_exception_escaped` |
 | 2 | `logon_type` | `logon_interactive` `logon_network` `logon_batch` `logon_service` `logon_unlock` `logon_network_cleartext` `logon_new_credentials` `logon_remote_interactive` `logon_cached_interactive` `logon_system` `logon_cached_remote_interactive` `logon_cached_unlock` |
 | 3 | `subject_kind` | `by_account` `by_machine` `by_system` `by_service` `by_local_service` `by_network_service` `by_anonymous` `by_group` |
 | 4 | `auth_package` | `auth_kerberos` `auth_ntlm` `auth_negotiate` `auth_negoextender` |
 
-Legal pattern count for this surface: 21060 (every slot independently present or absent).
+Legal pattern count for this surface: 22230 (every slot independently present or absent).
 Most of those cannot physically occur; the count is a bound on the language, not a prediction.
 
 ### `sign_in_failed` / `sspi_probe`
@@ -460,11 +460,11 @@ Most of those cannot physically occur; the count is a bound on the language, not
 
 | # | Slot | Legal values |
 |---|---|---|
-| 1 | `cause` | `function_unsupported` `unknown_target` `invalid_token` `unknown_credentials` `no_credentials_available` `no_authenticating_authority` `untrusted_root` `no_such_device` `no_memory` `object_name_not_found` `no_logon_servers` `unknown_username` `bad_password` `bad_username_or_auth` `account_restriction` `outside_logon_hours` `workstation_not_authorized` `password_expired` `account_disabled` `name_translation_failed` `insufficient_resources` `device_data_error` `commit_limit_reached` `clock_skew` `registry_io_failed` `logon_right_not_granted` `netlogon_not_started` `account_expired` `password_must_change` `account_locked_out` `no_local_secret` `smartcard_wrong_pin` `auth_firewall_blocked` `image_hash_invalid` `image_certificate_revoked` |
+| 1 | `cause` | `function_unsupported` `unknown_target` `invalid_token` `unknown_credentials` `no_credentials_available` `no_authenticating_authority` `untrusted_root` `no_such_device` `no_memory` `object_name_not_found` `no_logon_servers` `unknown_username` `bad_password` `bad_username_or_auth` `account_restriction` `outside_logon_hours` `workstation_not_authorized` `password_expired` `account_disabled` `name_translation_failed` `insufficient_resources` `device_data_error` `commit_limit_reached` `clock_skew` `registry_io_failed` `logon_right_not_granted` `netlogon_not_started` `account_expired` `password_must_change` `account_locked_out` `no_local_secret` `smartcard_wrong_pin` `auth_firewall_blocked` `image_hash_invalid` `image_certificate_revoked` `clr_managed_exception_escaped` `native_cpp_exception_escaped` |
 | 2 | `logon_type` | `logon_interactive` `logon_network` `logon_batch` `logon_service` `logon_unlock` `logon_network_cleartext` `logon_new_credentials` `logon_remote_interactive` `logon_cached_interactive` `logon_system` `logon_cached_remote_interactive` `logon_cached_unlock` |
 | 3 | `subject_kind` | `by_account` `by_machine` `by_system` `by_service` `by_local_service` `by_network_service` `by_anonymous` `by_group` |
 
-Legal pattern count for this surface: 4212 (every slot independently present or absent).
+Legal pattern count for this surface: 4446 (every slot independently present or absent).
 Most of those cannot physically occur; the count is a bound on the language, not a prediction.
 
 ### `system_time_changed` / `other_caller`

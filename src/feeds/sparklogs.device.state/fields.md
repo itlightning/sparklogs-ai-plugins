@@ -39,6 +39,10 @@ The last column is different in kind: it is the author's account of the row or e
 
 | Surface | Event ids | Fields set | Row fields |
 |---|---|---|---|
+| `app_crash_recurring` / `held` | n/a | **fields: none** |  |
+| `app_crash_recurring` / `onset` | n/a | **fields: none** |  |
+| `app_crash_recurring` / `recovered` | n/a | **fields: none** |  |
+| `audit_policy_changed` / `default` | n/a | **fields: none** |  |
 | `cpu_busy` / `held` | n/a | **fields: none** |  |
 | `cpu_busy` / `onset` | n/a | **fields: none** |  |
 | `cpu_busy` / `recovered` | n/a | **fields: none** |  |
@@ -70,6 +74,9 @@ The last column is different in kind: it is the author's account of the row or e
 | `kernel_crash_recurring` / `held` | n/a | **fields: none** |  |
 | `kernel_crash_recurring` / `onset` | n/a | **fields: none** |  |
 | `kernel_crash_recurring` / `recovered` | n/a | **fields: none** |  |
+| `kernel_crash_signature_recurring` / `held` | n/a | **fields: none** |  |
+| `kernel_crash_signature_recurring` / `onset` | n/a | **fields: none** |  |
+| `kernel_crash_signature_recurring` / `recovered` | n/a | **fields: none** |  |
 | `os_clock_drift` / `held` | n/a | **fields: none** |  |
 | `os_clock_drift` / `onset` | n/a | **fields: none** |  |
 | `os_clock_drift` / `recovered` | n/a | **fields: none** |  |
@@ -141,6 +148,10 @@ The last column is different in kind: it is the author's account of the row or e
 These carry class, reason and message text only.
 A predicate over them uses the reason, the class, or the retained payload; there is no promoted field to filter on.
 
+- `app_crash_recurring` / `held`
+- `app_crash_recurring` / `onset`
+- `app_crash_recurring` / `recovered`
+- `audit_policy_changed` / `default`
 - `cpu_busy` / `held`
 - `cpu_busy` / `onset`
 - `cpu_busy` / `recovered`
@@ -172,6 +183,9 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `kernel_crash_recurring` / `held`
 - `kernel_crash_recurring` / `onset`
 - `kernel_crash_recurring` / `recovered`
+- `kernel_crash_signature_recurring` / `held`
+- `kernel_crash_signature_recurring` / `onset`
+- `kernel_crash_signature_recurring` / `recovered`
 - `os_clock_drift` / `held`
 - `os_clock_drift` / `onset`
 - `os_clock_drift` / `recovered`

@@ -1,5 +1,5 @@
 <!-- GENERATED reference. Do not hand-edit. -->
-# System information fields
+# System info fields
 
 Full inventory every hour. Supported changes are reported when the agent observes them.
 

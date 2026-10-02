@@ -8,6 +8,8 @@ Every section below is from the public reason block only.
 
 | reason | service | severity | benign |
 |---|---|---|---|
+| `app_crash_recurring` | `app_stability` | Notice to Serious, depending on how often and how recently this one executable has crashed. |  |
+| `audit_policy_changed` | `security_audit` | Notice on a workstation, Warning on a server, depending on host class. |  |
 | `cpu_busy` | `performance` |  |  |
 | `cpu_interrupt_storm` | `performance` |  |  |
 | `cpu_kernel_dominated` | `performance` |  |  |
@@ -19,6 +21,7 @@ Every section below is from the public reason block only.
 | `disk_unresponsive` | `storage` |  |  |
 | `kernel_crash` | `os_stability` |  |  |
 | `kernel_crash_recurring` | `os_stability` |  |  |
+| `kernel_crash_signature_recurring` | `os_stability` | Warning to Serious, depending on how often and how recently the same crash signature has recurred. |  |
 | `os_clock_drift` | `performance` |  |  |
 | `os_dump_pagefile_too_small` | `os_stability` |  |  |
 | `os_volume_space_exhausting` | `storage` |  |  |
@@ -42,6 +45,34 @@ Every section below is from the public reason block only.
 | `vss_shadowstorage_near_cap` | `backup` |  |  |
 | `vss_snapshots_failing_for_space` | `backup` |  |  |
 | `vss_writer_failed` | `backup` |  |  |
+
+## `app_crash_recurring`
+
+One application is crashing repeatedly on this host.
+
+**Severity:** Notice to Serious, depending on how often and how recently this one executable has crashed.
+
+**Impact:** Users or services depending on this application lose work or availability each time it crashes. Compare crash details across the individual process_crash records for the same executable to narrow the cause.
+
+**Consider:**
+
+- Check whether the application was recently updated or changed around when the recurrence began.
+- A single crashy helper process can be excluded from escalation by its own class and tier in the process classification table.
+
+## `audit_policy_changed`
+
+The host's audit policy changed: which Windows Security events get audited was edited.
+
+**Also reported by:** `win.eventlog.security`
+
+**Severity:** Notice on a workstation, Warning on a server, depending on host class.
+
+**Impact:** A narrower audit subcategory set can mean less evidence exists for a future investigation on this host. A broader set means more audit volume and more coverage.
+
+**Consider:**
+
+- Compare the added and removed subcategories against your audit policy baseline for this host's role.
+- Server audit scope reductions are worth a closer look; routine management-tool churn on a workstation usually is not.
 
 ## `cpu_busy`
 
@@ -106,6 +137,19 @@ Windows stopped with a bug check (blue screen).
 The host is crashing with bug checks (blue screens) repeatedly.
 
 **Impact:** Repeated kernel crashes interrupt every user and service on the host. Compare the bug check codes of the individual crashes to see whether one cause repeats.
+
+## `kernel_crash_signature_recurring`
+
+The host is crashing with bug checks that keep showing the same signature.
+
+**Severity:** Warning to Serious, depending on how often and how recently the same crash signature has recurred.
+
+**Impact:** Repeated crashes sharing one bug check signature point to a single, recurring cause (often a specific driver or module), rather than unrelated one-off crashes. Each crash restarts the host, interrupting every user and service on it.
+
+**Consider:**
+
+- The blamed module in the signature is where the fault was reported, which is not always its cause.
+- Check for a driver or firmware update released around when the recurrence began.
 
 ## `os_clock_drift`
 

@@ -99,10 +99,10 @@ Prefer these over the per-feed fields for anything that spans feeds.
 
 | LQL path | Family means |
 |---|---|
-| `sparklogs.throttle.window_s` |  |
 | `sparklogs.config_change.type` | The kind of object that changed, from a closed set of object nouns. |
 | `sparklogs.config_change.action` | What was done to that object, from a closed set of verbs. |
 | `sparklogs.config_change.target` | Which object it was: its own identity within its kind, as a name, a path or an id. A different field from the principal a change acted on, and a change acting on a principal carries both. |
+| `sparklogs.throttle.window_s` |  |
 | `sparklogs.actor.id` | The initiator. Who wanted the thing done. |
 | `sparklogs.actor.name` | The initiator. Who wanted the thing done. |
 | `sparklogs.actor.type` | The initiator. Who wanted the thing done. |
