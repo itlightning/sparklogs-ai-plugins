@@ -10,6 +10,7 @@ Every section below is from the public reason block only.
 |---|---|---|---|
 | `app_crash_recurring` | `app_stability` | Notice to Serious, depending on how often and how recently this one executable has crashed. |  |
 | `audit_policy_changed` | `security_audit` | Notice on a workstation, Warning on a server, depending on host class. |  |
+| `audit_policy_reapplied` | `security_audit` |  |  |
 | `cpu_busy` | `performance` |  |  |
 | `cpu_interrupt_storm` | `performance` |  |  |
 | `cpu_kernel_dominated` | `performance` |  |  |
@@ -39,6 +40,8 @@ Every section below is from the public reason block only.
 | `sparklogs_agent_cpu_over_budget` | `rmm` |  |  |
 | `sparklogs_agent_handle_over_budget` | `rmm` |  |  |
 | `sparklogs_agent_memory_over_budget` | `rmm` |  |  |
+| `sparklogs_agent_started` | `rmm` |  |  |
+| `sparklogs_agent_stopped` | `rmm` |  |  |
 | `volume_bitlocker_dropped` | `storage` |  |  |
 | `volume_fill_rate_high` | `storage` |  |  |
 | `volume_unreadable` | `storage` |  |  |
@@ -73,6 +76,16 @@ The host's audit policy changed: which Windows Security events get audited was e
 
 - Compare the added and removed subcategories against your audit policy baseline for this host's role.
 - Server audit scope reductions are worth a closer look; routine management-tool churn on a workstation usually is not.
+
+## `audit_policy_reapplied`
+
+The audit policy was re-applied many times in an hour with no net change.
+
+**Impact:** Repeated identical audit policy writes, usually a Group Policy refresh loop, bury real policy edits under thousands of change records.
+
+**Consider:**
+
+- On a domain controller, compare the Group Policy objects that set audit subcategories; two that disagree rewrite the policy at every refresh.
 
 ## `cpu_busy`
 
@@ -252,6 +265,29 @@ SparkLogs Agent handle usage exceeds its budget.
 Combined SparkLogs Agent and Vector memory usage exceeds its budget.
 
 **Impact:** Monitoring overhead may be higher than expected on this host.
+
+## `sparklogs_agent_started`
+
+The SparkLogs agent started.
+
+**Also reported by:** `win.eventlog.system`
+
+**Consider:**
+
+- Read the span since the previous sparklogs_agent_stopped as time the agent was not collecting.
+
+## `sparklogs_agent_stopped`
+
+The SparkLogs agent stopped.
+
+**Also reported by:** `win.eventlog.system`
+
+**Impact:** The host is not collecting until the agent starts again.
+
+**Consider:**
+
+- Read stop_cause: an update or an OS shutdown is routine, an error is the agent failing.
+- Read the span to the next sparklogs_agent_started as time the agent was not collecting.
 
 ## `volume_bitlocker_dropped`
 

@@ -43,6 +43,9 @@ The last column is different in kind: it is the author's account of the row or e
 | `app_crash_recurring` / `onset` | n/a | **fields: none** |  |
 | `app_crash_recurring` / `recovered` | n/a | **fields: none** |  |
 | `audit_policy_changed` / `default` | n/a | **fields: none** |  |
+| `audit_policy_reapplied` / `held` | n/a | **fields: none** |  |
+| `audit_policy_reapplied` / `onset` | n/a | **fields: none** |  |
+| `audit_policy_reapplied` / `recovered` | n/a | **fields: none** |  |
 | `cpu_busy` / `held` | n/a | **fields: none** |  |
 | `cpu_busy` / `onset` | n/a | **fields: none** |  |
 | `cpu_busy` / `recovered` | n/a | **fields: none** |  |
@@ -126,6 +129,8 @@ The last column is different in kind: it is the author's account of the row or e
 | `sparklogs_agent_memory_over_budget` / `held` | n/a | **fields: none** |  |
 | `sparklogs_agent_memory_over_budget` / `onset` | n/a | **fields: none** |  |
 | `sparklogs_agent_memory_over_budget` / `recovered` | n/a | **fields: none** |  |
+| `sparklogs_agent_started` / `default` | n/a | **fields: none** |  |
+| `sparklogs_agent_stopped` / `default` | n/a | **fields: none** |  |
 | `volume_bitlocker_dropped` / `held` | n/a | **fields: none** |  |
 | `volume_bitlocker_dropped` / `onset` | n/a | **fields: none** |  |
 | `volume_bitlocker_dropped` / `recovered` | n/a | **fields: none** |  |
@@ -152,6 +157,9 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `app_crash_recurring` / `onset`
 - `app_crash_recurring` / `recovered`
 - `audit_policy_changed` / `default`
+- `audit_policy_reapplied` / `held`
+- `audit_policy_reapplied` / `onset`
+- `audit_policy_reapplied` / `recovered`
 - `cpu_busy` / `held`
 - `cpu_busy` / `onset`
 - `cpu_busy` / `recovered`
@@ -235,6 +243,8 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `sparklogs_agent_memory_over_budget` / `held`
 - `sparklogs_agent_memory_over_budget` / `onset`
 - `sparklogs_agent_memory_over_budget` / `recovered`
+- `sparklogs_agent_started` / `default`
+- `sparklogs_agent_stopped` / `default`
 - `volume_bitlocker_dropped` / `held`
 - `volume_bitlocker_dropped` / `onset`
 - `volume_bitlocker_dropped` / `recovered`

@@ -99,10 +99,10 @@ Prefer these over the per-feed fields for anything that spans feeds.
 
 | LQL path | Family means |
 |---|---|
+| `sparklogs.throttle.window_s` |  |
 | `sparklogs.config_change.type` | The kind of object that changed, from a closed set of object nouns. |
 | `sparklogs.config_change.action` | What was done to that object, from a closed set of verbs. |
 | `sparklogs.config_change.target` | Which object it was: its own identity within its kind, as a name, a path or an id. A different field from the principal a change acted on, and a change acting on a principal carries both. |
-| `sparklogs.throttle.window_s` |  |
 | `sparklogs.actor.id` | The initiator. Who wanted the thing done. |
 | `sparklogs.actor.name` | The initiator. Who wanted the thing done. |
 | `sparklogs.actor.type` | The initiator. Who wanted the thing done. |
@@ -226,6 +226,7 @@ The last column is different in kind: it is the author's account of the row or e
 | `group_member_added` / `default` | 4728, 4732, 4756 | **fields: none** |  |
 | `group_member_removed` / `default` | 4729, 4733, 4757 | **fields: none** |  |
 | `guest_account_sign_in` / `default` | 4624 | `win.eventlog.security.auth_package` `win.eventlog.security.lm_package` `win.eventlog.security.logon_guid` `win.eventlog.security.logon_type` `win.eventlog.security.logon_type_name` `win.eventlog.security.token_elevated` `win.eventlog.security.workstation` |  |
+| `kerberos_duplicate_request_rejected` / `default` | 4649 | **fields: none** |  |
 | `kerberos_preauth_failed` / `default` | 4771 | `win.eventlog.security.kerberos_target` `win.eventlog.security.status` `win.eventlog.security.status_meaning` |  |
 | `kerberos_rc4_ticket_issued` / `default` | 4769 | `win.eventlog.security.etype_meaning` `win.eventlog.security.kerberos_target` `win.eventlog.security.ticket_encryption_type` |  |
 | `kerberos_ticket_failed` / `service_ticket` | 4768, 4769, 4770 | `win.eventlog.security.kerberos_target` `win.eventlog.security.status` `win.eventlog.security.status_meaning` |  |
@@ -241,7 +242,6 @@ The last column is different in kind: it is the author's account of the row or e
 | `principal_renamed` / `default` | 4781 | `win.eventlog.security.new_target_user` `win.eventlog.security.old_target_user` |  |
 | `process_exited_abnormally` / `default` | 4689 | **fields: none** |  |
 | `psdirect_handshake_probe` / `default` | 4625 | `win.eventlog.security.auth_package` `win.eventlog.security.lm_package` `win.eventlog.security.logon_type` `win.eventlog.security.logon_type_name` `win.eventlog.security.psdirect_handshake` `win.eventlog.security.status` `win.eventlog.security.status_meaning` `win.eventlog.security.substatus` `win.eventlog.security.workstation` |  |
-| `replay_attack_detected` / `default` | 4649 | **fields: none** |  |
 | `scheduled_task_created` / `default` | 4698 | `win.eventlog.security.task_name` |  |
 | `scheduled_task_deleted` / `default` | 4699 | `win.eventlog.security.task_name` |  |
 | `scheduled_task_disabled` / `default` | 4701 | `win.eventlog.security.task_name` |  |
@@ -280,6 +280,7 @@ The last column is different in kind: it is the author's account of the row or e
 | `non_account_sign_out` | 4647 | **fields: none** |  |
 | `ntlm_credentials_validated` | 4776 | `win.eventlog.security.workstation` |  |
 | `object_audit_settings_changed` | 4907 | `win.eventlog.security.object_name` `win.eventlog.security.object_type` |  |
+| `object_deleted` | 4660 | **fields: none** |  |
 | `outbound_connection_blocked` | 5157 | `win.eventlog.security.wfp_dest_address` `win.eventlog.security.wfp_dest_port` `win.eventlog.security.wfp_direction` `win.eventlog.security.wfp_protocol` |  |
 | `per_user_audit_policy_table_created` | 4902 | `win.eventlog.security.pua_count` |  |
 | `platform_privileges_assigned` | 4672 | `win.eventlog.security.privileges` |  |
@@ -329,10 +330,10 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `firewall_service_stopped` / `stopped`
 - `group_member_added` / `default`
 - `group_member_removed` / `default`
+- `kerberos_duplicate_request_rejected` / `default`
 - `logon_right_granted` / `default`
 - `logon_right_removed` / `default`
 - `process_exited_abnormally` / `default`
-- `replay_attack_detected` / `default`
 - `security_group_changed` / `default`
 - `security_group_created` / `default`
 - `security_group_deleted` / `default`
@@ -352,6 +353,7 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `key_migration_operation`
 - `key_migration_operation_succeeded`
 - `non_account_sign_out`
+- `object_deleted`
 - `primary_token_assigned`
 - `privilege_use_refused`
 - `privileged_group_membership_enumerated`

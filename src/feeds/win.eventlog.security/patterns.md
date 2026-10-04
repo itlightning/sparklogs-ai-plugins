@@ -29,7 +29,7 @@ Its rendered text cannot survive pattern derivation, so a string that appears to
 
 An unexpected pattern is one of three things, in falling order of likelihood: a curated surface this catalog does not list, a vocabulary that gained a value, or a token rendered from something that is not a closed vocabulary at all. The third is the one that matters.
 
-This module has 77 curated surface(s) and a legal-pattern language of 32838 strings.
+This module has 78 curated surface(s) and a legal-pattern language of 32839 strings.
 That number is why this file is a procedure and not a list.
 
 ## Surfaces
@@ -697,6 +697,16 @@ Most of those cannot physically occur; the count is a bound on the language, not
 **Renders:** `auditing settings on an object changed`
 
 **Event ids:** 4907
+
+**Slots:** none. This surface renders exactly one pattern.
+
+### `object_deleted`
+
+**When:** 4660, an object was deleted
+
+**Renders:** `object deleted`
+
+**Event ids:** 4660
 
 **Slots:** none. This surface renders exactly one pattern.
 

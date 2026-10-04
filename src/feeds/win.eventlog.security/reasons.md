@@ -44,6 +44,7 @@ Every section below is from the public reason block only.
 | `group_member_added` | `security_audit` | Error (privileged group) / Notice (any other security group) |  |
 | `group_member_removed` | `security_audit` | Warning (privileged group) / Notice (any other security group) |  |
 | `guest_account_sign_in` | `auth` | Notice |  |
+| `kerberos_duplicate_request_rejected` | `auth` | Warning |  |
 | `kerberos_preauth_failed` | `auth` | Warning (account state or broken infrastructure) / Notice (wrong password, unknown client, undecoded) |  |
 | `kerberos_rc4_ticket_issued` | `auth` | Warning |  |
 | `kerberos_ticket_failed` | `auth` | Warning (account state or broken infrastructure) / Notice (wrong password, unknown principal, expired, undecoded) |  |
@@ -57,7 +58,6 @@ Every section below is from the public reason block only.
 | `principal_renamed` | `security_audit` | Notice for a rename that changed the name; Debug when the old and new names are identical |  |
 | `process_exited_abnormally` | `security_audit` | Notice |  |
 | `psdirect_handshake_probe` | `auth` | Debug | benign |
-| `replay_attack_detected` | `auth` | Error |  |
 | `scheduled_task_created` | `scheduled_tasks` | Warning |  |
 | `scheduled_task_deleted` | `scheduled_tasks` | Warning |  |
 | `scheduled_task_disabled` | `scheduled_tasks` | Info |  |
@@ -605,6 +605,24 @@ Guest is a real account with a fixed allocation, and it is not the anonymous wel
 that the identity-less sign-in surfaces cover: those name the absence of a principal, this names
 a principal that exists and is normally switched off.
 
+## `kerberos_duplicate_request_rejected`
+
+Windows rejected a Kerberos request that repeated one it had just received.
+
+**Severity:** Warning
+
+**Impact:** A duplicate most often comes from network gear or a retrying client. An attacker reusing an intercepted ticket produces the same event, so check which before acting.
+
+**Consider:**
+
+- Network devices duplicating packets between the client and this server
+- A client retrying too fast
+- Clock skew between the client and this server
+- The same account used from an unexpected host
+
+One event is worth a look, because a repeated authenticator is rare on a healthy network. The
+event does not say what produced the duplicate, and it does not show that any access succeeded.
+
 ## `kerberos_preauth_failed`
 
 Kerberos pre-authentication failed at the domain controller. The decoded reason is on the line, so a wrong password reads differently from a disabled account or a clock that has drifted.
@@ -788,22 +806,6 @@ Hyper-V opened a PowerShell Direct channel to a guest virtual machine. The legac
 
 The account name on these rows is a fixed protocol constant, not a principal, and the domain
 field carries handshake bytes rather than a domain name. Neither is a value to pivot on.
-
-## `replay_attack_detected`
-
-Windows reported a Kerberos authentication replay. Rare; treat as high-signal even as a single event.
-
-**Severity:** Error
-
-**Impact:** Credentials or tickets may be reused by an attacker. Investigate immediately; do not assume compromise is proven from this event alone.
-
-**Consider:**
-
-- Correlate time skew, duplicate authenticators, and the Subject fields
-- Check for concurrent lateral movement or ticket anomalies on the same principals
-
-One event is enough to act on. The event reports a detected replay; it does not show that any
-access succeeded.
 
 ## `scheduled_task_created`
 

@@ -10,6 +10,8 @@ Full inventory every 6 hours. Supported changes are reported when the agent obse
 | `sparklogs.data.services.current_state_code` | integer |  | Windows Service Control Manager numeric code for `current_state`. |
 | `sparklogs.data.services.pid` | integer |  | ID of the process hosting this service. Absent when the service is not running. |
 | `sparklogs.data.services.start_type` | string |  | Configured service startup type. Absent when the configuration could not be read. |
+| `sparklogs.data.services.command_line` | string |  | The command the Service Control Manager runs to start the service, taken from its registry `ImagePath`: unexpanded, arguments included, cut at 4096 characters. Absent when the configuration could not be read. |
+| `sparklogs.data.services.account` | string |  | The account the service runs as, such as `LocalSystem` or a domain account, as the service's registry configuration names it. Absent when the configuration could not be read or names no account. |
 | `sparklogs.data.services.auto_start` | bool |  | Whether the service is configured to start automatically. |
 | `sparklogs.data.services.has_triggers` | bool |  | Whether the service has startup triggers. A trigger-start service can legitimately be stopped. |
 | `sparklogs.data.services.delayed_in_boot_grace` | bool |  | Whether this service is a delayed-auto-start service still inside its boot grace period. |
@@ -29,6 +31,7 @@ Full inventory every 6 hours. Supported changes are reported when the agent obse
 | `sparklogs.data.services.svc_crash_truncated` | bool |  | Whether the crash count hit its cap: more crashes happened than the counter kept individually. |
 | `sparklogs.data.services.svc_crash_unresolved_count` | integer | count | How many crash records could not be attributed to a specific service. |
 | `sparklogs.data.services.svc_crash_measured_at` | string | timestamp | When this row's crash counts were measured. |
+| `sparklogs.data.services.stop_cause` | string |  | On the agent's own `sparklogs_agent_stopped` row only: why it stopped, `update`, `os_shutdown`, `operator` or `error`. |
 | `sparklogs.data.services.service_auto_not_running_age_basis` | string |  | `onset`: witnessed start. `observed`: already present when first seen, making age a lower bound. `unknown_ongoing`: no meaningful onset time. |
 | `sparklogs.data.services.service_auto_not_running_age_h` | float | hours | How long this condition has been open, in hours. |
 | `sparklogs.data.services.service_flapping_age_basis` | string |  | `onset`: witnessed start. `observed`: already present when first seen, making age a lower bound. `unknown_ongoing`: no meaningful onset time. |

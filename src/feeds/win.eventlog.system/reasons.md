@@ -48,7 +48,12 @@ Every section below is from the public reason block only.
 | `nic_driver_fault_reported` | `networking` | Warning |  |
 | `nic_driver_load_failed` | `networking` | Error |  |
 | `nic_link_down` | `networking` | Warning or Info |  |
+| `os_boot` | `os_stability` | Info |  |
 | `os_bsod` | `os_stability` | Serious (server or unknown) / Error (workstation) |  |
+| `os_restart_requested` | `os_stability` | Notice |  |
+| `os_shutdown` | `os_stability` | Info |  |
+| `os_sleep` | `hardware` | Info |  |
+| `os_wake` | `hardware` | Info |  |
 | `patch_install_deferred` | `patching` | Info or Verbose | benign |
 | `patch_install_failed` | `patching` | Minor or Info | benign possible |
 | `platform_tamper_indicator_reported` | `endpoint_protection` | Error or Warning |  |
@@ -67,6 +72,8 @@ Every section below is from the public reason block only.
 | `smb_delayed_write_lost` | `storage` | Error |  |
 | `smb_server_transport_bind_failed` | `networking` | Warning (server) / Info (workstation) |  |
 | `smb_share_recreate_failed` | `storage` | Warning |  |
+| `sparklogs_agent_started` | `rmm` | Info |  |
+| `sparklogs_agent_stopped` | `rmm` | Error or Notice |  |
 | `storage_controller_reset` | `storage` | Warning |  |
 | `time_sync_failed` | `time_sync` | Warning |  |
 | `tls_cert_expired` | `certificates` | Error |  |
@@ -626,6 +633,16 @@ A network adapter reported that its link went down, or reported the link back (R
 - Look for the matching link-up record and read the gap between them.
 - Repeated drop-and-return cycles on one adapter point at the cable, the port or the switch.
 
+## `os_boot`
+
+The operating system started.
+
+**Severity:** Info
+
+**Consider:**
+
+- Read the gap from the previous os_shutdown or unexpected_shutdown to see how long the host was down.
+
 ## `os_bsod`
 
 Windows rebooted from a bugcheck.
@@ -639,6 +656,46 @@ Windows rebooted from a bugcheck.
 - Preserve the dump path and bugcheck code.
 - Search the bugcheck_name: it is the name Microsoft documents the stop code under.
 - Correlate with Kernel-Power 41 and EventLog 6008.
+
+## `os_restart_requested`
+
+A process asked Windows to restart or shut down the machine.
+
+**Severity:** Notice
+
+**Consider:**
+
+- Read the process, the actor and shutdown_reason: an updater, an RMM tool or a person each look different.
+
+## `os_shutdown`
+
+The operating system shut down cleanly.
+
+**Severity:** Info
+
+**Consider:**
+
+- Pair with the nearest os_restart_requested to see which process and user asked for it.
+
+## `os_sleep`
+
+The device went to sleep.
+
+**Severity:** Info
+
+**Consider:**
+
+- Read the span to the next os_wake as time the device was asleep, not as missing data.
+
+## `os_wake`
+
+The device woke from sleep.
+
+**Severity:** Info
+
+**Consider:**
+
+- Read the wake source from the message when a device wakes when nobody expected it to.
 
 ## `patch_install_deferred`
 
@@ -888,6 +945,33 @@ A file share could not be recreated because the folder it points at no longer ex
 - Read the share name and path from the message; the event names both remedies.
 - Check whether the folder was moved rather than deleted before removing the share.
 
+## `sparklogs_agent_started`
+
+The SparkLogs agent service started.
+
+**Also reported by:** `services`
+
+**Severity:** Info
+
+**Consider:**
+
+- Read the span since the previous sparklogs_agent_stopped as time the agent was not collecting.
+
+## `sparklogs_agent_stopped`
+
+The SparkLogs agent service stopped, or terminated unexpectedly.
+
+**Also reported by:** `services`
+
+**Severity:** Error or Notice
+
+**Impact:** The host is not collecting until the agent starts again.
+
+**Consider:**
+
+- A terminated row is the agent dying, not stopping; read crash_count for how often.
+- Read the span to the next sparklogs_agent_started as time the agent was not collecting.
+
 ## `storage_controller_reset`
 
 The AHCI storage controller reported a reset or timeout condition.
@@ -1019,7 +1103,7 @@ The previous shutdown was not clean: the host stopped without shutting down and 
 
 - Use with os_bsod as the crash triangle around one boot gap.
 - Inspect bugcheck_code and bugcheck_name when present: a nonzero code means a bug check ended the session; a zero code leaves the cause undetermined.
-- The row time is the next boot, not the moment the host stopped.
+- On EventLog 6008 the row time is the loss and recorded_at is the next boot; on Kernel-Power 41 the row time is the next boot.
 - Check the nearest clean shutdown and boot markers.
 
 ## `vpn_connected`
