@@ -73,6 +73,14 @@ The last column is different in kind: it is the author's account of the row or e
 | `disk_unresponsive` / `held` | n/a | **fields: none** |  |
 | `disk_unresponsive` / `onset` | n/a | **fields: none** |  |
 | `disk_unresponsive` / `recovered` | n/a | **fields: none** |  |
+| `driver_installed` / `default` | n/a | **fields: none** |  |
+| `driver_removed` / `default` | n/a | **fields: none** |  |
+| `driver_updated` / `default` | n/a | **fields: none** |  |
+| `host_role_added` / `default` | n/a | **fields: none** |  |
+| `host_role_removed` / `default` | n/a | **fields: none** |  |
+| `installed_product_changed` / `default` | n/a | **fields: none** |  |
+| `installed_product_installed` / `default` | n/a | **fields: none** |  |
+| `installed_product_removed` / `default` | n/a | **fields: none** |  |
 | `kernel_crash` / `default` | n/a | **fields: none** |  |
 | `kernel_crash_recurring` / `held` | n/a | **fields: none** |  |
 | `kernel_crash_recurring` / `onset` | n/a | **fields: none** |  |
@@ -80,6 +88,7 @@ The last column is different in kind: it is the author's account of the row or e
 | `kernel_crash_signature_recurring` / `held` | n/a | **fields: none** |  |
 | `kernel_crash_signature_recurring` / `onset` | n/a | **fields: none** |  |
 | `kernel_crash_signature_recurring` / `recovered` | n/a | **fields: none** |  |
+| `operating_system_changed` / `default` | n/a | **fields: none** |  |
 | `os_clock_drift` / `held` | n/a | **fields: none** |  |
 | `os_clock_drift` / `onset` | n/a | **fields: none** |  |
 | `os_clock_drift` / `recovered` | n/a | **fields: none** |  |
@@ -111,12 +120,19 @@ The last column is different in kind: it is the author's account of the row or e
 | `ram_hard_fault_storm` / `held` | n/a | **fields: none** |  |
 | `ram_hard_fault_storm` / `onset` | n/a | **fields: none** |  |
 | `ram_hard_fault_storm` / `recovered` | n/a | **fields: none** |  |
+| `secure_boot_disabled` / `default` | n/a | **fields: none** |  |
+| `secure_boot_enabled` / `default` | n/a | **fields: none** |  |
 | `service_auto_not_running` / `held` | n/a | **fields: none** |  |
 | `service_auto_not_running` / `onset` | n/a | **fields: none** |  |
 | `service_auto_not_running` / `recovered` | n/a | **fields: none** |  |
+| `service_command_line_changed` / `default` | n/a | **fields: none** |  |
 | `service_flapping` / `held` | n/a | **fields: none** |  |
 | `service_flapping` / `onset` | n/a | **fields: none** |  |
 | `service_flapping` / `recovered` | n/a | **fields: none** |  |
+| `service_installed` / `default` | n/a | **fields: none** |  |
+| `service_logon_account_changed` / `default` | n/a | **fields: none** |  |
+| `service_removed` / `default` | n/a | **fields: none** |  |
+| `service_start_type_changed` / `default` | n/a | **fields: none** |  |
 | `service_stuck_pending` / `held` | n/a | **fields: none** |  |
 | `service_stuck_pending` / `onset` | n/a | **fields: none** |  |
 | `service_stuck_pending` / `recovered` | n/a | **fields: none** |  |
@@ -131,6 +147,8 @@ The last column is different in kind: it is the author's account of the row or e
 | `sparklogs_agent_memory_over_budget` / `recovered` | n/a | **fields: none** |  |
 | `sparklogs_agent_started` / `default` | n/a | **fields: none** |  |
 | `sparklogs_agent_stopped` / `default` | n/a | **fields: none** |  |
+| `tpm_presence_changed` / `default` | n/a | **fields: none** |  |
+| `tpm_version_changed` / `default` | n/a | **fields: none** |  |
 | `volume_bitlocker_dropped` / `held` | n/a | **fields: none** |  |
 | `volume_bitlocker_dropped` / `onset` | n/a | **fields: none** |  |
 | `volume_bitlocker_dropped` / `recovered` | n/a | **fields: none** |  |
@@ -187,6 +205,14 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `disk_unresponsive` / `held`
 - `disk_unresponsive` / `onset`
 - `disk_unresponsive` / `recovered`
+- `driver_installed` / `default`
+- `driver_removed` / `default`
+- `driver_updated` / `default`
+- `host_role_added` / `default`
+- `host_role_removed` / `default`
+- `installed_product_changed` / `default`
+- `installed_product_installed` / `default`
+- `installed_product_removed` / `default`
 - `kernel_crash` / `default`
 - `kernel_crash_recurring` / `held`
 - `kernel_crash_recurring` / `onset`
@@ -194,6 +220,7 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `kernel_crash_signature_recurring` / `held`
 - `kernel_crash_signature_recurring` / `onset`
 - `kernel_crash_signature_recurring` / `recovered`
+- `operating_system_changed` / `default`
 - `os_clock_drift` / `held`
 - `os_clock_drift` / `onset`
 - `os_clock_drift` / `recovered`
@@ -225,12 +252,19 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `ram_hard_fault_storm` / `held`
 - `ram_hard_fault_storm` / `onset`
 - `ram_hard_fault_storm` / `recovered`
+- `secure_boot_disabled` / `default`
+- `secure_boot_enabled` / `default`
 - `service_auto_not_running` / `held`
 - `service_auto_not_running` / `onset`
 - `service_auto_not_running` / `recovered`
+- `service_command_line_changed` / `default`
 - `service_flapping` / `held`
 - `service_flapping` / `onset`
 - `service_flapping` / `recovered`
+- `service_installed` / `default`
+- `service_logon_account_changed` / `default`
+- `service_removed` / `default`
+- `service_start_type_changed` / `default`
 - `service_stuck_pending` / `held`
 - `service_stuck_pending` / `onset`
 - `service_stuck_pending` / `recovered`
@@ -245,6 +279,8 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `sparklogs_agent_memory_over_budget` / `recovered`
 - `sparklogs_agent_started` / `default`
 - `sparklogs_agent_stopped` / `default`
+- `tpm_presence_changed` / `default`
+- `tpm_version_changed` / `default`
 - `volume_bitlocker_dropped` / `held`
 - `volume_bitlocker_dropped` / `onset`
 - `volume_bitlocker_dropped` / `recovered`

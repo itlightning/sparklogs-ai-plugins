@@ -6,6 +6,8 @@ Full inventory every 6 hours. Supported changes are reported when the agent obse
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
 | `sparklogs.data.services.name` | string |  | The service's name. |
+| `sparklogs.data.services.display_name` | string |  | The service's display name reported by the Service Control Manager. |
+| `sparklogs.data.services.user_instance` | bool |  | Whether this is an actual per-user service instance, identified by the SCM service-type instance bit. These rows are retained only in inventories. |
 | `sparklogs.data.services.current_state` | string |  | The service's current SCM state. |
 | `sparklogs.data.services.current_state_code` | integer |  | Windows Service Control Manager numeric code for `current_state`. |
 | `sparklogs.data.services.pid` | integer |  | ID of the process hosting this service. Absent when the service is not running. |

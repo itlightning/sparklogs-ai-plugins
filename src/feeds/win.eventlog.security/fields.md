@@ -53,7 +53,7 @@ Stored flat under the `win.eventlog.security.` prefix.
 | `win.eventlog.security.ticket_encryption_type` | string | Kerberos ticket encryption type (hex enum) on every ticket row of 4768/4769/4770 that states one; 0x17 RC4-HMAC and 0x18 RC4-HMAC-EXP are the downgrade pair the RC4 arm labels. |
 | `win.eventlog.security.etype_meaning` | string | Decoded encryption-type token (rc4_hmac, rc4_hmac_exp): the meaning behind ticket_encryption_type. Only the RC4 pair decodes, so every other encryption type leaves this unset and the raw enum answers instead. |
 | `win.eventlog.security.target_server` | string | Server the explicit credential was presented to (TargetServerName on 4648), kept verbatim in the provider spelling; the portable destination host carries the same end as the cross-feed join key, the routine localhost form included. |
-| `win.eventlog.security.audit_subcategory_guid` | string | Audit subcategory GUID from 4719/4912 (SubcategoryGuid): the locale-invariant key of WHICH audit policy changed. |
+| `win.eventlog.security.audit_subcategory_guid` | string | Validated lowercase, braced audit subcategory GUID from 4719/4912 (SubcategoryGuid). Unknown nonzero GUIDs remain valid identifiers. |
 | `win.eventlog.security.new_process_id` | string | Created process id from 4688 in the hex form the provider logged. Where a matching 4689 exit is stored it carries the same hex in ProcessId, so this is the join key at rest; exits are stored only when the process ended on a non-zero status, so most creations have no exit to join to. The portable process id carries the same number in decimal. |
 | `win.eventlog.security.uac_token_type` | string | UAC split of the created process token on 4688, decoded from TokenElevationType (unsplit, full, limited). unsplit is TokenElevationTypeDefault: UAC produced no filtered pair. full is TokenElevationTypeFull (type 2), not Default. An unrecognized reference leaves this unset. |
 | `win.eventlog.security.integrity_level` | string | MIC integrity level of the created process token on 4688, decoded from MandatoryLabel (untrusted, low, medium, high, system). An unrecognized SID leaves this unset and stamps the raw SID on integrity_level_sid. |
@@ -103,6 +103,7 @@ Prefer these over the per-feed fields for anything that spans feeds.
 | `sparklogs.config_change.type` | The kind of object that changed, from a closed set of object nouns. |
 | `sparklogs.config_change.action` | What was done to that object, from a closed set of verbs. |
 | `sparklogs.config_change.target` | Which object it was: its own identity within its kind, as a name, a path or an id. A different field from the principal a change acted on, and a change acting on a principal carries both. |
+| `sparklogs.config_change.category` | Positive upkeep classification, maintenance when established, omitted otherwise. |
 | `sparklogs.actor.id` | The initiator. Who wanted the thing done. |
 | `sparklogs.actor.name` | The initiator. Who wanted the thing done. |
 | `sparklogs.actor.type` | The initiator. Who wanted the thing done. |
@@ -204,7 +205,9 @@ The last column is different in kind: it is the author's account of the row or e
 | `audit_events_dropped` / `default` | 1101 | `win.eventlog.security.dropped_count` |  |
 | `audit_log_cleared` / `default` | 1102 | **fields: none** |  |
 | `audit_log_full` / `default` | 1104 | **fields: none** |  |
-| `audit_policy_changed` / `default` | 4715, 4719, 4912 | `win.eventlog.security.audit_subcategory_guid` |  |
+| `audit_policy_changed` / `default` | 4715 | **fields: none** |  |
+| `audit_subcategory_changed` / `coverage_reduced` | 4719 | `win.eventlog.security.audit_subcategory_guid` |  |
+| `audit_subcategory_changed` / `neutral` | 4719 | `win.eventlog.security.audit_subcategory_guid` |  |
 | `crypto_selftest_failed` / `default` | 6418 | **fields: none** |  |
 | `directory_object_access_denied` / `default` | 4662 | **fields: none** |  |
 | `directory_object_changed` / `default` | 5136, 5139 | `win.eventlog.security.attribute_name` `win.eventlog.security.object_dn` |  |
@@ -249,7 +252,8 @@ The last column is different in kind: it is the author's account of the row or e
 | `security_group_changed` / `default` | 4735, 4737, 4755, 4764 | **fields: none** |  |
 | `security_group_created` / `default` | 4727, 4731, 4754 | **fields: none** |  |
 | `security_group_deleted` / `default` | 4730, 4734, 4758 | **fields: none** |  |
-| `service_installed` / `default` | 4697 | `command_line` `win.eventlog.security.service_account` `win.eventlog.security.service_image_path` `win.eventlog.security.service_name` |  |
+| `service_installed` / `installed` | 4697 | `command_line` `win.eventlog.security.service_account` `win.eventlog.security.service_image_path` `win.eventlog.security.service_name` |  |
+| `service_installed` / `self_versioned_updater` | 4697 | `command_line` `win.eventlog.security.service_account` `win.eventlog.security.service_image_path` `win.eventlog.security.service_name` |  |
 | `sid_history_add_failed` / `default` | 4766 | **fields: none** |  |
 | `sid_history_added` / `default` | 4765 | **fields: none** |  |
 | `sign_in_failed` / `account_attempt` | 4625 | `win.eventlog.security.auth_package` `win.eventlog.security.lm_package` `win.eventlog.security.logon_type` `win.eventlog.security.logon_type_name` `win.eventlog.security.status` `win.eventlog.security.status_meaning` `win.eventlog.security.substatus` `win.eventlog.security.workstation` |  |
@@ -257,6 +261,7 @@ The last column is different in kind: it is the author's account of the row or e
 | `special_group_sign_in` / `default` | 4964 | **fields: none** |  |
 | `system_time_changed` / `other_caller` | 4616 | `win.eventlog.security.new_time` `win.eventlog.security.previous_time` |  |
 | `system_time_changed` / `routine_time_service` | 4616 | `win.eventlog.security.new_time` `win.eventlog.security.previous_time` |  |
+| `user_audit_subcategory_changed` / `default` | 4912 | `win.eventlog.security.audit_subcategory_guid` |  |
 | `win_insecure_boot_config` / `default` | 4826 | `win.eventlog.security.insecure_boot_flags` |  |
 | `win_registry_value_changed` / `default` | 4657 | `win.eventlog.security.object_name` `win.eventlog.security.object_value_name` `win.eventlog.security.operation_meaning` |  |
 | `win_registry_value_created` / `default` | 4657 | `win.eventlog.security.object_name` `win.eventlog.security.object_value_name` `win.eventlog.security.operation_meaning` |  |
@@ -321,6 +326,7 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `adcs_request_failed` / `default`
 - `audit_log_cleared` / `default`
 - `audit_log_full` / `default`
+- `audit_policy_changed` / `default`
 - `crypto_selftest_failed` / `default`
 - `directory_object_access_denied` / `default`
 - `directory_replication_access_requested` / `default`

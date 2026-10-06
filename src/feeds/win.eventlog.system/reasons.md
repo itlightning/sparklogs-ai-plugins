@@ -66,7 +66,7 @@ Every section below is from the public reason block only.
 | `service_crashed` | `app_stability` | Error |  |
 | `service_exited_with_error` | `app_stability` | Error |  |
 | `service_hang` | `app_stability` | Error |  |
-| `service_installed` | `security_audit` | Notice |  |
+| `service_installed` | `security_audit` | Notice or Info | benign possible |
 | `service_start_failed` | `app_stability` | Error |  |
 | `service_start_timeout` | `app_stability` | Error |  |
 | `smb_delayed_write_lost` | `storage` | Error |  |
@@ -869,9 +869,9 @@ A Windows service stopped responding to a control transaction.
 
 A Windows service was installed.
 
-**Also reported by:** `win.eventlog.security`
+**Also reported by:** `win.eventlog.security`, `services`
 
-**Severity:** Notice
+**Severity:** Notice or Info
 
 **Impact:** Unexpected service creation can establish persistence or run code under a privileged account.
 

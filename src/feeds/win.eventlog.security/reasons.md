@@ -25,7 +25,8 @@ Every section below is from the public reason block only.
 | `audit_events_dropped` | `security_audit` | Error when records were discarded; Debug when the count is zero |  |
 | `audit_log_cleared` | `security_audit` | Critical (non-system clearer) / Error |  |
 | `audit_log_full` | `security_audit` | Serious |  |
-| `audit_policy_changed` | `security_audit` | Warning |  |
+| `audit_policy_changed` | `security_audit` | Notice |  |
+| `audit_subcategory_changed` | `security_audit` | Warning or Notice |  |
 | `crypto_selftest_failed` | `os_stability` | Error |  |
 | `directory_object_access_denied` | `directory_services` | Notice |  |
 | `directory_object_changed` | `directory_services` | Warning |  |
@@ -65,12 +66,13 @@ Every section below is from the public reason block only.
 | `security_group_changed` | `security_audit` | Warning for a privileged group, Notice for any other security group, Info when Windows configures its own builtin groups. |  |
 | `security_group_created` | `security_audit` | Warning for a privileged group, Notice for any other security group, Info when Windows provisions its own builtin groups. |  |
 | `security_group_deleted` | `security_audit` | Warning for a privileged group, Notice for any other security group. |  |
-| `service_installed` | `security_audit` | Notice |  |
+| `service_installed` | `security_audit` | Notice or Info | benign possible |
 | `sid_history_add_failed` | `security_audit` | Error |  |
 | `sid_history_added` | `security_audit` | Serious |  |
 | `sign_in_failed` | `auth` | Warning (account-state) / Notice (other) / Verbose (credential-less probe) | benign possible |
 | `special_group_sign_in` | `security_audit` | Warning |  |
 | `system_time_changed` | `time_sync` | Warning (non-time-service) / Debug (routine time service) |  |
+| `user_audit_subcategory_changed` | `security_audit` | Notice |  |
 | `win_insecure_boot_config` | `security_audit` | Warning |  |
 | `win_registry_value_changed` | `security_audit` | Warning |  |
 | `win_registry_value_created` | `security_audit` | Warning |  |
@@ -323,16 +325,29 @@ The Security log is full. This usually means retention is set to do-not-overwrit
 
 ## `audit_policy_changed`
 
-Local audit policy changed (system, object security descriptor, or per-user). These events are dependable even when other audit subcategories are off.
+An object's audit policy descriptor changed.
 
-**Severity:** Warning
+**Also reported by:** `audit-policy`
 
-**Impact:** What gets logged (or silenced) on this host can change. Unexpected policy edits can hide later activity or flood the log.
+**Severity:** Notice
+
+**Impact:** Review the native old and new descriptors to determine what changed.
 
 **Consider:**
 
-- Use SubcategoryGuid to see which subcategory changed
-- On DCs, correlate with GPO refresh before treating every hit as tamper
+- Compare OldSd and NewSd in the original event
+
+## `audit_subcategory_changed`
+
+A system audit subcategory setting changed.
+
+**Severity:** Warning or Notice
+
+**Impact:** A removed success or failure setting reduces auditing for the named subcategory.
+
+**Consider:**
+
+- Check the native AuditPolicyChanges values and subcategory GUID
 
 ## `crypto_selftest_failed`
 
@@ -909,9 +924,9 @@ A security group was deleted. Deletion of a privileged group (Administrators, Do
 
 A Windows service was installed. This Security-channel event appears when service-install auditing is enabled; the System channel often carries the same fact by default.
 
-**Also reported by:** `win.eventlog.system`
+**Also reported by:** `win.eventlog.system`, `services`
 
-**Severity:** Notice
+**Severity:** Notice or Info
 
 **Impact:** A new service can run code at boot or on demand under a chosen account. Unexpected installs are a common persistence path.
 
@@ -997,6 +1012,18 @@ The system clock was changed. Routine time-service adjustments are quiet; change
 
 - Inspect the process path and the actor together
 - previous_time and new_time carry the decoded before and after clock values in UTC
+
+## `user_audit_subcategory_changed`
+
+A per-user audit subcategory setting changed.
+
+**Severity:** Notice
+
+**Impact:** The effective audit effect depends on system settings and per-user precedence.
+
+**Consider:**
+
+- Review TargetUserSid and SubcategoryGuid in the original event
 
 ## `win_insecure_boot_config`
 

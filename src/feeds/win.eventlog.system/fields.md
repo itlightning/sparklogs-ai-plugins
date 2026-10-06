@@ -85,6 +85,7 @@ Prefer these over the per-feed fields for anything that spans feeds.
 | `sparklogs.config_change.type` | The kind of object that changed, from a closed set of object nouns. |
 | `sparklogs.config_change.action` | What was done to that object, from a closed set of verbs. |
 | `sparklogs.config_change.target` | Which object it was: its own identity within its kind, as a name, a path or an id. A different field from the principal a change acted on, and a change acting on a principal carries both. |
+| `sparklogs.config_change.category` | Positive upkeep classification, maintenance when established, omitted otherwise. |
 | `sparklogs.actor.name` | The initiator. Who wanted the thing done. |
 | `sparklogs.actor.type` | The initiator. Who wanted the thing done. |
 | `sparklogs.actor.domain` | The initiator. Who wanted the thing done. |
@@ -200,7 +201,8 @@ The last column is different in kind: it is the author's account of the row or e
 | `service_crashed` / `default` | 7031, 7034 | `win.eventlog.system.crash_count` `win.eventlog.system.service_name` |  |
 | `service_exited_with_error` / `default` | 7023, 7024 | `win.eventlog.system.service_error` `win.eventlog.system.service_name` |  |
 | `service_hang` / `default` | 7011 | `win.eventlog.system.service_name` |  |
-| `service_installed` / `default` | 7045 | `command_line` `win.eventlog.system.account_name` `win.eventlog.system.image_path` `win.eventlog.system.service_name` `win.eventlog.system.service_type` `win.eventlog.system.start_type` |  |
+| `service_installed` / `installed` | 7045 | `command_line` `win.eventlog.system.account_name` `win.eventlog.system.image_path` `win.eventlog.system.service_name` `win.eventlog.system.service_type` `win.eventlog.system.start_type` |  |
+| `service_installed` / `self_versioned_updater` | 7045 | `command_line` `win.eventlog.system.account_name` `win.eventlog.system.image_path` `win.eventlog.system.service_name` `win.eventlog.system.service_type` `win.eventlog.system.start_type` |  |
 | `service_start_failed` / `default` | 7000 | `win.eventlog.system.service_error` `win.eventlog.system.service_name` |  |
 | `service_start_timeout` / `default` | 7009 | `win.eventlog.system.service_name` |  |
 | `smb_delayed_write_lost` / `default` | 50, 139 | **fields: none** |  |

@@ -51,6 +51,7 @@ ECS is field-per-concept and flat-dotted. Its identity fields collapse the initi
 | `sparklogs.config_change.type` |  |
 | `sparklogs.config_change.action` | `event.action` |
 | `sparklogs.config_change.target` |  |
+| `sparklogs.config_change.category` |  |
 
 ### What each family means here
 

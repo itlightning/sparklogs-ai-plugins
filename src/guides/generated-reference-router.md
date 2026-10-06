@@ -204,7 +204,6 @@ say in your findings that you were reading uncurated text.
 - `fields/family-event.md`
 - `fields/family-sparklogs-actor.md`
 - `fields/family-sparklogs-capture.md`
-- `fields/family-sparklogs-change-counts.md`
 - `fields/family-sparklogs-config-change.md`
 - `fields/family-sparklogs-data.md`
 - `fields/family-sparklogs-delta.md`

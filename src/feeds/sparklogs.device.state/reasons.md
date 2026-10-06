@@ -9,7 +9,7 @@ Every section below is from the public reason block only.
 | reason | service | severity | benign |
 |---|---|---|---|
 | `app_crash_recurring` | `app_stability` | Notice to Serious, depending on how often and how recently this one executable has crashed. |  |
-| `audit_policy_changed` | `security_audit` | Notice on a workstation, Warning on a server, depending on host class. |  |
+| `audit_policy_changed` | `security_audit` |  |  |
 | `audit_policy_reapplied` | `security_audit` |  |  |
 | `cpu_busy` | `performance` |  |  |
 | `cpu_interrupt_storm` | `performance` |  |  |
@@ -20,9 +20,18 @@ Every section below is from the public reason block only.
 | `disk_latency_degraded` | `storage` |  |  |
 | `disk_saturated` | `storage` |  |  |
 | `disk_unresponsive` | `storage` |  |  |
+| `driver_installed` | `platform` |  |  |
+| `driver_removed` | `platform` |  |  |
+| `driver_updated` | `platform` |  |  |
+| `host_role_added` | `platform` |  |  |
+| `host_role_removed` | `platform` |  |  |
+| `installed_product_changed` | `patching` |  |  |
+| `installed_product_installed` | `patching` |  |  |
+| `installed_product_removed` | `patching` |  |  |
 | `kernel_crash` | `os_stability` |  |  |
 | `kernel_crash_recurring` | `os_stability` |  |  |
 | `kernel_crash_signature_recurring` | `os_stability` | Warning to Serious, depending on how often and how recently the same crash signature has recurred. |  |
+| `operating_system_changed` | `patching` |  |  |
 | `os_clock_drift` | `performance` |  |  |
 | `os_dump_pagefile_too_small` | `os_stability` |  |  |
 | `os_volume_space_exhausting` | `storage` |  |  |
@@ -34,14 +43,23 @@ Every section below is from the public reason block only.
 | `process_handle_count_high` | `performance` |  |  |
 | `ram_commit_near_cap` | `performance` |  |  |
 | `ram_hard_fault_storm` | `performance` |  |  |
+| `secure_boot_disabled` | `security_audit` |  |  |
+| `secure_boot_enabled` | `security_audit` |  |  |
 | `service_auto_not_running` | `app_stability` |  |  |
+| `service_command_line_changed` | `security_audit` |  |  |
 | `service_flapping` | `app_stability` |  |  |
+| `service_installed` | `security_audit` |  |  |
+| `service_logon_account_changed` | `security_audit` |  |  |
+| `service_removed` | `security_audit` |  |  |
+| `service_start_type_changed` | `security_audit` |  |  |
 | `service_stuck_pending` | `app_stability` |  |  |
 | `sparklogs_agent_cpu_over_budget` | `rmm` |  |  |
 | `sparklogs_agent_handle_over_budget` | `rmm` |  |  |
 | `sparklogs_agent_memory_over_budget` | `rmm` |  |  |
 | `sparklogs_agent_started` | `rmm` |  |  |
 | `sparklogs_agent_stopped` | `rmm` |  |  |
+| `tpm_presence_changed` | `platform` |  |  |
+| `tpm_version_changed` | `platform` |  |  |
 | `volume_bitlocker_dropped` | `storage` |  |  |
 | `volume_fill_rate_high` | `storage` |  |  |
 | `volume_unreadable` | `storage` |  |  |
@@ -55,7 +73,7 @@ One application is crashing repeatedly on this host.
 
 **Severity:** Notice to Serious, depending on how often and how recently this one executable has crashed.
 
-**Impact:** Users or services depending on this application lose work or availability each time it crashes. Compare crash details across the individual process_crash records for the same executable to narrow the cause.
+**Impact:** Users or services depending on this application lose work or availability each time it crashes. Compare crash details across the individual crash records for the same executable to narrow the cause.
 
 **Consider:**
 
@@ -68,14 +86,12 @@ The host's audit policy changed: which Windows Security events get audited was e
 
 **Also reported by:** `win.eventlog.security`
 
-**Severity:** Notice on a workstation, Warning on a server, depending on host class.
-
 **Impact:** A narrower audit subcategory set can mean less evidence exists for a future investigation on this host. A broader set means more audit volume and more coverage.
 
 **Consider:**
 
 - Compare the added and removed subcategories against your audit policy baseline for this host's role.
-- Server audit scope reductions are worth a closer look; routine management-tool churn on a workstation usually is not.
+- Audit scope reductions on a server are worth a closer look; routine management-tool churn on a workstation usually is not.
 
 ## `audit_policy_reapplied`
 
@@ -139,6 +155,38 @@ A storage device is busy but moving almost no data.
 
 **Impact:** IO to this device may be stalled, and a writeable volume on it can stop responding.
 
+## `driver_installed`
+
+A driver was installed.
+
+## `driver_removed`
+
+A driver was removed.
+
+## `driver_updated`
+
+A driver's version, package date or package identity changed.
+
+## `host_role_added`
+
+A host role was detected.
+
+## `host_role_removed`
+
+A host role is no longer detected.
+
+## `installed_product_changed`
+
+An installed product changed.
+
+## `installed_product_installed`
+
+An installed product appeared.
+
+## `installed_product_removed`
+
+An installed product left the inventory.
+
 ## `kernel_crash`
 
 Windows stopped with a bug check (blue screen).
@@ -163,6 +211,10 @@ The host is crashing with bug checks that keep showing the same signature.
 
 - The blamed module in the signature is where the fault was reported, which is not always its cause.
 - Check for a driver or firmware update released around when the recurrence began.
+
+## `operating_system_changed`
+
+The operating system changed.
 
 ## `os_clock_drift`
 
@@ -230,17 +282,58 @@ High hard-page-fault activity persists.
 
 **Impact:** Memory-related disk reads may slow workloads.
 
+## `secure_boot_disabled`
+
+Secure Boot was disabled.
+
+## `secure_boot_enabled`
+
+Secure Boot was enabled.
+
 ## `service_auto_not_running`
 
 An automatic service is not running.
 
 **Impact:** Expected background functionality may be unavailable until the service starts.
 
+## `service_command_line_changed`
+
+A service's executable, arguments or configured directory changed.
+
 ## `service_flapping`
 
 A Windows service keeps crashing and restarting.
 
 **Impact:** The service may be unstable, unavailable between restarts, or masking a crash loop.
+
+## `service_installed`
+
+A service registration appeared on this device.
+
+**Also reported by:** `win.eventlog.security`, `win.eventlog.system`
+
+**Consider:**
+
+- Check nearby recorded service-install events for the installer, account and recorded time.
+
+## `service_logon_account_changed`
+
+A service now runs as a different account.
+
+**Impact:** The service runs with the access of its new account, which can be more or less than before.
+
+**Consider:**
+
+- Read the old and new account in the change: a move to LocalSystem or to a domain account widens what the service can reach.
+- Check whether an installer, an update or an administrator made the move around that time.
+
+## `service_removed`
+
+A previously observed service registration is absent.
+
+## `service_start_type_changed`
+
+A service's configured startup setting changed.
 
 ## `service_stuck_pending`
 
@@ -262,7 +355,7 @@ SparkLogs Agent handle usage exceeds its budget.
 
 ## `sparklogs_agent_memory_over_budget`
 
-Combined SparkLogs Agent and Vector memory usage exceeds its budget.
+Combined memory use of the SparkLogs agent and its log collector exceeds its budget.
 
 **Impact:** Monitoring overhead may be higher than expected on this host.
 
@@ -274,7 +367,7 @@ The SparkLogs agent started.
 
 **Consider:**
 
-- Read the span since the previous sparklogs_agent_stopped as time the agent was not collecting.
+- Read the span since the agent last stopped as time it was not collecting.
 
 ## `sparklogs_agent_stopped`
 
@@ -286,8 +379,16 @@ The SparkLogs agent stopped.
 
 **Consider:**
 
-- Read stop_cause: an update or an OS shutdown is routine, an error is the agent failing.
-- Read the span to the next sparklogs_agent_started as time the agent was not collecting.
+- Read the stop cause: an update or an OS shutdown is routine, an error is the agent failing.
+- Read the span to the agent's next start as time it was not collecting.
+
+## `tpm_presence_changed`
+
+TPM availability changed.
+
+## `tpm_version_changed`
+
+The TPM specification version changed.
 
 ## `volume_bitlocker_dropped`
 
