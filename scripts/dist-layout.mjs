@@ -88,7 +88,7 @@ export const FEED_ID = /^[a-z][a-z0-9_]*(?:\.[a-z][a-z0-9_]*)*$/;
 export const MAX_SRC_FILE_BYTES = 128 * 1024;
 // Every host materializes the corpus inside each skill. Claude additionally ships agents/ at the
 // package root. Cap is sized for corpus times skill count plus commands and assets.
-export const MAX_PACKAGE_BYTES = 4 * 1024 * 1024;
+export const MAX_PACKAGE_BYTES = 8 * 1024 * 1024;
 export const MAX_DIST_BYTES = 20 * 1024 * 1024;
 
 export const DOCS_URL = 'https://sparklogs.com/docs/it-fleet-intelligence';
