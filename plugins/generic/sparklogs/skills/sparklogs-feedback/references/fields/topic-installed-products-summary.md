@@ -1,5 +1,5 @@
 <!-- GENERATED reference. Do not hand-edit. -->
-# Installed product summary fields
+# Product summary fields
 
 Full inventory on its own schedule. Supported changes are reported when the agent observes them.
 

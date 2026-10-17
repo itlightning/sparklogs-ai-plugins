@@ -26,7 +26,7 @@ The rendered `key=value` tail exists to be READ, not re-parsed: its values are n
 
 ## Reconstruction guarantee
 
-70 curated surface(s) drop the vendor body text below the synthesized first line.
+71 curated surface(s) drop the vendor body text below the synthesized first line.
 That is never data loss: the provider payload is retained at rest, so a dropped body can be reconstructed from it.
 What the body said is derivable; what it cost to ship it repeatedly is not.
 
@@ -53,7 +53,7 @@ Stored flat under the `win.eventlog.security.` prefix.
 | `win.eventlog.security.ticket_encryption_type` | string | Kerberos ticket encryption type (hex enum) on every ticket row of 4768/4769/4770 that states one; 0x17 RC4-HMAC and 0x18 RC4-HMAC-EXP are the downgrade pair the RC4 arm labels. |
 | `win.eventlog.security.etype_meaning` | string | Decoded encryption-type token (rc4_hmac, rc4_hmac_exp): the meaning behind ticket_encryption_type. Only the RC4 pair decodes, so every other encryption type leaves this unset and the raw enum answers instead. |
 | `win.eventlog.security.target_server` | string | Server the explicit credential was presented to (TargetServerName on 4648), kept verbatim in the provider spelling; the portable destination host carries the same end as the cross-feed join key, the routine localhost form included. |
-| `win.eventlog.security.audit_subcategory_guid` | string | Audit subcategory GUID from 4719/4912 (SubcategoryGuid): the locale-invariant key of WHICH audit policy changed. |
+| `win.eventlog.security.audit_subcategory_guid` | string | Validated lowercase, braced audit subcategory GUID from 4719/4912 (SubcategoryGuid). Unknown nonzero GUIDs remain valid identifiers. |
 | `win.eventlog.security.new_process_id` | string | Created process id from 4688 in the hex form the provider logged. Where a matching 4689 exit is stored it carries the same hex in ProcessId, so this is the join key at rest; exits are stored only when the process ended on a non-zero status, so most creations have no exit to join to. The portable process id carries the same number in decimal. |
 | `win.eventlog.security.uac_token_type` | string | UAC split of the created process token on 4688, decoded from TokenElevationType (unsplit, full, limited). unsplit is TokenElevationTypeDefault: UAC produced no filtered pair. full is TokenElevationTypeFull (type 2), not Default. An unrecognized reference leaves this unset. |
 | `win.eventlog.security.integrity_level` | string | MIC integrity level of the created process token on 4688, decoded from MandatoryLabel (untrusted, low, medium, high, system). An unrecognized SID leaves this unset and stamps the raw SID on integrity_level_sid. |
@@ -73,6 +73,9 @@ Stored flat under the `win.eventlog.security.` prefix.
 | `win.eventlog.security.insecure_boot_flags` | string | Comma-joined boot-chain weaknesses found true on 4826 (TestSigning, KernelDebug, DisableIntegrityChecks): which setting makes the boot chain accept unsigned or debugger-attached kernel code. |
 | `win.eventlog.security.rule_name` | string | Firewall rule display name from the MPSSVC rule-change family. |
 | `win.eventlog.security.rule_id` | string | Firewall rule id from the MPSSVC rule-change family (stable across renames). |
+| `win.eventlog.security.firewall_rule_condition` | string | The rule condition that resolved to an empty set on 4957, the stated reason Windows Firewall did not apply the rule (RuleAttr, such as Remote Addresses or Local Port). |
+| `win.eventlog.security.firewall_setting_type` | string | Firewall-wide setting named on 4950 (SettingType, such as Default Inbound Action). |
+| `win.eventlog.security.firewall_setting_value` | string | Value the 4950 setting now holds (SettingValue, such as Block or No). |
 | `win.eventlog.security.share_name` | string | Network share name, from 5142 (share added) and from the write-class 5145 access checks. |
 | `win.eventlog.security.share_path` | string | Local filesystem path backing the share (5142 and 5145 ShareLocalPath); a system-root share is a higher-concern surface. |
 | `win.eventlog.security.share_relative_target` | string | Path of the object inside the share that a 5145 access check was made against (RelativeTargetName): what was written, renamed, deleted or re-permissioned. |
@@ -103,6 +106,7 @@ Prefer these over the per-feed fields for anything that spans feeds.
 | `sparklogs.config_change.type` | The kind of object that changed, from a closed set of object nouns. |
 | `sparklogs.config_change.action` | What was done to that object, from a closed set of verbs. |
 | `sparklogs.config_change.target` | Which object it was: its own identity within its kind, as a name, a path or an id. A different field from the principal a change acted on, and a change acting on a principal carries both. |
+| `sparklogs.config_change.category` | Positive upkeep classification, maintenance when established, omitted otherwise. |
 | `sparklogs.actor.id` | The initiator. Who wanted the thing done. |
 | `sparklogs.actor.name` | The initiator. Who wanted the thing done. |
 | `sparklogs.actor.type` | The initiator. Who wanted the thing done. |
@@ -164,6 +168,7 @@ Each key names one field; that field is where the value is queried.
 | `pua_count` | `win.eventlog.security.pua_count` |
 | `dropped_count` | `win.eventlog.security.dropped_count` |
 | `object_name` | `win.eventlog.security.object_name` |
+| `rule_condition` | `win.eventlog.security.firewall_rule_condition` |
 | `previous_time` | `win.eventlog.security.previous_time` |
 | `new_time` | `win.eventlog.security.new_time` |
 | `uac_token_type` | `win.eventlog.security.uac_token_type` |
@@ -204,7 +209,9 @@ The last column is different in kind: it is the author's account of the row or e
 | `audit_events_dropped` / `default` | 1101 | `win.eventlog.security.dropped_count` |  |
 | `audit_log_cleared` / `default` | 1102 | **fields: none** |  |
 | `audit_log_full` / `default` | 1104 | **fields: none** |  |
-| `audit_policy_changed` / `default` | 4715, 4719, 4912 | `win.eventlog.security.audit_subcategory_guid` |  |
+| `audit_policy_changed` / `default` | 4715 | **fields: none** |  |
+| `audit_subcategory_changed` / `coverage_reduced` | 4719 | `win.eventlog.security.audit_subcategory_guid` |  |
+| `audit_subcategory_changed` / `neutral` | 4719 | `win.eventlog.security.audit_subcategory_guid` |  |
 | `crypto_selftest_failed` / `default` | 6418 | **fields: none** |  |
 | `directory_object_access_denied` / `default` | 4662 | **fields: none** |  |
 | `directory_object_changed` / `default` | 5136, 5139 | `win.eventlog.security.attribute_name` `win.eventlog.security.object_dn` |  |
@@ -216,16 +223,16 @@ The last column is different in kind: it is the author's account of the row or e
 | `dsrm_password_changed` / `default` | 4794 | `win.eventlog.security.workstation` |  |
 | `event_logging_stopped` / `default` | 1100 | **fields: none** |  |
 | `explicit_credential_used` / `default` | 4648 | `win.eventlog.security.target_server` |  |
-| `firewall_rule_changed` / `disabled` | 4954 | `win.eventlog.security.rule_id` `win.eventlog.security.rule_name` |  |
-| `firewall_rule_changed` / `enabled` | 4956 | `win.eventlog.security.rule_id` `win.eventlog.security.rule_name` |  |
-| `firewall_rule_changed` / `updated` | 4947, 4950, 4957 | `win.eventlog.security.rule_id` `win.eventlog.security.rule_name` |  |
+| `firewall_rule_changed` / `default` | 4947 | `win.eventlog.security.rule_id` `win.eventlog.security.rule_name` |  |
 | `firewall_rule_created` / `default` | 4946 | `win.eventlog.security.rule_id` `win.eventlog.security.rule_name` |  |
 | `firewall_rule_deleted` / `default` | 4948 | `win.eventlog.security.rule_id` `win.eventlog.security.rule_name` |  |
 | `firewall_service_stopped` / `recovered` | 5024, 5025, 5033, 5034 | **fields: none** |  |
 | `firewall_service_stopped` / `stopped` | 5024, 5025, 5033, 5034 | **fields: none** |  |
+| `firewall_setting_applied` / `default` | 4950 | `win.eventlog.security.firewall_setting_type` `win.eventlog.security.firewall_setting_value` |  |
 | `group_member_added` / `default` | 4728, 4732, 4756 | **fields: none** |  |
 | `group_member_removed` / `default` | 4729, 4733, 4757 | **fields: none** |  |
 | `guest_account_sign_in` / `default` | 4624 | `win.eventlog.security.auth_package` `win.eventlog.security.lm_package` `win.eventlog.security.logon_guid` `win.eventlog.security.logon_type` `win.eventlog.security.logon_type_name` `win.eventlog.security.token_elevated` `win.eventlog.security.workstation` |  |
+| `kerberos_duplicate_request_rejected` / `default` | 4649 | **fields: none** |  |
 | `kerberos_preauth_failed` / `default` | 4771 | `win.eventlog.security.kerberos_target` `win.eventlog.security.status` `win.eventlog.security.status_meaning` |  |
 | `kerberos_rc4_ticket_issued` / `default` | 4769 | `win.eventlog.security.etype_meaning` `win.eventlog.security.kerberos_target` `win.eventlog.security.ticket_encryption_type` |  |
 | `kerberos_ticket_failed` / `service_ticket` | 4768, 4769, 4770 | `win.eventlog.security.kerberos_target` `win.eventlog.security.status` `win.eventlog.security.status_meaning` |  |
@@ -241,15 +248,19 @@ The last column is different in kind: it is the author's account of the row or e
 | `principal_renamed` / `default` | 4781 | `win.eventlog.security.new_target_user` `win.eventlog.security.old_target_user` |  |
 | `process_exited_abnormally` / `default` | 4689 | **fields: none** |  |
 | `psdirect_handshake_probe` / `default` | 4625 | `win.eventlog.security.auth_package` `win.eventlog.security.lm_package` `win.eventlog.security.logon_type` `win.eventlog.security.logon_type_name` `win.eventlog.security.psdirect_handshake` `win.eventlog.security.status` `win.eventlog.security.status_meaning` `win.eventlog.security.substatus` `win.eventlog.security.workstation` |  |
-| `replay_attack_detected` / `default` | 4649 | **fields: none** |  |
-| `scheduled_task_created` / `default` | 4698 | `win.eventlog.security.task_name` |  |
-| `scheduled_task_deleted` / `default` | 4699 | `win.eventlog.security.task_name` |  |
+| `scheduled_task_created` / `other_task` | 4698 | `win.eventlog.security.task_name` |  |
+| `scheduled_task_created` / `platform_os_task` | 4698 | `win.eventlog.security.task_name` |  |
+| `scheduled_task_deleted` / `other_task` | 4699 | `win.eventlog.security.task_name` |  |
+| `scheduled_task_deleted` / `platform_os_task` | 4699 | `win.eventlog.security.task_name` |  |
 | `scheduled_task_disabled` / `default` | 4701 | `win.eventlog.security.task_name` |  |
-| `scheduled_task_updated` / `default` | 4702 | `win.eventlog.security.task_name` |  |
+| `scheduled_task_updated` / `other_task` | 4702 | `win.eventlog.security.task_name` |  |
+| `scheduled_task_updated` / `platform_os_task` | 4702 | `win.eventlog.security.task_name` |  |
 | `security_group_changed` / `default` | 4735, 4737, 4755, 4764 | **fields: none** |  |
 | `security_group_created` / `default` | 4727, 4731, 4754 | **fields: none** |  |
 | `security_group_deleted` / `default` | 4730, 4734, 4758 | **fields: none** |  |
-| `service_installed` / `default` | 4697 | `command_line` `win.eventlog.security.service_account` `win.eventlog.security.service_image_path` `win.eventlog.security.service_name` |  |
+| `service_installed` / `installed` | 4697 | `command_line` `win.eventlog.security.service_account` `win.eventlog.security.service_image_path` `win.eventlog.security.service_name` |  |
+| `service_installed` / `per_user_instance` | 4697 | `command_line` `win.eventlog.security.service_account` `win.eventlog.security.service_image_path` `win.eventlog.security.service_name` |  |
+| `service_installed` / `self_versioned_updater` | 4697 | `command_line` `win.eventlog.security.service_account` `win.eventlog.security.service_image_path` `win.eventlog.security.service_name` |  |
 | `sid_history_add_failed` / `default` | 4766 | **fields: none** |  |
 | `sid_history_added` / `default` | 4765 | **fields: none** |  |
 | `sign_in_failed` / `account_attempt` | 4625 | `win.eventlog.security.auth_package` `win.eventlog.security.lm_package` `win.eventlog.security.logon_type` `win.eventlog.security.logon_type_name` `win.eventlog.security.status` `win.eventlog.security.status_meaning` `win.eventlog.security.substatus` `win.eventlog.security.workstation` |  |
@@ -257,6 +268,7 @@ The last column is different in kind: it is the author's account of the row or e
 | `special_group_sign_in` / `default` | 4964 | **fields: none** |  |
 | `system_time_changed` / `other_caller` | 4616 | `win.eventlog.security.new_time` `win.eventlog.security.previous_time` |  |
 | `system_time_changed` / `routine_time_service` | 4616 | `win.eventlog.security.new_time` `win.eventlog.security.previous_time` |  |
+| `user_audit_subcategory_changed` / `default` | 4912 | `win.eventlog.security.audit_subcategory_guid` |  |
 | `win_insecure_boot_config` / `default` | 4826 | `win.eventlog.security.insecure_boot_flags` |  |
 | `win_registry_value_changed` / `default` | 4657 | `win.eventlog.security.object_name` `win.eventlog.security.object_value_name` `win.eventlog.security.operation_meaning` |  |
 | `win_registry_value_created` / `default` | 4657 | `win.eventlog.security.object_name` `win.eventlog.security.object_value_name` `win.eventlog.security.operation_meaning` |  |
@@ -270,7 +282,10 @@ The last column is different in kind: it is the author's account of the row or e
 | `crypto_operation` | 5061 | **fields: none** |  |
 | `crypto_operation_succeeded` | 5061 | **fields: none** |  |
 | `fips_selftest_passed` | 6417 | **fields: none** |  |
+| `firewall_active_profile_changed` | 4956 | **fields: none** |  |
 | `firewall_packet_blocked` | 5152 | `win.eventlog.security.wfp_dest_address` `win.eventlog.security.wfp_dest_port` `win.eventlog.security.wfp_direction` `win.eventlog.security.wfp_protocol` |  |
+| `firewall_policy_applied` | 4954 | **fields: none** |  |
+| `firewall_rule_not_applied` | 4957 | `win.eventlog.security.firewall_rule_condition` `win.eventlog.security.rule_id` `win.eventlog.security.rule_name` |  |
 | `group_membership_enumerated` | 4799 | **fields: none** |  |
 | `inbound_connection_blocked` | 5157 | `win.eventlog.security.wfp_dest_address` `win.eventlog.security.wfp_dest_port` `win.eventlog.security.wfp_direction` `win.eventlog.security.wfp_protocol` |  |
 | `key_file_operation` | 5058 | **fields: none** |  |
@@ -280,6 +295,7 @@ The last column is different in kind: it is the author's account of the row or e
 | `non_account_sign_out` | 4647 | **fields: none** |  |
 | `ntlm_credentials_validated` | 4776 | `win.eventlog.security.workstation` |  |
 | `object_audit_settings_changed` | 4907 | `win.eventlog.security.object_name` `win.eventlog.security.object_type` |  |
+| `object_deleted` | 4660 | **fields: none** |  |
 | `outbound_connection_blocked` | 5157 | `win.eventlog.security.wfp_dest_address` `win.eventlog.security.wfp_dest_port` `win.eventlog.security.wfp_direction` `win.eventlog.security.wfp_protocol` |  |
 | `per_user_audit_policy_table_created` | 4902 | `win.eventlog.security.pua_count` |  |
 | `platform_privileges_assigned` | 4672 | `win.eventlog.security.privileges` |  |
@@ -320,6 +336,7 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `adcs_request_failed` / `default`
 - `audit_log_cleared` / `default`
 - `audit_log_full` / `default`
+- `audit_policy_changed` / `default`
 - `crypto_selftest_failed` / `default`
 - `directory_object_access_denied` / `default`
 - `directory_replication_access_requested` / `default`
@@ -329,10 +346,10 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `firewall_service_stopped` / `stopped`
 - `group_member_added` / `default`
 - `group_member_removed` / `default`
+- `kerberos_duplicate_request_rejected` / `default`
 - `logon_right_granted` / `default`
 - `logon_right_removed` / `default`
 - `process_exited_abnormally` / `default`
-- `replay_attack_detected` / `default`
 - `security_group_changed` / `default`
 - `security_group_created` / `default`
 - `security_group_deleted` / `default`
@@ -346,12 +363,15 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `crypto_operation`
 - `crypto_operation_succeeded`
 - `fips_selftest_passed`
+- `firewall_active_profile_changed`
+- `firewall_policy_applied`
 - `group_membership_enumerated`
 - `key_file_operation`
 - `key_file_operation_succeeded`
 - `key_migration_operation`
 - `key_migration_operation_succeeded`
 - `non_account_sign_out`
+- `object_deleted`
 - `primary_token_assigned`
 - `privilege_use_refused`
 - `privileged_group_membership_enumerated`

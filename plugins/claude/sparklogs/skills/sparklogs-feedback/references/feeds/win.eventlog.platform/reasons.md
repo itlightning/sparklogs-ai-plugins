@@ -28,7 +28,7 @@ Every section below is from the public reason block only.
 | `os_shutdown_duration_high` | `performance` | Warning when ShutdownIsDegradation is true; Notice for long shutdown or slow service |  |
 | `platform_tamper_indicator_reported` | `endpoint_protection` | Error, Warning or Notice |  |
 | `portable_device_unresponsive` | `hardware` | Info |  |
-| `ram_commit_exhausted` | `performance` | Warning at or above 95% commit ratio, Notice for diagnosis failure or lower ratio |  |
+| `ram_commit_exhausted` | `performance` | Warning, Notice or Info |  |
 | `secure_boot_revocation_update_failed` | `os_stability` | Info |  |
 | `thermal_cooling_engaged` | `hardware` | Notice or Info |  |
 | `tpm_initialization_failed` | `os_stability` | Warning |  |
@@ -308,7 +308,9 @@ A phone, camera, or media player on USB stopped answering.
 
 Committed memory on this host reached its limit.
 
-**Severity:** Warning at or above 95% commit ratio, Notice for diagnosis failure or lower ratio
+**Also reported by:** `win.eventlog.system`
+
+**Severity:** Warning, Notice or Info
 
 **Impact:** Applications can fail allocations while committed memory stays near its limit.
 

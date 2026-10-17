@@ -34,7 +34,7 @@ Stored flat under the `win.eventlog.storage.` prefix.
 | `win.eventlog.storage.scsi_status` | int | SCSI status byte the device returned, from Storage-ClassPnP 507 (ScsiStatus). |
 | `win.eventlog.storage.srb_status` | int | SRB status as the storage port driver logged it, from Storage-ClassPnP 507 (SrbStatus). Carries flag bits above the status itself; group on srb_status_code instead. |
 | `win.eventlog.storage.srb_status_code` | int | The SRB status with its flag bits removed (the low six bits of srb_status). One status arrives under several srb_status numbers depending on which flags the driver set, so this is the value a query groups on. |
-| `win.eventlog.storage.cdb_bytes` | string | The SCSI command descriptor block the failing command carried, from Storage-ClassPnP 507 (CdbBytes), as hex text with a 0x prefix. The prefix is added here: Windows writes the field without one, and an all-digit hex string is otherwise read as a number and stored as one. |
+| `win.eventlog.storage.cdb_bytes` | string | The SCSI command descriptor block the failing command carried, from Storage-ClassPnP 505/506/507 (CdbBytes) and Storport 500 (Cdb), as hex text with a 0x prefix. The prefix is added here: Windows writes the field without one, and an all-digit hex string is otherwise read as a number and stored as one. |
 | `win.eventlog.storage.sense_key_name` | string | Bounded meaning token decoded from the sense key (no_sense, not_ready, medium_error, hardware_error, illegal_request, unit_attention, data_protect, aborted_command and the rest of the published set). The number stays beside it; an unlisted code leaves this unset. |
 | `win.eventlog.storage.additional_sense_name` | string | Bounded meaning token decoded from the additional sense code, for the small set this module reads (illegal_command, invalid_cdb, medium_changed, bus_reset, no_media_in_device). An unlisted code leaves this unset. |
 | `win.eventlog.storage.srb_status_name` | string | Bounded meaning token decoded from srb_status_code, the SRB status with its flag bits removed (success, error, busy, timeout, bus_reset and the rest of the published set). An unlisted code leaves this unset. |
@@ -78,6 +78,16 @@ Stored flat under the `win.eventlog.storage.` prefix.
 
 This module populates no portable family.
 
+## Tail keys and where the value is queryable
+
+The curated first line renders a `key=value` tail in one canonical order for the whole module, so an omitted key never moves the rest.
+Each key names one field; that field is where the value is queried.
+
+| Tail key | Queryable as |
+|---|---|
+| `ioctl_control_code` | not queryable as a field |
+| `ioctl_name` | not queryable as a field |
+
 ## What sets each field
 
 Presence is per curated surface, from what its author declared under `promotions`: a field reaches this row only when the surface's own arm or shape names it, never from a text scan of classify guessing which branch a write belongs to.
@@ -87,14 +97,26 @@ The last column is different in kind: it is the author's account of the row or e
 
 | Surface | Event ids | Fields set | Row fields |
 |---|---|---|---|
-| `disk_bad_block` / `device_data_error` | 148, 505, 506 | `win.eventlog.storage.additional_sense_code` `win.eventlog.storage.additional_sense_name` `win.eventlog.storage.bus_type` `win.eventlog.storage.bus_type_name` `win.eventlog.storage.clusters_count` `win.eventlog.storage.device_number` `win.eventlog.storage.io_size_bytes` `win.eventlog.storage.io_type` `win.eventlog.storage.is_boot_volume` `win.eventlog.storage.retries_done` `win.eventlog.storage.sense_key` `win.eventlog.storage.sense_key_name` `win.eventlog.storage.srb_status` `win.eventlog.storage.srb_status_code` `win.eventlog.storage.srb_status_name` `win.eventlog.storage.starting_lcn` `win.eventlog.storage.volume_name` |  |
+| `disk_bad_block` / `device_data_error` | 148, 505, 506 | `win.eventlog.storage.additional_sense_code` `win.eventlog.storage.additional_sense_name` `win.eventlog.storage.bus_type` `win.eventlog.storage.bus_type_name` `win.eventlog.storage.cdb_bytes` `win.eventlog.storage.clusters_count` `win.eventlog.storage.device_number` `win.eventlog.storage.io_size_bytes` `win.eventlog.storage.io_type` `win.eventlog.storage.is_boot_volume` `win.eventlog.storage.retries_done` `win.eventlog.storage.sense_key` `win.eventlog.storage.sense_key_name` `win.eventlog.storage.srb_status` `win.eventlog.storage.srb_status_code` `win.eventlog.storage.srb_status_name` `win.eventlog.storage.starting_lcn` `win.eventlog.storage.volume_name` |  |
 | `disk_bad_block` / `removable_verify` | 148 | `win.eventlog.storage.bus_type` `win.eventlog.storage.bus_type_name` `win.eventlog.storage.clusters_count` `win.eventlog.storage.io_size_bytes` `win.eventlog.storage.io_type` `win.eventlog.storage.is_boot_volume` `win.eventlog.storage.starting_lcn` `win.eventlog.storage.volume_name` |  |
 | `disk_failure_predicted` / `default` | 539, 542, 543 | `win.eventlog.storage.endurance_threshold_pct` `win.eventlog.storage.health_flag_name` `win.eventlog.storage.health_flag_value` `win.eventlog.storage.percentage_used_pct` |  |
-| `disk_paging_error` / `default` | 502, 503 | `win.eventlog.storage.device_number` `win.eventlog.storage.lba` `win.eventlog.storage.nv_cache_priority` `win.eventlog.storage.paging_priority` `win.eventlog.storage.transfer_bytes` |  |
+| `disk_io_failed` / `device_gone` | 500, 501, 505, 506 | `win.eventlog.storage.additional_sense_code` `win.eventlog.storage.additional_sense_name` `win.eventlog.storage.bus_type` `win.eventlog.storage.bus_type_name` `win.eventlog.storage.cdb_bytes` `win.eventlog.storage.device_number` `win.eventlog.storage.retries_done` `win.eventlog.storage.sense_key` `win.eventlog.storage.sense_key_name` `win.eventlog.storage.srb_status` `win.eventlog.storage.srb_status_code` `win.eventlog.storage.srb_status_name` |  |
+| `disk_io_failed` / `transfer_failed` | 500, 501, 505, 506 | `win.eventlog.storage.cdb_bytes` |  |
+| `disk_paging_error` / `device_gone` | 502, 503 | `win.eventlog.storage.device_number` `win.eventlog.storage.lba` `win.eventlog.storage.nv_cache_priority` `win.eventlog.storage.paging_priority` `win.eventlog.storage.transfer_bytes` |  |
+| `disk_paging_error` / `paging_failed` | 502, 503 | `win.eventlog.storage.device_number` `win.eventlog.storage.lba` `win.eventlog.storage.nv_cache_priority` `win.eventlog.storage.paging_priority` `win.eventlog.storage.transfer_bytes` |  |
 | `disk_surprise_removal` / `default` | 103, 551 | `win.eventlog.storage.device_state` `win.eventlog.storage.device_type` `win.eventlog.storage.lun` `win.eventlog.storage.miniport_name` `win.eventlog.storage.port_number` `win.eventlog.storage.removable` `win.eventlog.storage.surprise_removal_ok` |  |
 | `filesystem_corruption` / `state_error` | 100 | `win.eventlog.storage.filesystem` `win.eventlog.storage.hc_stateid` |  |
 | `filesystem_corruption` / `state_warning` | 100 | `win.eventlog.storage.filesystem` `win.eventlog.storage.hc_stateid` |  |
-| `storage_controller_reset` / `default` | 500, 501, 550 | `win.eventlog.storage.boot_device` `win.eventlog.storage.bus_reset_reason` `win.eventlog.storage.bus_type` `win.eventlog.storage.bus_type_name` `win.eventlog.storage.failed_io_count` `win.eventlog.storage.lun` `win.eventlog.storage.miniport_name` `win.eventlog.storage.path_id` `win.eventlog.storage.port_number` `win.eventlog.storage.reset_status` `win.eventlog.storage.reset_type` `win.eventlog.storage.srb_timeout_s` `win.eventlog.storage.target_id` |  |
-| `storage_device_command_failed` / `default` | 507 | `win.eventlog.storage.additional_sense_code` `win.eventlog.storage.additional_sense_code_qualifier` `win.eventlog.storage.cdb_bytes` `win.eventlog.storage.scsi_status` `win.eventlog.storage.sense_key` `win.eventlog.storage.srb_status` `win.eventlog.storage.srb_status_code` |  |
+| `storage_controller_reset` / `default` | 500, 501, 550 | `win.eventlog.storage.boot_device` `win.eventlog.storage.bus_reset_reason` `win.eventlog.storage.bus_type` `win.eventlog.storage.bus_type_name` `win.eventlog.storage.cdb_bytes` `win.eventlog.storage.failed_io_count` `win.eventlog.storage.lun` `win.eventlog.storage.miniport_name` `win.eventlog.storage.path_id` `win.eventlog.storage.port_number` `win.eventlog.storage.reset_status` `win.eventlog.storage.reset_type` `win.eventlog.storage.srb_timeout_s` `win.eventlog.storage.target_id` |  |
+| `storage_device_command_failed` / `command_failed` | 507 | `win.eventlog.storage.additional_sense_code` `win.eventlog.storage.additional_sense_code_qualifier` `win.eventlog.storage.cdb_bytes` `win.eventlog.storage.scsi_status` `win.eventlog.storage.sense_key` `win.eventlog.storage.srb_status` `win.eventlog.storage.srb_status_code` |  |
+| `storage_device_command_failed` / `trim_rejected` | 507 | `win.eventlog.storage.additional_sense_code` `win.eventlog.storage.additional_sense_code_qualifier` `win.eventlog.storage.cdb_bytes` `win.eventlog.storage.scsi_status` `win.eventlog.storage.sense_key` `win.eventlog.storage.srb_status` `win.eventlog.storage.srb_status_code` |  |
 | `volume_mount_failed` / `device_offline` | 305 | `win.eventlog.storage.volume_guid` `win.eventlog.storage.volume_name` |  |
 | `volume_mount_failed` / `mount_failed` | 305 | `win.eventlog.storage.volume_guid` `win.eventlog.storage.volume_name` |  |
+| `storport_sample_repeat` | 548, 554, 557 | **fields: none** |  |
+
+### Surfaces that promote nothing
+
+These carry class, reason and message text only.
+A predicate over them uses the reason, the class, or the retained payload; there is no promoted field to filter on.
+
+- `storport_sample_repeat`

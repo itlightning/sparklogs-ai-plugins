@@ -10,14 +10,14 @@ Every section below is from the public reason block only.
 |---|---|---|---|
 | `adcs_ca_chain_failed` | `certificates` | Error |  |
 | `adcs_crl_publish_failed` | `certificates` | Error |  |
-| `app_crash` | `app_stability` | Error |  |
-| `app_hang` | `app_stability` | Error |  |
+| `app_crash` | `app_stability` | Minor |  |
+| `app_hang` | `app_stability` | Minor |  |
 | `appx_activation_failed` | `app_stability` | Info when Windows declines to run the application under the built-in Administrator account, Notice otherwise | benign possible |
 | `aspnet_compilation_failed` | `web` | Error |  |
 | `aspnet_unhandled_exception` | `web` | Minor |  |
 | `cert_enroll_failed` | `certificates` | Warning or Verbose | benign possible |
 | `cert_expiring` | `certificates` | Warning |  |
-| `dotnet_unhandled_exception` | `app_stability` | Error |  |
+| `dotnet_unhandled_exception` | `app_stability` | Minor |  |
 | `entra_password_hash_sync_failed` | `directory_services` | Error |  |
 | `entra_sync_run_failed` | `directory_services` | Error |  |
 | `entra_sync_scheduler_aborted` | `directory_services` | Error |  |
@@ -30,6 +30,7 @@ Every section below is from the public reason block only.
 | `mfa_sign_in_succeeded` | `auth` | Info |  |
 | `mfa_unavailable_access_granted` | `auth` | Error |  |
 | `mfa_user_not_enrolled` | `auth` | Notice |  |
+| `mssql_agent_job_failed` | `database` | Error |  |
 | `mssql_db_io_failed` | `database` | Error |  |
 | `mssql_db_page_corruption` | `database` | Critical |  |
 | `mssql_db_read_retried` | `database` | Warning |  |
@@ -82,7 +83,7 @@ Active Directory Certificate Services reported a CRL publication failure.
 
 A Windows application process crashed.
 
-**Severity:** Error
+**Severity:** Minor
 
 **Impact:** The app exited unexpectedly; user work, background processing, or service functionality may have been interrupted.
 
@@ -96,7 +97,7 @@ A Windows application process crashed.
 
 A Windows application stopped responding and was closed.
 
-**Severity:** Error
+**Severity:** Minor
 
 **Impact:** The user-facing app or background process became unusable until Windows terminated it.
 
@@ -184,7 +185,7 @@ A certificate held by this machine is about to expire or has already expired, an
 
 A .NET application terminated because of an unhandled managed exception.
 
-**Severity:** Error
+**Severity:** Minor
 
 **Impact:** The affected .NET app stopped unexpectedly; repeated events can point to an application defect, dependency issue, or bad input path.
 
@@ -356,6 +357,19 @@ A sign-in was refused because the account is not enrolled with the multi-factor 
 
 - Enrol the account, or place it in the exclusion the policy intends.
 - Service accounts appearing here usually need a policy exclusion rather than an enrolment.
+
+## `mssql_agent_job_failed`
+
+A scheduled SQL Server Agent job failed.
+
+**Severity:** Error
+
+**Impact:** The work that job does, such as a backup, an import or a maintenance task, did not happen on this run.
+
+**Consider:**
+
+- Read the job history in SQL Server Agent for the failing step and its error.
+- Check the job owner and the Agent service account still have access to the instance.
 
 ## `mssql_db_io_failed`
 

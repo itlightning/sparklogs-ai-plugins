@@ -9,7 +9,7 @@ Every section below is from the public reason block only.
 | reason | service | severity | benign |
 |---|---|---|---|
 | `bitlocker_policy_noncompliant` | `device_management` | Warning where the operating-system volume is the one out of compliance. Notice for a data volume or where the event cannot say which drive it is about. |  |
-| `bits_transfer_failed` | `patching` | Warning |  |
+| `bits_transfer_failed` | `patching` | Info |  |
 | `dfsr_partner_communication_failed` | `directory_services` | Warning |  |
 | `dfsr_replication_stopped` | `directory_services` | Serious or Warning |  |
 | `dfsr_sysvol_initial_sync_pending` | `directory_services` | Warning |  |
@@ -24,9 +24,9 @@ Every section below is from the public reason block only.
 | `print_connection_reopen_failed` | `printing` | Warning or Info | benign possible |
 | `printer_driver_install_failed` | `printing` | Warning where an add or an import failed. Notice where the spooler was only asking the driver store whether it already held the driver. |  |
 | `scheduled_task_engine_failed` | `scheduled_tasks` | Warning or Info | benign possible |
-| `scheduled_task_load_failed` | `scheduled_tasks` | Warning |  |
+| `scheduled_task_load_failed` | `scheduled_tasks` | Notice for a Microsoft task whose definition is not found, Warning for any other code or task. |  |
 | `scheduled_task_sign_in_failed` | `scheduled_tasks` | Warning |  |
-| `scheduled_task_start_failed` | `scheduled_tasks` | Warning where a named automation stopped running. Lower where the task ships with Windows and the program it points at was removed by Windows. |  |
+| `scheduled_task_start_failed` | `scheduled_tasks` | Warning where a named automation stopped running. Notice where a task in the Microsoft task folder failed or was refused, and lower still where Windows removed the program it points at. |  |
 | `win_locale_registry_read_failed` | `user_profiles` | Warning |  |
 
 ## `bitlocker_policy_noncompliant`
@@ -49,7 +49,7 @@ The management client is the authority on what the policy requires. The device's
 
 A Background Intelligent Transfer Service job reported an error on one transfer attempt.
 
-**Severity:** Warning
+**Severity:** Info
 
 **Consider:**
 
@@ -274,7 +274,7 @@ A per-user task engine only starts when that user has a session, so this line is
 
 A scheduled task definition could not be read at service start, so the task is not in the schedule at all.
 
-**Severity:** Warning
+**Severity:** Notice for a Microsoft task whose definition is not found, Warning for any other code or task.
 
 **Impact:** The task is gone rather than failing, so nothing else reports that its work has stopped.
 
@@ -304,7 +304,7 @@ A service-account password change is the usual cause, and the tasks stop silentl
 
 A scheduled task did not run, and the result code says whether the program was missing, the identity was refused, or the action itself failed.
 
-**Severity:** Warning where a named automation stopped running. Lower where the task ships with Windows and the program it points at was removed by Windows.
+**Severity:** Warning where a named automation stopped running. Notice where a task in the Microsoft task folder failed or was refused, and lower still where Windows removed the program it points at.
 
 **Impact:** Whatever that task does is not being done. On a backup pre-job or a patch orchestration task, that is a gap nothing else reports.
 

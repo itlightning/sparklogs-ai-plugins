@@ -9,11 +9,6 @@ Reported every 5 minutes on clock boundaries for the window ending at `t`. `spar
 | `sparklogs.data.storage_io.display_name` | string |  | The volume's drive letter or mount path, for display. |
 | `sparklogs.data.storage_io.volume_role` | string |  | What this volume is for, the same value `disk_volumes` writes: `os`, `fixed_data`, or `removable`. Absent when the volume has no role. |
 | `sparklogs.data.storage_io.volume_role_code` | integer |  | `volume_role` as the numeric code `disk_volumes` uses for the same role. |
-| `sparklogs.data.storage_io.device_class` | string |  | The latency class of the volume's backing device: `hdd` or `flash`. Absent when the backing device is not fully resolved. |
-| `sparklogs.data.storage_io.device_class_code` | float |  | `device_class` as the number the latency rules compare. |
-| `sparklogs.data.storage_io.latency_warn_ms` | float | milliseconds | Latency threshold in milliseconds for degraded performance, chosen by device class and host class. |
-| `sparklogs.data.storage_io.latency_error_ms` | float | milliseconds | Latency threshold in milliseconds at or above which this volume is considered severely degraded. |
-| `sparklogs.data.storage_io.latency_recover_ms` | float | milliseconds | The latency this volume must fall back under before a latency episode is considered closed. |
 | `sparklogs.data.storage_io.busy_pct_avg` | float | percent | The average share of the window this volume's backing store spent busy. |
 | `sparklogs.data.storage_io.busy_pct_p90_10s` | float | percent | The 90th percentile, across the window's 10-second samples, of busy share. |
 | `sparklogs.data.storage_io.busy_pct_max_10s` | float | percent | The highest 10-second busy share the window observed. |
@@ -31,11 +26,7 @@ Reported every 5 minutes on clock boundaries for the window ending at `t`. `spar
 | `sparklogs.data.storage_io.latency_ms_max_10s` | float | milliseconds | The highest 10-second mean latency the window observed. |
 | `sparklogs.data.storage_io.avg_read_kb` | float | kilobytes | The average size of a read over the window. |
 | `sparklogs.data.storage_io.avg_write_kb` | float | kilobytes | The average size of a write over the window. |
-| `sparklogs.data.storage_io.queue_depth_avg` | float |  | The average outstanding IO queue depth over the window. |
-| `sparklogs.data.storage_io.queue_depth_max_10s` | float |  | The highest 10-second queue depth the window observed. |
+| `sparklogs.data.storage_io.queue_depth_avg` | float |  | An occupancy estimate from completed-IO response time divided by eligible elapsed time (Little's law). It does not measure pending IO; a stuck interval can report zero. |
+| `sparklogs.data.storage_io.queue_depth_max_10s` | float |  | The highest interval completed-response occupancy estimate. It does not measure pending IO. |
 | `sparklogs.data.storage_io.topology_segment_count` | integer | count | How many distinct topology signatures the window's samples held. More than two in one window marks `topology_mixed` and holds until every sample shares one topology again. |
 | `sparklogs.data.storage_io.topology_mixed` | bool |  | Whether the topology changed too many times within one window to trust a single reduction. Absent when the topology held steady. |
-| `sparklogs.data.storage_io.disk_latency_degraded_age_basis` | string |  | `onset`: witnessed start. `observed`: already present when first seen, making age a lower bound. `unknown_ongoing`: no meaningful onset time. |
-| `sparklogs.data.storage_io.disk_latency_degraded_age_h` | float | hours | How long this condition has been open, in hours. |
-| `sparklogs.data.storage_io.disk_saturated_age_basis` | string |  | `onset`: witnessed start. `observed`: already present when first seen, making age a lower bound. `unknown_ongoing`: no meaningful onset time. |
-| `sparklogs.data.storage_io.disk_saturated_age_h` | float | hours | How long this condition has been open, in hours. |

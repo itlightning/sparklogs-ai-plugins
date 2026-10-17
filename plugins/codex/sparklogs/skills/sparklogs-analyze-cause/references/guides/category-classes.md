@@ -57,13 +57,13 @@ must act on.
 is independently stamped as its own field on the same event.
 
 ```
-disk_volumes.os_volume_space_exhausting.ELEVATED
+disk_volumes.os_volume_space_low.ELEVATED
 disk_volumes.NOTABLE
 disk_volumes.INVENTORY
 hash_mismatch.NOTABLE
 ```
 
-The class segment, when present, is LAST. `ELEVATED.os_volume_space_exhausting` is not a shape this
+The class segment, when present, is LAST. `ELEVATED.os_volume_space_low` is not a shape this
 system produces, and neither is any ladder led by the module name: the producing module is already a
 field (`subsource` (LQL)), so it never leads the ladder.
 

@@ -23,7 +23,7 @@ A promoted field being absent does not mean the raw one is: promotion is per cur
 
 ## Reconstruction guarantee
 
-4 curated surface(s) drop the vendor body text below the synthesized first line.
+7 curated surface(s) drop the vendor body text below the synthesized first line.
 That is never data loss: the provider payload is retained at rest, so a dropped body can be reconstructed from it.
 What the body said is derivable; what it cost to ship it repeatedly is not.
 
@@ -33,7 +33,7 @@ Stored flat under the `win.eventlog.system.` prefix.
 
 | LQL path | Type | Meaning |
 |---|---|---|
-| `win.eventlog.system.service_name` | string | Windows service (or driver service) the event is about: SCM 7000/7009/7011/7023/7024/7031/7034/7045, UserPnp 20003. The recurrence + vendor-recognition join key (vendor service crashes arrive as SCM events keyed on this name). |
+| `win.eventlog.system.service_name` | string | Windows service (or driver service) the event is about: SCM 7000/7009/7011/7022/7023/7024/7031/7034/7045, UserPnp 20003. The recurrence + vendor-recognition join key (vendor service crashes arrive as SCM events keyed on this name). |
 | `win.eventlog.system.image_path` | string | Installed service IMAGE path from SCM 7045, with the arguments of the ImagePath command line removed. Unset where the image cannot be split off unambiguously (an unterminated quote, or an unquoted path containing spaces), so the value is always a path and never a command line. The full ImagePath text is root command_line. |
 | `win.eventlog.system.service_type` | string | Service type text from SCM 7045 (kernel mode driver \| user mode service \| ...). |
 | `win.eventlog.system.start_type` | string | Service start type text from SCM 7045 (auto start \| demand start \| ...). |
@@ -44,6 +44,12 @@ Stored flat under the `win.eventlog.system.` prefix.
 | `win.eventlog.system.bugcheck_name` | string | Bug check constant name for the stop code (DRIVER_IRQL_NOT_LESS_OR_EQUAL), from Kernel-Power 41 and WER-SystemErrorReporting 1001. Absent when the code is 0 or not a documented bug check. |
 | `win.eventlog.system.sleep_in_progress` | string | SleepInProgress from Kernel-Power 41, as logged: the sleep state the system was in when the session ended. A number, not a flag; values other than 0 and 1 occur. |
 | `win.eventlog.system.connected_standby_in_progress` | string | ConnectedStandbyInProgress from Kernel-Power 41, as logged (true or false): whether Modern Standby was active when the session ended. |
+| `win.eventlog.system.shutdown_reason` | string | The reason a restart or shutdown was requested, as Windows states it in User32 1074 (param3), e.g. "Operating System: Upgrade (Planned)". |
+| `win.eventlog.system.shutdown_reason_code` | string | The shutdown reason code from User32 1074 (param4), as Windows renders it (0x...): the major and minor reason and the planned flag. |
+| `win.eventlog.system.shutdown_type` | string | What was requested in User32 1074 (param5), as a fixed token: restart, power_off, shutdown, or other for a value outside those (another display language). |
+| `win.eventlog.system.shutdown_type_text` | string | The shutdown type as Windows logged it in User32 1074 (param5), only when it maps to other, so a host in another display language keeps the meaning. |
+| `win.eventlog.system.shutdown_comment` | string | The comment the requester gave in User32 1074 (param6), such as the text passed to shutdown /c. Absent when empty. |
+| `win.eventlog.system.recorded_at` | string | When Windows wrote the EventLog 6008 record (RFC 3339, UTC), at the boot after an unexpected shutdown. The row time of that record is the loss time decoded from its binary data; the two are equal when no loss time could be decoded. |
 | `win.eventlog.system.bugcheck_text` | string | Full bugcheck string from WER-SystemErrorReporting 1001, e.g. "0x0000001e (0x..., ...)". Kept verbatim: the code plus its four parameters are the crash identity. |
 | `win.eventlog.system.dump_file` | string | Memory-dump path from WER-SystemErrorReporting 1001. |
 | `win.eventlog.system.report_id` | string | WER report id from WER-SystemErrorReporting 1001; joins to the WER report store. A GUID on current builds; the minidump base name on Windows Server 2012 R2 (build 9600). |
@@ -68,6 +74,11 @@ Stored flat under the `win.eventlog.system.` prefix.
 | `win.eventlog.system.clsid` | string | COM server CLSID from DistributedCOM 10010. |
 | `win.eventlog.system.time_peer` | string | Configured NTP peer from Time-Service 134 (DomainPeer). |
 | `win.eventlog.system.update_title` | string | Update the WindowsUpdateClient 20 install outcome is about (updateTitle). The fleet pivot for separating a bad update from a bad device. |
+| `win.eventlog.system.mem_commit_bytes` | int | Committed virtual-memory bytes when Resource-Exhaustion-Detector 2004 diagnosed low virtual memory (SystemCommitCharge). |
+| `win.eventlog.system.mem_commit_limit_bytes` | int | Virtual-memory commit limit in bytes at the Resource-Exhaustion-Detector 2004 diagnosis (SystemCommitLimit). |
+| `win.eventlog.system.mem_physical_bytes` | int | Physical memory size in bytes reported by Resource-Exhaustion-Detector 2004 (PhysicalMemorySize). |
+| `win.eventlog.system.mem_physical_used_bytes` | int | Physical memory in use in bytes reported by Resource-Exhaustion-Detector 2004 (PhysicalMemoryUsage). |
+| `win.eventlog.system.mem_top_consumer_image` | string | Image name of the program that held the most committed memory at the Resource-Exhaustion-Detector 2004 diagnosis, read from the English rendered message; unset when the message does not name one. |
 
 ## Portable families
 
@@ -79,6 +90,12 @@ Prefer these over the per-feed fields for anything that spans feeds.
 | `sparklogs.config_change.type` | The kind of object that changed, from a closed set of object nouns. |
 | `sparklogs.config_change.action` | What was done to that object, from a closed set of verbs. |
 | `sparklogs.config_change.target` | Which object it was: its own identity within its kind, as a name, a path or an id. A different field from the principal a change acted on, and a change acting on a principal carries both. |
+| `sparklogs.config_change.category` | Positive upkeep classification, maintenance when established, omitted otherwise. |
+| `sparklogs.actor.name` | The initiator. Who wanted the thing done. |
+| `sparklogs.actor.type` | The initiator. Who wanted the thing done. |
+| `sparklogs.actor.domain` | The initiator. Who wanted the thing done. |
+| `sparklogs.process.path` | The process the event is about. |
+| `sparklogs.process.name` | The process the event is about. |
 
 ## Tail keys and where the value is queryable
 
@@ -88,6 +105,13 @@ Each key names one field; that field is where the value is queried.
 | Tail key | Queryable as |
 |---|---|
 | `volume` | not queryable as a field |
+| `process_path` | not queryable as a field |
+| `actor` | not queryable as a field |
+| `actor_domain` | not queryable as a field |
+| `reason` | not queryable as a field |
+| `reason_code` | not queryable as a field |
+| `shutdown_type` | not queryable as a field |
+| `comment` | not queryable as a field |
 | `bugcheck_code` | not queryable as a field |
 | `bugcheck_name` | not queryable as a field |
 | `power_button_timestamp` | not queryable as a field |
@@ -107,14 +131,17 @@ The last column is different in kind: it is the author's account of the row or e
 | Surface | Event ids | Fields set | Row fields |
 |---|---|---|---|
 | `av_unsigned_code_blocked` / `default` | 514 | **fields: none** |  |
+| `bitlocker_key_retrieval_code_reported` / `default` | 24641 | **fields: none** |  |
 | `dcom_activation_timeout` / `default` | 10029 | **fields: none** |  |
 | `dcom_register_timeout` / `default` | 10010 | `win.eventlog.system.clsid` |  |
 | `dcom_start_failed` / `default` | 10005 | **fields: none** |  |
 | `disk_bad_block` / `default` | 7 | **fields: none** |  |
 | `disk_controller_error` / `default` | 11 | **fields: none** |  |
+| `disk_io_failed` / `default` | 154 | **fields: none** |  |
 | `disk_io_retried` / `default` | 153 | **fields: none** |  |
 | `disk_paging_error` / `default` | 51 | **fields: none** |  |
 | `disk_surprise_removal` / `default` | 157 | **fields: none** |  |
+| `dns_registration_failed` / `default` | 8015, 8016, 8017, 8018, 8019, 8020, 8021, 8022, 8023, 8024, 8025, 8026, 8033, 8034, 8035, 8036, 8037, 8038 | **fields: none** |  |
 | `driver_load_failed` / `default` | 219 | `win.eventlog.system.device_instance` `win.eventlog.system.driver_name` |  |
 | `ephemeral_port_alloc_failed` / `default` | 4231, 4266 | **fields: none** |  |
 | `failover_cluster_csv_unavailable` / `default` | 5120, 5142 | **fields: none** |  |
@@ -136,6 +163,7 @@ The last column is different in kind: it is the author's account of the row or e
 | `filesystem_transaction_log_operation_failed` / `recovery_error` | 134, 136, 137, 140 | `win.eventlog.system.filesystem` `win.eventlog.system.volume` |  |
 | `filesystem_transaction_log_operation_failed` / `start_failed` | 134, 136, 137, 140 | `win.eventlog.system.filesystem` `win.eventlog.system.volume` |  |
 | `gpu_driver_reset` / `default` | 153 | **fields: none** |  |
+| `group_policy_processing_failed` / `default` | 1129 | **fields: none** |  |
 | `hardware_error_corrected` / `boot_corrected` | 1 | `win.eventlog.system.cper_creator` `win.eventlog.system.cper_decode` `win.eventlog.system.cper_error_ts` `win.eventlog.system.cper_firmware_record_types` `win.eventlog.system.cper_flags` `win.eventlog.system.cper_flags_raw` `win.eventlog.system.cper_notification` `win.eventlog.system.cper_revision` `win.eventlog.system.cper_section_count` `win.eventlog.system.cper_section_severities` `win.eventlog.system.cper_section_types` `win.eventlog.system.cper_severity` |  |
 | `hardware_error_corrected` / `error_source_record` | 17, 19 | `win.eventlog.system.device_instance` `win.eventlog.system.error_source` |  |
 | `hardware_error_uncorrected` / `boot_recoverable` | 1 | `win.eventlog.system.cper_creator` `win.eventlog.system.cper_decode` `win.eventlog.system.cper_error_ts` `win.eventlog.system.cper_firmware_record_types` `win.eventlog.system.cper_flags` `win.eventlog.system.cper_flags_raw` `win.eventlog.system.cper_notification` `win.eventlog.system.cper_revision` `win.eventlog.system.cper_section_count` `win.eventlog.system.cper_section_severities` `win.eventlog.system.cper_section_types` `win.eventlog.system.cper_severity` |  |
@@ -156,9 +184,15 @@ The last column is different in kind: it is the author's account of the row or e
 | `kerberos_weak_krbtgt_key` / `default` | 42 | **fields: none** |  |
 | `nic_driver_fault_reported` / `default` | 5002, 5005 | **fields: none** |  |
 | `nic_driver_load_failed` / `default` | 5000 | **fields: none** |  |
-| `nic_link_down` / `down` | 2, 27 | **fields: none** |  |
-| `nic_link_down` / `recovered` | 2, 27 | **fields: none** |  |
+| `nic_link_down` / `down` | 1, 2, 27, 32, 33, 34 | **fields: none** |  |
+| `nic_link_down` / `recovered` | 1, 2, 27, 32, 33, 34 | **fields: none** |  |
+| `os_boot` / `default` | 12 | **fields: none** |  |
 | `os_bsod` / `default` | 1001 | `win.eventlog.system.bugcheck_name` `win.eventlog.system.bugcheck_text` `win.eventlog.system.dump_file` `win.eventlog.system.report_id` |  |
+| `os_restart_requested` / `default` | 1074 | `win.eventlog.system.shutdown_comment` `win.eventlog.system.shutdown_reason` `win.eventlog.system.shutdown_reason_code` `win.eventlog.system.shutdown_type` `win.eventlog.system.shutdown_type_text` |  |
+| `os_shutdown` / `default` | 13 | **fields: none** |  |
+| `os_sleep` / `default` | 42, 506 | **fields: none** |  |
+| `os_wake` / `default` | 1, 507 | **fields: none** |  |
+| `pagefile_extended` / `default` | 26 | **fields: none** |  |
 | `patch_install_deferred` / `packages_in_use` | 20 | `win.eventlog.system.update_title` |  |
 | `patch_install_deferred` / `retry_later` | 20 | `win.eventlog.system.update_title` |  |
 | `patch_install_failed` / `failed` | 20 | `win.eventlog.system.update_title` |  |
@@ -167,6 +201,8 @@ The last column is different in kind: it is the author's account of the row or e
 | `platform_tamper_indicator_reported` / `escalated` | 11, 12 | **fields: none** |  |
 | `platform_tamper_indicator_reported` / `partial` | 11, 12 | **fields: none** |  |
 | `platform_tamper_indicator_reported` / `reported` | 11, 12 | **fields: none** |  |
+| `ram_commit_exhausted` / `diagnosed` | 26, 2004 | `win.eventlog.system.mem_commit_bytes` `win.eventlog.system.mem_commit_limit_bytes` `win.eventlog.system.mem_physical_bytes` `win.eventlog.system.mem_physical_used_bytes` `win.eventlog.system.mem_top_consumer_image` |  |
+| `ram_commit_exhausted` / `dialog` | 26, 2004 | **fields: none** |  |
 | `rds_license_server_unactivated` / `default` | 18 | **fields: none** |  |
 | `rds_license_tracking_failed` / `default` | 4105 | **fields: none** |  |
 | `rds_licensing_service_failed` / `database_error` | 37, 44, 4097 | **fields: none** |  |
@@ -177,14 +213,19 @@ The last column is different in kind: it is the author's account of the row or e
 | `service_crashed` / `default` | 7031, 7034 | `win.eventlog.system.crash_count` `win.eventlog.system.service_name` |  |
 | `service_exited_with_error` / `default` | 7023, 7024 | `win.eventlog.system.service_error` `win.eventlog.system.service_name` |  |
 | `service_hang` / `default` | 7011 | `win.eventlog.system.service_name` |  |
-| `service_installed` / `default` | 7045 | `command_line` `win.eventlog.system.account_name` `win.eventlog.system.image_path` `win.eventlog.system.service_name` `win.eventlog.system.service_type` `win.eventlog.system.start_type` |  |
+| `service_hung_starting` / `default` | 7022 | `win.eventlog.system.service_name` |  |
+| `service_installed` / `installed` | 7045 | `command_line` `win.eventlog.system.account_name` `win.eventlog.system.image_path` `win.eventlog.system.service_name` `win.eventlog.system.service_type` `win.eventlog.system.start_type` |  |
+| `service_installed` / `self_versioned_updater` | 7045 | `command_line` `win.eventlog.system.account_name` `win.eventlog.system.image_path` `win.eventlog.system.service_name` `win.eventlog.system.service_type` `win.eventlog.system.start_type` |  |
 | `service_start_failed` / `default` | 7000 | `win.eventlog.system.service_error` `win.eventlog.system.service_name` |  |
 | `service_start_timeout` / `default` | 7009 | `win.eventlog.system.service_name` |  |
 | `smb_delayed_write_lost` / `default` | 50, 139 | **fields: none** |  |
 | `smb_server_transport_bind_failed` / `default` | 2504 | **fields: none** |  |
 | `smb_share_recreate_failed` / `default` | 2511 | **fields: none** |  |
-| `storage_controller_reset` / `default` | n/a | **fields: none** |  |
-| `time_sync_failed` / `default` | 134 | `win.eventlog.system.time_peer` |  |
+| `sparklogs_agent_started` / `default` | 7036 | **fields: none** |  |
+| `sparklogs_agent_stopped` / `stopped` | 7031, 7034, 7036 | **fields: none** |  |
+| `sparklogs_agent_stopped` / `terminated` | 7031, 7034, 7036 | `win.eventlog.system.crash_count` |  |
+| `storage_controller_reset` / `default` | 11, 129 | **fields: none** |  |
+| `time_sync_failed` / `default` | 47, 129, 134 | `win.eventlog.system.time_peer` |  |
 | `tls_cert_expired` / `default` | 36881 | **fields: none** |  |
 | `tls_cert_name_mismatch` / `default` | 36884 | **fields: none** |  |
 | `tls_cert_untrusted_ca` / `default` | 36882 | **fields: none** |  |
@@ -192,7 +233,7 @@ The last column is different in kind: it is the author's account of the row or e
 | `tls_client_credential_failed` / `default` | 36871 | **fields: none** |  |
 | `tls_server_credential_failed` / `default` | 36870 | **fields: none** |  |
 | `tpm_attestation_failed` / `default` | 1040 | **fields: none** |  |
-| `unexpected_shutdown` / `event_log` | 41, 6008 | **fields: none** |  |
+| `unexpected_shutdown` / `event_log` | 41, 6008 | `win.eventlog.system.recorded_at` |  |
 | `unexpected_shutdown` / `kernel_power` | 41 | `win.eventlog.system.bugcheck_code` `win.eventlog.system.bugcheck_name` `win.eventlog.system.connected_standby_in_progress` `win.eventlog.system.sleep_in_progress` |  |
 | `vpn_connected` / `default` | 20267 | **fields: none** |  |
 | `vss_shadow_aborted` / `abort_on_failure` | 13, 14, 15, 16, 20, 23, 24, 27, 28, 29, 32, 35, 36 | `win.eventlog.system.volume` |  |
@@ -202,8 +243,11 @@ The last column is different in kind: it is the author's account of the row or e
 | `win_app_error_dialog_shown` / `default` | 26 | **fields: none** |  |
 | `winre_servicing_failed` / `default` | 4502 | **fields: none** |  |
 | `wlan_limited_connectivity` / `default` | 4003 | **fields: none** |  |
+| `bitlocker_key_retrieval_success_code` | 24641 | **fields: none** |  |
+| `iscsi_path_repeat` | 1, 7, 9, 20, 39, 49, 129 | **fields: none** |  |
 | `vss_shadow_copy_reclaimed` | 33, 58, 95 | `win.eventlog.system.volume` |  |
 | `whea_boot_error_record` | 1 | `win.eventlog.system.cper_creator` `win.eventlog.system.cper_decode` `win.eventlog.system.cper_error_ts` `win.eventlog.system.cper_firmware_record_types` `win.eventlog.system.cper_flags` `win.eventlog.system.cper_flags_raw` `win.eventlog.system.cper_notification` `win.eventlog.system.cper_revision` `win.eventlog.system.cper_section_count` `win.eventlog.system.cper_section_severities` `win.eventlog.system.cper_section_types` `win.eventlog.system.cper_severity` |  |
+| `wifi_direct_adapter_fault` | 10317 | **fields: none** |  |
 
 ### Surfaces that promote nothing
 
@@ -211,13 +255,16 @@ These carry class, reason and message text only.
 A predicate over them uses the reason, the class, or the retained payload; there is no promoted field to filter on.
 
 - `av_unsigned_code_blocked` / `default`
+- `bitlocker_key_retrieval_code_reported` / `default`
 - `dcom_activation_timeout` / `default`
 - `dcom_start_failed` / `default`
 - `disk_bad_block` / `default`
 - `disk_controller_error` / `default`
+- `disk_io_failed` / `default`
 - `disk_io_retried` / `default`
 - `disk_paging_error` / `default`
 - `disk_surprise_removal` / `default`
+- `dns_registration_failed` / `default`
 - `ephemeral_port_alloc_failed` / `default`
 - `failover_cluster_csv_unavailable` / `default`
 - `failover_cluster_node_removed` / `default`
@@ -228,6 +275,7 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `failover_cluster_service_down` / `default`
 - `filesystem_corruption` / `disk`
 - `gpu_driver_reset` / `default`
+- `group_policy_processing_failed` / `default`
 - `http_ssl_binding_created` / `default`
 - `http_ssl_binding_deleted` / `default`
 - `http_ssl_config_failed` / `default`
@@ -245,10 +293,16 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `nic_driver_load_failed` / `default`
 - `nic_link_down` / `down`
 - `nic_link_down` / `recovered`
+- `os_boot` / `default`
+- `os_shutdown` / `default`
+- `os_sleep` / `default`
+- `os_wake` / `default`
+- `pagefile_extended` / `default`
 - `platform_tamper_indicator_reported` / `detected`
 - `platform_tamper_indicator_reported` / `escalated`
 - `platform_tamper_indicator_reported` / `partial`
 - `platform_tamper_indicator_reported` / `reported`
+- `ram_commit_exhausted` / `dialog`
 - `rds_license_server_unactivated` / `default`
 - `rds_license_tracking_failed` / `default`
 - `rds_licensing_service_failed` / `database_error`
@@ -259,6 +313,8 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `smb_delayed_write_lost` / `default`
 - `smb_server_transport_bind_failed` / `default`
 - `smb_share_recreate_failed` / `default`
+- `sparklogs_agent_started` / `default`
+- `sparklogs_agent_stopped` / `stopped`
 - `storage_controller_reset` / `default`
 - `tls_cert_expired` / `default`
 - `tls_cert_name_mismatch` / `default`
@@ -267,8 +323,10 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `tls_client_credential_failed` / `default`
 - `tls_server_credential_failed` / `default`
 - `tpm_attestation_failed` / `default`
-- `unexpected_shutdown` / `event_log`
 - `vpn_connected` / `default`
 - `win_app_error_dialog_shown` / `default`
 - `winre_servicing_failed` / `default`
 - `wlan_limited_connectivity` / `default`
+- `bitlocker_key_retrieval_success_code`
+- `iscsi_path_repeat`
+- `wifi_direct_adapter_fault`

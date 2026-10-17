@@ -81,6 +81,7 @@ The last column is different in kind: it is the author's account of the row or e
 | `dfsr_replication_stopped` / `config_unreachable` | 1202 | **fields: none** |  |
 | `dfsr_replication_stopped` / `folder_stopped` | 2004, 2104, 4004 | **fields: none** |  |
 | `dfsr_replication_stopped` / `offline_too_long` | 4012 | **fields: none** |  |
+| `dfsr_replication_stopped` / `wmi_registration_failed` | 6104 | **fields: none** |  |
 | `dfsr_sysvol_initial_sync_pending` / `default` | 4612, 4614 | **fields: none** |  |
 | `hyperv_replication_failed` / `retrying` | 32315 | `win.eventlog.management.replica_retry_minutes` `win.eventlog.management.vm_name` |  |
 | `hyperv_replication_failed` / `state_conflict` | 33676 | `win.eventlog.management.vm_name` |  |
@@ -123,6 +124,7 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `dfsr_replication_stopped` / `config_unreachable`
 - `dfsr_replication_stopped` / `folder_stopped`
 - `dfsr_replication_stopped` / `offline_too_long`
+- `dfsr_replication_stopped` / `wmi_registration_failed`
 - `dfsr_sysvol_initial_sync_pending` / `default`
 - `print_connection_reopen_failed` / `service_profile`
 - `print_connection_reopen_failed` / `user_profile`

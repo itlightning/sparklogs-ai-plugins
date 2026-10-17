@@ -140,6 +140,7 @@ The last column is different in kind: it is the author's account of the row or e
 | `mfa_sign_in_succeeded` / `default` | 0 | **fields: none** |  |
 | `mfa_unavailable_access_granted` / `default` | 0 | **fields: none** |  |
 | `mfa_user_not_enrolled` / `default` | 0 | **fields: none** |  |
+| `mssql_agent_job_failed` / `default` | 208 | **fields: none** |  |
 | `mssql_db_io_failed` / `default` | 823 | **fields: none** |  |
 | `mssql_db_page_corruption` / `default` | 824 | **fields: none** |  |
 | `mssql_db_read_retried` / `default` | 825 | **fields: none** |  |
@@ -170,6 +171,7 @@ The last column is different in kind: it is the author's account of the row or e
 | `win_user_profile_load_failed` / `default` | 1511, 1542 | **fields: none** |  |
 | `wmi_provider_registered_as_localsystem` / `default` | 63 | **fields: none** |  |
 | `app_crash_report` | 1001 | `win.eventlog.application.app_name` `win.eventlog.application.app_version` `win.eventlog.application.bugcheck_name` `win.eventlog.application.event_name` `win.eventlog.application.exception_code` `win.eventlog.application.fault_bucket` `win.eventlog.application.fault_offset` `win.eventlog.application.managed_exception_type` `win.eventlog.application.module_name` `win.eventlog.application.module_version` `win.eventlog.application.report_id` |  |
+| `intel_dynamic_tuning_not_started` | n/a | **fields: none** |  |
 | `vss_account_resolve_failed` | 8230 | `command_line` `win.eventlog.application.vss_execution_context` `win.eventlog.application.vss_operation_call` `win.eventlog.application.vss_operation_intent` `win.eventlog.application.vss_snapshot_attrs` `win.eventlog.application.vss_snapshot_context` `win.eventlog.application.vss_state` `win.eventlog.application.vss_writer` |  |
 | `vss_flush_writes_timeout` | 12297 | `command_line` `win.eventlog.application.vss_execution_context` `win.eventlog.application.vss_operation_call` `win.eventlog.application.vss_operation_intent` `win.eventlog.application.vss_snapshot_attrs` `win.eventlog.application.vss_snapshot_context` `win.eventlog.application.vss_state` `win.eventlog.application.vss_writer` |  |
 | `vss_hold_writes_timeout` | 12298 | `command_line` `win.eventlog.application.vss_execution_context` `win.eventlog.application.vss_operation_call` `win.eventlog.application.vss_operation_intent` `win.eventlog.application.vss_snapshot_attrs` `win.eventlog.application.vss_snapshot_context` `win.eventlog.application.vss_state` `win.eventlog.application.vss_writer` |  |
@@ -205,6 +207,7 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `mfa_sign_in_succeeded` / `default`
 - `mfa_unavailable_access_granted` / `default`
 - `mfa_user_not_enrolled` / `default`
+- `mssql_agent_job_failed` / `default`
 - `mssql_db_io_failed` / `default`
 - `mssql_db_page_corruption` / `default`
 - `mssql_db_read_retried` / `default`
@@ -219,4 +222,5 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `win_msi_operation_failed` / `install_error`
 - `win_user_profile_load_failed` / `default`
 - `wmi_provider_registered_as_localsystem` / `default`
+- `intel_dynamic_tuning_not_started`
 - `vss_legacy_driver_scan`

@@ -12,31 +12,31 @@ Every section below is from the public reason block only.
 | `dhcp_lease_denied` | `networking` | Warning |  |
 | `dhcp_lease_failed` | `networking` | Warning |  |
 | `dns_client_resolution_timed_out` | `networking` | Warning |  |
-| `firewall_rule_changed` | `networking` | Notice |  |
-| `firewall_rule_created` | `networking` | Notice |  |
-| `firewall_rule_deleted` | `networking` | Notice |  |
+| `firewall_rule_changed` | `networking` | Verbose |  |
+| `firewall_rule_created` | `networking` | Verbose |  |
+| `firewall_rule_deleted` | `networking` | Verbose for one rule removed; Info for the whole-store reset (2033), which reads like every rule being lost and is the firewall service's own routine. | benign possible |
 | `offline_files_slow_link_transition_blocked` | `file_sharing` | Warning |  |
 | `offline_files_sync_failed` | `file_sharing` | Warning |  |
 | `rds_redirected_printer_setup_failed` | `printing` | Warning |  |
-| `smb_anonymous_access_denied` | `file_sharing` | Notice |  |
+| `smb_anonymous_access_denied` | `file_sharing` | Warning (public client address) / Verbose (local network or no address) |  |
 | `smb_anonymous_access_enabled` | `file_sharing` | Notice |  |
 | `smb_client_auth_context_failed` | `file_sharing` | Warning |  |
 | `smb_client_mutual_auth_lost` | `file_sharing` | Warning |  |
 | `smb_client_security_call_slow` | `file_sharing` | Notice |  |
-| `smb_connect_failed` | `file_sharing` | Warning |  |
+| `smb_connect_failed` | `file_sharing` | Notice (admin-share 31010) / Warning (other access denied) / Notice (connection failures) |  |
 | `smb_insecure_guest_allowed` | `file_sharing` | Warning |  |
 | `smb_insecure_guest_rejected` | `file_sharing` | Warning |  |
 | `smb_legacy_dialect_rejected` | `file_sharing` | Notice |  |
 | `smb_security_setting_nondefault` | `file_sharing` | Notice |  |
-| `smb_server_name_unresolved` | `file_sharing` | Warning |  |
+| `smb_server_name_unresolved` | `file_sharing` | Display |  |
 | `smb_server_operation_slow` | `file_sharing` | Notice |  |
 | `smb_session_auth_failed` | `file_sharing` | Warning or Notice |  |
-| `smb_session_lost` | `file_sharing` | Warning or Info |  |
+| `smb_session_lost` | `file_sharing` | Display or Info |  |
 | `smb_session_reopen_failed` | `file_sharing` | Warning |  |
-| `smb_share_access_denied` | `file_sharing` | Warning |  |
-| `smb_share_connection_lost` | `file_sharing` | Warning or Info |  |
+| `smb_share_access_denied` | `file_sharing` | Info |  |
+| `smb_share_connection_lost` | `file_sharing` | Display or Info |  |
 | `smb_signing_validation_failed` | `file_sharing` | Warning |  |
-| `wfp_transaction_watchdog_timeout` | `networking` | Warning |  |
+| `wfp_transaction_watchdog_timeout` | `networking` | Display |  |
 | `wlan_connect_failed` | `networking` | Warning or Info |  |
 | `wlan_security_handshake_failed` | `networking` | Warning |  |
 
@@ -93,7 +93,7 @@ The Windows Firewall service reported that a rule was modified. The payload iden
 
 **Also reported by:** `win.eventlog.security`
 
-**Severity:** Notice
+**Severity:** Verbose
 
 **Impact:** This record describes firewall configuration activity. It does not prove effective enforcement or network exposure.
 
@@ -108,7 +108,7 @@ The Windows Firewall service reported that a rule was added. The payload identif
 
 **Also reported by:** `win.eventlog.security`
 
-**Severity:** Notice
+**Severity:** Verbose
 
 **Impact:** This record describes firewall configuration activity. It does not prove effective enforcement or network exposure.
 
@@ -123,7 +123,7 @@ The Windows Firewall service reported that a rule was deleted. The payload ident
 
 **Also reported by:** `win.eventlog.security`
 
-**Severity:** Notice
+**Severity:** Verbose for one rule removed; Info for the whole-store reset (2033), which reads like every rule being lost and is the firewall service's own routine.
 
 **Impact:** This record describes firewall configuration activity. It does not prove effective enforcement or network exposure.
 
@@ -171,9 +171,9 @@ RDS redirected printer setup failed.
 
 This server refused anonymous access at the share or server scope.
 
-**Severity:** Notice
+**Severity:** Warning (public client address) / Verbose (local network or no address)
 
-**Impact:** The refusal is expected when anonymous access is disabled.
+**Impact:** The refusal is expected when anonymous access is disabled. From a public address it means the SMB server is reachable from outside the network.
 
 ## `smb_anonymous_access_enabled`
 
@@ -228,7 +228,7 @@ An SMB client security call exceeded its slow threshold.
 
 An SMB connection attempt failed after the server name resolved.
 
-**Severity:** Warning
+**Severity:** Notice (admin-share 31010) / Warning (other access denied) / Notice (connection failures)
 
 **Impact:** Applications cannot reach the share or server until connectivity or permissions improve.
 
@@ -296,7 +296,7 @@ An SMB security setting on this device differs from the Windows default. The pay
 
 The SMB client could not resolve a server name.
 
-**Severity:** Warning
+**Severity:** Display
 
 **Impact:** File shares on that server name stay unreachable until name resolution works.
 
@@ -332,7 +332,7 @@ An SMB session authentication attempt on this server failed.
 
 An SMB session to a server was lost or recovered.
 
-**Severity:** Warning or Info
+**Severity:** Display or Info
 
 **Impact:** Open files on that session fail until the client reconnects.
 
@@ -348,7 +348,7 @@ The server could not reopen an SMB file after the client returned.
 
 A share on this server denied access to a client.
 
-**Severity:** Warning
+**Severity:** Info
 
 **Impact:** The user cannot open the share until permissions change.
 
@@ -361,7 +361,7 @@ A share on this server denied access to a client.
 
 An SMB share tree connection was lost or recovered.
 
-**Severity:** Warning or Info
+**Severity:** Display or Info
 
 **Impact:** Applications using that share see I/O errors until the tree reconnects.
 
@@ -383,9 +383,9 @@ SMB signing or encryption validation failed for a session.
 
 A Windows Filtering Platform transaction hit a watchdog timeout.
 
-**Severity:** Warning
+**Severity:** Display
 
-**Impact:** Firewall or filter policy changes may be incomplete until the platform recovers.
+**Impact:** Other filter policy writes wait while one process holds a transaction open; filtering already in force keeps working, so on its own this does not block traffic.
 
 ## `wlan_connect_failed`
 

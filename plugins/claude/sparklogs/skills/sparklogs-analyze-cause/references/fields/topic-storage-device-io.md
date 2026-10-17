@@ -7,8 +7,12 @@ Reported every 5 minutes on clock boundaries for the window ending at `t`. `spar
 |---|---|---|---|
 | `sparklogs.data.storage_device_io.device` | string |  | The device's stable identity, the same identity `storage_devices` uses. |
 | `sparklogs.data.storage_device_io.display_name` | string |  | The device's friendly name, for display. |
-| `sparklogs.data.storage_device_io.transport` | string |  | The bus this device is attached over. |
+| `sparklogs.data.storage_device_io.transport` | string |  | The bus this device is attached over, as `storage_devices.transport` reports it. A sum of IO across devices leaves out `file_backed_virtual` rows: a mounted VHD's IO is also counted on the disk that holds its file. A `spaces` row stays in: its pool members have no row of their own. |
 | `sparklogs.data.storage_device_io.media` | string |  | The device's media: `hdd` or `ssd`. Omitted when not read. |
+| `sparklogs.data.storage_device_io.presentation` | string |  | What the device presents as, the class `storage_devices.presentation` documents. |
+| `sparklogs.data.storage_device_io.io_completed_count_5m` | float |  | Completed IO operations in valid intervals in the five-minute window; the exact count used by the demand floor. |
+| `sparklogs.data.storage_device_io.media_code` | integer |  | Media selector used by the disk latency thresholds: 0 unknown, 1 HDD, 2 SSD. Matches media when reported. |
+| `sparklogs.data.storage_device_io.volumes` | string_array |  | Mounted volume names backed by this device. |
 | `sparklogs.data.storage_device_io.total_iops_avg` | float | iops | Average combined read and write operations per second over the window. |
 | `sparklogs.data.storage_device_io.total_mb_per_s_avg` | float | megabytes_per_second | The average combined read-plus-write throughput over the window, in 1024-based MB per second. |
 | `sparklogs.data.storage_device_io.bus_permanent` | bool |  | Whether this device uses a permanent bus, excluding USB. |
@@ -31,9 +35,17 @@ Reported every 5 minutes on clock boundaries for the window ending at `t`. `spar
 | `sparklogs.data.storage_device_io.latency_ms_max_10s` | float | milliseconds | The highest 10-second mean latency the window observed. |
 | `sparklogs.data.storage_device_io.avg_read_kb` | float | kilobytes | The average size of a read over the window. |
 | `sparklogs.data.storage_device_io.avg_write_kb` | float | kilobytes | The average size of a write over the window. |
-| `sparklogs.data.storage_device_io.queue_depth_avg` | float |  | The average outstanding IO queue depth over the window. |
-| `sparklogs.data.storage_device_io.queue_depth_max_10s` | float |  | The highest 10-second queue depth the window observed. |
+| `sparklogs.data.storage_device_io.queue_depth_avg` | float |  | An occupancy estimate from completed-IO response time divided by eligible elapsed time (Little's law). It does not measure pending IO; a stuck interval can report zero. |
+| `sparklogs.data.storage_device_io.queue_depth_max_10s` | float |  | The highest interval completed-response occupancy estimate. It does not measure pending IO. |
+| `sparklogs.data.storage_device_io.io_pct_time_stuck` | float | percent | The share of valid intervals with no completions, at least 99% busy, and an outstanding IO at both endpoints. |
+| `sparklogs.data.storage_device_io.io_slow_10s_count_5m` | integer |  | Intervals whose mean response time in a direction with completions is at least 1000 ms, with at most 16 time-average outstanding IOs in that direction. |
+| `sparklogs.data.storage_device_io.io_stall_10s_count_5m` | integer |  | Intervals whose mean response time in a direction with completions is at least 2000 ms, with at most 16 time-average outstanding IOs in that direction. |
+| `sparklogs.data.storage_device_io.io_slow_window_count_1h` | integer |  | Slow buckets among the trailing twelve judged non-overlapping five-minute buckets of observed time. Under-covered and unobserved time does not advance this history. |
 | `sparklogs.data.storage_device_io.topology_segment_count` | integer | count | How many distinct topology signatures the window's samples held. More than two in one window marks `topology_mixed` and holds until every sample shares one topology again. |
 | `sparklogs.data.storage_device_io.topology_mixed` | bool |  | Whether the topology changed too many times within one window to trust a single reduction. Absent when the topology held steady. |
+| `sparklogs.data.storage_device_io.disk_latency_degraded_age_basis` | string |  | `onset`: witnessed start. `observed`: already present when first seen, making age a lower bound. `unknown_ongoing`: no meaningful onset time. |
+| `sparklogs.data.storage_device_io.disk_latency_degraded_age_h` | float | hours | How long this condition has been open, in hours. |
+| `sparklogs.data.storage_device_io.disk_saturated_age_basis` | string |  | `onset`: witnessed start. `observed`: already present when first seen, making age a lower bound. `unknown_ongoing`: no meaningful onset time. |
+| `sparklogs.data.storage_device_io.disk_saturated_age_h` | float | hours | How long this condition has been open, in hours. |
 | `sparklogs.data.storage_device_io.disk_unresponsive_age_basis` | string |  | `onset`: witnessed start. `observed`: already present when first seen, making age a lower bound. `unknown_ongoing`: no meaningful onset time. |
 | `sparklogs.data.storage_device_io.disk_unresponsive_age_h` | float | hours | How long this condition has been open, in hours. |

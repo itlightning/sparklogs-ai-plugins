@@ -17,5 +17,9 @@ Full inventory every hour. Supported changes are reported when the agent observe
 | `sparklogs.data.volume_map.backing_resolution` | string |  | How completely the backing devices could be resolved: `complete`, `partial`, `unavailable`, or `not_applicable`. |
 | `sparklogs.data.volume_map.logical_bytes` | integer | bytes | The filesystem's logical size, duplicated from the same observation `disk_volumes` reads. Informational only. |
 | `sparklogs.data.volume_map.available_bytes` | integer | bytes | The filesystem's available space, duplicated from the same observation `disk_volumes` reads. Informational only. |
+| `sparklogs.data.volume_map.extents` | object_array |  | Where the volume lives on disk: one `{device, offset_bytes, length_bytes}` per extent, ordered by device then offset. `device` equals a `storage_devices` row's `device`. A consumer places the volume in a partition by offset containment. Absent when the backing could not be resolved. |
+| `sparklogs.data.volume_map.extents[].device` | string |  | In each `extents` entry. |
+| `sparklogs.data.volume_map.extents[].offset_bytes` | integer | bytes | In each `extents` entry. |
+| `sparklogs.data.volume_map.extents[].length_bytes` | integer | bytes | In each `extents` entry. |
 | `sparklogs.data.volume_map.observed_at` | string | timestamp | When this row's reading was taken. |
 | `sparklogs.data.volume_map.stale` | bool |  | Whether this row is a held reading from a probe that could not complete rather than a fresh one. |

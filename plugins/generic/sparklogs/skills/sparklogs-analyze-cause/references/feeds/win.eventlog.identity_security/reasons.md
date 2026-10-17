@@ -10,6 +10,8 @@ Every section below is from the public reason block only.
 |---|---|---|---|
 | `applocker_audit_would_block` | `security_audit` | Notice |  |
 | `applocker_unsupported_windows_edition` | `security_audit` | Notice |  |
+| `bitlocker_protection_resume_failed` | `encryption` | Warning |  |
+| `bitlocker_recovery_info_read_failed` | `encryption` | Notice or Info |  |
 | `bitlocker_recovery_key_backup_failed` | `encryption` | Error or Info | benign possible |
 | `bitlocker_secure_boot_unavailable` | `encryption` | Notice |  |
 | `cert_expired` | `certificates` | Warning |  |
@@ -22,12 +24,12 @@ Every section below is from the public reason block only.
 | `code_integrity_signing_level_blocked` | `security_audit` | Warning |  |
 | `crypto_key_operation_failed` | `certificates` | Notice or Debug | benign possible |
 | `defender_sensor_connection_failed` | `endpoint_protection` | Warning or Info | benign possible |
-| `device_encryption_enable_failed` | `encryption` | Warning |  |
+| `device_encryption_enable_failed` | `encryption` | Warning or Notice |  |
 | `device_registration_failed` | `device_management` | Warning or Notice |  |
 | `dpapi_unprotect_failed` | `certificates` | Notice |  |
 | `entra_device_certificate_update_failed` | `device_management` | Warning |  |
 | `entra_sign_in_failed` | `auth` | Notice for a wrong credential or an unreachable service, Warning for a refusal the event does not explain. |  |
-| `entra_token_acquisition_failed` | `auth` | Info where the library is asking for a sign-in, Notice for a transport failure, Warning where a tenant setting refused the request. | benign possible |
+| `entra_token_acquisition_failed` | `auth` | Warning, Notice, Info or Verbose | benign possible |
 | `exploit_mitigation_audit_would_block` | `security_audit` | Info | benign |
 | `exploit_mitigation_blocked` | `security_audit` | Notice or Verbose | benign possible |
 | `exploit_mitigation_shadow_stack_mismatch` | `security_audit` | Notice on the documented compatibility path, Warning where nothing on the event explains the mismatch. |  |
@@ -36,7 +38,7 @@ Every section below is from the public reason block only.
 | `group_policy_file_share_unhardened` | `device_management` | Notice |  |
 | `group_policy_processing_failed` | `device_management` | Notice on a device that moves and loses the corporate network, Warning otherwise. |  |
 | `laps_password_backup_failed` | `auth` | Warning |  |
-| `ntlm_authentication_used` | `auth` | Warning or Notice |  |
+| `ntlm_authentication_used` | `auth` | Warning or Verbose |  |
 | `vbs_key_isolation_failed` | `certificates` | Notice or Info | benign possible |
 | `windows_hello_key_registration_failed` | `auth` | Notice or Info | benign possible |
 | `windows_hello_provisioning_blocked` | `auth` | Notice or Info | benign possible |
@@ -67,9 +69,35 @@ An application-control policy reached a device whose Windows edition cannot enfo
 
 - Give the device a Windows edition that can enforce the policy, or remove it from the policy's scope.
 
+## `bitlocker_protection_resume_failed`
+
+BitLocker could not turn protection back on for the OS volume after it was suspended.
+
+**Severity:** Warning
+
+**Impact:** Until protection resumes, the key to the OS volume is stored in the clear on the disk, so the encryption does not protect a lost or stolen device.
+
+**Consider:**
+
+- Check whether protection resumed later (manage-bde -status shows the protection state).
+- Read the error code in the event; an unreachable domain or credential is the usual cause.
+
+## `bitlocker_recovery_info_read_failed`
+
+BitLocker could not read the recovery information escrowed for this device in Entra.
+
+**Severity:** Notice or Info
+
+**Impact:** None on the drive: it stays protected and the escrowed copy is untouched. A refusal that keeps repeating may point at the device object or its recovery record in Entra.
+
+**Consider:**
+
+- Check whether the device had network access at the time.
+- If the service keeps refusing, look at the device object and its BitLocker keys in Entra.
+
 ## `bitlocker_recovery_key_backup_failed`
 
-BitLocker reported that a recovery-key backup or retrieval operation failed for a volume.
+BitLocker reported that a recovery-key backup operation failed for a volume.
 
 **Severity:** Error or Info
 
@@ -221,7 +249,7 @@ A key operation failed against one of the Windows key-storage providers.
 
 - Read the provider name and the process together.
 - An application probing the software provider for a key it does not have is routine.
-- A hardware provider reporting the device as not ready flags a hardware or provisioning problem.
+- A hardware provider refusing an operation on a device expected to use Windows Hello flags a hardware or provisioning problem.
 
 ## `defender_sensor_connection_failed`
 
@@ -240,9 +268,9 @@ The endpoint detection sensor cannot reach its cloud service, or cannot get a to
 
 ## `device_encryption_enable_failed`
 
-The device qualifies for automatic device encryption, tried to turn it on and failed.
+Device encryption, automatic or required by policy, did not start.
 
-**Severity:** Warning
+**Severity:** Warning or Notice
 
 **Impact:** The system volume stays unencrypted. The customer likely believes that device is encrypted.
 
@@ -311,9 +339,9 @@ The cloud authentication plugin refused a sign-in on this device.
 
 The device failed to get a token for a cloud resource.
 
-**Severity:** Info where the library is asking for a sign-in, Notice for a transport failure, Warning where a tenant setting refused the request.
+**Severity:** Warning, Notice, Info or Verbose
 
-**Impact:** The resource behind that token is unavailable to the user until the cause is fixed. A tenant configuration error affects every device in the tenant.
+**Impact:** Depends on the cause. A disabled or locked account or device, or a device key fault, keeps the resource behind that token unavailable to the user until it is fixed (a lockout clears itself after its period), and a tenant configuration error affects every device in the tenant. A fallback step or a sign-in prompt is normal flow, and an application registration error affects only that application.
 
 **Consider:**
 
@@ -321,6 +349,8 @@ The device failed to get a token for a cloud resource.
 - A transport error points to a network or proxy problem.
 - A grant or consent error points to a tenant configuration problem, and no work on the device fixes that.
 - An interaction-required message reports normal sign-in flow.
+- An application registration row names one application whose reply URL or scope Entra rejects; the owner of that app registration fixes it.
+- A disabled account or device needs an administrator, a locked account clears after the lockout period or when an administrator unlocks it, and a key or TPM fault needs the device repaired.
 
 ## `exploit_mitigation_audit_would_block`
 
@@ -408,6 +438,8 @@ The machine reads Group Policy files from a file share without mutual authentica
 
 Group Policy failed to apply for that boot or that logon.
 
+**Also reported by:** `win.eventlog.system`
+
 **Severity:** Notice on a device that moves and loses the corporate network, Warning otherwise.
 
 **Impact:** That machine enforces none of the customer's expected settings for that session, and runs whatever policy it last cached.
@@ -436,7 +468,7 @@ The device manages its local administrator password and the backup of that passw
 
 This machine used the legacy NTLM authentication protocol, as a client or as a server.
 
-**Severity:** Warning or Notice
+**Severity:** Warning or Verbose
 
 **Impact:** Nothing failed. Where the first version of the protocol was used, the credential on that session carried a weakness the vendor has documented for a decade.
 

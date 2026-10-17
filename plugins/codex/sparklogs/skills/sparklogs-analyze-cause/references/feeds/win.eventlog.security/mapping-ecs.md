@@ -51,6 +51,7 @@ ECS is field-per-concept and flat-dotted. Its identity fields collapse the initi
 | `sparklogs.config_change.type` |  |
 | `sparklogs.config_change.action` | `event.action` |
 | `sparklogs.config_change.target` |  |
+| `sparklogs.config_change.category` |  |
 
 ### What each family means here
 
@@ -105,6 +106,9 @@ ECS is field-per-concept and flat-dotted. Its identity fields collapse the initi
 | `win.eventlog.security.insecure_boot_flags` |  |
 | `win.eventlog.security.rule_name` | `rule.name` |
 | `win.eventlog.security.rule_id` | `rule.id` |
+| `win.eventlog.security.firewall_rule_condition` |  |
+| `win.eventlog.security.firewall_setting_type` |  |
+| `win.eventlog.security.firewall_setting_value` |  |
 | `win.eventlog.security.share_name` |  |
 | `win.eventlog.security.share_path` | `file.directory` |
 | `win.eventlog.security.share_relative_target` | `file.path` |

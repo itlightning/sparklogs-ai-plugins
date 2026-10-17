@@ -109,11 +109,14 @@ The last column is different in kind: it is the author's account of the row or e
 | `applocker_audit_would_block` / `no_matching_rule` | 8003 | `win.eventlog.identity_security.applocker_file_path` `win.eventlog.identity_security.applocker_policy_name` `win.eventlog.identity_security.applocker_rule_id` `win.eventlog.identity_security.applocker_rule_name` |  |
 | `applocker_audit_would_block` / `rule_matched` | 8003 | `win.eventlog.identity_security.applocker_file_path` `win.eventlog.identity_security.applocker_policy_name` `win.eventlog.identity_security.applocker_rule_id` `win.eventlog.identity_security.applocker_rule_name` |  |
 | `applocker_unsupported_windows_edition` / `default` | 8009 | **fields: none** |  |
-| `bitlocker_recovery_key_backup_failed` / `consumer_account` | 829, 846, 868, 872, 875, 898 | `win.eventlog.identity_security.bitlocker_backup_target` `win.eventlog.identity_security.bitlocker_volume_mount_point` |  |
-| `bitlocker_recovery_key_backup_failed` / `directory_backup` | 829, 846, 868, 872, 875, 898 | `win.eventlog.identity_security.bitlocker_backup_target` `win.eventlog.identity_security.bitlocker_volume_mount_point` |  |
-| `bitlocker_secure_boot_unavailable` / `measurement_invalid` | 810, 811, 812, 813, 834, 835, 878, 881, 893 | `win.eventlog.identity_security.bitlocker_secure_boot_reason` |  |
-| `bitlocker_secure_boot_unavailable` / `measurement_unreadable` | 810, 811, 812, 813, 834, 835, 878, 881, 893 | `win.eventlog.identity_security.bitlocker_secure_boot_reason` |  |
-| `bitlocker_secure_boot_unavailable` / `secure_boot_disabled` | 810, 811, 812, 813, 834, 835, 878, 881, 893 | `win.eventlog.identity_security.bitlocker_secure_boot_reason` |  |
+| `bitlocker_protection_resume_failed` / `default` | 822 | **fields: none** |  |
+| `bitlocker_recovery_info_read_failed` / `fetch_failed` | 868, 875 | **fields: none** |  |
+| `bitlocker_recovery_info_read_failed` / `service_refused` | 868, 875 | **fields: none** |  |
+| `bitlocker_recovery_key_backup_failed` / `consumer_account` | 829, 846, 872, 898 | `win.eventlog.identity_security.bitlocker_backup_target` `win.eventlog.identity_security.bitlocker_volume_mount_point` |  |
+| `bitlocker_recovery_key_backup_failed` / `directory_backup` | 829, 846, 872, 898 | `win.eventlog.identity_security.bitlocker_backup_target` `win.eventlog.identity_security.bitlocker_volume_mount_point` |  |
+| `bitlocker_secure_boot_unavailable` / `measurement_invalid` | 810, 811, 812, 813, 815, 834, 835, 878, 881, 893 | `win.eventlog.identity_security.bitlocker_secure_boot_reason` |  |
+| `bitlocker_secure_boot_unavailable` / `measurement_unreadable` | 810, 811, 812, 813, 815, 834, 835, 878, 881, 893 | `win.eventlog.identity_security.bitlocker_secure_boot_reason` |  |
+| `bitlocker_secure_boot_unavailable` / `secure_boot_disabled` | 810, 811, 812, 813, 815, 834, 835, 878, 881, 893 | `win.eventlog.identity_security.bitlocker_secure_boot_reason` |  |
 | `cert_expired` / `default` | 1002, 1003 | `win.eventlog.identity_security.cert_not_valid_after` `win.eventlog.identity_security.cert_store` `win.eventlog.identity_security.cert_subject` |  |
 | `cert_expiring` / `default` | 1002, 1003 | `win.eventlog.identity_security.cert_not_valid_after` `win.eventlog.identity_security.cert_store` `win.eventlog.identity_security.cert_subject` |  |
 | `code_integrity_catalog_load_failed` / `resource_pressure` | 3010, 3024 | `win.eventlog.identity_security.code_integrity_catalog` |  |
@@ -126,11 +129,15 @@ The last column is different in kind: it is the author's account of the row or e
 | `code_integrity_signing_level_blocked` / `default` | 3033, 3066, 3086 | `win.eventlog.identity_security.code_integrity_file` `win.eventlog.identity_security.code_integrity_requested_level` `win.eventlog.identity_security.code_integrity_requested_level_name` `win.eventlog.identity_security.code_integrity_validated_level` `win.eventlog.identity_security.code_integrity_validated_level_name` |  |
 | `crypto_key_operation_failed` / `key_absent_probe` | 1, 2, 3, 4, 5, 6, 8, 10, 12 | `win.eventlog.identity_security.crypto_operation_type` `win.eventlog.identity_security.crypto_provider` |  |
 | `crypto_key_operation_failed` / `other_failure` | 1, 2, 3, 4, 5, 6, 8, 10, 12 | `win.eventlog.identity_security.crypto_operation_type` `win.eventlog.identity_security.crypto_provider` |  |
-| `crypto_key_operation_failed` / `platform_module_not_ready` | 1, 2, 3, 4, 5, 6, 8, 10, 12 | `win.eventlog.identity_security.crypto_operation_type` `win.eventlog.identity_security.crypto_provider` |  |
+| `crypto_key_operation_failed` / `platform_provider_failure` | 1, 2, 3, 4, 5, 6, 8, 10, 12 | `win.eventlog.identity_security.crypto_operation_type` `win.eventlog.identity_security.crypto_provider` |  |
 | `defender_sensor_connection_failed` / `contact_failed` | 5, 67, 101, 405, 406, 409 | `win.eventlog.identity_security.sensor_connection_error_code` `win.eventlog.identity_security.sensor_contact_failures` `win.eventlog.identity_security.sensor_contact_successes` `win.eventlog.identity_security.sensor_request_type` |  |
 | `defender_sensor_connection_failed` / `name_resolution` | 5, 67, 101, 405, 406, 409 | `win.eventlog.identity_security.sensor_connection_error_code` `win.eventlog.identity_security.sensor_contact_failures` `win.eventlog.identity_security.sensor_contact_successes` `win.eventlog.identity_security.sensor_request_type` |  |
 | `defender_sensor_connection_failed` / `partial` | 5, 67, 101, 405, 406, 409 | `win.eventlog.identity_security.sensor_connection_error_code` `win.eventlog.identity_security.sensor_contact_failures` `win.eventlog.identity_security.sensor_contact_successes` `win.eventlog.identity_security.sensor_request_type` |  |
-| `device_encryption_enable_failed` / `default` | 4103 | **fields: none** |  |
+| `device_encryption_enable_failed` / `automatic` | 851, 853, 854, 4103 | **fields: none** |  |
+| `device_encryption_enable_failed` / `automatic_no_account` | 851, 853, 854, 4103 | **fields: none** |  |
+| `device_encryption_enable_failed` / `silent` | 851, 853, 854, 4103 | **fields: none** |  |
+| `device_encryption_enable_failed` / `silent_no_tpm` | 851, 853, 854, 4103 | **fields: none** |  |
+| `device_encryption_enable_failed` / `silent_no_winre` | 851, 853, 854, 4103 | **fields: none** |  |
 | `device_registration_failed` / `attempt_failed` | 204, 220, 221, 233, 252, 258, 304, 307 | `win.eventlog.identity_security.directory_error_code` `win.eventlog.identity_security.directory_error_subcode` `win.eventlog.identity_security.http_status` `win.eventlog.identity_security.registration_attribute` |  |
 | `device_registration_failed` / `directory_refused` | 204, 220, 221, 233, 252, 258, 304, 307 | `win.eventlog.identity_security.directory_error_subcode` `win.eventlog.identity_security.http_status` `win.eventlog.identity_security.registration_attribute` |  |
 | `device_registration_failed` / `directory_unreachable` | 204, 220, 221, 233, 252, 258, 304, 307 | `win.eventlog.identity_security.directory_error_subcode` `win.eventlog.identity_security.http_status` `win.eventlog.identity_security.registration_attribute` |  |
@@ -143,7 +150,12 @@ The last column is different in kind: it is the author's account of the row or e
 | `entra_sign_in_failed` / `credential` | 1085, 1086, 1160, 1161, 1162 | **fields: none** |  |
 | `entra_sign_in_failed` / `unexplained` | 1085, 1086, 1160, 1161, 1162 | **fields: none** |  |
 | `entra_sign_in_failed` / `unreachable` | 1085, 1086, 1160, 1161, 1162 | **fields: none** |  |
+| `entra_token_acquisition_failed` / `account_state` | 1084, 1094, 1097, 1098, 1112, 1155, 1202, 1215 | `win.eventlog.identity_security.correlation_id` `win.eventlog.identity_security.entra_error_message` |  |
+| `entra_token_acquisition_failed` / `app_registration` | 1084, 1094, 1097, 1098, 1112, 1155, 1202, 1215 | `win.eventlog.identity_security.correlation_id` `win.eventlog.identity_security.entra_error_message` |  |
 | `entra_token_acquisition_failed` / `configuration` | 1084, 1094, 1097, 1098, 1112, 1155, 1202, 1215 | `win.eventlog.identity_security.correlation_id` `win.eventlog.identity_security.entra_error_message` |  |
+| `entra_token_acquisition_failed` / `device_key` | 1084, 1094, 1097, 1098, 1112, 1155, 1202, 1215 | `win.eventlog.identity_security.correlation_id` `win.eventlog.identity_security.entra_error_message` |  |
+| `entra_token_acquisition_failed` / `fallback_step` | 1084, 1094, 1097, 1098, 1112, 1155, 1202, 1215 | `win.eventlog.identity_security.correlation_id` `win.eventlog.identity_security.entra_error_message` |  |
+| `entra_token_acquisition_failed` / `first_party_preauthorization` | 1084, 1094, 1097, 1098, 1112, 1155, 1202, 1215 | `win.eventlog.identity_security.correlation_id` `win.eventlog.identity_security.entra_error_message` |  |
 | `entra_token_acquisition_failed` / `interaction_required` | 1084, 1094, 1097, 1098, 1112, 1155, 1202, 1215 | `win.eventlog.identity_security.correlation_id` `win.eventlog.identity_security.entra_error_message` |  |
 | `entra_token_acquisition_failed` / `transport` | 1084, 1094, 1097, 1098, 1112, 1155, 1202, 1215 | `win.eventlog.identity_security.correlation_id` `win.eventlog.identity_security.entra_error_message` |  |
 | `entra_token_acquisition_failed` / `unclassified` | 1084, 1094, 1097, 1098, 1112, 1155, 1202, 1215 | `win.eventlog.identity_security.correlation_id` `win.eventlog.identity_security.entra_error_message` |  |
@@ -183,7 +195,14 @@ These carry class, reason and message text only.
 A predicate over them uses the reason, the class, or the retained payload; there is no promoted field to filter on.
 
 - `applocker_unsupported_windows_edition` / `default`
-- `device_encryption_enable_failed` / `default`
+- `bitlocker_protection_resume_failed` / `default`
+- `bitlocker_recovery_info_read_failed` / `fetch_failed`
+- `bitlocker_recovery_info_read_failed` / `service_refused`
+- `device_encryption_enable_failed` / `automatic`
+- `device_encryption_enable_failed` / `automatic_no_account`
+- `device_encryption_enable_failed` / `silent`
+- `device_encryption_enable_failed` / `silent_no_tpm`
+- `device_encryption_enable_failed` / `silent_no_winre`
 - `entra_sign_in_failed` / `credential`
 - `entra_sign_in_failed` / `unexplained`
 - `entra_sign_in_failed` / `unreachable`

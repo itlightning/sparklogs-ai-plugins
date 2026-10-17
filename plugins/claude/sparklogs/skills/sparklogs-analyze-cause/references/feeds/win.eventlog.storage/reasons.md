@@ -8,13 +8,14 @@ Every section below is from the public reason block only.
 
 | reason | service | severity | benign |
 |---|---|---|---|
-| `disk_bad_block` | `storage` | Serious when the bus proves the device is fixed to the machine, Warning otherwise. Info on removable media taken away mid-IO, which is not a fault. | benign possible |
-| `disk_failure_predicted` | `storage` | Warning |  |
-| `disk_paging_error` | `storage` | Error when the device returned a data error, which is the medium failing. Warning otherwise. |  |
-| `disk_surprise_removal` | `storage` | Warning |  |
+| `disk_bad_block` | `storage` | ClassPnP medium errors select Serious on fixed disks, Error on removable disks and Warning on removable media, virtual disks or unknown/missing facts. Hardware-error and aborted-command sense keys remain Warning. NTFS data errors retain the fixed-bus Serious raise; verify-required requests against media taken away mid-IO remain Info. | benign possible |
+| `disk_failure_predicted` | `storage` | Serious when a server's drive reports its reliability degraded, Error for the same report on any other host, Warning when the drive has only passed its rated write endurance. |  |
+| `disk_io_failed` | `storage` | Warning or Debug |  |
+| `disk_paging_error` | `storage` | Device data errors select Error, or Warning on removable disks and Notice on removable media. Other failed transfers remain Warning; recognized device departures remain Notice. |  |
+| `disk_surprise_removal` | `storage` | Info on Storport551 USB or mounted-virtual-disk detaches; Warning on other removals. |  |
 | `filesystem_corruption` | `storage` | Error |  |
 | `storage_controller_reset` | `storage` | Error when the device is the one the machine boots from, Warning otherwise. |  |
-| `storage_device_command_failed` | `storage` | Info when the device is announcing a change to itself, Notice otherwise. One occurrence claims no fault. |  |
+| `storage_device_command_failed` | `storage` | Info when the device is announcing a change to itself, Debug for a drive rejecting TRIM, Notice otherwise. One occurrence claims no fault. |  |
 | `volume_mount_failed` | `storage` | Warning or Info | benign possible |
 
 ## `disk_bad_block`
@@ -23,7 +24,7 @@ A storage device returned a fault instead of the data.
 
 **Also reported by:** `win.eventlog.system`
 
-**Severity:** Serious when the bus proves the device is fixed to the machine, Warning otherwise. Info on removable media taken away mid-IO, which is not a fault.
+**Severity:** ClassPnP medium errors select Serious on fixed disks, Error on removable disks and Warning on removable media, virtual disks or unknown/missing facts. Hardware-error and aborted-command sense keys remain Warning. NTFS data errors retain the fixed-bus Serious raise; verify-required requests against media taken away mid-IO remain Info.
 
 **Impact:** The file did not come back, and the drive is consuming its spare-block reserve.
 
@@ -38,7 +39,7 @@ The file NTFS names is not shown here. It carries user document paths.
 
 A storage device reported that its own reliability is degraded or that it has passed its rated write endurance.
 
-**Severity:** Warning
+**Severity:** Serious when a server's drive reports its reliability degraded, Error for the same report on any other host, Warning when the drive has only passed its rated write endurance.
 
 **Impact:** The drive still serves IO. It is reporting wear before reads or writes start failing.
 
@@ -48,13 +49,27 @@ A storage device reported that its own reliability is degraded or that it has pa
 - Check the backup state for the host before scheduling anything on it.
 - Read the endurance percentages together: consumed endurance above the device's own threshold is the claim.
 
+## `disk_io_failed`
+
+A device IO operation failed.
+
+**Also reported by:** `win.eventlog.system`
+
+**Severity:** Warning or Debug
+
+**Impact:** The request did not complete; the event alone does not prove damaged media or a lasting host fault.
+
+**Consider:**
+
+- Check the named device and status, then correlate repeated failures with controller resets and device behavior.
+
 ## `disk_paging_error`
 
 A paging read or write to a storage device failed.
 
 **Also reported by:** `win.eventlog.system`
 
-**Severity:** Error when the device returned a data error, which is the medium failing. Warning otherwise.
+**Severity:** Device data errors select Error, or Warning on removable disks and Notice on removable media. Other failed transfers remain Warning; recognized device departures remain Notice.
 
 **Impact:** Nobody chose this IO and no application error surfaces, so this line is the only record.
 
@@ -68,13 +83,13 @@ A device disappeared without an orderly removal.
 
 **Also reported by:** `win.eventlog.system`
 
-**Severity:** Warning
+**Severity:** Info on Storport551 USB or mounted-virtual-disk detaches; Warning on other removals.
 
 **Impact:** Open handles and writes in flight were lost with it.
 
 **Consider:**
 
-- Check removable and surprise_removal_ok. A device with both false vanished through a path failure, not a user action.
+- Read miniport_name beside removable and surprise_removal_ok. A virtual disk can report both flags false during an ordinary detach.
 - Check what was writing to it.
 
 ## `filesystem_corruption`
@@ -113,7 +128,7 @@ The storage port driver reset the path to a device.
 
 A storage device did not complete a command, and reported sense data saying why.
 
-**Severity:** Info when the device is announcing a change to itself, Notice otherwise. One occurrence claims no fault.
+**Severity:** Info when the device is announcing a change to itself, Debug for a drive rejecting TRIM, Notice otherwise. One occurrence claims no fault.
 
 **Impact:** The command was not carried out as issued. The driver reissues, so a single occurrence usually reaches no application.
 

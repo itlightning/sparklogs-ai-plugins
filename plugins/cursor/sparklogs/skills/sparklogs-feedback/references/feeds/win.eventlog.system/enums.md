@@ -64,3 +64,11 @@ Which ceiling the volume snapshot driver was holding to when it reclaimed the ol
 - `space_limit`
 - `count_limit`
 - `delete_pending`
+
+## Portable vocabularies this module uses
+
+Library-wide closed sets, so the same token means the same thing on every data feed.
+
+### `sparklogs.actor.type`
+
+- `samaccountname`: bare logon name with no domain suffix (the ordinary Windows account name)
