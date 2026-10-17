@@ -232,6 +232,9 @@ say in your findings that you were reading uncurated text.
 - `fields/topic-installed-products-summary.md`
 - `fields/topic-installed-products.md`
 - `fields/topic-kernel-crashes.md`
+- `fields/topic-lifecycle.md`
+- `fields/topic-network-adapters.md`
+- `fields/topic-network-config.md`
 - `fields/topic-performance.md`
 - `fields/topic-processes.md`
 - `fields/topic-services.md`

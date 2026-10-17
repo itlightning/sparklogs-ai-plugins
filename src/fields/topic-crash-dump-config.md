@@ -13,4 +13,4 @@ Full inventory every 8 hours. Supported changes are reported when the agent obse
 | `sparklogs.data.crash_dump_config.minidump_count_7d` | integer | count | Minidump files written in the last seven days. |
 | `sparklogs.data.crash_dump_config.minidump_count_30d` | integer | count | Minidump files written in the last thirty days. |
 | `sparklogs.data.crash_dump_config.newest_minidump_age_min` | float | minutes | How long since the newest minidump file was written. |
-| `sparklogs.data.crash_dump_config.os_dump_pagefile_too_small_basis` | string |  | `onset`: witnessed start. `observed`: already present when first seen, making age a lower bound. `unknown_ongoing`: no meaningful onset time. |
+| `sparklogs.data.crash_dump_config.crash_dump_page_file_too_small_basis` | string |  | `onset`: witnessed start. `observed`: already present when first seen, making age a lower bound. `unknown_ongoing`: no meaningful onset time. |

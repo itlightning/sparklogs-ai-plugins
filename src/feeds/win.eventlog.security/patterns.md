@@ -29,7 +29,7 @@ Its rendered text cannot survive pattern derivation, so a string that appears to
 
 An unexpected pattern is one of three things, in falling order of likelihood: a curated surface this catalog does not list, a vocabulary that gained a value, or a token rendered from something that is not a closed vocabulary at all. The third is the one that matters.
 
-This module has 78 curated surface(s) and a legal-pattern language of 32839 strings.
+This module has 81 curated surface(s) and a legal-pattern language of 32842 strings.
 That number is why this file is a procedure and not a list.
 
 ## Surfaces
@@ -595,6 +595,16 @@ Most of those cannot physically occur; the count is a bound on the language, not
 
 **Slots:** none. This surface renders exactly one pattern.
 
+### `firewall_active_profile_changed`
+
+**When:** 4956, Windows Firewall changed the active profile
+
+**Renders:** `firewall active profile changed`
+
+**Event ids:** 4956
+
+**Slots:** none. This surface renders exactly one pattern.
+
 ### `firewall_packet_blocked`
 
 **When:** 5152, the filtering platform blocked a packet
@@ -602,6 +612,26 @@ Most of those cannot physically occur; the count is a bound on the language, not
 **Renders:** `packet blocked by the firewall`
 
 **Event ids:** 5152
+
+**Slots:** none. This surface renders exactly one pattern.
+
+### `firewall_policy_applied`
+
+**When:** 4954, Windows Firewall applied its Group Policy settings
+
+**Renders:** `firewall group policy settings applied`
+
+**Event ids:** 4954
+
+**Slots:** none. This surface renders exactly one pattern.
+
+### `firewall_rule_not_applied`
+
+**When:** 4957, Windows Firewall did not apply a rule because a rule condition resolved to an empty set
+
+**Renders:** `firewall rule not applied`
+
+**Event ids:** 4957
 
 **Slots:** none. This surface renders exactly one pattern.
 

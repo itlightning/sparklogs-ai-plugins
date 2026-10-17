@@ -26,7 +26,7 @@ The rendered `key=value` tail exists to be READ, not re-parsed: its values are n
 
 ## Reconstruction guarantee
 
-70 curated surface(s) drop the vendor body text below the synthesized first line.
+71 curated surface(s) drop the vendor body text below the synthesized first line.
 That is never data loss: the provider payload is retained at rest, so a dropped body can be reconstructed from it.
 What the body said is derivable; what it cost to ship it repeatedly is not.
 
@@ -73,6 +73,9 @@ Stored flat under the `win.eventlog.security.` prefix.
 | `win.eventlog.security.insecure_boot_flags` | string | Comma-joined boot-chain weaknesses found true on 4826 (TestSigning, KernelDebug, DisableIntegrityChecks): which setting makes the boot chain accept unsigned or debugger-attached kernel code. |
 | `win.eventlog.security.rule_name` | string | Firewall rule display name from the MPSSVC rule-change family. |
 | `win.eventlog.security.rule_id` | string | Firewall rule id from the MPSSVC rule-change family (stable across renames). |
+| `win.eventlog.security.firewall_rule_condition` | string | The rule condition that resolved to an empty set on 4957, the stated reason Windows Firewall did not apply the rule (RuleAttr, such as Remote Addresses or Local Port). |
+| `win.eventlog.security.firewall_setting_type` | string | Firewall-wide setting named on 4950 (SettingType, such as Default Inbound Action). |
+| `win.eventlog.security.firewall_setting_value` | string | Value the 4950 setting now holds (SettingValue, such as Block or No). |
 | `win.eventlog.security.share_name` | string | Network share name, from 5142 (share added) and from the write-class 5145 access checks. |
 | `win.eventlog.security.share_path` | string | Local filesystem path backing the share (5142 and 5145 ShareLocalPath); a system-root share is a higher-concern surface. |
 | `win.eventlog.security.share_relative_target` | string | Path of the object inside the share that a 5145 access check was made against (RelativeTargetName): what was written, renamed, deleted or re-permissioned. |
@@ -165,6 +168,7 @@ Each key names one field; that field is where the value is queried.
 | `pua_count` | `win.eventlog.security.pua_count` |
 | `dropped_count` | `win.eventlog.security.dropped_count` |
 | `object_name` | `win.eventlog.security.object_name` |
+| `rule_condition` | `win.eventlog.security.firewall_rule_condition` |
 | `previous_time` | `win.eventlog.security.previous_time` |
 | `new_time` | `win.eventlog.security.new_time` |
 | `uac_token_type` | `win.eventlog.security.uac_token_type` |
@@ -219,13 +223,12 @@ The last column is different in kind: it is the author's account of the row or e
 | `dsrm_password_changed` / `default` | 4794 | `win.eventlog.security.workstation` |  |
 | `event_logging_stopped` / `default` | 1100 | **fields: none** |  |
 | `explicit_credential_used` / `default` | 4648 | `win.eventlog.security.target_server` |  |
-| `firewall_rule_changed` / `disabled` | 4954 | `win.eventlog.security.rule_id` `win.eventlog.security.rule_name` |  |
-| `firewall_rule_changed` / `enabled` | 4956 | `win.eventlog.security.rule_id` `win.eventlog.security.rule_name` |  |
-| `firewall_rule_changed` / `updated` | 4947, 4950, 4957 | `win.eventlog.security.rule_id` `win.eventlog.security.rule_name` |  |
+| `firewall_rule_changed` / `default` | 4947 | `win.eventlog.security.rule_id` `win.eventlog.security.rule_name` |  |
 | `firewall_rule_created` / `default` | 4946 | `win.eventlog.security.rule_id` `win.eventlog.security.rule_name` |  |
 | `firewall_rule_deleted` / `default` | 4948 | `win.eventlog.security.rule_id` `win.eventlog.security.rule_name` |  |
 | `firewall_service_stopped` / `recovered` | 5024, 5025, 5033, 5034 | **fields: none** |  |
 | `firewall_service_stopped` / `stopped` | 5024, 5025, 5033, 5034 | **fields: none** |  |
+| `firewall_setting_applied` / `default` | 4950 | `win.eventlog.security.firewall_setting_type` `win.eventlog.security.firewall_setting_value` |  |
 | `group_member_added` / `default` | 4728, 4732, 4756 | **fields: none** |  |
 | `group_member_removed` / `default` | 4729, 4733, 4757 | **fields: none** |  |
 | `guest_account_sign_in` / `default` | 4624 | `win.eventlog.security.auth_package` `win.eventlog.security.lm_package` `win.eventlog.security.logon_guid` `win.eventlog.security.logon_type` `win.eventlog.security.logon_type_name` `win.eventlog.security.token_elevated` `win.eventlog.security.workstation` |  |
@@ -245,14 +248,18 @@ The last column is different in kind: it is the author's account of the row or e
 | `principal_renamed` / `default` | 4781 | `win.eventlog.security.new_target_user` `win.eventlog.security.old_target_user` |  |
 | `process_exited_abnormally` / `default` | 4689 | **fields: none** |  |
 | `psdirect_handshake_probe` / `default` | 4625 | `win.eventlog.security.auth_package` `win.eventlog.security.lm_package` `win.eventlog.security.logon_type` `win.eventlog.security.logon_type_name` `win.eventlog.security.psdirect_handshake` `win.eventlog.security.status` `win.eventlog.security.status_meaning` `win.eventlog.security.substatus` `win.eventlog.security.workstation` |  |
-| `scheduled_task_created` / `default` | 4698 | `win.eventlog.security.task_name` |  |
-| `scheduled_task_deleted` / `default` | 4699 | `win.eventlog.security.task_name` |  |
+| `scheduled_task_created` / `other_task` | 4698 | `win.eventlog.security.task_name` |  |
+| `scheduled_task_created` / `platform_os_task` | 4698 | `win.eventlog.security.task_name` |  |
+| `scheduled_task_deleted` / `other_task` | 4699 | `win.eventlog.security.task_name` |  |
+| `scheduled_task_deleted` / `platform_os_task` | 4699 | `win.eventlog.security.task_name` |  |
 | `scheduled_task_disabled` / `default` | 4701 | `win.eventlog.security.task_name` |  |
-| `scheduled_task_updated` / `default` | 4702 | `win.eventlog.security.task_name` |  |
+| `scheduled_task_updated` / `other_task` | 4702 | `win.eventlog.security.task_name` |  |
+| `scheduled_task_updated` / `platform_os_task` | 4702 | `win.eventlog.security.task_name` |  |
 | `security_group_changed` / `default` | 4735, 4737, 4755, 4764 | **fields: none** |  |
 | `security_group_created` / `default` | 4727, 4731, 4754 | **fields: none** |  |
 | `security_group_deleted` / `default` | 4730, 4734, 4758 | **fields: none** |  |
 | `service_installed` / `installed` | 4697 | `command_line` `win.eventlog.security.service_account` `win.eventlog.security.service_image_path` `win.eventlog.security.service_name` |  |
+| `service_installed` / `per_user_instance` | 4697 | `command_line` `win.eventlog.security.service_account` `win.eventlog.security.service_image_path` `win.eventlog.security.service_name` |  |
 | `service_installed` / `self_versioned_updater` | 4697 | `command_line` `win.eventlog.security.service_account` `win.eventlog.security.service_image_path` `win.eventlog.security.service_name` |  |
 | `sid_history_add_failed` / `default` | 4766 | **fields: none** |  |
 | `sid_history_added` / `default` | 4765 | **fields: none** |  |
@@ -275,7 +282,10 @@ The last column is different in kind: it is the author's account of the row or e
 | `crypto_operation` | 5061 | **fields: none** |  |
 | `crypto_operation_succeeded` | 5061 | **fields: none** |  |
 | `fips_selftest_passed` | 6417 | **fields: none** |  |
+| `firewall_active_profile_changed` | 4956 | **fields: none** |  |
 | `firewall_packet_blocked` | 5152 | `win.eventlog.security.wfp_dest_address` `win.eventlog.security.wfp_dest_port` `win.eventlog.security.wfp_direction` `win.eventlog.security.wfp_protocol` |  |
+| `firewall_policy_applied` | 4954 | **fields: none** |  |
+| `firewall_rule_not_applied` | 4957 | `win.eventlog.security.firewall_rule_condition` `win.eventlog.security.rule_id` `win.eventlog.security.rule_name` |  |
 | `group_membership_enumerated` | 4799 | **fields: none** |  |
 | `inbound_connection_blocked` | 5157 | `win.eventlog.security.wfp_dest_address` `win.eventlog.security.wfp_dest_port` `win.eventlog.security.wfp_direction` `win.eventlog.security.wfp_protocol` |  |
 | `key_file_operation` | 5058 | **fields: none** |  |
@@ -353,6 +363,8 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `crypto_operation`
 - `crypto_operation_succeeded`
 - `fips_selftest_passed`
+- `firewall_active_profile_changed`
+- `firewall_policy_applied`
 - `group_membership_enumerated`
 - `key_file_operation`
 - `key_file_operation_succeeded`

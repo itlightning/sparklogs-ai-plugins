@@ -9,12 +9,15 @@ Full inventory every 8 hours. Supported changes are reported when the agent obse
 | `sparklogs.data.crashes.kernel_crash_count_5d` | integer | count | Kernel crashes in the last five days. |
 | `sparklogs.data.crashes.kernel_crash_count_10d` | integer | count | Kernel crashes in the last ten days. |
 | `sparklogs.data.crashes.kernel_crash_days_since_last` | float | days | How long since the most recent kernel crash. Absent when the thirty-day history holds none. |
-| `sparklogs.data.crashes.kernel_crash_coverage_days` | float | days | How long the System log has been read without a gap (no record lost to a clear or a roll-over). Absent until it has been read once. |
+| `sparklogs.data.crashes.kernel_crash_quiet_awake_days` | float | days | Host-awake quiet days since the later of the newest kernel crash and uninterrupted System-log reading. Sleep and low-power idle count zero; settle counts. Floored to 0.01 day, delaying a clear by less than 0.01 day. Absent when clock accounting is unknown. |
+| `sparklogs.data.crashes.kernel_crash_top_failure_code` | string |  | The stop code of the kernel crash signature with the most crashes in the last ten days, the one with the newer newest crash breaking a tie, as its `kernel_crashes` row spells `failure_code`. Absent when no kernel crash fell in that window. |
+| `sparklogs.data.crashes.kernel_crash_top_blame_module` | string |  | The module that signature's newest analyzed dump blamed, as its `kernel_crashes` row spells `blame_module`; with `kernel_crash_top_failure_code` it names that row, whose `signature` is the two lowercased and joined by `\|`. Absent when no analyzed dump of the signature blamed one, or when there is no such signature. |
+| `sparklogs.data.crashes.kernel_crash_top_count_10d` | integer | count | Crashes of that signature in the last ten days. Absent when there is no such signature. |
 | `sparklogs.data.crashes.app_crash_count_1d` | integer | count | Application crashes in the last day, every application together, counted per hour as the `app_crashes` rows count them (per hour for the last day, per UTC day beyond it). |
 | `sparklogs.data.crashes.app_crash_count_5d` | integer | count | Application crashes in the last five days, every application together, counted per hour for the last day and per UTC day beyond it. |
 | `sparklogs.data.crashes.app_crash_count_10d` | integer | count | Application crashes in the last ten days, every application together, counted per hour for the last day and per UTC day beyond it. |
 | `sparklogs.data.crashes.app_crash_days_since_last` | float | days | How long since the most recent application crash. Absent when the thirty-day history holds none. |
-| `sparklogs.data.crashes.app_crash_coverage_days` | float | days | How long the log application crashes are recorded in (Windows: Application) has been read without a gap. Absent until it has been read once. |
+| `sparklogs.data.crashes.app_crash_quiet_awake_days` | float | days | Host-awake quiet days since the later of the newest app crash and uninterrupted Application-log reading. Sleep and low-power idle count zero; settle counts. Floored to 0.01 day, delaying a clear by less than 0.01 day. Absent when clock accounting is unknown. |
 | `sparklogs.data.crashes.kernel_signatures_10d` | integer | count | Kernel crash signatures (stop code, and the module an analyzed dump blamed) with a reported crash in the last ten days. |
 | `sparklogs.data.crashes.apps_crashing_10d` | integer | count | Applications with a crash in the last ten days. |
 | `sparklogs.data.crashes.kernel_signatures_total` | integer | count | Kernel crash signatures in the thirty-day history: the rows `kernel_crashes` would carry before it keeps the 64 with the most crashes. Above 64, the table was cut. |
@@ -26,6 +29,11 @@ Full inventory every 8 hours. Supported changes are reported when the agent obse
 | `sparklogs.data.crashes.detected_ts` | string | timestamp | When the agent first found the crash; not the crash time. Occurrence only. |
 | `sparklogs.data.crashes.wer_report_ids` | string_array |  | The Windows Error Reporting report ids the crash's records carry, lowercase: a report GUID, or on Windows Server 2012 R2 the small dump's base name the System report uses as its id. Occurrence only. |
 | `sparklogs.data.crashes.evidence` | object_array |  | The event records the crash was built from, oldest first, at most 16: `channel`, `provider`, `event_id`, `record_id` (absent when unread) and `event_ts`. Occurrence only. |
+| `sparklogs.data.crashes.evidence[].channel` | string |  | In each `evidence` entry. |
+| `sparklogs.data.crashes.evidence[].provider` | string |  | In each `evidence` entry. |
+| `sparklogs.data.crashes.evidence[].event_id` | integer |  | In each `evidence` entry. |
+| `sparklogs.data.crashes.evidence[].record_id` | integer |  | In each `evidence` entry. |
+| `sparklogs.data.crashes.evidence[].event_ts` | string | timestamp | In each `evidence` entry. |
 | `sparklogs.data.crashes.evidence_total` | integer | count | How many records the crash was built from, including any past the list. Occurrence only. |
 | `sparklogs.data.crashes.analysis` | string |  | What the dump analysis did: `complete`, `partial_timeout`, `partial_error`, `resource_limited`, `dump_unavailable`, `unsupported_format` or `budget_skipped`. `complete` means the supported analysis finished, not that the cause is known. Occurrence only. |
 | `sparklogs.data.crashes.budget_reason` | string |  | Why the dump was not analyzed: with `budget_skipped`, `per_key` (three of this kind in a day), `overall` (64 in a day) or `queue_full`; with `resource_limited`, `commit_pressure` (the system's commit stayed too high to start the analysis). Occurrence only. |
@@ -43,25 +51,57 @@ Full inventory every 8 hours. Supported changes are reported when the agent obse
 | `sparklogs.data.crashes.context_sp` | string |  | The crashing context's stack pointer (`rsp` or `esp`), as hex. Occurrence only. |
 | `sparklogs.data.crashes.context_fp` | string |  | The crashing context's frame pointer (`rbp` or `ebp`), as hex. Occurrence only. |
 | `sparklogs.data.crashes.modules` | object_array |  | Loaded modules from the analyzed dump, at most 512; frames refer to them by position. Each has `basename`, and where read `machine` (hex), `size_of_image`, `time_date_stamp` (8 hex digits), `identity_source`, `codeview_kind` (`rsds` or `nb10`), `pdb_name`, `pdb_guid` (32 hex digits), `pdb_signature` (8 hex digits), `pdb_age`, `debug_source`, `portable_pdb`, `pdb_checksum_algorithm`, `pdb_checksum`, `debug_directory_source`, `file_version` and `version_source`. Sources are `module_stream`, `triage_entry`, `dump_image` or `local_image`. Occurrence only. |
+| `sparklogs.data.crashes.modules[].basename` | string |  | In each `modules` entry. |
+| `sparklogs.data.crashes.modules[].machine` | string |  | In each `modules` entry. |
+| `sparklogs.data.crashes.modules[].size_of_image` | integer | bytes | In each `modules` entry. |
+| `sparklogs.data.crashes.modules[].time_date_stamp` | string |  | In each `modules` entry. |
+| `sparklogs.data.crashes.modules[].identity_source` | string |  | In each `modules` entry. |
+| `sparklogs.data.crashes.modules[].codeview_kind` | string |  | In each `modules` entry. |
+| `sparklogs.data.crashes.modules[].pdb_name` | string |  | In each `modules` entry. |
+| `sparklogs.data.crashes.modules[].pdb_guid` | string |  | In each `modules` entry. |
+| `sparklogs.data.crashes.modules[].pdb_signature` | string |  | In each `modules` entry. |
+| `sparklogs.data.crashes.modules[].pdb_age` | integer |  | In each `modules` entry. |
+| `sparklogs.data.crashes.modules[].debug_source` | string |  | In each `modules` entry. |
+| `sparklogs.data.crashes.modules[].portable_pdb` | bool |  | In each `modules` entry. |
+| `sparklogs.data.crashes.modules[].pdb_checksum_algorithm` | string |  | In each `modules` entry. |
+| `sparklogs.data.crashes.modules[].pdb_checksum` | string |  | In each `modules` entry. |
+| `sparklogs.data.crashes.modules[].debug_directory_source` | string |  | In each `modules` entry. |
+| `sparklogs.data.crashes.modules[].file_version` | string |  | In each `modules` entry. |
+| `sparklogs.data.crashes.modules[].version_source` | string |  | In each `modules` entry. |
 | `sparklogs.data.crashes.modules_total` | integer | count | How many modules the dump lists, including any past the list. Occurrence only. |
 | `sparklogs.data.crashes.modules_truncated` | bool |  | Modules were left out of the list. Occurrence only. |
 | `sparklogs.data.crashes.modules_walk` | string |  | How the module list walk ended: `complete`, `unavailable`, `cycle` or `iteration_cap`. Occurrence only. |
 | `sparklogs.data.crashes.unloaded_modules` | object_array |  | Recently unloaded modules from the analyzed dump, at most 128: `basename`, `name_possibly_truncated`, and where read `size_of_image`, `time_date_stamp` (8 hex digits) and `unload_ts`. Occurrence only. |
+| `sparklogs.data.crashes.unloaded_modules[].basename` | string |  | In each `unloaded_modules` entry. |
+| `sparklogs.data.crashes.unloaded_modules[].name_possibly_truncated` | bool |  | In each `unloaded_modules` entry. |
+| `sparklogs.data.crashes.unloaded_modules[].size_of_image` | integer | bytes | In each `unloaded_modules` entry. |
+| `sparklogs.data.crashes.unloaded_modules[].time_date_stamp` | string |  | In each `unloaded_modules` entry. |
+| `sparklogs.data.crashes.unloaded_modules[].unload_ts` | string | timestamp | In each `unloaded_modules` entry. |
 | `sparklogs.data.crashes.unloaded_total` | integer | count | How many unloaded modules the dump lists. Occurrence only. |
 | `sparklogs.data.crashes.unloaded_truncated` | bool |  | Unloaded modules were left out of the list. Occurrence only. |
 | `sparklogs.data.crashes.unloaded_walk` | string |  | How the unloaded list walk ended: `complete`, `unavailable`, `cycle` or `iteration_cap`. Occurrence only. |
 | `sparklogs.data.crashes.unloaded_order` | string |  | The unloaded list's order: `most_recent_first`, or `as_recorded` when recency is not known. Occurrence only. |
 | `sparklogs.data.crashes.frames` | object_array |  | The crashing thread's stack, at most 64 frames: `module` (position in `modules`) and `offset` (hex, module-relative), or `unmapped` for an address outside every module; `address` (`instruction` for frame 0, `return_address` after), `method` (`context`, `unwind_table`, `leaf_assumed` or `frame_pointer`), `unwind_source` (`dump` or `local_image`), and `nearest_export` with `nearest_export_displacement` (hex), which is the nearest export, never a resolved symbol. Occurrence only. |
+| `sparklogs.data.crashes.frames[].module` | integer |  | In each `frames` entry. |
+| `sparklogs.data.crashes.frames[].offset` | string |  | In each `frames` entry. |
+| `sparklogs.data.crashes.frames[].unmapped` | bool |  | In each `frames` entry. |
+| `sparklogs.data.crashes.frames[].address` | string |  | In each `frames` entry. |
+| `sparklogs.data.crashes.frames[].method` | string |  | In each `frames` entry. |
+| `sparklogs.data.crashes.frames[].unwind_source` | string |  | In each `frames` entry. |
+| `sparklogs.data.crashes.frames[].nearest_export` | string |  | In each `frames` entry. |
+| `sparklogs.data.crashes.frames[].nearest_export_displacement` | string |  | In each `frames` entry. |
 | `sparklogs.data.crashes.frames_truncated` | bool |  | The stack went on past the frame cap. Occurrence only. |
 | `sparklogs.data.crashes.stack_stop` | string |  | Why the stack walk stopped: `end_of_stack`, `unmapped`, `no_image`, `image_unavailable`, `unwind_failed`, `stack_unavailable`, `frame_cap`, `unsupported_architecture` or `no_context`. Occurrence only. |
 | `sparklogs.data.crashes.blame_module` | string |  | The first module on the crashing stack that is not the operating system's own, where a debugger's first look points; not a proven cause. Windows kernel crash: the first module outside the agent's list of in-box kernel modules, so a vendor driver above the kernel's frames is blamed. Windows process crash: the first module whose path, as the dump recorded it, is not in the Windows directory (its first directory `SystemRoot` or `Windows`, or a `System32`, `SysWOW64` or `WinSxS` directory anywhere in it). Linux and macOS: outside the kernel's own image and the system library directories. Absent when no dump was analyzed or no frame qualifies. Occurrence only. |
 | `sparklogs.data.crashes.blame_offset` | string |  | The blamed frame's offset in `blame_module`, as hex: the faulting instruction for the first frame, a return address after it. Occurrence only. |
-| `sparklogs.data.crashes.failure` | string |  | What ended the crash, by name. Windows: for a process crash the .NET exception type when the runtime reported one (its `.NET Runtime` 1026 record, else the `CLR20r3` error report's ninth parameter), otherwise the exception code's NTSTATUS name from the pack's status-code table; for a kernel crash the bugcheck name from the pack's bugcheck table. Linux: the signal name, or the kernel panic string. macOS: the Mach exception name. Absent when no name is known. Occurrence only. |
-| `sparklogs.data.crashes.failure_code` | string |  | The raw code behind `failure`. Windows: the exception code of a process crash or the bugcheck code of a kernel crash, `0x` and 8 hex digits. Linux: the signal number. macOS: the Mach exception code. Absent only when no record or dump carried one. Occurrence only. |
+| `sparklogs.data.crashes.failure_name` | string |  | What ended the crash, by name. Windows: for a process crash the .NET exception type when the runtime reported one (its `.NET Runtime` 1026 record, else the `CLR20r3` error report's ninth parameter), otherwise the exception code's NTSTATUS name from the pack's status-code table; for a kernel crash the bugcheck name from the pack's bugcheck table. Linux: the signal name, or the kernel panic string. macOS: the Mach exception name. Absent when no name is known. Occurrence only. |
+| `sparklogs.data.crashes.failure_space` | string |  | The code table `failure_code` belongs to: `ntstatus` for a process crash, `bugcheck` for a kernel crash. Present whenever the code is, named or not; a .NET exception type in `failure_name` is not from that table. Occurrence only. |
+| `sparklogs.data.crashes.failure_code` | string |  | The raw code behind `failure_name`. Windows: the exception code of a process crash or the bugcheck code of a kernel crash, `0x` and 8 hex digits. Linux: the signal number. macOS: the Mach exception code. Absent only when no record or dump carried one. Occurrence only. |
 | `sparklogs.data.crashes.identity_basis` | string |  | What names a kernel crash: `boot_start` (the boot it was reported in), `report_id` or `power_41`. Kernel crash only. |
 | `sparklogs.data.crashes.boot_start_missing` | bool |  | No boot-start record placed the boot the kernel crash was reported in. Kernel crash only. |
 | `sparklogs.data.crashes.bugcheck_code` | string |  | The bugcheck code, `0x` and 8 hex digits. Absent only when no record or dump carried one. Kernel crash only. |
 | `sparklogs.data.crashes.bugcheck_name` | string |  | The bugcheck's symbolic name, from the pack's bugcheck table. Absent when the table has no row for the code. Kernel crash only. |
+| `sparklogs.data.crashes.bugcheck_space` | string |  | The code table `bugcheck_code` belongs to: `bugcheck`. Present whenever the code is, named or not. Kernel crash only. |
 | `sparklogs.data.crashes.bugcheck_param1` | string |  | The bugcheck's first parameter, as hex. Kernel crash only. |
 | `sparklogs.data.crashes.bugcheck_param2` | string |  | The bugcheck's second parameter, as hex. Kernel crash only. |
 | `sparklogs.data.crashes.bugcheck_param3` | string |  | The bugcheck's third parameter, as hex. Kernel crash only. |
@@ -76,6 +116,7 @@ Full inventory every 8 hours. Supported changes are reported when the agent obse
 | `sparklogs.data.crashes.process_start_ts` | string | timestamp | When the crashed process started. Process crash only. |
 | `sparklogs.data.crashes.exception_code` | string |  | The exception code, `0x` and 8 hex digits. Process crash only. |
 | `sparklogs.data.crashes.exception_name` | string |  | The exception code's NTSTATUS name, from the pack's status-code table. Absent when the table has no row for the code. Process crash only. |
+| `sparklogs.data.crashes.exception_space` | string |  | The code table `exception_code` belongs to: `ntstatus`. Present whenever the code is, named or not. Process crash only. |
 | `sparklogs.data.crashes.exception_address` | string |  | The faulting address the dump's exception record carries, as hex. Process crash only. |
 | `sparklogs.data.crashes.exception_thread_id` | integer |  | The faulting thread's id, from the dump. Process crash only. |
 | `sparklogs.data.crashes.fault_module` | string |  | The module the crash record reports the fault in. Reported, not a cause. Process crash only. |
@@ -93,5 +134,8 @@ Full inventory every 8 hours. Supported changes are reported when the agent obse
 | `sparklogs.data.crashes.managed_frames_truncated` | bool |  | The .NET stack went on past the list. Process crash only. |
 | `sparklogs.data.crashes.stitch_status` | string |  | Whether the .NET stack continues the native one: `stitched`, or why not (`no_managed_frames`, `not_single_exception`, `no_native_stack`, `no_junction`). A stitch is by position, never an unwind. Process crash only. |
 | `sparklogs.data.crashes.scan_candidates` | object_array |  | x86 only: stack values just past a call instruction in a module's code, at most 256, for a symbolizer to validate; never frames. Each has `module`, `offset` (hex) and `stack_offset` (bytes above the stack pointer). Process crash only. |
+| `sparklogs.data.crashes.scan_candidates[].module` | integer |  | In each `scan_candidates` entry. |
+| `sparklogs.data.crashes.scan_candidates[].offset` | string |  | In each `scan_candidates` entry. |
+| `sparklogs.data.crashes.scan_candidates[].stack_offset` | integer | bytes | In each `scan_candidates` entry. |
 | `sparklogs.data.crashes.scan_window_bytes` | integer | bytes | Stack bytes searched for scan candidates. Process crash only. |
 | `sparklogs.data.crashes.scan_candidates_truncated` | bool |  | Scan candidates were left out of the list. Process crash only. |
