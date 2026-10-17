@@ -13,19 +13,20 @@ Every section below is from the public reason block only.
 | `account_deleted` | `security_audit` | Notice |  |
 | `account_disabled` | `security_audit` | Notice |  |
 | `account_enabled` | `security_audit` | Notice |  |
-| `account_locked_out` | `auth` | Error (privileged account) / Warning |  |
+| `account_locked_out` | `auth` | Warning (built-in Administrator, any name) / Error (other accounts) |  |
 | `account_password_change_failed` | `security_audit` | Info |  |
 | `account_password_reset` | `security_audit` | Warning |  |
 | `account_password_reset_failed` | `security_audit` | Warning |  |
 | `adcs_audit_evidence_tampered` | `certificates` | Serious |  |
 | `adcs_config_changed` | `certificates` | Error |  |
 | `adcs_request_failed` | `certificates` | Warning |  |
-| `anonymous_remote_sign_in` | `auth` | Notice |  |
+| `anonymous_remote_sign_in` | `auth` | Warning (public origin address) / Verbose (local network or no address) |  |
 | `audit_event_processing_failed` | `security_audit` | Warning |  |
 | `audit_events_dropped` | `security_audit` | Error when records were discarded; Debug when the count is zero |  |
 | `audit_log_cleared` | `security_audit` | Critical (non-system clearer) / Error |  |
 | `audit_log_full` | `security_audit` | Serious |  |
-| `audit_policy_changed` | `security_audit` | Warning |  |
+| `audit_policy_changed` | `security_audit` | Notice |  |
+| `audit_subcategory_changed` | `security_audit` | Verbose |  |
 | `crypto_selftest_failed` | `os_stability` | Error |  |
 | `directory_object_access_denied` | `directory_services` | Notice |  |
 | `directory_object_changed` | `directory_services` | Warning |  |
@@ -37,13 +38,15 @@ Every section below is from the public reason block only.
 | `dsrm_password_changed` | `security_audit` | Serious |  |
 | `event_logging_stopped` | `security_audit` | Info |  |
 | `explicit_credential_used` | `auth` | Info |  |
-| `firewall_rule_changed` | `networking` | Warning |  |
-| `firewall_rule_created` | `networking` | Warning |  |
-| `firewall_rule_deleted` | `networking` | Warning |  |
+| `firewall_rule_changed` | `networking` | Verbose |  |
+| `firewall_rule_created` | `networking` | Verbose |  |
+| `firewall_rule_deleted` | `networking` | Verbose |  |
 | `firewall_service_stopped` | `networking` | Warning or Info |  |
+| `firewall_setting_applied` | `networking` | Info, and Warning when the setting switches the firewall off or allows inbound traffic by default. |  |
 | `group_member_added` | `security_audit` | Error (privileged group) / Notice (any other security group) |  |
 | `group_member_removed` | `security_audit` | Warning (privileged group) / Notice (any other security group) |  |
 | `guest_account_sign_in` | `auth` | Notice |  |
+| `kerberos_duplicate_request_rejected` | `auth` | Warning |  |
 | `kerberos_preauth_failed` | `auth` | Warning (account state or broken infrastructure) / Notice (wrong password, unknown client, undecoded) |  |
 | `kerberos_rc4_ticket_issued` | `auth` | Warning |  |
 | `kerberos_ticket_failed` | `auth` | Warning (account state or broken infrastructure) / Notice (wrong password, unknown principal, expired, undecoded) |  |
@@ -57,20 +60,20 @@ Every section below is from the public reason block only.
 | `principal_renamed` | `security_audit` | Notice for a rename that changed the name; Debug when the old and new names are identical |  |
 | `process_exited_abnormally` | `security_audit` | Notice |  |
 | `psdirect_handshake_probe` | `auth` | Debug | benign |
-| `replay_attack_detected` | `auth` | Error |  |
-| `scheduled_task_created` | `scheduled_tasks` | Warning |  |
-| `scheduled_task_deleted` | `scheduled_tasks` | Warning |  |
+| `scheduled_task_created` | `scheduled_tasks` | Notice or Display |  |
+| `scheduled_task_deleted` | `scheduled_tasks` | Notice or Display |  |
 | `scheduled_task_disabled` | `scheduled_tasks` | Info |  |
-| `scheduled_task_updated` | `scheduled_tasks` | Warning |  |
+| `scheduled_task_updated` | `scheduled_tasks` | Notice or Display |  |
 | `security_group_changed` | `security_audit` | Warning for a privileged group, Notice for any other security group, Info when Windows configures its own builtin groups. |  |
 | `security_group_created` | `security_audit` | Warning for a privileged group, Notice for any other security group, Info when Windows provisions its own builtin groups. |  |
 | `security_group_deleted` | `security_audit` | Warning for a privileged group, Notice for any other security group. |  |
-| `service_installed` | `security_audit` | Notice |  |
+| `service_installed` | `security_audit` | Notice, Info or Debug | benign possible |
 | `sid_history_add_failed` | `security_audit` | Error |  |
 | `sid_history_added` | `security_audit` | Serious |  |
 | `sign_in_failed` | `auth` | Warning (account-state) / Notice (other) / Verbose (credential-less probe) | benign possible |
 | `special_group_sign_in` | `security_audit` | Warning |  |
 | `system_time_changed` | `time_sync` | Warning (non-time-service) / Debug (routine time service) |  |
+| `user_audit_subcategory_changed` | `security_audit` | Notice |  |
 | `win_insecure_boot_config` | `security_audit` | Warning |  |
 | `win_registry_value_changed` | `security_audit` | Warning |  |
 | `win_registry_value_created` | `security_audit` | Warning |  |
@@ -149,14 +152,14 @@ A user or computer account that was disabled has been enabled and can authentica
 
 An account was locked out after failed sign-ins. CallerComputerName names the machine that caused the lockout (often a stale cached credential).
 
-**Severity:** Error (privileged account) / Warning
+**Severity:** Warning (built-in Administrator, any name) / Error (other accounts)
 
 **Impact:** User cannot authenticate until unlock. Privileged lockout can block admin recovery paths.
 
 **Consider:**
 
 - Treat CallerComputerName as the device to remediate (password/cache), not only the locked user
-- Privileged RID lockouts deserve faster response than routine user lockouts
+- Use the account SID to identify the built-in Administrator, including renamed or localized names
 
 Highest ticket-value auth pivot on many fleets: find the noisy device, fix the credential.
 
@@ -252,7 +255,7 @@ A certification authority denied or failed a certificate request.
 
 A sign-in succeeded with no identity, from a machine other than this one. Windows uses anonymous logons routinely for its own local plumbing, but those name no source machine; this one did.
 
-**Severity:** Notice
+**Severity:** Warning (public origin address) / Verbose (local network or no address)
 
 **Impact:** Something on the network authenticated as nobody. That is normal for a deliberately public share and abnormal otherwise, where it is the shape null-session enumeration takes.
 
@@ -323,16 +326,29 @@ The Security log is full. This usually means retention is set to do-not-overwrit
 
 ## `audit_policy_changed`
 
-Local audit policy changed (system, object security descriptor, or per-user). These events are dependable even when other audit subcategories are off.
+An object's audit policy descriptor changed.
 
-**Severity:** Warning
+**Also reported by:** `audit-policy`
 
-**Impact:** What gets logged (or silenced) on this host can change. Unexpected policy edits can hide later activity or flood the log.
+**Severity:** Notice
+
+**Impact:** Review the native old and new descriptors to determine what changed.
 
 **Consider:**
 
-- Use SubcategoryGuid to see which subcategory changed
-- On DCs, correlate with GPO refresh before treating every hit as tamper
+- Compare OldSd and NewSd in the original event
+
+## `audit_subcategory_changed`
+
+A system audit subcategory setting changed.
+
+**Severity:** Verbose
+
+**Impact:** A removed success or failure setting reduces auditing for the named subcategory.
+
+**Consider:**
+
+- Check the native AuditPolicyChanges values and subcategory GUID
 
 ## `crypto_selftest_failed`
 
@@ -503,18 +519,17 @@ on the reason and read the calling process, rather than filtering by severity.
 
 ## `firewall_rule_changed`
 
-A Windows Firewall rule or related policy was modified, enabled, or disabled. This Security-channel copy fires when that audit subcategory is enabled.
+A Windows Firewall rule was modified. This Security-channel copy fires when that audit subcategory is enabled.
 
 **Also reported by:** `win.eventlog.network`
 
-**Severity:** Warning
+**Severity:** Verbose
 
 **Impact:** What traffic is allowed or blocked can change. Unexpected opens can expose services; unexpected closes can break apps.
 
 **Consider:**
 
 - Pivot on RuleName / RuleId and Subject
-- The change action names the direction: updated, enabled, or disabled
 - Prefer the Firewall operational channel when Security auditing is off
 
 ## `firewall_rule_created`
@@ -523,7 +538,7 @@ A Windows Firewall rule was added to the exception list. This Security-channel c
 
 **Also reported by:** `win.eventlog.network`
 
-**Severity:** Warning
+**Severity:** Verbose
 
 **Impact:** What traffic is allowed can change. Unexpected opens can expose services.
 
@@ -538,7 +553,7 @@ A Windows Firewall rule was deleted from the exception list. This Security-chann
 
 **Also reported by:** `win.eventlog.network`
 
-**Severity:** Warning
+**Severity:** Verbose
 
 **Impact:** What traffic is allowed or blocked can change. Unexpected closes can break apps.
 
@@ -559,6 +574,19 @@ The Windows Firewall service or driver stopped, or came back (RECOVERED).
 
 - Confirm whether stop was planned maintenance
 - Check for paired start events and adjacent rule changes
+
+## `firewall_setting_applied`
+
+A Windows Firewall setting was written with the value it now holds. This Security-channel copy fires when that audit subcategory is enabled.
+
+**Severity:** Info, and Warning when the setting switches the firewall off or allows inbound traffic by default.
+
+**Impact:** Usually none: a policy apply writes every setting again. When the firewall is switched off or inbound traffic is allowed by default, the host no longer filters what it filtered before.
+
+**Consider:**
+
+- Read the setting name and value promoted on the row
+- For a Warning row, check whether policy or an administrator turned the firewall off on that profile
 
 ## `group_member_added`
 
@@ -604,6 +632,24 @@ The built-in guest account signed in successfully. Windows disables that account
 Guest is a real account with a fixed allocation, and it is not the anonymous well-known identity
 that the identity-less sign-in surfaces cover: those name the absence of a principal, this names
 a principal that exists and is normally switched off.
+
+## `kerberos_duplicate_request_rejected`
+
+Windows rejected a Kerberos request that repeated one it had just received.
+
+**Severity:** Warning
+
+**Impact:** A duplicate most often comes from network gear or a retrying client. An attacker reusing an intercepted ticket produces the same event, so check which before acting.
+
+**Consider:**
+
+- Network devices duplicating packets between the client and this server
+- A client retrying too fast
+- Clock skew between the client and this server
+- The same account used from an unexpected host
+
+One event is worth a look, because a repeated authenticator is rare on a healthy network. The
+event does not say what produced the duplicate, and it does not show that any access succeeded.
 
 ## `kerberos_preauth_failed`
 
@@ -789,27 +835,11 @@ Hyper-V opened a PowerShell Direct channel to a guest virtual machine. The legac
 The account name on these rows is a fixed protocol constant, not a principal, and the domain
 field carries handshake bytes rather than a domain name. Neither is a value to pivot on.
 
-## `replay_attack_detected`
-
-Windows reported a Kerberos authentication replay. Rare; treat as high-signal even as a single event.
-
-**Severity:** Error
-
-**Impact:** Credentials or tickets may be reused by an attacker. Investigate immediately; do not assume compromise is proven from this event alone.
-
-**Consider:**
-
-- Correlate time skew, duplicate authenticators, and the Subject fields
-- Check for concurrent lateral movement or ticket anomalies on the same principals
-
-One event is enough to act on. The event reports a detected replay; it does not show that any
-access succeeded.
-
 ## `scheduled_task_created`
 
 A scheduled task was created.
 
-**Severity:** Warning
+**Severity:** Notice or Display
 
 **Impact:** The new task can run code on a schedule or at logon, under whatever identity it was registered with. Unexpected creates are a common persistence path.
 
@@ -823,7 +853,7 @@ A scheduled task was created.
 
 A scheduled task was deleted.
 
-**Severity:** Warning
+**Severity:** Notice or Display
 
 **Impact:** Whatever the task did on its schedule will not happen again, and nothing on the host restores it. A deletion can equally be routine housekeeping or an attacker removing their own task after it ran.
 
@@ -851,7 +881,7 @@ A scheduled task was disabled. The task still exists and no longer runs.
 
 An existing scheduled task's definition was updated.
 
-**Severity:** Warning
+**Severity:** Notice or Display
 
 **Impact:** The task keeps its name and now runs something else, on a different schedule, or as a different identity. An edit to a trusted task is a quieter persistence path than a new one.
 
@@ -907,9 +937,9 @@ A security group was deleted. Deletion of a privileged group (Administrators, Do
 
 A Windows service was installed. This Security-channel event appears when service-install auditing is enabled; the System channel often carries the same fact by default.
 
-**Also reported by:** `win.eventlog.system`
+**Also reported by:** `win.eventlog.system`, `services`
 
-**Severity:** Notice
+**Severity:** Notice, Info or Debug
 
 **Impact:** A new service can run code at boot or on demand under a chosen account. Unexpected installs are a common persistence path.
 
@@ -995,6 +1025,18 @@ The system clock was changed. Routine time-service adjustments are quiet; change
 
 - Inspect the process path and the actor together
 - previous_time and new_time carry the decoded before and after clock values in UTC
+
+## `user_audit_subcategory_changed`
+
+A per-user audit subcategory setting changed.
+
+**Severity:** Notice
+
+**Impact:** The effective audit effect depends on system settings and per-user precedence.
+
+**Consider:**
+
+- Review TargetUserSid and SubcategoryGuid in the original event
 
 ## `win_insecure_boot_config`
 

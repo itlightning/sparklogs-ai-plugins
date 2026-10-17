@@ -9,14 +9,17 @@ Every section below is from the public reason block only.
 | reason | service | severity | benign |
 |---|---|---|---|
 | `av_unsigned_code_blocked` | `endpoint_protection` | Serious |  |
+| `bitlocker_key_retrieval_code_reported` | `encryption` | Verbose | benign |
 | `dcom_activation_timeout` | `app_stability` | Minor |  |
 | `dcom_register_timeout` | `app_stability` | Minor |  |
 | `dcom_start_failed` | `app_stability` | Minor |  |
-| `disk_bad_block` | `storage` | Serious |  |
-| `disk_controller_error` | `storage` | Error |  |
-| `disk_io_retried` | `storage` | Warning |  |
-| `disk_paging_error` | `storage` | Warning |  |
+| `disk_bad_block` | `storage` | Fixed disks select Serious; removable disks Error; removable media Warning. Virtual, unknown and missing facts retain Serious. |  |
+| `disk_controller_error` | `storage` | Fixed disks select Error; removable media Notice; removable disks, virtual, unknown and missing facts Warning. |  |
+| `disk_io_failed` | `storage` | Fixed disks select Error; removable media Notice; removable disks, virtual, unknown and missing facts Warning. |  |
+| `disk_io_retried` | `storage` | Removable disks and media select Notice; fixed, virtual, unknown and missing facts retain Warning. |  |
+| `disk_paging_error` | `storage` | Fixed disks select Error; removable media Notice; removable disks, virtual, unknown and missing facts Warning. |  |
 | `disk_surprise_removal` | `storage` | Warning |  |
+| `dns_registration_failed` | `networking` | Warning (server) / Info (workstation or unknown) |  |
 | `driver_load_failed` | `hardware` | Warning |  |
 | `ephemeral_port_alloc_failed` | `networking` | Notice |  |
 | `failover_cluster_csv_unavailable` | `clustering` | Severe |  |
@@ -30,6 +33,7 @@ Every section below is from the public reason block only.
 | `filesystem_delayed_write_lost` | `storage` | Serious (path on the system volume) / Error (path anywhere else) |  |
 | `filesystem_transaction_log_operation_failed` | `storage` | Warning (flush failed on a live volume, recovery error, metadata reset) / Notice (flush failed on a volume that no longer exists) / Error (resource manager could not start) |  |
 | `gpu_driver_reset` | `hardware` | Notice |  |
+| `group_policy_processing_failed` | `device_management` | Notice on a workstation, Warning on a server or an unknown host class. |  |
 | `hardware_error_corrected` | `hardware` | Notice |  |
 | `hardware_error_uncorrected` | `hardware` | Error or Minor |  |
 | `http_ssl_binding_created` | `certificates` | Notice |  |
@@ -47,11 +51,18 @@ Every section below is from the public reason block only.
 | `kerberos_weak_krbtgt_key` | `auth` | Warning |  |
 | `nic_driver_fault_reported` | `networking` | Warning |  |
 | `nic_driver_load_failed` | `networking` | Error |  |
-| `nic_link_down` | `networking` | Warning or Info |  |
+| `nic_link_down` | `networking` | Notice (workstation down) / Warning (server or unknown down) / Info (recovered) |  |
+| `os_boot` | `os_stability` | Info |  |
 | `os_bsod` | `os_stability` | Serious (server or unknown) / Error (workstation) |  |
+| `os_restart_requested` | `os_stability` | Notice |  |
+| `os_shutdown` | `os_stability` | Info |  |
+| `os_sleep` | `hardware` | Info |  |
+| `os_wake` | `hardware` | Info |  |
+| `pagefile_extended` | `performance` | Notice |  |
 | `patch_install_deferred` | `patching` | Info or Verbose | benign |
 | `patch_install_failed` | `patching` | Minor or Info | benign possible |
 | `platform_tamper_indicator_reported` | `endpoint_protection` | Error or Warning |  |
+| `ram_commit_exhausted` | `performance` | Serious on a server, Error otherwise |  |
 | `rds_license_server_unactivated` | `licensing` | Warning |  |
 | `rds_license_tracking_failed` | `licensing` | Warning |  |
 | `rds_licensing_service_failed` | `licensing` | Error |  |
@@ -60,15 +71,18 @@ Every section below is from the public reason block only.
 | `security_agent_service_terminated` | `endpoint_protection` | Minor |  |
 | `service_crashed` | `app_stability` | Error |  |
 | `service_exited_with_error` | `app_stability` | Error |  |
-| `service_hang` | `app_stability` | Error |  |
-| `service_installed` | `security_audit` | Notice |  |
+| `service_hang` | `app_stability` | Notice |  |
+| `service_hung_starting` | `app_stability` | Notice |  |
+| `service_installed` | `security_audit` | Notice or Info | benign possible |
 | `service_start_failed` | `app_stability` | Error |  |
-| `service_start_timeout` | `app_stability` | Error |  |
+| `service_start_timeout` | `app_stability` | Notice |  |
 | `smb_delayed_write_lost` | `storage` | Error |  |
 | `smb_server_transport_bind_failed` | `networking` | Warning (server) / Info (workstation) |  |
 | `smb_share_recreate_failed` | `storage` | Warning |  |
-| `storage_controller_reset` | `storage` | Warning |  |
-| `time_sync_failed` | `time_sync` | Warning |  |
+| `sparklogs_agent_started` | `rmm` | Display |  |
+| `sparklogs_agent_stopped` | `rmm` | Error or Display |  |
+| `storage_controller_reset` | `storage` | Notice on uaspstor USB-path resets; Warning on other controller resets. |  |
+| `time_sync_failed` | `time_sync` | Warning (server or unknown) / Info (workstation) |  |
 | `tls_cert_expired` | `certificates` | Error |  |
 | `tls_cert_name_mismatch` | `certificates` | Error |  |
 | `tls_cert_untrusted_ca` | `certificates` | Error |  |
@@ -97,6 +111,20 @@ A security agent blocked a process whose image contained unsigned or corrupted c
 - Identify the named executable and confirm whether it is expected on this host.
 - Check whether the same executable appears on other hosts in the fleet.
 - A legitimate application with a stripped or broken signature produces this line too.
+
+## `bitlocker_key_retrieval_code_reported`
+
+BitLocker reported an error retrieving the volume master key during restart.
+
+**Severity:** Verbose
+
+**Impact:** None shown by this event, which does not by itself show an unlock failure. Failures appear as 24635, a recovery prompt or BitLocker-API protector errors.
+
+**Consider:**
+
+- Look for a recovery prompt or a BitLocker protector error near the same restart before treating this as a problem.
+
+The code this event carries has no public decode, so it is shown as written.
 
 ## `dcom_activation_timeout`
 
@@ -143,7 +171,7 @@ A disk reported a bad block.
 
 **Also reported by:** `win.eventlog.storage`
 
-**Severity:** Serious
+**Severity:** Fixed disks select Serious; removable disks Error; removable media Warning. Virtual, unknown and missing facts retain Serious.
 
 **Impact:** Data in the affected block may be unreadable, and the drive is consuming its spare-block reserve.
 
@@ -156,7 +184,7 @@ A disk reported a bad block.
 
 A disk controller error was reported for a storage device.
 
-**Severity:** Error
+**Severity:** Fixed disks select Error; removable media Notice; removable disks, virtual, unknown and missing facts Warning.
 
 **Impact:** Repeated controller errors can precede disk, cabling, controller, or removable-media failure.
 
@@ -165,11 +193,25 @@ A disk controller error was reported for a storage device.
 - Check whether the device path maps to a fixed disk or removable media.
 - Correlate with disk_io_retried, disk_paging_error, and NTFS corruption on the same device.
 
+## `disk_io_failed`
+
+A device IO operation failed.
+
+**Also reported by:** `win.eventlog.storage`
+
+**Severity:** Fixed disks select Error; removable media Notice; removable disks, virtual, unknown and missing facts Warning.
+
+**Impact:** The request did not complete; the event alone does not prove damaged media or a lasting host fault.
+
+**Consider:**
+
+- Check the named device and status, then correlate repeated failures with controller resets and device behavior.
+
 ## `disk_io_retried`
 
 A disk IO operation had to be retried.
 
-**Severity:** Warning
+**Severity:** Removable disks and media select Notice; fixed, virtual, unknown and missing facts retain Warning.
 
 **Impact:** Retries can add latency and may indicate a degrading disk, cable, controller, or transient removable-device issue.
 
@@ -184,7 +226,7 @@ Windows reported a disk error during a paging operation.
 
 **Also reported by:** `win.eventlog.storage`
 
-**Severity:** Warning
+**Severity:** Fixed disks select Error; removable media Notice; removable disks, virtual, unknown and missing facts Warning.
 
 **Impact:** The affected device may be slow, unstable, or disconnecting under IO pressure.
 
@@ -207,6 +249,19 @@ A disk disappeared without an orderly removal path.
 
 - Identify whether the device is USB, virtual, or fixed storage.
 - Check adjacent service or backup failures that used the disk.
+
+## `dns_registration_failed`
+
+Windows could not register or update the name records of this computer in DNS.
+
+**Severity:** Warning (server) / Info (workstation or unknown)
+
+**Impact:** Other machines may resolve the name of this computer to an old address, or not at all, until a later registration succeeds. On a workstation away from its network this is expected.
+
+**Consider:**
+
+- Read the DNS server list in the event: a public resolver there will never accept the update.
+- On a server, confirm the zone allows its dynamic updates and that the server is reachable.
 
 ## `driver_load_failed`
 
@@ -384,6 +439,21 @@ The NVIDIA display driver reset.
 - Correlate with application hangs or desktop session resets.
 - Check for an adjacent driver install: an upgrade resets the display stack and is expected.
 - Repetition WITHOUT a driver install is the real signal; a single reset usually is not.
+
+## `group_policy_processing_failed`
+
+Group Policy could not reach a domain controller and did not apply for that pass.
+
+**Also reported by:** `win.eventlog.identity_security`
+
+**Severity:** Notice on a workstation, Warning on a server or an unknown host class.
+
+**Impact:** The machine runs whatever policy it last cached until a later refresh reaches a domain controller.
+
+**Consider:**
+
+- A portable device booting away from the corporate network writes this at every boot.
+- The same event on a server or a desktop that never moves is a real connectivity fault.
 
 ## `hardware_error_corrected`
 
@@ -617,7 +687,7 @@ A wireless network adapter driver could not load, normally because of a resource
 
 A network adapter reported that its link went down, or reported the link back (RECOVERED).
 
-**Severity:** Warning or Info
+**Severity:** Notice (workstation down) / Warning (server or unknown down) / Info (recovered)
 
 **Impact:** Traffic on that adapter stops until the link returns. A host with another working adapter stays reachable; a host with only this one is offline for the duration.
 
@@ -625,6 +695,16 @@ A network adapter reported that its link went down, or reported the link back (R
 
 - Look for the matching link-up record and read the gap between them.
 - Repeated drop-and-return cycles on one adapter point at the cable, the port or the switch.
+
+## `os_boot`
+
+The operating system started.
+
+**Severity:** Info
+
+**Consider:**
+
+- Read the gap from the previous os_shutdown or unexpected_shutdown to see how long the host was down.
 
 ## `os_bsod`
 
@@ -639,6 +719,58 @@ Windows rebooted from a bugcheck.
 - Preserve the dump path and bugcheck code.
 - Search the bugcheck_name: it is the name Microsoft documents the stop code under.
 - Correlate with Kernel-Power 41 and EventLog 6008.
+
+## `os_restart_requested`
+
+A process asked Windows to restart or shut down the machine.
+
+**Severity:** Notice
+
+**Consider:**
+
+- Read the process, the actor and shutdown_reason: an updater, an RMM tool or a person each look different.
+
+## `os_shutdown`
+
+The operating system shut down cleanly.
+
+**Severity:** Info
+
+**Consider:**
+
+- Pair with the nearest os_restart_requested to see which process and user asked for it.
+
+## `os_sleep`
+
+The device went to sleep.
+
+**Severity:** Info
+
+**Consider:**
+
+- Read the span to the next os_wake as time the device was asleep, not as missing data.
+
+## `os_wake`
+
+The device woke from sleep.
+
+**Severity:** Info
+
+**Consider:**
+
+- Read the wake source from the message when a device wakes when nobody expected it to.
+
+## `pagefile_extended`
+
+Windows grew the page file because committed memory ran low.
+
+**Severity:** Notice
+
+**Impact:** Some memory requests may be refused while the page file grows.
+
+**Consider:**
+
+- When it repeats, size the page file or memory for the workload.
 
 ## `patch_install_deferred`
 
@@ -688,6 +820,21 @@ A platform-security agent reported a tamper indicator against this machine.
 - Read the Category and the listed events from the message: they name what was matched.
 - Check whether a deliberate BIOS change or a hardware service visit explains it.
 - Where nothing explains it, treat the named firmware settings as the thing to put back.
+
+## `ram_commit_exhausted`
+
+Committed memory on this host reached its limit.
+
+**Also reported by:** `win.eventlog.platform`
+
+**Severity:** Serious on a server, Error otherwise
+
+**Impact:** Applications fail memory allocations until memory is freed or the page file can grow.
+
+**Consider:**
+
+- Find the top consumer named in the event and restart or update it.
+- Add memory or let the page file grow when no single program explains it.
 
 ## `rds_license_server_unactivated`
 
@@ -799,7 +946,7 @@ A Windows service exited with an error.
 
 A Windows service stopped responding to a control transaction.
 
-**Severity:** Error
+**Severity:** Notice
 
 **Impact:** A hung service can block dependent work or delay shutdown, startup, or control operations.
 
@@ -808,13 +955,26 @@ A Windows service stopped responding to a control transaction.
 - Identify the named service and transaction timeout.
 - Check for adjacent service crashes or resource pressure.
 
+## `service_hung_starting`
+
+A Windows service hung while starting.
+
+**Severity:** Notice
+
+**Impact:** The service may not have started; dependent services or applications can wait on it.
+
+**Consider:**
+
+- Check whether the named service is running now.
+- Pair with SCM 7000, 7009 or 7011 for the same service.
+
 ## `service_installed`
 
 A Windows service was installed.
 
-**Also reported by:** `win.eventlog.security`
+**Also reported by:** `win.eventlog.security`, `services`
 
-**Severity:** Notice
+**Severity:** Notice or Info
 
 **Impact:** Unexpected service creation can establish persistence or run code under a privileged account.
 
@@ -840,7 +1000,7 @@ A Windows service failed to start.
 
 A Windows service did not connect before the startup timeout.
 
-**Severity:** Error
+**Severity:** Notice
 
 **Impact:** The service may be unavailable or too slow to initialize under current load or dependency state.
 
@@ -888,13 +1048,40 @@ A file share could not be recreated because the folder it points at no longer ex
 - Read the share name and path from the message; the event names both remedies.
 - Check whether the folder was moved rather than deleted before removing the share.
 
+## `sparklogs_agent_started`
+
+The SparkLogs agent service started.
+
+**Also reported by:** `lifecycle`
+
+**Severity:** Display
+
+**Consider:**
+
+- Read the span since the previous sparklogs_agent_stopped as time the agent was not collecting.
+
+## `sparklogs_agent_stopped`
+
+The SparkLogs agent service stopped, or terminated unexpectedly.
+
+**Also reported by:** `lifecycle`
+
+**Severity:** Error or Display
+
+**Impact:** The host is not collecting until the agent starts again.
+
+**Consider:**
+
+- A terminated row is the agent dying, not stopping; read crash_count for how often.
+- Read the span to the next sparklogs_agent_started as time the agent was not collecting.
+
 ## `storage_controller_reset`
 
-The AHCI storage controller reported a reset or timeout condition.
+The storage controller reported a reset or timeout condition.
 
 **Also reported by:** `win.eventlog.storage`
 
-**Severity:** Warning
+**Severity:** Notice on uaspstor USB-path resets; Warning on other controller resets.
 
 **Impact:** A controller reset can stall storage IO and may indicate a failing device, cable, controller, or driver path.
 
@@ -907,7 +1094,7 @@ The AHCI storage controller reported a reset or timeout condition.
 
 Windows Time could not reach or resolve its time source.
 
-**Severity:** Warning
+**Severity:** Warning (server or unknown) / Info (workstation)
 
 **Impact:** Clock skew can break Kerberos, TLS validation, scheduled jobs, and timeline analysis.
 
@@ -1019,7 +1206,7 @@ The previous shutdown was not clean: the host stopped without shutting down and 
 
 - Use with os_bsod as the crash triangle around one boot gap.
 - Inspect bugcheck_code and bugcheck_name when present: a nonzero code means a bug check ended the session; a zero code leaves the cause undetermined.
-- The row time is the next boot, not the moment the host stopped.
+- On EventLog 6008 the row time is the loss and recorded_at is the next boot; on Kernel-Power 41 the row time is the next boot.
 - Check the nearest clean shutdown and boot markers.
 
 ## `vpn_connected`
