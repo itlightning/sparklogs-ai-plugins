@@ -40,7 +40,7 @@ The agent truncated an oversized event.
 
 ## `sparklogs_agent_spool_dropped`
 
-The agent dropped sealed spool data to stay under its disk cap.
+The agent dropped its oldest unsent spool file to stay under its disk cap.
 
 **Severity:** Warning
 
@@ -48,7 +48,7 @@ The agent dropped sealed spool data to stay under its disk cap.
 
 ## `sparklogs_agent_spool_expired`
 
-The agent deleted spooled data that aged out before it could be sent.
+Before agent 1.14.1, the agent deleted unsent spool data older than 24 hours.
 
 **Severity:** Warning
 

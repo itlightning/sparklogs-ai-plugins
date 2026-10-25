@@ -233,8 +233,11 @@ say in your findings that you were reading uncurated text.
 - `fields/topic-installed-products.md`
 - `fields/topic-kernel-crashes.md`
 - `fields/topic-lifecycle.md`
+- `fields/topic-network-adapter-io.md`
 - `fields/topic-network-adapters.md`
 - `fields/topic-network-config.md`
+- `fields/topic-network-path.md`
+- `fields/topic-network-shares.md`
 - `fields/topic-performance.md`
 - `fields/topic-processes.md`
 - `fields/topic-services.md`
@@ -242,6 +245,7 @@ say in your findings that you were reading uncurated text.
 - `fields/topic-storage-devices.md`
 - `fields/topic-storage-io.md`
 - `fields/topic-system-info.md`
+- `fields/topic-top-network-connections.md`
 - `fields/topic-top-processes.md`
 - `fields/topic-volume-map.md`
 - `fields/topic-vss-shadowstorage.md`
