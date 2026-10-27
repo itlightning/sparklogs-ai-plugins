@@ -11,16 +11,18 @@ Every section below is from the public reason block only.
 | `av_unsigned_code_blocked` | `endpoint_protection` | Serious |  |
 | `bitlocker_key_retrieval_code_reported` | `encryption` | Verbose | benign |
 | `dcom_activation_timeout` | `app_stability` | Minor |  |
-| `dcom_register_timeout` | `app_stability` | Minor |  |
+| `dcom_register_timeout` | `app_stability` | Notice |  |
 | `dcom_start_failed` | `app_stability` | Minor |  |
 | `disk_bad_block` | `storage` | Fixed disks select Serious; removable disks Error; removable media Warning. Virtual, unknown and missing facts retain Serious. |  |
 | `disk_controller_error` | `storage` | Fixed disks select Error; removable media Notice; removable disks, virtual, unknown and missing facts Warning. |  |
+| `disk_failure_predicted` | `storage` | Serious on servers; Error on workstations or an unknown host class. |  |
 | `disk_io_failed` | `storage` | Fixed disks select Error; removable media Notice; removable disks, virtual, unknown and missing facts Warning. |  |
 | `disk_io_retried` | `storage` | Removable disks and media select Notice; fixed, virtual, unknown and missing facts retain Warning. |  |
 | `disk_paging_error` | `storage` | Fixed disks select Error; removable media Notice; removable disks, virtual, unknown and missing facts Warning. |  |
 | `disk_surprise_removal` | `storage` | Warning |  |
+| `dns_client_resolution_timed_out` | `networking` | Display |  |
 | `dns_registration_failed` | `networking` | Warning (server) / Info (workstation or unknown) |  |
-| `driver_load_failed` | `hardware` | Warning |  |
+| `driver_load_failed` | `hardware` | Warning or Info | benign possible |
 | `ephemeral_port_alloc_failed` | `networking` | Notice |  |
 | `failover_cluster_csv_unavailable` | `clustering` | Severe |  |
 | `failover_cluster_node_removed` | `clustering` | Serious |  |
@@ -143,7 +145,7 @@ DCOM activation timed out.
 
 A DCOM server did not register in time.
 
-**Severity:** Minor
+**Severity:** Notice
 
 **Impact:** The COM server or application may be hung, unavailable, or too slow to start.
 
@@ -192,6 +194,20 @@ A disk controller error was reported for a storage device.
 
 - Check whether the device path maps to a fixed disk or removable media.
 - Correlate with disk_io_retried, disk_paging_error, and NTFS corruption on the same device.
+
+## `disk_failure_predicted`
+
+A storage device predicted its own failure.
+
+**Also reported by:** `win.eventlog.storage`
+
+**Severity:** Serious on servers; Error on workstations or an unknown host class.
+
+**Impact:** The drive still serves IO, but its failure prediction warrants examination before data becomes inaccessible.
+
+**Consider:**
+
+- Check backup state and plan a replacement while the drive remains readable.
 
 ## `disk_io_failed`
 
@@ -250,6 +266,24 @@ A disk disappeared without an orderly removal path.
 - Identify whether the device is USB, virtual, or fixed storage.
 - Check adjacent service or backup failures that used the disk.
 
+## `dns_client_resolution_timed_out`
+
+A DNS name lookup timed out because none of the configured DNS servers answered.
+
+**Also reported by:** `win.eventlog.network`
+
+**Severity:** Display
+
+**Impact:** Whatever needed that name fails until resolution succeeds. One timeout on a waking or roaming client is routine; repeats for many names point at the resolver path.
+
+**Consider:**
+
+- Read this as unreachable DNS servers, not a missing record: a negative answer stops the client without a timeout.
+- Count the different names that time out in the same minutes: one name points at the suffix or forwarder for that zone, many names at the adapter's DNS servers or the path to them.
+- The client works through the servers configured on the adapter on one short fixed budget, so how many are listed and in what order decides whether a reachable one is reached before it gives up; put a reachable server first. The reference below carries the current timings.
+
+A host with the DNS client Operational log turned on can record one timeout twice, once from the System log and once from the Operational log; the subsource tells them apart.
+
 ## `dns_registration_failed`
 
 Windows could not register or update the name records of this computer in DNS.
@@ -267,7 +301,7 @@ Windows could not register or update the name records of this computer in DNS.
 
 A device driver failed to load.
 
-**Severity:** Warning
+**Severity:** Warning or Info
 
 **Impact:** The device may be unavailable, degraded, or missing expected driver functionality.
 
@@ -1222,7 +1256,7 @@ A remote-access connection was established.
 
 ## `vss_shadow_aborted`
 
-A volume shadow-copy operation was aborted by shadow storage limits.
+A volume shadow-copy operation failed or its shadow storage could not grow.
 
 **Severity:** Error or Warning
 

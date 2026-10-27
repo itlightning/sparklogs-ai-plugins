@@ -74,6 +74,10 @@ Explain the specific limit in a report.
 `unobserved_gap` (value) means the timestamp was clamped to the last confirmation before an observation gap.
 The condition may have persisted after that timestamp; do not use it as an exact recovery time or date a cause to it.
 
+An `ended` (value) episode closed without a witnessed recovery; `sparklogs.episode.end_reason` (col) says why tracking stopped.
+`no_longer_applicable` (value) means the condition stopped applying to its subject, such as a network adapter that disconnected while its condition was open.
+Never report an ended episode as fixed; check the subject's later readings.
+
 `sparklogs.episode.max_observation_gap_s` (col) is the longest observation gap during the episode.
 An absent value does not establish zero gaps.
 `sparklogs.episode.post_gap_s` (col) marks the first reading after a gap.
@@ -93,6 +97,18 @@ For repeating configuration changes, use the timeline view and the relevant chan
 The episode occurrence counter is not a list of change events.
 Correlate a condition with underlying logs using its subject, reason and time window.
 A reported change alone does not establish causation.
+
+Name a changed item with `sparklogs.config_change.target_name` (col) when present; group and join on `sparklogs.config_change.target` (col), since the name is display only.
+On an inventory, `sparklogs.observes_config_changes` (col) false means the agent cannot report observed changes on that topic.
+No change rows then says nothing about whether anything changed.
+
+## Network adapters
+
+`sparklogs.data.network_adapters.adapter_class` (col) separates `physical` (value) adapters from virtual switches, other virtual adapters (VPN, TAP, Wi-Fi Direct), tunnels, WAN miniports, loopback and `not_present` (value) ones.
+Filter to physical adapters before judging a device's wired or wireless connectivity.
+`network_adapter_dhcp_failed` (value) is open while an adapter holds only a self-assigned 169.254 address; it rates higher on a server and when no other default route keeps the device online.
+`network_adapter_link_downshifted` (value) is open while a wired link runs at half or less of its seven-day peak speed; cables, ports, docks and power policy are the usual causes.
+Both end as `no_longer_applicable` (value) when the adapter disconnects, which is not a recovery.
 
 ## Devices without data
 

@@ -146,7 +146,9 @@ cols:
   - sparklogs.class
   - sparklogs.config_change.action
   - sparklogs.config_change.target
+  - sparklogs.config_change.target_name
   - sparklogs.config_change.type
+  - sparklogs.data.network_adapters.adapter_class
   - sparklogs.delta.id
   - sparklogs.delta.prev_id
   - sparklogs.display_name
@@ -175,6 +177,7 @@ cols:
   - sparklogs.inventory.total_parts
   - sparklogs.kind
   - sparklogs.malformed_event
+  - sparklogs.observes_config_changes
   - sparklogs.open_monitors_count
   - sparklogs.reason
   - sparklogs.target.id
@@ -323,6 +326,11 @@ values:
   episode_transition:
     - severity_raised
     - severity_lowered
+  episode_end_reason:
+    - no_longer_applicable
+  network_adapter_class:
+    - physical
+    - not_present
   device_health_views:
     - latest_state
     - event_timeline

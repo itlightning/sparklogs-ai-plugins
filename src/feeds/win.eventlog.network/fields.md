@@ -27,7 +27,7 @@ Stored flat under the `win.eventlog.network.` prefix.
 
 | LQL path | Type | Meaning |
 |---|---|---|
-| `win.eventlog.network.dns_query_name` | string | DNS query name from a client resolution timeout. |
+| `win.eventlog.network.dns_query_name` | string | DNS name the client was resolving when the lookup timed out. |
 | `win.eventlog.network.firewall_rule_action` | int | Firewall rule action code from the dedicated channel. |
 | `win.eventlog.network.firewall_rule_active` | int | Whether the firewall rule is enabled: 1 enabled, 0 disabled. |
 | `win.eventlog.network.firewall_rule_application_path` | string | Program path the firewall rule applies to. |
@@ -38,6 +38,9 @@ Stored flat under the `win.eventlog.network.` prefix.
 | `win.eventlog.network.firewall_rule_protocol` | int | IP protocol number the firewall rule matches (6 TCP, 17 UDP, 256 any). |
 | `win.eventlog.network.firewall_rule_remote_ports` | string | Remote ports the firewall rule matches, as the rule states them. |
 | `win.eventlog.network.firewall_rule_service_name` | string | Windows service the firewall rule applies to. |
+| `win.eventlog.network.ncsi_capability` | int | Connectivity NCSI reports after the change: 0 none, 1 local network only, 2 internet. |
+| `win.eventlog.network.ncsi_change_reason` | int | Numeric reason NCSI gives for a connectivity change; the rendered message names it. |
+| `win.eventlog.network.ncsi_family` | int | Address family of the connectivity change, as NCSI numbers it (0 is IPv4); the rendered message names it. |
 | `win.eventlog.network.offline_files_failed_count` | int | Offline-files sync failure count. |
 | `win.eventlog.network.offline_files_path` | string | Offline-files scope path. |
 | `win.eventlog.network.printer_name` | string | Redirected printer name from RDS setup. |
@@ -92,6 +95,8 @@ Prefer these over the per-feed fields for anything that spans feeds.
 | `sparklogs.config_change.type` | The kind of object that changed, from a closed set of object nouns. |
 | `sparklogs.config_change.action` | What was done to that object, from a closed set of verbs. |
 | `sparklogs.config_change.target` | Which object it was: its own identity within its kind, as a name, a path or an id. A different field from the principal a change acted on, and a change acting on a principal carries both. |
+| `sparklogs.config_change.target_name` | The object's name for a reader at the time of the change. Display only: join and group on target, never on this. |
+| `sparklogs.config_change.category` | Positive upkeep classification, maintenance when established, omitted otherwise. |
 | `sparklogs.actor.id` | The initiator. Who wanted the thing done. |
 | `sparklogs.actor.type` | The initiator. Who wanted the thing done. |
 | `sparklogs.process.path` | The process the event is about. |
@@ -119,11 +124,16 @@ The last column is different in kind: it is the author's account of the row or e
 | `dhcp_address_conflict_detected` / `default` | 1004 | **fields: none** |  |
 | `dhcp_lease_denied` / `default` | 1002 | **fields: none** |  |
 | `dhcp_lease_failed` / `default` | 1001, 1003 | **fields: none** |  |
-| `dns_client_resolution_timed_out` / `default` | 1013, 1015 | `win.eventlog.network.dns_query_name` |  |
-| `firewall_rule_changed` / `default` | 2005, 2099 | `win.eventlog.network.firewall_rule_action` `win.eventlog.network.firewall_rule_active` `win.eventlog.network.firewall_rule_application_path` `win.eventlog.network.firewall_rule_direction` `win.eventlog.network.firewall_rule_local_ports` `win.eventlog.network.firewall_rule_origin` `win.eventlog.network.firewall_rule_profiles` `win.eventlog.network.firewall_rule_protocol` `win.eventlog.network.firewall_rule_remote_ports` `win.eventlog.network.firewall_rule_service_name` `win.eventlog.network.rule_id` `win.eventlog.network.rule_name` |  |
-| `firewall_rule_created` / `default` | 2004, 2097 | `win.eventlog.network.firewall_rule_action` `win.eventlog.network.firewall_rule_active` `win.eventlog.network.firewall_rule_application_path` `win.eventlog.network.firewall_rule_direction` `win.eventlog.network.firewall_rule_local_ports` `win.eventlog.network.firewall_rule_origin` `win.eventlog.network.firewall_rule_profiles` `win.eventlog.network.firewall_rule_protocol` `win.eventlog.network.firewall_rule_remote_ports` `win.eventlog.network.firewall_rule_service_name` `win.eventlog.network.rule_id` `win.eventlog.network.rule_name` |  |
+| `dns_client_resolution_timed_out` / `default` | 1013 | `win.eventlog.network.dns_query_name` |  |
+| `firewall_rule_changed` / `single_rule` | 2005, 2099 | `win.eventlog.network.firewall_rule_action` `win.eventlog.network.firewall_rule_active` `win.eventlog.network.firewall_rule_application_path` `win.eventlog.network.firewall_rule_direction` `win.eventlog.network.firewall_rule_local_ports` `win.eventlog.network.firewall_rule_origin` `win.eventlog.network.firewall_rule_profiles` `win.eventlog.network.firewall_rule_protocol` `win.eventlog.network.firewall_rule_remote_ports` `win.eventlog.network.firewall_rule_service_name` `win.eventlog.network.rule_id` `win.eventlog.network.rule_name` |  |
+| `firewall_rule_changed` / `upkeep` | 2005, 2099 | `win.eventlog.network.firewall_rule_action` `win.eventlog.network.firewall_rule_active` `win.eventlog.network.firewall_rule_application_path` `win.eventlog.network.firewall_rule_direction` `win.eventlog.network.firewall_rule_local_ports` `win.eventlog.network.firewall_rule_origin` `win.eventlog.network.firewall_rule_profiles` `win.eventlog.network.firewall_rule_protocol` `win.eventlog.network.firewall_rule_remote_ports` `win.eventlog.network.firewall_rule_service_name` `win.eventlog.network.rule_id` `win.eventlog.network.rule_name` |  |
+| `firewall_rule_created` / `single_rule` | 2004, 2097 | `win.eventlog.network.firewall_rule_action` `win.eventlog.network.firewall_rule_active` `win.eventlog.network.firewall_rule_application_path` `win.eventlog.network.firewall_rule_direction` `win.eventlog.network.firewall_rule_local_ports` `win.eventlog.network.firewall_rule_origin` `win.eventlog.network.firewall_rule_profiles` `win.eventlog.network.firewall_rule_protocol` `win.eventlog.network.firewall_rule_remote_ports` `win.eventlog.network.firewall_rule_service_name` `win.eventlog.network.rule_id` `win.eventlog.network.rule_name` |  |
+| `firewall_rule_created` / `upkeep` | 2004, 2097 | `win.eventlog.network.firewall_rule_action` `win.eventlog.network.firewall_rule_active` `win.eventlog.network.firewall_rule_application_path` `win.eventlog.network.firewall_rule_direction` `win.eventlog.network.firewall_rule_local_ports` `win.eventlog.network.firewall_rule_origin` `win.eventlog.network.firewall_rule_profiles` `win.eventlog.network.firewall_rule_protocol` `win.eventlog.network.firewall_rule_remote_ports` `win.eventlog.network.firewall_rule_service_name` `win.eventlog.network.rule_id` `win.eventlog.network.rule_name` |  |
 | `firewall_rule_deleted` / `all_rules` | 2033 | **fields: none** |  |
+| `firewall_rule_deleted` / `all_rules_upkeep` | 2033 | **fields: none** |  |
 | `firewall_rule_deleted` / `single_rule` | 2006, 2052 | `win.eventlog.network.firewall_rule_action` `win.eventlog.network.firewall_rule_direction` `win.eventlog.network.firewall_rule_origin` `win.eventlog.network.firewall_rule_profiles` `win.eventlog.network.rule_id` `win.eventlog.network.rule_name` |  |
+| `firewall_rule_deleted` / `upkeep` | 2006, 2052 | `win.eventlog.network.firewall_rule_action` `win.eventlog.network.firewall_rule_direction` `win.eventlog.network.firewall_rule_origin` `win.eventlog.network.firewall_rule_profiles` `win.eventlog.network.rule_id` `win.eventlog.network.rule_name` |  |
+| `ncsi_internet_lost` / `default` | 4042 | `win.eventlog.network.ncsi_capability` `win.eventlog.network.ncsi_change_reason` `win.eventlog.network.ncsi_family` |  |
 | `offline_files_slow_link_transition_blocked` / `default` | 1008 | `win.eventlog.network.offline_files_path` |  |
 | `offline_files_sync_failed` / `default` | 1006 | `win.eventlog.network.offline_files_failed_count` `win.eventlog.network.offline_files_path` |  |
 | `rds_redirected_printer_setup_failed` / `config_not_restored` | 1108, 1109 | `win.eventlog.network.printer_name` |  |
@@ -163,6 +173,8 @@ The last column is different in kind: it is the author's account of the row or e
 | `wfp_transaction_watchdog_timeout` / `default` | 1030, 5150 | **fields: none** |  |
 | `wlan_connect_failed` / `join_failed` | 8002 | `win.eventlog.network.wlan_adapter` `win.eventlog.network.wlan_bss_type` `win.eventlog.network.wlan_connection_mode` `win.eventlog.network.wlan_failure_reason` `win.eventlog.network.wlan_profile_name` `win.eventlog.network.wlan_reason_code` |  |
 | `wlan_connect_failed` / `not_visible` | 8002 | `win.eventlog.network.wlan_adapter` `win.eventlog.network.wlan_bss_type` `win.eventlog.network.wlan_connection_mode` `win.eventlog.network.wlan_failure_reason` `win.eventlog.network.wlan_profile_name` `win.eventlog.network.wlan_reason_code` |  |
+| `wlan_disconnected` / `default` | 8003 | `win.eventlog.network.wlan_adapter` `win.eventlog.network.wlan_bss_type` `win.eventlog.network.wlan_connection_mode` `win.eventlog.network.wlan_profile_name` `win.eventlog.network.wlan_reason_code` |  |
+| `wlan_disconnected_by_request` / `default` | 8003 | `win.eventlog.network.wlan_adapter` `win.eventlog.network.wlan_bss_type` `win.eventlog.network.wlan_connection_mode` `win.eventlog.network.wlan_profile_name` `win.eventlog.network.wlan_reason_code` |  |
 | `wlan_security_handshake_failed` / `default` | 11006 | `win.eventlog.network.wlan_adapter` `win.eventlog.network.wlan_bss_type` `win.eventlog.network.wlan_reason_code` `win.eventlog.network.wlan_reason_text` |  |
 | `firewall_setting_changed` | 2083 | **fields: none** |  |
 | `rdp_client_component_error` | 1033 | **fields: none** |  |
@@ -179,6 +191,7 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `dhcp_lease_denied` / `default`
 - `dhcp_lease_failed` / `default`
 - `firewall_rule_deleted` / `all_rules`
+- `firewall_rule_deleted` / `all_rules_upkeep`
 - `smb_anonymous_access_enabled` / `default`
 - `smb_insecure_guest_allowed` / `default`
 - `smb_insecure_guest_rejected` / `default`
