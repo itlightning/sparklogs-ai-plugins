@@ -8,7 +8,7 @@ Full inventory every 6 hours. Supported changes are reported when the agent obse
 | `sparklogs.data.vss_shadowstorage.display_name` | string |  | The volume's drive letter or mount path, for display. |
 | `sparklogs.data.vss_shadowstorage.volume` | string |  | The volume's stable identity, the same identity `disk_volumes` and `volume_map` use. Falls back to the raw lowercased `vssadmin` string when the volume could not be resolved to that identity. |
 | `sparklogs.data.vss_shadowstorage.volume_resolution` | string |  | `unresolved` when the volume key is the raw `vssadmin` value and cannot be joined to the shared volume identity. |
-| `sparklogs.data.vss_shadowstorage.shadowstorage_used_pct` | float | percent | How much of the volume's shadow-storage allocation is used. |
+| `sparklogs.data.vss_shadowstorage.shadowstorage_used_pct` | float | percent | How much of the volume's shadow-storage allocation is used. Can exceed 100 when the allocation's maximum is lowered below the space already in use. |
 | `sparklogs.data.vss_shadowstorage.shadowstorage_at_cap` | bool |  | Whether shadow-storage usage is at or above its maximum allocation. |
 | `sparklogs.data.vss_shadowstorage.shadow_snapshots_deleted_delta` | integer | count | Restore points lost since the prior facts pass, when that could be derived. Normally absent: the underlying commands do not enumerate shadows, so this lights up only when a source happens to supply it. |
 | `sparklogs.data.vss_shadowstorage.snap_fail_count_7d` | integer | count | How many snapshot failures this volume has recorded in the last 7 days. Absent until the event-log failure scan has first run after a start, or while its reading is stale; zero when the scan ran and found none. |

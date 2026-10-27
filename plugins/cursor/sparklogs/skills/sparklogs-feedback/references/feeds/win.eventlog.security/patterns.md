@@ -29,7 +29,7 @@ Its rendered text cannot survive pattern derivation, so a string that appears to
 
 An unexpected pattern is one of three things, in falling order of likelihood: a curated surface this catalog does not list, a vocabulary that gained a value, or a token rendered from something that is not a closed vocabulary at all. The third is the one that matters.
 
-This module has 81 curated surface(s) and a legal-pattern language of 32842 strings.
+This module has 82 curated surface(s) and a legal-pattern language of 32851 strings.
 That number is why this file is a procedure and not a list.
 
 ## Surfaces
@@ -122,7 +122,24 @@ Most of those cannot physically occur; the count is a bound on the language, not
 Legal pattern count for this surface: 9 (every slot independently present or absent).
 Most of those cannot physically occur; the count is a bound on the language, not a prediction.
 
-### `account_password_reset` / `default`
+### `account_password_reset` / `reset`
+
+**When:** Every other completed reset: a person, a service account or a domain account as the actor, a domain account as the target, or SYSTEM resetting a local account the rotation arm does not name.
+
+**Renders:** `account_password_reset: NOTABLE: account password reset by another principal`
+
+**Event ids:** 4724
+
+| # | Slot | Legal values |
+|---|---|---|
+| 1 | `target_kind` | `by_account` `by_machine` `by_system` `by_service` `by_local_service` `by_network_service` `by_anonymous` `by_group` |
+
+Legal pattern count for this surface: 9 (every slot independently present or absent).
+Most of those cannot physically occur; the count is a bound on the language, not a prediction.
+
+### `account_password_reset` / `system_rotation`
+
+**When:** SYSTEM (SubjectUserSid S-1-5-18, SubjectLogonId 0x3e7) reset a LOCAL SAM account (the target domain is the host's own NetBIOS name) that is either on the pack-owned list of management agent accounts (`ltservice`) or the built-in Administrator (target RID 500).
 
 **Renders:** `account_password_reset: NOTABLE: account password reset by another principal`
 
@@ -1010,6 +1027,7 @@ These surfaces share a head and headline, so a pattern matching one is attribute
 
 | Renders | Surfaces |
 |---|---|
+| `account_password_reset: NOTABLE: account password reset by another principal` | `account_password_reset` / `reset`, `account_password_reset` / `system_rotation` |
 | `cryptographic key file operation` | `key_file_operation`, `key_file_operation_succeeded` |
 | `cryptographic key migration operation` | `key_migration_operation`, `key_migration_operation_succeeded` |
 | `cryptographic operation` | `crypto_operation`, `crypto_operation_succeeded` |

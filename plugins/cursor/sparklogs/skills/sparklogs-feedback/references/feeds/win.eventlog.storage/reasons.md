@@ -39,6 +39,8 @@ The file NTFS names is not shown here. It carries user document paths.
 
 A storage device reported that its own reliability is degraded or that it has passed its rated write endurance.
 
+**Also reported by:** `win.eventlog.system`
+
 **Severity:** Serious when a server's drive reports its reliability degraded, Error for the same report on any other host, Warning when the drive has only passed its rated write endurance.
 
 **Impact:** The drive still serves IO. It is reporting wear before reads or writes start failing.

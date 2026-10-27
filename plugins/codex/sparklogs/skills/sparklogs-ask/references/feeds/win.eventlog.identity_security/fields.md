@@ -132,6 +132,7 @@ The last column is different in kind: it is the author's account of the row or e
 | `crypto_key_operation_failed` / `platform_provider_failure` | 1, 2, 3, 4, 5, 6, 8, 10, 12 | `win.eventlog.identity_security.crypto_operation_type` `win.eventlog.identity_security.crypto_provider` |  |
 | `defender_sensor_connection_failed` / `contact_failed` | 5, 67, 101, 405, 406, 409 | `win.eventlog.identity_security.sensor_connection_error_code` `win.eventlog.identity_security.sensor_contact_failures` `win.eventlog.identity_security.sensor_contact_successes` `win.eventlog.identity_security.sensor_request_type` |  |
 | `defender_sensor_connection_failed` / `name_resolution` | 5, 67, 101, 405, 406, 409 | `win.eventlog.identity_security.sensor_connection_error_code` `win.eventlog.identity_security.sensor_contact_failures` `win.eventlog.identity_security.sensor_contact_successes` `win.eventlog.identity_security.sensor_request_type` |  |
+| `defender_sensor_connection_failed` / `ndr_component_not_started` | 5, 67, 101, 405, 406, 409 | `win.eventlog.identity_security.sensor_connection_error_code` `win.eventlog.identity_security.sensor_contact_failures` `win.eventlog.identity_security.sensor_contact_successes` `win.eventlog.identity_security.sensor_request_type` |  |
 | `defender_sensor_connection_failed` / `partial` | 5, 67, 101, 405, 406, 409 | `win.eventlog.identity_security.sensor_connection_error_code` `win.eventlog.identity_security.sensor_contact_failures` `win.eventlog.identity_security.sensor_contact_successes` `win.eventlog.identity_security.sensor_request_type` |  |
 | `device_encryption_enable_failed` / `automatic` | 851, 853, 854, 4103 | **fields: none** |  |
 | `device_encryption_enable_failed` / `automatic_no_account` | 851, 853, 854, 4103 | **fields: none** |  |
@@ -146,7 +147,8 @@ The last column is different in kind: it is the author's account of the row or e
 | `dpapi_unprotect_failed` / `bad_key_state` | 8196, 8198, 8202, 8204, 8205 | `win.eventlog.identity_security.dpapi_failure_reason` `win.eventlog.identity_security.dpapi_master_key_guid` |  |
 | `dpapi_unprotect_failed` / `credential_mismatch` | 8196, 8198, 8202, 8204, 8205 | `win.eventlog.identity_security.dpapi_failure_reason` `win.eventlog.identity_security.dpapi_master_key_guid` |  |
 | `dpapi_unprotect_failed` / `unprotect_incomplete` | 8196, 8198, 8202, 8204, 8205 | `win.eventlog.identity_security.dpapi_failure_reason` `win.eventlog.identity_security.dpapi_master_key_guid` |  |
-| `entra_device_certificate_update_failed` / `default` | 1131, 1256 | `win.eventlog.identity_security.correlation_id` |  |
+| `entra_device_certificate_update_failed` / `logon_or_network` | 1131, 1256 | `win.eventlog.identity_security.correlation_id` |  |
+| `entra_device_certificate_update_failed` / `other_status` | 1131, 1256 | `win.eventlog.identity_security.correlation_id` |  |
 | `entra_sign_in_failed` / `credential` | 1085, 1086, 1160, 1161, 1162 | **fields: none** |  |
 | `entra_sign_in_failed` / `unexplained` | 1085, 1086, 1160, 1161, 1162 | **fields: none** |  |
 | `entra_sign_in_failed` / `unreachable` | 1085, 1086, 1160, 1161, 1162 | **fields: none** |  |
@@ -169,6 +171,7 @@ The last column is different in kind: it is the author's account of the row or e
 | `group_policy_domain_controller_unresolved` / `domain_unresolved` | 7017, 7320, 7326 | `win.eventlog.identity_security.gp_dc_discovery_ms` |  |
 | `group_policy_extension_apply_failed` / `deferred` | 6016, 7016 | `win.eventlog.identity_security.gp_extension_id` `win.eventlog.identity_security.gp_extension_name` |  |
 | `group_policy_extension_apply_failed` / `extension_failed` | 6016, 7016 | `win.eventlog.identity_security.gp_extension_id` `win.eventlog.identity_security.gp_extension_name` |  |
+| `group_policy_extension_apply_failed` / `no_changes` | 6016, 7016 | `win.eventlog.identity_security.gp_extension_id` `win.eventlog.identity_security.gp_extension_name` |  |
 | `group_policy_extension_apply_failed` / `share_unreachable` | 6016, 7016 | `win.eventlog.identity_security.gp_extension_id` `win.eventlog.identity_security.gp_extension_name` |  |
 | `group_policy_file_share_unhardened` / `default` | 9001 | `win.eventlog.identity_security.gp_integrity_enforced` `win.eventlog.identity_security.gp_mutual_auth_enforced` |  |
 | `group_policy_processing_failed` / `no_network` | 7000, 7001 | `win.eventlog.identity_security.gp_connectivity_failure` `win.eventlog.identity_security.gp_elapsed_seconds` `win.eventlog.identity_security.gp_is_machine` |  |
@@ -188,6 +191,7 @@ The last column is different in kind: it is the author's account of the row or e
 | `windows_hello_provisioning_blocked` / `not_configured` | 359, 360, 6045, 6055, 7054, 7200, 7201, 7203 | `win.eventlog.identity_security.whfb_device_joined` `win.eventlog.identity_security.whfb_hardware_met` `win.eventlog.identity_security.whfb_policy_enabled` `win.eventlog.identity_security.whfb_primary_refresh_token` `win.eventlog.identity_security.whfb_user_remote` |  |
 | `windows_hello_provisioning_blocked` / `prerequisite_unmet` | 7054, 7200, 7201, 7203 | `win.eventlog.identity_security.whfb_device_joined` `win.eventlog.identity_security.whfb_hardware_met` `win.eventlog.identity_security.whfb_policy_enabled` `win.eventlog.identity_security.whfb_primary_refresh_token` `win.eventlog.identity_security.whfb_user_remote` |  |
 | `windows_hello_provisioning_blocked` / `remote_session` | 359, 360, 6045, 6055, 7054, 7200, 7201, 7203 | `win.eventlog.identity_security.whfb_device_joined` `win.eventlog.identity_security.whfb_hardware_met` `win.eventlog.identity_security.whfb_policy_enabled` `win.eventlog.identity_security.whfb_primary_refresh_token` `win.eventlog.identity_security.whfb_user_remote` |  |
+| `applocker_managed_installer_check_failed` | 8033 | **fields: none** |  |
 
 ### Surfaces that promote nothing
 
@@ -209,3 +213,4 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `laps_password_backup_failed` / `authentication`
 - `laps_password_backup_failed` / `backup_failed`
 - `laps_password_backup_failed` / `tenant_not_enabled`
+- `applocker_managed_installer_check_failed`

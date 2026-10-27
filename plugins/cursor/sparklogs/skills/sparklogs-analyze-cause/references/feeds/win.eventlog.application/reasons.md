@@ -34,7 +34,9 @@ Every section below is from the public reason block only.
 | `mssql_db_io_failed` | `database` | Error |  |
 | `mssql_db_page_corruption` | `database` | Critical |  |
 | `mssql_db_read_retried` | `database` | Warning |  |
+| `mssql_login_failed` | `database` | Notice |  |
 | `office_subscription_licensing_failed` | `licensing` | Warning |  |
+| `quickbooks_verify_database_advised` | `app_stability` | Error |  |
 | `remote_assist_session_started` | `remote_access` | Notice |  |
 | `restart_manager_app_pending` | `patching` | Info cap | benign |
 | `security_agent_config_fetch_failed` | `endpoint_protection` | Error |  |
@@ -409,6 +411,22 @@ SQL Server retried a database read after it failed, and the retry succeeded.
 - Identify the database, file, and storage path named in the event.
 - Treat this as an early warning, not confirmed corruption.
 
+## `mssql_login_failed`
+
+A login to a SQL Server instance failed.
+
+**Severity:** Notice
+
+**Impact:** The client could not connect as that login. An application that keeps failing cannot reach its database until the credential or the database name is fixed.
+
+**Consider:**
+
+- Read the failure reason, the login and the client in the message.
+- A steady repeat from one client is usually an application with a stale credential or a missing database.
+- Many logins from one remote client in a short time can be a password guess.
+
+Repeats of the same login, database and client are kept once a minute with a count of the repeats.
+
 ## `office_subscription_licensing_failed`
 
 The subscription licensing check for the installed office suite failed.
@@ -422,6 +440,19 @@ The subscription licensing check for the installed office suite failed.
 - Check whether the same host reports it repeatedly, or only around periods of being offline.
 - Confirm the signed-in account still holds a licence in the tenant.
 - Check outbound access to the licensing endpoints from that machine.
+
+## `quickbooks_verify_database_advised`
+
+QuickBooks advised verifying the company database.
+
+**Severity:** Error
+
+**Impact:** QuickBooks reported a company-file error and requested verification. This advice alone does not confirm damage or require rebuilding the file.
+
+**Consider:**
+
+- Follow the QuickBooks Verify Data instructions before deciding whether a rebuild is needed.
+- Review the retained diagnostic and take a backup before repair work.
 
 ## `remote_assist_session_started`
 

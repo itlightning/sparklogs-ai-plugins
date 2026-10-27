@@ -27,6 +27,7 @@ Stored flat under the `win.eventlog.application.` prefix.
 
 | LQL path | Type | Meaning |
 |---|---|---|
+| `win.eventlog.application.quickbooks_edition` | string | QuickBooks product edition from the quoted event wrapper. |
 | `win.eventlog.application.event_name` | string | WER report EventName from Windows Error Reporting 1001 (APPCRASH \| AppHangB1 \| BEX \| BlueScreen \| StoreAgentInstall* \| ...). The discriminator of the heterogeneous 1001 id; the recognition pivot for crash-report queries. |
 | `win.eventlog.application.fault_bucket` | string | WER fault bucket id from Windows Error Reporting 1001. The dedup/recurrence key: same bucket = same crash signature. |
 | `win.eventlog.application.appx_app_id` | string | Packaged-application identity reported by an activation record, the package family plus the application id. The same key the packaged-apps feed promotes, so one application reads the same way on both feeds. |
@@ -69,6 +70,7 @@ Prefer these over the per-feed fields for anything that spans feeds.
 
 | LQL path | Family means |
 |---|---|
+| `sparklogs.throttle.window_s` |  |
 | `sparklogs.process.id` | The process the event is about. |
 | `sparklogs.process.path` | The process the event is about. |
 | `sparklogs.process.name` | The process the event is about. |
@@ -111,7 +113,8 @@ The last column is different in kind: it is the author's account of the row or e
 |---|---|---|---|
 | `adcs_ca_chain_failed` / `default` | 58, 65, 66 | **fields: none** |  |
 | `adcs_crl_publish_failed` / `default` | 74 | **fields: none** |  |
-| `app_crash` / `default` | 1000 | `win.eventlog.application.app_name` `win.eventlog.application.app_version` `win.eventlog.application.exception_code` `win.eventlog.application.fault_offset` `win.eventlog.application.module_name` `win.eventlog.application.module_path` `win.eventlog.application.module_version` `win.eventlog.application.process_start_filetime` `win.eventlog.application.report_id` |  |
+| `app_crash` / `application_error` | 4, 1000 | `win.eventlog.application.app_name` `win.eventlog.application.app_version` `win.eventlog.application.exception_code` `win.eventlog.application.fault_offset` `win.eventlog.application.module_name` `win.eventlog.application.module_path` `win.eventlog.application.module_version` `win.eventlog.application.process_start_filetime` `win.eventlog.application.report_id` |  |
+| `app_crash` / `quickbooks_shutdown` | 4, 1000 | `win.eventlog.application.quickbooks_edition` |  |
 | `app_hang` / `default` | 1002 | `win.eventlog.application.app_name` `win.eventlog.application.hang_type` `win.eventlog.application.report_id` |  |
 | `appx_activation_failed` / `administrator_token` | 5973 | `win.eventlog.application.appx_app_id` |  |
 | `appx_activation_failed` / `other_failure` | 5973 | `win.eventlog.application.appx_app_id` |  |
@@ -144,7 +147,9 @@ The last column is different in kind: it is the author's account of the row or e
 | `mssql_db_io_failed` / `default` | 823 | **fields: none** |  |
 | `mssql_db_page_corruption` / `default` | 824 | **fields: none** |  |
 | `mssql_db_read_retried` / `default` | 825 | **fields: none** |  |
+| `mssql_login_failed` / `default` | 18456 | **fields: none** |  |
 | `office_subscription_licensing_failed` / `default` | 0 | **fields: none** |  |
+| `quickbooks_verify_database_advised` / `default` | 4 | `win.eventlog.application.quickbooks_edition` |  |
 | `remote_assist_session_started` / `default` | 0 | **fields: none** |  |
 | `restart_manager_app_pending` / `default` | 10006, 10007 | `win.eventlog.application.blocked_app` `win.eventlog.application.blocked_app_path` `win.eventlog.application.rm_session_id` `win.eventlog.application.rm_status` |  |
 | `security_agent_config_fetch_failed` / `default` | 4 | **fields: none** |  |
@@ -172,6 +177,21 @@ The last column is different in kind: it is the author's account of the row or e
 | `wmi_provider_registered_as_localsystem` / `default` | 63 | **fields: none** |  |
 | `app_crash_report` | 1001 | `win.eventlog.application.app_name` `win.eventlog.application.app_version` `win.eventlog.application.bugcheck_name` `win.eventlog.application.event_name` `win.eventlog.application.exception_code` `win.eventlog.application.fault_bucket` `win.eventlog.application.fault_offset` `win.eventlog.application.managed_exception_type` `win.eventlog.application.module_name` `win.eventlog.application.module_version` `win.eventlog.application.report_id` |  |
 | `intel_dynamic_tuning_not_started` | n/a | **fields: none** |  |
+| `quickbooks_bank_feed_decryption_failed` | 4 | `win.eventlog.application.quickbooks_edition` |  |
+| `quickbooks_cache_save_failed` | 4 | `win.eventlog.application.quickbooks_edition` |  |
+| `quickbooks_connection_login_refused` | 4 | `win.eventlog.application.quickbooks_edition` |  |
+| `quickbooks_connection_probe` | 4 | `win.eventlog.application.quickbooks_edition` |  |
+| `quickbooks_database_disconnected` | 4 | `win.eventlog.application.quickbooks_edition` |  |
+| `quickbooks_document_print_failed` | 4 | `win.eventlog.application.quickbooks_edition` |  |
+| `quickbooks_oauth_identity_empty` | 4 | `win.eventlog.application.quickbooks_edition` |  |
+| `quickbooks_print_abort_close` | 4 | `win.eventlog.application.quickbooks_edition` |  |
+| `quickbooks_print_job_end_failed` | 4 | `win.eventlog.application.quickbooks_edition` |  |
+| `quickbooks_printer_add_denied` | 4 | `win.eventlog.application.quickbooks_edition` |  |
+| `quickbooks_printer_already_exists` | 4 | `win.eventlog.application.quickbooks_edition` |  |
+| `quickbooks_printer_driver_unknown` | 4 | `win.eventlog.application.quickbooks_edition` |  |
+| `quickbooks_printer_open_failed` | 4 | `win.eventlog.application.quickbooks_edition` |  |
+| `quickbooks_printer_setup_failed` | 4 | `win.eventlog.application.quickbooks_edition` |  |
+| `therefore_db_error` | 101 | **fields: none** |  |
 | `vss_account_resolve_failed` | 8230 | `command_line` `win.eventlog.application.vss_execution_context` `win.eventlog.application.vss_operation_call` `win.eventlog.application.vss_operation_intent` `win.eventlog.application.vss_snapshot_attrs` `win.eventlog.application.vss_snapshot_context` `win.eventlog.application.vss_state` `win.eventlog.application.vss_writer` |  |
 | `vss_flush_writes_timeout` | 12297 | `command_line` `win.eventlog.application.vss_execution_context` `win.eventlog.application.vss_operation_call` `win.eventlog.application.vss_operation_intent` `win.eventlog.application.vss_snapshot_attrs` `win.eventlog.application.vss_snapshot_context` `win.eventlog.application.vss_state` `win.eventlog.application.vss_writer` |  |
 | `vss_hold_writes_timeout` | 12298 | `command_line` `win.eventlog.application.vss_execution_context` `win.eventlog.application.vss_operation_call` `win.eventlog.application.vss_operation_intent` `win.eventlog.application.vss_snapshot_attrs` `win.eventlog.application.vss_snapshot_context` `win.eventlog.application.vss_state` `win.eventlog.application.vss_writer` |  |
@@ -211,6 +231,7 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `mssql_db_io_failed` / `default`
 - `mssql_db_page_corruption` / `default`
 - `mssql_db_read_retried` / `default`
+- `mssql_login_failed` / `default`
 - `office_subscription_licensing_failed` / `default`
 - `remote_assist_session_started` / `default`
 - `security_agent_config_fetch_failed` / `default`
@@ -223,4 +244,5 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `win_user_profile_load_failed` / `default`
 - `wmi_provider_registered_as_localsystem` / `default`
 - `intel_dynamic_tuning_not_started`
+- `therefore_db_error`
 - `vss_legacy_driver_scan`

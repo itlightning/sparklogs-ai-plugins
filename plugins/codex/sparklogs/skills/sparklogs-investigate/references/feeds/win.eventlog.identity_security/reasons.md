@@ -8,7 +8,7 @@ Every section below is from the public reason block only.
 
 | reason | service | severity | benign |
 |---|---|---|---|
-| `applocker_audit_would_block` | `security_audit` | Notice |  |
+| `applocker_audit_would_block` | `security_audit` | Notice for a file under the executable or script rules. Info under the DLL and managed-installer rules, where one record per file a day is kept. |  |
 | `applocker_unsupported_windows_edition` | `security_audit` | Notice |  |
 | `bitlocker_protection_resume_failed` | `encryption` | Warning |  |
 | `bitlocker_recovery_info_read_failed` | `encryption` | Notice or Info |  |
@@ -27,7 +27,7 @@ Every section below is from the public reason block only.
 | `device_encryption_enable_failed` | `encryption` | Warning or Notice |  |
 | `device_registration_failed` | `device_management` | Warning or Notice |  |
 | `dpapi_unprotect_failed` | `certificates` | Notice |  |
-| `entra_device_certificate_update_failed` | `device_management` | Warning |  |
+| `entra_device_certificate_update_failed` | `device_management` | Warning or Notice |  |
 | `entra_sign_in_failed` | `auth` | Notice for a wrong credential or an unreachable service, Warning for a refusal the event does not explain. |  |
 | `entra_token_acquisition_failed` | `auth` | Warning, Notice, Info or Verbose | benign possible |
 | `exploit_mitigation_audit_would_block` | `security_audit` | Info | benign |
@@ -47,7 +47,7 @@ Every section below is from the public reason block only.
 
 An application-control policy running in audit mode would have blocked this file under enforcement.
 
-**Severity:** Notice
+**Severity:** Notice for a file under the executable or script rules. Info under the DLL and managed-installer rules, where one record per file a day is kept.
 
 **Impact:** Nothing was blocked and the file ran. Someone must decide about every file like this before the policy can move to enforcement.
 
@@ -311,7 +311,7 @@ Windows could not decrypt a protected blob, such as a saved credential or a cert
 
 The device failed to refresh the certificate that proves its identity to the directory.
 
-**Severity:** Warning
+**Severity:** Warning or Notice
 
 **Impact:** Left alone, the device eventually cannot prove it is registered, and every conditional-access policy that depends on device state stops seeing it.
 

@@ -15,7 +15,7 @@ Every section below is from the public reason block only.
 | `account_enabled` | `security_audit` | Notice |  |
 | `account_locked_out` | `auth` | Warning (built-in Administrator, any name) / Error (other accounts) |  |
 | `account_password_change_failed` | `security_audit` | Info |  |
-| `account_password_reset` | `security_audit` | Warning |  |
+| `account_password_reset` | `security_audit` | Warning or Notice |  |
 | `account_password_reset_failed` | `security_audit` | Warning |  |
 | `adcs_audit_evidence_tampered` | `certificates` | Serious |  |
 | `adcs_config_changed` | `certificates` | Error |  |
@@ -52,7 +52,7 @@ Every section below is from the public reason block only.
 | `kerberos_ticket_failed` | `auth` | Warning (account state or broken infrastructure) / Notice (wrong password, unknown principal, expired, undecoded) |  |
 | `logon_right_granted` | `security_audit` | Notice |  |
 | `logon_right_removed` | `security_audit` | Notice |  |
-| `network_share_added` | `file_sharing` | Warning |  |
+| `network_share_added` | `file_sharing` | Warning or Info |  |
 | `nps_access_denied` | `auth` | Warning (policy or infrastructure defect) / Notice (credentials, account state, undecoded) |  |
 | `nps_lockout` | `auth` | Error (privileged account) / Warning |  |
 | `nps_request_discarded` | `auth` | Warning |  |
@@ -75,8 +75,8 @@ Every section below is from the public reason block only.
 | `system_time_changed` | `time_sync` | Warning (non-time-service) / Debug (routine time service) |  |
 | `user_audit_subcategory_changed` | `security_audit` | Notice |  |
 | `win_insecure_boot_config` | `security_audit` | Warning |  |
-| `win_registry_value_changed` | `security_audit` | Warning |  |
-| `win_registry_value_created` | `security_audit` | Warning |  |
+| `win_registry_value_changed` | `security_audit` | Warning or Verbose |  |
+| `win_registry_value_created` | `security_audit` | Warning or Verbose |  |
 | `win_registry_value_deleted` | `security_audit` | Warning |  |
 
 ## `account_changed`
@@ -178,7 +178,7 @@ A principal tried to change its own password and the change was rejected.
 
 One principal reset the password of another principal, and the reset completed.
 
-**Severity:** Warning
+**Severity:** Warning or Notice
 
 **Impact:** The account holder can no longer sign in with the credential they were using, and whoever performed the reset chose the replacement. A reset nobody requested is one of the standard ways an identity is taken over.
 
@@ -188,6 +188,10 @@ One principal reset the password of another principal, and the reset completed.
 - Compare the actor against the set of principals expected to perform resets
 
 The value the credential was set to is never recorded by the event and never reaches any field.
+SYSTEM resetting the built-in local Administrator, or the local account of a management agent,
+is the scheduled rotation LAPS and those agents perform, and is recorded at Notice; every other
+reset is Warning. Malware running as SYSTEM can produce the same event, so the actor and target
+fields are what to check, not the band.
 
 ## `account_password_reset_failed`
 
@@ -723,7 +727,9 @@ A system logon right (interactive, network, batch, service, or remote desktop si
 
 A new network share was created on the host.
 
-**Severity:** Warning
+**Also reported by:** `network-shares`
+
+**Severity:** Warning or Info
 
 **Impact:** Remote clients may read or write the shared path. Unexpected shares are a common persistence and data-exposure path.
 
@@ -731,6 +737,8 @@ A new network share was created on the host.
 
 - Inspect ShareName, ShareLocalPath, and Subject
 - Confirm the share is expected inventory for that host role
+
+The event cannot tell a share created now from one Windows publishes again at each boot, so it records who wrote the share and is not a configuration change record. Written by SYSTEM it is Info, which includes the rare share SYSTEM really creates; written by any other account it is Warning.
 
 ## `nps_access_denied`
 
@@ -1057,7 +1065,7 @@ Flag names ride the message kv tail (InsecureBootFlags) when labeled.
 
 An audited registry value was modified. These events appear only where a SACL and the registry audit subcategory are aimed at that object.
 
-**Severity:** Warning
+**Severity:** Warning or Verbose
 
 **Impact:** Host configuration under that key changed. Persistence, policy, and credential material can live in registry values; unexpected edits deserve review of ObjectName and value name.
 
@@ -1070,7 +1078,7 @@ An audited registry value was modified. These events appear only where a SACL an
 
 An audited registry value was created. These events appear only where a SACL and the registry audit subcategory are aimed at that object.
 
-**Severity:** Warning
+**Severity:** Warning or Verbose
 
 **Impact:** Host configuration under that key changed. Persistence, policy, and credential material can live in registry values; unexpected new values deserve review of ObjectName and value name.
 

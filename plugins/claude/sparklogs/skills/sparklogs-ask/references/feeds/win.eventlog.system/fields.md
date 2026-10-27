@@ -73,6 +73,7 @@ Stored flat under the `win.eventlog.system.` prefix.
 | `win.eventlog.system.filesystem` | string | Filesystem type the filesystem_* reasons name (ntfs, refs, fat32), read from the provider that raised the event. A constant per provider, not a decoded field: this fleet has never carried a non-NTFS provider for these reasons. |
 | `win.eventlog.system.clsid` | string | COM server CLSID from DistributedCOM 10010. |
 | `win.eventlog.system.time_peer` | string | Configured NTP peer from Time-Service 134 (DomainPeer). |
+| `win.eventlog.system.dns_query_name` | string | DNS name the client was resolving when the lookup timed out (DNS-Client 1014, QueryName). |
 | `win.eventlog.system.update_title` | string | Update the WindowsUpdateClient 20 install outcome is about (updateTitle). The fleet pivot for separating a bad update from a bad device. |
 | `win.eventlog.system.mem_commit_bytes` | int | Committed virtual-memory bytes when Resource-Exhaustion-Detector 2004 diagnosed low virtual memory (SystemCommitCharge). |
 | `win.eventlog.system.mem_commit_limit_bytes` | int | Virtual-memory commit limit in bytes at the Resource-Exhaustion-Detector 2004 diagnosis (SystemCommitLimit). |
@@ -90,6 +91,7 @@ Prefer these over the per-feed fields for anything that spans feeds.
 | `sparklogs.config_change.type` | The kind of object that changed, from a closed set of object nouns. |
 | `sparklogs.config_change.action` | What was done to that object, from a closed set of verbs. |
 | `sparklogs.config_change.target` | Which object it was: its own identity within its kind, as a name, a path or an id. A different field from the principal a change acted on, and a change acting on a principal carries both. |
+| `sparklogs.config_change.target_name` | The object's name for a reader at the time of the change. Display only: join and group on target, never on this. |
 | `sparklogs.config_change.category` | Positive upkeep classification, maintenance when established, omitted otherwise. |
 | `sparklogs.actor.name` | The initiator. Who wanted the thing done. |
 | `sparklogs.actor.type` | The initiator. Who wanted the thing done. |
@@ -137,12 +139,15 @@ The last column is different in kind: it is the author's account of the row or e
 | `dcom_start_failed` / `default` | 10005 | **fields: none** |  |
 | `disk_bad_block` / `default` | 7 | **fields: none** |  |
 | `disk_controller_error` / `default` | 11 | **fields: none** |  |
+| `disk_failure_predicted` / `default` | 52 | **fields: none** |  |
 | `disk_io_failed` / `default` | 154 | **fields: none** |  |
 | `disk_io_retried` / `default` | 153 | **fields: none** |  |
 | `disk_paging_error` / `default` | 51 | **fields: none** |  |
 | `disk_surprise_removal` / `default` | 157 | **fields: none** |  |
+| `dns_client_resolution_timed_out` / `default` | 1014 | `win.eventlog.system.dns_query_name` |  |
 | `dns_registration_failed` / `default` | 8015, 8016, 8017, 8018, 8019, 8020, 8021, 8022, 8023, 8024, 8025, 8026, 8033, 8034, 8035, 8036, 8037, 8038 | **fields: none** |  |
-| `driver_load_failed` / `default` | 219 | `win.eventlog.system.device_instance` `win.eventlog.system.driver_name` |  |
+| `driver_load_failed` / `failed` | 219 | `win.eventlog.system.device_instance` `win.eventlog.system.driver_name` |  |
+| `driver_load_failed` / `wudf_reflector_entry` | 219 | `win.eventlog.system.device_instance` `win.eventlog.system.driver_name` |  |
 | `ephemeral_port_alloc_failed` / `default` | 4231, 4266 | **fields: none** |  |
 | `failover_cluster_csv_unavailable` / `default` | 5120, 5142 | **fields: none** |  |
 | `failover_cluster_node_removed` / `default` | 1135 | **fields: none** |  |
@@ -151,12 +156,13 @@ The last column is different in kind: it is the author's account of the row or e
 | `failover_cluster_resource_hang` / `default` | 1230 | **fields: none** |  |
 | `failover_cluster_resource_host_crash` / `default` | 1146 | **fields: none** |  |
 | `failover_cluster_service_down` / `default` | 1006, 1073, 1177 | **fields: none** |  |
-| `filesystem_corruption` / `correction_required` | 7, 55, 130, 131, 132, 133 | `win.eventlog.system.filesystem` `win.eventlog.system.volume` |  |
-| `filesystem_corruption` / `corruption_discovered` | 7, 55, 130, 131, 132, 133 | `win.eventlog.system.filesystem` `win.eventlog.system.volume` |  |
-| `filesystem_corruption` / `disk` | 7, 55, 130, 131, 132, 133 | **fields: none** |  |
-| `filesystem_corruption` / `repair_activity` | 7, 55, 130, 131, 132, 133 | `win.eventlog.system.filesystem` `win.eventlog.system.volume` |  |
-| `filesystem_corruption` / `repair_posting_throttled` | 7, 55, 130, 131, 132, 133 | `win.eventlog.system.filesystem` `win.eventlog.system.volume` |  |
-| `filesystem_corruption` / `torn_write_detected` | 7, 55, 130, 131, 132, 133 | `win.eventlog.system.filesystem` `win.eventlog.system.volume` |  |
+| `filesystem_corruption` / `correction_required` | 7, 55, 98, 130, 131, 132, 133 | `win.eventlog.system.filesystem` `win.eventlog.system.volume` |  |
+| `filesystem_corruption` / `corruption_discovered` | 7, 55, 98, 130, 131, 132, 133 | `win.eventlog.system.filesystem` `win.eventlog.system.volume` |  |
+| `filesystem_corruption` / `disk` | 7, 55, 98, 130, 131, 132, 133 | **fields: none** |  |
+| `filesystem_corruption` / `offline_repair_required` | 7, 55, 98, 130, 131, 132, 133 | `win.eventlog.system.filesystem` `win.eventlog.system.volume` |  |
+| `filesystem_corruption` / `repair_activity` | 7, 55, 98, 130, 131, 132, 133 | `win.eventlog.system.filesystem` `win.eventlog.system.volume` |  |
+| `filesystem_corruption` / `repair_posting_throttled` | 7, 55, 98, 130, 131, 132, 133 | `win.eventlog.system.filesystem` `win.eventlog.system.volume` |  |
+| `filesystem_corruption` / `torn_write_detected` | 7, 55, 98, 130, 131, 132, 133 | `win.eventlog.system.filesystem` `win.eventlog.system.volume` |  |
 | `filesystem_delayed_write_lost` / `default` | 50 | `win.eventlog.system.filesystem` `win.eventlog.system.volume` |  |
 | `filesystem_transaction_log_operation_failed` / `flush_failed` | 134, 136, 137, 140 | `win.eventlog.system.filesystem` `win.eventlog.system.volume` |  |
 | `filesystem_transaction_log_operation_failed` / `metadata_reset` | 134, 136, 137, 140 | `win.eventlog.system.filesystem` `win.eventlog.system.volume` |  |
@@ -236,9 +242,9 @@ The last column is different in kind: it is the author's account of the row or e
 | `unexpected_shutdown` / `event_log` | 41, 6008 | `win.eventlog.system.recorded_at` |  |
 | `unexpected_shutdown` / `kernel_power` | 41 | `win.eventlog.system.bugcheck_code` `win.eventlog.system.bugcheck_name` `win.eventlog.system.connected_standby_in_progress` `win.eventlog.system.sleep_in_progress` |  |
 | `vpn_connected` / `default` | 20267 | **fields: none** |  |
-| `vss_shadow_aborted` / `abort_on_failure` | 13, 14, 15, 16, 20, 23, 24, 27, 28, 29, 32, 35, 36 | `win.eventlog.system.volume` |  |
-| `vss_shadow_aborted` / `storage_growth_failed` | 13, 14, 15, 16, 20, 23, 24, 27, 28, 29, 32, 35, 36 | `win.eventlog.system.volume` |  |
-| `vss_shadow_aborted` / `storage_limit_reached` | 13, 14, 15, 16, 20, 23, 24, 27, 28, 29, 32, 35, 36 | `win.eventlog.system.volume` |  |
+| `vss_shadow_aborted` / `abort_on_failure` | 1, 5, 13, 14, 15, 16, 20, 23, 24, 27, 28, 29, 32, 35, 36, 67 | `win.eventlog.system.volume` |  |
+| `vss_shadow_aborted` / `storage_growth_failed` | 1, 5, 13, 14, 15, 16, 20, 23, 24, 27, 28, 29, 32, 35, 36, 67 | `win.eventlog.system.volume` |  |
+| `vss_shadow_aborted` / `storage_limit_reached` | 1, 5, 13, 14, 15, 16, 20, 23, 24, 27, 28, 29, 32, 35, 36, 67 | `win.eventlog.system.volume` |  |
 | `vss_snapshots_failing_for_space` / `default` | 25 | `win.eventlog.system.volume` |  |
 | `win_app_error_dialog_shown` / `default` | 26 | **fields: none** |  |
 | `winre_servicing_failed` / `default` | 4502 | **fields: none** |  |
@@ -260,6 +266,7 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `dcom_start_failed` / `default`
 - `disk_bad_block` / `default`
 - `disk_controller_error` / `default`
+- `disk_failure_predicted` / `default`
 - `disk_io_failed` / `default`
 - `disk_io_retried` / `default`
 - `disk_paging_error` / `default`

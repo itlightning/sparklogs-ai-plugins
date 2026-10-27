@@ -26,7 +26,7 @@ The rendered `key=value` tail exists to be READ, not re-parsed: its values are n
 
 ## Reconstruction guarantee
 
-71 curated surface(s) drop the vendor body text below the synthesized first line.
+72 curated surface(s) drop the vendor body text below the synthesized first line.
 That is never data loss: the provider payload is retained at rest, so a dropped body can be reconstructed from it.
 What the body said is derivable; what it cost to ship it repeatedly is not.
 
@@ -106,6 +106,7 @@ Prefer these over the per-feed fields for anything that spans feeds.
 | `sparklogs.config_change.type` | The kind of object that changed, from a closed set of object nouns. |
 | `sparklogs.config_change.action` | What was done to that object, from a closed set of verbs. |
 | `sparklogs.config_change.target` | Which object it was: its own identity within its kind, as a name, a path or an id. A different field from the principal a change acted on, and a change acting on a principal carries both. |
+| `sparklogs.config_change.target_name` | The object's name for a reader at the time of the change. Display only: join and group on target, never on this. |
 | `sparklogs.config_change.category` | Positive upkeep classification, maintenance when established, omitted otherwise. |
 | `sparklogs.actor.id` | The initiator. Who wanted the thing done. |
 | `sparklogs.actor.name` | The initiator. Who wanted the thing done. |
@@ -199,7 +200,8 @@ The last column is different in kind: it is the author's account of the row or e
 | `account_enabled` / `default` | 4722 | **fields: none** |  |
 | `account_locked_out` / `default` | 4740 | `win.eventlog.security.caller_computer` |  |
 | `account_password_change_failed` / `default` | 4723 | **fields: none** |  |
-| `account_password_reset` / `default` | 4724 | **fields: none** |  |
+| `account_password_reset` / `reset` | 4724 | **fields: none** |  |
+| `account_password_reset` / `system_rotation` | 4724 | **fields: none** |  |
 | `account_password_reset_failed` / `default` | 4724 | **fields: none** |  |
 | `adcs_audit_evidence_tampered` / `default` | 4885, 4896 | **fields: none** |  |
 | `adcs_config_changed` / `default` | 4882, 4890 | **fields: none** |  |
@@ -240,7 +242,8 @@ The last column is different in kind: it is the author's account of the row or e
 | `kerberos_ticket_failed` / `ticket_renewal` | 4768, 4769, 4770 | `win.eventlog.security.kerberos_target` `win.eventlog.security.status` `win.eventlog.security.status_meaning` |  |
 | `logon_right_granted` / `default` | 4717 | **fields: none** |  |
 | `logon_right_removed` / `default` | 4718 | **fields: none** |  |
-| `network_share_added` / `default` | 5142 | `win.eventlog.security.share_name` `win.eventlog.security.share_path` |  |
+| `network_share_added` / `added` | 5142 | `win.eventlog.security.share_name` `win.eventlog.security.share_path` |  |
+| `network_share_added` / `system_republish` | 5142 | `win.eventlog.security.share_name` `win.eventlog.security.share_path` |  |
 | `nps_access_denied` / `default` | 6273 | `win.eventlog.security.nps_policy` `win.eventlog.security.nps_reason_code` `win.eventlog.security.nps_reason_meaning` |  |
 | `nps_lockout` / `default` | 6279 | `win.eventlog.security.nps_reason_code` `win.eventlog.security.nps_reason_meaning` |  |
 | `nps_request_discarded` / `default` | 6274 | `win.eventlog.security.nps_policy` `win.eventlog.security.nps_reason_code` `win.eventlog.security.nps_reason_meaning` |  |
@@ -270,8 +273,10 @@ The last column is different in kind: it is the author's account of the row or e
 | `system_time_changed` / `routine_time_service` | 4616 | `win.eventlog.security.new_time` `win.eventlog.security.previous_time` |  |
 | `user_audit_subcategory_changed` / `default` | 4912 | `win.eventlog.security.audit_subcategory_guid` |  |
 | `win_insecure_boot_config` / `default` | 4826 | `win.eventlog.security.insecure_boot_flags` |  |
-| `win_registry_value_changed` / `default` | 4657 | `win.eventlog.security.object_name` `win.eventlog.security.object_value_name` `win.eventlog.security.operation_meaning` |  |
-| `win_registry_value_created` / `default` | 4657 | `win.eventlog.security.object_name` `win.eventlog.security.object_value_name` `win.eventlog.security.operation_meaning` |  |
+| `win_registry_value_changed` / `audited` | 4657 | `win.eventlog.security.object_name` `win.eventlog.security.object_value_name` `win.eventlog.security.operation_meaning` |  |
+| `win_registry_value_changed` / `wmi_system_upkeep` | 4657 | `win.eventlog.security.object_name` `win.eventlog.security.object_value_name` `win.eventlog.security.operation_meaning` |  |
+| `win_registry_value_created` / `audited` | 4657 | `win.eventlog.security.object_name` `win.eventlog.security.object_value_name` `win.eventlog.security.operation_meaning` |  |
+| `win_registry_value_created` / `wmi_system_upkeep` | 4657 | `win.eventlog.security.object_name` `win.eventlog.security.object_value_name` `win.eventlog.security.operation_meaning` |  |
 | `win_registry_value_deleted` / `default` | 4657 | `win.eventlog.security.object_name` `win.eventlog.security.object_value_name` `win.eventlog.security.operation_meaning` |  |
 | `admin_session_started` | 4672 | `win.eventlog.security.privileges` |  |
 | `anonymous_sign_in` | 4624 | `win.eventlog.security.auth_package` `win.eventlog.security.lm_package` `win.eventlog.security.logon_guid` `win.eventlog.security.logon_type` `win.eventlog.security.logon_type_name` `win.eventlog.security.token_elevated` `win.eventlog.security.workstation` |  |
@@ -329,7 +334,8 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `account_disabled` / `default`
 - `account_enabled` / `default`
 - `account_password_change_failed` / `default`
-- `account_password_reset` / `default`
+- `account_password_reset` / `reset`
+- `account_password_reset` / `system_rotation`
 - `account_password_reset_failed` / `default`
 - `adcs_audit_evidence_tampered` / `default`
 - `adcs_config_changed` / `default`

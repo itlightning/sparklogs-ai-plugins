@@ -28,6 +28,7 @@ Every section below is from the public reason block only.
 | `disk_saturated` | `storage` |  |  |
 | `disk_taken_offline` | `storage` |  |  |
 | `disk_unresponsive` | `storage` |  |  |
+| `dns_lookup_redirected` | `networking` |  |  |
 | `domain_membership_changed` | `platform` |  |  |
 | `driver_installed` | `platform` |  |  |
 | `driver_removed` | `platform` |  |  |
@@ -48,19 +49,32 @@ Every section below is from the public reason block only.
 | `installed_product_removed` | `patching` |  |  |
 | `kernel_crash` | `os_stability` |  |  |
 | `kernel_crash_recurring` | `os_stability` |  |  |
+| `network_adapter_dhcp_failed` | `networking` |  |  |
 | `network_adapter_disabled` | `networking` |  |  |
+| `network_adapter_emulated` | `networking` |  |  |
 | `network_adapter_enabled` | `networking` |  |  |
 | `network_adapter_filters_changed` | `networking` |  |  |
 | `network_adapter_ipv4_dhcp_changed` | `networking` |  |  |
+| `network_adapter_link_downshifted` | `networking` |  |  |
 | `network_adapter_metric_changed` | `networking` |  |  |
 | `network_adapter_mtu_changed` | `networking` |  |  |
+| `network_adapter_saturated` | `networking` |  |  |
 | `network_adapter_static_address_changed` | `networking` |  |  |
+| `network_adapter_static_dns_changed` | `networking` |  |  |
+| `network_adapter_static_gateway_changed` | `networking` |  |  |
+| `network_context_changed` | `networking` |  |  |
+| `network_ipv6_broken` | `networking` |  |  |
+| `network_share_added` | `file_sharing` | Notice by default; configurable from Info through Warning. |  |
+| `network_share_path_changed` | `file_sharing` | Notice by default; configurable from Info through Warning. |  |
+| `network_share_permissions_changed` | `file_sharing` | Notice by default; configurable from Info through Warning. |  |
+| `network_share_removed` | `file_sharing` | Notice by default; configurable from Info through Warning. |  |
 | `operating_system_changed` | `patching` |  |  |
 | `os_clock_drift` | `performance` |  |  |
 | `os_volume_space_low` | `storage` | Rises as free space runs out, and one step higher while the volume is still filling. A server's OS volume rates higher than a workstation's at the bottom bar. |  |
 | `page_file_configuration_changed` | `performance` |  |  |
 | `patch_scan_stale` | `patching` |  |  |
 | `patch_updates_paused` | `patching` |  |  |
+| `power_wake_loop` | `platform` |  |  |
 | `primary_dns_suffix_changed` | `networking` |  |  |
 | `process_cpu_high` | `performance` |  |  |
 | `process_crash` | `app_stability` |  |  |
@@ -213,6 +227,12 @@ Outstanding IO with essentially no completions.
 
 **Impact:** IO to this device may be stalled, and a writeable volume on it can stop responding.
 
+## `dns_lookup_redirected`
+
+Lookups of the monitored DNS name are answered with addresses that are not its own.
+
+**Impact:** Names may resolve to a portal or a filter instead of their servers, so connections to them can fail or reach the wrong host.
+
 ## `domain_membership_changed`
 
 The machine joined, left or moved to a different domain or workgroup.
@@ -297,9 +317,21 @@ The host is crashing with bug checks (blue screens) repeatedly.
 
 **Impact:** Repeated kernel crashes interrupt every user and service on the host. The message names the bug check most of them share; a blamed driver is where the fault was reported, which is not always its cause.
 
+## `network_adapter_dhcp_failed`
+
+A network adapter could not get an address from DHCP.
+
+**Impact:** The adapter has no usable IPv4 address; with no other default route, IPv6 on this adapter included, the device is offline.
+
 ## `network_adapter_disabled`
 
 A network adapter was disabled.
+
+## `network_adapter_emulated`
+
+A virtual machine's network adapter is an emulated NIC model rather than the paravirtual one.
+
+**Impact:** An emulated NIC costs the host CPU per packet and caps throughput well below the paravirtual adapter's; the Hyper-V legacy adapter is a 100 Mb/s device.
 
 ## `network_adapter_enabled`
 
@@ -313,6 +345,12 @@ A network adapter's filter drivers changed.
 
 A network adapter's IPv4 DHCP setting changed.
 
+## `network_adapter_link_downshifted`
+
+A wired network link is running at half or less of its seven-day peak speed.
+
+**Impact:** Network throughput on this adapter is reduced; a cable, port, dock or power policy is the usual cause.
+
 ## `network_adapter_metric_changed`
 
 A network adapter's manual metric changed.
@@ -321,9 +359,59 @@ A network adapter's manual metric changed.
 
 A network adapter's MTU changed.
 
+## `network_adapter_saturated`
+
+The busiest wired network link is running near its full speed.
+
+**Impact:** Traffic on this link queues behind its capacity: transfers slow and latency rises for everything sharing it.
+
 ## `network_adapter_static_address_changed`
 
 A network adapter's static address changed.
+
+## `network_adapter_static_dns_changed`
+
+A network adapter's static DNS servers changed.
+
+## `network_adapter_static_gateway_changed`
+
+A network adapter's static default gateway changed.
+
+## `network_context_changed`
+
+The device connected to a different primary network.
+
+## `network_ipv6_broken`
+
+IPv6 is advertised on this network but its internet echoes fail while IPv4's answer.
+
+**Impact:** Applications that try IPv6 first can stall or time out before falling back to IPv4.
+
+## `network_share_added`
+
+A network share was added.
+
+**Also reported by:** `win.eventlog.security`
+
+**Severity:** Notice by default; configurable from Info through Warning.
+
+## `network_share_path_changed`
+
+The local path exposed by a network share changed.
+
+**Severity:** Notice by default; configurable from Info through Warning.
+
+## `network_share_permissions_changed`
+
+A network share's permissions changed.
+
+**Severity:** Notice by default; configurable from Info through Warning.
+
+## `network_share_removed`
+
+A network share was removed.
+
+**Severity:** Notice by default; configurable from Info through Warning.
 
 ## `operating_system_changed`
 
@@ -360,6 +448,12 @@ Windows Update scan data is stale.
 Windows Updates are paused for too long.
 
 **Impact:** Security and reliability updates may be deferred past policy intent.
+
+## `power_wake_loop`
+
+The machine keeps waking from sleep with nobody at it.
+
+**Impact:** Each wake costs battery and wear, and a laptop in a bag can run hot or flat; a wake timer or a device allowed to wake the machine is the usual cause.
 
 ## `primary_dns_suffix_changed`
 

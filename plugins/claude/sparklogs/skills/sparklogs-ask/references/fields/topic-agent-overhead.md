@@ -15,8 +15,8 @@ Reported every 15 minutes on clock boundaries for the window ending at `t`. `spa
 | `sparklogs.data.agent_overhead.cpu_cycles_delta` | integer |  | CPU cycles between the first and last readings retained in the window. Absent without two readings of the same process identity. |
 | `sparklogs.data.agent_overhead.user_time_delta_ms` | float | milliseconds | User-mode CPU time between the first and last readings retained in the window. Absent without two readings of the same process identity. |
 | `sparklogs.data.agent_overhead.kernel_time_delta_ms` | float | milliseconds | Kernel-mode CPU time between the first and last readings retained in the window. Absent without two readings of the same process identity. |
-| `sparklogs.data.agent_overhead.cpu_pct_of_one_core_avg` | float | percent | Mean of CPU percentages measured between consecutive captures, relative to one logical core. Each percentage uses the measured elapsed time. |
-| `sparklogs.data.agent_overhead.cpu_pct_of_one_core_p95` | float | percent | 95th percentile of this process's CPU percentages between captures, relative to one logical core. |
+| `sparklogs.data.agent_overhead.cpu_pct_of_one_core_avg` | float | percent | Mean of CPU percentages measured between consecutive captures, relative to one logical core. Each percentage uses the measured elapsed time. Can exceed 100: two busy cores read 200. |
+| `sparklogs.data.agent_overhead.cpu_pct_of_one_core_p95` | float | percent | 95th percentile of this process's CPU percentages between captures, relative to one logical core. Can exceed 100: two busy cores read 200. |
 | `sparklogs.data.agent_overhead.working_set_avg_bytes` | integer | bytes | This process's mean resident working set over the window. |
 | `sparklogs.data.agent_overhead.working_set_peak_bytes` | integer | bytes | The highest working set this process reached in the window. |
 | `sparklogs.data.agent_overhead.private_bytes` | integer | bytes | This process's private (non-shared) memory at the most recent reading in the window. |

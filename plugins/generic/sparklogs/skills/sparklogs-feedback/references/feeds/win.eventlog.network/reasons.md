@@ -11,10 +11,11 @@ Every section below is from the public reason block only.
 | `dhcp_address_conflict_detected` | `networking` | Warning |  |
 | `dhcp_lease_denied` | `networking` | Warning |  |
 | `dhcp_lease_failed` | `networking` | Warning |  |
-| `dns_client_resolution_timed_out` | `networking` | Warning |  |
+| `dns_client_resolution_timed_out` | `networking` | Display |  |
 | `firewall_rule_changed` | `networking` | Verbose |  |
-| `firewall_rule_created` | `networking` | Verbose |  |
-| `firewall_rule_deleted` | `networking` | Verbose for one rule removed; Info for the whole-store reset (2033), which reads like every rule being lost and is the firewall service's own routine. | benign possible |
+| `firewall_rule_created` | `networking` | Verbose for a rule added; Debug for an application sandbox's own short-lived Block rule, which the firewall service adds and removes on the sandbox's behalf. A rule the firewall service or a SYSTEM service added for itself is categorized as maintenance. |  |
+| `firewall_rule_deleted` | `networking` | Verbose for one rule removed; Debug for an application sandbox's own short-lived Block rule, which the firewall service removes on the sandbox's behalf; Info for the whole-store reset (2033), which reads like every rule being lost and is the firewall service's own routine; Notice when a person, or SYSTEM through a scripting or administration tool, removes every rule in a store. A removal by the firewall service or a SYSTEM service for itself is categorized as maintenance. | benign possible |
+| `ncsi_internet_lost` | `networking` | Notice (workstation) / Warning (server or unknown host class) |  |
 | `offline_files_slow_link_transition_blocked` | `file_sharing` | Warning |  |
 | `offline_files_sync_failed` | `file_sharing` | Warning |  |
 | `rds_redirected_printer_setup_failed` | `printing` | Warning |  |
@@ -38,6 +39,8 @@ Every section below is from the public reason block only.
 | `smb_signing_validation_failed` | `file_sharing` | Warning |  |
 | `wfp_transaction_watchdog_timeout` | `networking` | Display |  |
 | `wlan_connect_failed` | `networking` | Warning or Info |  |
+| `wlan_disconnected` | `networking` | Notice |  |
+| `wlan_disconnected_by_request` | `networking` | Display |  |
 | `wlan_security_handshake_failed` | `networking` | Warning |  |
 
 ## `dhcp_address_conflict_detected`
@@ -76,16 +79,21 @@ The DHCP client could not obtain a lease.
 
 ## `dns_client_resolution_timed_out`
 
-A DNS client query timed out.
+A DNS name lookup timed out because none of the configured DNS servers answered.
 
-**Severity:** Warning
+**Also reported by:** `win.eventlog.system`
 
-**Impact:** Name-dependent services fail until resolution succeeds.
+**Severity:** Display
+
+**Impact:** Whatever needed that name fails until resolution succeeds. One timeout on a waking or roaming client is routine; repeats for many names point at the resolver path.
 
 **Consider:**
 
 - Read this as unreachable DNS servers, not a missing record: a negative answer stops the client without a timeout.
+- Count the different names that time out in the same minutes: one name points at the suffix or forwarder for that zone, many names at the adapter's DNS servers or the path to them.
 - The client works through the servers configured on the adapter on one short fixed budget, so how many are listed and in what order decides whether a reachable one is reached before it gives up; put a reachable server first. The reference below carries the current timings.
+
+A host with the DNS client Operational log turned on can record one timeout twice, once from the System log and once from the Operational log; the subsource tells them apart.
 
 ## `firewall_rule_changed`
 
@@ -108,7 +116,7 @@ The Windows Firewall service reported that a rule was added. The payload identif
 
 **Also reported by:** `win.eventlog.security`
 
-**Severity:** Verbose
+**Severity:** Verbose for a rule added; Debug for an application sandbox's own short-lived Block rule, which the firewall service adds and removes on the sandbox's behalf. A rule the firewall service or a SYSTEM service added for itself is categorized as maintenance.
 
 **Impact:** This record describes firewall configuration activity. It does not prove effective enforcement or network exposure.
 
@@ -123,7 +131,7 @@ The Windows Firewall service reported that a rule was deleted. The payload ident
 
 **Also reported by:** `win.eventlog.security`
 
-**Severity:** Verbose for one rule removed; Info for the whole-store reset (2033), which reads like every rule being lost and is the firewall service's own routine.
+**Severity:** Verbose for one rule removed; Debug for an application sandbox's own short-lived Block rule, which the firewall service removes on the sandbox's behalf; Info for the whole-store reset (2033), which reads like every rule being lost and is the firewall service's own routine; Notice when a person, or SYSTEM through a scripting or administration tool, removes every rule in a store. A removal by the firewall service or a SYSTEM service for itself is categorized as maintenance.
 
 **Impact:** This record describes firewall configuration activity. It does not prove effective enforcement or network exposure.
 
@@ -131,6 +139,19 @@ The Windows Firewall service reported that a rule was deleted. The payload ident
 
 - Use the event to identify the rule change and its actor or source where available.
 - Inspect the resulting firewall policy and test the relevant traffic path before deciding whether the change altered effective access.
+
+## `ncsi_internet_lost`
+
+Windows reported that a network interface lost Internet capability for one address family: its reported connectivity changed from Internet to local network only, or to none.
+
+**Severity:** Notice (workstation) / Warning (server or unknown host class)
+
+**Impact:** The event records the connectivity status Windows assigned to the interface, not an observed application failure. Whether anything on the host lost access, and where a fault lies, needs other signals, such as connection failures, DNS timeouts, other interfaces or a VPN.
+
+**Consider:**
+
+- NCSI writes one record per interface and address family: a host with IPv4 and IPv6 can record one loss twice, so read the promoted family before counting.
+- Treat the new capability as a lead, not a diagnosis: check for link or wireless events, connection failures and DNS timeouts in the same minutes, and for other interfaces or a VPN that kept connectivity, before locating a fault.
 
 ## `offline_files_slow_link_transition_blocked`
 
@@ -400,6 +421,31 @@ WLAN AutoConfig failed to connect using a saved profile.
 - On the not-visible arm, treat this as the profile's network being out of range, not as a credential problem.
 - On the join arm, read the promoted failure reason first; on an 802.1X network, check NPS event 6273 on the RADIUS server for the rejection reason.
 - Check the client and server certificates before the profile: invalid, expired or unrevocable certificates are the most common 802.1X cause.
+
+## `wlan_disconnected`
+
+The wireless adapter's driver dropped the connection to a wireless network.
+
+**Severity:** Notice
+
+**Impact:** Network traffic over Wi-Fi stops until WLAN AutoConfig reconnects.
+
+**Consider:**
+
+- Count the drops per host and per profile: one a day is a sleep or roaming edge, many on one host point at signal, the access point or the adapter driver.
+- Compare the adapter description across hosts with repeated drops; a shared adapter model points at its driver version.
+
+## `wlan_disconnected_by_request`
+
+A wireless network was disconnected other than by the driver dropping the link, usually by a user, a policy or switching to another network.
+
+**Severity:** Display
+
+**Impact:** Wi-Fi traffic on that profile stops; for the common codes the device is moving to another network or was told to stop connecting automatically.
+
+**Consider:**
+
+- Read the promoted reason code with the rendered reason text: a policy disabling automatic connection on many hosts at once points at a pushed Wi-Fi profile or policy change, not at the network.
 
 ## `wlan_security_handshake_failed`
 

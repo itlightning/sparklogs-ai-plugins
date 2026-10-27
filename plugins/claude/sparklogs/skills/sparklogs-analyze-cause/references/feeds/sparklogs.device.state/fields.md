@@ -79,6 +79,9 @@ The last column is different in kind: it is the author's account of the row or e
 | `disk_unresponsive` / `held` | n/a | **fields: none** |  |
 | `disk_unresponsive` / `onset` | n/a | **fields: none** |  |
 | `disk_unresponsive` / `recovered` | n/a | **fields: none** |  |
+| `dns_lookup_redirected` / `held` | n/a | **fields: none** |  |
+| `dns_lookup_redirected` / `onset` | n/a | **fields: none** |  |
+| `dns_lookup_redirected` / `recovered` | n/a | **fields: none** |  |
 | `domain_membership_changed` / `default` | n/a | **fields: none** |  |
 | `driver_installed` / `default` | n/a | **fields: none** |  |
 | `driver_removed` / `default` | n/a | **fields: none** |  |
@@ -101,13 +104,35 @@ The last column is different in kind: it is the author's account of the row or e
 | `kernel_crash_recurring` / `held` | n/a | **fields: none** |  |
 | `kernel_crash_recurring` / `onset` | n/a | **fields: none** |  |
 | `kernel_crash_recurring` / `recovered` | n/a | **fields: none** |  |
+| `network_adapter_dhcp_failed` / `held` | n/a | **fields: none** |  |
+| `network_adapter_dhcp_failed` / `onset` | n/a | **fields: none** |  |
+| `network_adapter_dhcp_failed` / `recovered` | n/a | **fields: none** |  |
 | `network_adapter_disabled` / `default` | n/a | **fields: none** |  |
+| `network_adapter_emulated` / `held` | n/a | **fields: none** |  |
+| `network_adapter_emulated` / `onset` | n/a | **fields: none** |  |
+| `network_adapter_emulated` / `recovered` | n/a | **fields: none** |  |
 | `network_adapter_enabled` / `default` | n/a | **fields: none** |  |
 | `network_adapter_filters_changed` / `default` | n/a | **fields: none** |  |
 | `network_adapter_ipv4_dhcp_changed` / `default` | n/a | **fields: none** |  |
+| `network_adapter_link_downshifted` / `held` | n/a | **fields: none** |  |
+| `network_adapter_link_downshifted` / `onset` | n/a | **fields: none** |  |
+| `network_adapter_link_downshifted` / `recovered` | n/a | **fields: none** |  |
 | `network_adapter_metric_changed` / `default` | n/a | **fields: none** |  |
 | `network_adapter_mtu_changed` / `default` | n/a | **fields: none** |  |
+| `network_adapter_saturated` / `held` | n/a | **fields: none** |  |
+| `network_adapter_saturated` / `onset` | n/a | **fields: none** |  |
+| `network_adapter_saturated` / `recovered` | n/a | **fields: none** |  |
 | `network_adapter_static_address_changed` / `default` | n/a | **fields: none** |  |
+| `network_adapter_static_dns_changed` / `default` | n/a | **fields: none** |  |
+| `network_adapter_static_gateway_changed` / `default` | n/a | **fields: none** |  |
+| `network_context_changed` / `default` | n/a | **fields: none** |  |
+| `network_ipv6_broken` / `held` | n/a | **fields: none** |  |
+| `network_ipv6_broken` / `onset` | n/a | **fields: none** |  |
+| `network_ipv6_broken` / `recovered` | n/a | **fields: none** |  |
+| `network_share_added` / `default` | n/a | **fields: none** |  |
+| `network_share_path_changed` / `default` | n/a | **fields: none** |  |
+| `network_share_permissions_changed` / `default` | n/a | **fields: none** |  |
+| `network_share_removed` / `default` | n/a | **fields: none** |  |
 | `operating_system_changed` / `default` | n/a | **fields: none** |  |
 | `os_clock_drift` / `held` | n/a | **fields: none** |  |
 | `os_clock_drift` / `onset` | n/a | **fields: none** |  |
@@ -122,6 +147,9 @@ The last column is different in kind: it is the author's account of the row or e
 | `patch_updates_paused` / `held` | n/a | **fields: none** |  |
 | `patch_updates_paused` / `onset` | n/a | **fields: none** |  |
 | `patch_updates_paused` / `recovered` | n/a | **fields: none** |  |
+| `power_wake_loop` / `held` | n/a | **fields: none** |  |
+| `power_wake_loop` / `onset` | n/a | **fields: none** |  |
+| `power_wake_loop` / `recovered` | n/a | **fields: none** |  |
 | `primary_dns_suffix_changed` / `default` | n/a | **fields: none** |  |
 | `process_cpu_high` / `held` | n/a | **fields: none** |  |
 | `process_cpu_high` / `onset` | n/a | **fields: none** |  |
@@ -226,6 +254,9 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `disk_unresponsive` / `held`
 - `disk_unresponsive` / `onset`
 - `disk_unresponsive` / `recovered`
+- `dns_lookup_redirected` / `held`
+- `dns_lookup_redirected` / `onset`
+- `dns_lookup_redirected` / `recovered`
 - `domain_membership_changed` / `default`
 - `driver_installed` / `default`
 - `driver_removed` / `default`
@@ -248,13 +279,35 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `kernel_crash_recurring` / `held`
 - `kernel_crash_recurring` / `onset`
 - `kernel_crash_recurring` / `recovered`
+- `network_adapter_dhcp_failed` / `held`
+- `network_adapter_dhcp_failed` / `onset`
+- `network_adapter_dhcp_failed` / `recovered`
 - `network_adapter_disabled` / `default`
+- `network_adapter_emulated` / `held`
+- `network_adapter_emulated` / `onset`
+- `network_adapter_emulated` / `recovered`
 - `network_adapter_enabled` / `default`
 - `network_adapter_filters_changed` / `default`
 - `network_adapter_ipv4_dhcp_changed` / `default`
+- `network_adapter_link_downshifted` / `held`
+- `network_adapter_link_downshifted` / `onset`
+- `network_adapter_link_downshifted` / `recovered`
 - `network_adapter_metric_changed` / `default`
 - `network_adapter_mtu_changed` / `default`
+- `network_adapter_saturated` / `held`
+- `network_adapter_saturated` / `onset`
+- `network_adapter_saturated` / `recovered`
 - `network_adapter_static_address_changed` / `default`
+- `network_adapter_static_dns_changed` / `default`
+- `network_adapter_static_gateway_changed` / `default`
+- `network_context_changed` / `default`
+- `network_ipv6_broken` / `held`
+- `network_ipv6_broken` / `onset`
+- `network_ipv6_broken` / `recovered`
+- `network_share_added` / `default`
+- `network_share_path_changed` / `default`
+- `network_share_permissions_changed` / `default`
+- `network_share_removed` / `default`
 - `operating_system_changed` / `default`
 - `os_clock_drift` / `held`
 - `os_clock_drift` / `onset`
@@ -269,6 +322,9 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `patch_updates_paused` / `held`
 - `patch_updates_paused` / `onset`
 - `patch_updates_paused` / `recovered`
+- `power_wake_loop` / `held`
+- `power_wake_loop` / `onset`
+- `power_wake_loop` / `recovered`
 - `primary_dns_suffix_changed` / `default`
 - `process_cpu_high` / `held`
 - `process_cpu_high` / `onset`

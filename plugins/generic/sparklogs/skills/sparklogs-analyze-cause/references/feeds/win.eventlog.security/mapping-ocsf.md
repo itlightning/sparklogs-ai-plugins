@@ -51,6 +51,7 @@ OCSF nests entities under the event actor. Anchors below name the object path, n
 | `sparklogs.config_change.type` |  |
 | `sparklogs.config_change.action` | `activity_name` |
 | `sparklogs.config_change.target` |  |
+| `sparklogs.config_change.target_name` |  |
 | `sparklogs.config_change.category` |  |
 
 ### What each family means here
