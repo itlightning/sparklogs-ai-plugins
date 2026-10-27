@@ -98,7 +98,7 @@ The episode occurrence counter is not a list of change events.
 Correlate a condition with underlying logs using its subject, reason and time window.
 A reported change alone does not establish causation.
 
-Name a changed item with `sparklogs.config_change.target_name` (col) when present; group and join on `sparklogs.config_change.target` (col), since the name is display only.
+Name a changed item with `sparklogs.config_change.target_name` (col) when present; group and join on `sparklogs.config_change.type` (col) with `sparklogs.config_change.target` (col), since a target is unique only within its type and the name is display only.
 On an inventory, `sparklogs.observes_config_changes` (col) false means the agent cannot report observed changes on that topic.
 No change rows then says nothing about whether anything changed.
 
