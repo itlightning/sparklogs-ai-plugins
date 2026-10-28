@@ -13,7 +13,7 @@ There are **fourteen** tools: `resolve_scope` (tool), `list_sources` (tool), `qu
 
 **Cross-cutting (full detail in MCP server instructions):**
 
-- **Funnel:** coverage before claims (`resolve_scope` (tool) → `list_sources` (tool) → health/activity when needed → counts/patterns → `query_logs` (tool) last).
+- **Funnel:** coverage before claims (`resolve_scope` (tool) → `list_sources` (tool) → device health or activity → counts/patterns → `query_logs` (tool) last). For one device or a few, device health starts with a device view.
 - **`external_investigation_id` (arg):** required on every scoped/data call except `server_info` (tool); reuse within one investigation, mint fresh for a new one.
 - **Time windows:** flat `start` (arg) / `end` (arg) in RFC3339 UTC; no relative shorthand.
 - **Scope filters:** service → app → subsource → category → pattern; an empty rung is not a finding.
@@ -40,7 +40,7 @@ Choose by the question: device state, process trends, event counts or raw eviden
 |---|---|
 | `resolve_scope` (tool) | You have a name (client, host, ticket) and need an `org_id` (col). Always first. Collection/completeness live here. Multiple rows at the same best `match_kind` (col): confirm with the engineer before proceeding, don't guess. |
 | `list_sources` (tool) | Before concluding anything from an absence: did this source send data in THIS window? Any source type, including ingest keys. Any non-zero `cnt_critical_plus` (col) in scope: fetch those events before proceeding, whatever the investigation topic. |
-| `query_device_health` (tool) | Device conditions, inventories and trends. Process charts: `view` (arg) `top_processes_over_time` (value). Raw samples: `series` (value). Topic discovery: `topics` (value). Latest inventory: `latest_state` (value). Episode history: `event_timeline` (value). Omit the view for the latest event per episode or occurrence. See `guides/device-state-fields.md` for interpretation. |
+| `query_device_health` (tool) | Device conditions, inventories and trends. For one device or a few, start with `view` (arg) `device_overview` (value) or `device_network` (value), then drill down. Process charts: `view` (arg) `top_processes_over_time` (value). Raw samples: `series` (value). Topic discovery: `topics` (value). Latest inventory: `latest_state` (value). Episode history: `event_timeline` (value). Omit the view for the latest event per episode or occurrence. See `guides/device-state-fields.md` for interpretation. |
 | `query_scope_activity` (tool) | You do not know what this client HAS: which apps, services and subsources exist at all. Orientation on an unfamiliar estate. |
 | `query_event_counts_by_severity` (tool) | "What is going on here", at any altitude. The default mid-tier tool. `group_by=["reason"]` or `["pattern_hash"]`; pass two fields when the question has two nouns in it. |
 | `describe_pattern` (tool) | You are about to cite a pattern and need its text and spread. Pass `pattern_hashes` (arg) (a list). Required before citing any teaser pattern. Mid-tier with counts. |
@@ -66,6 +66,22 @@ Choose by the question: device state, process trends, event counts or raw eviden
 ---
 
 ## Common call sequences (recipes)
+
+### Recipe: "Something is wrong with this device" (slow, dropping, failing)
+
+Start from device health, then read events only for what health points at.
+
+```
+1. resolve_scope(<device or client>): the agent row's id and org_id
+2. query_device_health view=device_overview (or device_network for a network complaint), agent_ids=[<id>], a window that covers the complaint
+3. Read header coverage and not_measured, then evidence, outages, heat spans, top processes or connections, events
+4. refine_query_result on the result set the reading points at (its filter_lql), or paste a next_reads entry
+5. query_event_counts_by_severity / query_logs only over the device and interval the reading named
+```
+
+Cite the reading's `query_url` (col) and each refine's `query_url` (col).
+The reading's `not_measured` (col) list seeds WHAT WAS NOT CHECKED.
+Several devices: name up to 25 for the light form, then up to 5 for full readings.
 
 ### Recipe: "Is this just us? Fleet pivot from a specific pattern"
 

@@ -34,6 +34,7 @@ Funnel, scope, LQL errors: `guides/mcp-tool-decision-tree.md`, `guides/scope-res
 
 ## Which tool (quick route)
 
+- Something wrong with one device or a few (slow, dropping, filling, failing) → `query_device_health` (tool), `view` (arg) `device_overview` (value), or `device_network` (value) for network trouble; then refine its result sets and read events only for the device and interval it points at (`guides/device-state-fields.md`, **Read a device view**)
 - Standing / latest event of each episode → `query_device_health` (tool), omit `view` (arg) (`fieldset` (arg) `rca` (value) for one host; `min_severity` (arg) `warning` (value) means that latest event is still warning or worse)
 - Inventory / what is on the box → same tool, `view` (arg) `latest_state` (value)
 - Process CPU, memory or I/O trends → same tool, `view` (arg) `top_processes_over_time` (value), with `rank_by` (arg)
@@ -52,7 +53,8 @@ Funnel, scope, LQL errors: `guides/mcp-tool-decision-tree.md`, `guides/scope-res
 If server instructions are missing or terminology is unclear, call `server_info` (tool) with `include_instructions: true`.
 For detailed views, fieldsets, aggregation or paging, call it with `describe_tool` (arg) naming the tool.
 Use these references when the visible description leaves a question, not on every call.
-Process charts use `query_device_health` (tool) with `view` (arg) `top_processes_over_time` (value).
+A question about one device or a few starts with `query_device_health` (tool) `view` (arg) `device_overview` (value) or `device_network` (value): read `guides/device-state-fields.md` (**Read a device view**).
+Process charts use the same tool with `view` (arg) `top_processes_over_time` (value).
 
 ## Curated data (read this before opening reference files)
 
@@ -115,14 +117,20 @@ Playbooks are incomplete recipes. If a recipe LQL produces empty results: widen 
 <!-- BEGIN GENERATED INDEX:playbooks -->
 | Symptom | File |
 |---|---|
+| One application slow or stalling over the network | `playbooks/application-network-stall.md` |
+| App slow over VPN | `playbooks/application-network-stall.md` |
 | Backup job failed | `playbooks/backup-failure.md` |
 | BitLocker recovery | `playbooks/bitlocker-recovery.md` |
 | Certificate expiry | `playbooks/certificate-expiry.md` |
 | Directory replication | `playbooks/directory-replication-failure.md` |
 | Disk full or filling | `playbooks/disk-full-or-filling.md` |
 | Memory or handle leak | `playbooks/memory-or-handle-leak.md` |
+| Internet down, slow or dropping | `playbooks/network-connectivity.md` |
+| Wi-Fi drops | `playbooks/network-connectivity.md` |
 | RAID / array degraded | `playbooks/raid-or-storage-degraded.md` |
 | RMM connectivity | `playbooks/rmm-connectivity.md` |
+| Slow or freezing PC | `playbooks/slow-device.md` |
+| Slow server | `playbooks/slow-device.md` |
 | Slow logon | `playbooks/slow-logon.md` |
 | Windows Update / patch failure | `playbooks/windows-update-failure.md` |
 | VSS / shadow copies / backup plumbing | `playbooks/windows-vss.md` |
@@ -137,7 +145,7 @@ Playbooks are incomplete recipes. If a recipe LQL produces empty results: widen 
 | Who changed what (Security) | `themes/windows-security-and-audit.md` |
 | Defender | `themes/endpoint-protection.md` |
 | App / System crashes and services | `themes/windows-operational-events.md` |
-| CPU, RAM, disk, installed software, monitors | `themes/device-health-and-state.md` |
+| CPU, RAM, disk, network, installed software, monitors | `themes/device-health-and-state.md` |
 | Named backup product (Veeam etc.): installed products. Not operational events. | `themes/device-health-and-state.md` |
 <!-- END GENERATED INDEX:themes -->
 

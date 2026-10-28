@@ -30,8 +30,9 @@ Keep this order. Drop a heading if it would be empty.
 3. Accuracy / claim strength: what this evidence can and cannot prove.
 4. Feeds and field schema: `subsource`, queryable dotted names, closed tokens. Point at `feeds/<id>/fields.md` and `reasons.md` instead of duplicating every reason. Scope Windows Event Log (WEL) with `subsource`. Product tokens: `guides/app-vocabulary.md`. Point at `guides/stream-kinds.md` instead of restating an explore ladder.
 5. Domain reasoning: lifecycle, budgets, vocabularies that look alike but are not, axes that change the next action.
-6. Queries: precise LQL (and device-health columns when state is the answer). No `query_*()` wrappers, no `org_ids=[...]`, no `external_investigation_id`.
-7. Off-endpoint: what this surface never sees. Point at `guides/off-endpoint-causes.md` by honesty id when one exists.
+6. Device health first (when the symptom lives on a device): which view (`device_overview`, `device_network`, a condition, `latest_state`), which reading parts and result-set columns answer it, and what each can and cannot prove. Mechanics of the views stay in `guides/device-state-fields.md`.
+7. Events, for what health named: precise LQL over the device and interval the health reading pointed at. No `query_*()` wrappers, no `org_ids=[...]`, no `external_investigation_id`.
+8. Off-endpoint: what this surface never sees. Point at `guides/off-endpoint-causes.md` by honesty id when one exists.
 
 ## Queries
 
@@ -40,8 +41,9 @@ Group-by is part of the question: one noun, one field; two nouns, a cross-tab.
 Name the field that carries the discriminator (`reason`, `vss_writer`, `instance`, `status_meaning`).
 Do not teach `describe_pattern` or `refine_query_result` here; the skill already knows those.
 
-Device-health playbooks name columns (`reason`, `instance`, `episode_age_basis`) and the claim each reason encodes.
-Do not paste a full `query_device_health(...)` call.
+Device-health sections name the view, the reading parts and the result-set columns (`heat_spans`, `outages`, `private_commit_bytes_last`), reasons and the claim each encodes.
+Do not paste a full `query_device_health(...)` call; the worked calls live in `guides/device-state-fields.md`.
+Every name must match the live tool: check it against the tool's input schema and a real response before committing.
 
 ## Do not
 

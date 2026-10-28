@@ -67,7 +67,8 @@ Tool decision tree and recipes: `guides/mcp-tool-decision-tree.md`.
 If server instructions are missing or terminology is unclear, call `server_info` (tool) with `include_instructions: true`.
 For detailed views, fieldsets, aggregation or paging, call it with `describe_tool` (arg) naming the tool.
 Use these references when the visible description leaves a question, not on every call.
-Process charts use `query_device_health` (tool) with `view` (arg) `top_processes_over_time` (value).
+A question about one device or a few starts with `query_device_health` (tool) `view` (arg) `device_overview` (value) or `device_network` (value): read `guides/device-state-fields.md` (**Read a device view**).
+Process charts use the same tool with `view` (arg) `top_processes_over_time` (value).
 
 ## Curated data (read this before opening reference files)
 
@@ -132,14 +133,20 @@ Detail: `playbooks/playbooks.md`.
 <!-- BEGIN GENERATED INDEX:playbooks -->
 | Symptom | File |
 |---|---|
+| One application slow or stalling over the network | `playbooks/application-network-stall.md` |
+| App slow over VPN | `playbooks/application-network-stall.md` |
 | Backup job failed | `playbooks/backup-failure.md` |
 | BitLocker recovery | `playbooks/bitlocker-recovery.md` |
 | Certificate expiry | `playbooks/certificate-expiry.md` |
 | Directory replication | `playbooks/directory-replication-failure.md` |
 | Disk full or filling | `playbooks/disk-full-or-filling.md` |
 | Memory or handle leak | `playbooks/memory-or-handle-leak.md` |
+| Internet down, slow or dropping | `playbooks/network-connectivity.md` |
+| Wi-Fi drops | `playbooks/network-connectivity.md` |
 | RAID / array degraded | `playbooks/raid-or-storage-degraded.md` |
 | RMM connectivity | `playbooks/rmm-connectivity.md` |
+| Slow or freezing PC | `playbooks/slow-device.md` |
+| Slow server | `playbooks/slow-device.md` |
 | Slow logon | `playbooks/slow-logon.md` |
 | Windows Update / patch failure | `playbooks/windows-update-failure.md` |
 | VSS / shadow copies / backup plumbing | `playbooks/windows-vss.md` |
@@ -154,7 +161,7 @@ Detail: `playbooks/playbooks.md`.
 | Who changed what (Security) | `themes/windows-security-and-audit.md` |
 | Defender | `themes/endpoint-protection.md` |
 | App / System crashes and services | `themes/windows-operational-events.md` |
-| CPU, RAM, disk, installed software, monitors | `themes/device-health-and-state.md` |
+| CPU, RAM, disk, network, installed software, monitors | `themes/device-health-and-state.md` |
 | Named backup product (Veeam etc.): installed products. Not operational events. | `themes/device-health-and-state.md` |
 <!-- END GENERATED INDEX:themes -->
 
@@ -198,6 +205,7 @@ Canonical template (field definitions, right-vs-wrong examples): `references/out
 ## Section 5. Citation discipline - every claim links to verifiable evidence
 
 Every factual claim cites a `query_url` (col) from the MCP response; record `query_id` (arg) beside it when several queries share a window. URLs scope org and time in explore, not your cached filter: copy verbatim. Quote `message` (LQL) bytes exactly when a Finding rests on log text. No query, no claim, or use `insufficient_evidence` (value).
+A Finding from a device view cites the reading's `query_url` (col) and names the result set and `filter_lql` (col) that return its rows; cite the refine's `query_url` (col) when you read those rows.
 
 Right/wrong shapes: `references/output-template.md`.
 
@@ -214,6 +222,7 @@ Patterns and examples: `references/output-template.md`.
 ## Section 7. Visibility limits - explicit, every time
 
 Every summary lists WHAT WAS NOT CHECKED: off-endpoint and declined checks for this scope (`guides/off-endpoint-causes.md`). Name checks you skipped and why. Brief is fine when on-endpoint evidence is sufficient.
+A device view's `not_measured` (col) and unreported seconds name on-endpoint gaps for that window; list the ones a Finding could depend on.
 
 ---
 
@@ -225,8 +234,9 @@ Every summary lists WHAT WAS NOT CHECKED: off-endpoint and declined checks for t
 
 **Query shape (lightest first):** (e.g., whose scope? what arrived? what's on the box? what's noisy and where? what do the events say?)
 1. **Scope and coverage:** `resolve_scope` (tool), `list_sources` (tool); then `query_device_health` (tool) when agents are in scope; `query_scope_activity` (tool) when the estate is unfamiliar.
-2. **Pattern mining:** `query_event_counts_by_severity` (tool) and `describe_pattern` (tool) before citing hashes.
-3. **Raw events (last resort):** one broad `query_logs` (tool) slice, then `refine_query_result` (tool) (not another backing query). `list_fields` (tool) is rare.
+2. **Device health first** when the ticket is about one device or a few: `view` (arg) `device_overview` (value) or `device_network` (value) over the complaint window, then refine the result sets it points at. Narrow events to the devices and intervals it names (`guides/device-state-fields.md`, **Read a device view**).
+3. **Pattern mining:** `query_event_counts_by_severity` (tool) and `describe_pattern` (tool) before citing hashes.
+4. **Raw events (last resort):** one broad `query_logs` (tool) slice, then `refine_query_result` (tool) (not another backing query). `list_fields` (tool) is rare.
 
 **Before "no evidence":** read `agent_complete_through` (col) / `advisories` (col), check `sparklogs.kind = agent_op` (value) rows, treat volume as a prompt only (not coverage). Empty `agent_op` (value) is inconclusive; name what you could not rule out in WHAT WAS NOT CHECKED.
 

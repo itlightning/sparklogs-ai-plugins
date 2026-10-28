@@ -194,6 +194,55 @@ cols:
   - top_interesting_patterns
   - total_count
   - worst_severity
+  # query_device_health device views: reading parts, their columns, and result-set
+  # columns the playbooks name.
+  - id
+  - query_id
+  - filter_lql
+  - summary.refinable_results
+  - refine_example
+  - unavailable
+  - truncated
+  - header
+  - measured
+  - not_measured
+  - bucket_s
+  - outages
+  - evidence
+  - result
+  - support
+  - domains
+  - heat_spans
+  - domain
+  - driver
+  - medium
+  - top_processes
+  - top_connections
+  - window_rank_by
+  - events
+  - next_reads
+  - omitted
+  - state
+  - ownership
+  - down_s
+  - down_by_bucket
+  - compare_start
+  - compare_end
+  - bucket_start
+  - image_name
+  - scope
+  - io_write_mb
+  - resident_bytes_peak
+  - private_commit_bytes_first
+  - private_commit_bytes_last
+  - private_commit_bytes_peak
+  - private_commit_bytes_avg
+  - connection_trouble
+  - tcp_timeouts
+  - retransmit_pct_peak
+  - dup_ack_per_1k_segments
+  - rtt_ms_avg
+  - rtt_min_ms
 
 # Resident LQL: query-engine / wire fields the pack field tables do not own.
 # Module paths (win.eventlog.*) come from the library harvest.
@@ -269,6 +318,7 @@ values:
     - rca
     - fleet
     - minimal
+    - detail
   agent_status:
     - online
     - offline
@@ -337,6 +387,46 @@ values:
     - series
     - topics
     - top_processes_over_time
+    - device_overview
+    - device_network
+  # Device view vocabularies: result-set names, evidence kinds, heat bands and domains,
+  # typical-range placement, outage state, process grouping and ranking.
+  device_view_result_sets:
+    - device_summary
+    - buckets
+    - processes
+    - storage
+    - events
+    - network_buckets
+    - adapters
+    - connections
+  device_view_evidence_kinds:
+    - unreported
+    - asleep
+    - powered_off
+    - physical_link_down
+    - probe_blips
+    - network_changed
+    - occurrences
+    - tcp_timeout_connections_total
+  device_view_bands:
+    - ok
+    - warm
+    - hot
+    - very_hot
+  device_view_domains:
+    - cpu
+    - ram
+    - disk
+  device_view_typical:
+    - below
+    - within
+    - above
+  device_view_outage_state:
+    - confirmed
+    - pending
+  process_grouping:
+    - process_instance
   # sparklogs.topic values observed on sparklogs.device.state in a live workspace.
   topics:
     - agent_overhead
