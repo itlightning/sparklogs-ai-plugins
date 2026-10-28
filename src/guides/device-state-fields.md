@@ -65,19 +65,26 @@ Use that light form to choose the devices and intervals worth a full reading, th
 2. `device_network` (value) only: `outages` (col), one row per probe outage (see **Network outages** below).
 3. `evidence` (col): witnesses with interval, value, unit and a `filter_lql` (col) over the result set named in `result` (col).
    `support` (col) is the number of rows that filter returns.
-   Kinds include `unreported` (value), `asleep` (value), `powered_off` (value), `physical_link_down` (value), `probe_blips` (value), `network_changed` (value), `occurrences` (value) and `tcp_timeout_connections_total` (value).
+   Both views carry `unreported` (value), `asleep` (value), `powered_off` (value), `physical_link_down` (value), `wifi_drops` (value), `ncsi_internet_lost` (value) and `dns_resolution_timeouts` (value).
+   `device_overview` (value) adds `probe_down` (value) per probe role.
+   `device_network` (value) adds `probe_blips` (value), `network_changed` (value), `occurrences` (value) (device-state networking occurrences, one row per reason) and `tcp_timeout_connections_total` (value) per route class.
    An outage that stopped traffic can leave no heat at all: read evidence even when no heat span exists.
 4. `domains` (col): the window in coarse buckets with each domain's reading and band.
    `heat_spans` (col): stretches where a domain's heat was above `ok` (value), found at `bucket_s` (col).
    Bands are `ok` (value), `warm` (value), `hot` (value) and `very_hot` (value).
    Each span carries its peak band and time, the `driver` (col) reading that set the peak and its value, where the peak sat against the device's typical range from before the window (`below` (value), `within` (value), `above` (value)), up to 3 contributors with their share, and the episodes and changes that overlapped it.
-   A span says when a measure ran high, not why. Contributors ran at the same time; they are not proven causes.
+   A span says when a measure ran high, not why. Contributors ran at the same time and are not proven causes.
+   Disk heat is the busiest disk's busy time, pushed up by its queue depth. Latency is not an input, so slow I/O at moderate busy time can leave no disk span.
+   Read `disk_latency_ms` (col) in `domains` (col) and `latency_ms_p90_10s` (col) in the `storage` (value) result set for latency. A span names no disk: `busiest_disk` (col) in the `buckets` (value) result set does.
    An incident shorter than `bucket_s` (col) shows in evidence, outages and events, which keep their own times.
 5. `top_processes` (col) (`device_overview` (value)) or `top_connections` (col) (`device_network` (value)): window figures over the observations the agent retained.
    The agent reports its top processes and connections per window, so these figures are lower bounds and a short burst can be missing.
-   `window_rank_by` (col) names the rankings that kept the row.
-   An executable row combines every instance with that name; it is not one process instance.
-6. `events` (col): episodes and changes, plus occurrences on `device_network` (value), including changes and still-open episodes from the 48 hours before the window.
+   `window_rank_by` (col) names the rankings a row led. It is empty for a row kept further down a ranking.
+   A `top_processes` (col) row combines every instance of one executable. A `top_connections` (col) row is one connection, with its PID.
+6. `events` (col): the most relevant episodes and changes, open episodes first.
+   An episode appears only when it had an event inside the window. One open since before the start with no event in the window is absent, so use a window of days for what is open now.
+   Changes also cover the 48 hours before the window.
+   Occurrences are not in this part. They are rows of the `events` (value) result set, which also carries the boot, sleep and shutdown marks. On `device_network` (value) that set holds only networking rows and those marks.
 7. `next_reads` (col): calls with their arguments ready to paste beside your `external_investigation_id` (arg).
 
 A list that left rows out counts them in `omitted` (col).
@@ -89,7 +96,7 @@ The reading itself is not refinable.
 `summary.refinable_results` (col) lists the result sets behind it, each with its own `query_id` (col), row and column counts, and a `refine_example` (col).
 An entry marked `unavailable` (col) failed to build and is not an empty set; say so instead of reading it as zero rows.
 `truncated` (col) appears only when a set was cut, and names which rows are missing.
-A result set read after its stored rows expired is rebuilt from the original call; refine it as usual.
+A result set read after its stored rows expired is rebuilt by re-running the original call on current data. Refine it as usual, but late-arriving data can change its rows.
 
 | View | Result sets |
 |---|---|
@@ -121,12 +128,14 @@ Then report `resent` (other) over `sent` (other) as the share.
 
 On `device_network` (value), each `outages` (col) row is one probe role (gateway, internet or DNS) failing over an interval.
 `state` (col) `confirmed` (value) means the agent counted confirmed down seconds (`down_s` (col), and per bucket in `down_by_bucket` (col)).
-`pending` (value) means probes failed, no answer followed in the window and no down seconds were confirmed: report failed probes, not an outage.
+`pending` (value) is a run of failed probes that ended with no answer and no confirmed down seconds. A run ends at the window's end, and also at a change of network, sleep, power-off or a link-down. Report failed probes, not an outage.
 Failures that a later probe answered before any down time was confirmed are `probe_blips` (value) evidence, not outage rows.
-A probe role listed in `not_measured` (col) had no reading in the window: the role was off, had no result yet, or its target ignores ping. That path was not measured, which says nothing about whether it was up.
-`ownership` (col) says where an outage sits, from the device's own evidence: its own link, between it and its gateway, beyond the gateway, or at the DNS resolver; it reads not placed when no gateway probe was counted during the outage.
-Beyond the gateway covers both the router's internet connection and the ISP; endpoint data cannot tell those apart, so do not name the ISP as the cause.
-`compare_start` (col) and `compare_end` (col) bound a comparison across the org: the matching `next_reads` (col) entry reads the org's other devices over those buckets, so you can say whether their probe down seconds rose too.
+On `device_overview` (value), a probe role listed in `not_measured` (col) had no reading in the window. That path was not measured, which says nothing about whether it was up.
+On `device_network` (value), a gateway that ignores ping still lists its attempts, so its role counts as measured. The signs are an outage whose `ownership` (col) reads not placed, and `gateway_probe_attempts` (col) of 0 in `network_buckets` (value).
+`ownership` (col) says where an outage sits, from the device's own evidence: its own link, between it and its gateway, beyond the gateway, or at the DNS resolver. It reads not placed when no gateway probe was counted during the outage.
+Beyond the gateway covers both the router's internet connection and the ISP. Endpoint data cannot tell those apart, so do not name the ISP as the cause.
+`compare_start` (col) and `compare_end` (col) bound a comparison: the matching `next_reads` (col) entry reads every device in the org over those buckets.
+The org can span several sites: compare only the devices at the same site. Several devices down together can also mean the probe target itself was down.
 
 ## Report installed software
 

@@ -243,6 +243,10 @@ cols:
   - dup_ack_per_1k_segments
   - rtt_ms_avg
   - rtt_min_ms
+  - gateway_probe_attempts
+  - disk_latency_ms
+  - latency_ms_p90_10s
+  - busiest_disk
 
 # Resident LQL: query-engine / wire fields the pack field tables do not own.
 # Module paths (win.eventlog.*) come from the library harvest.
@@ -409,6 +413,10 @@ values:
     - network_changed
     - occurrences
     - tcp_timeout_connections_total
+    - probe_down
+    - wifi_drops
+    - ncsi_internet_lost
+    - dns_resolution_timeouts
   device_view_bands:
     - ok
     - warm
@@ -418,6 +426,11 @@ values:
     - cpu
     - ram
     - disk
+    - link
+    - net_link_segment
+    - net_lan
+    - net_vpn
+    - net_internet
   device_view_typical:
     - below
     - within

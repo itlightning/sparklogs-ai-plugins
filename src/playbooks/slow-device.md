@@ -8,23 +8,22 @@ aliases:
 
 **Trigger.** "The PC has been slow this week", "it freezes for a few seconds", or a server responds slowly.
 
-**Accuracy.** The agent measures CPU, memory, paging, disk and the network path; it does not measure how long an application took to respond.
+**Accuracy.** The agent measures CPU, memory, paging, disk and the network path. It does not measure how long an application took to respond.
 A device can feel slow with every measured lane quiet: the delay can sit inside the application, at its server, or in the far end of a connection.
 Say which lanes were measured and quiet, and name the unmeasured ones, instead of calling the device healthy.
-A heat span says when a measure ran high; its contributors ran at the same time and are not proven causes.
-The agent retains its top processes per window, so a short burst by a process outside them can be missing.
-Read a span against the device's typical range: a span `within` (value) typical is this device's normal load.
+Reading heat spans, contributors and the top lists: `guides/device-state-fields.md` (**Read a device view**).
+A span whose peak sat `within` (value) the device's typical range is not new for this device.
 
 **Device health first.** `device_overview` (value) over the complaint window, up to 30 days and 1 hour.
 
 - Header: coverage (an asleep or unreported stretch is not a quiet one), `measured` (col) and `not_measured` (col).
 - `heat_spans` (col) by `domain` (col) (`cpu` (value), `ram` (value), `disk` (value)), each with its `driver` (col), peak, typical placement and contributors.
   Paging stall drives memory heat: programs waited on the disk for memory they were using.
-  Disk heat names the reading behind it (latency, busy time or queue depth) and the busiest disk.
+  Disk heat is busy time pushed up by queue depth. Latency is not in it: read `disk_latency_ms` (col) in `domains` (col) for slow I/O at moderate busy time.
 - `top_processes` (col): `window_rank_by` (col) says whether a row was kept for CPU, memory, disk I/O or network.
-  Process I/O includes I/O that does not reach the disk; storage readings carry disk load.
+  Process I/O includes I/O that does not reach the disk. Storage readings carry disk load.
 - `events` (col): episodes such as `cpu_busy` (value), `cpu_throttled_under_load` (value), `ram_pressure` (value), `disk_latency_degraded` (value) and `disk_saturated` (value), and the changes (driver, product, configuration) that overlapped a span.
-- When the complaint names times, call again with a narrow `bucket` (arg) over those hours; a freeze shorter than `bucket_s` (col) leaves no span.
+- When the complaint names times, call again with a narrow `bucket` (arg) over those hours. A freeze shorter than `bucket_s` (col) leaves no span.
 
 Then drill down from what the reading named:
 

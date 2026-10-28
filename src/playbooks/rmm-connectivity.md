@@ -19,8 +19,9 @@ No data here either: you cannot distinguish agent, machine, and network; say so.
 
 **Device health first.** `device_network` (value) over the interval the RMM showed the device offline.
 Header coverage separates asleep and powered-off stretches (from the device's own lifecycle marks) from unreported time.
-`outages` (col), `physical_link_down` (value) evidence and `network_changed` (value) evidence say whether the device's own link, gateway and internet probes were up in that interval.
-Probes and link up through the RMM's offline interval means this device had a working network path then; the RMM agent's logs and the RMM console say what the RMM saw.
+`outages` (col), `physical_link_down` (value) evidence and `network_changed` (value) evidence say whether the device's link and its gateway, internet and DNS probes were up in that interval.
+Check the probe roles were measured (`guides/device-state-fields.md`, **Network outages**).
+Measured probes and link up through the RMM's offline interval mean the device reached its gateway, the agent's internet target and DNS then. They do not test the path to the RMM's own servers. The RMM agent's logs and the RMM console say what the RMM saw.
 Unreported time over that interval leaves both questions open.
 
 **Events, for what health named.**

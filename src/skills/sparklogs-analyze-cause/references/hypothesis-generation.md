@@ -42,8 +42,8 @@ When the prior investigation surfaced "this affects N sources" Findings:
 
 When the prior investigation cited a device view:
 
-- **Heat span with contributors** -> hypothesis "a contributor's load caused the pressure." Contributors only ran at the same time. Discriminator: does the span recur without that executable, and does the executable's own trajectory (the `processes` (value) result set) rise with the span?
-- **Confirmed outage beyond the gateway** -> hypotheses "the site's internet connection" and "something on this device's path past the router." Discriminator: the same-org comparison over the outage's `compare_start` (col) to `compare_end` (col). Other devices down in the same buckets points at the shared connection; this device alone points at its own path. Endpoint data cannot separate the router's internet connection from the ISP.
+- **Heat span with contributors** -> hypothesis "a contributor's load caused the pressure." Discriminator: does the span recur without that executable, and does the executable's own trajectory (the `processes` (value) result set) rise with the span?
+- **Confirmed outage beyond the gateway** -> hypotheses "the site's internet connection" and "something on this device's path past the router." Discriminator: the org comparison over the outage's `compare_start` (col) to `compare_end` (col), kept to devices at the same site (an org can span sites). Other devices down in the same buckets points at the shared connection or the probe target. This device alone points at its own path. Placement limits: `guides/device-state-fields.md` (**Network outages**).
 - **Recent change overlapping a span or outage** -> hypothesis "the change caused it." Discriminator: did the span or outage start after the change, and does it appear on devices without the change?
 
 ### Off-endpoint visibility patterns
