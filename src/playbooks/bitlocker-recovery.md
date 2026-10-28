@@ -10,9 +10,11 @@ index: BitLocker recovery
 The prompt itself happens before anything is shipping; reconstruct from before and after.
 Include the last successful boot in the window.
 
-**Queries.**
+**Device health first.** `device_overview` (value) from before the last successful boot through the prompt.
+Its `events` (col), and the `events` (value) result set for the full list, carry the device's own observed changes between boots: `bios_version_changed` (value), `boot_mode_changed` (value), `secure_boot_disabled` (value), `secure_boot_enabled` (value), `tpm_presence_changed` (value), `tpm_version_changed` (value), `hardware_identity_changed` (value) and `volume_bitlocker_protection_dropped` (value), with the boot and shutdown marks around them.
+An observed change says the setting moved between two readings, not who moved it or when inside that gap.
 
-What changed before reboot:
+**Events, for what health named.** What changed before reboot:
 
 ```
 source = "<host>" AND sparklogs.kind = config_change

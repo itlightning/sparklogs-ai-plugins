@@ -8,11 +8,15 @@ index: Slow logon
 
 **Accuracy.** Security sign-in events carry `win.eventlog.security.logon_type_name` (LQL), the authenticating package, and `sparklogs.actor.*`.
 That separates cached interactive from network and names the account and origin.
-Group Policy processing time and DNS latency are not curated; if the answer lives there, say so.
+Group Policy processing time is not curated; if the answer lives there, say so.
+The agent's DNS probe times its own lookups, not the lookups a logon makes.
 
-**Queries.**
+**Device health first.** `device_overview` (value) over a window that holds several slow logons, at a narrow `bucket` (arg).
+CPU or disk heat spans that start at the logon times, and their contributors, show what the machine was busy with while the user waited.
+Logon is short, so read `evidence` (col) and `events` (col) as well as heat: a pressure stretch shorter than `bucket_s` (col) leaves no span.
+`device_network` (value) over the same window: DNS and gateway outages, link drops and network changes at logon time separate a path problem from a busy machine.
 
-Sign-in shape for the account:
+**Events, for what health named.** Sign-in shape for the account:
 
 ```
 source = "<host>" AND sparklogs.actor.name = "<account>"
