@@ -233,6 +233,8 @@ Lookups of the monitored DNS name are answered with addresses that are not its o
 
 **Impact:** Names may resolve to a portal or a filter instead of their servers, so connections to them can fail or reach the wrong host.
 
+A lookup reported as `filtered` (a filter blocks the probe domain while the resolver answers other names) does not count toward this condition and carries no DNS latency. Allow the probe domain, named in the probe data, to enable measurement of DNS latency. The answer addresses and their class are on each `network_path` probe entry (`answer_a`, `answer_aaaa`, `answer_a_class`, `answer_aaaa_class`).
+
 ## `domain_membership_changed`
 
 The machine joined, left or moved to a different domain or workgroup.

@@ -214,6 +214,7 @@ The last column is different in kind: it is the author's account of the row or e
 | `audit_policy_changed` / `default` | 4715 | **fields: none** |  |
 | `audit_subcategory_changed` / `coverage_reduced` | 4719 | `win.eventlog.security.audit_subcategory_guid` |  |
 | `audit_subcategory_changed` / `neutral` | 4719 | `win.eventlog.security.audit_subcategory_guid` |  |
+| `audit_subcategory_changed` / `system_subject` | 4719 | `win.eventlog.security.audit_subcategory_guid` |  |
 | `crypto_selftest_failed` / `default` | 6418 | **fields: none** |  |
 | `directory_object_access_denied` / `default` | 4662 | **fields: none** |  |
 | `directory_object_changed` / `default` | 5136, 5139 | `win.eventlog.security.attribute_name` `win.eventlog.security.object_dn` |  |
