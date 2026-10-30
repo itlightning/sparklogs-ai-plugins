@@ -22,6 +22,7 @@ Every section below is from the public reason block only.
 | `disk_surprise_removal` | `storage` | Warning |  |
 | `dns_client_resolution_timed_out` | `networking` | Display |  |
 | `dns_registration_failed` | `networking` | Warning (server) / Info (workstation or unknown) |  |
+| `domain_secure_channel_failed` | `auth` | Warning, Notice or Display |  |
 | `driver_load_failed` | `hardware` | Warning or Info | benign possible |
 | `ephemeral_port_alloc_failed` | `networking` | Notice |  |
 | `failover_cluster_csv_unavailable` | `clustering` | Severe |  |
@@ -36,6 +37,7 @@ Every section below is from the public reason block only.
 | `filesystem_transaction_log_operation_failed` | `storage` | Warning (flush failed on a live volume, recovery error, metadata reset) / Notice (flush failed on a volume that no longer exists) / Error (resource manager could not start) |  |
 | `gpu_driver_reset` | `hardware` | Notice |  |
 | `group_policy_processing_failed` | `device_management` | Notice on a workstation, Warning on a server or an unknown host class. |  |
+| `group_policy_software_install_failed` | `device_management` | Warning or Info | benign possible |
 | `hardware_error_corrected` | `hardware` | Notice |  |
 | `hardware_error_uncorrected` | `hardware` | Error or Minor |  |
 | `http_ssl_binding_created` | `certificates` | Notice |  |
@@ -297,6 +299,19 @@ Windows could not register or update the name records of this computer in DNS.
 - Read the DNS server list in the event: a public resolver there will never accept the update.
 - On a server, confirm the zone allows its dynamic updates and that the server is reachable.
 
+## `domain_secure_channel_failed`
+
+The machine could not set up its secure session with a domain controller.
+
+**Severity:** Warning, Notice or Display
+
+**Impact:** Domain sign-in and Group Policy fall back to cached state until the session is set up. A refused trust does not clear on its own.
+
+**Consider:**
+
+- Read the error code: an unreachable controller clears when the network returns, a refused trust needs the machine rejoined or its account reset.
+- A desktop that never moves writing the unreachable causes all day points at its network or DNS rather than at the machine.
+
 ## `driver_load_failed`
 
 A device driver failed to load.
@@ -489,6 +504,19 @@ Group Policy could not reach a domain controller and did not apply for that pass
 - A portable device booting away from the corporate network writes this at every boot.
 - The same event on a server or a desktop that never moves is a real connectivity fault.
 
+## `group_policy_software_install_failed`
+
+Group Policy software installation did not complete an assignment, install or removal, or an extension deferred its change to the next startup or logon.
+
+**Severity:** Warning or Info
+
+**Impact:** A deferral applies at the next startup or logon. Any other code leaves the assigned software missing until a later pass succeeds.
+
+**Consider:**
+
+- Code 1274 means the change waits for a startup or logon; a device that never restarts never applies it.
+- 1612 means the install source could not be reached and 1603 that the package failed; check the share and the package.
+
 ## `hardware_error_corrected`
 
 Windows Hardware Error Architecture reported a CORRECTED hardware error.
@@ -636,7 +664,7 @@ Kerberos could not resolve the domain named in a certificate offered for sign-in
 - Confirm whether the device is joined to the domain named in the certificate.
 - On domain-joined devices, check domain controller reachability and DNS from this host.
 
-The same code path serves physical smart cards, virtual smart cards and Windows Hello for Business, so the message is not evidence that a physical card is in use.
+Windows' text says 'non-domain joined computer' on every host, domain-joined ones included; on a joined device it commonly means no domain controller was reachable at sign-in, for example off the corporate network. The same code path serves physical smart cards, virtual smart cards and Windows Hello for Business, so the message is not evidence that a physical card is in use.
 
 ## `kerberos_etype_unsupported`
 

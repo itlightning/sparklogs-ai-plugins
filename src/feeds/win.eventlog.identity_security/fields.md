@@ -97,6 +97,16 @@ Prefer these over the per-feed fields for anything that spans feeds.
 |---|---|
 | `sparklogs.destination.host` | Where it was going. Both are present when the event names both ends. On sign-in events only the other machine is named, because the reporting machine is the near end. |
 
+## Tail keys and where the value is queryable
+
+The curated first line renders a `key=value` tail in one canonical order for the whole module, so an omitted key never moves the rest.
+Each key names one field; that field is where the value is queried.
+
+| Tail key | Queryable as |
+|---|---|
+| `extension` | not queryable as a field |
+| `error_code` | not queryable as a field |
+
 ## What sets each field
 
 Presence is per curated surface, from what its author declared under `promotions`: a field reaches this row only when the surface's own arm or shape names it, never from a text scan of classify guessing which branch a write belongs to.
@@ -124,7 +134,7 @@ The last column is different in kind: it is the author's account of the row or e
 | `code_integrity_driver_revoked` / `default` | 3023 | `win.eventlog.identity_security.code_integrity_file` `win.eventlog.identity_security.code_integrity_secure_required` |  |
 | `code_integrity_image_hash_missing` / `driver` | 3002, 3004 | `win.eventlog.identity_security.code_integrity_file` `win.eventlog.identity_security.code_integrity_requested_level` `win.eventlog.identity_security.code_integrity_secure_required` |  |
 | `code_integrity_image_hash_missing` / `user_mode` | 3002, 3004 | `win.eventlog.identity_security.code_integrity_file` `win.eventlog.identity_security.code_integrity_requested_level` `win.eventlog.identity_security.code_integrity_secure_required` |  |
-| `code_integrity_policy_audit_would_block` / `default` | 3076 | `win.eventlog.identity_security.code_integrity_file_sha256` `win.eventlog.identity_security.code_integrity_file_user_writable` `win.eventlog.identity_security.code_integrity_policy_id` `win.eventlog.identity_security.code_integrity_policy_name` `win.eventlog.identity_security.code_integrity_requested_level` `win.eventlog.identity_security.code_integrity_requested_level_name` `win.eventlog.identity_security.code_integrity_validated_level` `win.eventlog.identity_security.code_integrity_validated_level_name` |  |
+| `code_integrity_policy_audit_would_block` / `default` | 3076, 8028 | `win.eventlog.identity_security.code_integrity_file_sha256` `win.eventlog.identity_security.code_integrity_file_user_writable` `win.eventlog.identity_security.code_integrity_policy_id` `win.eventlog.identity_security.code_integrity_policy_name` `win.eventlog.identity_security.code_integrity_requested_level` `win.eventlog.identity_security.code_integrity_requested_level_name` `win.eventlog.identity_security.code_integrity_validated_level` `win.eventlog.identity_security.code_integrity_validated_level_name` |  |
 | `code_integrity_policy_blocked` / `default` | 3077 | `win.eventlog.identity_security.code_integrity_file_sha256` `win.eventlog.identity_security.code_integrity_file_user_writable` `win.eventlog.identity_security.code_integrity_policy_id` `win.eventlog.identity_security.code_integrity_policy_name` `win.eventlog.identity_security.code_integrity_requested_level` `win.eventlog.identity_security.code_integrity_requested_level_name` `win.eventlog.identity_security.code_integrity_validated_level` `win.eventlog.identity_security.code_integrity_validated_level_name` |  |
 | `code_integrity_signing_level_blocked` / `default` | 3033, 3066, 3086 | `win.eventlog.identity_security.code_integrity_file` `win.eventlog.identity_security.code_integrity_requested_level` `win.eventlog.identity_security.code_integrity_requested_level_name` `win.eventlog.identity_security.code_integrity_validated_level` `win.eventlog.identity_security.code_integrity_validated_level_name` |  |
 | `crypto_key_operation_failed` / `key_absent_probe` | 1, 2, 3, 4, 5, 6, 8, 10, 12 | `win.eventlog.identity_security.crypto_operation_type` `win.eventlog.identity_security.crypto_provider` |  |

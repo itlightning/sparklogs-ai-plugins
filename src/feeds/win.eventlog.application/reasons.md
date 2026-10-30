@@ -21,7 +21,7 @@ Every section below is from the public reason block only.
 | `entra_password_hash_sync_failed` | `directory_services` | Error |  |
 | `entra_sync_run_failed` | `directory_services` | Error |  |
 | `entra_sync_scheduler_aborted` | `directory_services` | Error |  |
-| `esent_db_corruption` | `database` | Error |  |
+| `esent_db_corruption` | `database` | Serious, Error or Warning |  |
 | `gpu_driver_error` | `hardware` | Notice at most; native level decides below |  |
 | `group_policy_drive_map_failed` | `device_management` | Warning |  |
 | `group_policy_extension_apply_failed` | `device_management` | Minor |  |
@@ -240,14 +240,15 @@ The directory synchronization scheduler stopped, so no further synchronization c
 
 ESENT reported embedded database corruption or a corruption-adjacent failure.
 
-**Severity:** Error
+**Severity:** Serious, Error or Warning
 
-**Impact:** Windows features backed by that embedded store may fail, rebuild state, or lose local cached state.
+**Impact:** The consequence depends on the database. A Windows cache such as the Search index, the usage history or a browser cache rebuilds once reset; a server role database such as Active Directory, DHCP or a certification authority is the store the role serves from and needs a repair or a restore.
 
 **Consider:**
 
-- Identify which ESENT database path or component is named in the event.
-- Correlate with Search, SRUM, token broker, profile, or OS feature symptoms.
+- Read the database path to see which store is corrupt.
+- For a rebuildable cache, reset the store; repeated corruption on a cache points at the disk.
+- For a server role database, check the role health and plan an offline repair or a restore.
 
 ## `gpu_driver_error`
 

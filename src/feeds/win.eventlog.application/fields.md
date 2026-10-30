@@ -36,6 +36,7 @@ Stored flat under the `win.eventlog.application.` prefix.
 | `win.eventlog.application.module_name` | string | Faulting module from Application Error 1000 and the WER 1001 APPCRASH report (P4). The module where the fault was reported, which is not always its cause. |
 | `win.eventlog.application.module_version` | string | Version of the faulting module: Application Error 1000, WER 1001 APPCRASH (P5). |
 | `win.eventlog.application.module_path` | string | Full path of the faulting module from Application Error 1000. |
+| `win.eventlog.application.esent_database_path` | string | Path of the ESENT database a corruption record names (447, 448, 474). Which database it is decides the consequence: a rebuildable cache, a server-role store, or an application store. |
 | `win.eventlog.application.exception_code` | string | Exception code as logged, eight hex digits (c0000005, or 0xc0000005 on builds that render the prefix): Application Error 1000, WER 1001 APPCRASH (P7). The decoded name rides the result code family. |
 | `win.eventlog.application.fault_offset` | string | Offset of the fault inside the faulting module, hex as logged: Application Error 1000, WER 1001 APPCRASH (P8). With module_name and module_version it locates the instruction. |
 | `win.eventlog.application.process_start_filetime` | string | Creation time of the crashed process from Application Error 1000, as logged: a Windows FILETIME in hex. With the process id it identifies the one process instance that crashed. |
@@ -129,7 +130,9 @@ The last column is different in kind: it is the author's account of the row or e
 | `entra_password_hash_sync_failed` / `default` | 611 | **fields: none** |  |
 | `entra_sync_run_failed` / `default` | 6056 | **fields: none** |  |
 | `entra_sync_scheduler_aborted` / `default` | 906 | **fields: none** |  |
-| `esent_db_corruption` / `default` | 447, 448, 474 | **fields: none** |  |
+| `esent_db_corruption` / `os_cache` | 447, 448, 474 | `win.eventlog.application.esent_database_path` |  |
+| `esent_db_corruption` / `other_database` | 447, 448, 474 | `win.eventlog.application.esent_database_path` |  |
+| `esent_db_corruption` / `server_role` | 447, 448, 474 | `win.eventlog.application.esent_database_path` |  |
 | `gpu_driver_error` / `default` | n/a | **fields: none** |  |
 | `group_policy_drive_map_failed` / `credential_rejected` | 4117 | `win.eventlog.application.drive` `win.eventlog.application.share` |  |
 | `group_policy_drive_map_failed` / `letter_in_use` | 4117 | `win.eventlog.application.drive` `win.eventlog.application.share` |  |
@@ -218,7 +221,6 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `entra_password_hash_sync_failed` / `default`
 - `entra_sync_run_failed` / `default`
 - `entra_sync_scheduler_aborted` / `default`
-- `esent_db_corruption` / `default`
 - `gpu_driver_error` / `default`
 - `group_policy_extension_apply_failed` / `default`
 - `group_policy_preference_item_failed` / `credential_rejected`

@@ -146,6 +146,9 @@ The last column is different in kind: it is the author's account of the row or e
 | `disk_surprise_removal` / `default` | 157 | **fields: none** |  |
 | `dns_client_resolution_timed_out` / `default` | 1014 | `win.eventlog.system.dns_query_name` |  |
 | `dns_registration_failed` / `default` | 8015, 8016, 8017, 8018, 8019, 8020, 8021, 8022, 8023, 8024, 8025, 8026, 8033, 8034, 8035, 8036, 8037, 8038 | **fields: none** |  |
+| `domain_secure_channel_failed` / `dc_unreachable` | 5719 | **fields: none** |  |
+| `domain_secure_channel_failed` / `other_cause` | 5719 | **fields: none** |  |
+| `domain_secure_channel_failed` / `trust_broken` | 5719 | **fields: none** |  |
 | `driver_load_failed` / `failed` | 219 | `win.eventlog.system.device_instance` `win.eventlog.system.driver_name` |  |
 | `driver_load_failed` / `wudf_reflector_entry` | 219 | `win.eventlog.system.device_instance` `win.eventlog.system.driver_name` |  |
 | `ephemeral_port_alloc_failed` / `default` | 4231, 4266 | **fields: none** |  |
@@ -170,6 +173,8 @@ The last column is different in kind: it is the author's account of the row or e
 | `filesystem_transaction_log_operation_failed` / `start_failed` | 134, 136, 137, 140 | `win.eventlog.system.filesystem` `win.eventlog.system.volume` |  |
 | `gpu_driver_reset` / `default` | 153 | **fields: none** |  |
 | `group_policy_processing_failed` / `default` | 1129 | **fields: none** |  |
+| `group_policy_software_install_failed` / `deferred` | 101, 102, 103, 108, 1112 | **fields: none** |  |
+| `group_policy_software_install_failed` / `install_failed` | 101, 102, 103, 108, 1112 | **fields: none** |  |
 | `hardware_error_corrected` / `boot_corrected` | 1 | `win.eventlog.system.cper_creator` `win.eventlog.system.cper_decode` `win.eventlog.system.cper_error_ts` `win.eventlog.system.cper_firmware_record_types` `win.eventlog.system.cper_flags` `win.eventlog.system.cper_flags_raw` `win.eventlog.system.cper_notification` `win.eventlog.system.cper_revision` `win.eventlog.system.cper_section_count` `win.eventlog.system.cper_section_severities` `win.eventlog.system.cper_section_types` `win.eventlog.system.cper_severity` |  |
 | `hardware_error_corrected` / `error_source_record` | 17, 19 | `win.eventlog.system.device_instance` `win.eventlog.system.error_source` |  |
 | `hardware_error_uncorrected` / `boot_recoverable` | 1 | `win.eventlog.system.cper_creator` `win.eventlog.system.cper_decode` `win.eventlog.system.cper_error_ts` `win.eventlog.system.cper_firmware_record_types` `win.eventlog.system.cper_flags` `win.eventlog.system.cper_flags_raw` `win.eventlog.system.cper_notification` `win.eventlog.system.cper_revision` `win.eventlog.system.cper_section_count` `win.eventlog.system.cper_section_severities` `win.eventlog.system.cper_section_types` `win.eventlog.system.cper_severity` |  |
@@ -272,6 +277,9 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `disk_paging_error` / `default`
 - `disk_surprise_removal` / `default`
 - `dns_registration_failed` / `default`
+- `domain_secure_channel_failed` / `dc_unreachable`
+- `domain_secure_channel_failed` / `other_cause`
+- `domain_secure_channel_failed` / `trust_broken`
 - `ephemeral_port_alloc_failed` / `default`
 - `failover_cluster_csv_unavailable` / `default`
 - `failover_cluster_node_removed` / `default`
@@ -283,6 +291,8 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `filesystem_corruption` / `disk`
 - `gpu_driver_reset` / `default`
 - `group_policy_processing_failed` / `default`
+- `group_policy_software_install_failed` / `deferred`
+- `group_policy_software_install_failed` / `install_failed`
 - `http_ssl_binding_created` / `default`
 - `http_ssl_binding_deleted` / `default`
 - `http_ssl_config_failed` / `default`

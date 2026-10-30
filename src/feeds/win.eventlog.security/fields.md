@@ -26,7 +26,7 @@ The rendered `key=value` tail exists to be READ, not re-parsed: its values are n
 
 ## Reconstruction guarantee
 
-72 curated surface(s) drop the vendor body text below the synthesized first line.
+71 curated surface(s) drop the vendor body text below the synthesized first line.
 That is never data loss: the provider payload is retained at rest, so a dropped body can be reconstructed from it.
 What the body said is derivable; what it cost to ship it repeatedly is not.
 
@@ -200,8 +200,7 @@ The last column is different in kind: it is the author's account of the row or e
 | `account_enabled` / `default` | 4722 | **fields: none** |  |
 | `account_locked_out` / `default` | 4740 | `win.eventlog.security.caller_computer` |  |
 | `account_password_change_failed` / `default` | 4723 | **fields: none** |  |
-| `account_password_reset` / `reset` | 4724 | **fields: none** |  |
-| `account_password_reset` / `system_rotation` | 4724 | **fields: none** |  |
+| `account_password_reset` / `default` | 4724 | **fields: none** |  |
 | `account_password_reset_failed` / `default` | 4724 | **fields: none** |  |
 | `adcs_audit_evidence_tampered` / `default` | 4885, 4896 | **fields: none** |  |
 | `adcs_config_changed` / `default` | 4882, 4890 | **fields: none** |  |
@@ -254,11 +253,14 @@ The last column is different in kind: it is the author's account of the row or e
 | `psdirect_handshake_probe` / `default` | 4625 | `win.eventlog.security.auth_package` `win.eventlog.security.lm_package` `win.eventlog.security.logon_type` `win.eventlog.security.logon_type_name` `win.eventlog.security.psdirect_handshake` `win.eventlog.security.status` `win.eventlog.security.status_meaning` `win.eventlog.security.substatus` `win.eventlog.security.workstation` |  |
 | `scheduled_task_created` / `other_task` | 4698 | `win.eventlog.security.task_name` |  |
 | `scheduled_task_created` / `platform_os_task` | 4698 | `win.eventlog.security.task_name` |  |
+| `scheduled_task_created` / `platform_other_task` | 4698 | `win.eventlog.security.task_name` |  |
 | `scheduled_task_deleted` / `other_task` | 4699 | `win.eventlog.security.task_name` |  |
 | `scheduled_task_deleted` / `platform_os_task` | 4699 | `win.eventlog.security.task_name` |  |
+| `scheduled_task_deleted` / `platform_other_task` | 4699 | `win.eventlog.security.task_name` |  |
 | `scheduled_task_disabled` / `default` | 4701 | `win.eventlog.security.task_name` |  |
 | `scheduled_task_updated` / `other_task` | 4702 | `win.eventlog.security.task_name` |  |
 | `scheduled_task_updated` / `platform_os_task` | 4702 | `win.eventlog.security.task_name` |  |
+| `scheduled_task_updated` / `platform_other_task` | 4702 | `win.eventlog.security.task_name` |  |
 | `security_group_changed` / `default` | 4735, 4737, 4755, 4764 | **fields: none** |  |
 | `security_group_created` / `default` | 4727, 4731, 4754 | **fields: none** |  |
 | `security_group_deleted` / `default` | 4730, 4734, 4758 | **fields: none** |  |
@@ -284,6 +286,7 @@ The last column is different in kind: it is the author's account of the row or e
 | `anonymous_sign_out` | 4647 | **fields: none** |  |
 | `audit_subsystem_started` | 4608 | **fields: none** |  |
 | `boot_configuration_loaded` | 4826 | **fields: none** |  |
+| `code_integrity_image_hash_invalid` | 5038 | **fields: none** |  |
 | `credman_credentials_read` | 5379, 5381, 5382 | **fields: none** |  |
 | `crypto_operation` | 5061 | **fields: none** |  |
 | `crypto_operation_succeeded` | 5061 | **fields: none** |  |
@@ -335,8 +338,7 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `account_disabled` / `default`
 - `account_enabled` / `default`
 - `account_password_change_failed` / `default`
-- `account_password_reset` / `reset`
-- `account_password_reset` / `system_rotation`
+- `account_password_reset` / `default`
 - `account_password_reset_failed` / `default`
 - `adcs_audit_evidence_tampered` / `default`
 - `adcs_config_changed` / `default`
@@ -366,6 +368,7 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `anonymous_sign_out`
 - `audit_subsystem_started`
 - `boot_configuration_loaded`
+- `code_integrity_image_hash_invalid`
 - `credman_credentials_read`
 - `crypto_operation`
 - `crypto_operation_succeeded`

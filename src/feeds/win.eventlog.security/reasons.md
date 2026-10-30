@@ -15,7 +15,7 @@ Every section below is from the public reason block only.
 | `account_enabled` | `security_audit` | Notice |  |
 | `account_locked_out` | `auth` | Warning (built-in Administrator, any name) / Error (other accounts) |  |
 | `account_password_change_failed` | `security_audit` | Info |  |
-| `account_password_reset` | `security_audit` | Warning or Notice |  |
+| `account_password_reset` | `security_audit` | Notice |  |
 | `account_password_reset_failed` | `security_audit` | Warning |  |
 | `adcs_audit_evidence_tampered` | `certificates` | Serious |  |
 | `adcs_config_changed` | `certificates` | Error |  |
@@ -178,7 +178,7 @@ A principal tried to change its own password and the change was rejected.
 
 One principal reset the password of another principal, and the reset completed.
 
-**Severity:** Warning or Notice
+**Severity:** Notice
 
 **Impact:** The account holder can no longer sign in with the credential they were using, and whoever performed the reset chose the replacement. A reset nobody requested is one of the standard ways an identity is taken over.
 
@@ -188,10 +188,9 @@ One principal reset the password of another principal, and the reset completed.
 - Compare the actor against the set of principals expected to perform resets
 
 The value the credential was set to is never recorded by the event and never reaches any field.
-SYSTEM resetting the built-in local Administrator, or the local account of a management agent,
-is the scheduled rotation LAPS and those agents perform, and is recorded at Notice; every other
-reset is Warning. Malware running as SYSTEM can produce the same event, so the actor and target
-fields are what to check, not the band.
+Every completed reset is recorded at Notice: help-desk resets, LAPS rotating the built-in
+Administrator and management agents rotating their own local account all produce this event.
+Check the actor and target fields to tell a requested reset from an unexpected one.
 
 ## `account_password_reset_failed`
 
