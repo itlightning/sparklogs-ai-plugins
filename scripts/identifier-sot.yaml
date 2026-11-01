@@ -517,7 +517,10 @@ values:
     - equals
     - regex
   stuck_reason:
+    - collection_suspended
     - collector_down
+    - collector_stopping_hung
+    - collector_stalled
     - collector_flapping
     - config_apply_stuck
     - feeds_inactive
