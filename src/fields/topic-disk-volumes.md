@@ -23,7 +23,7 @@ Full inventory every 15 minutes. Supported changes are reported when the agent o
 | `sparklogs.data.disk_volumes.bitlocker_protection` | string |  | The volume's BitLocker posture: `on`, `off`, `suspended`, or `n_a` when BitLocker is not in use on this volume. Absent when the provider could not answer. |
 | `sparklogs.data.disk_volumes.bitlocker_dropped` | bool |  | Whether BitLocker protection is off or suspended. Absent when protection status could not be read. |
 | `sparklogs.data.disk_volumes.bitlocker_off_age_min` | float | minutes | How long BitLocker protection has been off or suspended, in wall time: sleep counts, because a sleeping device with protection off is exposed all the same. |
-| `sparklogs.data.disk_volumes.bitlocker_was_protected` | bool |  | Whether this agent has read BitLocker protection `on` for this volume since it began tracking it. A volume never seen protected is a posture, not a drop, and opens nothing. |
+| `sparklogs.data.disk_volumes.bitlocker_was_protected` | bool |  | Whether this agent has read BitLocker protection `on` for this volume since it began tracking it. A volume never found protected is a posture, not a drop, and opens nothing. |
 | `sparklogs.data.disk_volumes.fill_rate_bytes_per_h` | float | bytes_per_hour | How fast the volume's free space is shrinking: the sustained p25 of five-minute free-space intervals over the last hour, gated on the last ~10 min still filling. Absent until that hour exists. |
 | `sparklogs.data.disk_volumes.fill_slope_sustained_h` | float | hours | How long the current fill trend has held. |
 | `sparklogs.data.disk_volumes.projected_full_eta_h` | float | hours | The raw projected time until the volume fills, from the fill rate alone. |
@@ -38,7 +38,7 @@ Full inventory every 15 minutes. Supported changes are reported when the agent o
 | `sparklogs.data.disk_volumes.presence_tracked_d` | float | days | How long this volume has been tracked for its presence baseline. |
 | `sparklogs.data.disk_volumes.observed_at` | string | timestamp | When this row's reading was taken. |
 | `sparklogs.data.disk_volumes.stale` | bool |  | True when a failed probe left a previous reading in place. Changes between stale and fresh readings produce a delta. |
-| `sparklogs.data.disk_volumes.volume_space_low_age_basis` | string |  | `onset`: witnessed start. `observed`: already present when first seen, making age a lower bound. `unknown_ongoing`: no meaningful onset time. |
+| `sparklogs.data.disk_volumes.volume_space_low_age_basis` | string |  | `onset`: start watched live. `observed`: already present when first noticed, making age a lower bound. `unknown_ongoing`: no meaningful onset time. |
 | `sparklogs.data.disk_volumes.volume_space_low_age_h` | float | hours | How long this condition has been open, in hours. |
-| `sparklogs.data.disk_volumes.volume_unreadable_age_basis` | string |  | `onset`: witnessed start. `observed`: already present when first seen, making age a lower bound. `unknown_ongoing`: no meaningful onset time. |
+| `sparklogs.data.disk_volumes.volume_unreadable_age_basis` | string |  | `onset`: start watched live. `observed`: already present when first noticed, making age a lower bound. `unknown_ongoing`: no meaningful onset time. |
 | `sparklogs.data.disk_volumes.volume_unreadable_age_h` | float | hours | How long this condition has been open, in hours. |

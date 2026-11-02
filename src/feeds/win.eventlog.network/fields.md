@@ -27,6 +27,7 @@ Stored flat under the `win.eventlog.network.` prefix.
 
 | LQL path | Type | Meaning |
 |---|---|---|
+| `win.eventlog.network.conflict_ip_address` | string | IP address the DHCP client (1005) or DHCPv6 client (1005) found already in use on the network. |
 | `win.eventlog.network.dns_query_name` | string | DNS name the client was resolving when the lookup timed out. |
 | `win.eventlog.network.firewall_rule_action` | int | Firewall rule action code from the dedicated channel. |
 | `win.eventlog.network.firewall_rule_active` | int | Whether the firewall rule is enabled: 1 enabled, 0 disabled. |
@@ -121,7 +122,6 @@ The last column is different in kind: it is the author's account of the row or e
 
 | Surface | Event ids | Fields set | Row fields |
 |---|---|---|---|
-| `dhcp_address_conflict_detected` / `default` | 1004 | **fields: none** |  |
 | `dhcp_lease_denied` / `default` | 1002 | **fields: none** |  |
 | `dhcp_lease_failed` / `default` | 1001, 1003 | **fields: none** |  |
 | `dns_client_resolution_timed_out` / `default` | 1013 | `win.eventlog.network.dns_query_name` |  |
@@ -133,6 +133,7 @@ The last column is different in kind: it is the author's account of the row or e
 | `firewall_rule_deleted` / `all_rules_upkeep` | 2033 | **fields: none** |  |
 | `firewall_rule_deleted` / `single_rule` | 2006, 2052 | `win.eventlog.network.firewall_rule_action` `win.eventlog.network.firewall_rule_direction` `win.eventlog.network.firewall_rule_origin` `win.eventlog.network.firewall_rule_profiles` `win.eventlog.network.rule_id` `win.eventlog.network.rule_name` |  |
 | `firewall_rule_deleted` / `upkeep` | 2006, 2052 | `win.eventlog.network.firewall_rule_action` `win.eventlog.network.firewall_rule_direction` `win.eventlog.network.firewall_rule_origin` `win.eventlog.network.firewall_rule_profiles` `win.eventlog.network.rule_id` `win.eventlog.network.rule_name` |  |
+| `ip_address_conflict_detected` / `default` | 1005 | `win.eventlog.network.conflict_ip_address` |  |
 | `ncsi_internet_lost` / `default` | 4042 | `win.eventlog.network.ncsi_capability` `win.eventlog.network.ncsi_change_reason` `win.eventlog.network.ncsi_family` |  |
 | `offline_files_slow_link_transition_blocked` / `default` | 1008 | `win.eventlog.network.offline_files_path` |  |
 | `offline_files_sync_failed` / `default` | 1006 | `win.eventlog.network.offline_files_failed_count` `win.eventlog.network.offline_files_path` |  |
@@ -187,7 +188,6 @@ The last column is different in kind: it is the author's account of the row or e
 These carry class, reason and message text only.
 A predicate over them uses the reason, the class, or the retained payload; there is no promoted field to filter on.
 
-- `dhcp_address_conflict_detected` / `default`
 - `dhcp_lease_denied` / `default`
 - `dhcp_lease_failed` / `default`
 - `firewall_rule_deleted` / `all_rules`

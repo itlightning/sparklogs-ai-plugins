@@ -43,9 +43,9 @@ Reported every 5 minutes on clock boundaries for the window ending at `t`. `spar
 | `sparklogs.data.storage_device_io.io_slow_window_count_1h` | integer |  | Slow buckets among the trailing twelve judged non-overlapping five-minute buckets of observed time. Under-covered and unobserved time does not advance this history. |
 | `sparklogs.data.storage_device_io.topology_segment_count` | integer | count | How many distinct topology signatures the window's samples held. More than two in one window marks `topology_mixed` and holds until every sample shares one topology again. |
 | `sparklogs.data.storage_device_io.topology_mixed` | bool |  | Whether the topology changed too many times within one window to trust a single reduction. Absent when the topology held steady. |
-| `sparklogs.data.storage_device_io.disk_latency_degraded_age_basis` | string |  | `onset`: witnessed start. `observed`: already present when first seen, making age a lower bound. `unknown_ongoing`: no meaningful onset time. |
+| `sparklogs.data.storage_device_io.disk_latency_degraded_age_basis` | string |  | `onset`: start watched live. `observed`: already present when first noticed, making age a lower bound. `unknown_ongoing`: no meaningful onset time. |
 | `sparklogs.data.storage_device_io.disk_latency_degraded_age_h` | float | hours | How long this condition has been open, in hours. |
-| `sparklogs.data.storage_device_io.disk_saturated_age_basis` | string |  | `onset`: witnessed start. `observed`: already present when first seen, making age a lower bound. `unknown_ongoing`: no meaningful onset time. |
+| `sparklogs.data.storage_device_io.disk_saturated_age_basis` | string |  | `onset`: start watched live. `observed`: already present when first noticed, making age a lower bound. `unknown_ongoing`: no meaningful onset time. |
 | `sparklogs.data.storage_device_io.disk_saturated_age_h` | float | hours | How long this condition has been open, in hours. |
-| `sparklogs.data.storage_device_io.disk_unresponsive_age_basis` | string |  | `onset`: witnessed start. `observed`: already present when first seen, making age a lower bound. `unknown_ongoing`: no meaningful onset time. |
+| `sparklogs.data.storage_device_io.disk_unresponsive_age_basis` | string |  | `onset`: start watched live. `observed`: already present when first noticed, making age a lower bound. `unknown_ongoing`: no meaningful onset time. |
 | `sparklogs.data.storage_device_io.disk_unresponsive_age_h` | float | hours | How long this condition has been open, in hours. |

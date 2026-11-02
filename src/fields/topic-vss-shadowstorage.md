@@ -20,5 +20,5 @@ Full inventory every 6 hours. Supported changes are reported when the agent obse
 | `sparklogs.data.vss_shadowstorage.snap_fail_truncated` | bool |  | Whether the snapshot failure count hit its cap: more failures happened than the counter kept individually. |
 | `sparklogs.data.vss_shadowstorage.snap_fail_unresolved_count` | integer | count | How many snapshot failure records could not be attributed to a specific volume. |
 | `sparklogs.data.vss_shadowstorage.snap_fail_measured_at` | string | timestamp | When this row's snapshot failure counts were measured. |
-| `sparklogs.data.vss_shadowstorage.vss_shadowstorage_age_basis` | string |  | `onset`: witnessed start. `observed`: already present when first seen, making age a lower bound. `unknown_ongoing`: no meaningful onset time. |
+| `sparklogs.data.vss_shadowstorage.vss_shadowstorage_age_basis` | string |  | `onset`: start watched live. `observed`: already present when first noticed, making age a lower bound. `unknown_ongoing`: no meaningful onset time. |
 | `sparklogs.data.vss_shadowstorage.vss_shadowstorage_age_h` | float | hours | How long this condition has been open, in hours. |

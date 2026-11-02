@@ -73,6 +73,8 @@ Stored flat under the `win.eventlog.system.` prefix.
 | `win.eventlog.system.filesystem` | string | Filesystem type the filesystem_* reasons name (ntfs, refs, fat32), read from the provider that raised the event. A constant per provider, not a decoded field: this fleet has never carried a non-NTFS provider for these reasons. |
 | `win.eventlog.system.clsid` | string | COM server CLSID from DistributedCOM 10010. |
 | `win.eventlog.system.time_peer` | string | Configured NTP peer from Time-Service 134 (DomainPeer). |
+| `win.eventlog.system.conflict_ip_address` | string | IPv4 address of this machine that Tcpip 4199 found another device using (read from the message). |
+| `win.eventlog.system.conflict_hardware_address` | string | Network hardware (MAC) address of the other device answering for that address, as Tcpip 4199 states it (read from the message). |
 | `win.eventlog.system.dns_query_name` | string | DNS name the client was resolving when the lookup timed out (DNS-Client 1014, QueryName). |
 | `win.eventlog.system.update_title` | string | Update the WindowsUpdateClient 20 install outcome is about (updateTitle). The fleet pivot for separating a bad update from a bad device. |
 | `win.eventlog.system.mem_commit_bytes` | int | Committed virtual-memory bytes when Resource-Exhaustion-Detector 2004 diagnosed low virtual memory (SystemCommitCharge). |
@@ -188,6 +190,7 @@ The last column is different in kind: it is the author's account of the row or e
 | `iis_apppool_identity_invalid` / `default` | 5021, 5057 | **fields: none** |  |
 | `iis_apppool_worker_start_failed` / `default` | 5059 | **fields: none** |  |
 | `iis_worker_crash` / `default` | 5009, 5011 | **fields: none** |  |
+| `ip_address_conflict_detected` / `default` | 4199 | `win.eventlog.system.conflict_hardware_address` `win.eventlog.system.conflict_ip_address` |  |
 | `kerberos_cert_domain_unresolved` / `default` | 11 | **fields: none** |  |
 | `kerberos_etype_unsupported` / `default` | 16, 203 | **fields: none** |  |
 | `kerberos_pac_verify_failed` / `default` | 18 | **fields: none** |  |

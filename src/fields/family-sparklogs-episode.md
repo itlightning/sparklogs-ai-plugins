@@ -9,7 +9,7 @@
 | `sparklogs.episode.phase` | string |  | Where the episode stands: `onset`, `held`, `recovering`, `recovered` or `ended`. |
 | `sparklogs.episode.transition` | string |  | Lifecycle change: `opened`, `recovering`, `relapsed`, `closed`, `ended`, `severity_raised` or `severity_lowered`. Absent without a transition. |
 | `sparklogs.episode.first_observed_ts` | string | timestamp | When the episode opened. |
-| `sparklogs.episode.age_basis` | string |  | `onset`: witnessed start. `observed`: already present when first seen, making age a lower bound. `unknown_ongoing`: no meaningful onset time. |
+| `sparklogs.episode.age_basis` | string |  | `onset`: start watched live. `observed`: already present when first noticed, making age a lower bound. `unknown_ongoing`: no meaningful onset time. |
 | `sparklogs.episode.last_confirmed_ts` | string | timestamp | The last time an observed reading found the condition still true, on a rung or held there by its hold level. A reading that could not tell, one below the ladder, or one at its exit does not move it. |
 | `sparklogs.episode.max_observation_gap_s` | integer | seconds | Longest single span, in seconds, the condition went unobserved between two observed readings that placed it: asleep, not capturing, or read without a usable reading. |
 | `sparklogs.episode.observed_s` | integer | seconds | Seconds since the episode opened that the agent was observing: awake and capturing, outside low-power idle and the settle after a resume. Episodes opened before 1.13.0 count their earlier time from the older agent's observed age, an upper bound. |
