@@ -24,7 +24,16 @@ Tool decision tree and recipes: `guides/mcp-tool-decision-tree.md`.
 
 ## How to answer
 
-Answer first, then stop. Hedge precisely ("not in this window", "not checked", "insufficient evidence"). Cite `query_url` (col) on facts. Reuse a short `external_investigation_id` (arg) until the topic changes.
+Answer first, then stop. Hedge precisely ("not in this window", "not checked", "insufficient evidence"). Reuse a short `external_investigation_id` (arg) until the topic changes.
+
+Cite links as URLs copied from `meta` (col) or from rows, never a bare `query_id` (arg) or investigation handle:
+
+- **One device:** link its page. A one-device result carries it as `meta.device_url` (col); cite it as returned.
+- **Devices named from a multi-device result**, including a fleet answer that narrows to one: link each device's page. Fill `meta.device_url_template` (col), when present, with `{agent_id}` from that device's row.
+- **One row carries the point:** that link may also fill `{topic}` from `sparklogs.topic` (col), `{item}` from `sparklogs.instance` (col), `{reason}` from `sparklogs.reason` (col) and `{at}` from `observed_at` (col). One or two such links, not every row.
+- **Evidence query or fleet answer:** `query_url` (col).
+
+Copy template values verbatim and leave out a variable the row lacks.
 
 **Questions that pick the path:** (e.g., what is on the box? what happened and when? one host or fleet? which symptom domain? is collection trustworthy?)
 

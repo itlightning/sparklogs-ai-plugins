@@ -207,6 +207,14 @@ Canonical template (field definitions, right-vs-wrong examples): `references/out
 Every factual claim cites a `query_url` (col) from the MCP response; record `query_id` (arg) beside it when several queries share a window. URLs scope org and time in explore, not your cached filter: copy verbatim. Quote `message` (LQL) bytes exactly when a Finding rests on log text. No query, no claim, or use `insufficient_evidence` (value).
 A Finding from a device view cites the reading's `query_url` (col) and names the result set and `filter_lql` (col) that return its rows; cite the refine's `query_url` (col) when you read those rows.
 
+Links are URLs copied from `meta` (col) or from rows, never a bare `query_id` (arg) or investigation handle. A Finding about a device also links that device's page; a Finding naming several devices links each:
+
+- **One-device result:** `meta.device_url` (col), as returned.
+- **Multi-device result**, including a fleet query that narrows to one device: fill `meta.device_url_template` (col), when present, with `{agent_id}` from that device's row.
+- **One row carries the point:** that link may also fill `{topic}` from `sparklogs.topic` (col), `{item}` from `sparklogs.instance` (col), `{reason}` from `sparklogs.reason` (col) and `{at}` from `observed_at` (col). One or two such links per Finding, not every row.
+
+Copy template values verbatim and leave out a variable the row lacks. The evidence query and a fleet answer cite `query_url` (col).
+
 Right/wrong shapes: `references/output-template.md`.
 
 ---

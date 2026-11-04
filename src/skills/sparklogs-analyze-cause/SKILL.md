@@ -33,7 +33,7 @@ Tool decision tree and recipes: `guides/mcp-tool-decision-tree.md`.
 
 ## Section 2. Trust principles
 
-Augment, don't replace: hypotheses are for the engineer to choose. Cite prior Findings and any new `query_url` (col). Calibrate confidence to evidence (usually looser than the factual summary). Carry forward prior not-checked items. Reuse `external_investigation_id` (arg).
+Augment, don't replace: hypotheses are for the engineer to choose. Cite prior Findings and any new `query_url` (col), and link each device you name by its device page (link rules: `sparklogs-investigate` Section 5). Calibrate confidence to evidence (usually looser than the factual summary). Carry forward prior not-checked items. Reuse `external_investigation_id` (arg).
 
 ---
 

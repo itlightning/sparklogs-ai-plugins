@@ -126,6 +126,11 @@ cols:
   - pattern
   - pattern_hash
   - query_url
+  # Device page links in the header meta: the full URL on a one-device result,
+  # an RFC 6570 template filled from row values on results whose rows carry agent_id.
+  - meta
+  - meta.device_url
+  - meta.device_url_template
   - reported_hostname
   - rows_cached
   - rows_matched

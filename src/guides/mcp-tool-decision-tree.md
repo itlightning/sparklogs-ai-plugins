@@ -80,6 +80,7 @@ Start from device health, then read events only for what health points at.
 ```
 
 Cite the reading's `query_url` (col) and each refine's `query_url` (col).
+Link each device's page: `meta.device_url` (col) on a one-device reading, the filled `meta.device_url_template` (col) otherwise.
 The reading's `not_measured` (col) list seeds WHAT WAS NOT CHECKED.
 Several devices: name up to 25 for the light form, then up to 5 for full readings.
 
