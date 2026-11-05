@@ -59,6 +59,8 @@ Use that light form to choose the devices and intervals worth a full reading, th
 
 1. `header` (col): window, `bucket_s` (col), coverage, `measured` (col) and `not_measured` (col).
    Coverage splits the window into observed, asleep, powered-off and unreported seconds.
+   Do not qualify an answer on observed share at 89 percent or above; a few seconds or one missing sample change nothing for the reader.
+   Asleep and powered-off time are device state, not coverage: state them when they bear on the question.
    Unreported time is unknown, not quiet, and limits every claim about that stretch.
    `not_measured` (col) lists the lanes with no reading in this window, then what the agent does not measure: application response time, per-process disk latency, UDP, and what the far end of a connection saw.
    Carry the entries that matter for the ticket into WHAT WAS NOT CHECKED.
