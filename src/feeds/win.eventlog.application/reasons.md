@@ -64,7 +64,7 @@ Active Directory Certificate Services reported a problem with the certification 
 
 **Why it matters:** A CA whose own certificate has expired stops issuing, and certificates it issued can stop validating: 802.1X Wi-Fi, VPN, smart card sign-in and internal websites can fail together.
 
-**In practice:** The certification authority writes events 58, 65 and 66 to the Application log (source CertificationAuthority) about its certificate chain. Event 58 says a certificate on the chain has expired, with the status code, such as 0x800b0101 (CERT_E_EXPIRED). It shows as Error. A revocation list the CA could not publish to a distribution point is event 74, recorded under its own reason.
+**In practice:** The certification authority writes event 58 to the Application log (source CertificationAuthority) when a certificate in the chain of its own CA certificate has expired, with the status code, such as 0x800b0101 (CERT_E_EXPIRED). It shows as Error. A revocation list the CA could not publish to a distribution point is events 65, 66, 74 and 75, recorded under their own reason.
 
 **What to check:**
 
@@ -89,7 +89,7 @@ The certification authority could not publish a certificate revocation list (CRL
 
 **Why it matters:** Nothing fails until the last published CRL expires. Then anything that checks revocation, such as VPN, 802.1X Wi-Fi, smart card sign-in and some web servers, rejects otherwise valid certificates.
 
-**In practice:** The certification authority writes event 74 to the Application log (source CertificationAuthority) when it cannot write a base or delta CRL to one of its distribution points. The message names the CRL, the location (an LDAP path, file share or web folder) and the error, such as 0x80072098 (insufficient access rights). A moved share, changed permissions on the location, or a server that is not reachable are common causes. It shows as Error.
+**In practice:** The certification authority writes events to the Application log (source CertificationAuthority) when it cannot write a CRL to one of its distribution points: event 65 for a base CRL and 66 for a delta CRL, and 74 (base) and 75 (delta) when the location names a server. The message names the CRL, the location (an LDAP path, file share or web folder) and the error, such as 0x80072098 (insufficient access rights). A moved share, changed permissions on the location, or a server that is not reachable are common causes. It shows as Error.
 
 **What to check:**
 

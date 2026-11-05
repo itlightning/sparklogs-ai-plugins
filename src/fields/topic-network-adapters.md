@@ -10,6 +10,7 @@ Full inventory every hour. Supported changes are reported when the agent observe
 | `sparklogs.data.network_adapters.description` | string |  | Native interface description, not provider ownership proof. |
 | `sparklogs.data.network_adapters.interface_guid` | string |  | Interface GUID, lowercase; several layers can share one, so never identity. |
 | `sparklogs.data.network_adapters.interface_index` | integer |  | Native interface index; it can move, so never identity. |
+| `sparklogs.data.network_adapters.adapters_omitted` | integer | count | How many more network adapters the machine has than this topic has room for; the rows kept are the highest ranked, and every row carries the count. Absent when every adapter has a row. |
 | `sparklogs.data.network_adapters.mtu_bytes` | integer | bytes | MTU of the adapter's topmost filter layer, the value Windows reports for the adapter. |
 | `sparklogs.data.network_adapters.admin_status_code` | integer |  | Native administrative status of the topmost filter layer. |
 | `sparklogs.data.network_adapters.admin_status` | string |  | Decoded `admin_status_code`: up, down, testing or unknown. |

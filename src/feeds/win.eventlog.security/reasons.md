@@ -54,7 +54,7 @@ Search for the heading "## `<code>`" or a word from the reason's label. Do not r
 | `logon_right_removed` | logon right removed | event | Notice | `security_audit` |  |
 | `network_share_added` | network share added | event | Info to Warning | `file_sharing` |  |
 | `nps_access_denied` | nps access denied | event | Warning | `auth` |  |
-| `nps_lockout` | nps lockout | event | Error | `auth` |  |
+| `nps_lockout` | nps lockout | event | Warning to Error | `auth` |  |
 | `nps_request_discarded` | nps request discarded | event | Warning | `auth` |  |
 | `ntlm_validation_failed` | ntlm validation failed | event | Warning | `auth` |  |
 | `principal_renamed` | principal renamed | event | Notice | `security_audit` |  |
@@ -240,6 +240,7 @@ An account was locked out after too many failed sign-ins. The event names the ma
 - Go to the machine Caller Computer Name names and find what keeps sending the old password: Credential Manager entries, mapped drives, scheduled tasks, services, a phone's mail profile.
 - Fix that source first, then clear the lockout on the account.
 - If many accounts lock out from one caller, or the caller is a machine you do not recognize, treat it as password guessing.
+- If the built-in Administrator locks out again and again, its name is exposed to password spraying: rename or disable it, and put MFA in front of RD Gateway and other remote access.
 
 **Related:**
 
@@ -1406,17 +1407,18 @@ Network Policy Server denied a connection request. The decision is on the line, 
 
 Network Policy Server locked an account after repeated failed attempts, so it cannot connect through RADIUS until the lockout clears.
 
-**Severity:** Error (privileged account) / Warning
+**Severity:** Warning (built-in Administrator, any name) / Error (other accounts)
 
 **Why it matters:** The user cannot connect to VPN or Wi-Fi through this server, even though their domain account can look healthy.
 
-**In practice:** Security log on the NPS server, event ID 6279, "Network Policy Server locked the user account due to repeated failed authentication attempts". NPS keeps its own lockout, separate from the domain's, configured in the registry under HKLM\SYSTEM\CurrentControlSet\Services\RemoteAccess\Parameters\AccountLockout. A device still sending an old password is the usual cause. The lockout clears after the configured reset time, or when the account's entry under that key is deleted. The built-in Administrator (SID ending in -500) is reported at Error; other accounts at Warning.
+**In practice:** Security log on the NPS server, event ID 6279, "Network Policy Server locked the user account due to repeated failed authentication attempts". NPS keeps its own lockout, separate from the domain's, configured in the registry under HKLM\SYSTEM\CurrentControlSet\Services\RemoteAccess\Parameters\AccountLockout. A device still sending an old password is the usual cause. The lockout clears after the configured reset time, or when the account's entry under that key is deleted. The built-in Administrator (SID ending in -500) is reported at Warning under any name; every other account at Error, as on the domain lockout.
 
 **What to check:**
 
 - Find the RADIUS client and device sending the failures; the denials before the lockout (event 6273) name them.
 - Fix the saved password on that device, then clear the NPS lockout.
 - Check for a domain lockout of the same account (event 4740).
+- If the built-in Administrator locks out again and again, its name is exposed to password spraying: rename or disable it, and put MFA in front of RD Gateway and other remote access.
 
 **Related:**
 

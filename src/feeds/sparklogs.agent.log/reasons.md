@@ -10,7 +10,7 @@ Search for the heading "## `<code>`" or a word from the reason's label. Do not r
 |---|---|---|---|---|---|
 | `sparklogs_agent_config_rejected` | sparklogs agent config rejected | event | Warning | `rmm` |  |
 | `sparklogs_agent_emission_capped` | sparklogs agent emission capped | event | Warning | `rmm` |  |
-| `sparklogs_agent_event_truncated` | sparklogs agent event truncated | event | Warning | `rmm` |  |
+| `sparklogs_agent_event_too_large_dropped` | sparklogs agent event too large dropped | event | Warning | `rmm` |  |
 | `sparklogs_agent_spool_dropped` | sparklogs agent spool dropped | event | Warning | `rmm` |  |
 | `sparklogs_agent_spool_expired` | sparklogs agent spool expired | event | Warning | `rmm` |  |
 
@@ -50,11 +50,11 @@ The agent held back routine change events for one device-state category after it
 
 **Related:**
 
-- `sparklogs_agent_event_truncated`: one event left out because it was too large
+- `sparklogs_agent_event_too_large_dropped`: one event left out because it was too large
 
 **Example:** The processes category on a build server sends more changes than its limit allows, and the agent reports 200 held back.
 
-## `sparklogs_agent_event_truncated`: sparklogs agent event truncated
+## `sparklogs_agent_event_too_large_dropped`: sparklogs agent event too large dropped
 
 The agent left out one device-state event because it was larger than the per-event size limit.
 
@@ -62,7 +62,7 @@ The agent left out one device-state event because it was larger than the per-eve
 
 **Why it matters:** That one event is missing from SparkLogs, so the category named in topic has a gap at that time.
 
-**In practice:** Every device-state event the agent queues for sending must fit a per-event size limit. This one did not, so the agent left it out whole; event_bytes gives its size and limit_bytes the limit. Despite the reason code's name, nothing is shortened: the event is not sent at all. An event this large is unexpected; if it keeps happening, report it to SparkLogs support with the device name.
+**In practice:** Every device-state event the agent queues for sending must fit a per-event size limit. This one did not, so the agent left it out whole; event_bytes gives its size and limit_bytes the limit. Nothing is shortened: the event is not sent at all. An event this large is unexpected; if it keeps happening, report it to SparkLogs support with the device name.
 
 **What to check:**
 

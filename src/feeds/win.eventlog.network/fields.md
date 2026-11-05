@@ -27,63 +27,63 @@ Stored flat under the `win.eventlog.network.` prefix.
 
 | LQL path | Type | Meaning |
 |---|---|---|
-| `win.eventlog.network.conflict_ip_address` | string | IP address the DHCP client (1005) or DHCPv6 client (1005) found already in use on the network. |
-| `win.eventlog.network.dns_query_name` | string | DNS name the client was resolving when the lookup timed out. |
-| `win.eventlog.network.firewall_rule_action` | int | Firewall rule action code from the dedicated channel. |
-| `win.eventlog.network.firewall_rule_active` | int | Whether the firewall rule is enabled: 1 enabled, 0 disabled. |
-| `win.eventlog.network.firewall_rule_application_path` | string | Program path the firewall rule applies to. |
-| `win.eventlog.network.firewall_rule_direction` | int | Firewall rule direction code. |
-| `win.eventlog.network.firewall_rule_local_ports` | string | Local ports the firewall rule matches, as the rule states them (a port, a list or a range). |
-| `win.eventlog.network.firewall_rule_origin` | int | Firewall rule origin code. |
-| `win.eventlog.network.firewall_rule_profiles` | int | Firewall rule profile bitmask. |
-| `win.eventlog.network.firewall_rule_protocol` | int | IP protocol number the firewall rule matches (6 TCP, 17 UDP, 256 any). |
-| `win.eventlog.network.firewall_rule_remote_ports` | string | Remote ports the firewall rule matches, as the rule states them. |
-| `win.eventlog.network.firewall_rule_service_name` | string | Windows service the firewall rule applies to. |
-| `win.eventlog.network.ncsi_capability` | int | Connectivity NCSI reports after the change: 0 none, 1 local network only, 2 internet. |
-| `win.eventlog.network.ncsi_change_reason` | int | Numeric reason NCSI gives for a connectivity change; the rendered message names it. |
-| `win.eventlog.network.ncsi_family` | int | Address family of the connectivity change, as NCSI numbers it (0 is IPv4); the rendered message names it. |
-| `win.eventlog.network.offline_files_failed_count` | int | Offline-files sync failure count. |
-| `win.eventlog.network.offline_files_path` | string | Offline-files scope path. |
-| `win.eventlog.network.printer_name` | string | Redirected printer name from RDS setup. |
-| `win.eventlog.network.rule_id` | string | Firewall rule identifier. |
-| `win.eventlog.network.rule_name` | string | Firewall rule label. |
-| `win.eventlog.network.smb_auth_protocol_new` | int | SMB authentication protocol after re-auth. |
-| `win.eventlog.network.smb_auth_protocol_old` | int | SMB authentication protocol before re-auth. |
-| `win.eventlog.network.smb_call_duration_secs` | int | SMB security call duration in seconds. |
-| `win.eventlog.network.smb_call_function` | string | SMB security function that ran slow. |
-| `win.eventlog.network.smb_call_threshold_secs` | int | SMB security call threshold in seconds. |
-| `win.eventlog.network.smb_command` | int | SMB2 command number. |
-| `win.eventlog.network.smb_connection_type` | int | SMB connection type code. |
-| `win.eventlog.network.smb_durable_handle` | bool | Whether the SMB handle was durable. |
-| `win.eventlog.network.smb_elapsed_ms` | int | SMB operation elapsed milliseconds. |
-| `win.eventlog.network.smb_encryption_used` | bool | Whether SMB encryption was used. |
-| `win.eventlog.network.smb_granted_access` | string | SMB granted access mask. |
-| `win.eventlog.network.smb_logon_id` | string | SMB logon identifier. |
-| `win.eventlog.network.smb_mapped_access` | string | SMB mapped access mask. |
-| `win.eventlog.network.smb_message_id` | int | SMB message identifier. |
-| `win.eventlog.network.smb_mutual_auth_lost` | bool | Whether mutual authentication was lost. |
-| `win.eventlog.network.smb_ntlm_blocked` | bool | Whether NTLM was blocked on the connection. |
-| `win.eventlog.network.smb_operation_duration` | int | SMB server operation duration. |
-| `win.eventlog.network.smb_operation_threshold` | int | SMB server operation threshold. |
-| `win.eventlog.network.smb_persistent_handle` | bool | Whether the SMB handle was persistent. |
-| `win.eventlog.network.smb_reason_code` | int | SMB provider reason code. |
-| `win.eventlog.network.smb_resilient_handle` | bool | Whether the SMB handle was resilient. |
-| `win.eventlog.network.smb_retry_count` | int | SMB retry count. |
-| `win.eventlog.network.smb_session_id` | string | SMB session identifier. |
-| `win.eventlog.network.smb_setting_default` | int | Shipped default for an SMB security setting. |
-| `win.eventlog.network.smb_setting_name` | string | SMB security setting name. |
-| `win.eventlog.network.smb_setting_value` | int | Configured SMB security setting value. |
-| `win.eventlog.network.smb_share_name` | string | SMB share the event is about: the share segment of a UNC the provider wrote under ServerName, or the ShareName field where the provider states one. |
-| `win.eventlog.network.smb_signing_used` | bool | Whether SMB signing was used. |
-| `win.eventlog.network.smb_spn_validation_policy` | int | SMB SPN validation policy code. |
-| `win.eventlog.network.smb_tree_id` | int | SMB tree connection identifier. |
-| `win.eventlog.network.wlan_adapter` | string | Wireless adapter description. |
-| `win.eventlog.network.wlan_bss_type` | string | Wireless BSS type. |
-| `win.eventlog.network.wlan_connection_mode` | string | Wireless connection mode. |
-| `win.eventlog.network.wlan_failure_reason` | string | Wireless failure reason sentence. |
-| `win.eventlog.network.wlan_profile_name` | string | Wireless profile name. |
-| `win.eventlog.network.wlan_reason_code` | int | Wireless reason code. |
-| `win.eventlog.network.wlan_reason_text` | string | Wireless security reason text. |
+| `win.eventlog.network.conflict_ip_address` | string | IP address the DHCP or DHCPv6 client found already in use by another device on the network, read from the message of event 1005. |
+| `win.eventlog.network.dns_query_name` | string | DNS name the client was looking up when the lookup timed out, from `QueryName` on DNS-Client event 1013. |
+| `win.eventlog.network.firewall_rule_action` | int | Action of the firewall rule (allow or block), as the number the Windows Firewall event writes in `Action`, on rule added, changed and deleted events. |
+| `win.eventlog.network.firewall_rule_active` | int | Whether the firewall rule is turned on: 1 on, 0 off, from `Active` on Windows Firewall rule events. |
+| `win.eventlog.network.firewall_rule_application_path` | string | Program path the firewall rule applies to, from `ApplicationPath` on Windows Firewall rule events. |
+| `win.eventlog.network.firewall_rule_direction` | int | Direction of the firewall rule (inbound or outbound), as the number the Windows Firewall event writes in `Direction`. |
+| `win.eventlog.network.firewall_rule_local_ports` | string | Local ports the firewall rule matches, as the rule states them (a port, a list or a range), from `LocalPorts` on Windows Firewall rule events. |
+| `win.eventlog.network.firewall_rule_origin` | int | Where the firewall rule came from (for example local settings or Group Policy), as the number the Windows Firewall event writes in `Origin`. |
+| `win.eventlog.network.firewall_rule_profiles` | int | Network profiles the firewall rule applies to, as the number in `Profiles`: add 1 for Domain, 2 for Private and 4 for Public. |
+| `win.eventlog.network.firewall_rule_protocol` | int | IP protocol number the firewall rule matches, from `Protocol`: 6 TCP, 17 UDP, 256 any. |
+| `win.eventlog.network.firewall_rule_remote_ports` | string | Remote ports the firewall rule matches, as the rule states them, from `RemotePorts` on Windows Firewall rule events. |
+| `win.eventlog.network.firewall_rule_service_name` | string | Windows service the firewall rule applies to, from `ServiceName` on Windows Firewall rule events. |
+| `win.eventlog.network.ncsi_capability` | int | Connectivity Windows reports after losing internet access, from `Capability` on NCSI event 4042: 0 no connectivity, 1 local network only. Present only when the previous state was internet access. |
+| `win.eventlog.network.ncsi_change_reason` | int | Reason code NCSI gives for the loss of internet access, from `CapabilityChangeReason` on event 4042, as a number. The message names the reason in words. |
+| `win.eventlog.network.ncsi_family` | int | Address family that lost internet access, from `Family` on NCSI event 4042, as a number (0 is IPv4). The message names it in words. |
+| `win.eventlog.network.offline_files_failed_count` | int | Number of files Offline Files failed to sync, from `FailedFileCount` on OfflineFiles event 1006. |
+| `win.eventlog.network.offline_files_path` | string | Folder or share the Offline Files sync was for, from `Path` on OfflineFiles events 1006 and 1008. |
+| `win.eventlog.network.printer_name` | string | Name of the printer Remote Desktop redirected into the session, from TerminalServices-Printers events 1108 and 1109. |
+| `win.eventlog.network.rule_id` | string | ID of the firewall rule, from `RuleId` on Windows Firewall rule added, changed and deleted events. |
+| `win.eventlog.network.rule_name` | string | Display name of the firewall rule, from `RuleName` on Windows Firewall rule added, changed and deleted events. |
+| `win.eventlog.network.smb_auth_protocol_new` | int | Authentication protocol the SMB client used after it signed in to the server again, from `NewAuthProtocolId` on SMBClient event 31019, as a number. |
+| `win.eventlog.network.smb_auth_protocol_old` | int | Authentication protocol the SMB client used before it signed in to the server again, from `OldAuthProtocolId` on SMBClient event 31019, as a number. |
+| `win.eventlog.network.smb_call_duration_secs` | int | Seconds a security call by the SMB client took, from `CallDuration` on SMBClient event 30955. |
+| `win.eventlog.network.smb_call_function` | string | Security function the SMB client called that took too long, from `FunctionName` on SMBClient event 30955. |
+| `win.eventlog.network.smb_call_threshold_secs` | int | Seconds a security call may take before the SMB client logs it as slow, from `ThresholdDuration` on SMBClient event 30955. |
+| `win.eventlog.network.smb_command` | int | SMB2 command number of the request that failed signing or encryption checks, from `Smb2Command` on SMBClient events 31013 and 31014. |
+| `win.eventlog.network.smb_connection_type` | int | Type of SMB connection, as the number Windows writes in `ConnectionType`, from SMBClient connectivity events and SMBServer event 4000. |
+| `win.eventlog.network.smb_durable_handle` | bool | Whether the file handle the SMB server could not reopen was durable, from `DurableHandle` on SMBServer event 1016. |
+| `win.eventlog.network.smb_elapsed_ms` | int | Milliseconds the SMB client spent on the connection attempt, from `ElapsedTimeInMs` on SMBClient connectivity events. |
+| `win.eventlog.network.smb_encryption_used` | bool | Whether the SMB connection or share was encrypted, from `EncryptionUsed` on SMBClient event 30808 or SMBServer event 4000. |
+| `win.eventlog.network.smb_granted_access` | string | Access mask the SMB server granted on the share, from `GrantedAccess` on SMBServer event 1006, as Windows wrote it. |
+| `win.eventlog.network.smb_logon_id` | string | Logon session ID of the user whose SMB sign-in failed, from `LogonId` on SMBClient security events. |
+| `win.eventlog.network.smb_mapped_access` | string | Access mask the client asked for, as the SMB server mapped it, from `MappedAccess` on SMBServer event 1006, as Windows wrote it. |
+| `win.eventlog.network.smb_message_id` | int | Message ID of the SMB request that failed signing or encryption checks, from `MessageId` on SMBClient events 31013 and 31014. |
+| `win.eventlog.network.smb_mutual_auth_lost` | bool | True when the SMB client had mutual authentication with the server before signing in again and lost it after, from SMBClient event 31019. |
+| `win.eventlog.network.smb_ntlm_blocked` | bool | Whether NTLM was blocked on the SMB connection, from `NTLMBlocked` on SMBServer event 4000. |
+| `win.eventlog.network.smb_operation_duration` | int | Time an SMB server operation took, in milliseconds, from SMBServer events 1020 (file system), 1047 (session setup) and 1054 (network). Event 1047 states it in seconds; it is stored in milliseconds like the others. |
+| `win.eventlog.network.smb_operation_threshold` | int | Time an SMB server operation may take before the server logs it as slow, in milliseconds, from SMBServer events 1020, 1047 and 1054. Event 1047 states it in seconds; it is stored in milliseconds like the others. |
+| `win.eventlog.network.smb_persistent_handle` | bool | Whether the file handle the SMB server could not reopen was persistent (continuously available), from `PersistentHandle` on SMBServer event 1016. |
+| `win.eventlog.network.smb_reason_code` | int | Reason code the SMB client or server gave for the failure, from `Reason` or `ReasonCode`, as a number. |
+| `win.eventlog.network.smb_resilient_handle` | bool | Whether the file handle the SMB server could not reopen was resilient, from `ResilientHandle` on SMBServer event 1016. |
+| `win.eventlog.network.smb_retry_count` | int | Number of times the SMB client retried the connection, from `RetryCount` on SMBClient connectivity events. |
+| `win.eventlog.network.smb_session_id` | string | SMB session ID, from `SessionId` on SMBClient and SMBServer events. Filter on it to follow one session. |
+| `win.eventlog.network.smb_setting_default` | int | Default value of the SMB security setting, from `DefaultLmCompatibilityLevel` on SMBServer event 1021. |
+| `win.eventlog.network.smb_setting_name` | string | Name of the SMB or LAN Manager security setting the event reports, from `RegName` on SMBClient events 31003, 31016 and 31018, or LmCompatibilityLevel on SMBServer event 1021. |
+| `win.eventlog.network.smb_setting_value` | int | Value the SMB or LAN Manager security setting is configured to, from `RegValue` on SMBClient events 31003, 31016 and 31018, or `ConfiguredLmCompatibilityLevel` on SMBServer event 1021. |
+| `win.eventlog.network.smb_share_name` | string | SMB share the event is about: the share part of the UNC path in `ServerName`, or `ShareName` where the event carries one. |
+| `win.eventlog.network.smb_signing_used` | bool | Whether the SMB connection or share used signing, from `SigningUsed` on SMBClient event 30808 or SMBServer event 4000. |
+| `win.eventlog.network.smb_spn_validation_policy` | int | SPN validation policy the SMB server applied, from `SPNValidationPolicy` on SMBServer event 551, as a number. |
+| `win.eventlog.network.smb_tree_id` | int | Tree connect ID (one connection to a share) on SMBClient events, from `TreeId`. |
+| `win.eventlog.network.wlan_adapter` | string | Wireless adapter, as Windows describes it, from `Adapter` or `InterfaceDescription` on WLAN-AutoConfig events. |
+| `win.eventlog.network.wlan_bss_type` | string | Wireless network type, such as infrastructure, from `BSSType` on WLAN-AutoConfig events. |
+| `win.eventlog.network.wlan_connection_mode` | string | How the wireless connection was started, such as automatically with a profile, from `ConnectionMode` on WLAN-AutoConfig events 8002 and 8003. |
+| `win.eventlog.network.wlan_failure_reason` | string | Reason Windows gives in words for the failed wireless connection, from `FailureReason` on WLAN-AutoConfig event 8002. |
+| `win.eventlog.network.wlan_profile_name` | string | Wireless profile (usually the network name) the connection used, from `ProfileName` on WLAN-AutoConfig events 8002 and 8003. |
+| `win.eventlog.network.wlan_reason_code` | int | Reason code for the wireless failure or disconnect, from `ReasonCode` on WLAN-AutoConfig events 8002, 8003 and 11006, stored as a number. Event Viewer shows it in decimal on 8002 and 8003 and in hex on 11006 (0x50005 is 327685). Absent when the event carries no readable code. |
+| `win.eventlog.network.wlan_reason_text` | string | Reason Windows gives in words for the failed wireless security exchange, from `ReasonText` on WLAN-AutoConfig event 11006. |
 
 ## Portable families
 

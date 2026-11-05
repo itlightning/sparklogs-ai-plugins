@@ -26,8 +26,8 @@ Search for the heading "## `<code>`" or a word from the reason's label. Do not r
 | `driver_load_failed` | driver load failed | event | Info to Warning | `hardware` | benign possible |
 | `ephemeral_port_alloc_failed` | ephemeral port alloc failed | event | Notice | `networking` |  |
 | `failover_cluster_csv_unavailable` | failover cluster csv unavailable | event | Severe | `clustering` |  |
+| `failover_cluster_node_config_stale` | failover cluster node config stale | event | Error | `clustering` |  |
 | `failover_cluster_node_removed` | failover cluster node removed | event | Serious | `clustering` |  |
-| `failover_cluster_quorum_loss` | failover cluster quorum loss | event | Severe | `clustering` |  |
 | `failover_cluster_resource_failed` | failover cluster resource failed | event | Serious | `clustering` |  |
 | `failover_cluster_resource_hang` | failover cluster resource hang | event | Serious | `clustering` |  |
 | `failover_cluster_resource_host_crash` | failover cluster resource host crash | event | Serious | `clustering` |  |
@@ -78,7 +78,7 @@ Search for the heading "## `<code>`" or a word from the reason's label. Do not r
 | `service_exited_with_error` | service exited with error | event | Error | `app_stability` |  |
 | `service_hang` | service hang | event | Notice | `app_stability` |  |
 | `service_hung_starting` | service hung starting | event | Notice | `app_stability` |  |
-| `service_installed` | service installed | event | Info to Notice | `security_audit` | benign possible |
+| `service_installed` | service installed | event | Verbose to Notice | `security_audit` | benign possible |
 | `service_start_failed` | service start failed | event | Error | `app_stability` |  |
 | `service_start_timeout` | service start timeout | event | Notice | `app_stability` |  |
 | `smb_delayed_write_lost` | smb delayed write lost | event | Error | `storage` |  |
@@ -594,13 +594,38 @@ A Cluster Shared Volume became unavailable or paused.
 
 **Related:**
 
+- `failover_cluster_node_config_stale`: the cluster service would not start because the node's configuration is out of date
 - `failover_cluster_node_removed`: a whole node dropped out of the cluster
-- `failover_cluster_quorum_loss`: the cluster lost the majority it needs to keep running
 - `failover_cluster_resource_failed`: one clustered resource failed
 
 **Example:** A Cluster Shared Volume enters a paused state because its connection was disconnected.
 
 **Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/feeds/eventlog-system#failover_cluster_csv_unavailable, https://sparklogs.com/reference/reasons/failover_cluster_csv_unavailable.json
+
+## `failover_cluster_node_config_stale`: failover cluster node config stale
+
+The cluster service would not start on this node because the node does not hold the latest cluster configuration.
+
+**Severity:** Error
+
+**Why it matters:** This node cannot join the cluster and runs none of its roles. If the nodes that hold the newer configuration are also down, the cluster cannot form at all.
+
+**In practice:** Failover Clustering logs event 1561 in the System log when the cluster service finds that this node's copy of the cluster configuration is older than the cluster's, and stops itself from starting. The configuration changed while this node was out of the cluster, and no node holding the newer copy can be reached now. A cluster service that was running and shut down because quorum was lost logs event 1177 instead.
+
+**What to check:**
+
+- Bring up the node that stayed up longest, or restore network reachability to the other nodes, so this node can copy the configuration from them.
+- Check this node's view of the other nodes in the Microsoft-Windows-FailoverClustering/Operational log.
+- Force the cluster to start from this node (`Start-ClusterNode -FixQuorum`) only when the nodes with the newer configuration are lost for good: changes made since this node left are lost.
+
+**Related:**
+
+- `failover_cluster_node_removed`: a running node dropped out of membership, logged by the nodes that lost contact with it
+- `failover_cluster_service_down`: the cluster service was running and then stopped, for example after losing quorum
+
+**Example:** After a site power failure, the first node to restart holds an older cluster configuration and will not start its cluster service.
+
+**Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/feeds/eventlog-system#failover_cluster_node_config_stale, https://sparklogs.com/reference/reasons/failover_cluster_node_config_stale.json
 
 ## `failover_cluster_node_removed`: failover cluster node removed
 
@@ -621,37 +646,12 @@ A failover cluster node was removed from active membership.
 **Related:**
 
 - `failover_cluster_csv_unavailable`: a Cluster Shared Volume paused or became unreachable
-- `failover_cluster_quorum_loss`: the cluster lost the majority it needs to keep running
+- `failover_cluster_node_config_stale`: the cluster service would not start because the node's configuration is out of date
 - `failover_cluster_service_down`: the Cluster service on a node stopped or failed
 
 **Example:** A cluster node is removed from active membership after it stops answering the other nodes.
 
 **Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/feeds/eventlog-system#failover_cluster_node_removed, https://sparklogs.com/reference/reasons/failover_cluster_node_removed.json
-
-## `failover_cluster_quorum_loss`: failover cluster quorum loss
-
-The cluster service would not start on this node because the node does not hold the latest cluster configuration.
-
-**Severity:** Severe
-
-**Why it matters:** This node cannot join the cluster and runs none of its roles. If the nodes that hold the newer configuration are also down, the cluster cannot form at all.
-
-**In practice:** Failover Clustering logs event 1561 in the System log when the cluster service finds that this node's copy of the cluster configuration is older than the cluster's, and stops itself from starting. The configuration changed while this node was out of the cluster, and no node holding the newer copy can be reached now. A cluster service that was running and shut down because quorum was lost logs event 1177 instead.
-
-**What to check:**
-
-- Bring up the node that stayed up longest, or restore network reachability to the other nodes, so this node can copy the configuration from them.
-- Check this node's view of the other nodes in the Microsoft-Windows-FailoverClustering/Operational log.
-- Force the cluster to start from this node (`Start-ClusterNode -FixQuorum`) only when the nodes with the newer configuration are lost for good: changes made since this node left are lost.
-
-**Related:**
-
-- `failover_cluster_node_removed`: a running node dropped out of membership, logged by the nodes that lost contact with it
-- `failover_cluster_service_down`: the cluster service was running and then stopped, for example after losing quorum
-
-**Example:** After a site power failure, the first node to restart holds an older cluster configuration and will not start its cluster service.
-
-**Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/feeds/eventlog-system#failover_cluster_quorum_loss, https://sparklogs.com/reference/reasons/failover_cluster_quorum_loss.json
 
 ## `failover_cluster_resource_failed`: failover cluster resource failed
 
@@ -748,8 +748,8 @@ The cluster service on this node stopped or was forced down.
 
 **Related:**
 
+- `failover_cluster_node_config_stale`: the cluster service would not start because the node's configuration is out of date
 - `failover_cluster_node_removed`: the other nodes dropped a node, logged on the nodes that stayed
-- `failover_cluster_quorum_loss`: the cluster service would not start because the node's configuration is out of date
 
 **Example:** During a switch outage, the cluster service on a node shuts down because quorum was lost.
 
@@ -1974,11 +1974,11 @@ A Windows service was installed.
 
 **Also reported by:** `win.eventlog.security`, `services`
 
-**Severity:** Notice or Info
+**Severity:** Notice, Info or Verbose
 
 **Why it matters:** A new service runs a program each time it starts, often as LocalSystem, so an install nobody planned can be malware or remote-access software setting itself up to persist.
 
-**In practice:** Service Control Manager logs event 7045 in the System log ("A service was installed in the system.") when a new service is registered. It records the service name, the program and its arguments (`image_path`, `command_line`), the service type, the start type and the account it runs as. Most installs are planned software: agents, drivers, updates and installers. An updater that registers a new service named after each version it installs, in that version's own folder, is recorded as routine maintenance. The Security log records the same install as event 4697 when auditing for it is turned on.
+**In practice:** Service Control Manager logs event 7045 in the System log ("A service was installed in the system.") when a new service is registered. It records the service name, the program and its arguments (`image_path`, `command_line`), the service type, the start type and the account it runs as. Most installs are planned software: agents, updates and installers. A kernel or file-system driver logs the same event, with no account, and is kept at a low level, because SparkLogs reports the driver install itself as `kernel_driver_installed`. An updater that registers a new service named after each version it installs, in that version's own folder, is recorded as routine maintenance. The Security log records the same install as event 4697 when auditing for it is turned on.
 
 **When to ignore:** An install that matches planned software on this machine, or an updater registering the service for its own new version.
 
@@ -1990,6 +1990,7 @@ A Windows service was installed.
 
 **Related:**
 
+- `kernel_driver_installed`: the agent reported a kernel or file-system driver install from this record
 - `service_command_line_changed`: the agent saw an existing service's program or arguments change
 - `service_removed`: the agent saw a service registration disappear
 
@@ -2192,7 +2193,7 @@ A storage controller driver reset the path to a disk, or reported a timeout or c
 
 **Why it matters:** Disk reads and writes stall while the controller resets, so programs freeze for seconds, and requests in flight are retried or lost. Repeated resets on one path often come before a cable, backplane, controller or drive failure.
 
-**In practice:** The storage miniport driver writes these in the System log. The common one is event 129, "Reset to device, \Device\RaidPortN, was issued": the driver gave up waiting for the device and reset the path to it. It covers Warning, Error and Critical records from storahci (SATA AHCI) and stornvme (NVMe), including stornvme event 11 controller errors, and event 129 from the Intel RST (iaStor), Hyper-V (storvsc) and USB attached SCSI (uaspstor) drivers. A reset through uaspstor is a USB drive or enclosure, and shows as Notice. The event does not say whether the device is the boot disk or something plugged in; the storage port driver's own record in the Microsoft-Windows-Storport/Operational log does. Informational records from these drivers are not counted here.
+**In practice:** The storage miniport driver writes these in the System log. The common one is event 129, "Reset to device, \Device\RaidPortN, was issued": the driver gave up waiting for the device and reset the path to it. It covers Warning, Error and Critical records of event 129 and of event 11 ("The driver detected a controller error on \Device\RaidPortN") from storahci (SATA AHCI) and stornvme (NVMe), and event 129 from the Intel RST (iaStor), Hyper-V (storvsc) and USB attached SCSI (uaspstor) drivers. A reset through uaspstor is a USB drive or enclosure, and shows as Notice. The event does not say whether the device is the boot disk or something plugged in; the storage port driver's own record in the Microsoft-Windows-Storport/Operational log does. Informational records from these drivers are not counted here.
 
 **When to ignore:** A single USB drive reset when the drive was being unplugged or was waking from sleep.
 

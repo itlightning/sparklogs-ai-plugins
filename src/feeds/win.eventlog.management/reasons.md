@@ -33,11 +33,11 @@ Search for the heading "## `<code>`" or a word from the reason's label. Do not r
 
 A device does not match the BitLocker encryption policy set for it: a drive is unencrypted, or encrypted with a method or scope the policy does not allow.
 
-**Severity:** Warning where the operating-system volume is the one out of compliance. Notice for a data volume, where the event cannot say which drive it is about, or where the OS drive uses a different cipher strength than policy names. Info where the OS drive is encrypted in full and policy asks for used space only.
+**Severity:** Warning where the operating-system volume is the one out of compliance. Notice for a data volume, where the event cannot say which drive it is about, or where the OS drive uses a different cipher strength than policy names, or encrypts only its used space where policy wants the full drive. Info where the OS drive is encrypted in full and policy asks for used space only.
 
 **Why it matters:** An unencrypted operating-system volume means every file on the machine is readable to anyone who takes it.
 
-**In practice:** The Windows MDM client checks the BitLocker policy from Intune or another MDM service at each sync and writes events 2900 to 2914 in Microsoft-Windows-DeviceManagement-Enterprise-Diagnostics-Provider/Admin when the device does not match. Event 2900 carries the drive role (OSV for the operating-system volume) and the drive's status bits; 2902 carries the encryption method found and the one the policy wants. Events 2910 and 2914 carry no details and cannot say which drive they are about. An OS drive encrypted in full where policy asks for used space only is protected beyond what the policy needs, and is recorded at Info. The client restates the same mismatch at every sync, so one device produces many records for one finding.
+**In practice:** The Windows MDM client checks the BitLocker policy from Intune or another MDM service at each sync and writes events 2900 to 2914 in Microsoft-Windows-DeviceManagement-Enterprise-Diagnostics-Provider/Admin when the device does not match. Event 2900 carries the drive role (OSV for the operating-system volume) and the drive's status bits; 2902 carries the encryption method found and the one the policy wants. Events 2910 and 2914 carry no details and cannot say which drive they are about. An OS drive encrypted in full where policy asks for used space only (event 2903) is protected beyond what the policy needs, and is recorded at Info. An OS drive with only its used space encrypted where policy wants the full drive (event 2904) has its data encrypted, but space freed before encryption may still hold readable remnants; it is recorded at Notice. The client restates the same mismatch at every sync, so one device produces many records for one finding.
 
 **When to ignore:** Info rows (full-disk encryption where policy asks for used space only) need no action.
 
@@ -47,6 +47,7 @@ A device does not match the BitLocker encryption policy set for it: a drive is u
 - Run `manage-bde -status` on the device to see each volume's encryption state and method.
 - For an unencrypted OS drive, check TPM readiness and the BitLocker event log for why encryption did not start.
 - For 2910 and 2914, use the device's own encryption state to find the drive.
+- For 2904, decide whether full encryption is really required; if it is, decrypt and re-encrypt the OS drive with full encryption, since BitLocker cannot change an encrypted drive from used space only to full.
 
 **Related:**
 

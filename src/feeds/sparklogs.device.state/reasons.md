@@ -49,6 +49,12 @@ Search for the heading "## `<code>`" or a word from the reason's label. Do not r
 | `installed_product_removed` | Installed product removed | change |  | `patching` |  |
 | `kernel_crash` | Windows crashed (blue screen) | occurrence |  | `os_stability` |  |
 | `kernel_crash_recurring` | Repeated Windows crashes | condition | Display to Critical | `os_stability` |  |
+| `kernel_driver_flapping` | Kernel driver loading repeatedly | condition | Notice | `platform` |  |
+| `kernel_driver_installed` | Kernel driver installed | change |  | `platform` |  |
+| `kernel_driver_installed_repeatedly` | Kernel driver installed repeatedly | condition | Display | `platform` |  |
+| `kernel_driver_loaded` | Kernel driver loaded | change |  | `platform` |  |
+| `kernel_driver_unloaded` | Kernel driver unloaded | change |  | `platform` |  |
+| `kernel_driver_updated` | Kernel driver updated | change |  | `platform` |  |
 | `network_adapter_dhcp_failed` | Network adapter DHCP failed | condition | Notice to Error | `networking` |  |
 | `network_adapter_disabled` | Network adapter disabled | change |  | `networking` |  |
 | `network_adapter_emulated` | Emulated network adapter | condition | Display to Notice | `networking` |  |
@@ -908,7 +914,7 @@ An installed program's version or publisher changed.
 
 **Why it matters:** A program that changed version just before a problem started is the first suspect for it.
 
-**In practice:** The version or publisher the program lists in the machine's installed programs changed, most often because it updated. A plain update, same publisher and a higher version number, is recorded as routine maintenance at Display. Anything else, such as a downgrade, a new publisher, or a version written in another form, is recorded at Notice. Programs whose name includes their version, as many runtimes and utilities do, show as one program removed and another installed instead.
+**In practice:** The version or publisher the program lists in the machine's installed programs changed, most often because it updated. A plain update, same publisher and a higher version number, is recorded as routine maintenance at Display. Anything else, such as a downgrade, a new publisher, or a version written in another form, is recorded at Notice. A program whose name includes its version, as many runtimes and utilities do, usually reads as this one program changing version, with the name it had before. When another edition of the same product line stays installed beside it, such as an older Visual C++ redistributable, the upgrade can still read as a removal and an install.
 
 **What to check:**
 
@@ -943,7 +949,7 @@ A program left the machine's list of installed programs.
 
 **Why it matters:** When it was a security agent, backup client or remote-access tool, the machine has lost that protection or that way in, often with nobody noticing.
 
-**In practice:** A user with admin rights, an upgrade that failed after removing the old version, or an attacker disabling protection removes a program. An upgrade that installs under a new name shows as this removal beside an install of the new name.
+**In practice:** A user with admin rights, an upgrade that failed after removing the old version, or an attacker disabling protection removes a program. An upgrade that only changes the version in the program's name usually reads as a version change instead. It still shows as this removal beside an install of the new name when it renames the program otherwise, or when another edition of the same product line stays installed beside it.
 
 **What to check:**
 
@@ -1008,6 +1014,158 @@ Windows on this machine keeps crashing with blue screens.
 **Example:** A workstation crashes five times in five days, most often with stop code 0x9F, a driver power state failure.
 
 **Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/topics/crashes#kernel_crash_recurring, https://sparklogs.com/reference/reasons/kernel_crash_recurring.json
+
+## `kernel_driver_flapping`: Kernel driver loading repeatedly
+
+A kernel driver keeps loading and unloading.
+
+**Severity:** Notice from 4 loads in an hour; it does not become more severe.
+
+**Why it matters:** This is not normal for a driver. It is often a crashing or restarting driver or tool, and whatever depends on the driver loses it each time it goes.
+
+**In practice:** The agent checks the loaded drivers once a minute, and past 4 loads in an hour the separate load and unload changes for this driver stop until the count falls. Security and monitoring tools restarting in a loop are a common cause. A Windows component is never reported here, but Microsoft-signed tools such as Process Monitor and Sysmon are. A driver loaded for less than about a minute is not counted; Kernel driver installed repeatedly covers those.
+
+**What to check:**
+
+- What loads the driver: the program or service that installed it, and whether that program is restarting.
+- The driver's publisher, signer and file on its row.
+- Whether Kernel driver installed repeatedly is reported too, which means something is installing the driver again and again.
+
+**How it ends:** Ends when the driver has loaded 1 or fewer times in the past hour, and stays there for 1 hour.
+
+**Related:**
+
+- `kernel_driver_installed_repeatedly`: A driver installed over and over, usually too briefly to show up as a load.
+- `service_flapping`: A service that keeps crashing.
+
+**Fields read:**
+
+- `sparklogs.data.kernel_drivers.load_count_1h`
+
+**Example:** A security agent stuck in a restart loop loads and unloads its filter driver five times in an hour.
+
+**Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/topics/kernel-drivers#kernel_driver_flapping, https://sparklogs.com/reference/reasons/kernel_driver_flapping.json
+
+## `kernel_driver_installed`: Kernel driver installed
+
+A kernel or file-system driver was installed on this machine.
+
+**Why it matters:** A driver runs with full control of the machine, so a new one is the first suspect when a machine starts crashing or a security tool stops working, even if it was gone a moment later.
+
+**In practice:** This comes from Service Control Manager event 7045 in the System log, so it reports a driver the once-a-minute check of loaded drivers never saw. The record means the driver's entry was registered, not that the driver ran. It can appear a few minutes after the install. A tool that leaves its service in place logs no record when it loads the driver again, and when one driver is installed over and over the separate changes stop, and Kernel driver installed repeatedly takes over. If the agent was not running for more than an hour, installs in that gap are not reported, though the System log still holds them.
+
+**What to check:**
+
+- The image path and start type on the event: a driver in a user, temp or download folder deserves a closer look.
+- Whether software installed or updated at that time explains it.
+- The Kernel driver loaded event for the same driver, which says whether it stayed loaded.
+
+**Related:**
+
+- `driver_installed`: A driver package installed for a device; one install can report both.
+- `kernel_driver_installed_repeatedly`: The same driver installed again and again.
+- `kernel_driver_loaded`: The driver loaded and staying.
+
+**Example:** A hardware monitoring tool installs its driver when it starts.
+
+**Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/topics/kernel-drivers#kernel_driver_installed, https://sparklogs.com/reference/reasons/kernel_driver_installed.json
+
+## `kernel_driver_installed_repeatedly`: Kernel driver installed repeatedly
+
+A kernel driver is being installed over and over.
+
+**Severity:** Display from 10 installs in an hour; it does not become more severe.
+
+**Why it matters:** Usually nothing is wrong: this is how some monitoring tools work. It matters when no tool on the machine explains it, because a driver that loads for a second can do anything a driver can.
+
+**In practice:** Hardware monitoring and overclocking tools often install a small driver, use it for a second and remove it, once a minute. The once-a-minute check of loaded drivers misses a driver that short-lived, so this counts Service Control Manager event 7045 in the System log. Past 10 installs in an hour the separate changes stop, so the true rate is here. A tool that keeps its service in place logs no record, so it is not counted. Minifilter reinstalls are not counted: fast ones are normal security software updating itself. This is not a vulnerable-driver check.
+
+**What to check:**
+
+- Which program owns the driver: the name and image path on the driver's last Kernel driver installed event.
+- Whether that program is meant to be on this machine.
+- If it is, and your fleet runs it everywhere, turn this reason off for those machines.
+
+**How it ends:** Ends when the driver has been installed 3 or fewer times in the past hour, and stays there for 1 hour.
+
+**Related:**
+
+- `kernel_driver_flapping`: A driver loading and unloading, for at least a minute at a time.
+- `kernel_driver_installed`: One install of a driver.
+
+**Fields read:**
+
+- `sparklogs.data.kernel_drivers.install_count_1h`
+
+**Example:** A hardware monitoring tool reinstalls its driver every minute for an hour.
+
+**Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/topics/kernel-drivers#kernel_driver_installed_repeatedly, https://sparklogs.com/reference/reasons/kernel_driver_installed_repeatedly.json
+
+## `kernel_driver_loaded`: Kernel driver loaded
+
+A kernel or file-system driver loaded on this machine.
+
+**Why it matters:** A driver runs with full control of the machine, so a new one is the first suspect when a machine starts crashing or a security tool stops working, and an unsigned one needs explaining.
+
+**In practice:** The agent checks the Service Control Manager's list of loaded drivers every minute, and a load waits one more check before it is reported, so a driver loaded for less than about a minute does not appear; Kernel driver installed reports short-lived drivers. Plugging in hardware, starting a tool and installing software are the usual sources. Loads during startup are not reported. This list is what Windows reports, so it is an inventory and not a rootkit check.
+
+**What to check:**
+
+- The driver's file, publisher, signer and signature status on the event.
+- Whether a tool someone just ran explains it: Process Monitor, a hardware utility or a hypervisor loads its driver on start.
+- The Kernel driver installed event for the same driver, when it was also newly installed.
+
+**Related:**
+
+- `driver_installed`: A driver package installed for a device.
+- `kernel_driver_installed`: The System log's record of the driver being installed.
+- `kernel_driver_unloaded`: The same driver leaving.
+
+**Example:** A technician starts Process Monitor on a server, and its driver loads.
+
+**Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/topics/kernel-drivers#kernel_driver_loaded, https://sparklogs.com/reference/reasons/kernel_driver_loaded.json
+
+## `kernel_driver_unloaded`: Kernel driver unloaded
+
+A kernel or file-system driver unloaded from this machine.
+
+**Why it matters:** A driver that leaves takes its function with it: a filter driver unloading can mean a security or backup tool stopped working.
+
+**In practice:** A driver has to stay gone for a couple of minutes before this is reported, so one that reloads quickly during an update does not appear. Closing a tool, unplugging hardware and stopping a product are the usual sources.
+
+**What to check:**
+
+- How long it was loaded, and whether the event says the agent watched it start.
+- Whether the product that owns the driver was stopped or removed on purpose.
+
+**Related:**
+
+- `kernel_driver_loaded`: The same driver arriving.
+
+**Example:** Process Monitor closes after half an hour, and its driver unloads.
+
+**Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/topics/kernel-drivers#kernel_driver_unloaded, https://sparklogs.com/reference/reasons/kernel_driver_unloaded.json
+
+## `kernel_driver_updated`: Kernel driver updated
+
+A loaded driver's file changed version or location.
+
+**Why it matters:** A new driver version is the first suspect when a device or the whole machine starts failing soon after, including blue screens.
+
+**In practice:** The version is read from the file on disk, checked about once an hour, so this can appear up to an hour after the file changed, and the file can be newer than the copy in memory until the driver reloads. Defender platform updates and Windows Update are the usual sources. A forward version from the same publisher, still trusted, is marked as maintenance; a move to a file Windows does not accept reads as a Warning, as such a load does.
+
+**What to check:**
+
+- The old and new version or path on the event.
+- Windows Update history and the product's own update log for the same time.
+
+**Related:**
+
+- `driver_updated`: A driver package moved version.
+
+**Example:** A graphics driver update moves the driver to a new driver store folder at a newer version.
+
+**Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/topics/kernel-drivers#kernel_driver_updated, https://sparklogs.com/reference/reasons/kernel_driver_updated.json
 
 ## `network_adapter_dhcp_failed`: Network adapter DHCP failed
 
@@ -1545,6 +1703,7 @@ The machine keeps waking from sleep with nobody at it.
 **What to check:**
 
 - `powercfg /lastwake` and `powercfg /waketimers` name the source.
+- `powercfg /devicequery wake_armed` lists the devices allowed to wake the machine.
 
 **How it ends:** Ends after 2 hours with no unattended wake.
 
@@ -2238,7 +2397,7 @@ A VSS writer has stayed in a failed state.
 
 **Why it matters:** Backups that need the writer warn, skip its data, or copy it without the application's help, as if the power had been cut. For SQL Server, Exchange or Hyper-V that is a backup that may not restore cleanly, even when the job reports success.
 
-**In practice:** The agent reads `vssadmin list writers` every few hours, and the condition opens once a writer has been failed for 6 hours. Most failures are one snapshot timing out on a busy machine, and clear at the next backup. An application writer still failed a day later has missed every snapshot since. The writer's last error, which the row carries, says what went wrong. Writers whose failure costs nothing you would restore (BITS, Task Scheduler, Performance Counters, Shadow Copy Optimization, search and VSS metadata writers) are ignored. A writer missing from the list, for example because its service is stopped, raises nothing.
+**In practice:** The agent reads `vssadmin list writers` every few hours, and the condition opens once a writer has been failed for 6 hours. Most failures are one snapshot timing out on a busy machine, and clear at the next backup. An application writer still failed a day later has missed every snapshot since. The writer's last error, which the row carries, says what went wrong. Writers whose failure costs nothing you would restore (BITS, Task Scheduler, Performance Counters, Shadow Copy Optimization, search and VSS metadata writers) are ignored. A writer missing from the list, for example because its service is stopped, opens nothing. One that goes missing while failed keeps the condition open and does not count as healthy.
 
 **What to check:**
 
@@ -2247,7 +2406,7 @@ A VSS writer has stayed in a failed state.
 - Restart the service that hosts the writer: SQL Server VSS Writer for SqlServerWriter, Hyper-V Virtual Machine Management for the Hyper-V writer, Cryptographic Services for the System Writer, Windows Management Instrumentation for the WMI Writer.
 - If it fails again at the next backup, look for a backup job that times out or overlaps another one.
 
-**How it ends:** Ends when the writer has been out of a failed state for 6 hours.
+**How it ends:** Ends when the writer has been out of a failed state for 6 hours, or missing from the list that long. A writer that leaves the list is not counted as recovered.
 
 **Fields read:**
 

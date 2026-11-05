@@ -5,39 +5,39 @@ Full inventory every 15 minutes. Supported changes are reported when the agent o
 
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
-| `sparklogs.data.disk_volumes.volume` | string |  | The volume's stable identity (its GUID), lowercased. Episode continuity keys off this, never the drive letter. |
-| `sparklogs.data.disk_volumes.display_name` | string |  | The drive letter, when the volume has one; otherwise its primary mount path. |
-| `sparklogs.data.disk_volumes.volume_label` | string |  | The volume's OS-assigned name. |
-| `sparklogs.data.disk_volumes.aliases` | string_array |  | Other names this volume is known by, such as its label: excludes its opaque id and its current `display_name`. |
-| `sparklogs.data.disk_volumes.drive_type` | string |  | What kind of drive this volume sits on, from `GetDriveTypeW`. |
-| `sparklogs.data.disk_volumes.volume_role` | string |  | `os`: Windows volume. `fixed_data`: other fixed data volume. `removable`: removable volume. Absent when unknown, which prevents conditions requiring a known role from firing. |
-| `sparklogs.data.disk_volumes.volume_role_code` | integer |  | Numeric code for `volume_role`. |
-| `sparklogs.data.disk_volumes.free_bytes` | integer | bytes | How many bytes are free on the volume. |
-| `sparklogs.data.disk_volumes.free_pct` | float | percent | Free space as a percentage of the volume's total. |
-| `sparklogs.data.disk_volumes.used_pct` | float | percent | Space used as a percentage of the volume's total (100 minus `free_pct`). |
-| `sparklogs.data.disk_volumes.total_bytes` | integer | bytes | The volume's size in bytes. |
-| `sparklogs.data.disk_volumes.writeable` | bool |  | Whether the filesystem reports that writes are allowed. Absent when the filesystem did not answer. |
-| `sparklogs.data.disk_volumes.mount_state` | string |  | Whether the volume is `mounted`, `unmounted`, `raw`, or `unreadable`. Absent when the volume's filesystem query did not answer this read. |
-| `sparklogs.data.disk_volumes.mount_state_code` | integer |  | Numeric code for `mount_state`. |
-| `sparklogs.data.disk_volumes.filesystem` | string |  | The volume's filesystem, lowercased. Absent when the volume's filesystem query did not answer this read. |
-| `sparklogs.data.disk_volumes.bitlocker_protection` | string |  | The volume's BitLocker posture: `on`, `off`, `suspended`, or `n_a` when BitLocker is not in use on this volume. Absent when the provider could not answer. |
-| `sparklogs.data.disk_volumes.bitlocker_dropped` | bool |  | Whether BitLocker protection is off or suspended. Absent when protection status could not be read. |
-| `sparklogs.data.disk_volumes.bitlocker_off_age_min` | float | minutes | How long BitLocker protection has been off or suspended, in wall time: sleep counts, because a sleeping device with protection off is exposed all the same. |
-| `sparklogs.data.disk_volumes.bitlocker_was_protected` | bool |  | Whether this agent has read BitLocker protection `on` for this volume since it began tracking it. A volume never found protected is a posture, not a drop, and opens nothing. |
-| `sparklogs.data.disk_volumes.fill_rate_bytes_per_h` | float | bytes_per_hour | How fast the volume's free space is shrinking: the sustained p25 of five-minute free-space intervals over the last hour, gated on the last ~10 min still filling. Absent until that hour exists. |
-| `sparklogs.data.disk_volumes.fill_slope_sustained_h` | float | hours | How long the current fill trend has held. |
-| `sparklogs.data.disk_volumes.projected_full_eta_h` | float | hours | The raw projected time until the volume fills, from the fill rate alone. |
-| `sparklogs.data.disk_volumes.volume_filling` | bool |  | Whether the volume is filling: over the fill window (30 observed minutes by default) every capture projected it full within the horizon (by default 24 hours, 72 on a server) from its measured fill rate, and free space fell by the fill drop (0.5 GiB by default) across the window. Stays true for the hold (12 observed hours by default) after the last such capture. Sleep and gaps credit no time. Absent when free space was not read. |
-| `sparklogs.data.disk_volumes.backing_bus_permanent` | bool |  | Whether every transport behind this volume is a permanent one (not USB). Absent while the backing transports are unknown. |
+| `sparklogs.data.disk_volumes.volume` | string |  | The volume's GUID, lowercased. It stays the same when the drive letter changes, so it is the key to follow a volume by. |
+| `sparklogs.data.disk_volumes.display_name` | string |  | The volume's drive letter, or its mount path when it has no letter. |
+| `sparklogs.data.disk_volumes.volume_label` | string |  | The volume's label, as File Explorer shows it. |
+| `sparklogs.data.disk_volumes.aliases` | string_array |  | Other names the volume is known by, such as its label, besides its drive letter or mount path and its GUID. |
+| `sparklogs.data.disk_volumes.drive_type` | string |  | The kind of drive Windows reports for the volume, such as `fixed` or `removable`. |
+| `sparklogs.data.disk_volumes.volume_role` | string |  | What the volume is used for: `os` (the Windows volume), `fixed_data` (another fixed volume) or `removable`. Absent when unknown; conditions that need a known role do not open then. |
+| `sparklogs.data.disk_volumes.volume_role_code` | integer |  | A numeric code for the volume's role. |
+| `sparklogs.data.disk_volumes.free_bytes` | integer | bytes | Free space on the volume. |
+| `sparklogs.data.disk_volumes.free_pct` | float | percent | Free space as a percentage of the volume's size. |
+| `sparklogs.data.disk_volumes.used_pct` | float | percent | Used space as a percentage of the volume's size. |
+| `sparklogs.data.disk_volumes.total_bytes` | integer | bytes | The volume's size. |
+| `sparklogs.data.disk_volumes.writeable` | bool |  | Whether the file system allows writes. Absent when the file system did not answer. |
+| `sparklogs.data.disk_volumes.mount_state` | string |  | Whether the volume is `mounted`, `unmounted`, `raw` (no recognized file system) or `unreadable`. Absent when the file system did not answer this reading. |
+| `sparklogs.data.disk_volumes.mount_state_code` | integer |  | A numeric code for the volume's mount state. |
+| `sparklogs.data.disk_volumes.filesystem` | string |  | The volume's file system, lowercased, such as `ntfs`. Absent when the file system did not answer this reading. |
+| `sparklogs.data.disk_volumes.bitlocker_protection` | string |  | The volume's BitLocker protection: `on`, `off`, `suspended`, or `n_a` when BitLocker does not apply to the volume. Absent when BitLocker status could not be read. |
+| `sparklogs.data.disk_volumes.bitlocker_dropped` | bool |  | Whether BitLocker protection is off or suspended. Absent when BitLocker status could not be read. |
+| `sparklogs.data.disk_volumes.bitlocker_off_age_min` | float | minutes | How long BitLocker protection has been off or suspended. Time asleep counts, since a sleeping device without protection is exposed all the same. |
+| `sparklogs.data.disk_volumes.bitlocker_was_protected` | bool |  | Whether the agent has seen BitLocker protection on for this volume since it began watching it. A volume never seen protected raises no dropped-protection condition. |
+| `sparklogs.data.disk_volumes.fill_rate_bytes_per_h` | float | bytes_per_hour | How fast the volume's free space is shrinking, from its steady rate over the last hour. Absent until the agent has an hour of readings, and when the volume is not steadily filling or has stopped filling in the last several minutes. |
+| `sparklogs.data.disk_volumes.fill_slope_sustained_h` | float | hours | How long the volume has been steadily filling. Absent when it is not. |
+| `sparklogs.data.disk_volumes.projected_full_eta_h` | float | hours | How long until the volume is full at its current fill rate. Absent when it is not steadily filling. |
+| `sparklogs.data.disk_volumes.volume_filling` | bool |  | Whether the volume is filling fast enough to matter: for a sustained stretch, every reading projected it full soon (with a longer horizon on a server) and free space dropped by a meaningful amount. Stays true for several hours after the last such reading. Only time the machine was awake and the agent watching counts. Absent when free space was not read. |
+| `sparklogs.data.disk_volumes.backing_bus_permanent` | bool |  | Whether every disk behind the volume is connected by a permanent bus, not USB. Absent while the disks behind it are unknown. |
 | `sparklogs.data.disk_volumes.resource` | object |  | What is measured (`volume_space`), its unit, and where it stands: `used` and `capacity` in bytes. |
-| `sparklogs.data.disk_volumes.projection` | object |  | The forecast derived from `resource` and a lookback window: the signed change in used bytes over the window, the window's length, and the horizon `volume_filling` projects against. |
-| `sparklogs.data.disk_volumes.departure_notice_eligible` | bool |  | Whether this volume's clean departure would be worth reporting: its role is known, its presence baseline is complete, and its backing bus is permanent, gated by whether departure notices are enabled on this host. |
-| `sparklogs.data.disk_volumes.seen_count` | integer | count | How many of the observations counted toward this volume's presence baseline actually saw it. |
-| `sparklogs.data.disk_volumes.observed_count` | integer | count | How many observations have counted toward this volume's presence baseline. |
-| `sparklogs.data.disk_volumes.presence_ratio_pct` | float | percent | `seen_count` over `observed_count`, as a percentage: the ratio the presence baseline is judged on. |
-| `sparklogs.data.disk_volumes.presence_tracked_d` | float | days | How long this volume has been tracked for its presence baseline. |
+| `sparklogs.data.disk_volumes.projection` | object |  | The fill forecast: how much used space changed over the recent lookback, how long that lookback was, and the horizon the volume is judged against for filling. |
+| `sparklogs.data.disk_volumes.departure_notice_eligible` | bool |  | Whether SparkLogs would report it if this volume went away: its role is known, the agent has seen it reliably for long enough, it is not on USB, and volume departure notices are on for this machine. |
+| `sparklogs.data.disk_volumes.seen_count` | integer | count | How many of the agent's checks while learning this volume's presence found it. |
+| `sparklogs.data.disk_volumes.observed_count` | integer | count | How many checks the agent has made while learning this volume's presence. |
+| `sparklogs.data.disk_volumes.presence_ratio_pct` | float | percent | The share of the agent's checks that found this volume, as a percentage. A volume must be seen often enough before its departure is reported. |
+| `sparklogs.data.disk_volumes.presence_tracked_d` | float | days | How long the agent has been tracking this volume's presence. |
 | `sparklogs.data.disk_volumes.observed_at` | string | timestamp | When this row's reading was taken. |
-| `sparklogs.data.disk_volumes.stale` | bool |  | True when a failed probe left a previous reading in place. Changes between stale and fresh readings produce a delta. |
+| `sparklogs.data.disk_volumes.stale` | bool |  | True when the latest reading of the volume failed and the row repeats the previous reading. A change between a repeated and a fresh reading raises a change event. |
 | `sparklogs.data.disk_volumes.volume_space_low_age_basis` | string |  | `onset`: start watched live. `observed`: already present when first noticed, making age a lower bound. `unknown_ongoing`: no meaningful onset time. |
 | `sparklogs.data.disk_volumes.volume_space_low_age_h` | float | hours | How long this condition has been open, in hours. |
 | `sparklogs.data.disk_volumes.volume_unreadable_age_basis` | string |  | `onset`: start watched live. `observed`: already present when first noticed, making age a lower bound. `unknown_ongoing`: no meaningful onset time. |

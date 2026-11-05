@@ -916,7 +916,7 @@ The wireless security handshake with an access point did not finish.
 
 **Why it matters:** The device cannot use that Wi-Fi network until the handshake succeeds.
 
-**In practice:** WLAN AutoConfig writes event 11006 to the Microsoft-Windows-WLAN-AutoConfig/Operational log when the security exchange with the access point fails. The event carries a reason code and text and names the adapter. A wrong pre-shared key, a RADIUS server rejecting the device, and certificate problems on 802.1X networks are the usual causes.
+**In practice:** WLAN AutoConfig writes event 11006 to the Microsoft-Windows-WLAN-AutoConfig/Operational log when the security exchange with the access point fails. The event carries a reason code and text, an error code (both shown in hex), and names the adapter. A wrong pre-shared key, a RADIUS server rejecting the device, and certificate problems on 802.1X networks are the usual causes.
 
 **What to check:**
 
