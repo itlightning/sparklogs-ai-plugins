@@ -53,7 +53,7 @@ The mistakes are grouped by the operating principle they violate.
 
 **Why it's wrong.** Fabricated URLs return errors when the engineer clicks them. Trust collapses immediately.
 
-**Recovery.** Always copy the `query_url` (col) field verbatim from the MCP tool response. Never construct, modify, or guess. Filling a server-provided `meta.device_url_template` (col) with values copied from a row is allowed; constructing or guessing any other URL is not.
+**Recovery.** Always copy the `query_url` (col) field verbatim from the MCP tool response. Never construct, modify, or guess. Filling a server-provided `meta.device_url_template` (col) is allowed; constructing or guessing a URL is not.
 
 ### Bare `query_id` (arg) or handle as a citation
 
@@ -61,7 +61,7 @@ The mistakes are grouped by the operating principle they violate.
 
 **Why it's wrong.** The engineer cannot click an id.
 
-**Recovery.** Cite the URL from `meta` (col) or the row: `query_url` (col), `meta.device_url` (col), or a filled `meta.device_url_template` (col). An id may sit beside its URL.
+**Recovery.** Cite the URL from `meta` (col): `query_url` (col), `meta.device_url` (col), or a filled `meta.device_url_template` (col). An id may sit beside its URL.
 
 ### Cited URL doesn't actually support the claim
 

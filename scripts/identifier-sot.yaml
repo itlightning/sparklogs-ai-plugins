@@ -126,8 +126,7 @@ cols:
   - pattern
   - pattern_hash
   - query_url
-  # Device page links in the header meta: the full URL on a one-device result,
-  # an RFC 6570 template filled from row values on results whose rows carry agent_id.
+  # Device page links in the header meta. The MCP tool reference owns how to fill the template.
   - meta
   - meta.device_url
   - meta.device_url_template
@@ -409,6 +408,7 @@ values:
     - network_buckets
     - adapters
     - connections
+    - state
   device_view_evidence_kinds:
     - unreported
     - asleep

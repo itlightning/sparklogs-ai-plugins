@@ -5,7 +5,7 @@ Installed packages do not include this file.
 Read it before adding or rewriting `src/playbooks/*.md`.
 Runtime investigation style is `src/guides/writing-voice.md`.
 Tool mechanics stay in `src/guides/mcp-tool-decision-tree.md` and the MCP server instructions.
-Do not recopy those into a playbook.
+Do not recopy those into a playbook or a skill.
 
 ## Audience
 

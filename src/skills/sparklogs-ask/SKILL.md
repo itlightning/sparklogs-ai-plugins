@@ -26,18 +26,11 @@ Tool decision tree and recipes: `guides/mcp-tool-decision-tree.md`.
 
 Answer first, then stop. Hedge precisely ("not in this window", "not checked", "insufficient evidence"). Reuse a short `external_investigation_id` (arg) until the topic changes.
 
-Cite links as URLs copied from `meta` (col) or from rows, never a bare `query_id` (arg) or investigation handle:
-
-- **One device:** link its page. A one-device result carries it as `meta.device_url` (col); cite it as returned.
-- **Devices named from a multi-device result**, including a fleet answer that narrows to one: link each device's page. Fill `meta.device_url_template` (col), when present, with `{agent_id}` from that device's row.
-- **One row carries the point:** that link may also fill `{topic}` from `sparklogs.topic` (col), `{item}` from `sparklogs.instance` (col), `{reason}` from `sparklogs.reason` (col) and `{at}` from `observed_at` (col). One or two such links, not every row.
-- **Evidence query or fleet answer:** `query_url` (col).
-
-Copy template values verbatim and leave out a variable the row lacks.
+Cite links as URLs from `meta` (col), never a bare `query_id` (arg) or investigation handle. Link the device's page when the answer is about one device, including a fleet answer that narrows to one, and each device's page when it names several. Link a specific row only when that row carries the point: one or two links, not every row. Use `query_url` (col) for the evidence query or a fleet answer. `meta.device_url` (col) is cited as returned; to fill `meta.device_url_template` (col), follow the tool's reference (`server_info` (tool) with `describe_tool` (arg)).
 
 **Questions that pick the path:** (e.g., what is on the box? what happened and when? one host or fleet? which symptom domain? is collection trustworthy?)
 
-**Principles:** empty `sparklogs.*` fields = uncurated (not a health finding); completeness from feed reports only (`agent_complete_through` (col)); default to named scope; ask only on fuzzy identity (`match_kind` (col) ties, weak match, zero hits). Fleet hunt only when serious/shared and they agree.
+**Principles:** empty `sparklogs.*` fields = uncurated (not a health finding); completeness from feed reports only (`agent_complete_through` (col)); default to named scope; ask only on fuzzy identity (`match_kind` (col) ties, weak match, zero hits). Fleet hunt only when serious/shared and they agree. A missing total on a query is not zero.
 
 Funnel, scope, LQL errors: `guides/mcp-tool-decision-tree.md`, `guides/scope-resolution.md`, `guides/lql-reference.md`. Stuck: `guides/common-mistakes.md`, `guides/stream-kinds.md`.
 
@@ -45,7 +38,7 @@ Funnel, scope, LQL errors: `guides/mcp-tool-decision-tree.md`, `guides/scope-res
 
 - Something wrong with one device or a few (slow, dropping, filling, failing) → `query_device_health` (tool), `view` (arg) `device_overview` (value), or `device_network` (value) for network trouble; then refine its result sets and read events only for the device and interval it points at (`guides/device-state-fields.md`, **Read a device view**)
 - Standing / latest event of each episode → `query_device_health` (tool), omit `view` (arg) (`fieldset` (arg) `rca` (value) for one host; `min_severity` (arg) `warning` (value) means that latest event is still warning or worse)
-- Inventory / what is on the box → same tool, `view` (arg) `latest_state` (value)
+- Inventory / what is on the box → same tool, `view` (arg) `latest_state` (value), which answers current state: do not merge changes into it yourself, and a topic reported empty is evidence of none. Follow-ups on one device's inventory: refine the overview's `state` (value) result set instead of new calls
 - Process CPU, memory or I/O trends → same tool, `view` (arg) `top_processes_over_time` (value), with `rank_by` (arg)
 - Raw device measurements over time → same tool, `view` (arg) `series` (value) with `topics` (arg); `view` (arg) `topics` (value) discovers available topics and fields
 - Episode series / RCA → same tool, `view` (arg) `event_timeline` (value), same `min_severity` (arg); peak in the window, then every in-window event of those episodes

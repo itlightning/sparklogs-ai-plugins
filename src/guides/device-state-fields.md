@@ -12,7 +12,7 @@ Agent-debug feeds describe collection problems, not the device's workload health
 | What happened on this device (or these few) over a window: CPU, memory, disk, processes, storage, episodes and changes | `device_overview` (value). See **Read a device view** below. |
 | Network trouble on this device: link, Wi-Fi, gateway, internet and DNS probes, TCP by route, connections, network events | `device_network` (value). |
 | Latest event of each episode or change occurrence in the window | Omit `view` (arg). Latest-event severity determines whether a row meets `min_severity` (arg). |
-| Latest reported inventory or subject reading | `latest_state` (value). Selects within the requested window and retains every part of the selected inventory. |
+| Current inventory state or subject reading | `latest_state` (value). Answers current state: do not merge changes into it yourself. How rows are built: `server_info` (tool) with `describe_tool` (arg). |
 | Process CPU, memory or I/O trends | `top_processes_over_time` (value). Choose `rank_by` (arg), process count, grouping and bucket width. |
 | Raw topic samples | `series` (value), with `topics` (arg). Each inventory part is a result row. |
 | Available topics and sampled fields | `topics` (value). |
@@ -100,11 +100,12 @@ A result set read after its stored rows expired is rebuilt by re-running the ori
 
 | View | Result sets |
 |---|---|
-| `device_overview` (value) | `device_summary` (value), `buckets` (value), `processes` (value), `storage` (value), `events` (value) |
+| `device_overview` (value) | `device_summary` (value), `buckets` (value), `processes` (value), `storage` (value), `events` (value), `state` (value) |
 | `device_network` (value) | `device_summary` (value), `network_buckets` (value), `adapters` (value), `connections` (value), `events` (value) |
 
 Every set leads with `agent_id` (col) and `org_id` (col), and bucketed sets with `bucket_start` (col).
 Paste a reading's `filter_lql` (col) into `refine_query_result` (tool) with that set's `query_id` (arg).
+For follow-ups on one device's inventory (is a service running, is a product installed, which drivers are loaded), refine the overview's `state` (value) set instead of new calls.
 A ratio or percent column sits beside its numerator and denominator: to combine buckets, sum both and divide.
 An average of a ratio column weights a near-idle bucket the same as a busy one.
 
@@ -139,22 +140,14 @@ The org can span several sites: compare only the devices at the same site. Sever
 
 ## Report installed software
 
-1. Request `latest_state` (value) for the installed-products topic and inventory kind, using a window that covers the expected inventory cadence.
-2. Refine with item-aligned grouping: device, inventory epoch, observation time, product name, version and publisher.
+1. Request `latest_state` (value) for the installed-products topic, or refine the overview's `state` (value) set when one device's overview is already in hand.
+2. Refine with item-aligned grouping: device, product name, version and publisher.
    Keep version and publisher on the same product item. Independent maxima can combine values from different products.
 3. Label results with the inventory observation time.
    Compare report devices with the scoped device list when answering fleet coverage or absence questions.
-   Missing inventory means status unknown. Identify stale inventories against the freshness the task requires.
+   A topic reported empty is evidence of none. A device with no report for the topic means status unknown. Identify stale inventories against the freshness the task requires.
 
-Inventories can span several parent rows.
-Those parts share `sparklogs.epoch.id` (col) and `observed_at` (col).
-`sparklogs.inventory.part_number` (col) and `sparklogs.inventory.total_parts` (col) identify the parts.
-If completeness matters or parts appear missing, inspect that metadata across all returned pages before claiming an item is absent.
-Item expansion can hide an empty part, so inspect parent rows for that check.
-This is not a required extra call for every report.
-
-`include_changes` (arg) adds a bounded list of later changes, at most 20 per device.
-It does not apply those changes to reconstruct a current inventory.
+`include_changes` (arg) lists who or what moved a row. Do not apply those changes to the rows.
 Make absence claims only for devices whose inventories are sufficiently current and complete for the question.
 
 ## Interpret event identity and freshness

@@ -207,13 +207,7 @@ Canonical template (field definitions, right-vs-wrong examples): `references/out
 Every factual claim cites a `query_url` (col) from the MCP response; record `query_id` (arg) beside it when several queries share a window. URLs scope org and time in explore, not your cached filter: copy verbatim. Quote `message` (LQL) bytes exactly when a Finding rests on log text. No query, no claim, or use `insufficient_evidence` (value).
 A Finding from a device view cites the reading's `query_url` (col) and names the result set and `filter_lql` (col) that return its rows; cite the refine's `query_url` (col) when you read those rows.
 
-Links are URLs copied from `meta` (col) or from rows, never a bare `query_id` (arg) or investigation handle. A Finding about a device also links that device's page; a Finding naming several devices links each:
-
-- **One-device result:** `meta.device_url` (col), as returned.
-- **Multi-device result**, including a fleet query that narrows to one device: fill `meta.device_url_template` (col), when present, with `{agent_id}` from that device's row.
-- **One row carries the point:** that link may also fill `{topic}` from `sparklogs.topic` (col), `{item}` from `sparklogs.instance` (col), `{reason}` from `sparklogs.reason` (col) and `{at}` from `observed_at` (col). One or two such links per Finding, not every row.
-
-Copy template values verbatim and leave out a variable the row lacks. The evidence query and a fleet answer cite `query_url` (col).
+Links are URLs from `meta` (col), never a bare `query_id` (arg) or investigation handle. A Finding about a device also links that device's page, including a fleet query that narrows to one device; a Finding naming several devices links each. Link a specific row only when that row carries the point: one or two links per Finding, not every row. The evidence query and a fleet answer cite `query_url` (col). `meta.device_url` (col) is cited as returned; to fill `meta.device_url_template` (col), follow the tool's reference (`server_info` (tool) with `describe_tool` (arg)).
 
 Right/wrong shapes: `references/output-template.md`.
 
@@ -238,11 +232,11 @@ A device view's `not_measured` (col) and unreported seconds name on-endpoint gap
 
 **Funnel before raw:** scope lightly, aggregate to narrow, then `query_logs` (tool) only over the narrowed slice. Investigation discipline (bounded discovery, aggregate before detail, cache before re-query) is above; per-tool tiers and recipes: `guides/mcp-tool-decision-tree.md`.
 
-**Rows returned are not the population.** Read matched TOTAL and `last_event_at` (col) before any how-much / how-long claim.
+**Rows returned are not the population.** Read matched TOTAL and `last_event_at` (col) before any how-much / how-long claim. A missing total is not zero.
 
 **Query shape (lightest first):** (e.g., whose scope? what arrived? what's on the box? what's noisy and where? what do the events say?)
 1. **Scope and coverage:** `resolve_scope` (tool), `list_sources` (tool); then `query_device_health` (tool) when agents are in scope; `query_scope_activity` (tool) when the estate is unfamiliar.
-2. **Device health first** when the ticket is about one device or a few: `view` (arg) `device_overview` (value) or `device_network` (value) over the complaint window, then refine the result sets it points at. Narrow events to the devices and intervals it names (`guides/device-state-fields.md`, **Read a device view**).
+2. **Device health first** when the ticket is about one device or a few: `view` (arg) `device_overview` (value) or `device_network` (value) over the complaint window, then refine the result sets it points at. Narrow events to the devices and intervals it names (`guides/device-state-fields.md`, **Read a device view**). Follow-ups on one device's inventory refine the overview's `state` (value) result set instead of new calls. `latest_state` (value) answers current state: do not merge changes into it yourself, and a topic reported empty is evidence of none.
 3. **Pattern mining:** `query_event_counts_by_severity` (tool) and `describe_pattern` (tool) before citing hashes.
 4. **Raw events (last resort):** one broad `query_logs` (tool) slice, then `refine_query_result` (tool) (not another backing query). `list_fields` (tool) is rare.
 
