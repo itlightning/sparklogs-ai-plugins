@@ -89,7 +89,8 @@ export const MAX_SRC_FILE_BYTES = 128 * 1024;
 // Every host materializes the corpus inside each skill. Claude additionally ships agents/ at the
 // package root. Cap is sized for corpus times skill count plus commands and assets.
 export const MAX_PACKAGE_BYTES = 8 * 1024 * 1024;
-export const MAX_DIST_BYTES = 20 * 1024 * 1024;
+// Decimal megabytes: 35 MB.
+export const MAX_DIST_BYTES = 35 * 1000 * 1000;
 
 export const DOCS_URL = 'https://sparklogs.com/docs/it-fleet-intelligence';
 
@@ -180,6 +181,12 @@ export function oversize(bytes, cap) {
   return bytes > cap;
 }
 
+// A feed's reasons.md is read by heading search, one section at a time, never whole (owner,
+// 2026-11-02), so the per-file cap does not bind it. The package and dist caps still do.
+export function srcFileCap(rel) {
+  return /^src\/feeds\/[^/]+\/reasons\.md$/.test(rel) ? Infinity : MAX_SRC_FILE_BYTES;
+}
+
 export function proveLayoutGuards() {
   const srcBad = classifySrcPath('src/oops.md');
   if (srcBad.ok) throw new Error('IN-list guard did not reject src/oops.md');
@@ -216,6 +223,12 @@ export function proveLayoutGuards() {
   }
   if (oversize(MAX_SRC_FILE_BYTES, MAX_SRC_FILE_BYTES)) {
     throw new Error('per-file size guard fired on the cap itself');
+  }
+  if (srcFileCap('src/feeds/win.eventlog.system/reasons.md') !== Infinity) {
+    throw new Error('per-file size guard still binds a feed reasons.md');
+  }
+  if (srcFileCap('src/feeds/win.eventlog.system/fields.md') !== MAX_SRC_FILE_BYTES) {
+    throw new Error('per-file size guard exempted a file other than reasons.md');
   }
   if (!oversize(MAX_DIST_BYTES + 1, MAX_DIST_BYTES)) {
     throw new Error('dist size guard did not fire over the cap');

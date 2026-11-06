@@ -4,11 +4,11 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { assertRepoRoot } from './assert-repo-root.mjs';
 import {
-  MAX_SRC_FILE_BYTES,
   classifySrcPath,
   extraFeedDirs,
   oversize,
   proveLayoutGuards,
+  srcFileCap,
 } from './dist-layout.mjs';
 import { MODULES } from './generated-references.config.mjs';
 import { listNoncanonicalRefs, proveHostTransforms } from './host-transforms.mjs';
@@ -38,8 +38,9 @@ async function lintSrc() {
     const verdict = classifySrcPath(file.rel);
     if (!verdict.ok) failures.push(verdict.reason);
     const stat = await fs.stat(file.full);
-    if (oversize(stat.size, MAX_SRC_FILE_BYTES)) {
-      failures.push(`${file.rel} is ${stat.size} bytes (cap ${MAX_SRC_FILE_BYTES})`);
+    const cap = srcFileCap(file.rel);
+    if (oversize(stat.size, cap)) {
+      failures.push(`${file.rel} is ${stat.size} bytes (cap ${cap})`);
     }
     if (file.rel.endsWith('.md')) {
       const text = await fs.readFile(file.full, 'utf8');

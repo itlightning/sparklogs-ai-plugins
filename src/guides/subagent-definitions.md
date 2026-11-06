@@ -38,7 +38,7 @@ For delegated bulk-summarization work, use **the fastest, most lightweight moder
 ```yaml
 findings:
   - timestamp_utc: <ISO>
-    kind: <inventory | monitor | delta | agent_op | config_change | malformed>
+    kind: <inventory | monitor | occurrence | delta | agent_op | config_change | malformed>
     severity: <ok | warning | error | critical>
     pattern_hash: <if applicable>
     summary: <one-sentence factual statement>
@@ -133,6 +133,7 @@ cluster_interpretations:
 - **Hypothesis evaluation.** "Does the evidence support hypothesis H?" - orchestrator's job (and `sparklogs-analyze-cause`'s job for cause hypotheses).
 - **Output template assembly.** Orchestrator assembles Findings, Executive Summary, What Was Not Checked.
 - **Citation discipline.** Orchestrator owns ensuring every Finding cites a query_url; subagents pass through the URL but don't author the Findings.
+- **Reading a device view.** A `device_overview` (value) or `device_network` (value) reading is already a bounded per-device summary with its pivots; read it yourself. A large page of one of its result sets (thousands of `processes` (value) or `connections` (value) rows) is bulk data and can go to `sparklogs-log-summarizer` with the focusing question the reading raised.
 
 ---
 

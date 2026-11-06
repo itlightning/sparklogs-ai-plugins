@@ -226,12 +226,14 @@ say in your findings that you were reading uncurated text.
 - `fields/topic-collector-health.md`
 - `fields/topic-crash-dump-config.md`
 - `fields/topic-crashes.md`
+- `fields/topic-devices.md`
 - `fields/topic-disk-volumes.md`
 - `fields/topic-drivers.md`
 - `fields/topic-feed-health.md`
 - `fields/topic-installed-products-summary.md`
 - `fields/topic-installed-products.md`
 - `fields/topic-kernel-crashes.md`
+- `fields/topic-kernel-drivers.md`
 - `fields/topic-lifecycle.md`
 - `fields/topic-network-adapter-io.md`
 - `fields/topic-network-adapters.md`
@@ -245,6 +247,7 @@ say in your findings that you were reading uncurated text.
 - `fields/topic-storage-devices.md`
 - `fields/topic-storage-io.md`
 - `fields/topic-system-info.md`
+- `fields/topic-top-kernel-memory.md`
 - `fields/topic-top-network-connections.md`
 - `fields/topic-top-processes.md`
 - `fields/topic-volume-map.md`

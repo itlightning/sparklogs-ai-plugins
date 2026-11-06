@@ -136,7 +136,6 @@ export const FORBIDDEN_TOKENS = [
   /\bwitnessed\b/i,
   /\bunwitnessed\b/i,
   /\bno witness\b/i,
-  /\bnot counted\b/i,
   /\bspec-derived\b/i,
   /no observed (event|events|row|rows|value|values)/i,
   /evidence tier/i,

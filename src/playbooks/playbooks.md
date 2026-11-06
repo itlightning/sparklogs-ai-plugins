@@ -8,18 +8,25 @@ Widen: what subsources this host actually emits (`query_scope_activity` (tool) /
 WEL classic: `provider_name` (LQL) before `pattern` (LQL). File logs: `origin` (LQL). Device state: `query_device_health` (tool) for latest-in-window; logs group `sparklogs.kind` (LQL) / `sparklogs.topic` (LQL) / `sparklogs.reason` (LQL).
 Curated `service` (LQL) / `sparklogs.reason` (LQL) filters miss uncurated raw text and sibling providers; look there before you stop.
 Playbooks assume MCP fluency: LQL, field meaning, and claim strength, not tool walkthroughs.
+A symptom that lives on a device starts from device health (a device view, a condition or the latest state) and narrows events to the device and interval that reading named.
 
 <!-- BEGIN GENERATED INDEX:playbooks -->
 | Symptom | File |
 |---|---|
+| One application slow or stalling over the network | `playbooks/application-network-stall.md` |
+| App slow over VPN | `playbooks/application-network-stall.md` |
 | Backup job failed | `playbooks/backup-failure.md` |
 | BitLocker recovery | `playbooks/bitlocker-recovery.md` |
 | Certificate expiry | `playbooks/certificate-expiry.md` |
 | Directory replication | `playbooks/directory-replication-failure.md` |
 | Disk full or filling | `playbooks/disk-full-or-filling.md` |
 | Memory or handle leak | `playbooks/memory-or-handle-leak.md` |
+| Internet down, slow or dropping | `playbooks/network-connectivity.md` |
+| Wi-Fi drops | `playbooks/network-connectivity.md` |
 | RAID / array degraded | `playbooks/raid-or-storage-degraded.md` |
 | RMM connectivity | `playbooks/rmm-connectivity.md` |
+| Slow or freezing PC | `playbooks/slow-device.md` |
+| Slow server | `playbooks/slow-device.md` |
 | Slow logon | `playbooks/slow-logon.md` |
 | Windows Update / patch failure | `playbooks/windows-update-failure.md` |
 | VSS / shadow copies / backup plumbing | `playbooks/windows-vss.md` |

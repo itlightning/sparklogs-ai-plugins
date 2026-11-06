@@ -11,9 +11,12 @@ Writers, snapshots, or shadow-copy rotation with a job that looks fine: `playboo
 VSS plumbing errors are not a job verdict.
 Two backup products competing for snapshots show on device-health inventory (`fieldset=rca`), nowhere else.
 
-**Queries.**
+**Device health first.** `device_overview` (value) over the failed job's window.
+Header coverage says whether the device was awake for it; a job window spent asleep or powered off is its own answer.
+`events` (col) carry `vss_writer_failed` (value), `vss_snapshots_failing_for_space` (value) and the space-low conditions; disk heat spans and `top_processes` (col) show whether the backup ran into a busy or slow disk.
+The device-health reading describes the machine around the job; the job's outcome still comes from the vendor's events.
 
-Vendor / Windows Backup errors in the failure window:
+**Events, for what health named.** Vendor / Windows Backup errors in the failure window:
 
 ```
 source = "<host>" AND severity >= 17

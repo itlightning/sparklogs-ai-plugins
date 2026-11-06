@@ -1,6 +1,7 @@
 # Device state: inventories, trends and observation limits
 
-Start device CPU, RAM, disk, software and condition questions with `query_device_health` (tool).
+Start device CPU, RAM, disk, network, software and condition questions with `query_device_health` (tool).
+For one device or a few, start with a device view (next section) and drill down from what it points at.
 For a ticket about another system or application, use device health where it helps interpret the evidence.
 Agent-debug feeds describe collection problems, not the device's workload health.
 
@@ -8,8 +9,10 @@ Agent-debug feeds describe collection problems, not the device's workload health
 
 | Question | View |
 |---|---|
+| What happened on this device (or these few) over a window: CPU, memory, disk, processes, storage, episodes and changes | `device_overview` (value). See **Read a device view** below. |
+| Network trouble on this device: link, Wi-Fi, gateway, internet and DNS probes, TCP by route, connections, network events | `device_network` (value). |
 | Latest event of each episode or change occurrence in the window | Omit `view` (arg). Latest-event severity determines whether a row meets `min_severity` (arg). |
-| Latest reported inventory or subject reading | `latest_state` (value). Selects within the requested window and retains every part of the selected inventory. |
+| Current inventory state or subject reading | `latest_state` (value). Answers current state: do not merge changes into it yourself. How rows are built: `server_info` (tool) with `describe_tool` (arg). |
 | Process CPU, memory or I/O trends | `top_processes_over_time` (value). Choose `rank_by` (arg), process count, grouping and bucket width. |
 | Raw topic samples | `series` (value), with `topics` (arg). Each inventory part is a result row. |
 | Available topics and sampled fields | `topics` (value). |
@@ -17,7 +20,7 @@ Agent-debug feeds describe collection problems, not the device's workload health
 
 For current conditions, use a window of days: an open episode with no event in a narrow window will be absent.
 Latest state is an observation, not a live inspection of the endpoint.
-Device-health handles re-run against current data when refined.
+Row and trend handles page a stored result when refined; `group_by_reason` (arg) handles read current data.
 
 For condition rows, `fieldset` (arg) `rca` (value) carries investigation detail, `fleet` (value) carries lifecycle and observation limits, and `minimal` (value) is a compact listing.
 The live parameter description lists their membership.
@@ -27,24 +30,126 @@ An unfamiliar kind can pass an explicit `kinds` (arg) filter so newly introduced
 If a view, fieldset or aggregation needs more explanation, call `server_info` (tool) with `describe_tool: "query_device_health"`.
 For field units and meanings, open `fields/INDEX.md`, then the relevant topic or family table.
 
+## Read a device view
+
+`device_overview` (value) and `device_network` (value) answer for the devices named in `agent_ids` (arg): 1 to 25 agent ids (the `id` (col) of the agent rows `resolve_scope` (tool) returned), over a window of at most 30 days and 1 hour.
+
+```json
+{
+  "view": "device_network",
+  "agent_ids": ["<agent id>"],
+  "query_scope": {"org_ids": ["<org id>"]},
+  "start": "2026-10-20T00:00:00Z",
+  "end": "2026-10-27T00:00:00Z",
+  "external_investigation_id": "ticket-4781-wifi-drops"
+}
+```
+
+Two optional parameters.
+`bucket` (arg) is one ladder width that fits the window (5m, 10m, 15m, 20m, 30m, 1h, 2h, 3h or 4h); omit it and the view picks one.
+`fieldset` (arg) `detail` (value) gives every result set its wider column list.
+The views refuse every other filter parameter; filter, order and page their result sets with `refine_query_result` (tool).
+For a different bucket width, call the view again; refine does not regroup the stored rows into wider buckets.
+
+Up to 5 devices get a full reading each.
+With 6 to 25 devices, each device gets its `device_summary` (value) row and a few notable changes.
+Use that light form to choose the devices and intervals worth a full reading, then call again with at most 5.
+
+### The reading, part by part
+
+1. `header` (col): window, `bucket_s` (col), coverage, `measured` (col) and `not_measured` (col).
+   Coverage splits the window into observed, asleep, powered-off and unreported seconds.
+   Do not qualify an answer on observed share at 89 percent or above; a few seconds or one missing sample change nothing for the reader.
+   Asleep and powered-off time are device state, not coverage: state them when they bear on the question.
+   Unreported time is unknown, not quiet, and limits every claim about that stretch.
+   `not_measured` (col) lists the lanes with no reading in this window, then what the agent does not measure: application response time, per-process disk latency, UDP, and what the far end of a connection saw.
+   Carry the entries that matter for the ticket into WHAT WAS NOT CHECKED.
+2. `device_network` (value) only: `outages` (col), one row per probe outage (see **Network outages** below).
+3. `evidence` (col): witnesses with interval, value, unit and a `filter_lql` (col) over the result set named in `result` (col).
+   `support` (col) is the number of rows that filter returns.
+   Both views carry `unreported` (value), `asleep` (value), `powered_off` (value), `physical_link_down` (value), `wifi_drops` (value), `ncsi_internet_lost` (value) and `dns_resolution_timeouts` (value).
+   `device_overview` (value) adds `probe_down` (value) per probe role.
+   `device_network` (value) adds `probe_blips` (value), `network_changed` (value), `occurrences` (value) (device-state networking occurrences, one row per reason) and `tcp_timeout_connections_total` (value) per route class.
+   An outage that stopped traffic can leave no heat at all: read evidence even when no heat span exists.
+4. `domains` (col): the window in coarse buckets with each domain's reading and band.
+   `heat_spans` (col): stretches where a domain's heat was above `ok` (value), found at `bucket_s` (col).
+   Bands are `ok` (value), `warm` (value), `hot` (value) and `very_hot` (value).
+   Each span carries its peak band and time, the `driver` (col) reading that set the peak and its value, where the peak sat against the device's typical range from before the window (`below` (value), `within` (value), `above` (value)), up to 3 contributors with their share, and the episodes and changes that overlapped it.
+   A span says when a measure ran high, not why. Contributors ran at the same time and are not proven causes.
+   Disk heat is the busiest disk's busy time, pushed up by its queue depth. Latency is not an input, so slow I/O at moderate busy time can leave no disk span.
+   Read `disk_latency_ms` (col) in `domains` (col) and `latency_ms_p90_10s` (col) in the `storage` (value) result set for latency. A span names no disk: `busiest_disk` (col) in the `buckets` (value) result set does.
+   An incident shorter than `bucket_s` (col) shows in evidence, outages and events, which keep their own times.
+5. `top_processes` (col) (`device_overview` (value)) or `top_connections` (col) (`device_network` (value)): window figures over the observations the agent retained.
+   The agent reports its top processes and connections per window, so these figures are lower bounds and a short burst can be missing.
+   `window_rank_by` (col) names the rankings a row led. It is empty for a row kept further down a ranking.
+   A `top_processes` (col) row combines every instance of one executable. A `top_connections` (col) row is one connection, with its PID.
+6. `events` (col): the most relevant episodes and changes, open episodes first.
+   An episode appears only when it had an event inside the window. One open since before the start with no event in the window is absent, so use a window of days for what is open now.
+   Changes also cover the 48 hours before the window.
+   Occurrences are not in this part. They are rows of the `events` (value) result set, which also carries the boot, sleep and shutdown marks. On `device_network` (value) that set holds only networking rows and those marks.
+7. `next_reads` (col): calls with their arguments ready to paste beside your `external_investigation_id` (arg).
+
+A list that left rows out counts them in `omitted` (col).
+Timestamps are RFC3339 UTC.
+
+### Result sets
+
+The reading itself is not refinable.
+`summary.refinable_results` (col) lists the result sets behind it, each with its own `query_id` (col), row and column counts, and a `refine_example` (col).
+An entry marked `unavailable` (col) failed to build and is not an empty set; say so instead of reading it as zero rows.
+`truncated` (col) appears only when a set was cut, and names which rows are missing.
+A result set read after its stored rows expired is rebuilt by re-running the original call on current data. Refine it as usual, but late-arriving data can change its rows.
+
+| View | Result sets |
+|---|---|
+| `device_overview` (value) | `device_summary` (value), `buckets` (value), `processes` (value), `storage` (value), `events` (value), `state` (value) |
+| `device_network` (value) | `device_summary` (value), `network_buckets` (value), `adapters` (value), `connections` (value), `events` (value) |
+
+Every set leads with `agent_id` (col) and `org_id` (col), and bucketed sets with `bucket_start` (col).
+Paste a reading's `filter_lql` (col) into `refine_query_result` (tool) with that set's `query_id` (arg).
+For follow-ups on one device's inventory (is a service running, is a product installed, which drivers are loaded), refine the overview's `state` (value) set instead of new calls.
+A ratio or percent column sits beside its numerator and denominator: to combine buckets, sum both and divide.
+An average of a ratio column weights a near-idle bucket the same as a busy one.
+
+Upload resend share over a span, from `network_buckets` (value):
+
+```json
+{
+  "query_id": "<network_buckets query_id>",
+  "filter_lql": "agent_id=\"<agent id>\" AND bucket_start>=\"2026-10-22T13:00:00Z\" AND bucket_start<\"2026-10-22T15:00:00Z\"",
+  "aggregate": [
+    {"fn": "sum", "col": "tcp_internet_bytes_out_retrans", "as": "resent"},
+    {"fn": "sum", "col": "tcp_internet_bytes_out", "as": "sent"}
+  ],
+  "external_investigation_id": "ticket-4781-wifi-drops"
+}
+```
+
+Then report `resent` (other) over `sent` (other) as the share.
+
+### Network outages
+
+On `device_network` (value), each `outages` (col) row is one probe role (gateway, internet or DNS) failing over an interval.
+`state` (col) `confirmed` (value) means the agent counted confirmed down seconds (`down_s` (col), and per bucket in `down_by_bucket` (col)).
+`pending` (value) is a run of failed probes that ended with no answer and no confirmed down seconds. A run ends at the window's end, and also at a change of network, sleep, power-off or a link-down. Report failed probes, not an outage.
+Failures that a later probe answered before any down time was confirmed are `probe_blips` (value) evidence, not outage rows.
+On `device_overview` (value), a probe role listed in `not_measured` (col) had no reading in the window. That path was not measured, which says nothing about whether it was up.
+On `device_network` (value), a gateway that ignores ping still lists its attempts, so its role counts as measured. The signs are an outage whose `ownership` (col) reads not placed, and `gateway_probe_attempts` (col) of 0 in `network_buckets` (value).
+`ownership` (col) says where an outage sits, from the device's own evidence: its own link, between it and its gateway, beyond the gateway, or at the DNS resolver. It reads not placed when no gateway probe was counted during the outage.
+Beyond the gateway covers both the router's internet connection and the ISP. Endpoint data cannot tell those apart, so do not name the ISP as the cause.
+`compare_start` (col) and `compare_end` (col) bound a comparison: the matching `next_reads` (col) entry reads every device in the org over those buckets.
+The org can span several sites: compare only the devices at the same site. Several devices down together can also mean the probe target itself was down.
+
 ## Report installed software
 
-1. Request `latest_state` (value) for the installed-products topic and inventory kind, using a window that covers the expected inventory cadence.
-2. Refine with item-aligned grouping: device, inventory epoch, observation time, product name, version and publisher.
+1. Request `latest_state` (value) for the installed-products topic, or refine the overview's `state` (value) set when one device's overview is already in hand.
+2. Refine with item-aligned grouping: device, product name, version and publisher.
    Keep version and publisher on the same product item. Independent maxima can combine values from different products.
 3. Label results with the inventory observation time.
    Compare report devices with the scoped device list when answering fleet coverage or absence questions.
-   Missing inventory means status unknown. Identify stale inventories against the freshness the task requires.
+   A topic reported empty is evidence of none. A device with no report for the topic means status unknown. Identify stale inventories against the freshness the task requires.
 
-Inventories can span several parent rows.
-Those parts share `sparklogs.epoch.id` (col) and `observed_at` (col).
-`sparklogs.inventory.part_number` (col) and `sparklogs.inventory.total_parts` (col) identify the parts.
-If completeness matters or parts appear missing, inspect that metadata across all returned pages before claiming an item is absent.
-Item expansion can hide an empty part, so inspect parent rows for that check.
-This is not a required extra call for every report.
-
-`include_changes` (arg) adds a bounded list of later changes, at most 20 per device.
-It does not apply those changes to reconstruct a current inventory.
+`include_changes` (arg) lists who or what moved a row. Do not apply those changes to the rows.
 Make absence claims only for devices whose inventories are sufficiently current and complete for the question.
 
 ## Interpret event identity and freshness
@@ -98,7 +203,7 @@ The episode occurrence counter is not a list of change events.
 Correlate a condition with underlying logs using its subject, reason and time window.
 A reported change alone does not establish causation.
 
-Name a changed item with `sparklogs.config_change.target_name` (col) when present; group and join on `sparklogs.config_change.target` (col), since the name is display only.
+Name a changed item with `sparklogs.config_change.target_name` (col) when present; group and join on `sparklogs.config_change.type` (col) with `sparklogs.config_change.target` (col), since a target is unique only within its type and the name is display only.
 On an inventory, `sparklogs.observes_config_changes` (col) false means the agent cannot report observed changes on that topic.
 No change rows then says nothing about whether anything changed.
 

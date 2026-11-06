@@ -42,6 +42,7 @@ Absence is a missing promotion, not a missing event.
 
 ## Device state vs events
 
+"What happened on this device" is `query_device_health` (tool) with `view` (arg) `device_overview` (value), or `device_network` (value) for network trouble.
 "Latest event of each episode in this window" is `query_device_health` (tool) with `view` (arg) omitted.
 "What is on the box / how it last read" is the same tool with `view` (arg) `latest_state` (value).
 Episode series, or repeating change points, is the same tool with `view` (arg) `event_timeline` (value). Process trends use `view` (arg) `top_processes_over_time` (value).
