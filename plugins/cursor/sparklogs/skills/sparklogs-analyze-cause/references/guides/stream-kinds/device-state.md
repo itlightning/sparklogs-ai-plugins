@@ -1,5 +1,6 @@
 # Kind: device state
 
+**One device or a few, over a window:** `query_device_health` `view` (arg) `device_overview` or `device_network`. How to read the answer: `../device-state-fields.md` (**Read a device view**).
 **Standing / latest of each episode:** `query_device_health`, omit `view` (arg) (`fieldset` (arg) = `rca` for one host).
 Columns: the response `schema.columns` (col) or the tool description. Episode and observation limits: `../device-state-fields.md`.
 A default-view row is the latest event of each episode that emitted inside the requested window, not the latest event of each subject.
@@ -18,6 +19,7 @@ Start at `../../fields/INDEX.md`, then open the topic table for its exact names,
 
 | Question | Tool |
 |---|---|
+| What happened on this device over a window (performance, storage, processes, network, episodes and changes) | `query_device_health`, `view` (arg) `device_overview` or `device_network`, then refine its result sets |
 | Standing conditions / latest event of each episode in this window | `query_device_health`, omit `view` (arg) (`fieldset` (arg) = `rca` for one host). Episode and observation limits: `../device-state-fields.md` |
 | What is on the box / how it last read | `query_device_health`, `view` (arg) `latest_state` |
 | Process CPU, memory or I/O trends | `query_device_health`, `view` (arg) `top_processes_over_time`. See the chart recipe below. |

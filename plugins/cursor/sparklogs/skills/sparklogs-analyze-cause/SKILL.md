@@ -31,7 +31,7 @@ Tool decision tree and recipes: `references/guides/mcp-tool-decision-tree.md`.
 
 ## Section 2. Trust principles
 
-Augment, don't replace: hypotheses are for the engineer to choose. Cite prior Findings and any new `query_url` (col). Calibrate confidence to evidence (usually looser than the factual summary). Carry forward prior not-checked items. Reuse `external_investigation_id` (arg).
+Augment, don't replace: hypotheses are for the engineer to choose. Cite prior Findings and any new `query_url` (col), and link each device you name by its device page (link rules: `sparklogs-investigate` Section 5). Calibrate confidence to evidence (usually looser than the factual summary). Carry forward prior not-checked items. Reuse `external_investigation_id` (arg).
 
 ---
 
@@ -55,7 +55,7 @@ From prior Findings: research and propose explanations, cluster, rank by corrobo
 
 Prior summary is the default evidence. Add MCP calls only when a discriminator needs data the summary lacks. (e.g., One host or fleet? why is this population diff? what is the device's health right now?) Same investigation discipline and tool tiers as `sparklogs-investigate` (`references/guides/mcp-tool-decision-tree.md`).
 
-**Typical triggers:** fleet spread (`group_by` (arg) on `source` (LQL) or ladder fields); cross-tab when two nouns matter (`group_by` (arg) with 2-3 fields); standing state (`query_device_health`); pattern text/spread (`describe_pattern`); narrow time window not in the prior run.
+**Typical triggers:** fleet spread (`group_by` (arg) on `source` (LQL) or ladder fields); cross-tab when two nouns matter (`group_by` (arg) with 2-3 fields); standing state (`query_device_health`); what the device did around a Finding (a device view, `view` (arg) `device_overview` or `device_network`, then its result sets); pattern text/spread (`describe_pattern`); narrow time window not in the prior run.
 
 **Skip when:** prior Findings already suffice, check is off-endpoint (flag in hypothesis), or scope expansion needs engineer permission. Reuse `external_investigation_id` (arg) and prior caches via `refine_query_result` when possible.
 
@@ -76,7 +76,8 @@ Stay in role: candidates with confirm/refute, not a single asserted cause. Stron
 If server instructions are missing or terminology is unclear, call `server_info` with `include_instructions: true`.
 For detailed views, fieldsets, aggregation or paging, call it with `describe_tool` (arg) naming the tool.
 Use these references when the visible description leaves a question, not on every call.
-Process charts use `query_device_health` with `view` (arg) `top_processes_over_time`.
+A question about one device or a few starts with `query_device_health` `view` (arg) `device_overview` or `device_network`: read `references/guides/device-state-fields.md` (**Read a device view**).
+Process charts use the same tool with `view` (arg) `top_processes_over_time`.
 
 ## Curated data (read this before opening reference files)
 
@@ -145,7 +146,7 @@ Per-feed closed vocabularies. **Grep** the code, constant, or `##` heading; neve
 | Who changed what (Security) | `references/themes/windows-security-and-audit.md` |
 | Defender | `references/themes/endpoint-protection.md` |
 | App / System crashes and services | `references/themes/windows-operational-events.md` |
-| CPU, RAM, disk, installed software, monitors | `references/themes/device-health-and-state.md` |
+| CPU, RAM, disk, network, installed software, monitors | `references/themes/device-health-and-state.md` |
 | Named backup product (Veeam etc.): installed products. Not operational events. | `references/themes/device-health-and-state.md` |
 
 | Feed | What | Path |

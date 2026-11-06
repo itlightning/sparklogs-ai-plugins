@@ -8,7 +8,7 @@ These sets are closed: a value outside them leaves its field unset rather than b
 
 ## `win_status_codes`
 
-341 row(s), 65 carrying a token.
+353 row(s), 65 carrying a token.
 
 | Code | Token | Meaning | Constant |
 |---|---|---|---|
@@ -94,7 +94,7 @@ These sets are closed: a value outside them leaves its field unset rather than b
 | `0x10` | `preauth_type_unsupported` | the offered preauthentication type is not supported | `KDC_ERR_PADATA_TYPE_NOSUPP` |
 | `0x12` | `client_revoked` | the client account is disabled expired or locked out | `KDC_ERR_CLIENT_REVOKED` |
 | `0x17` | `key_expired` | the account password has expired | `KDC_ERR_KEY_EXPIRED` |
-| `0x18` | `preauth_failed` | preauthentication failed usually a wrong password | `KDC_ERR_PREAUTH_FAILED` |
+| `0x18` | `preauth_failed` | preauthentication failed; usually a wrong password | `KDC_ERR_PREAUTH_FAILED` |
 | `0x1f` | `integrity_check_failed` | message integrity check failed | `KRB_AP_ERR_BAD_INTEGRITY` |
 | `0x20` | `ticket_expired` | the presented ticket has expired | `KRB_AP_ERR_TKT_EXPIRED` |
 | `0x22` | `replay_detected` | the request repeats one the KDC already served | `KRB_AP_ERR_REPEAT` |
@@ -228,7 +228,7 @@ Library-wide closed sets, so the same token means the same thing on every data f
 
 - `kerberos`: Kerberos protocol result code (KDC_ERR_*), a protocol space of its own, not an NTSTATUS
 - `ntstatus`: Windows NTSTATUS code (kernel and security subsystem)
-- `sspi`: Windows SSPI security result (SEC_E_*/SEC_I_*), the security-package half of HRESULT facility 9
+- `sspi`: Windows SSPI security result (SEC_E_*/SEC_I_*), the security-package block of HRESULT facility 9
 
 ### `sparklogs.running_as.kind`
 

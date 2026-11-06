@@ -5,9 +5,9 @@ Full inventory every 6 hours. Supported changes are reported when the agent obse
 
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
-| `sparklogs.data.windows_update_agent_state.updates_paused` | bool |  | Whether Windows Update is currently paused on this host. |
-| `sparklogs.data.windows_update_agent_state.updates_paused_age_h` | float | hours | How long the pause has been in force. Absent when the pause start stamp is present but cannot be parsed, which leaves the posture on the row and the duration unclaimed. |
-| `sparklogs.data.windows_update_agent_state.last_scan_age_h` | float | hours | How long since Windows Update last completed a scan for updates. |
-| `sparklogs.data.windows_update_agent_state.wu_never_searched` | bool |  | Whether Windows Update reports it has never searched for updates: true when it answered with no last-search date and the registry holds none either, which reads as a stale scan with no age. False when the last scan is dated. Absent when the scan time could not be read. |
-| `sparklogs.data.windows_update_agent_state.wuauserv_start_type` | string |  | The start type configured for the Windows Update service: `boot`, `system`, `auto`, `auto_delayed`, `manual` or `disabled`, or `missing` when the service is not installed. Absent when the service table or its configuration could not be read, never a reassuring default. |
-| `sparklogs.data.windows_update_agent_state.patch_updates_paused_basis` | string |  | `onset`: witnessed start. `observed`: already present when first seen, making age a lower bound. `unknown_ongoing`: no meaningful onset time. |
+| `sparklogs.data.windows_update_agent_state.updates_paused` | bool |  | Whether Windows Update is paused on this machine. |
+| `sparklogs.data.windows_update_agent_state.updates_paused_age_h` | float | hours | How long Windows Update has been paused. Absent when the pause start time could not be read. |
+| `sparklogs.data.windows_update_agent_state.last_scan_age_h` | float | hours | How long since Windows Update last finished checking for updates. |
+| `sparklogs.data.windows_update_agent_state.wu_never_searched` | bool |  | Whether Windows Update has never checked for updates: no last-check date from Windows Update or the registry. False when the last check is dated. Absent when the check time could not be read. |
+| `sparklogs.data.windows_update_agent_state.wuauserv_start_type` | string |  | The start type of the Windows Update service: `boot`, `system`, `auto`, `auto_delayed`, `manual` or `disabled`, or `missing` when the service is not installed. Absent when the service configuration could not be read. |
+| `sparklogs.data.windows_update_agent_state.patch_updates_paused_basis` | string |  | `onset`: start watched live. `observed`: already present when first noticed, making age a lower bound. `unknown_ongoing`: no meaningful onset time. |

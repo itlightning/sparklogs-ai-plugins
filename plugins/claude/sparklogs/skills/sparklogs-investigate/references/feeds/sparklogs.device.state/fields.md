@@ -104,6 +104,16 @@ The last column is different in kind: it is the author's account of the row or e
 | `kernel_crash_recurring` / `held` | n/a | **fields: none** |  |
 | `kernel_crash_recurring` / `onset` | n/a | **fields: none** |  |
 | `kernel_crash_recurring` / `recovered` | n/a | **fields: none** |  |
+| `kernel_driver_flapping` / `held` | n/a | **fields: none** |  |
+| `kernel_driver_flapping` / `onset` | n/a | **fields: none** |  |
+| `kernel_driver_flapping` / `recovered` | n/a | **fields: none** |  |
+| `kernel_driver_installed` / `default` | n/a | **fields: none** |  |
+| `kernel_driver_installed_repeatedly` / `held` | n/a | **fields: none** |  |
+| `kernel_driver_installed_repeatedly` / `onset` | n/a | **fields: none** |  |
+| `kernel_driver_installed_repeatedly` / `recovered` | n/a | **fields: none** |  |
+| `kernel_driver_loaded` / `default` | n/a | **fields: none** |  |
+| `kernel_driver_unloaded` / `default` | n/a | **fields: none** |  |
+| `kernel_driver_updated` / `default` | n/a | **fields: none** |  |
 | `network_adapter_dhcp_failed` / `held` | n/a | **fields: none** |  |
 | `network_adapter_dhcp_failed` / `onset` | n/a | **fields: none** |  |
 | `network_adapter_dhcp_failed` / `recovered` | n/a | **fields: none** |  |
@@ -279,6 +289,16 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `kernel_crash_recurring` / `held`
 - `kernel_crash_recurring` / `onset`
 - `kernel_crash_recurring` / `recovered`
+- `kernel_driver_flapping` / `held`
+- `kernel_driver_flapping` / `onset`
+- `kernel_driver_flapping` / `recovered`
+- `kernel_driver_installed` / `default`
+- `kernel_driver_installed_repeatedly` / `held`
+- `kernel_driver_installed_repeatedly` / `onset`
+- `kernel_driver_installed_repeatedly` / `recovered`
+- `kernel_driver_loaded` / `default`
+- `kernel_driver_unloaded` / `default`
+- `kernel_driver_updated` / `default`
 - `network_adapter_dhcp_failed` / `held`
 - `network_adapter_dhcp_failed` / `onset`
 - `network_adapter_dhcp_failed` / `recovered`

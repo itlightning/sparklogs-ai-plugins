@@ -23,18 +23,21 @@ Tool decision tree and recipes: `references/guides/mcp-tool-decision-tree.md`.
 
 ## How to answer
 
-Answer first, then stop. Hedge precisely ("not in this window", "not checked", "insufficient evidence"). Cite `query_url` (col) on facts. Reuse a short `external_investigation_id` (arg) until the topic changes.
+Answer first, then stop. Hedge precisely ("not in this window", "not checked", "insufficient evidence"). Reuse a short `external_investigation_id` (arg) until the topic changes.
+
+Cite links as URLs from `meta` (col), never a bare `query_id` (arg) or investigation handle. Link the device's page when the answer is about one device, including a fleet answer that narrows to one, and each device's page when it names several. Link a specific row only when that row carries the point: one or two links, not every row. Use `query_url` (col) for the evidence query or a fleet answer. `meta.device_url` (col) is cited as returned; to fill `meta.device_url_template` (col), follow the tool's reference (`server_info` with `describe_tool` (arg)).
 
 **Questions that pick the path:** (e.g., what is on the box? what happened and when? one host or fleet? which symptom domain? is collection trustworthy?)
 
-**Principles:** empty `sparklogs.*` fields = uncurated (not a health finding); completeness from feed reports only (`agent_complete_through` (col)); default to named scope; ask only on fuzzy identity (`match_kind` (col) ties, weak match, zero hits). Fleet hunt only when serious/shared and they agree.
+**Principles:** empty `sparklogs.*` fields = uncurated (not a health finding); completeness from feed reports only (`agent_complete_through` (col)); default to named scope; ask only on fuzzy identity (`match_kind` (col) ties, weak match, zero hits). Fleet hunt only when serious/shared and they agree. A missing total on a query is not zero.
 
 Funnel, scope, LQL errors: `references/guides/mcp-tool-decision-tree.md`, `references/guides/scope-resolution.md`, `references/guides/lql-reference.md`. Stuck: `references/guides/common-mistakes.md`, `references/guides/stream-kinds.md`.
 
 ## Which tool (quick route)
 
+- Something wrong with one device or a few (slow, dropping, filling, failing) → `query_device_health`, `view` (arg) `device_overview`, or `device_network` for network trouble; then refine its result sets and read events only for the device and interval it points at (`references/guides/device-state-fields.md`, **Read a device view**)
 - Standing / latest event of each episode → `query_device_health`, omit `view` (arg) (`fieldset` (arg) `rca` for one host; `min_severity` (arg) `warning` means that latest event is still warning or worse)
-- Inventory / what is on the box → same tool, `view` (arg) `latest_state`
+- Inventory / what is on the box → same tool, `view` (arg) `latest_state`, which answers current state: do not merge changes into it yourself, and a topic reported empty is evidence of none. Follow-ups on one device's inventory: refine the overview's `state` result set instead of new calls
 - Process CPU, memory or I/O trends → same tool, `view` (arg) `top_processes_over_time`, with `rank_by` (arg)
 - Raw device measurements over time → same tool, `view` (arg) `series` with `topics` (arg); `view` (arg) `topics` discovers available topics and fields
 - Episode series / RCA → same tool, `view` (arg) `event_timeline`, same `min_severity` (arg); peak in the window, then every in-window event of those episodes
@@ -50,7 +53,8 @@ Funnel, scope, LQL errors: `references/guides/mcp-tool-decision-tree.md`, `refer
 If server instructions are missing or terminology is unclear, call `server_info` with `include_instructions: true`.
 For detailed views, fieldsets, aggregation or paging, call it with `describe_tool` (arg) naming the tool.
 Use these references when the visible description leaves a question, not on every call.
-Process charts use `query_device_health` with `view` (arg) `top_processes_over_time`.
+A question about one device or a few starts with `query_device_health` `view` (arg) `device_overview` or `device_network`: read `references/guides/device-state-fields.md` (**Read a device view**).
+Process charts use the same tool with `view` (arg) `top_processes_over_time`.
 
 ## Curated data (read this before opening reference files)
 
@@ -111,14 +115,20 @@ Playbooks are incomplete recipes. If a recipe LQL produces empty results: widen 
 
 | Symptom | File |
 |---|---|
+| One application slow or stalling over the network | `references/playbooks/application-network-stall.md` |
+| App slow over VPN | `references/playbooks/application-network-stall.md` |
 | Backup job failed | `references/playbooks/backup-failure.md` |
 | BitLocker recovery | `references/playbooks/bitlocker-recovery.md` |
 | Certificate expiry | `references/playbooks/certificate-expiry.md` |
 | Directory replication | `references/playbooks/directory-replication-failure.md` |
 | Disk full or filling | `references/playbooks/disk-full-or-filling.md` |
 | Memory or handle leak | `references/playbooks/memory-or-handle-leak.md` |
+| Internet down, slow or dropping | `references/playbooks/network-connectivity.md` |
+| Wi-Fi drops | `references/playbooks/network-connectivity.md` |
 | RAID / array degraded | `references/playbooks/raid-or-storage-degraded.md` |
 | RMM connectivity | `references/playbooks/rmm-connectivity.md` |
+| Slow or freezing PC | `references/playbooks/slow-device.md` |
+| Slow server | `references/playbooks/slow-device.md` |
 | Slow logon | `references/playbooks/slow-logon.md` |
 | Windows Update / patch failure | `references/playbooks/windows-update-failure.md` |
 | VSS / shadow copies / backup plumbing | `references/playbooks/windows-vss.md` |
@@ -131,7 +141,7 @@ Playbooks are incomplete recipes. If a recipe LQL produces empty results: widen 
 | Who changed what (Security) | `references/themes/windows-security-and-audit.md` |
 | Defender | `references/themes/endpoint-protection.md` |
 | App / System crashes and services | `references/themes/windows-operational-events.md` |
-| CPU, RAM, disk, installed software, monitors | `references/themes/device-health-and-state.md` |
+| CPU, RAM, disk, network, installed software, monitors | `references/themes/device-health-and-state.md` |
 | Named backup product (Veeam etc.): installed products. Not operational events. | `references/themes/device-health-and-state.md` |
 
 **Data feeds** (`subsource` (LQL) = directory name). Follow **After you pick a `subsource` (LQL)** in the corpus block above.

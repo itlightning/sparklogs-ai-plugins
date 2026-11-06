@@ -128,7 +128,7 @@ Format: `<subject> was <state> at <time>`, or `<event class> occurred N times in
 - "Backups are failing."
 
 ### Evidence
-One or more `query_url` (col) values from the MCP tool responses that produced the evidence for this Finding. The engineer clicks these to verify in the SparkLogs cached-query explorer. **If you don't have a query_url, you don't have the evidence - don't make the claim.**
+One or more `query_url` (col) values from the MCP tool responses that produced the evidence for this Finding. The engineer clicks these to verify in the SparkLogs cached-query explorer. **If you don't have a query_url, you don't have the evidence - don't make the claim.** A Finding about a device also links the device's page (SKILL.md Section 5).
 
 ### Confidence
 One of: `high`, `medium`, `low`, `insufficient_evidence`. See SKILL.md Section 6 for calibration guidance.

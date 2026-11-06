@@ -27,15 +27,15 @@ Stored flat under the `win.eventlog.setup.` prefix.
 
 | LQL path | Type | Meaning |
 |---|---|---|
-| `win.eventlog.setup.package` | string | PackageIdentifier: KB number or component/package name. The join + recurrence key (a package failing repeatedly is a stuck-update loop; correlates with WU-layer copies by KB). |
-| `win.eventlog.setup.error_code` | string | ErrorCode hex HRESULT as logged (0x0 success; 0x800F####/0x8007#### servicing failure on event 3; scan Status on 1014). Kept a string: codes are identifiers, not quantities. |
-| `win.eventlog.setup.target_state` | string | IntendedPackageStateTextized: target state of the transition (Installed \| Staged \| Absent). |
-| `win.eventlog.setup.initial_state` | string | InitialPackageStateTextized: prior state (event 1 only; Staged \| Absent \| Installed \| Superseded). |
-| `win.eventlog.setup.client` | string | Servicing client that drove the operation (CbsTask, UpdateAgentLCU, DISM, TrustedInstaller, WindowsUpdate, ...). |
-| `win.eventlog.setup.corruption_total` | int | TotalCorruption count from a component-store corruption scan (events 1014/1015). |
-| `win.eventlog.setup.corruption_repaired` | int | Repaired count from a component-store corruption scan (events 1014/1015). |
-| `win.eventlog.setup.detection_only` | bool | Scan ran in detection-only mode (no repair attempted); qualifies whether 0 repaired is expected (events 1013/1014). |
-| `win.eventlog.setup.auto_triggered` | bool | Corruption scan was automatically triggered rather than operator-run (event 1013). |
+| `win.eventlog.setup.package` | string | Package the servicing operation was about, from `PackageIdentifier`: a KB number or a package name. The same package failing again and again is an update stuck in a retry loop, and the KB number matches the Windows Update records for it. |
+| `win.eventlog.setup.error_code` | string | Result code the servicing operation logged, from `ErrorCode`, as a hex HRESULT such as 0x800f0831 (0x0 is success). On event 3 it says why the package failed, usually a 0x800F or 0x8007 code. On event 1014 it is the scan status. |
+| `win.eventlog.setup.target_state` | string | State Windows was moving the package to, from `IntendedPackageStateTextized`: Installed, Staged or Absent (removed). |
+| `win.eventlog.setup.initial_state` | string | State the package was in before the change, from `InitialPackageStateTextized`: Installed, Staged, Absent or Superseded. Event 1 carries it. |
+| `win.eventlog.setup.client` | string | Servicing client that started the operation, from `Client`, as Windows writes it: for example CbsTask, UpdateAgentLCU, DISM, TrustedInstaller or WindowsUpdate. |
+| `win.eventlog.setup.corruption_total` | int | Number of corruptions a component-store scan found, from `TotalCorruption` on events 1014 and 1015. |
+| `win.eventlog.setup.corruption_repaired` | int | Number of corruptions a component-store scan repaired, from `Repaired` on events 1014 and 1015. |
+| `win.eventlog.setup.detection_only` | bool | Whether the component-store scan only looked for corruption and made no repair attempt, from `DetectionOnly` on events 1013 and 1014. On a detection-only scan, zero repaired is the expected result. |
+| `win.eventlog.setup.auto_triggered` | bool | Whether Windows started the corruption scan on its own, without an administrator running it, from `AutoTriggered` on event 1013. |
 
 ## Portable families
 

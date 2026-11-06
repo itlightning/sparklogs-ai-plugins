@@ -5,28 +5,28 @@ Reported every 5 minutes on clock boundaries for the window ending at `t`. `spar
 
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
-| `sparklogs.data.storage_io.volume` | string |  | The volume's stable identity (its GUID), the same identity `disk_volumes` uses. |
-| `sparklogs.data.storage_io.display_name` | string |  | The volume's drive letter or mount path, for display. |
-| `sparklogs.data.storage_io.volume_role` | string |  | What this volume is for, the same value `disk_volumes` writes: `os`, `fixed_data`, or `removable`. Absent when the volume has no role. |
-| `sparklogs.data.storage_io.volume_role_code` | integer |  | `volume_role` as the numeric code `disk_volumes` uses for the same role. |
-| `sparklogs.data.storage_io.busy_pct_avg` | float | percent | The average share of the window this volume's backing store spent busy. |
-| `sparklogs.data.storage_io.busy_pct_p90_10s` | float | percent | The 90th percentile, across the window's 10-second samples, of busy share. |
-| `sparklogs.data.storage_io.busy_pct_max_10s` | float | percent | The highest 10-second busy share the window observed. |
-| `sparklogs.data.storage_io.read_iops_avg` | float | iops | The average read rate over the window. |
-| `sparklogs.data.storage_io.read_iops_max_10s` | float | iops | The highest 10-second read rate the window observed. |
-| `sparklogs.data.storage_io.write_iops_avg` | float | iops | The average write rate over the window. |
-| `sparklogs.data.storage_io.write_iops_max_10s` | float | iops | The highest 10-second write rate the window observed. |
-| `sparklogs.data.storage_io.read_mb_per_s_avg` | float | megabytes_per_second | The average read throughput over the window, in 1024-based MB per second. |
-| `sparklogs.data.storage_io.read_mb_per_s_max_10s` | float | megabytes_per_second | The highest 10-second read throughput the window observed, in 1024-based MB per second. |
-| `sparklogs.data.storage_io.write_mb_per_s_avg` | float | megabytes_per_second | The average write throughput over the window, in 1024-based MB per second. |
-| `sparklogs.data.storage_io.write_mb_per_s_max_10s` | float | megabytes_per_second | The highest 10-second write throughput the window observed, in 1024-based MB per second. |
-| `sparklogs.data.storage_io.read_latency_ms_avg` | float | milliseconds | The count-weighted average read latency over the window. |
-| `sparklogs.data.storage_io.write_latency_ms_avg` | float | milliseconds | The count-weighted average write latency over the window. |
-| `sparklogs.data.storage_io.latency_ms_p90_10s` | float | milliseconds | The 90th percentile, across the window's 10-second mean-latency samples, of latency. Chosen over a per-IO percentile because the tail matters and a median converges on the mean. |
-| `sparklogs.data.storage_io.latency_ms_max_10s` | float | milliseconds | The highest 10-second mean latency the window observed. |
+| `sparklogs.data.storage_io.volume` | string |  | The volume's GUID, the same key `disk_volumes` uses. |
+| `sparklogs.data.storage_io.display_name` | string |  | The volume's drive letter or mount path. |
+| `sparklogs.data.storage_io.volume_role` | string |  | What the volume is used for: `os` (the Windows volume), `fixed_data` (another fixed volume) or `removable`. Absent when the role is unknown. |
+| `sparklogs.data.storage_io.volume_role_code` | integer |  | A numeric code for the volume's role. |
+| `sparklogs.data.storage_io.busy_pct_avg` | float | percent | The average share of the 5-minute window the volume's storage was busy. |
+| `sparklogs.data.storage_io.busy_pct_p90_10s` | float | percent | The 90th percentile of the volume's storage's busy share across the window's 10-second readings. |
+| `sparklogs.data.storage_io.busy_pct_max_10s` | float | percent | The volume's storage's highest busy share in any 10-second reading in the window. |
+| `sparklogs.data.storage_io.read_iops_avg` | float | iops | Average reads per second over the window. |
+| `sparklogs.data.storage_io.read_iops_max_10s` | float | iops | The highest reads per second in any 10-second reading in the window. |
+| `sparklogs.data.storage_io.write_iops_avg` | float | iops | Average writes per second over the window. |
+| `sparklogs.data.storage_io.write_iops_max_10s` | float | iops | The highest writes per second in any 10-second reading in the window. |
+| `sparklogs.data.storage_io.read_mb_per_s_avg` | float | megabytes_per_second | Average read throughput over the window. |
+| `sparklogs.data.storage_io.read_mb_per_s_max_10s` | float | megabytes_per_second | The highest read throughput in any 10-second reading in the window. |
+| `sparklogs.data.storage_io.write_mb_per_s_avg` | float | megabytes_per_second | Average write throughput over the window. |
+| `sparklogs.data.storage_io.write_mb_per_s_max_10s` | float | megabytes_per_second | The highest write throughput in any 10-second reading in the window. |
+| `sparklogs.data.storage_io.read_latency_ms_avg` | float | milliseconds | Average time a read took to complete over the window, weighted by the number of reads. |
+| `sparklogs.data.storage_io.write_latency_ms_avg` | float | milliseconds | Average time a write took to complete over the window, weighted by the number of writes. |
+| `sparklogs.data.storage_io.latency_ms_p90_10s` | float | milliseconds | The 90th percentile of the average I/O time across the window's 10-second readings. |
+| `sparklogs.data.storage_io.latency_ms_max_10s` | float | milliseconds | The highest average I/O time in any 10-second reading in the window. |
 | `sparklogs.data.storage_io.avg_read_kb` | float | kilobytes | The average size of a read over the window. |
 | `sparklogs.data.storage_io.avg_write_kb` | float | kilobytes | The average size of a write over the window. |
-| `sparklogs.data.storage_io.queue_depth_avg` | float |  | An occupancy estimate from completed-IO response time divided by eligible elapsed time (Little's law). It does not measure pending IO; a stuck interval can report zero. |
-| `sparklogs.data.storage_io.queue_depth_max_10s` | float |  | The highest interval completed-response occupancy estimate. It does not measure pending IO. |
-| `sparklogs.data.storage_io.topology_segment_count` | integer | count | How many distinct topology signatures the window's samples held. More than two in one window marks `topology_mixed` and holds until every sample shares one topology again. |
-| `sparklogs.data.storage_io.topology_mixed` | bool |  | Whether the topology changed too many times within one window to trust a single reduction. Absent when the topology held steady. |
+| `sparklogs.data.storage_io.queue_depth_avg` | float |  | An estimate of how many I/O requests were in progress on average, worked out from the response times of completed requests. It counts only completed I/O, so a device with stuck requests can read 0. |
+| `sparklogs.data.storage_io.queue_depth_max_10s` | float |  | The highest estimate of I/O requests in progress in any 10-second reading, worked out from completed requests only. |
+| `sparklogs.data.storage_io.topology_segment_count` | integer | count | How many different disk layouts the window's readings saw, such as a disk added or removed during the window. More than two sets `topology_mixed` until every reading shows one layout again. |
+| `sparklogs.data.storage_io.topology_mixed` | bool |  | Whether the disk layout changed too often during the window for its figures to be trusted. Absent when the layout held steady. |

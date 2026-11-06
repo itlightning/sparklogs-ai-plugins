@@ -8,17 +8,24 @@ Widen: what subsources this host actually emits (`query_scope_activity` / counts
 WEL classic: `provider_name` (LQL) before `pattern` (LQL). File logs: `origin` (LQL). Device state: `query_device_health` for latest-in-window; logs group `sparklogs.kind` (LQL) / `sparklogs.topic` (LQL) / `sparklogs.reason` (LQL).
 Curated `service` (LQL) / `sparklogs.reason` (LQL) filters miss uncurated raw text and sibling providers; look there before you stop.
 Playbooks assume MCP fluency: LQL, field meaning, and claim strength, not tool walkthroughs.
+A symptom that lives on a device starts from device health (a device view, a condition or the latest state) and narrows events to the device and interval that reading named.
 
 | Symptom | File |
 |---|---|
+| One application slow or stalling over the network | `application-network-stall.md` |
+| App slow over VPN | `application-network-stall.md` |
 | Backup job failed | `backup-failure.md` |
 | BitLocker recovery | `bitlocker-recovery.md` |
 | Certificate expiry | `certificate-expiry.md` |
 | Directory replication | `directory-replication-failure.md` |
 | Disk full or filling | `disk-full-or-filling.md` |
 | Memory or handle leak | `memory-or-handle-leak.md` |
+| Internet down, slow or dropping | `network-connectivity.md` |
+| Wi-Fi drops | `network-connectivity.md` |
 | RAID / array degraded | `raid-or-storage-degraded.md` |
 | RMM connectivity | `rmm-connectivity.md` |
+| Slow or freezing PC | `slow-device.md` |
+| Slow server | `slow-device.md` |
 | Slow logon | `slow-logon.md` |
 | Windows Update / patch failure | `windows-update-failure.md` |
 | VSS / shadow copies / backup plumbing | `windows-vss.md` |

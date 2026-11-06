@@ -27,30 +27,30 @@ Stored flat under the `win.eventlog.management.` prefix.
 
 | LQL path | Type | Meaning |
 |---|---|---|
-| `win.eventlog.management.job_name` | string | BITS transfer job display name from Bits-Client 61 (`name`), e.g. the update-download job a servicing client created. The recurrence pivot for a transfer that keeps failing. |
-| `win.eventlog.management.task_name` | string | Scheduled task path from the Task Scheduler failure ids (`TaskName`), e.g. `\Microsoft\Windows\UpdateOrchestrator\USO_UxBroker`. The recurrence pivot for one task that keeps failing to start or to load. |
-| `win.eventlog.management.task_error_description` | string | The internal operation Task Scheduler names beside the failure on ids 104 and 311 (`ErrorDescription`), e.g. the logon call or the elevation check that returned the code. |
-| `win.eventlog.management.task_engine_command` | string | Host process Task Scheduler tried to start for a task engine, from TaskScheduler 311 (`Command`). |
-| `win.eventlog.management.update_service_id` | string | Identifier of the update service a scan was run against, from WindowsUpdateClient 25 (`serviceGuid`), casefolded. Separates a local update server from the public update service. |
-| `win.eventlog.management.update_title` | string | Display title of the update whose download failed, from WindowsUpdateClient 31 (`updateTitle`). |
-| `win.eventlog.management.printer_driver_name` | string | Printer driver a failed install was for, from the PrintService driver ids (`DriverName`, `Driver` or `ObjectName`). The pivot that collapses one hash per driver name into one group. |
-| `win.eventlog.management.driver_install_stage` | string | Stage of the driver install the spooler was in when it failed, from the PrintService driver ids (`Label`). |
-| `win.eventlog.management.driver_install_message` | string | The spooler operation that returned the failure on a driver install, from the PrintService driver ids (`Message`). Separates a real add or import from a driver-store lookup. |
-| `win.eventlog.management.bitlocker_drive_role` | string | Drive role a BitLocker compliance check was about, from DeviceManagement 2900 (`Message1`), e.g. the operating-system volume or a fixed data volume. |
-| `win.eventlog.management.bitlocker_fve_status` | string | Raw BitLocker status bitmask the device management client reported beside a compliance failure (`HexInt1`). Promoted undecoded: no published value map was read for it. |
-| `win.eventlog.management.bitlocker_method_found` | string | Encryption method the operating-system volume is actually using, from DeviceManagement 2902 (`HexInt1`). |
-| `win.eventlog.management.bitlocker_method_wanted` | string | Encryption method the policy requires for the operating-system volume, from DeviceManagement 2902 (`HexInt2`). |
-| `win.eventlog.management.mdm_csp_uri` | string | Configuration node a management command was addressed to, from the MDM ConfigurationManager ids (`Message5`). The pivot that says WHICH setting did not take effect. |
-| `win.eventlog.management.mdm_policy_area` | string | Policy area a management setting belongs to, from the MDM PolicyManager ids (`Message1`). |
-| `win.eventlog.management.mdm_policy_name` | string | Policy setting a management command tried to set, from the MDM PolicyManager ids (`Message2`). |
-| `win.eventlog.management.locale_registry_key` | string | Registry key holding the locale settings a process could not read, from International 1001 (`RegistryKey`). Separates a machine-wide fault from a per-user one. |
-| `win.eventlog.management.vm_name` | string | Virtual machine an event is about, from the Hyper-V ids (`VmName`). An administrator-chosen machine label and the pivot every virtualization reason here needs. |
-| `win.eventlog.management.vm_storage_request_ms` | int | Milliseconds one guest storage request took to complete, from Hyper-V-StorageVSP 9 (`Duration`). |
-| `win.eventlog.management.vm_storage_opcode` | int | SCSI operation code of the guest storage request, from Hyper-V-StorageVSP 9 (`Command`). Promoted as the number: no constant-name table is claimed for it here. |
-| `win.eventlog.management.vm_storage_transfer_bytes` | int | Bytes the guest storage request was transferring, from Hyper-V-StorageVSP 9 (`DataTransferLength`). |
-| `win.eventlog.management.vhd_parent_guid_expected` | string | Parent identity a differencing virtual disk expected, from VHDMP 7 (`ExpectedParentLastWriteGUID1`). |
-| `win.eventlog.management.vhd_parent_guid_actual` | string | Parent identity the parent virtual disk actually carries, from VHDMP 7 (`ParentLastWriteGUID`). Differs from the expected one when the chain is broken. |
-| `win.eventlog.management.replica_retry_minutes` | int | Minutes Hyper-V will wait before retrying replication for a virtual machine, from VMMS 32315 (`Parameter0`). |
+| `win.eventlog.management.job_name` | string | Display name of the BITS transfer job that failed, from `name` on Bits-Client event 61, such as a download job Windows Update created. Group by it to find one transfer that keeps failing. |
+| `win.eventlog.management.task_name` | string | Path of the scheduled task, from `TaskName` on the Task Scheduler failure events, such as `\Microsoft\Windows\UpdateOrchestrator\USO_UxBroker`. Group by it to find one task that keeps failing to start or to load. |
+| `win.eventlog.management.task_error_description` | string | Step Task Scheduler names beside the failure code on events 104 and 311, from `ErrorDescription`, such as the logon or the elevation check that failed. |
+| `win.eventlog.management.task_engine_command` | string | Program Task Scheduler tried to start to run a task, from `Command` on event 311. |
+| `win.eventlog.management.update_service_id` | string | GUID of the update service a Windows Update scan ran against, from `serviceGuid` on WindowsUpdateClient event 25, in lowercase. Tells a local update server (WSUS) apart from Microsoft Update. |
+| `win.eventlog.management.update_title` | string | Title of the update whose download failed, from `updateTitle` on WindowsUpdateClient event 31. |
+| `win.eventlog.management.printer_driver_name` | string | Printer driver a failed install was for, from `DriverName`, `Driver` or `ObjectName` on the PrintService driver events. Group by it to see which driver keeps failing. |
+| `win.eventlog.management.driver_install_stage` | string | Stage the print spooler had reached when a driver install failed, from `Label` on the PrintService driver events. |
+| `win.eventlog.management.driver_install_message` | string | Spooler call that failed during a driver install, from `Message` on the PrintService driver events. Tells a real driver add or import from a lookup in the driver store. |
+| `win.eventlog.management.bitlocker_drive_role` | string | Kind of drive a BitLocker compliance check was about, from `Message1` on DeviceManagement BitLocker events, such as the operating-system drive or a fixed data drive. |
+| `win.eventlog.management.bitlocker_fve_status` | string | BitLocker status flags the device management client reported with a compliance failure, from `HexInt1`, as the hex value Windows wrote. SparkLogs does not decode it. |
+| `win.eventlog.management.bitlocker_method_found` | string | Encryption method the operating-system drive is using, from `HexInt1` on DeviceManagement event 2902, as the hex value Windows wrote. |
+| `win.eventlog.management.bitlocker_method_wanted` | string | Encryption method policy requires for the operating-system drive, from `HexInt2` on DeviceManagement event 2902, as the hex value Windows wrote. |
+| `win.eventlog.management.mdm_csp_uri` | string | Configuration setting path (CSP URI) an MDM command was sent to, from `Message5` on the DeviceManagement-Enterprise-Diagnostics-Provider failure events. Says which setting did not apply. |
+| `win.eventlog.management.mdm_policy_area` | string | Policy area of the MDM setting that failed, from `Message1` on PolicyManager events 806 and 821. |
+| `win.eventlog.management.mdm_policy_name` | string | Name of the MDM policy setting that failed to apply, from `Message2` on PolicyManager events 806 and 821. |
+| `win.eventlog.management.locale_registry_key` | string | Registry key with the locale settings a program could not read, from `RegistryKey` on International event 1001. A key in one user profile points to that user, and a machine-wide key affects everyone on the machine. |
+| `win.eventlog.management.vm_name` | string | Name of the virtual machine the Hyper-V event is about, from `VmName`, as the administrator named it. |
+| `win.eventlog.management.vm_storage_request_ms` | int | Time in milliseconds one virtual machine storage request took to complete, from `Duration` on Hyper-V-StorageVSP event 9. |
+| `win.eventlog.management.vm_storage_opcode` | int | SCSI command code of the slow virtual machine storage request, from `Command` on Hyper-V-StorageVSP event 9, as a number. |
+| `win.eventlog.management.vm_storage_transfer_bytes` | int | Size in bytes of the slow virtual machine storage request, from `DataTransferLength` on Hyper-V-StorageVSP event 9. |
+| `win.eventlog.management.vhd_parent_guid_expected` | string | Identifier of the parent disk a differencing virtual disk expects, from `ExpectedParentLastWriteGUID1` on VHDMP event 7. |
+| `win.eventlog.management.vhd_parent_guid_actual` | string | Identifier the parent virtual disk actually carries, from `ParentLastWriteGUID` on VHDMP event 7. When it differs from the expected identifier, the disk chain is broken, usually because the parent disk was changed or replaced. |
+| `win.eventlog.management.replica_retry_minutes` | int | Minutes Hyper-V will wait before it retries replication for the virtual machine, from VMMS event 32315. |
 
 ## Portable families
 
@@ -75,7 +75,7 @@ The last column is different in kind: it is the author's account of the row or e
 
 | Surface | Event ids | Fields set | Row fields |
 |---|---|---|---|
-| `bitlocker_policy_noncompliant` / `default` | 2900, 2902, 2903, 2905, 2906, 2910, 2914 | `win.eventlog.management.bitlocker_drive_role` `win.eventlog.management.bitlocker_fve_status` `win.eventlog.management.bitlocker_method_found` `win.eventlog.management.bitlocker_method_wanted` |  |
+| `bitlocker_policy_noncompliant` / `default` | 2900, 2902, 2903, 2904, 2905, 2906, 2910, 2914 | `win.eventlog.management.bitlocker_drive_role` `win.eventlog.management.bitlocker_fve_status` `win.eventlog.management.bitlocker_method_found` `win.eventlog.management.bitlocker_method_wanted` |  |
 | `bits_transfer_failed` / `default` | 61 | `win.eventlog.management.job_name` |  |
 | `dfsr_partner_communication_failed` / `default` | 5002, 5008, 5012, 5014 | **fields: none** |  |
 | `dfsr_replication_stopped` / `config_unreachable` | 1202 | **fields: none** |  |

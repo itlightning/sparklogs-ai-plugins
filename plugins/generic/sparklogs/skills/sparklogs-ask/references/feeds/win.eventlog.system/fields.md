@@ -33,53 +33,55 @@ Stored flat under the `win.eventlog.system.` prefix.
 
 | LQL path | Type | Meaning |
 |---|---|---|
-| `win.eventlog.system.service_name` | string | Windows service (or driver service) the event is about: SCM 7000/7009/7011/7022/7023/7024/7031/7034/7045, UserPnp 20003. The recurrence + vendor-recognition join key (vendor service crashes arrive as SCM events keyed on this name). |
-| `win.eventlog.system.image_path` | string | Installed service IMAGE path from SCM 7045, with the arguments of the ImagePath command line removed. Unset where the image cannot be split off unambiguously (an unterminated quote, or an unquoted path containing spaces), so the value is always a path and never a command line. The full ImagePath text is root command_line. |
-| `win.eventlog.system.service_type` | string | Service type text from SCM 7045 (kernel mode driver \| user mode service \| ...). |
-| `win.eventlog.system.start_type` | string | Service start type text from SCM 7045 (auto start \| demand start \| ...). |
-| `win.eventlog.system.account_name` | string | Account the installed service runs as, from SCM 7045 (LocalSystem etc.). |
-| `win.eventlog.system.crash_count` | int | How many times the service has terminated unexpectedly, from SCM 7031/7034. The flapping-service recurrence datum. |
-| `win.eventlog.system.service_error` | string | Error the service exited/failed with, from SCM 7000/7023/7024. Stored as logged; may be a %%nnnn message-catalog reference. |
-| `win.eventlog.system.bugcheck_code` | string | BugcheckCode from Kernel-Power 41 (decimal, as logged). Nonzero: a bug check ended the previous session. 0: no bug check was recorded, and the cause (power loss, a hang, a held power button) is undetermined. |
-| `win.eventlog.system.bugcheck_name` | string | Bug check constant name for the stop code (DRIVER_IRQL_NOT_LESS_OR_EQUAL), from Kernel-Power 41 and WER-SystemErrorReporting 1001. Absent when the code is 0 or not a documented bug check. |
-| `win.eventlog.system.sleep_in_progress` | string | SleepInProgress from Kernel-Power 41, as logged: the sleep state the system was in when the session ended. A number, not a flag; values other than 0 and 1 occur. |
-| `win.eventlog.system.connected_standby_in_progress` | string | ConnectedStandbyInProgress from Kernel-Power 41, as logged (true or false): whether Modern Standby was active when the session ended. |
-| `win.eventlog.system.shutdown_reason` | string | The reason a restart or shutdown was requested, as Windows states it in User32 1074 (param3), e.g. "Operating System: Upgrade (Planned)". |
-| `win.eventlog.system.shutdown_reason_code` | string | The shutdown reason code from User32 1074 (param4), as Windows renders it (0x...): the major and minor reason and the planned flag. |
-| `win.eventlog.system.shutdown_type` | string | What was requested in User32 1074 (param5), as a fixed token: restart, power_off, shutdown, or other for a value outside those (another display language). |
-| `win.eventlog.system.shutdown_type_text` | string | The shutdown type as Windows logged it in User32 1074 (param5), only when it maps to other, so a host in another display language keeps the meaning. |
-| `win.eventlog.system.shutdown_comment` | string | The comment the requester gave in User32 1074 (param6), such as the text passed to shutdown /c. Absent when empty. |
-| `win.eventlog.system.recorded_at` | string | When Windows wrote the EventLog 6008 record (RFC 3339, UTC), at the boot after an unexpected shutdown. The row time of that record is the loss time decoded from its binary data; the two are equal when no loss time could be decoded. |
-| `win.eventlog.system.bugcheck_text` | string | Full bugcheck string from WER-SystemErrorReporting 1001, e.g. "0x0000001e (0x..., ...)". Kept verbatim: the code plus its four parameters are the crash identity. |
-| `win.eventlog.system.dump_file` | string | Memory-dump path from WER-SystemErrorReporting 1001. |
-| `win.eventlog.system.report_id` | string | WER report id from WER-SystemErrorReporting 1001; joins to the WER report store. A GUID on current builds; the minidump base name on Windows Server 2012 R2 (build 9600). |
-| `win.eventlog.system.driver_name` | string | Driver that failed to load, from Kernel-PnP 219 (FailureName, e.g. \Driver\WUDFRd). |
-| `win.eventlog.system.device_instance` | string | Device instance path the event is about: Kernel-PnP 219, WHEA-Logger 17-20 (PrimaryDeviceName), UserPnp 20003, DriverFrameworks-UserMode driver installs. |
-| `win.eventlog.system.error_source` | string | WHEA error source enum from WHEA-Logger 17-20 (ErrorSource; numeric string, locale-stable). |
-| `win.eventlog.system.cper_decode` | string | How much of the WHEA-Logger 1 hardware error record decoded: complete, partial (the record carries fewer bytes than it declares, or more sections than are read), or invalid (a signature, the revision, a length, a section range or the timestamp failed validation; no other cper field is set). |
-| `win.eventlog.system.cper_error_ts` | string | Time of the error as the WHEA-Logger 1 record states it (RFC 3339, UTC), as firmware or Windows recorded it and subject to the platform clock. Present only when the record marks its timestamp valid and precise and the timestamp reads as one date. |
-| `win.eventlog.system.cper_revision` | string | Record format revision from the WHEA-Logger 1 error record header, major.minor (2.10). |
-| `win.eventlog.system.cper_severity` | string | Severity the WHEA-Logger 1 error record header states: recoverable (uncorrected but not fatal), fatal, corrected or informational. |
-| `win.eventlog.system.cper_notification` | string | How the WHEA-Logger 1 error was reported (boot, mce, cmc, pcie, nmi, and the other notification types the UEFI error record format defines), or the raw type GUID when it is not a published one. boot means the record was found when Windows started. |
-| `win.eventlog.system.cper_flags` | string | Header flags of the WHEA-Logger 1 error record, comma-separated: previous_error (the error happened in an earlier session), recovered, simulated (deliberately injected); none when no flag is set. |
-| `win.eventlog.system.cper_flags_raw` | string | Header flags of the WHEA-Logger 1 error record as a hex word, including any reserved bits. |
-| `win.eventlog.system.cper_creator` | string | Software that wrote the WHEA-Logger 1 error record: windows, device_driver, or the raw creator GUID. |
-| `win.eventlog.system.cper_section_count` | int | Number of sections the WHEA-Logger 1 error record declares. |
-| `win.eventlog.system.cper_section_types` | string | Type of each section in the WHEA-Logger 1 error record, in record order, comma-separated: firmware_error_record_reference, processor_generic, ia32_x64_mca, platform_memory, pcie, generic, or the raw type GUID. At most the first 16. |
-| `win.eventlog.system.cper_section_severities` | string | Severity of each section in the WHEA-Logger 1 error record, in the same order as cper_section_types. |
-| `win.eventlog.system.cper_firmware_record_types` | string | For each firmware error record reference section of the WHEA-Logger 1 record, the kind of firmware record it points to: ipf_sal, soc_type1, soc_type2, or the raw number. The referenced record itself is held by firmware and is not in the event. |
-| `win.eventlog.system.framework_version` | string | UMDF framework version from DriverFrameworks-UserMode install narration. |
-| `win.eventlog.system.volume` | string | Volume the storage event is about: Ntfs 55/130 (DriveName/VolumeName), Volsnap 25/36 (VolumeName). |
-| `win.eventlog.system.filesystem` | string | Filesystem type the filesystem_* reasons name (ntfs, refs, fat32), read from the provider that raised the event. A constant per provider, not a decoded field: this fleet has never carried a non-NTFS provider for these reasons. |
-| `win.eventlog.system.clsid` | string | COM server CLSID from DistributedCOM 10010. |
-| `win.eventlog.system.time_peer` | string | Configured NTP peer from Time-Service 134 (DomainPeer). |
-| `win.eventlog.system.dns_query_name` | string | DNS name the client was resolving when the lookup timed out (DNS-Client 1014, QueryName). |
-| `win.eventlog.system.update_title` | string | Update the WindowsUpdateClient 20 install outcome is about (updateTitle). The fleet pivot for separating a bad update from a bad device. |
-| `win.eventlog.system.mem_commit_bytes` | int | Committed virtual-memory bytes when Resource-Exhaustion-Detector 2004 diagnosed low virtual memory (SystemCommitCharge). |
-| `win.eventlog.system.mem_commit_limit_bytes` | int | Virtual-memory commit limit in bytes at the Resource-Exhaustion-Detector 2004 diagnosis (SystemCommitLimit). |
-| `win.eventlog.system.mem_physical_bytes` | int | Physical memory size in bytes reported by Resource-Exhaustion-Detector 2004 (PhysicalMemorySize). |
-| `win.eventlog.system.mem_physical_used_bytes` | int | Physical memory in use in bytes reported by Resource-Exhaustion-Detector 2004 (PhysicalMemoryUsage). |
-| `win.eventlog.system.mem_top_consumer_image` | string | Image name of the program that held the most committed memory at the Resource-Exhaustion-Detector 2004 diagnosis, read from the English rendered message; unset when the message does not name one. |
+| `win.eventlog.system.service_name` | string | Service or driver service the event is about, from Service Control Manager events 7000, 7009, 7011, 7022, 7023, 7024, 7031, 7034 and 7045 and UserPnp event 20003. Group by it to find one service that keeps failing. A vendor service crash arrives as a Service Control Manager event under its service name. |
+| `win.eventlog.system.image_path` | string | Path of the program the installed service runs, from `ImagePath` on Service Control Manager event 7045, without its command-line arguments. Absent when the path cannot be separated from the arguments with certainty. The full command line is in the command line field. |
+| `win.eventlog.system.service_type` | string | Service type as Windows wrote it on Service Control Manager event 7045, such as kernel mode driver or user mode service. |
+| `win.eventlog.system.start_type` | string | Start type as Windows wrote it on Service Control Manager event 7045, such as auto start or demand start. |
+| `win.eventlog.system.account_name` | string | Account the installed service runs as, from Service Control Manager event 7045, such as LocalSystem. |
+| `win.eventlog.system.crash_count` | int | Number of times the service has stopped unexpectedly, from Service Control Manager events 7031 and 7034. A rising count means a service that keeps crashing. |
+| `win.eventlog.system.service_error` | string | Error the service stopped or failed with, from Service Control Manager events 7000, 7023 and 7024, as Windows logged it. It may be a %%nnnn message reference instead of text. |
+| `win.eventlog.system.bugcheck_code` | string | Stop code from `BugcheckCode` on Kernel-Power event 41, in decimal as Windows logged it. Nonzero means a stop error (blue screen) ended the previous session. Zero means none was recorded, so the cause (power loss, a hang, a held power button) is unknown. |
+| `win.eventlog.system.bugcheck_name` | string | Name of the stop error, such as DRIVER_IRQL_NOT_LESS_OR_EQUAL, from Kernel-Power event 41 and WER-SystemErrorReporting event 1001. Absent when the code is zero or not a documented bug check. |
+| `win.eventlog.system.sleep_in_progress` | string | Sleep state the machine was in when the session ended, from `SleepInProgress` on Kernel-Power event 41, as Windows logged it. A number, not a yes or no: values other than 0 and 1 occur. |
+| `win.eventlog.system.connected_standby_in_progress` | string | Whether Modern Standby was active when the session ended, from `ConnectedStandbyInProgress` on Kernel-Power event 41, as Windows logged it (true or false). |
+| `win.eventlog.system.shutdown_reason` | string | Reason given for the restart or shutdown, as Windows states it on User32 event 1074, such as "Operating System: Upgrade (Planned)". |
+| `win.eventlog.system.shutdown_reason_code` | string | Shutdown reason code on User32 event 1074, as Windows writes it (0x...). It encodes the major and minor reason and whether the shutdown was planned. |
+| `win.eventlog.system.shutdown_type` | string | What was requested on User32 event 1074: restart, power off, shutdown, or other when Windows wrote a value not on that list, such as one in another display language. |
+| `win.eventlog.system.shutdown_type_text` | string | Shutdown type as Windows wrote it on User32 event 1074, kept only when it is not restart, power off or shutdown, so a machine in another display language keeps the meaning. |
+| `win.eventlog.system.shutdown_comment` | string | Comment the person or program gave for the shutdown on User32 event 1074, such as the text passed to `shutdown /c`. Absent when empty. |
+| `win.eventlog.system.recorded_at` | string | When Windows wrote EventLog event 6008, at the boot after an unexpected shutdown, in UTC (RFC 3339). The event time of that row is the time of the unexpected shutdown where Windows recorded one. Otherwise the two are equal. |
+| `win.eventlog.system.bugcheck_text` | string | Full stop error text from WER-SystemErrorReporting event 1001, such as "0x0000001e (0x..., ...)": the stop code and its four parameters together identify the crash. |
+| `win.eventlog.system.dump_file` | string | Path of the memory dump file, from WER-SystemErrorReporting event 1001. |
+| `win.eventlog.system.report_id` | string | Windows Error Reporting report ID, from WER-SystemErrorReporting event 1001. A GUID on current Windows versions, and the minidump file name on Windows Server 2012 R2. |
+| `win.eventlog.system.driver_name` | string | Driver that failed to load, from `FailureName` on Kernel-PnP event 219, such as \Driver\WUDFRd. |
+| `win.eventlog.system.device_instance` | string | Device instance path the event is about, as Device Manager shows it under Details, from Kernel-PnP event 219, WHEA-Logger events 17 to 20 (`PrimaryDeviceName`), UserPnp event 20003 and DriverFrameworks-UserMode driver install events. |
+| `win.eventlog.system.error_source` | string | Kind of hardware error source, as the number on WHEA-Logger events 17 to 20 (`ErrorSource`). |
+| `win.eventlog.system.cper_decode` | string | How much of the hardware error record on WHEA-Logger event 1 SparkLogs could read: complete, partial (the record is shorter than it says or has more sections than are read), or invalid (the record failed a format check, and no other hardware error record field is set). |
+| `win.eventlog.system.cper_error_ts` | string | Time of the hardware error as the WHEA-Logger event 1 record states it, in UTC (RFC 3339), as firmware or Windows recorded it on the machine clock. Present only when the record marks the time as valid and precise. |
+| `win.eventlog.system.cper_revision` | string | Format revision of the hardware error record on WHEA-Logger event 1, as major.minor, such as 2.10. |
+| `win.eventlog.system.cper_severity` | string | Severity the hardware error record on WHEA-Logger event 1 states: recoverable (uncorrected but not fatal), fatal, corrected or informational. |
+| `win.eventlog.system.cper_notification` | string | How the hardware error on WHEA-Logger event 1 was reported: for example boot (found when Windows started), mce (machine check), cmc (corrected machine check), pcie or nmi, or the raw type GUID when it is not a published type. |
+| `win.eventlog.system.cper_flags` | string | Flags on the hardware error record of WHEA-Logger event 1, separated by commas: previous error (it happened in an earlier session), recovered, or simulated (deliberately injected). None when no flag is set. |
+| `win.eventlog.system.cper_flags_raw` | string | Flags on the hardware error record of WHEA-Logger event 1 as a hex value, including reserved bits. |
+| `win.eventlog.system.cper_creator` | string | Software that wrote the hardware error record on WHEA-Logger event 1: Windows, a device driver, or the raw creator GUID. |
+| `win.eventlog.system.cper_section_count` | int | Number of sections the hardware error record on WHEA-Logger event 1 says it has. |
+| `win.eventlog.system.cper_section_types` | string | Type of each section of the hardware error record on WHEA-Logger event 1, in order, separated by commas: for example processor, machine check (IA32/x64 MCA), memory, PCIe, generic, a firmware record reference, or the raw type GUID. The first 16 at most. |
+| `win.eventlog.system.cper_section_severities` | string | Severity of each section of the hardware error record on WHEA-Logger event 1, in section order, separated by commas. |
+| `win.eventlog.system.cper_firmware_record_types` | string | For each section of the WHEA-Logger event 1 record that points to a firmware error record, the kind of firmware record, or the raw number. The firmware record itself stays in firmware and is not in the event. |
+| `win.eventlog.system.framework_version` | string | UMDF (user-mode driver framework) version, from DriverFrameworks-UserMode driver install events. |
+| `win.eventlog.system.volume` | string | Volume the storage event is about, from `DriveName` or `VolumeName` on Ntfs events and `VolumeName` on Volsnap (shadow copy) events. |
+| `win.eventlog.system.filesystem` | string | File system the event is about, set from the provider that logged it. Today only NTFS events set it, so the value is always ntfs. |
+| `win.eventlog.system.clsid` | string | CLSID of the COM server that did not register with DCOM in time, from DistributedCOM event 10010. |
+| `win.eventlog.system.time_peer` | string | Time server the Windows Time service is configured to use, from `DomainPeer` on Time-Service events 47, 129 and 134. |
+| `win.eventlog.system.conflict_ip_address` | string | IPv4 address of this machine that another device on the network is also using, read from the message of Tcpip event 4199. |
+| `win.eventlog.system.conflict_hardware_address` | string | MAC address of the other device using the same IP address, read from the message of Tcpip event 4199. |
+| `win.eventlog.system.dns_query_name` | string | DNS name the client was looking up when the lookup timed out, from `QueryName` on DNS-Client event 1014. |
+| `win.eventlog.system.update_title` | string | Title of the update the install result is about, from `updateTitle` on WindowsUpdateClient event 20. Group by it to tell a bad update from a bad machine. |
+| `win.eventlog.system.mem_commit_bytes` | int | Committed memory in bytes when Windows found virtual memory running low, from `SystemCommitCharge` on Resource-Exhaustion-Detector event 2004. The Committed figure in Task Manager. |
+| `win.eventlog.system.mem_commit_limit_bytes` | int | Commit limit in bytes when Windows found virtual memory running low, from `SystemCommitLimit` on Resource-Exhaustion-Detector event 2004. The limit beside Committed in Task Manager. |
+| `win.eventlog.system.mem_physical_bytes` | int | Installed physical memory in bytes, from `PhysicalMemorySize` on Resource-Exhaustion-Detector event 2004. |
+| `win.eventlog.system.mem_physical_used_bytes` | int | Physical memory in use in bytes, from `PhysicalMemoryUsage` on Resource-Exhaustion-Detector event 2004. |
+| `win.eventlog.system.mem_top_consumer_image` | string | Program that held the most committed memory when Windows found virtual memory running low, read from the message of Resource-Exhaustion-Detector event 2004. Absent when the message does not name one or is not in English. |
 
 ## Portable families
 
@@ -146,12 +148,15 @@ The last column is different in kind: it is the author's account of the row or e
 | `disk_surprise_removal` / `default` | 157 | **fields: none** |  |
 | `dns_client_resolution_timed_out` / `default` | 1014 | `win.eventlog.system.dns_query_name` |  |
 | `dns_registration_failed` / `default` | 8015, 8016, 8017, 8018, 8019, 8020, 8021, 8022, 8023, 8024, 8025, 8026, 8033, 8034, 8035, 8036, 8037, 8038 | **fields: none** |  |
+| `domain_secure_channel_failed` / `dc_unreachable` | 5719 | **fields: none** |  |
+| `domain_secure_channel_failed` / `other_cause` | 5719 | **fields: none** |  |
+| `domain_secure_channel_failed` / `trust_broken` | 5719 | **fields: none** |  |
 | `driver_load_failed` / `failed` | 219 | `win.eventlog.system.device_instance` `win.eventlog.system.driver_name` |  |
 | `driver_load_failed` / `wudf_reflector_entry` | 219 | `win.eventlog.system.device_instance` `win.eventlog.system.driver_name` |  |
 | `ephemeral_port_alloc_failed` / `default` | 4231, 4266 | **fields: none** |  |
 | `failover_cluster_csv_unavailable` / `default` | 5120, 5142 | **fields: none** |  |
+| `failover_cluster_node_config_stale` / `default` | 1561 | **fields: none** |  |
 | `failover_cluster_node_removed` / `default` | 1135 | **fields: none** |  |
-| `failover_cluster_quorum_loss` / `default` | 1561 | **fields: none** |  |
 | `failover_cluster_resource_failed` / `default` | 1069 | **fields: none** |  |
 | `failover_cluster_resource_hang` / `default` | 1230 | **fields: none** |  |
 | `failover_cluster_resource_host_crash` / `default` | 1146 | **fields: none** |  |
@@ -170,6 +175,8 @@ The last column is different in kind: it is the author's account of the row or e
 | `filesystem_transaction_log_operation_failed` / `start_failed` | 134, 136, 137, 140 | `win.eventlog.system.filesystem` `win.eventlog.system.volume` |  |
 | `gpu_driver_reset` / `default` | 153 | **fields: none** |  |
 | `group_policy_processing_failed` / `default` | 1129 | **fields: none** |  |
+| `group_policy_software_install_failed` / `deferred` | 101, 102, 103, 108, 1112 | **fields: none** |  |
+| `group_policy_software_install_failed` / `install_failed` | 101, 102, 103, 108, 1112 | **fields: none** |  |
 | `hardware_error_corrected` / `boot_corrected` | 1 | `win.eventlog.system.cper_creator` `win.eventlog.system.cper_decode` `win.eventlog.system.cper_error_ts` `win.eventlog.system.cper_firmware_record_types` `win.eventlog.system.cper_flags` `win.eventlog.system.cper_flags_raw` `win.eventlog.system.cper_notification` `win.eventlog.system.cper_revision` `win.eventlog.system.cper_section_count` `win.eventlog.system.cper_section_severities` `win.eventlog.system.cper_section_types` `win.eventlog.system.cper_severity` |  |
 | `hardware_error_corrected` / `error_source_record` | 17, 19 | `win.eventlog.system.device_instance` `win.eventlog.system.error_source` |  |
 | `hardware_error_uncorrected` / `boot_recoverable` | 1 | `win.eventlog.system.cper_creator` `win.eventlog.system.cper_decode` `win.eventlog.system.cper_error_ts` `win.eventlog.system.cper_firmware_record_types` `win.eventlog.system.cper_flags` `win.eventlog.system.cper_flags_raw` `win.eventlog.system.cper_notification` `win.eventlog.system.cper_revision` `win.eventlog.system.cper_section_count` `win.eventlog.system.cper_section_severities` `win.eventlog.system.cper_section_types` `win.eventlog.system.cper_severity` |  |
@@ -183,6 +190,7 @@ The last column is different in kind: it is the author's account of the row or e
 | `iis_apppool_identity_invalid` / `default` | 5021, 5057 | **fields: none** |  |
 | `iis_apppool_worker_start_failed` / `default` | 5059 | **fields: none** |  |
 | `iis_worker_crash` / `default` | 5009, 5011 | **fields: none** |  |
+| `ip_address_conflict_detected` / `default` | 4199 | `win.eventlog.system.conflict_hardware_address` `win.eventlog.system.conflict_ip_address` |  |
 | `kerberos_cert_domain_unresolved` / `default` | 11 | **fields: none** |  |
 | `kerberos_etype_unsupported` / `default` | 16, 203 | **fields: none** |  |
 | `kerberos_pac_verify_failed` / `default` | 18 | **fields: none** |  |
@@ -221,6 +229,7 @@ The last column is different in kind: it is the author's account of the row or e
 | `service_hang` / `default` | 7011 | `win.eventlog.system.service_name` |  |
 | `service_hung_starting` / `default` | 7022 | `win.eventlog.system.service_name` |  |
 | `service_installed` / `installed` | 7045 | `command_line` `win.eventlog.system.account_name` `win.eventlog.system.image_path` `win.eventlog.system.service_name` `win.eventlog.system.service_type` `win.eventlog.system.start_type` |  |
+| `service_installed` / `kernel_driver` | 7045 | `command_line` `win.eventlog.system.image_path` `win.eventlog.system.service_name` `win.eventlog.system.service_type` `win.eventlog.system.start_type` |  |
 | `service_installed` / `self_versioned_updater` | 7045 | `command_line` `win.eventlog.system.account_name` `win.eventlog.system.image_path` `win.eventlog.system.service_name` `win.eventlog.system.service_type` `win.eventlog.system.start_type` |  |
 | `service_start_failed` / `default` | 7000 | `win.eventlog.system.service_error` `win.eventlog.system.service_name` |  |
 | `service_start_timeout` / `default` | 7009 | `win.eventlog.system.service_name` |  |
@@ -272,10 +281,13 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `disk_paging_error` / `default`
 - `disk_surprise_removal` / `default`
 - `dns_registration_failed` / `default`
+- `domain_secure_channel_failed` / `dc_unreachable`
+- `domain_secure_channel_failed` / `other_cause`
+- `domain_secure_channel_failed` / `trust_broken`
 - `ephemeral_port_alloc_failed` / `default`
 - `failover_cluster_csv_unavailable` / `default`
+- `failover_cluster_node_config_stale` / `default`
 - `failover_cluster_node_removed` / `default`
-- `failover_cluster_quorum_loss` / `default`
 - `failover_cluster_resource_failed` / `default`
 - `failover_cluster_resource_hang` / `default`
 - `failover_cluster_resource_host_crash` / `default`
@@ -283,6 +295,8 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `filesystem_corruption` / `disk`
 - `gpu_driver_reset` / `default`
 - `group_policy_processing_failed` / `default`
+- `group_policy_software_install_failed` / `deferred`
+- `group_policy_software_install_failed` / `install_failed`
 - `http_ssl_binding_created` / `default`
 - `http_ssl_binding_deleted` / `default`
 - `http_ssl_config_failed` / `default`

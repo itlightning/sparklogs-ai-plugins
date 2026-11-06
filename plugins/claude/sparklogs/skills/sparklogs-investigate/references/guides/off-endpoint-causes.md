@@ -36,7 +36,7 @@ The list is **not exhaustive** - it's a starting set covering common patterns. I
 - **Time drift on the PDC emulator.** If the PDC's clock is drifting, Kerberos fails silently for clients. The PDC needs to be in scope for the investigation; if only the workstation is investigated, the PDC's time state is invisible.
 - **Azure AD Connect sync break.** Users get silently dropped from on-prem replica. Sync state lives in Azure AD Connect logs (which the SparkLogs Agent could ship if Connect is installed and the log location is known) but not in on-prem AD itself.
 - **Network path between user and DC.** Packet loss, latency, intermittent DNS - visible from network monitoring, not from endpoint state alone.
-- **Cellular / coffee-shop WiFi for laptops.** Some "slow logon" reports are devices with intermittent network paths to the DC. The system_health subsource (rev-8) captures network latency to cloud but not to DC specifically.
+- **Cellular / coffee-shop WiFi for laptops.** Some "slow logon" reports are devices with intermittent network paths to the DC. The agent's probes cover the gateway, an internet target and DNS, not the path to a DC.
 
 ---
 
@@ -122,6 +122,38 @@ The list is **not exhaustive** - it's a starting set covering common patterns. I
 - **EDR cloud quarantine of RMM agent.** SentinelOne or Defender flags RMM agent as suspicious and quarantines it. The quarantine is in EDR cloud audit, not on endpoint.
 - **Network path between endpoint and RMM cloud.** Firewall, proxy, ISP, WAN, DNS - all off-endpoint.
 - **Corporate proxy / TLS inspection.** Some corporate networks MITM-inspect TLS; if the proxy doesn't understand the RMM protocol, it can break the connection.
+
+---
+
+## HM11 - Internet down, slow or dropping
+
+**Off-endpoint causes:**
+
+- **The router's internet connection and the ISP.** An outage placed beyond the gateway sits on either one; endpoint probes cannot tell them apart. The router's WAN log or the ISP's status page can.
+- **Router, firewall and access points.** Their own logs and Wi-Fi controller data are off-endpoint; an access point dropping clients shows on the device only as drops and reconnects.
+- **Other devices at the site without the agent.** The same-org comparison covers only devices that run the agent.
+- **The far end.** A cloud service or website being slow reads like a slow path from the device.
+
+---
+
+## HM12 - Slow or freezing device
+
+**Off-endpoint causes:**
+
+- **Application servers and SaaS backends.** An application waiting on its server looks idle on the device; the agent does not measure application response time.
+- **File servers and mapped drives.** A slow share stalls Explorer and Office on the device; the share's host needs its own reading.
+- **Virtualization host contention.** A VM's CPU ready time and the host's storage latency are measured on the host, not in the guest.
+
+---
+
+## HM13 - One application slow or stalling over the network
+
+**Off-endpoint causes:**
+
+- **The application server.** Server-side load, database locks and timeouts appear on the device only as slow or stalled connections.
+- **VPN concentrator and tunnel.** Tunnel renegotiation, MTU problems and concentrator load are logged on the VPN gateway.
+- **Remote site network.** Links and firewalls between the VPN gateway and the application server are off-endpoint.
+- **UDP traffic.** The agent measures TCP connections only; voice, video and UDP-based VPNs carry no per-connection readings.
 
 ---
 

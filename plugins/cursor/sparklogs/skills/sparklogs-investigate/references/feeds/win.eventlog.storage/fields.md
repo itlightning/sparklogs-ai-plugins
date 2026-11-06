@@ -27,52 +27,52 @@ Stored flat under the `win.eventlog.storage.` prefix.
 
 | LQL path | Type | Meaning |
 |---|---|---|
-| `win.eventlog.storage.filesystem` | string | Filesystem type the filesystem_corruption reason names (ntfs, refs, fat32), read from the provider that raised the event. A constant per provider: today the provider is always Microsoft-Windows-Ntfs, so the value is always ntfs. |
-| `win.eventlog.storage.sense_key` | int | SCSI sense key the device returned on a failed command, from Storage-ClassPnP 507 (SenseKey). The top-level classification of what the device is reporting, and the grouping key for a drive answering the same way repeatedly. |
-| `win.eventlog.storage.additional_sense_code` | int | SCSI additional sense code from Storage-ClassPnP 507 (AdditionalSenseCode). Read together with the sense key: the pair is what names the specific condition. |
-| `win.eventlog.storage.additional_sense_code_qualifier` | int | SCSI additional sense code qualifier from Storage-ClassPnP 507 (AdditionalSenseCodeQualifier). The third element of the sense triple. |
-| `win.eventlog.storage.scsi_status` | int | SCSI status byte the device returned, from Storage-ClassPnP 507 (ScsiStatus). |
-| `win.eventlog.storage.srb_status` | int | SRB status as the storage port driver logged it, from Storage-ClassPnP 507 (SrbStatus). Carries flag bits above the status itself; group on srb_status_code instead. |
-| `win.eventlog.storage.srb_status_code` | int | The SRB status with its flag bits removed (the low six bits of srb_status). One status arrives under several srb_status numbers depending on which flags the driver set, so this is the value a query groups on. |
-| `win.eventlog.storage.cdb_bytes` | string | The SCSI command descriptor block the failing command carried, from Storage-ClassPnP 505/506/507 (CdbBytes) and Storport 500 (Cdb), as hex text with a 0x prefix. The prefix is added here: Windows writes the field without one, and an all-digit hex string is otherwise read as a number and stored as one. |
-| `win.eventlog.storage.sense_key_name` | string | Bounded meaning token decoded from the sense key (no_sense, not_ready, medium_error, hardware_error, illegal_request, unit_attention, data_protect, aborted_command and the rest of the published set). The number stays beside it; an unlisted code leaves this unset. |
-| `win.eventlog.storage.additional_sense_name` | string | Bounded meaning token decoded from the additional sense code, for the small set this module reads (illegal_command, invalid_cdb, medium_changed, bus_reset, no_media_in_device). An unlisted code leaves this unset. |
-| `win.eventlog.storage.srb_status_name` | string | Bounded meaning token decoded from srb_status_code, the SRB status with its flag bits removed (success, error, busy, timeout, bus_reset and the rest of the published set). An unlisted code leaves this unset. |
-| `win.eventlog.storage.bus_type` | int | The bus the device sits on, as the STORAGE_BUS_TYPE number the driver wrote. The value that separates a fixed disk from a removable one, which is what decides whether a read failure is a claim about the medium. |
-| `win.eventlog.storage.bus_type_name` | string | Bounded meaning token decoded from bus_type (bus_usb, bus_sata, bus_nvme, bus_raid, bus_sas and the rest of the published set). An unlisted code leaves this unset. |
-| `win.eventlog.storage.io_type` | int | The kind of IO NTFS was performing when it failed, as the number the file system wrote (Ntfs 148 IoType). |
-| `win.eventlog.storage.io_size_bytes` | int | Size in bytes of the IO NTFS was performing when it failed (Ntfs 148 IoSize). |
-| `win.eventlog.storage.clusters_count` | int | How many clusters the failed NTFS IO covered (Ntfs 148 ClustersCount). Read with starting_lcn: the pair is the extent the device would not return. |
-| `win.eventlog.storage.starting_lcn` | int | The first logical cluster number of the failed NTFS IO (Ntfs 148 StartingLcn). Every occurrence names a different one, which is why it is evidence rather than a grouping key. |
-| `win.eventlog.storage.is_boot_volume` | bool | Whether the volume NTFS was reading or writing is the boot volume (Ntfs 148 IsBootVolume). |
-| `win.eventlog.storage.volume_name` | string | The volume the NTFS event is about, as the file system named it (VolumeName). Empty on a mount attempt against a device that is not present. |
-| `win.eventlog.storage.volume_guid` | string | The volume GUID the NTFS event carried (VolumeGuid). The stable key for a volume across drive-letter changes; null when NTFS never got far enough to have one. |
-| `win.eventlog.storage.device_number` | int | The disk number the storage class driver assigned the device (DeviceNumber). The per-host device key a repeated failure groups on. |
-| `win.eventlog.storage.retries_done` | int | How many times the class driver had already retried the request before it gave up (NumberOfRetriesDone). |
-| `win.eventlog.storage.miniport_name` | string | The Storport miniport driver handling the device path (MiniportName). What separates an external USB enclosure from an internal controller. |
-| `win.eventlog.storage.boot_device` | bool | Whether the device the port driver reset is the boot device (BootDevice). The positive test that raises a reset out of the degraded band. |
-| `win.eventlog.storage.bus_reset_reason` | int | Why the port driver reset the bus, as the number the driver wrote (BusResetReason). Microsoft publishes no value table, so the number ships undecoded rather than guessed at. |
-| `win.eventlog.storage.reset_type` | int | Which level of reset the port driver performed, as the number the driver wrote (ResetType). Microsoft publishes no value table, so the number ships undecoded rather than guessed at. |
-| `win.eventlog.storage.reset_status` | string | The status the reset itself returned (ResetStatus), as the hex word the driver wrote. Zero says the reset succeeded, which is the ordinary case. |
-| `win.eventlog.storage.failed_io_count` | int | How many outstanding requests the port driver threw away when it reset the path (FailedIoCount). |
-| `win.eventlog.storage.srb_timeout_s` | int | The per-request timeout in seconds the port driver was enforcing when the request timed out (SrbTimeout). |
-| `win.eventlog.storage.port_number` | int | The adapter port the device is attached to (PortNumber). Part of the device path address. |
-| `win.eventlog.storage.path_id` | int | The bus number within the adapter (PathID). Part of the device path address. |
-| `win.eventlog.storage.target_id` | int | The target number on the bus (TargetID). Part of the device path address. |
-| `win.eventlog.storage.lun` | int | The logical unit number on the target (LUN). Part of the device path address. |
-| `win.eventlog.storage.removable` | bool | Whether the driver considers the device removable (Removable). A device that vanishes with this false is a path failure rather than somebody unplugging something. |
-| `win.eventlog.storage.surprise_removal_ok` | bool | Whether the device declares that removal without an eject is supported (SurpriseRemovalOK). |
-| `win.eventlog.storage.device_state` | int | The device state the port driver recorded at removal, as the number the driver wrote (DeviceState). |
-| `win.eventlog.storage.device_type` | int | The SCSI device type the port driver recorded, as the number the driver wrote (DeviceType). |
-| `win.eventlog.storage.hc_stateid` | int | The NTFS global corruption-handling state the file system moved to (Ntfs/WHC 100 hc_stateid). Microsoft publishes the template and no value map, so the number ships undecoded and the provider level carries the reading. |
-| `win.eventlog.storage.paging_priority` | int | The priority the kernel attached to the paging IO that failed (PagingPriority). |
-| `win.eventlog.storage.lba` | string | The logical block address of the failed paging IO (LBA), as the hex text the driver wrote. |
-| `win.eventlog.storage.transfer_bytes` | int | How many bytes the failed paging IO was moving (TransferByteCount). |
-| `win.eventlog.storage.nv_cache_priority` | int | The non-volatile cache priority the request carried (NvCachePriority). |
-| `win.eventlog.storage.health_flag_name` | string | The device-health parameter the miniport named on a Storport health sample, verbatim as the driver wrote it (the ParameterNName whose value the arm tested). |
-| `win.eventlog.storage.health_flag_value` | int | The value the miniport reported for health_flag_name (the matching ParameterNValue). |
-| `win.eventlog.storage.percentage_used_pct` | int | Percent of rated write endurance the device reports it has consumed, from an NVMe health sample. Values above 100 are legal and mean the drive is past its rated life. |
-| `win.eventlog.storage.endurance_threshold_pct` | int | The endurance percentage the device treats as its own threshold, from the same NVMe health sample. Read against percentage_used_pct: the comparison is the claim, not either number alone. |
+| `win.eventlog.storage.filesystem` | string | File system the corruption event is about, set from the provider that logged it. Today only NTFS events (Ntfs/WHC event 100) set it, so the value is always ntfs. |
+| `win.eventlog.storage.sense_key` | int | SCSI sense key the disk returned for a failed command, from `SenseKey` on Storage-ClassPnP events 505, 506 and 507, as a number. The broad kind of error the disk reports. Group by it to see a disk giving the same answer again and again. |
+| `win.eventlog.storage.additional_sense_code` | int | SCSI additional sense code, from `AdditionalSenseCode` on Storage-ClassPnP events 505, 506 and 507. With the sense key it names the specific condition. |
+| `win.eventlog.storage.additional_sense_code_qualifier` | int | SCSI additional sense code qualifier, from `AdditionalSenseCodeQualifier` on Storage-ClassPnP event 507. Narrows the condition the sense key and additional sense code name. |
+| `win.eventlog.storage.scsi_status` | int | SCSI status the disk returned, from `ScsiStatus` on Storage-ClassPnP event 507, as a number. |
+| `win.eventlog.storage.srb_status` | int | Request (SRB) status the storage driver logged, from `SrbStatus` on Storage-ClassPnP events 505, 506 and 507. It includes flag bits, so one status can appear as several numbers. Group by the code without flags instead. |
+| `win.eventlog.storage.srb_status_code` | int | Request (SRB) status with its flag bits removed (the low six bits of `SrbStatus`). Group by this one: it is the same number for the same status whatever flags the driver set. |
+| `win.eventlog.storage.cdb_bytes` | string | SCSI command the failed request carried (the command descriptor block), from `CdbBytes` on Storage-ClassPnP events 505, 506 and 507 or `Cdb` on Storport events, as hex text with a 0x prefix. |
+| `win.eventlog.storage.sense_key_name` | string | Sense key in words, such as not ready, medium error, hardware error, illegal request, unit attention or aborted command, from the published SCSI list. Absent for a number not on that list. |
+| `win.eventlog.storage.additional_sense_name` | string | Additional sense code in words, for the few codes SparkLogs names: illegal command, invalid command block, medium changed, bus reset and no media in the device. Absent for other codes. |
+| `win.eventlog.storage.srb_status_name` | string | Request (SRB) status in words, such as success, error, busy, timeout or bus reset, from the published list. Absent for a code not on that list. |
+| `win.eventlog.storage.bus_type` | int | Bus the disk is attached to, as the number the driver wrote (STORAGE_BUS_TYPE). Tells a fixed disk from a removable one, which decides whether a read failure says anything about the disk itself. |
+| `win.eventlog.storage.bus_type_name` | string | Bus the disk is attached to, in words, such as USB, SATA, NVMe, RAID or SAS. Absent for a number not on the published list. |
+| `win.eventlog.storage.io_type` | int | Kind of read or write NTFS was doing when it failed, as the number on Ntfs event 148 (`IoType`). |
+| `win.eventlog.storage.io_size_bytes` | int | Size in bytes of the read or write NTFS was doing when it failed, from `IoSize` on Ntfs event 148. |
+| `win.eventlog.storage.clusters_count` | int | Number of clusters the failed NTFS read or write covered, from `ClustersCount` on Ntfs event 148. With the starting cluster it marks the area of the disk that failed. |
+| `win.eventlog.storage.starting_lcn` | int | First cluster number of the failed NTFS read or write, from `StartingLcn` on Ntfs event 148. Each failure names a different one, so do not group by it. |
+| `win.eventlog.storage.is_boot_volume` | bool | Whether the volume NTFS failed to read or write is the boot volume, from `IsBootVolume` on Ntfs event 148. |
+| `win.eventlog.storage.volume_name` | string | Volume the NTFS event is about, as NTFS names it, from `VolumeName` on Ntfs events 148 and 305. Empty when Windows tried to mount a device that is not present. |
+| `win.eventlog.storage.volume_guid` | string | Volume GUID on Ntfs event 305, from `VolumeGuid`. Stays the same when the drive letter changes. Absent when NTFS never got far enough to read one. |
+| `win.eventlog.storage.device_number` | int | Disk number Windows assigned the disk, as Disk Management shows it, from `DeviceNumber` on Storage-ClassPnP events. Group by it to see repeated failures on one disk. |
+| `win.eventlog.storage.retries_done` | int | Number of times the storage driver retried the request before it gave up, from `NumberOfRetriesDone` on Storage-ClassPnP events 505 and 506. |
+| `win.eventlog.storage.miniport_name` | string | Storage controller driver for the disk, from `MiniportName` on Storport events, such as uaspstor for a USB enclosure or stornvme for an internal NVMe drive. |
+| `win.eventlog.storage.boot_device` | bool | Whether the disk the storage driver reset is the boot disk, from `BootDevice` on Storport events 500, 501 and 550. |
+| `win.eventlog.storage.bus_reset_reason` | int | Reason the storage driver reset the bus, as the number the driver wrote in `BusResetReason`. Microsoft publishes no list of these numbers. |
+| `win.eventlog.storage.reset_type` | int | Kind of reset the storage driver performed, as the number the driver wrote in `ResetType`. Microsoft publishes no list of these numbers. |
+| `win.eventlog.storage.reset_status` | string | Result of the reset, from `ResetStatus`, as the hex value the driver wrote. Zero means the reset succeeded, which is usual. |
+| `win.eventlog.storage.failed_io_count` | int | Number of pending requests the storage driver failed when it reset the disk path, from `FailedIoCount` on Storport events. |
+| `win.eventlog.storage.srb_timeout_s` | int | Timeout in seconds the storage driver allowed each request before it gave up, from `SrbTimeout` on Storport events. |
+| `win.eventlog.storage.port_number` | int | Controller port the disk is attached to, from `PortNumber` on Storport events. Part of the disk address. |
+| `win.eventlog.storage.path_id` | int | Bus number on the controller, from `PathID` on Storport events. Part of the disk address. |
+| `win.eventlog.storage.target_id` | int | Target number on the bus, from `TargetID` on Storport events. Part of the disk address. |
+| `win.eventlog.storage.lun` | int | Logical unit number on the target, from `LUN` on Storport events. Part of the disk address. |
+| `win.eventlog.storage.removable` | bool | Whether the driver treats the disk as removable, from `Removable` on Storport event 551 and EhStorClass event 103. A non-removable disk that disappears usually means the path to it failed. Virtual disks also report themselves non-removable and are detached routinely. |
+| `win.eventlog.storage.surprise_removal_ok` | bool | Whether the disk says it can be removed without ejecting it first, from `SurpriseRemovalOK` on Storport event 551 and EhStorClass event 103. |
+| `win.eventlog.storage.device_state` | int | State of the disk when it was removed, as the number the driver wrote in `DeviceState` on Storport event 551. |
+| `win.eventlog.storage.device_type` | int | SCSI device type, as the number the driver wrote in `DeviceType` on Storport event 551. |
+| `win.eventlog.storage.hc_stateid` | int | NTFS corruption handling state the file system moved to, from `hc_stateid` on Ntfs/WHC event 100, as a number. Microsoft publishes no list of these numbers. The event level says how serious it is. |
+| `win.eventlog.storage.paging_priority` | int | Priority of the paging request (memory read from or written to disk) that failed, from `PagingPriority` on Storage-ClassPnP events 502 and 503. |
+| `win.eventlog.storage.lba` | string | Disk block address (LBA) of the failed paging request, as the hex value the driver wrote, from Storage-ClassPnP events 502 and 503. |
+| `win.eventlog.storage.transfer_bytes` | int | Bytes the failed paging request was moving, from `TransferByteCount` on Storage-ClassPnP events 502 and 503. |
+| `win.eventlog.storage.nv_cache_priority` | int | Disk cache priority of the failed request, from `NvCachePriority` on Storage-ClassPnP events 502 and 503. |
+| `win.eventlog.storage.health_flag_name` | string | Disk health value the storage driver flagged, by the name the driver gave it, from Storport health events 539, 542 and 543. |
+| `win.eventlog.storage.health_flag_value` | int | Value of the flagged disk health value, from Storport health events 539, 542 and 543. |
+| `win.eventlog.storage.percentage_used_pct` | int | Percent of its rated write endurance the NVMe drive says it has used, from Storport health events. Over 100 means the drive is past its rated life. |
+| `win.eventlog.storage.endurance_threshold_pct` | int | Endurance percent the NVMe drive treats as its own warning point, from the same Storport health event. Compare the percent used with it. |
 
 ## Portable families
 

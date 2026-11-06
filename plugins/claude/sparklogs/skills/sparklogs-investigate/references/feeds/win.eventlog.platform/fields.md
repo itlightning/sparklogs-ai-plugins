@@ -27,74 +27,74 @@ Stored flat under the `win.eventlog.platform.` prefix.
 
 | LQL path | Type | Meaning |
 |---|---|---|
-| `win.eventlog.platform.pnp_problem_code` | int | Device Manager problem code reported for a device start failure. |
-| `win.eventlog.platform.pnp_problem_code_name` | string | Published CM_PROB name for the device problem code. |
-| `win.eventlog.platform.pnp_veto_type` | int | Published PnP removal veto type number. |
-| `win.eventlog.platform.pnp_veto_type_name` | string | Published PNP_Veto name for the removal veto type. |
-| `win.eventlog.platform.pnp_veto_holder` | string | Provider label for the component that vetoed device removal. |
-| `win.eventlog.platform.driver_inf` | string | INF basename reported for a device start failure. |
-| `win.eventlog.platform.device_service` | string | Driver service label reported for a device. |
-| `win.eventlog.platform.device_class` | string | Leading device-instance class without the identifying path tail. |
-| `win.eventlog.platform.device_count` | int | Number of child devices reported in a removal event. |
-| `win.eventlog.platform.mem_commit_bytes` | int | Committed virtual-memory bytes reported by Windows. |
-| `win.eventlog.platform.mem_commit_limit_bytes` | int | Virtual-memory commit limit in bytes reported by Windows. |
-| `win.eventlog.platform.mem_commit_ratio` | float | Commit charge divided by the positive commit limit. |
-| `win.eventlog.platform.clock_freq_error_ppm` | float | Measured hardware-clock frequency error in parts per million. |
-| `win.eventlog.platform.clock_drift_seconds_per_day` | float | Measured clock drift in seconds per day. |
-| `win.eventlog.platform.clock_measure_window_minutes` | float | Clock frequency measurement window in minutes. |
-| `win.eventlog.platform.secure_boot_sbat_failure_point` | int | Firmware revocation update failure point. |
-| `win.eventlog.platform.secure_boot_sbat_update_status` | int | Firmware revocation update status number. |
-| `win.eventlog.platform.secure_boot_sbat_firmware_level` | string | Firmware SBAT generation list reported by Windows. |
-| `win.eventlog.platform.firmware_indicator_category` | string | Category reported for a platform tamper indicator. |
-| `win.eventlog.platform.firmware_indicator_events` | string | Firmware setting names reported behind a tamper indicator. |
-| `win.eventlog.platform.firmware_scan_name` | string | Vendor firmware verification scan label. |
-| `win.eventlog.platform.firmware_scan_result` | string | Result clause reported by a firmware verification scan. |
-| `win.eventlog.platform.firmware_scan_result_code` | int | Numeric result code reported by a firmware verification scan. |
-| `win.eventlog.platform.security_assessment_result` | string | Result clause reported by the device security assessment. |
-| `win.eventlog.platform.security_assessment_score` | int | Device security assessment score. |
-| `win.eventlog.platform.security_assessment_failed_areas` | string | Risk areas the device security assessment marked failed or high. |
-| `win.eventlog.platform.firmware_event_store` | string | Vendor secure event-store label. |
-| `win.eventlog.platform.trace_session_name` | string | Windows tracing session that reported a failure. |
-| `win.eventlog.platform.boot_duration_ms` | int | Measured whole-boot duration in milliseconds. |
-| `win.eventlog.platform.boot_main_path_ms` | int | Measured main boot-path duration in milliseconds. |
-| `win.eventlog.platform.boot_post_boot_ms` | int | Measured post-boot duration in milliseconds. |
-| `win.eventlog.platform.boot_is_degradation` | bool | Whether Windows classified the boot measurement as degraded. |
-| `win.eventlog.platform.boot_startup_app_count` | int | Startup application count reported for a boot. |
-| `win.eventlog.platform.startup_component` | string | Executable or service basename associated with a startup delay. |
-| `win.eventlog.platform.startup_component_total_ms` | int | Total startup component duration in milliseconds. |
-| `win.eventlog.platform.startup_component_degradation_ms` | int | Startup component degradation duration in milliseconds. |
-| `win.eventlog.platform.shutdown_duration_ms` | int | Measured whole-shutdown duration in milliseconds. |
-| `win.eventlog.platform.shutdown_is_degradation` | bool | Whether Windows classified the shutdown measurement as degraded. |
-| `win.eventlog.platform.shutdown_services_ms` | int | Measured shutdown service duration in milliseconds. |
-| `win.eventlog.platform.shutdown_user_session_ms` | int | Measured user-session shutdown duration in milliseconds. |
-| `win.eventlog.platform.shutdown_component` | string | Service basename associated with a shutdown delay. |
-| `win.eventlog.platform.shutdown_component_degradation_ms` | int | Shutdown component degradation duration in milliseconds. |
-| `win.eventlog.platform.usb_failure_type` | int | USB controller failure type reported by Windows. |
-| `win.eventlog.platform.usb_failure_subtype` | int | USB controller failure subtype reported by Windows. |
-| `win.eventlog.platform.usb_error_reason` | int | USB controller error reason reported by Windows. |
-| `win.eventlog.platform.usb_ucsi_command` | int | UCSI command number associated with a connector-manager fault. |
-| `win.eventlog.platform.mtp_operation_code` | int | Media transfer operation code reported for an unresponsive device. |
-| `win.eventlog.platform.font_load_blocked` | bool | Whether Windows blocked the font load. |
-| `win.eventlog.platform.font_source_type` | int | Font source type reported by Windows. |
-| `win.eventlog.platform.font_file` | string | Font filename without its source path. |
-| `win.eventlog.platform.thermal_zone` | string | ACPI thermal zone object reported by firmware. |
-| `win.eventlog.platform.thermal_temperature_k` | float | Thermal zone temperature reported in Kelvin. |
-| `win.eventlog.platform.thermal_active_trip_k` | float | Active cooling trip point reported in Kelvin. |
-| `win.eventlog.platform.thermal_passive_trip_k` | float | Passive cooling trip point reported in Kelvin. |
-| `win.eventlog.platform.thermal_min_throttle` | float | Minimum processor throttle reported for passive cooling. |
-| `win.eventlog.platform.live_dump_component` | string | Kernel component that requested a live dump. |
-| `win.eventlog.platform.live_dump_requested_policy` | int | Requested live-dump policy number. |
-| `win.eventlog.platform.live_dump_granted_policy` | int | Granted live-dump policy number. |
-| `win.eventlog.platform.live_dump_throttled` | bool | Whether the live-dump request was throttled. |
-| `win.eventlog.platform.gpu_memory_bytes` | int | Graphics memory involved in compositor contention. |
-| `win.eventlog.platform.gpu_memory_bandwidth` | int | Graphics memory bandwidth reported during contention. |
-| `win.eventlog.platform.gpu_contention_scenario` | int | Desktop compositor contention scenario number. |
-| `win.eventlog.platform.boot_measure_reason_code` | int | Measured-boot library reason code. |
-| `win.eventlog.platform.boot_measure_init_state` | int | Measured-boot library initialization state. |
-| `win.eventlog.platform.tpm_init_position` | int | Boot position where TPM initialization failed. |
-| `win.eventlog.platform.device_software_name` | string | Device companion software label reported by setup. |
-| `win.eventlog.platform.device_software_exit_code` | int | Raw process exit code reported by device software setup. |
-| `win.eventlog.platform.intel_graphics_category` | string | Category parsed from an Intel Graphics Software JSON insert. |
+| `win.eventlog.platform.pnp_problem_code` | int | Device Manager problem code for a device that failed to start, from `Problem` on Kernel-PnP event 411. The same number Device Manager shows as "Code N" on the device. |
+| `win.eventlog.platform.pnp_problem_code_name` | string | Name Microsoft publishes for the device problem code, such as CM_PROB_FAILED_START for code 10. Set for codes 10, 12, 37 and 43, absent for other codes. |
+| `win.eventlog.platform.pnp_veto_type` | int | Type of component that blocked removal of a device, as the number on Kernel-PnP event 1000 (`VetoType`). |
+| `win.eventlog.platform.pnp_veto_type_name` | string | Name Microsoft publishes for the removal veto type, such as PNP_VetoOutstandingOpen. Absent when the number is not in the published list. |
+| `win.eventlog.platform.pnp_veto_holder` | string | Component that blocked removal of the device, such as a driver or a program with the device open, from `VetoName` on Kernel-PnP event 1000. |
+| `win.eventlog.platform.driver_inf` | string | Driver INF file name of a device that failed to start, from `DriverName` on Kernel-PnP event 411. |
+| `win.eventlog.platform.device_service` | string | Driver service of a device that failed to start, from `ServiceName` on Kernel-PnP event 411. |
+| `win.eventlog.platform.device_class` | string | First part of the device instance ID, such as USB, PCI or HID, which names the bus or device type. The rest of the ID, which can carry a serial number, is left out. |
+| `win.eventlog.platform.device_count` | int | Number of child devices removed with the device, from `DeviceCount` on Kernel-PnP event 1011. |
+| `win.eventlog.platform.mem_commit_bytes` | int | Committed memory in bytes when Windows detected low virtual memory, from `SystemCommitCharge` on Resource-Exhaustion-Detector event 1003. The Committed figure in Task Manager. |
+| `win.eventlog.platform.mem_commit_limit_bytes` | int | Commit limit in bytes when Windows detected low virtual memory, from `SystemCommitLimit` on Resource-Exhaustion-Detector event 1003. The limit beside Committed in Task Manager. |
+| `win.eventlog.platform.mem_commit_ratio` | float | Committed memory divided by the commit limit, from Resource-Exhaustion-Detector event 1003. 1.0 means memory is fully committed. |
+| `win.eventlog.platform.clock_freq_error_ppm` | float | Average frequency error of the hardware clock in parts per million, measured by the Windows Time service, from `AvgFrequencyErrorPPM` on Time-Service event 282. |
+| `win.eventlog.platform.clock_drift_seconds_per_day` | float | Average clock drift in seconds per day, measured by the Windows Time service, from `AvgDailyDriftSeconds` on Time-Service event 282. |
+| `win.eventlog.platform.clock_measure_window_minutes` | float | Minutes over which the Windows Time service measured the clock error, from `AvgFreqDurationMins` on Time-Service event 282. |
+| `win.eventlog.platform.secure_boot_sbat_failure_point` | int | Step at which the Secure Boot revocation (SBAT) update failed, from `FailurePoint` on Kernel-Boot event 292, as a number. |
+| `win.eventlog.platform.secure_boot_sbat_update_status` | int | Status of the Secure Boot revocation (SBAT) update, from `UpdateStatusEnum` on Kernel-Boot event 292, as a number. |
+| `win.eventlog.platform.secure_boot_sbat_firmware_level` | string | SBAT revocation level the firmware holds, as Windows reports it in `FwLevel` on Kernel-Boot event 292. |
+| `win.eventlog.platform.firmware_indicator_category` | string | Category of the BIOS tamper indicator, from Dell Trusted Device BIOS Events and IoA events 10, 11 and 12. |
+| `win.eventlog.platform.firmware_indicator_events` | string | BIOS setting changed behind the tamper indicator, from Dell Trusted Device BIOS Events and IoA events 10, 11 and 12. |
+| `win.eventlog.platform.firmware_scan_name` | string | Firmware verification scan that ran, such as the BIOS or Intel ME verification, from Dell Trusted Device scan events. |
+| `win.eventlog.platform.firmware_scan_result` | string | Result line of the Dell Trusted Device firmware verification scan, as the event wrote it. |
+| `win.eventlog.platform.firmware_scan_result_code` | int | Result code of the Dell Trusted Device firmware verification scan, when the event gives one. |
+| `win.eventlog.platform.security_assessment_result` | string | Result line of the Dell Trusted Device security assessment, from events 14 and 15, as the event wrote it. |
+| `win.eventlog.platform.security_assessment_score` | int | Score of the Dell Trusted Device security assessment, from events 14 and 15. |
+| `win.eventlog.platform.security_assessment_failed_areas` | string | Areas the Dell Trusted Device security assessment marked FAIL or HIGH, separated by commas, from events 14 and 15. |
+| `win.eventlog.platform.firmware_event_store` | string | Dell secure event log store the event is about, from Dell Trusted Device Secure Event Log events 21 and 45. |
+| `win.eventlog.platform.trace_session_name` | string | Windows event tracing session that reported a problem, from `SessionName` on Kernel-EventTracing Admin events. |
+| `win.eventlog.platform.boot_duration_ms` | int | Milliseconds the whole boot took, from `BootTime` on Diagnostics-Performance event 100. |
+| `win.eventlog.platform.boot_main_path_ms` | int | Milliseconds of the main boot phase, up to the desktop appearing, from `MainPathBootTime` on Diagnostics-Performance event 100. |
+| `win.eventlog.platform.boot_post_boot_ms` | int | Milliseconds from the desktop appearing until the machine became idle, from `BootPostBootTime` on Diagnostics-Performance event 100. |
+| `win.eventlog.platform.boot_is_degradation` | bool | Whether Windows judged this boot slower than usual for the machine, from `BootIsDegradation` on Diagnostics-Performance event 100. |
+| `win.eventlog.platform.boot_startup_app_count` | int | Number of startup apps during the boot, from `BootNumStartupApps` on Diagnostics-Performance event 100. |
+| `win.eventlog.platform.startup_component` | string | Program, driver or service that slowed the boot, from `Name` on Diagnostics-Performance events 101, 103, 107 and 108. |
+| `win.eventlog.platform.startup_component_total_ms` | int | Milliseconds that component took during the boot, from `TotalTime` on Diagnostics-Performance events 101, 103, 107 and 108. |
+| `win.eventlog.platform.startup_component_degradation_ms` | int | Milliseconds that component took beyond its usual time, from `DegradationTime` on Diagnostics-Performance events 101, 103, 107 and 108. |
+| `win.eventlog.platform.shutdown_duration_ms` | int | Milliseconds the whole shutdown took, from `ShutdownTime` on Diagnostics-Performance event 200. |
+| `win.eventlog.platform.shutdown_is_degradation` | bool | Whether Windows judged this shutdown slower than usual for the machine, from `ShutdownIsDegradation` on Diagnostics-Performance event 200. |
+| `win.eventlog.platform.shutdown_services_ms` | int | Milliseconds services took to stop during the shutdown, from `ShutdownServicesTime` on Diagnostics-Performance event 200. |
+| `win.eventlog.platform.shutdown_user_session_ms` | int | Milliseconds the user session took to close during the shutdown, from `ShutdownUserSessionTime` on Diagnostics-Performance event 200. |
+| `win.eventlog.platform.shutdown_component` | string | Service that slowed the shutdown, from `Name` on Diagnostics-Performance event 203. |
+| `win.eventlog.platform.shutdown_component_degradation_ms` | int | Milliseconds that service took to stop beyond its usual time, from `DegradationTime` on Diagnostics-Performance event 203. |
+| `win.eventlog.platform.usb_failure_type` | int | Type of USB controller failure, as the number on USB-USBXHCI events 50 and 62 or UcmUcsiCx event 1. |
+| `win.eventlog.platform.usb_failure_subtype` | int | Subtype of the USB controller failure, as the number on USB-USBXHCI events 50 and 62 or UcmUcsiCx event 1. |
+| `win.eventlog.platform.usb_error_reason` | int | Error reason of the USB controller failure, as the number on USB-USBXHCI events 50 and 62 or UcmUcsiCx event 1. |
+| `win.eventlog.platform.usb_ucsi_command` | int | USB Type-C connector command (UCSI) that failed, as the number on UcmUcsiCx event 1. |
+| `win.eventlog.platform.mtp_operation_code` | int | Media Transfer Protocol operation the phone, camera or player did not answer, as the number on WPD-MTPClassDriver events 1006, 1007 and 1008. |
+| `win.eventlog.platform.font_load_blocked` | bool | Whether Windows blocked the font from loading, from `Blocked` on Win32k event 260. |
+| `win.eventlog.platform.font_source_type` | int | Type of font source, as the number on Win32k event 260. |
+| `win.eventlog.platform.font_file` | string | File name (without folder) of the font Windows blocked or flagged, from Win32k event 260. |
+| `win.eventlog.platform.thermal_zone` | string | Thermal zone the firmware reported on, from `ThermalZoneDeviceInstance` on Kernel-Power thermal events 114 and 116. |
+| `win.eventlog.platform.thermal_temperature_k` | float | Temperature of the thermal zone in kelvin, from `_TMP` on Kernel-Power thermal events 114 and 116. Subtract 273.15 for degrees Celsius. |
+| `win.eventlog.platform.thermal_active_trip_k` | float | Temperature in kelvin at which the firmware turns on active cooling (fans), from `_AC0` on Kernel-Power thermal events. |
+| `win.eventlog.platform.thermal_passive_trip_k` | float | Temperature in kelvin at which Windows slows the processor to cool it, from `_PSV` on Kernel-Power thermal events. |
+| `win.eventlog.platform.thermal_min_throttle` | float | Lowest processor speed Windows may throttle to for passive cooling, from `MinimumThrottle` on Kernel-Power thermal events. |
+| `win.eventlog.platform.live_dump_component` | string | Kernel component that asked for a live kernel dump, from `ComponentName` on WERKernel events 1001 and 1002. |
+| `win.eventlog.platform.live_dump_requested_policy` | int | Live dump policy the component asked for, as the number on WERKernel events 1001 and 1002. |
+| `win.eventlog.platform.live_dump_granted_policy` | int | Live dump policy Windows granted, as the number on WERKernel events 1001 and 1002. |
+| `win.eventlog.platform.live_dump_throttled` | bool | Whether Windows throttled the live dump request and did not take the dump, from `ThrottleCheckResult` on WERKernel events 1001 and 1002. |
+| `win.eventlog.platform.gpu_memory_bytes` | int | Graphics memory involved when the desktop compositor ran short of GPU resources, from `MemorySize` on Diagnostics-Performance event 500. |
+| `win.eventlog.platform.gpu_memory_bandwidth` | int | Graphics memory bandwidth reported when the desktop compositor ran short of GPU resources, from `MemoryBandwidth` on Diagnostics-Performance event 500. |
+| `win.eventlog.platform.gpu_contention_scenario` | int | Scenario number Windows gave for the desktop compositor contention, from `Scenario` on Diagnostics-Performance event 500. |
+| `win.eventlog.platform.boot_measure_reason_code` | int | Reason code for the measured boot failure, from `ReasonCode` on Kernel-Boot events 208 and 235, as a number. |
+| `win.eventlog.platform.boot_measure_init_state` | int | Initialization state of measured boot when it failed, from `InitState` on Kernel-Boot events 208 and 235, as a number. |
+| `win.eventlog.platform.tpm_init_position` | int | Point in the boot where TPM initialization failed, from `Position` on Kernel-Boot events 208 and 235, as a number. |
+| `win.eventlog.platform.device_software_name` | string | Device companion software Windows tried to install or remove, from `Prop_SoftwareName` on DeviceSetupManager Admin events. |
+| `win.eventlog.platform.device_software_exit_code` | int | Exit code of the device companion software installer, from `Error` on DeviceSetupManager Admin events, as Windows wrote it. |
+| `win.eventlog.platform.intel_graphics_category` | string | Category the Intel Graphics Software event gives for itself, read from the JSON the Intel service writes. |
 
 ## Portable families
 

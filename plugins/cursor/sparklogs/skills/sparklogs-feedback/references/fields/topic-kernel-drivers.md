@@ -1,0 +1,35 @@
+<!-- GENERATED reference. Do not hand-edit. -->
+# Kernel drivers fields
+
+Full inventory every day. Supported changes are reported when the agent observes them.
+
+| Field | Type | Unit | Meaning |
+|---|---|---|---|
+| `sparklogs.data.kernel_drivers.name` | string |  | The OS's name for the driver. On Windows, its service name as Windows spells it. This inventory lists what the Service Control Manager reports as loaded: a driver with no service entry does not appear, so this is not a rootkit check. |
+| `sparklogs.data.kernel_drivers.display_name` | string |  | The driver's display name, as the Service Control Manager reports it. |
+| `sparklogs.data.kernel_drivers.driver_type` | string |  | What kind of driver this is: `kernel`, `file_system` (minifilters included), `recognizer`, or `unknown` for a type this agent does not name. |
+| `sparklogs.data.kernel_drivers.driver_type_code` | integer |  | The service type number Windows reports for the driver. |
+| `sparklogs.data.kernel_drivers.start_type` | string |  | When the driver is configured to load: `boot`, `system`, `auto`, `manual` or `disabled`. On Windows, absent when its configuration could not be read. |
+| `sparklogs.data.kernel_drivers.load_order_group` | string |  | The driver's load order group, such as `FSFilter Bottom`. Empty when it names none; on Windows, absent when its configuration could not be read. |
+| `sparklogs.data.kernel_drivers.filter_altitude` | string |  | The altitude of the driver's default minifilter instance, as the registry spells it: where it sits in the file system filter stack. Absent for a driver that is not a registered minifilter. |
+| `sparklogs.data.kernel_drivers.filter_class` | string |  | Which of Microsoft's documented minifilter groups the altitude falls in, such as `anti_virus` or `activity_monitor`; `unknown` when it falls in none. Absent for a driver that is not a registered minifilter. |
+| `sparklogs.data.kernel_drivers.image_path_raw` | string |  | The driver's `ImagePath` registry value, as configured. Empty when the value is not set, which means Windows loads the driver from `System32\drivers`; on Windows, absent when its configuration could not be read. |
+| `sparklogs.data.kernel_drivers.image_path` | string |  | The driver file on this machine, which the file facts below describe. Absent when the configured path is not a local drive path; such a file is never opened. |
+| `sparklogs.data.kernel_drivers.file_version` | string |  | The file's version resource. This is the file on disk, which can differ from the copy in memory after an update until the driver reloads. Absent until the agent has read the file since it started, and for a file with no version resource. |
+| `sparklogs.data.kernel_drivers.publisher` | string |  | The company named in the file's version resource: the vendor, where the signer of a hardware-certified driver is Microsoft. Absent until the agent has read the file since it started, and when the file names none. |
+| `sparklogs.data.kernel_drivers.signer` | string |  | Who signed the file: the common name on the certificate of the signature Windows accepted. Hardware-certified drivers read `Microsoft Windows Hardware Compatibility Publisher`, so read `publisher` for the vendor. Absent until a check has accepted a signature. |
+| `sparklogs.data.kernel_drivers.signature_type` | string |  | Where the signature that was checked lives: `catalog` (a Windows catalog holds the file's hash) or `embedded` (in the file). Absent until a check has answered. |
+| `sparklogs.data.kernel_drivers.signature_status` | string |  | What the signature check found: `trusted`, `unsigned`, `untrusted` (a signature Windows rejects), `test_signed` (it chains to a test root, so test signing is on) or `timed_out` (the check did not finish). The check uses no network, so revocation is not checked. Absent until a check has answered since the agent started. |
+| `sparklogs.data.kernel_drivers.signature_error_code` | integer |  | The result Windows gave for a file it did not accept. Present for `unsigned`, `untrusted` and `test_signed`. |
+| `sparklogs.data.kernel_drivers.signature_error_name` | string |  | The name of the result, such as `TRUST_E_NOSIGNATURE`. Absent when it has no known name. |
+| `sparklogs.data.kernel_drivers.signature_error_space` | string |  | The code table that named the result: `trust` or `crypt`. Absent when it has no known name. |
+| `sparklogs.data.kernel_drivers.loaded_since_ts` | string | timestamp | When the agent first saw the driver loaded, in this boot. A driver loaded for less than about a minute has no row; `kernel_driver_installed` reports a short-lived driver from its System log record. |
+| `sparklogs.data.kernel_drivers.loaded_since_basis` | string |  | How far `loaded_since_ts` can be trusted: `onset` when the agent watched the load happen, `observed` when the driver was already loaded at the first look of a boot or loaded while the agent was not running. |
+| `sparklogs.data.kernel_drivers.load_count_1h` | integer | count | How many times this driver loaded in the last hour of this boot. A load counts once it has lasted to the next capture, after an unload that lasted past the absence grace, so a short blink never counts. |
+| `sparklogs.data.kernel_drivers.loaded_for_s` | integer | seconds | How long the driver was loaded, from when the agent first saw it to the first capture that missed it: within about a minute either way, and much less than the truth when `loaded_since_basis` is `observed`. Present only on `kernel_driver_unloaded`. |
+| `sparklogs.data.kernel_drivers.install_count_1h` | integer | count | How many times this driver was installed in the last hour, from Service Control Manager event 7045. Each record means the driver's entry was registered, not that it ran. A tool that keeps its service key logs no record for later loads, and a minifilter's reinstalls are not counted. Absent until the System log has been read, and when it has not been read lately. Counts `service_installed` records matching `sparklogs.reason_variant="kernel_driver"`; the latest is `sparklogs.data.kernel_drivers.install_last_seen_ts`. |
+| `sparklogs.data.kernel_drivers.install_last_seen_ts` | string | timestamp | When the newest record counted in `install_count_1h` was written. Absent when the hour holds none. |
+| `sparklogs.data.kernel_drivers.kernel_driver_flapping_age_basis` | string |  | `onset`: start watched live. `observed`: already present when first noticed, making age a lower bound. `unknown_ongoing`: no meaningful onset time. |
+| `sparklogs.data.kernel_drivers.kernel_driver_flapping_age_h` | float | hours | How long this condition has been open, in hours. |
+| `sparklogs.data.kernel_drivers.kernel_driver_installed_repeatedly_age_basis` | string |  | `onset`: start watched live. `observed`: already present when first noticed, making age a lower bound. `unknown_ongoing`: no meaningful onset time. |
+| `sparklogs.data.kernel_drivers.kernel_driver_installed_repeatedly_age_h` | float | hours | How long this condition has been open, in hours. |

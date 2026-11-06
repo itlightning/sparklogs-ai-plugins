@@ -3,7 +3,8 @@
 If server instructions are missing or terminology is unclear, call `server_info` with `include_instructions: true`.
 For detailed views, fieldsets, aggregation or paging, call it with `describe_tool` (arg) naming the tool.
 Use these references when the visible description leaves a question, not on every call.
-Process charts use `query_device_health` with `view` (arg) `top_processes_over_time`.
+A question about one device or a few starts with `query_device_health` `view` (arg) `device_overview` or `device_network`: read `device-state-fields.md` (**Read a device view**).
+Process charts use the same tool with `view` (arg) `top_processes_over_time`.
 
 ## Curated data (read this before opening reference files)
 

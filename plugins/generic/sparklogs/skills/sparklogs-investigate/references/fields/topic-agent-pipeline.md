@@ -5,14 +5,14 @@ Full inventory on its own schedule. Supported changes are reported when the agen
 
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
-| `sparklogs.data.agent_pipeline.agent_version` | string |  | The agent version, plain semver, without build metadata. |
-| `sparklogs.data.agent_pipeline.agent_build` | string |  | The agent build: semver plus the commit this binary was built from. `.dirty` means the tree was modified. |
-| `sparklogs.data.agent_pipeline.cpu_pct_of_one_core_avg` | float | percent | Mean of the combined agent and Vector CPU percentages measured between consecutive captures, relative to one logical core. Includes whichever processes were measured in each interval. Can exceed 100: two busy cores read 200. |
-| `sparklogs.data.agent_pipeline.cpu_pct_of_one_core_p95` | float | percent | 95th percentile of the combined agent and Vector CPU percentages between captures, relative to one logical core. Can exceed 100: two busy cores read 200. |
-| `sparklogs.data.agent_pipeline.working_set_avg_bytes` | integer | bytes | Sum of the agent and Vector mean resident working sets over the window. Includes available readings. |
-| `sparklogs.data.agent_pipeline.spool_dir_bytes` | integer | bytes | How many bytes the agent's event spool currently holds. |
-| `sparklogs.data.agent_pipeline.spool_pct_of_cap` | float | percent | Spool size as a percentage of its limit. May exceed 100 because the limit is enforced after a write. |
-| `sparklogs.data.agent_pipeline.spool_growth_mb_per_h` | float | megabytes_per_hour | The spool's growth rate in MiB (1,048,576 bytes) per hour, fitted from its recent size readings. |
-| `sparklogs.data.agent_pipeline.spool_last_drained_at` | string | timestamp | The last instant the pipeline was known to be caught up. Absent when no such instant has ever been observed. |
-| `sparklogs.data.agent_pipeline.tables_pct_of_cap_max` | float | percent | The fullest persisted dedupe or throttle table's size as a percentage of its byte limit. A full table drops its oldest rows, so repeats of those keys pass again. Absent when no table is persisted. |
-| `sparklogs.data.agent_pipeline.tables_evictions` | integer | count | Rows dropped from persisted dedupe and throttle tables to stay under their byte limits, summed across tables, since Vector last started. Absent when no table is persisted. |
+| `sparklogs.data.agent_pipeline.agent_version` | string |  | The agent version, such as 1.14.9, without build details. |
+| `sparklogs.data.agent_pipeline.agent_build` | string |  | The agent version plus the source commit it was built from. A `.dirty` suffix marks a build from modified source. |
+| `sparklogs.data.agent_pipeline.cpu_pct_of_one_core_avg` | float | percent | The agent's and Vector's average CPU use over the last several minutes added together, as a percentage of one logical core. Can exceed 100: two busy cores read 200. |
+| `sparklogs.data.agent_pipeline.cpu_pct_of_one_core_p95` | float | percent | The 95th percentile of the agent's and Vector's combined CPU use over the last several minutes, as a percentage of one logical core. Can exceed 100: two busy cores read 200. |
+| `sparklogs.data.agent_pipeline.working_set_avg_bytes` | integer | bytes | The agent's and Vector's average working sets over the last several minutes added together. |
+| `sparklogs.data.agent_pipeline.spool_dir_bytes` | integer | bytes | The size of the agent's event spool on disk. |
+| `sparklogs.data.agent_pipeline.spool_pct_of_cap` | float | percent | The spool's size as a percentage of its size limit. Can briefly exceed 100, because the limit is applied after each write. |
+| `sparklogs.data.agent_pipeline.spool_growth_mb_per_h` | float | megabytes_per_hour | How fast the spool is growing per hour, fitted from its recent sizes; negative while it drains. |
+| `sparklogs.data.agent_pipeline.spool_last_drained_at` | string | timestamp | The time up to which every feed has read all its events: the oldest of the feeds' last caught-up times. Absent while any feed has never been seen caught up. |
+| `sparklogs.data.agent_pipeline.tables_pct_of_cap_max` | float | percent | How full the fullest of Vector's saved duplicate and throttle tables is, as a percentage of its size limit. A full table forgets its oldest entries, so repeats of those events pass again. Absent when Vector keeps no such table. |
+| `sparklogs.data.agent_pipeline.tables_evictions` | integer | count | How many entries Vector's saved duplicate and throttle tables forgot to stay under their size limits, across all tables, since Vector last started. Absent when Vector keeps no such table. |

@@ -27,24 +27,24 @@ Stored flat under the `win.eventlog.apps.` prefix.
 
 | LQL path | Type | Meaning |
 |---|---|---|
-| `win.eventlog.apps.appx_package_full_name` | string | Full packaged-application identity reported by deployment, readiness, or runtime records. |
-| `win.eventlog.apps.appx_package_family_name` | string | Package family identity reported by the shell or application runtime. |
-| `win.eventlog.apps.appx_operation` | string | Deployment or readiness operation as the provider wrote it. Numeric deployment values remain raw. |
-| `win.eventlog.apps.appx_deployment_operation` | int | Raw AppX DeploymentOperation integer. No local name map is inferred. |
-| `win.eventlog.apps.appx_requeue_reason` | string | Reason the deployment provider gives for putting an attempt back on its queue, as written. |
-| `win.eventlog.apps.appx_calling_process` | string | Process label the deployment provider reports as the caller. |
-| `win.eventlog.apps.appx_package_type` | string | Package type reported by the deployment provider. |
-| `win.eventlog.apps.appx_cleanup_error_count` | int | Number of package files a cleanup summary says remain. |
-| `win.eventlog.apps.appx_cleanup_registry_key` | string | Registry key name a package cleanup record could not remove. |
-| `win.eventlog.apps.appx_app_id` | string | Packaged-application identity reported by an activation record. |
-| `win.eventlog.apps.appx_activation_phase` | string | Activation phase flags as the provider wrote them. |
-| `win.eventlog.apps.appx_contract_id` | string | Application contract the shell attempted to activate. |
-| `win.eventlog.apps.appx_service_name` | string | Packaged-application service the deployment client tried to start. |
-| `win.eventlog.apps.perf_counter_set_guid` | string | Counter-set identifier whose provider registration failed. |
-| `win.eventlog.apps.perf_provider_guid` | string | Performance-counter provider identifier that failed to register. |
-| `win.eventlog.apps.perf_counter_id` | int | Performance-counter identifier reported by the provider. |
-| `win.eventlog.apps.app_domain` | string | Hosted application domain that raised a request exception. |
-| `win.eventlog.apps.exception_type` | string | Framework exception type parsed from the provider exception detail. |
+| `win.eventlog.apps.appx_package_full_name` | string | Full name of the Store or packaged app (name, version, architecture and publisher ID), as the AppX deployment, App Readiness or app runtime event names it, from `PackageFullName` or the provider's equivalent. |
+| `win.eventlog.apps.appx_package_family_name` | string | Package family name of the app (name and publisher ID, without version), from `PackageFamilyName` (or `MainPackageFamilyName`) on AppX deployment failures, Shell-Core event 62164 and app runtime events 79 and 80. |
+| `win.eventlog.apps.appx_operation` | string | Operation App Readiness was running, from `Operation`, as Windows wrote it. |
+| `win.eventlog.apps.appx_deployment_operation` | int | Number of the AppX deployment operation, from `DeploymentOperation`, as Windows wrote it. SparkLogs does not translate it to a name. |
+| `win.eventlog.apps.appx_requeue_reason` | string | Reason the AppX deployment service gave for putting a deployment back on its queue, from `RequeueReason`, as Windows wrote it. |
+| `win.eventlog.apps.appx_calling_process` | string | Program that asked the AppX deployment service for the operation, from `CallingProcess`. |
+| `win.eventlog.apps.appx_package_type` | string | Package type the AppX deployment service reported, from `PackageType`. |
+| `win.eventlog.apps.appx_cleanup_error_count` | int | Number of items a package cleanup could not remove, from `ErrorCount` on AppXDeploymentServer cleanup summary events 493, 494 and 516. |
+| `win.eventlog.apps.appx_cleanup_registry_key` | string | Registry key a package cleanup could not remove, from `RegistryKeyName` on AppXDeploymentServer events 801, 802 and 808. |
+| `win.eventlog.apps.appx_app_id` | string | ID of the packaged app an activation event is about, from `AppId` on app runtime and TWinUI activation events. |
+| `win.eventlog.apps.appx_activation_phase` | string | Phase flags of an app activation, from `PhaseFlags` on TWinUI activation events, as Windows wrote them. |
+| `win.eventlog.apps.appx_contract_id` | string | Kind of activation the shell asked for (for example launching the app or opening a file with it), from `ContractId` on TWinUI activation events. |
+| `win.eventlog.apps.appx_service_name` | string | Service the AppX deployment client tried to start, from `ServiceName` on AppXDeployment events 302, 303, 311 and 328. |
+| `win.eventlog.apps.perf_counter_set_guid` | string | GUID of the performance counter set whose registration failed, from Diagnosis-PCW events 2 and 3. |
+| `win.eventlog.apps.perf_provider_guid` | string | GUID of the performance counter provider that failed to register, from Diagnosis-PCW events 2 and 3. |
+| `win.eventlog.apps.perf_counter_id` | int | ID of the performance counter named on the failure, from `CounterId` on Diagnosis-PCW events 2 and 3. |
+| `win.eventlog.apps.app_domain` | string | Application domain of the hosted WCF service that hit a request exception, from `AppDomain` on Application Server-Applications events 57397, 57405 and 57408. |
+| `win.eventlog.apps.exception_type` | string | .NET exception type of the failed WCF request, read from the start of the exception detail on Application Server-Applications events 57397, 57405 and 57408. |
 
 ## Portable families
 

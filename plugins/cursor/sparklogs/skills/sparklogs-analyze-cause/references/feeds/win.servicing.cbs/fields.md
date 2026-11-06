@@ -25,12 +25,12 @@ Stored flat under the `win.servicing.cbs.` prefix.
 
 | LQL path | Type | Meaning |
 |---|---|---|
-| `win.servicing.cbs.component` | string | CBS log component column (CBS, CSI, DPX, SXS, WCP, SQM, DEPLOY, DMI, PnP). |
-| `win.servicing.cbs.detected_corruption` | int | Total Detected Corruption count from a DISM scan-summary line. |
-| `win.servicing.cbs.repaired_corruption` | int | Total Repaired Corruption count from a DISM scan-summary line. |
-| `win.servicing.cbs.corrupt_component` | string | WinSxS component family of a corrupt payload (e.g. userexperience-oobe). Aggregate query-side. |
-| `win.servicing.cbs.corrupt_file` | string | Corrupt payload file path from a CSI Payload Corrupt line. |
-| `win.servicing.cbs.unrepairable_file` | string | A file CSI could not repair, from an Unable to repair payload file line. |
+| `win.servicing.cbs.component` | string | Component that wrote the CBS.log line, from its component column, such as CBS, CSI, DPX, SXS or WCP. Absent when the line names none. |
+| `win.servicing.cbs.detected_corruption` | int | Number of corruptions a DISM component-store scan found, from its "Total Detected Corruption" summary line in CBS.log. |
+| `win.servicing.cbs.repaired_corruption` | int | Number of corruptions a DISM component-store scan repaired, from its "Total Repaired Corruption" summary line in CBS.log. |
+| `win.servicing.cbs.corrupt_component` | string | Component-store (WinSxS) component that holds a corrupt file, such as userexperience-oobe, read from the path on a "CSI Payload Corrupt" line. Count by it to see which components keep turning up corrupt. Absent when the path names no component. |
+| `win.servicing.cbs.corrupt_file` | string | Path of a corrupt file in the component store, as a "CSI Payload Corrupt" line in CBS.log names it. |
+| `win.servicing.cbs.unrepairable_file` | string | File the servicing stack could not repair, from an "Unable to repair payload file" line in CBS.log. |
 
 ## Portable families
 

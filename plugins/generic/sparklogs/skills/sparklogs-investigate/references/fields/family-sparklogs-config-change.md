@@ -13,8 +13,8 @@
 | `sparklogs.config_change.changes[].field` | string |  | In each `changes` entry. |
 | `sparklogs.config_change.changes[].old` | any |  | In each `changes` entry. |
 | `sparklogs.config_change.changes[].new` | any |  | In each `changes` entry. |
-| `sparklogs.config_change.renamed_from` | string |  | On an update of a subject that changed identity (a driver package renumbered by its update), the instance of the subject it replaced. Absent otherwise. |
-| `sparklogs.config_change.recorded_evidence` | object_array |  | Exact selectors for independently recorded events associated with an observed service installation. Each entry has original UTC RFC3339 `t`, `match_fields` (`subsource`, `origin`, `event_id`, positive signed `record_id`) and `association: inferred_same_change`. A referenced original may be unavailable in stored events. |
+| `sparklogs.config_change.renamed_from` | string |  | On an update of a subject that changed identity (a driver package renumbered by its update, or a program whose name carries its version), the instance of the subject it replaced. Absent otherwise. |
+| `sparklogs.config_change.recorded_evidence` | object_array |  | Exact selectors for the recorded events behind a change. On an observed service installation or driver load, an independent record of the same change, `association: inferred_same_change`. On a change with `basis: recorded`, the record the change was read from, `association: source_record`. Each entry has original UTC RFC3339 `t`, `match_fields` (`subsource`, `origin`, `event_id`, positive signed `record_id`) and `association`. A referenced original may be unavailable in stored events. |
 | `sparklogs.config_change.recorded_evidence[].t` | string | timestamp | In each `recorded_evidence` entry. |
 | `sparklogs.config_change.recorded_evidence[].match_fields` | object |  | In each `recorded_evidence` entry. |
 | `sparklogs.config_change.recorded_evidence[].association` | string |  | In each `recorded_evidence` entry. |

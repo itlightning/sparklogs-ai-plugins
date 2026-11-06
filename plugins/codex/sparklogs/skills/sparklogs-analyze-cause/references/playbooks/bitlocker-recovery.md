@@ -6,9 +6,12 @@
 The prompt itself happens before anything is shipping; reconstruct from before and after.
 Include the last successful boot in the window.
 
-**Queries.**
+**Device health first.** `device_overview` from before the last successful boot through the prompt.
+Its `events` (col), and the `events` result set for the full list, carry the device's own observed changes between boots: `bios_version_changed`, `boot_mode_changed`, `secure_boot_disabled`, `secure_boot_enabled`, `tpm_presence_changed`, `tpm_version_changed`, `hardware_identity_changed` and `volume_bitlocker_protection_dropped`.
+The boot and shutdown marks around them are rows of the `events` result set only.
+An observed change says the setting moved between two readings, not who moved it or when inside that gap.
 
-What changed before reboot:
+**Events, for what health named.** What changed before reboot:
 
 ```
 source = "<host>" AND sparklogs.kind = config_change

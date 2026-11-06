@@ -25,7 +25,7 @@ Stored flat under the `win.servicing.dism.` prefix.
 
 | LQL path | Type | Meaning |
 |---|---|---|
-| `win.servicing.dism.component` | string | DISM log component column (usually DISM; CSI on shim lines). |
+| `win.servicing.dism.component` | string | Component that wrote the DISM.log line, from its component column: usually DISM, sometimes CSI. Absent when the line names none. |
 
 ## Portable families
 

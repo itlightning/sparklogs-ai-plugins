@@ -5,7 +5,11 @@
 **Accuracy.** Servicing is curated across CBS, DISM, Setup, and System.
 Pending reboot and component-store health are servicing *reasons* on the same pass, not a second scan.
 
-**Queries.**
+**Device health first.** Open conditions `patch_scan_stale` and `patch_updates_paused`, then `latest_state` on the `windows_update_agent_state` and `system_info` topics for the update agent's last scan and a pending reboot.
+A machine "behind on updates" that has not scanned is a different ticket from one whose installs fail.
+`device_overview` over the install window shows whether the device was asleep or powered off then (header coverage) and whether the OS volume ran low on space (`events` (col)).
+
+**Events, for what health named.**
 
 ```
 source = "<host>" AND service = patching

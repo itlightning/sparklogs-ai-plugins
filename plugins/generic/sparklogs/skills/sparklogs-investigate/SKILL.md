@@ -64,7 +64,8 @@ Tool decision tree and recipes: `references/guides/mcp-tool-decision-tree.md`.
 If server instructions are missing or terminology is unclear, call `server_info` with `include_instructions: true`.
 For detailed views, fieldsets, aggregation or paging, call it with `describe_tool` (arg) naming the tool.
 Use these references when the visible description leaves a question, not on every call.
-Process charts use `query_device_health` with `view` (arg) `top_processes_over_time`.
+A question about one device or a few starts with `query_device_health` `view` (arg) `device_overview` or `device_network`: read `references/guides/device-state-fields.md` (**Read a device view**).
+Process charts use the same tool with `view` (arg) `top_processes_over_time`.
 
 ## Curated data (read this before opening reference files)
 
@@ -127,14 +128,20 @@ Detail: `references/playbooks/playbooks.md`.
 
 | Symptom | File |
 |---|---|
+| One application slow or stalling over the network | `references/playbooks/application-network-stall.md` |
+| App slow over VPN | `references/playbooks/application-network-stall.md` |
 | Backup job failed | `references/playbooks/backup-failure.md` |
 | BitLocker recovery | `references/playbooks/bitlocker-recovery.md` |
 | Certificate expiry | `references/playbooks/certificate-expiry.md` |
 | Directory replication | `references/playbooks/directory-replication-failure.md` |
 | Disk full or filling | `references/playbooks/disk-full-or-filling.md` |
 | Memory or handle leak | `references/playbooks/memory-or-handle-leak.md` |
+| Internet down, slow or dropping | `references/playbooks/network-connectivity.md` |
+| Wi-Fi drops | `references/playbooks/network-connectivity.md` |
 | RAID / array degraded | `references/playbooks/raid-or-storage-degraded.md` |
 | RMM connectivity | `references/playbooks/rmm-connectivity.md` |
+| Slow or freezing PC | `references/playbooks/slow-device.md` |
+| Slow server | `references/playbooks/slow-device.md` |
 | Slow logon | `references/playbooks/slow-logon.md` |
 | Windows Update / patch failure | `references/playbooks/windows-update-failure.md` |
 | VSS / shadow copies / backup plumbing | `references/playbooks/windows-vss.md` |
@@ -147,7 +154,7 @@ Detail: `references/playbooks/playbooks.md`.
 | Who changed what (Security) | `references/themes/windows-security-and-audit.md` |
 | Defender | `references/themes/endpoint-protection.md` |
 | App / System crashes and services | `references/themes/windows-operational-events.md` |
-| CPU, RAM, disk, installed software, monitors | `references/themes/device-health-and-state.md` |
+| CPU, RAM, disk, network, installed software, monitors | `references/themes/device-health-and-state.md` |
 | Named backup product (Veeam etc.): installed products. Not operational events. | `references/themes/device-health-and-state.md` |
 
 ### Feed id → lookup
@@ -188,6 +195,9 @@ Canonical template (field definitions, right-vs-wrong examples): `references/out
 ## Section 5. Citation discipline - every claim links to verifiable evidence
 
 Every factual claim cites a `query_url` (col) from the MCP response; record `query_id` (arg) beside it when several queries share a window. URLs scope org and time in explore, not your cached filter: copy verbatim. Quote `message` (LQL) bytes exactly when a Finding rests on log text. No query, no claim, or use `insufficient_evidence`.
+A Finding from a device view cites the reading's `query_url` (col) and names the result set and `filter_lql` (col) that return its rows; cite the refine's `query_url` (col) when you read those rows.
+
+Links are URLs from `meta` (col), never a bare `query_id` (arg) or investigation handle. A Finding about a device also links that device's page, including a fleet query that narrows to one device; a Finding naming several devices links each. Link a specific row only when that row carries the point: one or two links per Finding, not every row. The evidence query and a fleet answer cite `query_url` (col). `meta.device_url` (col) is cited as returned; to fill `meta.device_url_template` (col), follow the tool's reference (`server_info` with `describe_tool` (arg)).
 
 Right/wrong shapes: `references/output-template.md`.
 
@@ -204,6 +214,7 @@ Patterns and examples: `references/output-template.md`.
 ## Section 7. Visibility limits - explicit, every time
 
 Every summary lists WHAT WAS NOT CHECKED: off-endpoint and declined checks for this scope (`references/guides/off-endpoint-causes.md`). Name checks you skipped and why. Brief is fine when on-endpoint evidence is sufficient.
+A device view's `not_measured` (col) and unreported seconds name on-endpoint gaps for that window; list the ones a Finding could depend on.
 
 ---
 
@@ -211,12 +222,13 @@ Every summary lists WHAT WAS NOT CHECKED: off-endpoint and declined checks for t
 
 **Funnel before raw:** scope lightly, aggregate to narrow, then `query_logs` only over the narrowed slice. Investigation discipline (bounded discovery, aggregate before detail, cache before re-query) is above; per-tool tiers and recipes: `references/guides/mcp-tool-decision-tree.md`.
 
-**Rows returned are not the population.** Read matched TOTAL and `last_event_at` (col) before any how-much / how-long claim.
+**Rows returned are not the population.** Read matched TOTAL and `last_event_at` (col) before any how-much / how-long claim. A missing total is not zero.
 
 **Query shape (lightest first):** (e.g., whose scope? what arrived? what's on the box? what's noisy and where? what do the events say?)
 1. **Scope and coverage:** `resolve_scope`, `list_sources`; then `query_device_health` when agents are in scope; `query_scope_activity` when the estate is unfamiliar.
-2. **Pattern mining:** `query_event_counts_by_severity` and `describe_pattern` before citing hashes.
-3. **Raw events (last resort):** one broad `query_logs` slice, then `refine_query_result` (not another backing query). `list_fields` is rare.
+2. **Device health first** when the ticket is about one device or a few: `view` (arg) `device_overview` or `device_network` over the complaint window, then refine the result sets it points at. Narrow events to the devices and intervals it names (`references/guides/device-state-fields.md`, **Read a device view**). Follow-ups on one device's inventory refine the overview's `state` result set instead of new calls. `latest_state` answers current state: do not merge changes into it yourself, and a topic reported empty is evidence of none.
+3. **Pattern mining:** `query_event_counts_by_severity` and `describe_pattern` before citing hashes.
+4. **Raw events (last resort):** one broad `query_logs` slice, then `refine_query_result` (not another backing query). `list_fields` is rare.
 
 **Before "no evidence":** read `agent_complete_through` (col) / `advisories` (col), check `sparklogs.kind = agent_op` (value) rows, treat volume as a prompt only (not coverage). Empty `agent_op` is inconclusive; name what you could not rule out in WHAT WAS NOT CHECKED.
 

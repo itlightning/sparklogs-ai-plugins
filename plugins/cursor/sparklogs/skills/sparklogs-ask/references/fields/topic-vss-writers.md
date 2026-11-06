@@ -5,13 +5,13 @@ Full inventory every 6 hours. Supported changes are reported when the agent obse
 
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
-| `sparklogs.data.vss_writers.writer` | string |  | The VSS writer's name, lowercased so it joins with the string a failure message names it by. |
-| `sparklogs.data.vss_writers.display_name` | string |  | The writer name as `vssadmin` prints it, case preserved, for display. |
-| `sparklogs.data.vss_writers.writer_state` | string |  | The writer's state as `vssadmin` reports it. |
-| `sparklogs.data.vss_writers.writer_present` | bool |  | Always `true`: this row exists only for a writer `vssadmin` actually listed. |
-| `sparklogs.data.vss_writers.writer_state_failed` | bool |  | Whether `writer_state` starts with `failed`. |
-| `sparklogs.data.vss_writers.writer_class_code` | integer |  | Numeric writer classification: 1 a writer whose failure costs nothing restorable (ignored), 2 a system writer, 3 a writer this agent does not classify, 4 an application writer (SQL Server, Exchange, Hyper-V, directory, DHCP, certificate authority, cluster volumes, DFS replication). |
-| `sparklogs.data.vss_writers.writer_last_error` | string |  | What the writer itself reported as its last error, so a failure names its cause instead of only its state. |
-| `sparklogs.data.vss_writers.writer_expected` | bool |  | Whether the enrichment store expects this writer to be present on this host (for example, a SQL Server host expecting `sqlserverwriter`). Absent when that inventory has not run. |
-| `sparklogs.data.vss_writers.vss_writer_failed_age_basis` | string |  | `onset`: witnessed start. `observed`: already present when first seen, making age a lower bound. `unknown_ongoing`: no meaningful onset time. |
+| `sparklogs.data.vss_writers.writer` | string |  | The VSS writer's name, lowercased, such as `sqlserverwriter`. |
+| `sparklogs.data.vss_writers.display_name` | string |  | The writer's name as `vssadmin list writers` prints it, lowercased. |
+| `sparklogs.data.vss_writers.writer_state` | string |  | The writer's state as `vssadmin list writers` reports it, such as `stable` or `failed`. |
+| `sparklogs.data.vss_writers.writer_present` | bool |  | Whether `vssadmin list writers` lists the writer. False on a writer that left the list, for example because its service stopped, while a failure is still open on it; the other readings are then absent. |
+| `sparklogs.data.vss_writers.writer_state_failed` | bool |  | Whether the writer is in a failed state. |
+| `sparklogs.data.vss_writers.writer_class_code` | integer |  | What kind of writer this is: 1 a writer whose failure loses nothing a restore needs (ignored), 2 a Windows system writer, 3 a writer SparkLogs does not classify, 4 an application writer (SQL Server, Exchange, Hyper-V, Active Directory, DHCP, certificate authority, cluster shared volumes, DFS Replication). |
+| `sparklogs.data.vss_writers.writer_last_error` | string |  | The last error the writer reported, which names the cause of a failure. |
+| `sparklogs.data.vss_writers.writer_expected` | bool |  | Whether a backup relies on this writer: true for the System, Registry, WMI, COM+ REGDB, SQL Server, Exchange and NTDS writers when the machine has a backup product SparkLogs recognizes installed, false otherwise. Context only: it sets no severity. Absent when the installed-products list is out of date or has not been read yet. |
+| `sparklogs.data.vss_writers.vss_writer_failed_age_basis` | string |  | `onset`: start watched live. `observed`: already present when first noticed, making age a lower bound. `unknown_ongoing`: no meaningful onset time. |
 | `sparklogs.data.vss_writers.vss_writer_failed_age_h` | float | hours | How long this condition has been open, in hours. |

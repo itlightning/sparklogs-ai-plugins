@@ -27,28 +27,28 @@ Stored flat under the `win.defender.eventlog.` prefix.
 
 | LQL path | Type | Meaning |
 |---|---|---|
-| `win.defender.eventlog.threat_name` | string | Threat identity from the detection/remediation family (1116-1119, legacy 1006-1008, 1015): `Threat Name`. |
-| `win.defender.eventlog.severity_id` | int | Numeric threat severity from 1116/1006 (`Severity ID`: 1 Low, 2 Moderate, 4 High, 5 Severe). Locale-safe, so prefer it over the rendered name. |
-| `win.defender.eventlog.severity_name` | string | Rendered threat severity text from 1116/1006 (`Severity Name`). Locale-sensitive fallback read only when `Severity ID` is absent. |
-| `win.defender.eventlog.category_id` | int | Numeric threat category from 1116/1006 (`Category ID`). |
-| `win.defender.eventlog.category_name` | string | Rendered threat category text from 1116/1006 (`Category Name`). |
-| `win.defender.eventlog.threat_path` | string | File/object path the threat/rule acted on: 1116-1119 (legacy 1006-1008), 1015 (`Path`), 1121 ASR block (`Path`). |
-| `win.defender.eventlog.detection_origin` | string | Where the detection originated, from 1116/1006 (`Detection Origin`). |
-| `win.defender.eventlog.detection_type` | string | Detection mechanism kind, from 1116/1006 (`Detection Type`). |
-| `win.defender.eventlog.detection_source` | string | Detection source engine/component, from 1116/1006 (`Detection Source`). |
-| `win.defender.eventlog.user` | string | User context Defender associated with the event: detection (`User`), scan lifecycle (1000/1001, `User`). |
-| `win.defender.eventlog.action_id` | int | Numeric remediation action from 1117/1007 (`Action ID`). |
-| `win.defender.eventlog.action_name` | string | Rendered remediation action text from 1117/1007 (`Action Name`, downcased). Locale-sensitive, so an allow on a non-English system reads in the local language. |
-| `win.defender.eventlog.status` | string | Result code as logged (`Error Code`): 1117/1007 remediation outcome, 1118/1119/1008 remediation failure, 1005 scan failure, 2001/2003/2004 definition update failure, 3002/5008 engine failure. The remediation ids state a completed action as a zero here, so the value is the outcome and not a failure claim. |
-| `win.defender.eventlog.new_value` | string | 5007 config-change new value (`New Value`): the setting content Defender wrote, never message text. Exclusions, real-time monitoring, anti-spyware, tamper protection and cloud reporting are the settings this value names on a tamper-shaped change. |
-| `win.defender.eventlog.old_value` | string | 5007 config-change prior value (`Old Value`). |
-| `win.defender.eventlog.sig_version` | string | Current security intelligence version: 2000/2002/2010/2014 update lifecycle, 2001/2003/2004 update failure (`Current security intelligence Version`). |
-| `win.defender.eventlog.sig_version_previous` | string | Prior security intelligence version, same id family as `sig_version` (`Previous security intelligence Version`). |
-| `win.defender.eventlog.scan_id` | string | Scan lifecycle join key: 1000/1001 (start/finish), 1002 (cancelled), 1005 (failed) (`Scan ID`). |
-| `win.defender.eventlog.feature_name` | string | RTP feature name: 3002/5008 (engine failure), 3007 (recovery) (`Feature Name`). |
-| `win.defender.eventlog.rule_id` | string | ASR rule GUID from 1121 block (`ID`). |
-| `win.defender.eventlog.filename` | string | 2050 file-upload-for-analysis filename (`Filename`). |
-| `win.defender.eventlog.sha256` | string | 2050 file-upload-for-analysis hash (`Sha256`); join key with `filename`. |
+| `win.defender.eventlog.threat_name` | string | Name Defender gives the threat, from `Threat Name` on the detection and remediation events (1116 to 1119, 1015, and the older 1006 to 1008). |
+| `win.defender.eventlog.severity_id` | int | Defender's rating of the threat, from `Severity ID` on events 1116 and 1006: 1 Low, 2 Moderate, 4 High, 5 Severe. The same number on every Windows language, so filter on it before the name. |
+| `win.defender.eventlog.severity_name` | string | Defender's rating of the threat as text, from `Severity Name` on events 1116 and 1006, in lowercase. The text follows the Windows display language. |
+| `win.defender.eventlog.category_id` | int | Number of the threat category Defender assigned, from `Category ID` on events 1116 and 1006. |
+| `win.defender.eventlog.category_name` | string | Threat category Defender assigned, as text, from `Category Name` on events 1116 and 1006. |
+| `win.defender.eventlog.threat_path` | string | Path of the file or other object Defender acted on, from `Path` on the detection and remediation events (1116 to 1119, 1015, and the older 1006 to 1008) and on attack surface reduction block event 1121. |
+| `win.defender.eventlog.detection_origin` | string | Where the threat was found, such as a local machine or a network share, from `Detection Origin` on events 1116 and 1006. |
+| `win.defender.eventlog.detection_type` | string | Kind of detection Defender made, from `Detection Type` on events 1116 and 1006. |
+| `win.defender.eventlog.detection_source` | string | Defender component that made the detection, such as real-time protection or a user scan, from `Detection Source` on events 1116 and 1006. |
+| `win.defender.eventlog.user` | string | User account Defender ties to the event, from `User`: the account on a detection or remediation (1116, 1117 and the older 1006, 1007), or the account that started or ran a scan (1000, 1001). |
+| `win.defender.eventlog.action_id` | int | Number of the remediation action Defender took, from `Action ID` on events 1117 and 1007. |
+| `win.defender.eventlog.action_name` | string | Remediation action Defender took, as text, from `Action Name` on events 1117 and 1007, in lowercase. The text follows the Windows display language, so an allow on a non-English system is not the word allow. |
+| `win.defender.eventlog.status` | string | Result code Defender logged, from `Error Code`. On remediation events 1117 and 1007 it is the outcome, and a completed action reads as zero. On remediation failures (1118, 1119, 1008), scan failure 1005, security intelligence update failures (2001, 2003, 2004) and engine failures (3002, 5008) it is the failure code. |
+| `win.defender.eventlog.new_value` | string | New setting Defender recorded on configuration change event 5007, from `New Value`: the registry path of the setting, often with the value it was given. A change to exclusions, real-time monitoring, anti-spyware, tamper protection or cloud reporting is reported as a protection setting change. |
+| `win.defender.eventlog.old_value` | string | Setting as it was before the change, from `Old Value` on configuration change event 5007. |
+| `win.defender.eventlog.sig_version` | string | Security intelligence (definitions) version on the machine, from `Current security intelligence Version` on update events 2000, 2002, 2010 and 2014 and update failures 2001, 2003 and 2004. |
+| `win.defender.eventlog.sig_version_previous` | string | Security intelligence (definitions) version before the update, from `Previous security intelligence Version` on update events 2000, 2002, 2010 and 2014 and update failures 2001, 2003 and 2004. |
+| `win.defender.eventlog.scan_id` | string | Identifier of one Defender scan, from `Scan ID` on scan started and finished (1000, 1001), cancelled (1002) and failed (1005). Filter on it to see one scan from start to end. |
+| `win.defender.eventlog.feature_name` | string | Real-time protection feature that failed or recovered, from `Feature Name` on engine failures 3002 and 5008 and recovery event 3007. |
+| `win.defender.eventlog.rule_id` | string | GUID of the attack surface reduction rule that blocked a file, from `ID` on event 1121. Microsoft's attack surface reduction documentation maps each GUID to its rule name. |
+| `win.defender.eventlog.filename` | string | File Defender uploaded for cloud analysis, from `Filename` on event 2050. |
+| `win.defender.eventlog.sha256` | string | SHA-256 of the file Defender uploaded for cloud analysis, from `Sha256` on event 2050. |
 
 ## Portable families
 
