@@ -42,6 +42,7 @@ Full inventory every 8 hours. Supported changes are reported when the agent obse
 | `sparklogs.data.crashes.analysis` | string |  | How the dump analysis went: `complete`, `partial_timeout`, `partial_error`, `resource_limited`, `dump_unavailable`, `unsupported_format` or `budget_skipped`. `complete` means the analysis finished, not that the cause is known. |
 | `sparklogs.data.crashes.budget_reason` | string |  | Why the dump was not analyzed. With `budget_skipped`: `per_key` (the limit for crashes of this kind in a day was reached), `overall` (the daily limit for all crashes was reached) or `queue_full`. With `resource_limited`: `commit_pressure` (the machine's committed memory stayed too high to start the analysis). |
 | `sparklogs.data.crashes.analysis_elapsed_ms` | integer | milliseconds | How long the dump analysis ran. Absent when none ran. |
+| `sparklogs.data.crashes.analysis_peak_commit_bytes` | integer | bytes | The most memory the dump analysis committed at one time. Absent when none ran or Windows did not report it. |
 | `sparklogs.data.crashes.matching_dump_count` | integer | count | How many dump files matched the crash. |
 | `sparklogs.data.crashes.dump_path` | string |  | The full path of the analyzed dump file. Absent when there was none. |
 | `sparklogs.data.crashes.dump_name` | string |  | The analyzed dump's file name. |

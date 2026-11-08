@@ -1644,7 +1644,7 @@ Windows Update has not checked for updates in a long time, or never has.
 
 **Why it matters:** The machine finds no new updates, so it falls behind on security fixes while patch reports can still show it as current.
 
-**In practice:** Windows Update's last successful search for updates is 14 days old or more, or Windows Update reports it has never searched. It is raised once that has held for 1 day while the agent is running, so a machine that was switched off for weeks has time to catch up. A disabled or broken Windows Update service, a proxy or firewall blocking the update servers, or a WSUS server named in policy that no longer exists is the usual cause.
+**In practice:** Windows Update's last successful search for updates is 14 days old or more, or Windows Update reports it has never searched. It is raised once that has held for 12 hours while the agent is running, so a machine that was switched off for weeks has time to catch up. A disabled or broken Windows Update service, a proxy or firewall blocking the update servers, or a WSUS server named in policy that no longer exists is the usual cause.
 
 **What to check:**
 
