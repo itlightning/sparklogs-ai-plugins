@@ -94,12 +94,15 @@ Process charts use the same tool with `view` (arg) `top_processes_over_time` (va
 
 Per-feed closed vocabularies. **Grep** the code, constant, or `##` heading; never load a whole file.
 
-| Kind | Typical feed | Use when |
+| Table | Feed | Use when |
 |---|---|---|
-| NTSTATUS / security status | `win.eventlog.security` (value) | Logon/auth failure codes |
-| Win32 / HRESULT | `win.eventlog.application` (value), `win.eventlog.system` (value), `win.eventlog.setup` (value) | Servicing, app, VSS errors |
-| MSI exit codes | `win.eventlog.application` (value) | Installer failures |
-| Logon types, WU result codes | `win.eventlog.security` (value), `win.eventlog.application` (value) | Discriminate 4625/4624, update errors |
+| `win_status_codes` (value), `kerberos` (value) | `win.eventlog.security` (value) | NTSTATUS and Kerberos result codes on logon and auth failures |
+| `win_logon_types` (value), `win_nps_reason_codes` (value) | `win.eventlog.security` (value) | Logon type on 4624/4625; NPS reason codes |
+| `msi_error_codes` (value) | `win.eventlog.application` (value) | Installer exit codes |
+| `scsi_sense_key` (value), `scsi_additional_sense` (value), `srb_status` (value), `storage_bus_type` (value) | `win.eventlog.storage` (value) | StorPort and disk-subsystem error codes |
+| `code_integrity_signing_levels` (value) | `win.eventlog.identity_security` (value) | Code Integrity requested and validated signing levels |
+
+Feeds without a table carry the raw code on a field: Setup's HRESULT is `win.eventlog.setup.error_code` (LQL); a curated result is `sparklogs.result.code` (LQL).
 
 ## How much to read
 
@@ -318,7 +321,7 @@ Fresh report → re-render per Section 4 with all Findings so far. Explore furth
 
 Heuristics for stopping:
 
-- **Found enough for the summary:** you have 3-7 cited findings, the WHAT WAS NOT CHECKED section is honestly populated, and the executive summary writes itself in 2-3 paragraphs. Produce the summary.
+- **Found enough for the summary:** you have 3-7 cited findings, the WHAT WAS NOT CHECKED section is honestly populated, and the executive summary fits in one paragraph. Produce the summary.
 - **Hit the ~15 tool-call mark without converging:** stop and produce an interim summary. State explicitly: "Investigation has examined N findings without converging on a coherent picture; here's what was found and the next investigative directions worth taking." Don't spend another 15 tool calls if the first 15 didn't yield clarity.
 - **Backing-query ceiling exceeded:** if your local investigation-state document shows backing queries >20, pause and assess. (Most investigations need fewer; the higher ceiling exists so you can be thorough when the symptom legitimately requires it. Backing queries are the meaningful unit to track - keep the running count yourself as you issue them.)
 - **Source not reporting:** if `list_sources` (tool) shows the source sent no telemetry in the relevant window, stop after a brief summary saying no data arrived and that the cause was not established.

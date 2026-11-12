@@ -16,7 +16,7 @@ Verify with the confirm/refute steps and use judgment before acting.
 
 INPUT
 The prior investigation's system condition summary
-(referenced by external_investigation_id <id>, accessible via /sparklogs:sparklogs-summary <id>).
+(referenced by external_investigation_id <id>; the engineer can ask for it again by that id).
 
 CANDIDATE HYPOTHESES (ranked by evidence support)
 
@@ -61,14 +61,14 @@ Reused from the prior investigation. Do not generate a new one - this analysis e
 Required at the top of every analysis, right after the title. Plain, calm framing: these are ranked explanations that fit the evidence, not established conclusions. Verbatim wording suggested above. Every hypothesis still needs the confirm/refute steps below; the intro sets expectations once instead of repeating a warning per hypothesis.
 
 ### INPUT
-Reference to the prior investigation summary. The engineer can re-display it via `/sparklogs:sparklogs-summary <id>`.
+Reference to the prior investigation summary by its `external_investigation_id` (arg). The engineer can ask for it again by that id.
 
 ### Hypothesis statement
 A plain-language statement of the candidate cause. State it directly and specifically - the Confidence field and the WORKING THEORIES intro already carry the "candidate, not proven" framing, so the statement itself shouldn't hedge.
 
 **Right (direct, specific):**
 - "Hypothesis #1: KB5034441 (installed at 02:45 UTC per Finding 4) changed something in the storage stack that interacts negatively with Veeam VSS operations on this Windows version."
-- "Hypothesis #2: VSS shadow storage exhaustion on a subset of sources (Finding 5b cluster) is a separate factor compounding with the patch-related issue."
+- "Hypothesis #2: Disk contention during the snapshot (Finding 5 disk heat span) is a separate factor compounding with the patch-related issue."
 - "Hypothesis #1: Disk signature collision on Harddisk2."
 
 **Wrong (vague hedging - state it directly instead):**
@@ -107,7 +107,7 @@ If the symptom could mean something different than the obvious interpretation, e
 
 ### What is uncertain
 Explicit enumeration of weak evidence and gaps. **Do not minimize.** Examples:
-- "Whether the disk-pressure cluster (Finding 5b) is independent or related to the primary pattern."
+- "Whether the disk contention during the snapshot (Finding 5) is independent of or related to the primary pattern."
 - "Whether NAS-01 issues are contributing - backup target was not checked (no SparkLogs Agent)."
 - "Whether there is a non-KB factor common to the 7 affected sources."
 
@@ -137,8 +137,7 @@ Verify with the confirm/refute steps and use judgment before acting.
 
 INPUT
 The prior investigation's system condition summary
-(referenced by external_investigation_id investigate-ticket-4781-veeam-backup, accessible via
- /sparklogs:sparklogs-summary investigate-ticket-4781-veeam-backup).
+(referenced by external_investigation_id investigate-ticket-4781-veeam-backup).
 
 CANDIDATE HYPOTHESES
 
@@ -146,20 +145,20 @@ HYPOTHESIS #1: KB5034441 (installed ~30 minutes before the failure per Finding 4
  a change that affects Veeam VSS interaction on this Windows version.
   Evidence support: Findings 3 (new pattern not present pre-install), 4 (install timing),
                     6 (fleet-wide consistency across 7 sources)
-  Confidence: medium-high
+  Confidence: medium
   What would confirm this: roll back KB5034441 on a single test source and observe whether
                            the new error pattern recurs in the next backup window.
   What would refute this: identify any of the 7 affected sources that does NOT have KB5034441
                           installed; or identify sources with KB5034441 that show no Veeam pattern.
   Off-endpoint check needed: no (all evidence is on-endpoint)
 
-HYPOTHESIS #2: Disk pressure on the small subset of sources in cluster B (Finding 5b)
- is a separate compounding factor.
-  Evidence support: Finding 5 cluster B (4 occurrences with disk-pressure precursor)
-  Confidence: medium (small sample; only 4 occurrences out of 412)
-  What would confirm this: check free space on cluster B sources at the error timestamps;
-                           compare to sources where the error occurred without disk pressure.
-  What would refute this: cluster B sources have adequate free space at error times.
+HYPOTHESIS #2: Disk contention during the snapshot (the hot disk span in Finding 5) pushed
+ the SQL Server writer past its freeze budget, compounding the patch-related issue.
+  Evidence support: Finding 5 (hot disk span 03:10 to 03:20 UTC, overlapping the failure)
+  Confidence: low (one device, one span; contributors ran at the same time and are not proven causes)
+  What would confirm this: device_overview on the 7 other affected sources shows a disk heat span
+                           overlapping each failure.
+  What would refute this: the other affected sources failed with no disk heat around the failure.
   Off-endpoint check needed: no
 
 HYPOTHESIS #3: Backup target NAS-01 issues compound with VSS issues.
@@ -178,7 +177,7 @@ ALTERNATIVE FRAMINGS
   causation requires the rollback or population-comparison test.
 
 WHAT IS UNCERTAIN
-- Whether the disk-pressure cluster (Hypothesis #2) is independent or related to the
+- Whether the disk contention (Hypothesis #2) is independent of or related to the
   KB-related hypothesis (Hypothesis #1).
 - Whether NAS-01 issues (Hypothesis #3) are contributing - not checked.
 - Whether there is a non-KB factor common to the 7 affected sources that we haven't checked.
@@ -191,8 +190,8 @@ RECOMMENDED NEXT STEPS (suggested, not prescribed)
    Hypothesis #3 (target-related).
 2. If Hypothesis #1 is the working theory: testing rollback on one staging source would
    provide a strong signal.
-3. Running `query_event_counts_by_severity` to compare installed_products across the 7 affected
-   sources vs unaffected fleet sources could surface non-KB factors.
+3. Comparing installed products (query_device_health latest_state, topic installed_products)
+   across the 7 affected sources and unaffected fleet sources could surface non-KB factors.
 
 WHAT WAS EXAMINED
 - Additional backing queries: 0

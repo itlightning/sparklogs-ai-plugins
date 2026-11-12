@@ -28,7 +28,6 @@ Three principles for scalable analysis at fleet scale. Shape picks the tool; the
 3. **Reuse result handles:** `refine_query_result` (tool) pages, filters and aggregates an existing result.
    Cached handles use stored rows; live handles re-run the parent query against current data.
 
-See **Server instructions** at the end of this file for the full vocabulary walkthrough.
 
 ---
 
@@ -42,7 +41,7 @@ Choose by the question: device state, process trends, event counts or raw eviden
 | `list_sources` (tool) | Before concluding anything from an absence: did this source send data in THIS window? Any source type, including ingest keys. Any non-zero `cnt_critical_plus` (col) in scope: fetch those events before proceeding, whatever the investigation topic. |
 | `query_device_health` (tool) | Device conditions, inventories and trends. For one device or a few, start with `view` (arg) `device_overview` (value) or `device_network` (value), then drill down. Process charts: `view` (arg) `top_processes_over_time` (value). Raw samples: `series` (value). Topic discovery: `topics` (value). Current inventory state: `latest_state` (value). Episode history: `event_timeline` (value). Omit the view for the latest event per episode or occurrence. See `guides/device-state-fields.md` for interpretation. |
 | `query_scope_activity` (tool) | You do not know what this client HAS: which apps, services and subsources exist at all. Orientation on an unfamiliar estate. |
-| `query_event_counts_by_severity` (tool) | "What is going on here", at any altitude. The default mid-tier tool. `group_by=["reason"]` or `["pattern_hash"]`; pass two fields when the question has two nouns in it. |
+| `query_event_counts_by_severity` (tool) | "What is going on here", at any altitude. The default mid-tier tool. `group_by=["sparklogs.reason"]` or `["pattern_hash"]`; pass two fields when the question has two nouns in it. |
 | `describe_pattern` (tool) | You are about to cite a pattern and need its text and spread. Pass `pattern_hashes` (arg) (a list). Required before citing any teaser pattern. Mid-tier with counts. |
 | `query_logs` (tool) | The grouping pointed somewhere specific and you now need the actual events. Last resort, over a narrowed filter. |
 | `refine_query_result` (tool) | Page, filter or aggregate an existing result handle. Read the response for whether the handle is cached or live. |

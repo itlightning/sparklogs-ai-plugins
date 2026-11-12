@@ -19,7 +19,7 @@ The list is **not exhaustive** - it's a starting set covering common patterns. I
 
 - **Backup target health (NAS, cloud destination, SAN).** Veeam/Datto/Acronis often write to a NAS or cloud target. If the target is failing, slow, or out of space, the on-endpoint side sees "VSS error" but the cause is upstream. Backup target typically does not run a SparkLogs Agent.
 - **EDR cloud blocking VSS operations.** SentinelOne, Sophos, CrowdStrike, Defender for Endpoint may flag VSS operations as suspicious and block them. The block is recorded in the EDR cloud audit, NOT on-endpoint. EDR cloud is outside SparkLogs ingestion currently.
-- **Bespoke / unsupported backup vendor.** SparkLogs autodetect rules cover Veeam, Datto, Acronis, MSP360, Cove, and a few others. If the MSP is using a less-common vendor (or a custom backup script), the vendor's log file may not be ingested.
+- **Backup vendor's own logs.** Vendor events reach SparkLogs only through the Windows Event Log channels the pack collects; the vendor's own log files are not collected. A vendor (or custom backup script) that writes its job detail only to its own files is invisible here.
 - **Backup credential expiry.** Veeam/Datto runs as a service account whose credentials live in vault/AD. Credential expiry manifests as auth failure earlier in the backup pipeline; the VSS error is a downstream symptom. Credential vault is outside on-endpoint state.
 - **Hyper-V / VMware guest writers.** When the source is a hypervisor host but the failed writer is in a guest, on-endpoint state shows host healthy but guest writers are not visible from host. Cross-host correlation is not currently in scope.
 - **Backup-job server-side state.** If the backup product has a central scheduling server (Veeam B&R, Datto BCDR appliance), job-orchestration state lives there, not on the protected endpoint.
@@ -34,7 +34,7 @@ The list is **not exhaustive** - it's a starting set covering common patterns. I
 - **MFA cloud (Duo, Microsoft Authenticator).** Rate-limits, outages, user-side MFA issues. From the endpoint, looks like generic auth failure. MFA cloud audit is outside SparkLogs ingestion currently.
 - **Federation server (ADFS) cert expiry or outage.** Federation servers are sometimes on a separate machine that may or may not run a SparkLogs Agent. If not, ADFS issues are invisible from on-endpoint state.
 - **Time drift on the PDC emulator.** If the PDC's clock is drifting, Kerberos fails silently for clients. The PDC needs to be in scope for the investigation; if only the workstation is investigated, the PDC's time state is invisible.
-- **Azure AD Connect sync break.** Users get silently dropped from on-prem replica. Sync state lives in Azure AD Connect logs (which the SparkLogs Agent could ship if Connect is installed and the log location is known) but not in on-prem AD itself.
+- **Azure AD Connect sync break.** Users get silently dropped from on-prem replica. Sync state lives in Entra Connect's own logs on the sync server, which SparkLogs does not collect, not in on-prem AD itself.
 - **Network path between user and DC.** Packet loss, latency, intermittent DNS - visible from network monitoring, not from endpoint state alone.
 - **Cellular / coffee-shop WiFi for laptops.** Some "slow logon" reports are devices with intermittent network paths to the DC. The agent's probes cover the gateway, an internet target and DNS, not the path to a DC.
 
@@ -44,7 +44,7 @@ The list is **not exhaustive** - it's a starting set covering common patterns. I
 
 **Off-endpoint causes (rare for HM3 but worth noting):**
 
-- **Vendor app internals.** The leak is in a vendor library/DLL inside a process - visible only with Sysmon-equivalent module-load tracing (not currently in scope).
+- **Vendor app internals.** The leak is in a vendor library/DLL inside a process - visible only with module-load tracing, which SparkLogs does not collect.
 - **Container / VM nested processes.** Workload inside Docker, WSL2, or VM is invisible from the host's processes snapshot.
 - **GPU memory.** Workstations with GPUs (CAD stations, ML workloads) may have GPU memory leaks invisible to system memory counters.
 - **Vendor app server-side state.** If the leak's trigger is a remote API call from a SaaS backend, the trigger is outside on-endpoint visibility.
@@ -57,7 +57,7 @@ The list is **not exhaustive** - it's a starting set covering common patterns. I
 
 - **WSUS server health.** If the MSP uses WSUS, server-side issues (storage, content sync, SUSDB) are at the WSUS server, not on the endpoint.
 - **Microsoft Update service / CDN status.** When endpoints update directly from MS, MS-side issues are off-endpoint.
-- **Update content-sync issues.** Endpoint reports "needs reboot" but the actual servicing-stack failure may need CBS log inspection (large; not shipped in full).
+- **Update content-sync issues.** Endpoint reports "needs reboot" but the actual servicing-stack failure may be in CBS detail the pack does not curate; read the curated `win.servicing.cbs` (value) and `win.servicing.dism` (value) reasons first, then the device's own CBS log.
 - **Driver vendor's parallel update channel.** If Intel/Realtek/NVIDIA pushed a driver update independently of WU, the conflict source is outside WU's view.
 
 ---

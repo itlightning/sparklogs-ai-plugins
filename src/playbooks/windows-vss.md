@@ -44,6 +44,13 @@ Absent writer is a real answer: many failures are coordinator-side.
 Writer-state enum (`VSS_WS_WAITING_FOR_FREEZE`, `VSS_WS_FAILED_AT_THAW`, …) is what a requester reads via `GetWriterStatus`.
 Do not map `vss_state` (other) onto that enum.
 
+## Device health first
+
+Open conditions `vss_writer_failed` (value) and `vss_snapshots_failing_for_space` (value) name the writer or volume and how long it has been open.
+`latest_state` (value) on topic `vss_writers` (value) gives each writer's state and last error (`sparklogs.data.vss_writers.writer_state_failed` (LQL), `sparklogs.data.vss_writers.writer_last_error` (LQL)), and `sparklogs.data.vss_writers.writer_expected` (LQL) says whether an installed backup product relies on it.
+`latest_state` (value) on topic `vss_shadowstorage` (value) gives per-volume shadow storage use against its limit (`sparklogs.data.vss_shadowstorage.shadowstorage_used_pct` (LQL), `sparklogs.data.vss_shadowstorage.shadowstorage_at_cap` (LQL)) and the volsnap failure counts (`sparklogs.data.vss_shadowstorage.snap_fail_count_24h` (LQL), `sparklogs.data.vss_shadowstorage.snap_fail_count_7d` (LQL)).
+A writer listed as failed between backups is a standing state; whether the last job failed is still the backup product's answer.
+
 ## Shadow-copy lifecycle
 
 Microsoft documents creation as: enumerate writers and metadata, prepare, freeze writes, provider commit, thaw, return the location (autorecovery may briefly make the copy writable, then seal).
@@ -97,17 +104,17 @@ source = "<host>" AND subsource = win.eventlog.system AND event_id in (33, 58, 9
 Group by `event_id` (LQL).
 Creation continuing with no 58 is accumulation in the *log stream*, not distance to the 512-copy cap.
 Used-% of shadow storage does not speak to that cap.
-The log stream does not carry the standing copy count.
+Neither the log stream nor the `vss_shadowstorage` (value) topic carries the standing copy count; the topic carries storage use against its limit.
 
-Fleet Error+ (two nouns: which reason, which host):
+Fleet, Error and above (two nouns: which reason, which host):
 
 ```lql
-service = backup AND subsource in (win.eventlog.application, win.eventlog.system) AND severity >= 17
+service = backup AND subsource in (win.eventlog.application, win.eventlog.system) AND severity >= error
 ```
 
 Group by `sparklogs.reason` (LQL), `source` (LQL).
 
-Installed backup products: device-health inventory (`fieldset=rca`).
+Installed backup products: `latest_state` (value) on topic `installed_products` (value).
 Two products competing for snapshots shows there, not in VSS prose.
 
 ## Off-endpoint

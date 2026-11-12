@@ -10,7 +10,7 @@ index: Disk full or filling
 One reason per volume role: `os_volume_space_low` (value) or `data_volume_space_low` (value). Severity rises while the volume is still filling; `sparklogs.data.disk_volumes[](volume_filling=true)` (LQL) finds those volumes.
 Two volumes on one host share a reason; `sparklogs.instance` (LQL) tells them apart.
 Display `coalesce(sparklogs.display_name, sparklogs.instance)`.
-Fleet totals: device-health grouped by reason (no `fieldset` (arg)); that is the exact condition count.
+Fleet totals: `query_device_health` (tool) with `group_by_reason` (arg) and `reasons` (arg) naming the space-low reasons; `affected_agents` (col) is the device count per reason (do not sum across reasons).
 
 **Device health first.** The space-low and `volume_fill_rate_high` (value) conditions, then `latest_state` (value) on the `disk_volumes` (value) topic for free space, fill rate and projected time to full.
 Who is writing: `device_overview` (value) over the filling interval.

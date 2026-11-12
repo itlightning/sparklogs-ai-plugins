@@ -1,8 +1,8 @@
 # LQL Reference - for the SparkLogs Investigator skill
 
-The complete, verified syntax of Lightning Query Language (LQL) - the filter language used by every LQL parameter on the SparkLogs MCP tools: `lql` (arg) (on `query_logs` (tool) / `query_event_counts_by_severity` (tool)), and `filter_lql` (arg) / `having_lql` (arg) (on `refine_query_result` (tool)). Read this file when composing any non-trivial LQL.
+The complete, verified syntax of Lightning Query Language (LQL) - the filter language used by every LQL parameter on the SparkLogs MCP tools: `lql` (arg) (on `query_logs` (tool) / `query_event_counts_by_severity` (tool)), `having` (arg) (on `query_event_counts_by_severity` (tool)), and `filter_lql` (arg) / `having_lql` (arg) (on `refine_query_result` (tool)). Read this file when composing any non-trivial LQL.
 
-An empty or omitted `lql` (arg) matches everything in the tool's `start` (arg)/`end` (arg) window and `org_ids` (arg) scope - useful as a starting point before narrowing.
+An empty or omitted `lql` (arg) matches everything in the tool's `start` (arg)/`end` (arg) window and `query_scope` (arg) - useful as a starting point before narrowing.
 
 Operator names, syntax forms, and edge cases are quoted from sparklogs.com docs.
 
@@ -22,7 +22,7 @@ Custom paths under `x.*` (LQL), such as `x.foo` (LQL), and the placeholders `pat
 | `=` | exact match | Pattern or regex allowed on right side. |
 | `!=` or `<>` | exact non-match | See **Negated operators (scalar vs array)** below. |
 | `>=`, `>`, `<`, `<=` | numeric/ordinal comparison | Right side must be a literal, not a pattern or regex. |
-| `<field>!` | field is present in the event | Presence check; matches even when the value is an explicit JSON `null` (other) (absent field = no match). e.g., `trace_id!` |
+| `<field>!` | field is present in the event | Presence check; matches even when the value is an explicit JSON `null` (other) (absent field = no match). e.g., `sparklogs.reason!` |
 | `<field> between <literal> and <literal>` | inclusive range | Works for numeric and timestamp fields. |
 | `<field> in (a, b, c)` | match any in value list | Comma-separated, parenthesized. NOT `[a, b, c]`. |
 | `<field> not in (a, b, c)` | match NONE in value list | Inverse of `in` (other). |
@@ -31,8 +31,8 @@ Custom paths under `x.*` (LQL), such as `x.foo` (LQL), and the placeholders `pat
 Use `NOT <field>!` for is-null. Use `<field>!` for is-not-null.
 
 ```lql
-NOT trace_id!     <- is-null
-trace_id!         <- is-not-null
+NOT sparklogs.reason!     <- is-null (uncurated events)
+sparklogs.reason!         <- is-not-null (curated events)
 ```
 
 ### No `LIKE` (no SQL-style wildcards)
@@ -113,7 +113,7 @@ Two terms inside one `[]()` bind to the SAME element; the same two terms as sepa
 
 A bare term does not reach element values. `any:` (LQL) does, at the usual cost.
 
-In `select` (arg), `[]` is accepted only as a trailing array reading today (`path[]` (LQL)); a mid-path `[]` is refused with a message naming the filter grammar, and naming the array alone returns every element. The next server build accepts `path[](pred)` (LQL), `path[](pred).leaf` (LQL) and `path[].leaf` (LQL) in `select` (arg), returning only the matching elements.
+In `select` (arg), `path[](pred)` (LQL) returns the matching elements whole and `path[](pred).leaf` returns that leaf per matching element (`[]` when none match). Naming the array alone returns every element.
 
 ### No `CONTAINS` / `CONTAINS_ANY` / `CONTAINS_ALL` (array fields use scalar operators directly)
 
@@ -142,7 +142,7 @@ LQL does NOT support `sparklogs.data.services.*.current_state = stopped`. Type r
 
 ```lql
 sparklogs.data.services.*.current_state = stopped              <- WRONG (wildcard JSON paths not supported)
-sparklogs.reason = service_not_running                        <- right (promoted field)
+sparklogs.reason = service_auto_not_running                   <- right (promoted field)
 sparklogs.data.services[](name=Spooler AND current_state=stopped)   <- right (array of objects)
 ```
 
@@ -153,7 +153,7 @@ sparklogs.data.services[](name=Spooler AND current_state=stopped)   <- right (ar
 Pattern operators in unquoted terms:
 - `*` - matches any number of any character (zero or more).
 - `?` - matches any single character.
-- Pattern operators only work on STRING-typed fields; on a numeric field they fail to compile ("invalid numeric value"). Coerce with the `#s` type suffix: `x.http.response.status#s not in (2??, 3??)`.
+- Pattern operators only work on STRING-typed fields; on a numeric field they fail to compile ("invalid numeric value"). Coerce with the `#s` type suffix: `event_id#s: 46??` (LQL).
 
 ```lql
 subsource: win.eventlog.*                 <- any WEL channel subsource
@@ -209,8 +209,8 @@ The operator you pair with `/regex/` changes whether the match is "contains the 
 **Examples showing the distinction:**
 
 ```lql
-x.error_code: /E[0-9]+/        <- matches "E1234", "PRE-E5678", "EXX99-extra" (regex appears anywhere)
-x.error_code = /E[0-9]+/       <- matches "E1234" only (regex must match entire value)
+win.eventlog.setup.error_code: /0x8024[0-9a-f]+/   <- matches "0x80240022" and "code 0x80240022 at stage 2" (regex appears anywhere)
+win.eventlog.setup.error_code = /0x8024[0-9a-f]+/   <- matches "0x80240022" only (regex must match entire value)
 ```
 
 **Pick the operator that matches your intent.** Use `:` when you want the pattern to appear *somewhere* in the value (typical for messages and free-text fields). Use `=` when the regex describes the whole value exactly (typical for IDs, codes, structured fields where partial matches would be misleading).
@@ -230,9 +230,9 @@ x.error_code = /E[0-9]+/       <- matches "E1234" only (regex must match entire 
 Precedence: `NOT` > `AND` > `OR`. Use parentheses for clarity.
 
 ```lql
-severity in (error, critical) AND source = "srv-x"
+severity >= warning AND source = "srv-x"
 (severity = error OR event_id = 7031) AND source = "srv-x"
-NOT (subsource = noisy_subsource) AND severity in (error, critical)
+NOT (subsource = win.eventlog.apps) AND severity >= error
 ```
 
 **Implicit AND:** adjacent expressions are AND'ed. These are equivalent:
@@ -269,7 +269,7 @@ Dot-separated. Field name components with whitespace or period must be double-qu
 
 ```lql
 sparklogs.data.system_info.reboot_pending!               <- simple path
-x.http.response.status!                                  <- nested custom field
+x.foo.bar!                                               <- nested custom field (illustrative)
 x."custom field"."some \"quoted\" field".final_value!   <- components with whitespace/quotes
 ```
 
@@ -318,13 +318,15 @@ any: "credit card"                       <- search all fields for "credit card"
 
 **Field-availability note.** `sparklogs.*` curated fields exist on events a source pack curated, and only on the streams that carry them; module-prefixed fields are narrower still. An empty result on a curated or module field may mean the source never writes that field, so check what the source carries before reading anything into it, and fall back to `severity` (LQL) / `message` (LQL) / `pattern` (LQL), which every source carries. The retired names event_kind, `SLASnapshot`, `SLAAgentOp`, `event_summary` (other), `snapshot_id` (other) and `state.*` resolve to nothing at all: an empty result there is a spelling problem, not a health signal.
 
-### Context-reduction filter (the most common starting filter)
+### Failure-side filter (the most common starting filter)
 
 ```lql
-severity in (error, critical)
+severity >= warning      <- curated sweeps: WARNING and above, the failure side every tool's band columns use
+severity >= error        <- raw, high-volume streams where WARNING is noise
 ```
 
-Use this whenever you want to focus on signal-rich events without specifying a more targeted filter: it keeps what the source flagged as bad.
+Compare severity by name with `>=`.
+`severity in (error, critical)` (LQL) is an exact list: it drops MINOR, SERIOUS, SEVERE and every WARNING level, which is where most curated failure signal sits.
 
 ### Single-source single-time-window scope
 
@@ -348,9 +350,12 @@ source: srv-app*
 
 ### Specific subsource
 
+`subsource` (LQL) is the feed id on agent data. Device-state topics and `service` (LQL) values are other fields.
+
 ```lql
-subsource = vss_writers
-subsource in (vss_writers, volumes, scheduled_tasks)   <- multi-subsource
+subsource = "win.eventlog.system"
+subsource in (win.eventlog.system, win.eventlog.application)   <- multi-subsource
+sparklogs.topic = vss_writers                                   <- a device-state topic, not a subsource
 ```
 
 ### Specific kind
@@ -359,6 +364,7 @@ subsource in (vss_writers, volumes, scheduled_tasks)   <- multi-subsource
 sparklogs.kind = inventory
 sparklogs.kind in (inventory, delta)                   <- what is on the box, or what changed
 sparklogs.kind = monitor                               <- a tracked condition
+sparklogs.kind = occurrence                            <- a one-off event the agent observed (crash, failure)
 sparklogs.kind = agent_op                              <- agent self-observability
 ```
 
@@ -391,12 +397,6 @@ sparklogs.epoch.id = "qX9k2mp4n7t1c8r5"
 
 Order within the era on `sparklogs.epoch.seq` (LQL), which is monotonic, rather than on the timestamp.
 
-### Trace ID
-
-```lql
-trace_id = "abc123def456"
-```
-
 ### Ingest-health check
 
 ```lql
@@ -422,7 +422,7 @@ t between 2026-04-23T03:00:00Z and 2026-04-23T04:00:00Z
 3. **`IS NULL` / `IS NOT NULL` instead of `NOT field!` / `field!`.** Different syntax.
 4. **`CONTAINS "value"` for arrays instead of `field: value` or `field = value`.** Array fields use scalar operators directly.
 5. **Wildcard JSON paths.** `sparklogs.data.services.*.current_state = stopped` does not work. Use the element grammar or a promoted field.
-6. **Square brackets for value lists.** `severity in [error, critical]` is wrong. Use `severity in (error, critical)` (LQL) with parentheses.
+6. **Square brackets for value lists.** `subsource in [win.eventlog.system, win.eventlog.application]` is rejected. Use `subsource in (win.eventlog.system, win.eventlog.application)` (LQL) with parentheses.
 7. **Quoting unquoted terms unnecessarily.** `severity = "error"` (LQL) works but `severity = error` (LQL) is fine and more readable.
 8. **Forgetting parentheses around OR with implicit AND.** `severity = error OR event_id = 7031 source = "x"` (LQL) parses unexpectedly. Use parentheses: `(severity = error OR event_id = 7031) AND source = "x"` (LQL).
 9. **Mixing `&&` / `||` with `AND` / `OR` in the same expression.** Both work but consistency reads better.
@@ -431,14 +431,11 @@ t between 2026-04-23T03:00:00Z and 2026-04-23T04:00:00Z
 
 ---
 
-## When LQL parser returns a structured error
+## Wrong syntax returns zero rows, not an error
 
-The cloud's LQL parser returns errors that name the rule violated. Read the message and fix the specific issue rather than retrying with a slightly different broken expression. After 2 failed retries on the same query shape, surface to the engineer rather than continuing to retry - it likely means a fundamental misunderstanding of the schema.
+Most malformed filters do not fail.
+`LIKE`, `MATCHES`, `IS NULL` and `CONTAINS` are read as bare search terms, and a wildcard JSON path names a field nothing carries: the query returns zero rows, or rows that happen to contain those words.
+Square brackets in a value list (`severity in [error, critical]`) are the exception: the parser rejects them with `unexpected token ","`.
 
-Common error messages and what they mean:
-
-- `unknown operator 'LIKE' at position N` -> use `:` with patterns instead.
-- `unknown operator 'MATCHES' at position N` -> use `:` with `/regex/`.
-- `'IS' is not a recognized operator` -> use `field!` or `NOT field!`.
-- `expected '(' at position N` -> value list needs parens, not brackets.
-- `unknown field 'sparklogs.data.services.*.current_state'` -> wildcard paths not supported; see workarounds above.
+So an unexpected zero, or an odd match count, on a filter you wrote by hand is a syntax and spelling check first.
+Compare the filter against this file, read `schema.empty_requested_columns` (col), and confirm field names with `list_fields` (tool) before reporting the absence as a finding.

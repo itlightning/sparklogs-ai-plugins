@@ -11,6 +11,8 @@ Join these data feeds when the ticket is patches that did not land, or landed an
 | `win.eventlog.setup` (value) | Setup channel: package target-state failures (`patch_install_failed` (value)), component-store scan (`win_component_store_corruption` (value)). |
 | `win.servicing.cbs` (value) | CBS.log: realized store corruption, servicing operations. |
 | `win.servicing.dism` (value) | DISM.log: repair and image servicing. |
+| `win.eventlog.management` (value) | Windows Update client and BITS channels: scans and downloads that failed (`patch_scan_failed` (value), `patch_download_failed` (value), `bits_transfer_failed` (value)). |
+| `win.eventlog.apps` (value) | Store app (AppX) deployment and provisioning (`appx_deployment_failed` (value)). |
 
 Windows Update agent snapshot: `sparklogs.device.state` (value) topic `windows_update_agent_state` (value). Open `feeds/sparklogs.device.state/` only after this theme. That is inventory/state, not the Setup channel.
 Explore Setup vs CBS/DISM vs state: `guides/stream-kinds.md`.

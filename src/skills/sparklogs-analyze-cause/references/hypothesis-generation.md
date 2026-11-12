@@ -27,7 +27,7 @@ This file gives detailed guidance on the analytic step: converting the prior inv
 When the prior investigation surfaced "X happened concurrent with Y" Findings:
 
 - **Recent change + new symptom** -> hypothesis "the recent change caused the symptom." Discriminator: rollback test, or finding sources without the change but with the symptom.
-- **Cyclical timing (same time every day/week)** -> hypothesis "scheduled job or external recurrence is the cause." Discriminator: identify the schedule; correlate with scheduled_tasks subsource.
+- **Cyclical timing (same time every day/week)** -> hypothesis "scheduled job or external recurrence is the cause." Discriminator: identify the schedule; correlate with Task Scheduler events (`subsource = "win.eventlog.management"` (LQL), `service = scheduled_tasks` (LQL)).
 - **Sudden onset without obvious change** -> hypothesis "external trigger (network event, cloud service issue, time-of-day boundary)." Discriminator: cross-source pivot ("did it happen on other sources at the same time?").
 
 ### Fleet pattern patterns
@@ -35,7 +35,7 @@ When the prior investigation surfaced "X happened concurrent with Y" Findings:
 When the prior investigation surfaced "this affects N sources" Findings:
 
 - **N = 1 (single source)** -> hypothesis space includes source-specific configuration, hardware, software state.
-- **N = small subset** -> hypothesis "shared factor among the subset." Discriminator: contrast `query_event_counts_by_severity` (tool) runs over the affected vs unaffected populations (in v1; `compare_populations` (other) is a fast-follow tool). Group by a scope-ladder field (`service` (LQL), `app` (LQL), `subsource` (LQL), `category` (LQL)) to test whether the subset shares a component.
+- **N = small subset** -> hypothesis "shared factor among the subset." Discriminator: contrast `query_event_counts_by_severity` (tool) runs over the affected and unaffected populations. Group by a field from `guides/scope-ladder.md` (`sparklogs.reason` (LQL), `service` (LQL), `app` (LQL), `subsource` (LQL)) to test whether the subset shares a component.
 - **N = fleet-wide** -> hypothesis "environment-wide cause" - recent fleet-wide change (patch, GPO push, DNS change), or upstream service issue.
 
 ### Device health patterns
@@ -143,7 +143,7 @@ Sometimes the prior investigation's findings are sufficient for analysis without
 
 **Make additional MCP calls when:**
 - A fleet pivot would discriminate between "single-source hypothesis" and "fleet-wide hypothesis." `query_event_counts_by_severity` (tool) with `group_by=["source"]` on the relevant pattern.
-- A population contrast would discriminate between "affected sources have factor X" and "factor X is irrelevant." In v1, run `query_event_counts_by_severity` (tool) over each population separately and compare; use prior Findings to define the populations. (`compare_populations` (other) is a fast-follow tool.)
+- A population contrast would discriminate between "affected sources have factor X" and "factor X is irrelevant." Run `query_event_counts_by_severity` (tool) over each population separately and compare; use prior Findings to define the populations.
 - A specific time-window check the prior investigation didn't cover would confirm/refute a hypothesis with a single targeted call.
 
 **Skip additional MCP calls when:**

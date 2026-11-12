@@ -106,12 +106,15 @@ Process charts use the same tool with `view` (arg) `top_processes_over_time` (va
 
 Per-feed closed vocabularies. **Grep** the code, constant, or `##` heading; never load a whole file.
 
-| Kind | Typical feed | Use when |
+| Table | Feed | Use when |
 |---|---|---|
-| NTSTATUS / security status | `win.eventlog.security` (value) | Logon/auth failure codes |
-| Win32 / HRESULT | `win.eventlog.application` (value), `win.eventlog.system` (value), `win.eventlog.setup` (value) | Servicing, app, VSS errors |
-| MSI exit codes | `win.eventlog.application` (value) | Installer failures |
-| Logon types, WU result codes | `win.eventlog.security` (value), `win.eventlog.application` (value) | Discriminate 4625/4624, update errors |
+| `win_status_codes` (value), `kerberos` (value) | `win.eventlog.security` (value) | NTSTATUS and Kerberos result codes on logon and auth failures |
+| `win_logon_types` (value), `win_nps_reason_codes` (value) | `win.eventlog.security` (value) | Logon type on 4624/4625; NPS reason codes |
+| `msi_error_codes` (value) | `win.eventlog.application` (value) | Installer exit codes |
+| `scsi_sense_key` (value), `scsi_additional_sense` (value), `srb_status` (value), `storage_bus_type` (value) | `win.eventlog.storage` (value) | StorPort and disk-subsystem error codes |
+| `code_integrity_signing_levels` (value) | `win.eventlog.identity_security` (value) | Code Integrity requested and validated signing levels |
+
+Feeds without a table carry the raw code on a field: Setup's HRESULT is `win.eventlog.setup.error_code` (LQL); a curated result is `sparklogs.result.code` (LQL).
 
 ## How much to read
 

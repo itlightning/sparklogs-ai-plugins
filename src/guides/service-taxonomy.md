@@ -32,6 +32,8 @@ channel carry `service = "email"` (LQL)).
 | `os_stability` (value) | BSOD/BugCheck, unexpected shutdown, boot failure, OS hang, OS-plane store corruption. |
 | `app_stability` (value) | Application Error/Hang/WER/.NET crashes; Windows service crash/hang/start-failure families. |
 | `hardware` (value) | Non-storage hardware catch-all: WHEA/ECC/PCIe, PnP and driver failures, thermal/battery, UPS, display/GPU, peripherals/docks. |
+| `platform` (value) | Device state for installed driver packages and other host platform configuration (driver install, update and removal, boot mode, CPU and hardware identity, domain membership, host roles). |
+| `encryption` (value) | BitLocker and device encryption, recovery-key backup. |
 | `performance` (value) | Slow boot/logon, resource pressure, performance-trend snapshots. |
 | `user_profiles` (value) | User Profile Service, FSLogix. |
 | `remote_access` (value) | RDP, TeamViewer/AnyDesk/ScreenConnect. |
@@ -72,5 +74,5 @@ never on `service = "security_audit"` (LQL) alone.**
 
 ## Coverage
 
-This table is the complete `service` (LQL) vocabulary, and it is kept complete: it cannot drift from the
-vocabulary without failing a check. A value you see in data and cannot find here is worth reporting.
+This table is the complete `service` (LQL) vocabulary as of this plugin release; a validation check holds it to the source pack's registry.
+A value you see in data and cannot find here comes from a newer pack or a non-pack sender: report it with `send_sparklogs_feedback` (tool) if the engineer agrees.

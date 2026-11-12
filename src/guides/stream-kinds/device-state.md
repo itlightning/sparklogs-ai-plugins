@@ -141,7 +141,7 @@ Two terms inside one `[]()` bind to the SAME element. The same two terms written
 | `sparklogs.data.processes[](image_name="svchost.exe" AND resident_bytes>200000000)` (LQL) | one svchost process is over 200 MB |
 | `sparklogs.data.processes[].image_name="svchost.exe" AND sparklogs.data.processes[].resident_bytes>200000000` (LQL) | the box runs svchost, and something on the box is over 200 MB |
 
-On a two-device dev fleet over 30 hours the bound form matched 0 events and the uncorrelated form matched 56. The same pair on services (stopped with auto_delayed) gave 76 bound against 94 uncorrelated. Reporting the uncorrelated count as the bound one overstates by whatever that gap happens to be.
+The uncorrelated count is usually larger, and reporting it as the bound one overstates by that gap.
 
 Write the bound form whenever the two facts have to be true of one process, one service, or one volume. Reach for the uncorrelated form only to ask whether both things exist somewhere on the host.
 
@@ -155,8 +155,6 @@ sparklogs.data.processes[]! AND NOT sparklogs.data.processes[](image_name="x")
 
 ## Step 3: see only the matching elements
 
-**This section arrives with the next server build.** Until then, `[]` in `select` (arg) is refused with a message pointing at the filter grammar, and the workaround below is the whole answer.
-
 Filtered element projection reuses the filter grammar in a name slot:
 
 ```
@@ -167,7 +165,7 @@ select: ["sparklogs.data.processes[].image_name"]                        every e
 
 The row filter and the projection are independent: the filter picks the events, the projection picks the elements shown. An empty match renders `[]`, an absent array is omitted from the JSONL row. One `[]` level per name; a nested second level is refused.
 
-**Today, name the array itself.** `select: ["sparklogs.data.processes"]` returns the whole array, and a full inventory array (hundreds of services, dozens of driver packages) is cut at the response cap with a `…[truncated:N more items]` marker on the tail. Prefer a narrow window and one device, then read `message` (col): it carries the topic's own summary line and the low-signal cut never touches it.
+Naming the array itself (`select: ["sparklogs.data.processes"]`) returns every element, and a full inventory array (hundreds of services, dozens of driver packages) is cut at the response cap with a `…[truncated:N more items]` marker on the tail. Project the matching elements instead.
 
 ## Aggregate across devices
 
@@ -210,7 +208,7 @@ After resolving scope, add the returned scope, device IDs and the requested star
 }
 ```
 
-Choose CPU, resident RAM, read bytes or write bytes as the ranking metric.
+Choose CPU, resident RAM, read bytes, write bytes, or TCP bytes received or sent (`net_rx` (value), `net_tx` (value)) as the ranking metric.
 The process count defaults to 10 and can reach 500 per device.
 Executable grouping combines same-named processes within each sample.
 Instance grouping separates PID and creation time on each device; paths are optional metadata.

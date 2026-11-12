@@ -34,8 +34,6 @@ args:
   - aggregate
   - bucket
   - comment
-  - device_classes
-  - device_roles
   - end
   - external_investigation_id
   - field_match
@@ -45,6 +43,10 @@ args:
   - full_length_values
   - group_by
   - group_by_reason
+  - having
+  - host_classes
+  - host_roles
+  - image
   - having_lql
   - include_agents
   - include_examples
@@ -53,6 +55,7 @@ args:
   - kinds
   - limit
   - lql
+  - metric
   - min_severity
   - offset
   - order_by
@@ -60,6 +63,7 @@ args:
   - path_match
   - path_prefix
   - pattern_hashes
+  - query_scope
   - psa_client_id
   - query
   - query_id
@@ -72,6 +76,7 @@ args:
   - subject
   - tier
   - type
+  - unhealthy_collection_only
 
 # Union of MCP response headers (health fieldsets, list_sources, resolve_scope,
 # counts, describe_pattern, envelope). A wire path (sparklogs.*) is a col too
@@ -79,6 +84,10 @@ args:
 # every wire field it lifts); resolve_scope's own flat "kind" is unrelated.
 cols:
   - advisories
+  - bytes_ingested
+  - summary.feed_health
+  - update_failure_reason
+  - update_status
   - affected_agents
   - affected_senders
   - affected_sources
@@ -327,6 +336,7 @@ values:
   kinds:
     - inventory
     - monitor
+    - occurrence
     - delta
     - agent_op
     - config_change
@@ -406,6 +416,8 @@ values:
     - top_processes_over_time
     - device_overview
     - device_network
+    - fleet_processes
+    - fleet_performance
   # Device view vocabularies: result-set names, evidence kinds, heat bands and domains,
   # typical-range placement, outage state, process grouping and ranking.
   device_view_result_sets:
@@ -496,37 +508,9 @@ values:
     - vss_shadowstorage
     - vss_writers
     - windows_update_agent_state
-  services:
-    - app_stability
-    - auth
-    - backup
-    - certificates
-    - clustering
-    - database
-    - device_management
-    - directory_services
-    - email
-    - encryption
-    - endpoint_protection
-    - file_sharing
-    - file_sync
-    - hardware
-    - licensing
-    - networking
-    - os_stability
-    - patching
-    - printing
-    - remote_access
-    - rmm
-    - scheduled_tasks
-    - security_audit
-    - storage
-    - telephony
-    - time_sync
-    - user_profiles
-    - virtualization
-    - vpn
-    - web
+  rank_by:
+    - net_rx
+    - net_tx
   aggregate_fn:
     - count
     - count_distinct

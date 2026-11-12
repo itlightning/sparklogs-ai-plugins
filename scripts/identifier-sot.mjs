@@ -187,6 +187,7 @@ export function mergeSot(fileDoc, harvested, modules) {
   addAll(lql, families);
   addAll(values, harvested.reasons);
   addAll(values, harvested.apps);
+  addAll(values, harvested.services ?? []);
   addAll(values, modules);
   const groups = fileDoc.values || {};
   if (typeof groups !== 'object' || Array.isArray(groups)) {
@@ -259,6 +260,8 @@ export async function loadIdentifierSot(root) {
     console.log(`identifier membership: using committed ${GENERATED_DIR}`);
     harvested = await harvestCommittedPlugin(root);
   }
+  // `service` values come from the registry list the sync writes, not a hand copy here.
+  harvested.services = JSON.parse(await fs.readFile(path.join(root, 'scripts', 'generated-service-vocabulary.json'), 'utf8'));
   const live = parseLiveFields(await fs.readFile(path.join(root, LIVE_FIELDS_FILE), 'utf8'));
   if (live.size === 0) throw new Error(`${LIVE_FIELDS_FILE} is empty; the LQL field vet would be vacuous`);
   return { ...mergeSot(doc, harvested, MODULES), live };

@@ -19,6 +19,12 @@ Product tokens on `app` (LQL): `guides/app-vocabulary.md`.
 |---|---|---|
 | `win.eventlog.application` (value) | WEL classic | `guides/stream-kinds/wel-classic.md` |
 | `win.eventlog.system` (value) | WEL classic | `guides/stream-kinds/wel-classic.md` |
+| `win.eventlog.platform` (value) | WEL multi-channel | `guides/stream-kinds/wel-classic.md` |
+| `win.eventlog.storage` (value) | WEL multi-channel | `guides/stream-kinds/wel-classic.md` |
+| `win.eventlog.network` (value) | WEL multi-channel | `guides/stream-kinds/wel-classic.md` |
+| `win.eventlog.identity_security` (value) | WEL multi-channel | `guides/stream-kinds/wel-classic.md` |
+| `win.eventlog.management` (value) | WEL multi-channel | `guides/stream-kinds/wel-classic.md` |
+| `win.eventlog.apps` (value) | WEL multi-channel | `guides/stream-kinds/wel-classic.md` |
 | `win.eventlog.security` (value) | WEL Security | `guides/stream-kinds/wel-security.md` |
 | `win.eventlog.setup` (value) | WEL Setup | `guides/stream-kinds/wel-setup.md` |
 | `win.defender.eventlog` (value) | WEL Defender | `guides/stream-kinds/wel-defender.md` |
@@ -28,7 +34,7 @@ Product tokens on `app` (LQL): `guides/app-vocabulary.md`.
 | `sparklogs.agent.vector` (value) | Collector debug | `guides/stream-kinds/collector-debug.md` |
 | `sparklogs.agent.log` (value) | Collector debug | `guides/stream-kinds/collector-debug.md` |
 
-Unknown `subsource` (LQL): treat as uncurated text (`message` (LQL) / `pattern` (LQL) / `severity` (LQL)).
+A `subsource` (LQL) not in this table comes from an ingest key or another non-agent sender: it is freeform, carries no feed health, and is uncurated text (`message` (LQL) / `pattern` (LQL) / `severity` (LQL)).
 
 ## Portable fields
 

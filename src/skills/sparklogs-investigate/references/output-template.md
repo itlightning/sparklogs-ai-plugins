@@ -11,7 +11,7 @@ INVESTIGATION SUMMARY - <ticket / scope description>
 external_investigation_id: <friendly handle, 8-200 chars>
 
 EXECUTIVE SUMMARY
-[1-3 paragraphs in plain language synthesizing the Findings, with citations to query_urls.
+[One paragraph, at most six sentences, synthesizing the Findings by number.
  Headline-first: the engineer reads this first.
  Every claim in the executive summary must derive from a Finding. Do not introduce new claims here.]
 
@@ -67,7 +67,7 @@ A friendly, human-meaningful correlation handle you supply - free text, 8-200 ch
 The cap is the point. An engineer reads this to decide whether to open the Findings; a summary that reproduces them has replaced the decision with a second read.
 
 **Right (factual synthesis):**
-"The investigation surfaced a VSS writer failure on srv-fileshare01 at 03:14 UTC concurrent with a Veeam error and a recent KB5034441 install (Findings 1, 2, 4). The same pattern appeared on 7 other fleet sources (Finding 6). The cluster analysis (Finding 5) shows the error happens in multiple contexts, with the most common involving SCM service activity preceding the failure. The agent reported its data complete through the end of the window with no advisories (Finding 7)."
+"The investigation surfaced a VSS writer failure on srv-fileshare01 at 03:14 UTC concurrent with a Veeam error and a recent KB5034441 install (Findings 1, 2, 4). The same pattern appeared on 7 other fleet sources (Finding 6). The agent reported its data complete through the end of the window with no advisories (Finding 7)."
 
 **Wrong (speculation):**
 "This is clearly caused by the KB5034441 update breaking VSS interaction with Veeam - the timing and fleet-wide pattern make this the obvious root cause."
@@ -106,8 +106,8 @@ Format: `<subject> was <state> at <time>`, or `<event class> occurred N times in
 
 **Right:**
 - "VSS writer SqlServerWriter was in FAILED state at 2026-04-23 03:14:32 UTC."
-- "Pattern_hash h7Vjf2Xk9a appeared 1247 times in last 24h on srv-fileshare01; absent in prior 24h."
-- "system_health.os_volume_free_pct was 8% at 2026-04-23 14:00 UTC (severity: error per workspace bands)."
+- "Pattern_hash ab_7f3c91d2e4a6b805 appeared 1247 times on srv-fileshare01 from 2026-04-22 14:00 to 2026-04-23 14:00 UTC; absent from 2026-04-21 14:00 to 2026-04-22 14:00 UTC."
+- "Volume C: on srv-fileshare01 had 8 percent free at 2026-04-23 14:00 UTC, with condition os_volume_space_low open since 2026-04-22 21:10 UTC."
 - "srv-fileshare01 reported agent_complete_through 2026-04-23 14:00 UTC with no advisories."
 
 **Wrong (speculation in this skill - move to cause-analysis skill or POSSIBLE NEXT DIRECTIONS):**
@@ -143,7 +143,7 @@ NOT:
 Track the running counts (backing queries, refinements, sources/orgs covered, matched population) in your local investigation-state document as you go. All figures here come from server-returned query summaries, not self-reported estimates. This section shows the engineer how much evidence backs the summary: how many queries ran, how broad a scope they covered, how many events were in the matched population.
 
 ### Audit Trail
-Provide the engineer with the means to inspect every query you ran: the `query_id` (arg) + `query_url` (col) list from the local investigation-state document, with per-query detail via `get_query_metadata(query_id="<qid>")`. Every call is also tagged `external_investigation_id` (arg) in the server-side audit (a direct investigation-level URL is preferred once SparkLogs UX surfaces it).
+Provide the engineer with the means to inspect every query you ran: the `query_id` (arg) + `query_url` (col) list from the local investigation-state document, with per-query detail via `get_query_metadata(query_id="<qid>")`. Every call is also tagged `external_investigation_id` (arg) in the server-side audit.
 
 ### POSSIBLE NEXT DIRECTIONS
 Bounded section at the end of the summary. 1-4 sentences max. Suggests where the investigation could go next - either more facts to dig into, or running `sparklogs-analyze-cause` to derive candidate hypotheses. Always ends with the explicit invitation:
@@ -151,7 +151,7 @@ Bounded section at the end of the summary. 1-4 sentences max. Suggests where the
 > "Would you like to (1) explore additional facts in any of the areas mentioned above, or (2) run sparklogs-analyze-cause <external_investigation_id> to derive candidate cause hypotheses from these findings?"
 
 **Right:**
-"The temporal correlation between the Tuesday KB install and the new error pattern, combined with the fleet-wide consistency, is worth exploring further. The disk-pressure cluster (Finding 5b) is a separate area on a small subset of sources.
+"The temporal correlation between the Tuesday KB install and the new error pattern, combined with the fleet-wide consistency, is worth exploring further.
 
 Would you like to (1) explore additional facts in any of the areas mentioned above, or (2) run sparklogs-analyze-cause investigate-ticket-4781-veeam-backup to derive candidate cause hypotheses from these findings?"
 
@@ -159,7 +159,7 @@ Would you like to (1) explore additional facts in any of the areas mentioned abo
 "The root cause is KB5034441 affecting Veeam VSS interaction. Roll back the patch on affected endpoints."
 
 **Wrong (cause analysis expanded beyond bounds):**
-"There are several possible root causes. First, KB5034441 may have changed the tcpip.sys driver in a way that affects Veeam's network communication during VSS snapshots. Second, disk pressure on cluster B sources may be exhausting VSS shadow storage. Third..." - that's `sparklogs-analyze-cause` territory.
+"There are several possible root causes. First, KB5034441 may have changed the tcpip.sys driver in a way that affects Veeam's network communication during VSS snapshots. Second, disk pressure on a subset of sources may be exhausting VSS shadow storage. Third..." - that's `sparklogs-analyze-cause` territory.
 
 ---
 
@@ -172,46 +172,44 @@ INVESTIGATION SUMMARY - Veeam backup failure on srv-fileshare01 (ticket #4781)
 external_investigation_id: investigate-ticket-4781-veeam-backup
 
 EXECUTIVE SUMMARY
-The investigation surfaced a VSS writer failure on srv-fileshare01 at 03:14 UTC concurrent with a
-Veeam error 0x80042308 (Findings 1, 2). A new error pattern appeared in the last 24 hours that
-wasn't present in the prior 24 hours (Finding 3), and the same pattern affected 7 other sources
-in the fleet during the same window (Finding 6). KB5034441 was installed approximately 30 minutes
-before the failure (Finding 4); temporal proximity is observed but causality is not asserted.
-Cluster analysis (Finding 5) shows the error happens in multiple distinct contexts, with the most
-common involving SCM service activity preceding the failure. The agent reported its data complete
-through the end of the window (Finding 7).
+The SqlServerWriter VSS writer on srv-fileshare01 failed at 2026-04-23 03:14:32 UTC, two seconds
+after the Application channel logged VSS error 0x80042308 (Findings 1, 2). The error's pattern
+first appeared in the investigation window and fired on 7 other sources in the fleet (Findings 3, 6).
+KB5034441 was installed about 30 minutes before the failure (Finding 4); timing is observed, cause
+is not asserted. The device was observed throughout the backup window, with one hot disk span
+during the snapshot (Finding 5), and its data is complete through the end of the window (Finding 7).
 
 SCOPE CHECKED
 - Source(s): srv-fileshare01
 - Org(s): org_acme_dental
 - Time window: 2026-04-22 00:00 UTC to 2026-04-23 14:00 UTC
-- Data sources queried: query_device_health; sparklogs.device.state; win.eventlog.application; win.eventlog.system; sparklogs.kind=agent_op
+- Data sources queried: query_device_health (device_overview, vss_writers condition);
+  win.eventlog.application; win.eventlog.system; sparklogs.kind=agent_op
 - WHAT WAS NOT CHECKED:
-  - Backup target NAS-01 (does not run a SparkLogs Agent). Recommend checking NAS-01 health directly
-    if the on-endpoint evidence below is insufficient.
+  - Backup target NAS-01 (does not run a SparkLogs Agent): check its health directly if the
+    on-endpoint evidence below is insufficient.
   - EDR cloud audit (SentinelOne SaaS): EDR-side blocks of VSS operations would not appear in
     on-endpoint state.
-  - Veeam service-account credential store (vault/AD): credential expiry would manifest as a
-    different failure mode than the one observed.
+  - Veeam job outcome on the Veeam server: the job's own verdict comes from the backup product.
 
 OBSERVED CONDITIONS
 
-Finding 1: VSS writer SqlServerWriter was in FAILED state at 2026-04-23 03:14:32 UTC
-  Evidence: <query_url as returned> (query_id: qXY9a3m2k7n1p4t8)
+Finding 1: VSS writer SqlServerWriter was in FAILED state from 2026-04-23 03:14:32 UTC (condition vss_writer_failed, still open at 14:00 UTC)
+  Evidence: <query_url as returned> (query_id: qXY9a3m2k7n1p4t8); device page: <meta.device_url_template filled from the row>
   Confidence: high
   Sources contributing: srv-fileshare01
-  Time window of evidence: 2026-04-23 03:14:00 to 03:14:45 UTC
+  Time window of evidence: 2026-04-23 03:14:32 to 14:00 UTC
 
-Finding 2: Veeam Application channel logged error 0x80042308 at 2026-04-23 03:14:30 UTC, in same window as Finding 1
+Finding 2: The Application channel logged VSS error 0x80042308 at 2026-04-23 03:14:30 UTC
   Evidence: <query_url as returned> (query_id: qP4n8k2r9c6m3y1z)
   Confidence: high
   Sources contributing: srv-fileshare01
   Time window of evidence: 2026-04-23 03:14:30 UTC
 
-Finding 3: New pattern_hash "h7Vjf2Xk9a" appeared in last 24h that wasn't present in prior 24h
+Finding 3: pattern_hash "ab_7f3c91d2e4a6b805" appeared 412 times from 2026-04-23 03:14 to 14:00 UTC and not at all from 2026-04-22 00:00 to 2026-04-23 03:14 UTC
   Evidence: <query_url as returned> (query_id: qK7m2p1n8r4t9c2v)
   Confidence: high
-  Pattern text: "Veeam VSS error 0x80042308 on volume <X> for job <Y>"
+  Pattern text: "Volume Shadow Copy Service error: Unexpected error calling routine <*>. hr = 0x80042308"
   Sources contributing: srv-fileshare01 (and 7 fleet sources per Finding 6)
   Time window of evidence: 2026-04-22 00:00 to 2026-04-23 14:00 UTC
 
@@ -222,16 +220,15 @@ Finding 4: KB5034441 was installed on srv-fileshare01 at 2026-04-23 02:45 UTC
   Time window of evidence: 2026-04-23 02:45 UTC
   Note: Temporal proximity to Finding 1 is observation only - causality is not asserted in this summary.
 
-Finding 5: Cluster analysis of the new error pattern shows 3 distinct contextual situations
-  Evidence: <query_url as returned> (query_id: qC5g7n3p2k8m1y4r)
-  Confidence: medium (cluster analysis is sample-based; sample_n_matches=100 of 412 total occurrences)
-  Sources contributing: srv-fileshare01 (47), srv-fileshare02 (38), srv-app01 (12), other fleet (5)
-  Time window of evidence: 2026-04-22 00:00 to 2026-04-23 14:00 UTC
-  Note: Cluster A (47 occurrences) precedes the error with SCM service activity. Cluster B (4
-        occurrences) precedes with disk-pressure indicators (volumes free <10%). Cluster C (49
-        occurrences) has no obvious common precursor pattern.
+Finding 5: device_overview for 2026-04-23 02:30 to 04:00 UTC: observed for the whole window, one disk heat span (hot, 03:10 to 03:20 UTC) on the busiest disk
+  Evidence: <meta.device_url as returned>; <query_url as returned> (query_id: qC5g7n3p2k8m1y4r)
+  Confidence: high
+  Sources contributing: srv-fileshare01
+  Time window of evidence: 2026-04-23 02:30 to 04:00 UTC
+  Note: The span lists VeeamAgent.exe and sqlservr.exe as contributors; they ran at the same time
+        and are not proven causes.
 
-Finding 6: Same Veeam error pattern fired on 7 other sources in this MSP fleet during same window
+Finding 6: The same pattern_hash fired on 7 other sources in this MSP fleet during the same window
   Evidence: <query_url as returned> (query_id: qF2h9k4n7m3p1c8y)
   Confidence: high
   Sources contributing: srv-fileshare01, srv-fileshare02, srv-app01, srv-app02, srv-mail01, srv-db01,
@@ -246,24 +243,21 @@ Finding 7: srv-fileshare01 reported agent_complete_through 2026-04-23 14:00 UTC,
   Note: The agent's own feed reports carry this. Event counts and first/last bounds do not.
 
 WHAT WAS EXAMINED
-- Backing queries: 4
+- Backing queries: 5
 - Cached refinements: 6
 - Sources covered: srv-fileshare01 (primary); 8 fleet sources for the cross-source pivot (Finding 6)
 - Org(s) covered: org_acme_dental
-- Matched population examined: 8,614 events across the 4 backing queries
+- Matched population examined: 8,614 events across the 5 backing queries
 - Wall-clock: 4 minutes
 
 AUDIT TRAIL
 Backing queries (from the investigation-state document; every call tagged external_investigation_id="investigate-ticket-4781-veeam-backup"):
-  q_ab12 https://sparklogs.app/explore?... | q_cd34 https://sparklogs.app/explore?...
+  qXY9a3m2k7n1p4t8 <query_url as returned> | qP4n8k2r9c6m3y1z <query_url as returned> | ...
 Per-query detail (parameters, cache status, schema): get_query_metadata(query_id="<qid>").
-Or browse interactively at: https://sparklogs.app/investigations/investigate-ticket-4781-veeam-backup
 
 POSSIBLE NEXT DIRECTIONS
-The temporal correlation between the Tuesday KB install and the new error pattern, combined with
-the fleet-wide consistency across 7 other sources, is worth exploring further. The disk-pressure
-cluster (Finding 5b) is a separate factor on a small subset of sources that could be examined
-independently.
+The timing of the KB install against the new VSS error, and the same error on 7 other sources,
+are worth exploring further: which of those sources also installed KB5034441, and when.
 
 Would you like to (1) explore additional facts in any of the areas mentioned above, or (2) run
 sparklogs-analyze-cause investigate-ticket-4781-veeam-backup to derive candidate cause hypotheses from these findings?
@@ -296,13 +290,13 @@ SCOPE CHECKED
 
 OBSERVED CONDITIONS
 
-Finding 1: srv-fileshare02 perf counters within normal range during the user-reported window
-  Evidence: <query_url as returned> (query_id: qN3k7m1p2r8t4c9y)
+Finding 1: device_overview for srv-fileshare02 from 2026-04-23 13:00 to 14:30 UTC: no heat spans, every domain band ok
+  Evidence: <meta.device_url as returned>; <query_url as returned> (query_id: qN3k7m1p2r8t4c9y)
   Confidence: high
   Sources contributing: srv-fileshare02
   Time window of evidence: 2026-04-23 13:00 to 14:30 UTC
-  Note: cpu_max_60s peaked at 42% (within nominal); disk_queue_max_60s peaked at 1.8 (nominal);
-        no perf-counter anomalies fired.
+  Note: Coverage was observed for the whole window. Disk heat does not grade latency; storage
+        latency_ms_p90_10s stayed under 5 ms on every disk.
 
 Finding 2: No SMB Server channel error or warning events in the window
   Evidence: <query_url as returned> (query_id: qP5g9n2k7m1t3r8c)

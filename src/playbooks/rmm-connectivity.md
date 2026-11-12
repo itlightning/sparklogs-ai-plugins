@@ -11,7 +11,6 @@ That is a different question from whether it is reporting to the RMM.
 `agent_status` (col) and `collection_status` (col) are two columns; do not merge them.
 `offline` (value) means no signal reached SparkLogs, never that the machine is down.
 The customer's RMM is the authority on up/down.
-`row_kind=silent_device` is an exact counted fact (no state rows), not "healthy" and not "agent down".
 `sparklogs.kind = agent_op` (LQL) empty is inconclusive, not reassuring.
 
 Data flowing here while the RMM shows offline localizes to the RMM path.

@@ -9,7 +9,7 @@ Writers, snapshots, or shadow-copy rotation with a job that looks fine: `playboo
 
 **Accuracy.** Vendor backup channels carry job outcome.
 VSS plumbing errors are not a job verdict.
-Two backup products competing for snapshots show on device-health inventory (`fieldset=rca`), nowhere else.
+Two backup products competing for snapshots show in `latest_state` (value) on topic `installed_products` (value), nowhere else.
 
 **Device health first.** `device_overview` (value) over the failed job's window.
 Header coverage says whether the device was awake for it; a job window spent asleep or powered off is its own answer.
@@ -19,7 +19,7 @@ The device-health reading describes the machine around the job; the job's outcom
 **Events, for what health named.** Vendor / Windows Backup errors in the failure window:
 
 ```lql
-source = "<host>" AND severity >= 17
+source = "<host>" AND severity >= error
 ```
 
 Group by `pattern` (LQL).

@@ -6,7 +6,7 @@ index: Windows Update / patch failure
 
 **Trigger.** "Patching reports `<KB>` failed", or a machine is behind on updates.
 
-**Accuracy.** Servicing is curated across CBS, DISM, Setup, and System.
+**Accuracy.** Servicing is curated across CBS, DISM, Setup, System, and the Windows Update client and BITS channels on `win.eventlog.management` (value) (`patch_scan_failed` (value), `patch_download_failed` (value), `bits_transfer_failed` (value)).
 Pending reboot and component-store health are servicing *reasons* on the same pass, not a second scan.
 
 **Device health first.** Open conditions `patch_scan_stale` (value) and `patch_updates_paused` (value), then `latest_state` (value) on the `windows_update_agent_state` (value) and `system_info` (value) topics for the update agent's last scan and a pending reboot.
@@ -24,14 +24,14 @@ Group by `sparklogs.reason` (LQL), worst first.
 Failing install in sequence:
 
 ```lql
-source = "<host>" AND service = patching AND severity >= 17
+source = "<host>" AND service = patching AND severity >= error
 ```
 
 Fleet: one noun `group_by=["source"]` over a pinned reason ("is it just us").
-Two nouns `group_by=["reason", "source"]` over Error+:
+Two nouns `group_by=["sparklogs.reason", "source"]` over Error and above:
 
 ```lql
-service = patching AND severity >= 17
+service = patching AND severity >= error
 ```
 
 One reason on every host is a bad KB.

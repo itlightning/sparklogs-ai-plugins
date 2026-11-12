@@ -57,10 +57,11 @@ must act on.
 is independently stamped as its own field on the same event.
 
 ```
-disk_volumes.os_volume_space_low.ELEVATED
-disk_volumes.NOTABLE
-disk_volumes.INVENTORY
-hash_mismatch.NOTABLE
+disk_volumes.volume_fill_rate_high.ELEVATED     <- topic.reason.CLASS
+disk_volumes.INVENTORY                          <- topic.KIND on inventory rows
+crashes.process_crash.NOTABLE                   <- topic.reason.CLASS on an occurrence
+app_crash.NOTABLE                               <- reason.CLASS on a curated Windows Event Log row
+disk_volumes                                    <- bare topic
 ```
 
 The class segment, when present, is LAST. `ELEVATED.os_volume_space_low` is not a shape this
@@ -113,9 +114,9 @@ bridge; everything else about severity in this doc set points here.
 
 | Where you see it | Form | Example |
 |---|---|---|
-| Prose you write, and LQL filters | lowercase rung name | `severity in (error, critical)` |
+| Prose you write, LQL filters and `min_severity` (arg) | lowercase rung name | `severity >= warning` (LQL), `min_severity: "error"` |
 | The `severity` (LQL) cell on a returned row | UPPERCASE rung name | `ERROR`, `CRITICAL`, and `WARN2` / `WARN3` for rungs between the named ones |
-| Numeric filters and `severity_level` (col) | integer 1-24 | `min_severity: 17` |
+| `severity_level` (col) | integer 1-24 | `17`. Filter by the name, not the number |
 | Anything that COUNTS events: the `cnt_<band>` columns and `summary.severity_histogram` (col) | lowercase band name, one of nine | `critical_plus` (value), `info_or_notice` (value) |
 
 **A cell and a digest speak different vocabularies on purpose.** A row's `severity` (LQL) reports ONE
@@ -152,8 +153,8 @@ vendor's taxonomy. A curated pack re-grades by consequence.
 
 ## Kind, and why counts double
 
-`sparklogs.kind` (LQL) says what MORPHOLOGY a row is: `inventory` (value), `monitor` (value), `delta` (value), `agent_op` (value),
-`config_change` (value), `malformed` (value). It is a different question from class and from severity.
+`sparklogs.kind` (LQL) says what MORPHOLOGY a row is: `inventory` (value), `monitor` (value), `occurrence` (value), `delta` (value), `agent_op` (value),
+`config_change` (value), `malformed` (value). An `occurrence` (value) is a one-off event the agent observed, such as a process crash. It is a different question from class and from severity.
 
 `malformed` (value) marks a row that did not parse cleanly, and it does not stand alone: a row can keep a
 valid `sparklogs.kind` (LQL) and still carry `sparklogs.malformed_event=true`, so a `sparklogs.kind=malformed` filter by itself misses

@@ -1,7 +1,7 @@
 # Playbook authoring
 
-Unpublished authoring doc on the `source` branch.
-Installed packages do not include this file.
+Authoring doc for contributors.
+Plugin packages do not include this file.
 Read it before adding or rewriting `src/playbooks/*.md`.
 Runtime investigation style is `src/guides/writing-voice.md`.
 Tool mechanics stay in `src/guides/mcp-tool-decision-tree.md` and the MCP server instructions.

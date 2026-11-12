@@ -116,41 +116,7 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` (value) or `
 
 ## Mistakes against "Show what you can't see"
 
-### Skipping the WHAT WAS NOT CHECKED section
-
-**Symptom.** Your summary doesn't have the section, or the section is just "n/a."
-
-**Why it's wrong.** The section is required, every time. Even when on-endpoint evidence is complete, the section says so explicitly: "The off-endpoint causes typically associated with this kind of investigation were considered but not relevant given the on-endpoint evidence."
-
-**Recovery.** Add the section. Read `off-endpoint-causes.md` for the relevant symptom category. Customize to the actual investigation.
-
-### Generic boilerplate instead of investigation-specific limits
-
-**Symptom.** WHAT WAS NOT CHECKED section says "many off-endpoint causes are possible" or "we don't see everything" or "cloud services are out of scope."
-
-**Why it's wrong.** Boilerplate is noise. The point of the section is to give the engineer concrete next-step pointers.
-
-**Recovery.** Per item, name the specific off-endpoint source and the specific reason it matters for THIS investigation. "Recommend checking NAS-01 health logs directly to confirm or rule out a target-side cause" is right; "we can't see everything" is wrong.
-
-### Concluding from on-endpoint evidence when off-endpoint cause is plausible
-
-**Symptom.** You conclude the cause is on-endpoint (or speculate so in POSSIBLE NEXT DIRECTIONS) without noting that off-endpoint causes were not checked.
-
-**Why it's wrong.** Confidently-wrong conclusion when actual cause is off-endpoint. The engineer wastes time on the wrong remediation.
-
-**Recovery.** When you suspect the cause might be off-endpoint, name the suspected off-endpoint source explicitly in the WHAT WAS NOT CHECKED section AND in POSSIBLE NEXT DIRECTIONS. Don't leave it implicit.
-
----
-
-## Mistakes against customization/tunability
-
-### Assuming the default filter is universal
-
-**Symptom.** You apply the canonical context-reduction filter (`severity in (error, critical)` (LQL)) without considering whether this workspace's tuning differs.
-
-**Why it's wrong.** Some environments are noisier and want a tighter severity floor; some want a looser one. Default-blind investigation will miss signal at one and overload at the other.
-
-**Recovery.** The canonical filter is a default, not a universal. If feedback during the investigation suggests the default isn't working, surface in the summary and use a different filter for the next refinement.
+Writing the WHAT WAS NOT CHECKED section, specific versus boilerplate wording, and naming a suspected off-endpoint cause: `guides/off-endpoint-causes.md` (Honest framing).
 
 ---
 
@@ -178,7 +144,7 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` (value) or `
 
 **Why it's wrong.** Investigation continuity breaks. Re-investigating from scratch duplicates work that maintaining state would have avoided.
 
-**Recovery.** At minimum, write the document at investigation start (scope, time window, external_investigation_id) and update after each major Finding accumulates. Use the host's filesystem tool. Schema is in SKILL.md Section 16.
+**Recovery.** At minimum, write the document at investigation start (scope, time window, external_investigation_id) and update after each major Finding accumulates. Use the host's filesystem tool. Contents: `sparklogs-investigate` Section 16.
 
 ---
 
@@ -202,14 +168,6 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` (value) or `
 
 **Recovery.** First substantive call should usually be `query_event_counts_by_severity` (tool) (group by the field the question is about). Use `query_logs` (tool) only when aggregation has narrowed to a specific small set whose raw text matters.
 
-### Reading Level 3 by default
-
-**Symptom.** Your `select` (arg) includes `state.<category>` or `anomalies` (other) on every call.
-
-**Why it's wrong.** Level 3 returns far more data than Level 1 or 2. Default should be Level 1 (triage) -> Level 2 (assess) -> Level 3 only when ground truth is needed.
-
-**Recovery.** Select the fields needed for the question. If a value is clipped, narrow to its row or field and request `full_length_values` (arg). Result-row and response-byte limits still apply. See `guides/mcp-tool-decision-tree.md` for retrieval options.
-
 ### Retrying refine on `cache_invalidated` (value)
 
 **Symptom.** `refine_query_result` (tool) or `get_query_metadata` (tool) returns a successful response with `summary.cache_status` (col) `cache_invalidated` (value), and you call refine again on the same `query_id` (arg), or you treat it as `scope_violation` (value) (a bad org list you passed).
@@ -232,7 +190,7 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` (value) or `
 
 **Why it's wrong.** Those columns count what ARRIVED. They are consistent with any amount of missing middle, so they cannot establish interior coverage at all. Only a data feed's own report can, and it reaches you as `agent_complete_through` (col) with the advisories beside it on the `resolve_scope` (tool) agent row.
 
-**Recovery.** Read-mode table in the skill corpus block. Read `agent_complete_through` (col). If it reaches the end of your window and advisories are empty, one sentence: "data is complete through <instant>". If it is `"unknown"`, say completeness could not be established, which is a statement about the claim, never a fault and never a claim that data is missing. Then stop; a healthy answer does not earn a section. Full rules: `scope-resolution.md` (Completeness).
+**Recovery.** Read-mode table in the skill corpus block. Read `agent_complete_through` (col). If it reaches the end of your window and advisories are empty, one sentence: "data is complete through <instant>". If it is absent, say completeness could not be established, which is a statement about the claim, never a fault and never a claim that data is missing. Then stop; a healthy answer does not earn a section. Full rules: `scope-resolution.md` (Completeness).
 
 ### Writing a completeness statement the question did not need
 
@@ -254,9 +212,9 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` (value) or `
 
 **Symptom.** You conclude "no evidence of X" without checking that the source actually had complete data ingestion during the relevant window.
 
-**Why it's wrong.** Source might have been emitting `ingest_drop` (other) / `spool_full` (other) / `backpressure` (value) events during the window, in which case "no evidence" might just mean "data was incomplete."
+**Why it's wrong.** The agent may have been behind, stuck or blocked during the window, in which case "no evidence" might just mean "data was incomplete."
 
-**Recovery.** Before any "no evidence found" conclusion, read `agent_complete_through` (col) and `advisories` (col) on the agent row, then run `query_logs(lql='source = "<X>" AND sparklogs.kind = agent_op', start=..., end=...)`. Those rows are stamped when an investigator must distrust other data on that host. If any fired, qualify the Finding's confidence and surface it in WHAT WAS NOT CHECKED. An EMPTY result is inconclusive rather than reassuring: a healthy agent, an agent that is not reporting, and a topic disabled for that agent's rollout ring all look identical from here. `list_sources` (tool) event-count trends are a prompt to look, never a coverage measurement. Say which case you could not rule out.
+**Recovery.** Before any "no evidence found" conclusion, read `agent_complete_through` (col), `stuck_reason` (col) and `advisories` (col) on the agent row, then query `source = "<X>" AND sparklogs.kind = agent_op` (LQL) over the window. If any of them says data on that host is suspect, qualify the Finding's confidence and surface it in WHAT WAS NOT CHECKED. An empty `agent_op` (value) result is inconclusive (`guides/lql-reference.md`, Ingest-health check). `list_sources` (tool) event-count trends are a prompt to look, never a coverage measurement.
 
 ### Reading empty `sparklogs.*` fields as a health finding
 
@@ -330,39 +288,20 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` (value) or `
 
 **Recovery.** Stay in the named scope. If the finding looks shared (same `pattern_hash` (LQL) / `service` (LQL) / reason; ransomware-class, backup-wide, identity), suggest a hunt and wait unless they already asked. Climb `query_scope_activity` (tool) and `query_event_counts_by_severity` (tool), then `describe_pattern` (tool) for spread. Raw logs only after that list is narrow.
 
-### Running 30 tool calls without converging
+### Running past ~15 tool calls without converging
 
-**Symptom.** Investigation has 20+ tool calls and you're still chasing leads without a coherent picture.
+**Symptom.** Investigation is past ~15 tool calls and you're still chasing leads without a coherent picture.
 
-**Why it's wrong.** Backing-query ceiling violated; engineer's wall-clock budget violated; usually means the investigation is structurally stuck.
+**Why it's wrong.** The engineer's wall-clock budget is gone, and it usually means the investigation is structurally stuck.
 
-**Recovery.** Stop at ~15 tool calls if not converging. Produce an interim summary that says "Investigation has examined N findings without converging on a coherent picture; here's what was found and the next investigative directions worth taking." Honest and useful; better than 30 tool calls of confused thrashing.
+**Recovery.** Stop and produce the interim summary `sparklogs-investigate` Section 15 describes.
 
 ---
 
 ## LQL syntax mistakes
 
-These are common enough to repeat here even though `lql-reference.md` covers them:
-
-### Using `LIKE`, `MATCHES`, `IS NULL`, `CONTAINS_*`
-
-These don't exist in LQL. Use `:`/`*`/`?`, `:`/`/regex/`, `<field>!`/`NOT <field>!`, scalar operators on array fields.
-
-### Wildcard JSON paths
-
-`x.services.*.status = STOPPED` does NOT work: type resolution needs an exact path. For an array of objects use the element grammar (`x.services[](status=stopped)`). Otherwise use a promoted field or the message.
-
-### Square brackets for value lists
-
-`severity in [error, critical]` is wrong. `severity in (error, critical)` with parentheses.
-
-### Confusing `:` vs `=` with `/regex/`
-
-`field: /regex/` matches if value *contains* the pattern; `field = /regex/` matches if regex matches the *entire* value. When the result count is surprising, double-check the operator-vs-regex pairing.
-
-### After 2 retries on broken LQL, surface to user
-
-Don't keep retrying with slightly different broken expressions. If the LQL parser returns errors twice in a row, the issue is fundamental - surface to the engineer rather than burning more tool calls. Syntax and common parser messages: `guides/lql-reference.md` (parser-errors section).
+Syntax, the common mistakes, and why a malformed filter returns zero rows instead of an error: `guides/lql-reference.md`.
+After two attempts at the same broken shape, stop and tell the engineer what you tried.
 
 ---
 
@@ -372,7 +311,7 @@ Don't keep retrying with slightly different broken expressions. If the LQL parse
 
 Every summary MUST have: EXECUTIVE SUMMARY (at top), SCOPE CHECKED, OBSERVED CONDITIONS, WHAT WAS NOT CHECKED (which lives inside SCOPE CHECKED), WHAT WAS EXAMINED, AUDIT TRAIL, POSSIBLE NEXT DIRECTIONS (with the explore-or-analyze invitation).
 
-### Making the POSSIBLE NEXT DIRECTIONS section longer than 3 sentences
+### Making the POSSIBLE NEXT DIRECTIONS section longer than 4 sentences
 
 The section is bounded. If it expands, it's becoming cause analysis. Trim and refer to `sparklogs-analyze-cause`.
 

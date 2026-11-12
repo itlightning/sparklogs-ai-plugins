@@ -30,7 +30,7 @@ Do not straddle a source-pack release when comparing pattern hashes; identity is
 **Events, for what health named.** Crashes and hangs of that executable in that interval:
 
 ```lql
-source = "<host>" AND subsource = "win.eventlog.application" AND severity >= 17
+source = "<host>" AND subsource = "win.eventlog.application" AND severity >= error
 ```
 
 Group by `pattern` (LQL).
