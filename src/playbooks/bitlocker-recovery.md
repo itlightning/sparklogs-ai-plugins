@@ -46,7 +46,6 @@ source = "<host>" AND sparklogs.reason = tpm_boot_pcr_values_recorded
 ```
 
 Read the rows in time order and compare the fingerprint of the last boot before the prompt with the first boot after it.
-A boot logged before the device's source pack added this reason carries only the raw System event 24709: read its message for the PCR values.
 If they differ, compare `win.eventlog.system.boot_pcrs` (LQL) entry by entry and name the PCR whose value changed.
 
 **Which PCRs the key depends on.** The fingerprint covers every recorded PCR, but the TPM releases the key against only the PCRs it was sealed to.

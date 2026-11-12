@@ -109,7 +109,6 @@ Detail: `playbooks/playbooks.md`.
 |---|---|
 | One application slow or stalling over the network | `playbooks/application-network-stall.md` |
 | App slow over VPN | `playbooks/application-network-stall.md` |
-| Backup job failed | `playbooks/backup-failure.md` |
 | BitLocker recovery | `playbooks/bitlocker-recovery.md` |
 | Certificate expiry | `playbooks/certificate-expiry.md` |
 | Directory replication | `playbooks/directory-replication-failure.md` |
@@ -225,7 +224,7 @@ Symptom playbooks: Section 3b and `playbooks/playbooks.md`.
 
 Group before you read: the event-shape ladder (`service` (LQL) -> `app` (LQL) -> `subsource` (LQL) -> `category` (LQL) -> `pattern_hash` (LQL), `source` (LQL) beside it), curated identity (`sparklogs.reason` (LQL), `sparklogs.reason_variant` (LQL), `sparklogs.class` (LQL), `sparklogs.instance` (LQL)), and device conditions. Fields, availability and the rules that change counts: `guides/scope-ladder.md`. An empty group is a field the source does not set, not a Finding.
 
-**Use it:** `query_event_counts_by_severity` (tool) with `group_by` (arg) to localize; cross-tab with 2-3 fields when the pairing is the question; drill with `pattern_hash = "..."` (LQL) or refine on cache; resolve `_hash` via `lookups` (col) before citing. Baseline-vs-incident hash compare: mind source-pack releases that recompute pattern identity or add reasons (events before the release carry raw text only: `guides/scope-ladder.md`).
+**Use it:** `query_event_counts_by_severity` (tool) with `group_by` (arg) to localize; cross-tab with 2-3 fields when the pairing is the question; drill with `pattern_hash = "..."` (LQL) or refine on cache; resolve `_hash` via `lookups` (col) before citing.
 
 Full ladder, worked shapes, RCA usage: `guides/scope-ladder.md`. Controlled `service` (LQL) vocabulary: `guides/service-taxonomy.md`.
 

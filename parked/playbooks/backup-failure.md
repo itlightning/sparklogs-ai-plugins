@@ -1,3 +1,5 @@
+<!-- Moved from src/playbooks/backup-failure.md at 0dc0045. Backup job results are not curated yet; rewrite after the backup log curation work. -->
+
 ---
 index: Backup job failed
 ---

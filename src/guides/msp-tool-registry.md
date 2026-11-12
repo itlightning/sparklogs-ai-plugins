@@ -4,7 +4,7 @@ Common MSP tools, their Windows service names, and the `app` (LQL) token SparkLo
 
 Use it two ways:
 
-- A symptom names a product ("Veeam reports backup failed"): filter on its `app` (LQL) token for its service events, and check its services in device state. A product's own job or detection results are not curated; vendor text the product writes to Application or System arrives uncurated with an empty `app` (LQL).
+- A ticket names a product ("Huntress flagged this machine"): filter on its `app` (LQL) token for its service events, and check its services in device state. A product's own job or detection results are not curated; vendor text the product writes to Application or System arrives uncurated with an empty `app` (LQL).
 - Device state lists a service you do not recognize: find the product here before treating it as unknown.
 
 Service names are the vendors' install defaults and change between versions.

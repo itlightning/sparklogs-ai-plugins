@@ -16,7 +16,6 @@ A symptom that lives on a device starts from device health (a device view, a con
 |---|---|
 | One application slow or stalling over the network | `playbooks/application-network-stall.md` |
 | App slow over VPN | `playbooks/application-network-stall.md` |
-| Backup job failed | `playbooks/backup-failure.md` |
 | BitLocker recovery | `playbooks/bitlocker-recovery.md` |
 | Certificate expiry | `playbooks/certificate-expiry.md` |
 | Directory replication | `playbooks/directory-replication-failure.md` |

@@ -18,6 +18,6 @@ If the visible tool description omits details you need, `server_info` (tool) wit
 Collection status and `agent_complete_through` (col) qualify coverage.
 An open condition alone does not establish a problem; read its severity and lifecycle.
 Use `query_logs` (tool) for underlying application or system events, scoped to the device and interval the health reading named.
-A VSS writer failure does not establish a backup job's outcome: follow `playbooks/backup-failure.md` for that investigation.
+A VSS writer failure does not establish a backup job's outcome; the job result lives in the backup console.
 
 Use `sparklogs.agent.vector` (value) and `sparklogs.agent.log` (value) when diagnosing SparkLogs collection.

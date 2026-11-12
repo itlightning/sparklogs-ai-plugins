@@ -5,7 +5,7 @@ index: VSS / shadow copies / backup plumbing
 # Windows VSS
 
 **Trigger.** Writers failing, snapshots not created, shadow copies piling up, `vssadmin` (other) looking wrong.
-Job failed: `playbooks/backup-failure.md` first; this file is the plumbing under the product.
+This file is the Windows plumbing under a backup product; the job result itself lives in the backup console.
 
 **Accuracy.** VSS errors often coexist with a completed backup job.
 Never report a backup failure from VSS evidence alone.

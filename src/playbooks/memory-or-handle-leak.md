@@ -12,7 +12,6 @@ Instance identity is PID plus creation time. Read it from the process trend with
 Paging heat and a leak are separate facts: a process can grow for days with no paging heat on a host with spare memory.
 Crashes and hangs are the consequence trail. A rising count of one `pattern_hash` (LQL) is a rising crash rate, not a leak.
 Read open conditions with `sparklogs.episode.age_basis` (col): `observed` (value) supports "for at least N days"; `unknown_ongoing` (value) supports no duration.
-Do not straddle a source-pack release when comparing pattern hashes; identity is recomputed at that boundary.
 
 **Device health first.** `device_overview` (value) over days, covering the slowdown and the last reboot if you can.
 

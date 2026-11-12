@@ -265,10 +265,10 @@ async function validateShippedMarkdown(host, base) {
       }
     }
     if (skill === 'sparklogs-analyze-cause') {
-      if (text.includes('playbooks/backup-failure.md')) {
+      if (text.includes('playbooks/windows-vss.md')) {
         throw new Error(`${host} ${skill} should not carry the playbook table`);
       }
-    } else if (!text.includes('playbooks/backup-failure.md')) {
+    } else if (!text.includes('playbooks/windows-vss.md')) {
       throw new Error(`${host} ${skill} missing generated playbook table`);
     }
   }

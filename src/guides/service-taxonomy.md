@@ -75,4 +75,4 @@ never on `service = "security_audit"` (LQL) alone.**
 ## Coverage
 
 This table is the complete `service` (LQL) vocabulary as of this plugin release; a validation check holds it to the source pack's registry.
-A value you see in data and cannot find here comes from a newer pack or a non-pack sender: report it with `send_sparklogs_feedback` (tool) if the engineer agrees.
+A value you see in data and cannot find here: report it with `send_sparklogs_feedback` (tool) if the engineer agrees.

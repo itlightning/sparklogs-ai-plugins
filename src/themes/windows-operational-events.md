@@ -20,8 +20,6 @@ Explore: `guides/stream-kinds/wel-classic.md` (`subsource` (LQL), then `origin` 
 
 Patching: `themes/windows-updates-and-patching.md`. Who changed it: `themes/windows-security-and-audit.md`.
 
-A named backup product job failed is not this theme.
 Installed products: `themes/device-health-and-state.md`.
-Job outcome: `playbooks/backup-failure.md`.
 VSS plumbing (writers, snapshots, shadow-copy rotation): `playbooks/windows-vss.md`.
-A VSS writer failure is not proof the backup product failed.
+A VSS writer failure is not proof a backup job failed; the job result lives in the backup console.

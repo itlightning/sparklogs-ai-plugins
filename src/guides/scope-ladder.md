@@ -62,7 +62,6 @@ Rules that change counts:
 - **Variant before messages.** Group `["sparklogs.reason", "sparklogs.reason_variant"]` before reading any message: variants of one reason often differ in severity and meaning.
 - **Instance before hosts.** Two volumes on one host share a reason; `sparklogs.instance` (LQL) tells them apart.
 - **Recovery.** The recovery of a fault is the same `sparklogs.reason` (LQL) with `sparklogs.class = RECOVERED` (LQL). Group by reason to collapse onset, hold and recovery into one finding.
-- **Reasons have a start date.** A reason added in a newer source pack is absent from events logged before the device ran that pack; those events carry the raw text only. Before reading the absence of a reason as an answer, check `feed_pack_version` (col) on the `resolve_scope` (tool) agent row and compare the event dates with that pack's release.
 - **Reason inventory of a scope.** `query_scope_activity` (tool) with `group_by` (arg) `["sparklogs.reason"]` lists every reason in scope with its failure-side severity counts in one call. The empty-reason row is the uncurated traffic.
 
 ---

@@ -38,7 +38,6 @@ Funnel, scope, LQL errors: `guides/mcp-tool-decision-tree.md`, `guides/scope-res
 - Which processes or devices stand out across the fleet → same tool, `view` (arg) `fleet_processes` (value) or `fleet_performance` (value)
 - Collection problems → `resolve_scope` (tool) with `unhealthy_collection_only` (arg)
 - Counts, patterns, when → `query_event_counts_by_severity` (tool) grouped by the fields in `guides/scope-ladder.md` (`sparklogs.reason` (LQL) first on curated data), `describe_pattern` (tool), `query_scope_activity` (tool)
-- Named backup product → installed products with `query_device_health` (tool); the job verdict comes from the backup console unless the vendor wrote it to Application or System (`playbooks/backup-failure.md`)
 - Raw event lines → `query_logs` (tool) last, then refine
 - Collector debug → `sparklogs.agent.vector` (value) / `sparklogs.agent.log` (value) only
 
@@ -108,7 +107,6 @@ Playbooks are incomplete recipes. If a recipe LQL produces empty results: widen 
 |---|---|
 | One application slow or stalling over the network | `playbooks/application-network-stall.md` |
 | App slow over VPN | `playbooks/application-network-stall.md` |
-| Backup job failed | `playbooks/backup-failure.md` |
 | BitLocker recovery | `playbooks/bitlocker-recovery.md` |
 | Certificate expiry | `playbooks/certificate-expiry.md` |
 | Directory replication | `playbooks/directory-replication-failure.md` |
