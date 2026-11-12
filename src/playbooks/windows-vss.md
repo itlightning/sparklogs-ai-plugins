@@ -66,7 +66,7 @@ Group by `sparklogs.reason` (LQL).
 Who is snapshotting (stays Info so default sweeps see it):
 
 ```
-source = "<host>" AND subsource = win.eventlog.application AND winlog.event_id = 8231
+source = "<host>" AND subsource = win.eventlog.application AND event_id = 8231
 ```
 
 Read requesters from the 8231 message tail; there is no command-line LQL field to group by.
@@ -91,10 +91,10 @@ Group by `win.eventlog.application.vss_operation_intent` (LQL).
 Volsnap reclamation (space 33, count 58, delete-pending 95):
 
 ```
-source = "<host>" AND subsource = win.eventlog.system AND winlog.event_id in (33, 58, 95)
+source = "<host>" AND subsource = win.eventlog.system AND event_id in (33, 58, 95)
 ```
 
-Group by `winlog.event_id` (LQL).
+Group by `event_id` (LQL).
 Creation continuing with no 58 is accumulation in the *log stream*, not distance to the 512-copy cap.
 Used-% of shadow storage does not speak to that cap.
 The log stream does not carry the standing copy count.

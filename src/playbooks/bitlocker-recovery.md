@@ -47,13 +47,25 @@ source = "<host>" AND sparklogs.reason = tpm_boot_pcr_values_recorded
 
 Read the rows in time order and compare the fingerprint of the last boot before the prompt with the first boot after it.
 If they differ, compare `win.eventlog.system.boot_pcrs` (LQL) entry by entry and name the PCR whose value changed.
+
+**Which PCRs the key depends on.** The fingerprint covers every recorded PCR, but the TPM releases the key against only the PCRs it was sealed to.
+BitLocker-API event 892 in the BitLocker management log, uncurated, names them: "BitLocker successfully sealed a key to the TPM. PCRs measured include [7,11]."
+Take the newest 892 before the prompt:
+
+```
+source = "<host>" AND subsource = "win.eventlog.identity_security" AND event_id = 892
+```
+
+A changed PCR outside that list did not cause the prompt.
+A boot manager update changes PCR 4 on every boot after it, and a key sealed to PCRs 7 and 11 still unlocks.
+Name a PCR as the cause only when it changed and it is in the sealed list, or when `win.eventlog.system.bitlocker_mismatched_pcr` (LQL) names it.
 Many devices also log BitLocker-Driver event 24711, uncurated, when a TPM protector started Windows. Some never log it, so read it against the device's own history:
 
 ```
-source = "<host>" AND subsource = "win.eventlog.system" AND winlog.event_id in (24709, 24711, 24652)
+source = "<host>" AND subsource = "win.eventlog.system" AND event_id in (24709, 24711, 24652)
 ```
 
-Group by `winlog.event_id` (LQL). On a device whose boots usually carry 24711, a boot with 24709 and 24652 but no 24711 is the recovery boot.
+Group by `event_id` (LQL). On a device whose boots usually carry 24711, a boot with 24709 and 24652 but no 24711 is the recovery boot.
 
 **From the PCR to the change.** Look on the same device around the boot before the prompt:
 
@@ -65,7 +77,7 @@ Group by `winlog.event_id` (LQL). On a device whose boots usually carry 24711, a
 BitLocker-API event 793 in the BitLocker management log, uncurated, reads "BitLocker resealed boot settings to the TPM". BitLocker bound the drive key to the boot measurements of that moment. A 793 after a firmware or Secure Boot update means the key already follows the new measurements, so that update did not cause the prompt:
 
 ```
-source = "<host>" AND subsource = "win.eventlog.identity_security" AND winlog.event_id = 793
+source = "<host>" AND subsource = "win.eventlog.identity_security" AND event_id = 793
 ```
 
 

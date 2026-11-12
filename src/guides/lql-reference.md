@@ -364,7 +364,7 @@ WEL identity is **`subsource` (LQL)**.
 Explore ladders: `guides/stream-kinds.md`.
 
 ```
-subsource = "win.eventlog.application" AND winlog.event_id = 1000
+subsource = "win.eventlog.application" AND event_id = 1000
 provider_name: Microsoft-Windows-Backup*
 ```
 

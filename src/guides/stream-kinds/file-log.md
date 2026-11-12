@@ -7,7 +7,7 @@ Group **`origin` (LQL)** when more than one file is in play, then `pattern` (LQL
 This kind is any **file-backed** feed, not only Windows servicing.
 CBS and DISM are the ones shipped today.
 
-No `provider_name` (LQL) and no `winlog.event_id` (LQL). Do not copy a WEL ladder onto these feeds.
+No `provider_name` (LQL) and no `event_id` (LQL). Do not copy a WEL ladder onto these feeds.
 
 ## Known file feeds
 

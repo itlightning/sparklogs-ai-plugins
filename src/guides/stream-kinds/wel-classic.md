@@ -1,6 +1,6 @@
 # Kind: WEL classic (Application, System)
 
-Group **`provider_name` (LQL)**, then `winlog.event_id` (LQL) / `pattern` (LQL) / `pattern_hash` (LQL), then `sparklogs.reason` (LQL) when curated.
+Group **`provider_name` (LQL)**, then `event_id` (LQL) / `pattern` (LQL) / `pattern_hash` (LQL), then `sparklogs.reason` (LQL) when curated.
 Scope with **`subsource` (LQL)** (`win.eventlog.application` (value) or `win.eventlog.system` (value)).
 
 `origin` (LQL) is set; one origin per channel is typical, so it is not the split.
@@ -9,7 +9,7 @@ Scope with **`subsource` (LQL)** (`win.eventlog.application` (value) or `win.eve
 
 1. Confirm the host emits this `subsource` (LQL) (`query_scope_activity` (tool) / counts grouped by `subsource` (LQL)).
 2. Group by **`provider_name` (LQL)**. Application and System have many publishers; this is the first useful split.
-3. Inside a publisher: `winlog.event_id` (LQL), then `pattern` (LQL) / `pattern_hash` (LQL), then `sparklogs.reason` (LQL) when curated.
+3. Inside a publisher: `event_id` (LQL), then `pattern` (LQL) / `pattern_hash` (LQL), then `sparklogs.reason` (LQL) when curated.
 4. Narrow `query_logs` (tool) on the dominant groups. Raw `message` (LQL) last.
 
 `service` (LQL) is ticket-class taxonomy when filled. Empty `service` (LQL) is still a real event. Do not require it.
@@ -17,7 +17,7 @@ Scope with **`subsource` (LQL)** (`win.eventlog.application` (value) or `win.eve
 ## Payload
 
 `event_data.*` is sparse unless curation promoted it.
-Module fields live in `feeds/<id>/fields.md`. `provider_name` (LQL), `winlog.event_id` (LQL) and `origin` (LQL) above often are not listed there.
+Module fields live in `feeds/<id>/fields.md`. `provider_name` (LQL), `event_id` (LQL) and `origin` (LQL) above often are not listed there.
 
 ## Accuracy
 

@@ -291,7 +291,7 @@ lql_resident:
   - subsource_hash
   - t
   - trace_id
-  - winlog.event_id
+  - event_id
   # Pedagogical custom paths in lql-reference.md
   - correlation_id
   - x.foo
