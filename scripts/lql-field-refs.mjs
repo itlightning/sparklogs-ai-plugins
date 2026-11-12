@@ -149,6 +149,29 @@ export function parseLiveFields(text) {
   return out;
 }
 
+// Paths the snapshot spells with an array mark (`a[].b` gives `a`): an LQL reference below one of
+// them must use the item grammar (`a[](b=1)` or `a[].b`); `a.b` matches nothing on the server.
+export function parseLiveArrayRoots(text) {
+  const out = new Set();
+  for (const raw of text.split(/\r?\n/)) {
+    const line = raw.trim();
+    if (!line || line.startsWith('#')) continue;
+    for (let at = line.indexOf('[]'); at >= 0; at = line.indexOf('[]', at + 2)) {
+      out.add(canonicalField(line.slice(0, at)));
+    }
+  }
+  return out;
+}
+
+function missingItemMark(field, arrayRoots) {
+  const raw = field.replace(/#[a-z]+(?:\[\])?/g, '');
+  const f = canonicalField(field);
+  for (const root of arrayRoots) {
+    if (f.startsWith(`${root}.`) && !raw.startsWith(`${root}[`)) return root;
+  }
+  return null;
+}
+
 function prefixesOf(fields) {
   const out = new Set();
   for (const f of fields) {
@@ -170,14 +193,15 @@ export function pedagogicalMatch(pedagogical, field) {
   return false;
 }
 
-// Returns vet(ref) -> 'live' | 'pack' | 'pedagogical' | null.
-export function makeFieldVet({ live, pack, pedagogical, families = new Set() }) {
+// Returns vet(ref) -> 'live' | 'pack' | 'pedagogical' | 'needs_item' | null.
+export function makeFieldVet({ live, pack, pedagogical, families = new Set(), arrayRoots = new Set() }) {
   const packCanon = new Set([...pack].map(canonicalField));
   const livePrefixes = prefixesOf(live);
   const packPrefixes = prefixesOf(packCanon);
   return ({ field, arrayRoot }) => {
     const f = canonicalField(field);
     if (pedagogicalMatch(pedagogical, f)) return 'pedagogical';
+    if (missingItemMark(field, arrayRoots)) return 'needs_item';
     const prefixOk = arrayRoot || families.has(f);
     if (live.has(f) || (prefixOk && livePrefixes.has(f))) return 'live';
     if (packCanon.has(f) || (prefixOk && packPrefixes.has(f))) return 'pack';
@@ -243,12 +267,13 @@ export function proveLqlFieldRefs() {
     pack: new Set(['win.eventlog.system.tpm_command']),
     pedagogical: ['x.*', 'path.*', 'field'],
     families: new Set(['sparklogs.data']),
+    arrayRoots: parseLiveArrayRoots('# header\nevent_id\nsparklogs.data.services[].current_state\nx.b[]\n'),
   });
   const verdicts = [
     ['event_id', false, 'live'],
     ['winlog.event_id', false, null],
     ['sparklogs.data.services[].current_state', false, 'live'],
-    ['sparklogs.data.services.current_state', false, 'live'],
+    ['sparklogs.data.services.current_state', false, 'needs_item'],
     ['sparklogs.data.services[]', true, 'live'],
     ['sparklogs.data', false, 'live'],
     ['sparklogs.data.services', false, null],

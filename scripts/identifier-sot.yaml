@@ -85,6 +85,8 @@ args:
 # whenever a tool renders it under that dotted name (device-health does, for
 # every wire field it lifts); resolve_scope's own flat "kind" is unrelated.
 cols:
+  - psa_client_id
+  - rmm_client_id
   - busy_pct_avg
   - class
   - collector_source_kind
@@ -528,6 +530,11 @@ values:
     - vss_writers
     - windows_update_agent_state
   # rank_by, fleet metric and fleet group_by values on query_device_health
+  # entry column of the device-view events result set
+  device_view_event_entries:
+    - episode
+    - episode_step
+    - change
   device_health_metrics:
     - net_rx
     - net_tx

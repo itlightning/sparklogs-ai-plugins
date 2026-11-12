@@ -36,10 +36,10 @@ Then drill down from what the reading named:
 
 Several devices slow on one network (same network key, `guides/device-state-fields.md` **Network outages**): name up to 25 in `agent_ids` (arg) for the light form, compare their worst bands and first hot times, then take up to 5 for full readings.
 
-**Events, for what health named.** Crashes, hangs and errors on that device over the span's interval:
+**Events, for what health named.** The failure side on that device over the span's interval (app crashes and hangs are Minor, process crashes Warning):
 
 ```lql
-source = "<host>" AND severity >= error
+source = "<host>" AND severity >= warning
 ```
 
 Group by `subsource` (LQL), then `pattern` (LQL) inside the dominant one.

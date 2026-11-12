@@ -139,19 +139,5 @@ Write the hypothesis statement as a direct, specific claim, not a hedge. "Disk s
 
 ## When to make additional MCP calls during analysis
 
-Sometimes the prior investigation's findings are sufficient for analysis without further data gathering. Other times, a quick additional check substantially strengthens or weakens a hypothesis.
+When and when not to: `SKILL.md` Section 5. A population contrast runs `query_event_counts_by_severity` (tool) over each population separately, defined from the prior Findings, and compares the two.
 
-**Make additional MCP calls when:**
-- A fleet pivot would discriminate between "single-source hypothesis" and "fleet-wide hypothesis." `query_event_counts_by_severity` (tool) with `group_by=["source"]` on the relevant pattern.
-- A population contrast would discriminate between "affected sources have factor X" and "factor X is irrelevant." Run `query_event_counts_by_severity` (tool) over each population separately and compare; use prior Findings to define the populations.
-- A specific time-window check the prior investigation didn't cover would confirm/refute a hypothesis with a single targeted call.
-
-**Skip additional MCP calls when:**
-- Prior findings already provide sufficient evidence.
-- The check is off-endpoint (surface as "off-endpoint check needed" instead).
-- The check would significantly expand the investigation without proportional analytic benefit.
-
-When you do make additional calls:
-- Reuse the prior investigation's `external_investigation_id` (arg).
-- Prefer cached refinements (`refine_query_result` (tool)) over fresh backing queries - they run against the cache, not the source.
-- Cite the resulting `query_url` (col)s in the hypothesis's Evidence support if they support a specific hypothesis.

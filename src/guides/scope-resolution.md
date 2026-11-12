@@ -20,7 +20,7 @@ Every log event carries two distinct identity fields:
 **Public row kinds from `resolve_scope` (tool):** `org` (other), `agent` (value) (a registered SparkLogs Agent), `ingest_key` (value) (API ingest credential; never call it an agent in reports).
 Ingest keys participate in name matching and appear when `include_agents` (arg) is true (default). That parameter means "include agents and ingest keys," not agents alone.
 
-**Correlation ids.** Org and agent rows carry `rmm_client_id` (arg) and `psa_client_id` (arg), read live. In an automated workflow (per-ticket automation), pass one: it is an EXACT lookup that returns the single org holding that id, or nothing, and never falls back to name matching. An absent correlation id means the org holds no such id.
+**Correlation ids.** Org and agent rows carry `rmm_client_id` (col) and `psa_client_id` (col), read live; pass them back as the arguments of the same name. In an automated workflow (per-ticket automation), pass one: it is an EXACT lookup that returns the single org holding that id, or nothing, and never falls back to name matching. An absent correlation id means none was captured.
 
 ---
 
@@ -140,7 +140,7 @@ Each row is one **(sender, source, `collector_source_kind` (col))** combination 
 | `event_count` (col), `bytes_ingested` (col) | Volume in the window |
 | `cnt_interesting` (col), `distinct_interesting` (col) | Triage: how much is going on here |
 | `cnt_warning` (col) .. `cnt_severe` (col) | One count per failure-side band, 13 through 19 (the ladder is in `category-classes.md`) |
-| `cnt_critical_plus` (col) | Severity 20 and above; fetch-first on curated data (`category-classes.md`) |
+| `cnt_critical_plus` (col) | Severity 20 and above (`category-classes.md`) |
 | `first_event_at` (col), `last_event_at` (col) | Exact window bounds for this pair |
 
 The summary may include **`top_interesting_patterns` (col)**: a short ranked teaser (~8 entries) of high-signal patterns in scope.

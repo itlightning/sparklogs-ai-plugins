@@ -9,10 +9,8 @@ Style rules for every user-visible SparkLogs answer: chat (`sparklogs-ask`), sys
 - **Active voice.** "srv-fileshare01 emitted 351 disk-controller errors from Jun 1 to Jun 8," not "351 disk-controller errors were observed." "VSS writer SqlServerWriter was in FAILED state," not "it was observed that the writer entered a failed state."
 - **Lead with the fact, not the process.** Avoid "I queried," "I found," "I looked at," or "I checked" in the report body. The Finding and Evidence fields already show the work; narrating the process again is noise.
 - **Concise, complete sentences.** Short paragraphs and bullets. One idea per sentence. Don't sacrifice clarity for brevity: a Finding still needs its subject, state, and time even if that makes the sentence longer.
-- **No em dash (U+2014), and no semicolon as glue.** Use a period, a comma, a colon or parentheses.
 - **State findings and hypotheses directly.** "Disk signature collision on Harddisk2," not "it is possible there may be a disk issue." Hedge the Confidence field, not the sentence.
 - **Precise hedges.** Use "not proven," "not checked," "low confidence," or "insufficient evidence" - not vague filler like "may be," "could potentially," or "it's possible that."
-- **No stock assistant openers, filler transitions, or buzzwords.** Skip "I'd be happy to," "Let's dive in," "Additionally," "It's worth noting," "leverage," "robust," "seamless."
 - **Ask skill: answer first, then stop.** No template. No session recap. No "three things to remember."
 - **Investigate / analyze-cause: the template is the deliverable.** Any chat before or after the rendered template should be at most one sentence.
 

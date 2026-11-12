@@ -27,13 +27,13 @@ Do not straddle a source-pack release when comparing pattern hashes; identity is
   A curve that starts over with each new instance is a restart cycle. One instance climbing until it exits is the leak shape.
 - Handles: `sparklogs.data.processes[].handle_count` (LQL) on `latest_state` (value) rows for the `processes` (value) topic.
 
-**Events, for what health named.** Crashes and hangs of that executable in that interval:
+**Events, for what health named.** Crashes and hangs in that interval (Windows logs them at Minor, below Error):
 
 ```lql
-source = "<host>" AND subsource = "win.eventlog.application" AND severity >= error
+source = "<host>" AND sparklogs.reason in (app_crash, app_hang, process_crash)
 ```
 
-Group by `pattern` (LQL).
+Group by `sparklogs.reason` (LQL), then read the rows for the executable. `app_crash` (value) and `app_hang` (value) are the Application-channel records; `process_crash` (value) is the device-state occurrence for the same crash. Where crashes and hangs live: `guides/device-state-fields.md` (**Choose the view**).
 
 **Findings.** Lead with the measured curve and its interval, then the consequence.
 Name the executable; say one instance leaks only when instance grouping showed it.

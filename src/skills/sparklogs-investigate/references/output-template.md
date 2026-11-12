@@ -66,7 +66,7 @@ A friendly, human-meaningful correlation handle you supply - free text, 8-200 ch
 The cap is the point. An engineer reads this to decide whether to open the Findings; a summary that reproduces them has replaced the decision with a second read.
 
 **Right (factual synthesis):**
-"The investigation surfaced a VSS writer failure on srv-fileshare01 at 03:14 UTC concurrent with a Veeam error and a recent KB5034441 install (Findings 1, 2, 4). The same pattern appeared on 7 other fleet sources (Finding 6). The agent reported its data complete through the end of the window with no advisories (Finding 7)."
+"The investigation surfaced a VSS writer failure on srv-fileshare01 at 03:14 UTC concurrent with a Veeam error and a recent KB5034441 install (Findings 1, 2, 4). The same pattern appeared on 7 other fleet sources (Finding 6)."
 
 **Wrong (speculation):**
 "This is clearly caused by the KB5034441 update breaking VSS interaction with Veeam - the timing and fleet-wide pattern make this the obvious root cause."
@@ -88,8 +88,8 @@ The subsources and helper outputs you actually queried. Be specific; e.g., `win.
 ### WHAT WAS NOT CHECKED
 Investigation-specific list of off-endpoint sources and conditions you couldn't check. Per-investigation-type reference: `guides/off-endpoint-causes.md`. Examples:
 - "Backup target NAS-01 was not checked (it does not run a SparkLogs Agent). Recommend checking NAS-01 health logs directly."
-- "Cloud identity audit logs (Azure AD / Entra) are outside SparkLogs ingestion. Sign-in failures from cloud-side conditional access policies would not appear in this investigation."
-- "EDR cloud audit (SentinelOne) is outside SparkLogs ingestion. EDR-side blocks of VSS operations would not appear in on-endpoint state."
+- "Cloud identity audit logs (Entra) were not checked: no sender for them in list_sources. Sign-in failures from cloud-side conditional access policies would not appear in this investigation."
+- "EDR cloud audit (SentinelOne) was not checked: no sender for it in list_sources. EDR-side blocks of VSS operations would not appear in on-endpoint state."
 
 **One bullet per item, one sentence each. Never prose.** Each bullet names the thing not checked and why it matters; the engineer scans this list for the gap that changes their next move, and a paragraph hides it.
 

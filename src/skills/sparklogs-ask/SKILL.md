@@ -33,13 +33,13 @@ Funnel, scope, LQL errors: `guides/mcp-tool-decision-tree.md`, `guides/scope-res
 ## Which tool (quick route)
 
 - Something wrong with one device or a few (slow, dropping, filling, failing) → `query_device_health` (tool), `view` (arg) `device_overview` (value), or `device_network` (value) for network trouble; then refine its result sets and read events only for the device and interval it points at
-- Crash or app problem → same tool, `view` (arg) `event_timeline` (value) with `kinds` (arg) `["occurrence"]` (value)
+- Crash or app problem → same tool, `view` (arg) `event_timeline` (value) with `kinds` (arg) `["occurrence"]` (value); app hangs are only in Application-channel events (`guides/device-state-fields.md`, **Choose the view**)
 - Open problems across a client, or how many devices have one → same tool, omit `view` (arg), or `group_by_reason` (arg) for device counts
 - Which processes or devices stand out across the fleet → same tool, `view` (arg) `fleet_processes` (value) or `fleet_performance` (value)
 - Every other device question (inventory, process trends, raw samples, episode history): the view table in `guides/device-state-fields.md` (**Choose the view**)
 - Collection problems → `resolve_scope` (tool) with `unhealthy_collection_only` (arg)
 - Counts, patterns, when → `query_event_counts_by_severity` (tool) grouped by the fields in `guides/scope-ladder.md` (`sparklogs.reason` (LQL) first on curated data), `describe_pattern` (tool), `query_scope_activity` (tool)
-- Named backup product installed → `query_device_health` (tool) first; job verdict in events, not VSS alone
+- Named backup product → installed products with `query_device_health` (tool); the job verdict comes from the backup console unless the vendor wrote it to Application or System (`playbooks/backup-failure.md`)
 - Raw event lines → `query_logs` (tool) last, then refine
 - Collector debug → `sparklogs.agent.vector` (value) / `sparklogs.agent.log` (value) only
 

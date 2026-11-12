@@ -31,7 +31,7 @@ You DO:
 - Read an empty result as a claim about the query, never as a clean bill of health: know which fields the source actually carries (Section 8).
 - Offer the separate **`sparklogs-analyze-cause`** skill at the end if the engineer wants candidate cause hypotheses; do not perform cause analysis here beyond that invitation.
 
-The trust principles let the AI judge what the likely cause is, labeled as analysis (principle 7). In this workflow that judgment goes to `sparklogs-analyze-cause`, so the summary stays checkable fact.
+The trust principles let the AI judge what the likely cause is, labeled as analysis (the SparkLogs AI trust principle "Likely causes are labeled as analysis"). In this workflow that judgment goes to `sparklogs-analyze-cause`, so the summary stays checkable fact.
 
 **This goal framing is non-negotiable.** A confidently-wrong root-cause conclusion damages trust in a way that takes a long time to recover. A defensible factual summary builds trust on every investigation.
 

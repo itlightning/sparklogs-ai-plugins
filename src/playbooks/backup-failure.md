@@ -20,10 +20,10 @@ Header coverage says whether the device was awake for it; a job window spent asl
 `events` (col) carry `vss_writer_failed` (value), `vss_snapshots_failing_for_space` (value) and the space-low conditions; disk heat spans and `top_processes` (col) show whether the backup ran into a busy or slow disk.
 The device-health reading describes the machine around the job; the job's outcome comes from the vendor, in events only when the vendor writes it to Application or System.
 
-**Events, for what health named.** Errors in the failure window, including any job text the vendor wrote to Application or System:
+**Events, for what health named.** The failure side in the job window, including any job text the vendor wrote to Application or System (vendors often log it at Warning):
 
 ```lql
-source = "<host>" AND severity >= error
+source = "<host>" AND severity >= warning
 ```
 
 Group by `pattern` (LQL).
@@ -38,4 +38,4 @@ pattern_hash = "<h>"
 
 Group by `source` (LQL).
 
-**Off-endpoint** (`guides/off-endpoint-causes.md` HM1): backup target NAS or cloud, EDR cloud blocking VSS, bespoke vendor with no autodetect, credential vault, Hyper-V or VMware guest writers, server-side job state.
+**Off-endpoint** (`guides/off-endpoint-causes.md` HM1): backup target NAS or cloud, EDR cloud blocking VSS, vendor job detail written only to the vendor's own files, credential vault, Hyper-V or VMware guest writers, server-side job state.

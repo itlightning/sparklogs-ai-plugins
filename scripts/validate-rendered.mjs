@@ -33,7 +33,7 @@ const DIST = path.resolve(ROOT, process.argv[2] ?? 'build/dist');
 const LICENSE = await fs.readFile(path.join(ROOT, 'LICENSE'));
 const ALLOWED_EXTS = new Set(['.md', '.json', '.svg', '.png']);
 const ALLOWED_NAMES = new Set(['README.md', 'LICENSE', '.mcp.json', 'mcp.json']);
-const MAINTAINER_ONLY = ['SYNC-MANIFEST.json'];
+const MAINTAINER_ONLY = ['SYNC-MANIFEST.json', 'reference-navigation.md'];
 const ALLOWED_MCP_HOSTS = new Set(['mcp.sparklogs.app', 'us.mcp.sparklogs.app', 'eu.mcp.sparklogs.app']);
 const SEMVER = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/;
 
@@ -217,7 +217,7 @@ async function validateShippedMarkdown(host, base) {
       leftoverHits.push(`${relative}: ${hit}`);
     }
     for (const kind of keepTagKindsFound(text)) keepKinds.add(kind);
-    if (/BEGIN GENERATED|END GENERATED|HOSTVARIANT|confirmed with data/.test(text)) markerHits.push(relative);
+    if (/BEGIN GENERATED|END GENERATED|HOSTVARIANT|confirmed with data|core-block:/.test(text)) markerHits.push(relative);
     const { data } = parseFrontmatter(text, `${host}:${relative}`);
     for (const key of Object.keys(data)) {
       if (AUTHORING_FRONTMATTER_KEYS.has(key)) authoringHits.push(`${relative} key ${key}`);

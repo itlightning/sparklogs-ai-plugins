@@ -47,8 +47,9 @@ Do not map `vss_state` (other) onto that enum.
 ## Device health first
 
 Open conditions `vss_writer_failed` (value) and `vss_snapshots_failing_for_space` (value) name the writer or volume and how long it has been open.
-`latest_state` (value) on topic `vss_writers` (value) gives each writer's state and last error (`sparklogs.data.vss_writers.writer_state_failed` (LQL), `sparklogs.data.vss_writers.writer_last_error` (LQL)), and `sparklogs.data.vss_writers.writer_expected` (LQL) says whether an installed backup product relies on it.
-`latest_state` (value) on topic `vss_shadowstorage` (value) gives per-volume shadow storage use against its limit (`sparklogs.data.vss_shadowstorage.shadowstorage_used_pct` (LQL), `sparklogs.data.vss_shadowstorage.shadowstorage_at_cap` (LQL)) and the volsnap failure counts (`sparklogs.data.vss_shadowstorage.snap_fail_count_24h` (LQL), `sparklogs.data.vss_shadowstorage.snap_fail_count_7d` (LQL)).
+`latest_state` (value) on topic `vss_writers` (value) gives each writer's state and last error (`sparklogs.data.vss_writers[].writer_state_failed` (LQL), `sparklogs.data.vss_writers[].writer_last_error` (LQL)), and `sparklogs.data.vss_writers[].writer_expected` (LQL) says whether an installed backup product relies on it.
+`latest_state` (value) on topic `vss_shadowstorage` (value) gives per-volume shadow storage use against its limit (`sparklogs.data.vss_shadowstorage[].shadowstorage_used_pct` (LQL), `sparklogs.data.vss_shadowstorage[].shadowstorage_at_cap` (LQL)) and the volsnap failure counts (`sparklogs.data.vss_shadowstorage[].snap_fail_count_24h` (LQL), `sparklogs.data.vss_shadowstorage[].snap_fail_count_7d` (LQL)).
+Filter a failed writer with `sparklogs.data.vss_writers[](writer_state_failed=true)` (LQL) and a capped volume with `sparklogs.data.vss_shadowstorage[](shadowstorage_at_cap=true)` (LQL).
 A writer listed as failed between backups is a standing state; whether the last job failed is still the backup product's answer.
 
 ## Shadow-copy lifecycle
@@ -108,10 +109,10 @@ Creation continuing with no 58 is accumulation in the *log stream*, not distance
 Used-% of shadow storage does not speak to that cap.
 Neither the log stream nor the `vss_shadowstorage` (value) topic carries the standing copy count; the topic carries storage use against its limit.
 
-Fleet, Error and above (two nouns: which reason, which host):
+Fleet, failure side (two nouns: which reason, which host):
 
 ```lql
-service = backup AND subsource in (win.eventlog.application, win.eventlog.system) AND severity >= error
+service = backup AND subsource in (win.eventlog.application, win.eventlog.system) AND severity >= warning
 ```
 
 Group by `sparklogs.reason` (LQL), `source` (LQL).

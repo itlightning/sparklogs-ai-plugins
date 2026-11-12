@@ -152,9 +152,13 @@ export function formatFrontmatter(data) {
 // An authored note that a playbook query's raw event id was seen in real data, on its own line
 // after the query's closing fence. Authoring evidence only: render drops the line.
 export const DATA_CONFIRMED_MARKER_RE = /^<!-- confirmed with data on \d{4}-\d{2}-\d{2} -->$/;
+// Brackets a block copied from the SparkLogs writing core; the copy procedure finds it by these lines.
+const CORE_BLOCK_MARKER_RE = /^<!-- core-block:(?:start|end)\b[^>]*-->$/;
 
 function stripDataConfirmedMarkers(text) {
-  return text.split('\n').filter((line) => !DATA_CONFIRMED_MARKER_RE.test(line)).join('\n');
+  return text.split('\n')
+    .filter((line) => !DATA_CONFIRMED_MARKER_RE.test(line) && !CORE_BLOCK_MARKER_RE.test(line))
+    .join('\n');
 }
 
 export function unwrapGeneratedBlocks(text) {
@@ -426,6 +430,8 @@ description: Example agent.
 `;
   const marked = shipMarkdown('# Playbook\n\n```lql\nevent_id = 1\n```\n<!-- confirmed with data on 2026-01-02 -->\n', 'p.md');
   if (marked.includes('confirmed with data')) throw new Error('shipMarkdown kept a data-confirmed marker');
+  const core = shipMarkdown('# Voice\n\n<!-- core-block:start (synced 2026-01-02) -->\n- rule\n<!-- core-block:end -->\n', 'v.md');
+  if (core.includes('core-block') || !core.includes('- rule')) throw new Error('shipMarkdown mishandled core-block markers');
   if (!marked.includes('event_id = 1')) throw new Error('shipMarkdown dropped the query beside a marker');
   const agentShipped = shipMarkdown(agent, 'agent.md');
   if (!agentShipped.includes('model: haiku')) throw new Error('shipMarkdown dropped model');

@@ -325,6 +325,8 @@ severity >= warning      <- curated sweeps: WARNING and above, the failure side 
 severity >= error        <- raw, high-volume streams where WARNING is noise
 ```
 
+`>= error` drops Minor and Warning, where app crashes and hangs (Minor) and process crashes (Warning) sit.
+
 Compare severity by name with `>=`.
 `severity in (error, critical)` (LQL) is an exact list: it drops MINOR, SERIOUS, SEVERE and every WARNING level, which is where most curated failure signal sits.
 

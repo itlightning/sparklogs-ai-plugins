@@ -62,7 +62,7 @@ Rules that change counts:
 - **Variant before messages.** Group `["sparklogs.reason", "sparklogs.reason_variant"]` before reading any message: variants of one reason often differ in severity and meaning.
 - **Instance before hosts.** Two volumes on one host share a reason; `sparklogs.instance` (LQL) tells them apart.
 - **Recovery.** The recovery of a fault is the same `sparklogs.reason` (LQL) with `sparklogs.class = RECOVERED` (LQL). Group by reason to collapse onset, hold and recovery into one finding.
-- **Reasons have a start date.** A reason added in a newer source pack is absent from events logged before the device ran that pack; those events carry the raw text only. Before reading the absence of a reason as an answer, check `feed_pack_version` (col) on the `resolve_scope` (tool) agent row and when the device moved to it.
+- **Reasons have a start date.** A reason added in a newer source pack is absent from events logged before the device ran that pack; those events carry the raw text only. Before reading the absence of a reason as an answer, check `feed_pack_version` (col) on the `resolve_scope` (tool) agent row and compare the event dates with that pack's release.
 - **Reason inventory of a scope.** `query_scope_activity` (tool) with `group_by` (arg) `["sparklogs.reason"]` lists every reason in scope with its failure-side severity counts in one call. The empty-reason row is the uncurated traffic.
 
 ---
@@ -106,7 +106,6 @@ See `mcp-tool-decision-tree.md` (Investigation discipline) for why order matters
 **`query_scope_activity` (tool)** (**bounded discovery**, not LQL-filtered):
 - Capped, pre-aggregated structure for app / service / subsource, or reasons, in org scope and time window.
 - Per-row triage: `event_count` (col), `cnt_interesting` (col), one count per failure-side severity band (`cnt_warning` (col) through `cnt_critical_plus` (col); the bands are defined in `category-classes.md`), `distinct_interesting` (col), `first_event_at` (col), `last_event_at` (col).
-- Non-zero `cnt_critical_plus` (col) on curated data: fetch-first (`category-classes.md`, Severity).
 - Narrow with `agent_ids` (arg) (collector UUIDs), `source` (arg) substring, or `field_match` (arg), which matches the source, app, service and subsource values (not field names).
 - Summary may include `top_interesting_patterns` (col) teaser; call **`describe_pattern` (tool)** before citing any teaser pattern.
 

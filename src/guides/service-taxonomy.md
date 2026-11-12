@@ -37,7 +37,7 @@ channel carry `service = "email"` (LQL)).
 | `performance` (value) | Slow boot/logon, resource pressure, performance-trend snapshots. |
 | `user_profiles` (value) | User Profile Service, FSLogix. |
 | `remote_access` (value) | RDP, TeamViewer/AnyDesk/ScreenConnect. |
-| `rmm` (value) | RMM agent health only (Automate/Kaseya/Ninja/Datto). An RMM-generated alert ticket routes by its underlying evidence class (a drive-space alert is `storage` (value)). SparkLogs' own agent health files HERE too (owner-ruled, deliberate: it is a management agent); separate it with app=sparklogs_agent. |
+| `rmm` (value) | RMM agent health only (Automate/Kaseya/Ninja/Datto). An RMM-generated alert ticket routes by its underlying evidence class (a drive-space alert is `storage` (value)). SparkLogs' own agent health also files under `rmm` (value); separate it with `app = sparklogs_agent` (LQL). |
 | `endpoint_protection` (value) | Defender/AV/EDR. |
 | `device_management` (value) | GPO/Intune/SCCM/MDM/Autopilot management plane (enrollment/sync/policy apply). The payload outcome of an install is `patching` (value). |
 | `directory_services` (value) | AD DS/DFSR/Netlogon, Entra Connect sync. |

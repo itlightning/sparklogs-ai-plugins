@@ -19,7 +19,7 @@ import {
   MODULES,
   SOURCE_LIBRARY_DIR_ENV,
 } from './generated-references.config.mjs';
-import { parseLiveFields, pedagogicalMatch } from './lql-field-refs.mjs';
+import { parseLiveArrayRoots, parseLiveFields, pedagogicalMatch } from './lql-field-refs.mjs';
 
 export const LIVE_FIELDS_FILE = 'scripts/fixtures/lql-live-fields.txt';
 
@@ -262,7 +262,8 @@ export async function loadIdentifierSot(root) {
   }
   // `service` values come from the registry list the sync writes, not a hand copy here.
   harvested.services = JSON.parse(await fs.readFile(path.join(root, 'scripts', 'generated-service-vocabulary.json'), 'utf8'));
-  const live = parseLiveFields(await fs.readFile(path.join(root, LIVE_FIELDS_FILE), 'utf8'));
+  const liveText = await fs.readFile(path.join(root, LIVE_FIELDS_FILE), 'utf8');
+  const live = parseLiveFields(liveText);
   if (live.size === 0) throw new Error(`${LIVE_FIELDS_FILE} is empty; the LQL field vet would be vacuous`);
-  return { ...mergeSot(doc, harvested, MODULES), live };
+  return { ...mergeSot(doc, harvested, MODULES), live, arrayRoots: parseLiveArrayRoots(liveText) };
 }

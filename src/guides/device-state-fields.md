@@ -17,7 +17,7 @@ Agent-debug feeds describe collection problems, not the device's workload health
 | Raw topic samples | `series` (value), with `topics` (arg). Each inventory part is a result row. |
 | Available topics and sampled fields | `topics` (value). |
 | Episode history or repeating changes | `event_timeline` (value). Includes all in-window events of episodes whose in-window peak meets the severity floor. Events without an episode filter individually. |
-| Crash or application problem on a device | `event_timeline` (value) with `kinds` (arg) `["occurrence"]` (value): the crashes and failures the agent observed, oldest first. |
+| Crash or application problem on a device | Process crashes, service crashes and other occurrences: `event_timeline` (value) with `kinds` (arg) `["occurrence"]` (value), oldest first. App hangs, and the Windows Error Reporting detail of crashes, are on `win.eventlog.application` (value) only (`app_hang` (value), `app_crash` (value), no `sparklogs.kind` (LQL)), so the device-health views never return them: count them with `query_event_counts_by_severity` (tool) on `sparklogs.reason in (app_crash, app_hang)` (LQL). |
 | Open problems across a client or the fleet | Omit `view` (arg) over a window of days. A row is open unless its `sparklogs.class` (col) is `RECOVERED` (value) or `ENDED` (value); a clearing one carries `clearing_since` (col) and `closes_in_about` (col): say since when and about how long until it closes. Narrow with `reasons` (arg) or `topics` (arg). |
 | How many devices have a condition | `group_by_reason` (arg) set: one row per kind and reason with `affected_agents` (col), `episode_count` (col) and `event_count` (col). A device can sit in several groups: do not sum `affected_agents` (col) across rows. |
 | Which processes use the most CPU, RAM or I/O across devices | `fleet_processes` (value), `metric` (arg) `cpu` (value), `ram` (value), `io_read` (value) or `io_write` (value). `image` (arg) narrows to one executable; `group_by` (arg) `device` (value) ranks the devices instead. |
@@ -81,7 +81,7 @@ Use that light form to choose the devices and intervals worth a full reading, th
 4. `domains` (col): the window in coarse buckets with each domain's reading and band.
    `heat_spans` (col): stretches where a domain's heat was above `ok` (value), found at `bucket_s` (col).
    Bands are `ok` (value), `warm` (value), `hot` (value) and `very_hot` (value).
-   Each span carries its peak band and time, the `driver` (col) reading that set the peak and its value, where the peak sat against the device's typical range from before the window (`below` (value), `within` (value), `above` (value)), up to 3 contributors with their share, and the episodes and changes that overlapped it.
+   Each span carries its peak band and time, the `driver` (col) reading that set the peak and its value, on `device_overview` (value) where the peak sat against the device's typical range from before the window (`device_network` (value) spans carry `medium` (col) instead) (`below` (value), `within` (value), `above` (value)), up to 3 contributors with their share, and the episodes and changes that overlapped it.
    A span says when a measure ran high, not why. Contributors ran at the same time and are not proven causes.
    Disk heat is the busiest disk's busy time, pushed up by its queue depth. Latency is not an input, so slow I/O at moderate busy time can leave no disk span.
    Read `disk_latency_ms` (col) in `domains` (col) and `latency_ms_p90_10s` (col) in the `storage` (value) result set for latency. A span names no disk: `busiest_disk` (col) in the `buckets` (value) result set does.
@@ -93,7 +93,7 @@ Use that light form to choose the devices and intervals worth a full reading, th
 6. `events` (col): the most relevant episodes and changes, open episodes first.
    An episode appears only when it had an event inside the window. One open since before the start with no event in the window is absent, so use a window of days for what is open now.
    Changes also cover the 48 hours before the window.
-   Occurrences are not in this part. They are rows of the `events` (value) result set, which also carries the boot, sleep and shutdown marks. On `device_network` (value) that set holds only networking rows and those marks.
+   On `device_overview` (value), crashes and other occurrences are in neither this part nor the `events` (value) result set, which carries only the boot, sleep, shutdown and agent start and stop marks: read them with the `next_reads` (col) `event_timeline` (value) call (`kinds` (arg) `["occurrence"]` (value)). On `device_network` (value) the `events` (value) set holds networking occurrences and those marks.
 7. `next_reads` (col): calls with their arguments ready to paste beside your `external_investigation_id` (arg).
 
 A list that left rows out counts them in `omitted` (col).
@@ -122,11 +122,11 @@ Key columns per set:
 | Set | Key columns |
 |---|---|
 | `state` (value) | `topic` (col), `instance` (col), `row_kind` (col), `kind` (col), `observed_at` (col), and the payload as `sparklogs.data.<topic>[]`. Filter `topic = installed_products AND sparklogs.data.installed_products[](name: "Edge")` |
-| `events` (value) | `entry` (col) (episode or change), `reason` (col), `topic` (col), `instance` (col), `class` (col), `severity` (col), `is_open` (col), `clearing_since` (col), `observed_at` (col) |
+| `events` (value) | `entry` (col) (`episode` (value), `episode_step` (value), `change` (value) or `occurrence` (value)), `reason` (col), `topic` (col), `instance` (col), `class` (col), `severity` (col), `is_open` (col), `clearing_since` (col), `observed_at` (col) |
 | `processes` (value) | `bucket_start` (col), `image_name` (col), `cpu_pct_avg` (col), `resident_bytes_avg` (col), `private_commit_bytes_avg` (col), per-process read, write and TCP rates |
 | `storage` (value) | `bucket_start` (col), `kind` (col) (disk or volume), `instance` (col), `label` (col), `media` (col), `is_busiest_disk` (col), `latency_ms_p90_10s` (col), `queue_depth_avg` (col), `busy_pct_avg` (col) |
 
-Every set lists its own columns in the refine response's `schema.columns` (col): read it before writing a filter.
+Every set lists its own columns in the refine response's `schema.columns` (col): read it before writing a filter. The `state` (value) set's payload, `sparklogs.data.<topic>[]` with the item grammar, is filterable although `schema.columns` (col) does not list it.
 A ratio or percent column sits beside its numerator and denominator: to combine buckets, sum both and divide.
 An average of a ratio column weights a near-idle bucket the same as a busy one.
 
@@ -229,7 +229,7 @@ No change rows then says nothing about whether anything changed.
 ## Network adapters
 
 `sparklogs.data.network_adapters.adapter_class` (col) separates `physical` (value) adapters from virtual switches, other virtual adapters (VPN, TAP, Wi-Fi Direct), tunnels, WAN miniports, loopback and `not_present` (value) ones.
-Filter to physical adapters before judging a device's wired or wireless connectivity.
+Filter to physical adapters (`sparklogs.data.network_adapters[](adapter_class="physical")` (LQL)) before judging a device's wired or wireless connectivity.
 `network_adapter_dhcp_failed` (value) is open while an adapter holds only a self-assigned 169.254 address; it rates higher on a server and when no other default route keeps the device online.
 `network_adapter_link_downshifted` (value) is open while a wired link runs at half or less of its seven-day peak speed; cables, ports, docks and power policy are the usual causes.
 Both end as `no_longer_applicable` (value) when the adapter disconnects, which is not a recovery.

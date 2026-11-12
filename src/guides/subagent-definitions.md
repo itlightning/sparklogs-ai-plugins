@@ -77,7 +77,7 @@ They do not recommend remediation or assert a root cause.
 
 ### Claude
 
-Subagent definitions live in the plugin's `agents/` directory. The orchestrator delegates by name: `Task(subagent_type="sparklogs-log-summarizer", prompt="...")`. Model tier is in the subagent definition's frontmatter.
+Subagent definitions live in the plugin's `agents/` directory. The orchestrator delegates by subagent name (`sparklogs-log-summarizer`, `sparklogs-pattern-enumerator`). Model tier is in the subagent definition's frontmatter.
 
 ### Codex / Cursor / other hosts
 

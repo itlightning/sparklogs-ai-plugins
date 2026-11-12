@@ -6,7 +6,7 @@ The mistakes are grouped by the operating principle they violate.
 
 ---
 
-## Mistakes against "Augment, don't replace"
+## Mistakes against "AI accelerates engineers, not replaces them"
 
 ### Producing cause analysis in this skill
 
@@ -37,7 +37,7 @@ The mistakes are grouped by the operating principle they violate.
 
 ---
 
-## Mistakes against "Cite everything"
+## Mistakes against "Every factual claim cites its data"
 
 ### Claims without `query_url` (col)
 
@@ -81,7 +81,7 @@ The mistakes are grouped by the operating principle they violate.
 
 ---
 
-## Mistakes against "Calibrate confidence honestly"
+## Mistakes against "Confidence is banded from the evidence"
 
 ### Claiming `high` (value) confidence on weak evidence
 
@@ -114,13 +114,13 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` (value) or `
 
 ---
 
-## Mistakes against "Show what you can't see"
+## Mistakes against "Nothing found comes with what was checked"
 
 Writing the WHAT WAS NOT CHECKED section, specific versus boilerplate wording, and naming a suspected off-endpoint cause: `guides/off-endpoint-causes.md` (Honest framing).
 
 ---
 
-## Mistakes against auditability
+## Mistakes against "Audit logs record every AI tool call"
 
 ### `external_investigation_id` (arg) misuse
 

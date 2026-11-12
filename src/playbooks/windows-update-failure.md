@@ -21,17 +21,17 @@ source = "<host>" AND service = patching
 
 Group by `sparklogs.reason` (LQL), worst first.
 
-Failing install in sequence:
+Failing install in sequence (Setup `patch_install_failed` (value) is Error; the System copy, scan and download failures run Info to Warning):
 
 ```lql
-source = "<host>" AND service = patching AND severity >= error
+source = "<host>" AND service = patching AND severity >= warning
 ```
 
 Fleet: one noun `group_by=["source"]` over a pinned reason ("is it just us").
-Two nouns `group_by=["sparklogs.reason", "source"]` over Error and above:
+Two nouns `group_by=["sparklogs.reason", "source"]` over the failure side:
 
 ```lql
-service = patching AND severity >= error
+service = patching AND severity >= warning
 ```
 
 One reason on every host is a bad KB.

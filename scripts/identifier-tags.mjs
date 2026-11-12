@@ -344,6 +344,7 @@ export function lqlRefsInMarkdown(text, { allFences = false } = {}) {
 export async function vetLqlFieldsInTree(root, sot) {
   const vet = makeFieldVet({
     live: sot.live, pack: sot.packLql, pedagogical: sot.pedagogical, families: new Set(sot.familyList),
+    arrayRoots: sot.arrayRoots,
   });
   const errors = vetSotLists({
     resident: sot.resident, families: sot.familyList, live: sot.live, pack: sot.packLql,
@@ -357,7 +358,10 @@ export async function vetLqlFieldsInTree(root, sot) {
     for (const ref of lqlRefsInMarkdown(text, { allFences: generated })) {
       const where = `${rel}:${ref.line}`;
       const verdict = vet(ref);
-      if (verdict === null) {
+      if (verdict === 'needs_item') {
+        const msg = `${where}: LQL field \`${ref.field}\` is inside an array in ${LIVE_FIELDS_FILE}: write it with the item grammar (path[](leaf=...) or path[].leaf); without [] it matches nothing`;
+        (generated ? warnings : errors).push(msg);
+      } else if (verdict === null) {
         const msg = `${where}: LQL field \`${ref.field}\` is not in ${LIVE_FIELDS_FILE}, the pack harvest, or lql_pedagogical`;
         (generated ? warnings : errors).push(msg);
       } else if (verdict === 'pack') {
