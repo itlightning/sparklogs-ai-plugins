@@ -1,6 +1,5 @@
 # Kind: file log
 
-Group **`origin` (LQL)** when more than one file is in play, then `pattern` (LQL) / `severity` (LQL) / `sparklogs.reason` (LQL).
 `origin` (LQL) is the normalized path (`<os>/...`), which is the group-by field.
 `filename` (LQL) is the raw name; use it only when you already have it from a row.
 

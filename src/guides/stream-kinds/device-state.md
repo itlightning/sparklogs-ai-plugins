@@ -74,7 +74,7 @@ field                                          type  event_count
 sparklogs.data.processes[].image_name          s     673
 sparklogs.data.processes[].image_path          s     673
 sparklogs.data.processes[].pid                 n     673
-sparklogs.data.processes[].resident_bytes   n     346
+sparklogs.data.processes[].resident_bytes      n     346
 sparklogs.data.processes[].delta_old.pid       n     336
 ```
 
@@ -96,7 +96,7 @@ disk_volumes:        {"volume":"volume:<guid>","display_name":"C:","volume_role"
 processes (delta):   {"image_name":"svchost.exe","pid":4816,"image_path":"<os>/system32/svchost.exe",
                       "instance":"process:4816|2026-09-06T04:41:50Z","services":["wuauserv"],
                       "age_s":81,"handle_count":329,"ram_growth_peak_mb":17.21,
-                      "create_time_raw":134331433103133250,"delta_kind":"added"}
+                      "create_time_ts":"2026-09-06T04:41:50Z","delta_kind":"added"}
 drivers:             {"class":"Net","provider":"Microsoft","inf":"wnetvsc.inf","device_count":1,
                       "description":"Microsoft Hyper-V Network Adapter","version":"10.0.14393.2273",
                       "driver_date":"2006-06-21T07:00:00.000000Z"}
@@ -108,7 +108,7 @@ Values are stored as lowercase tokens: current_state is running or stopped, star
 
 A stopped_exit_code of 1077 means the service has not been started since boot. It is not a failure code.
 
-The process instance key is pid plus create time, so it changes on every restart. Group process questions on image_name, not on the instance. create_time_raw is a 64-bit count that loses digits under the default number reading; force it with `#i` when you compare it.
+The process instance key is pid plus `sparklogs.data.processes[].create_time_ts` (LQL), so it changes on every restart. Group process questions on image_name, not on the instance.
 
 ## Step 2: find the devices
 

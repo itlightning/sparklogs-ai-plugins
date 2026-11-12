@@ -90,7 +90,7 @@ source = "<host>" AND subsource = "win.eventlog.identity_security" AND event_id 
 source = "<host>" AND sparklogs.kind = config_change AND sparklogs.config_change.type != firewall_rule
 ```
 
-Group by `sparklogs.config_change.type` (LQL) first, then `sparklogs.config_change.target` (LQL) inside the types that matter (`bios` (value), `operating_system` (value), drivers). Firewall rules are excluded: Store app updates churn them by the hundred.
+Group by `sparklogs.config_change.type` (LQL) first, then `sparklogs.config_change.target` (LQL) inside the types that matter (`bios` (value), `operating_system` (value), `kernel_driver` (value), `device_driver` (value)). Firewall rules are excluded: Store app updates churn them by the hundred.
 
 Patching and firmware in the same window: servicing as in `playbooks/windows-update-failure.md`.
 BitLocker that could not tie its key to Secure Boot on a boot: `bitlocker_secure_boot_unavailable` (value). Protection left suspended after a planned change: `bitlocker_protection_resume_failed` (value). Both are on `win.eventlog.identity_security` (value).

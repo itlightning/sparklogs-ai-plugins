@@ -35,7 +35,7 @@ Group by `sparklogs.reason` (LQL) first.
 | `win.eventlog.application.vss_snapshot_set` (LQL) | Snapshot Set GUID from Application 8231 |
 | `win.eventlog.application.vss_routine` (LQL) | API symbol on call-failure ids (8193, 12289, 12293) |
 
-8231 requester command line is message-tail `process_command_line` (other), not an LQL field.
+8231 carries the requester's command line in `command_line` (LQL).
 Inventory of who asked, not a job verdict.
 
 `VSS_CTX_CLIENT_ACCESSIBLE` is Previous Versions / Shadow Copies for Shared Folders, not backup copies.
@@ -78,7 +78,7 @@ source = "<host>" AND subsource = win.eventlog.application AND event_id = 8231
 ```
 <!-- confirmed with data on 2026-11-12 -->
 
-Read requesters from the 8231 message tail; there is no command-line LQL field to group by.
+Group by `command_line` (LQL) for who asked.
 Group attempts by `win.eventlog.application.vss_snapshot_set` (LQL).
 
 Writer × code:

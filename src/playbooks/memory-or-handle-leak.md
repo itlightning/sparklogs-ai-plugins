@@ -26,7 +26,7 @@ Read open conditions with `sparklogs.episode.age_basis` (col): `observed` (value
   A curve that starts over with each new instance is a restart cycle. One instance climbing until it exits is the leak shape.
 - Handles: `sparklogs.data.processes[].handle_count` (LQL) on `latest_state` (value) rows for the `processes` (value) topic.
 
-**Events, for what health named.** Crashes and hangs in that interval (Windows logs them at Minor, below Error):
+**Events, for what health named.** Crashes and hangs in that interval (the pack grades most of them Minor, below Error):
 
 ```lql
 source = "<host>" AND sparklogs.reason in (app_crash, app_hang, process_crash)

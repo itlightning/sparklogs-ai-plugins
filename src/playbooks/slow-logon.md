@@ -39,6 +39,6 @@ AND sparklogs.actor.name in ("<sam>", "<upn>", "AzureAD\\<upn>")
 ```
 
 Several users on one site slow, others not: same filter, group by `source` (LQL).
-Standing conditions on the workstation: a device silent in the complaint window changes what you can conclude.
+Check the workstation's agent row first: a device that reported nothing in the complaint window supports no logon finding.
 
 **Off-endpoint** (HM2): conditional-access, MFA cloud, federation certificates, PDC time drift, directory sync, path between user and DC.

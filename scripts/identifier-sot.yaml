@@ -289,6 +289,8 @@ cols:
 # Each entry must be in scripts/fixtures/lql-live-fields.txt or the pack harvest, and each
 # lql_families prefix must prefix a field in one of them (lint-identifier-tags.mjs checks).
 lql_resident:
+  - command_line
+  - service_detail
   - agent_id
   - app
   - app_hash
@@ -540,6 +542,8 @@ values:
     - bios
     - operating_system
     - firewall_rule
+    - kernel_driver
+    - device_driver
   device_health_metrics:
     - net_rx
     - net_tx

@@ -37,7 +37,7 @@ source = "<host>" AND service = rmm AND app != sparklogs_agent AND severity >= w
 
 Group by `app` (LQL), `sparklogs.reason` (LQL).
 The vendor's Windows service events carry its token: `app in (connectwise, ninjaone, datto, atera, nable)` (LQL); `guides/msp-tool-registry.md` names each product's services.
-Rows with an empty `app` (LQL) under `service = rmm` (LQL) are Windows remote-management plumbing (WinRM, WMI), not the RMM product.
+Rows with an empty `app` (LQL) under `service = rmm` (LQL) are WinRM, WMI and the System-channel copies of SparkLogs agent start and stop (`sparklogs_agent_started` (value), `sparklogs_agent_stopped` (value)), not the RMM product.
 The vendor's own agent log is not collected; read the Application channel for any errors it writes there.
 
 **Off-endpoint** (HM10): RMM cloud, RMM agent health, EDR quarantine of the RMM agent, network path.

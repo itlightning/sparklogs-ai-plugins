@@ -36,6 +36,7 @@ Funnel, scope, LQL errors: `guides/mcp-tool-decision-tree.md`, `guides/scope-res
 - Crash or app problem → same tool, `view` (arg) `event_timeline` (value) with `kinds` (arg) `["occurrence"]` (value); app hangs are only in Application-channel events (`guides/device-state-fields.md`, **Choose the view**)
 - Open problems across a client, or how many devices have one → same tool, omit `view` (arg), or `group_by_reason` (arg) for device counts
 - Which processes or devices stand out across the fleet → same tool, `view` (arg) `fleet_processes` (value) or `fleet_performance` (value)
+- What is installed or configured now → same tool, `view` (arg) `latest_state` (value), or refine an overview's `state` (value) result set
 - Collection problems → `resolve_scope` (tool) with `unhealthy_collection_only` (arg)
 - Counts, patterns, when → `query_event_counts_by_severity` (tool) grouped by the fields in `guides/scope-ladder.md` (`sparklogs.reason` (LQL) first on curated data), `describe_pattern` (tool), `query_scope_activity` (tool)
 - Raw event lines → `query_logs` (tool) last, then refine

@@ -21,9 +21,9 @@ Process write bytes include writes that do not reach the disk: they rank writers
 **Events, for what health named.** Storage errors when the volume is filling because something is failing:
 
 ```lql
-source = "<host>" AND service = storage AND sparklogs.reason!
+source = "<host>" AND service = storage AND sparklogs.kind not in (inventory, delta) AND severity >= info
 ```
 
-Group by `sparklogs.reason` (LQL). `sparklogs.reason!` (LQL) drops the device-state inventory rows that also file under `storage` (value).
+Group by `sparklogs.reason` (LQL). Then group the empty-reason rows by `provider_name` (LQL). The kind filter drops the device-state inventory rows that also file under `storage` (value); uncurated controller and disk events stay.
 
 **Off-endpoint** (HM5): mounted network shares, backup shadow locations, sync clients.

@@ -20,7 +20,7 @@ channel carry `service = "email"` (LQL)).
 | Service | Evidence that maps here |
 |---|---|
 | `storage` (value) | Disk/NTFS/controller/StorPort/Storage Spaces events, SMART, chkdsk. Storage-related hardware lives here, not in `hardware` (value). |
-| `patching` (value) | OS and software updates AND installs (CBS/DISM/Windows Update/MSI/Setup channel/OEM and browser updaters). Install-vs-update rides `service_detail` (value) where extractable. |
+| `patching` (value) | OS and software updates AND installs (CBS/DISM/Windows Update/MSI/Setup channel/OEM and browser updaters). Install-vs-update rides `service_detail` (LQL) where extractable. |
 | `auth` (value) | Identity and logon lifecycle: Kerberos/NTLM/lockout/LAPS/Winlogon/MFA brokers/NPS. |
 | `security_audit` (value) | Audit infrastructure, object/registry/file-share access auditing, audit policy and tamper, persistence signals (including the SCM 7045 service-install family). Deliberately evidence-flavored; the consumer is investigations, not a ticket queue. NOT the complete set of audit-related events: see the demarcation list below. |
 | `networking` (value) | DHCP/DNS client, WLAN, NCSI, firewall. |
@@ -37,7 +37,7 @@ channel carry `service = "email"` (LQL)).
 | `performance` (value) | Slow boot/logon, resource pressure, performance-trend snapshots. |
 | `user_profiles` (value) | User Profile Service, FSLogix. |
 | `remote_access` (value) | RDP, TeamViewer/AnyDesk/ScreenConnect. |
-| `rmm` (value) | RMM agent health only (Automate/Kaseya/Ninja/Datto). An RMM-generated alert ticket routes by its underlying evidence class (a drive-space alert is `storage` (value)). SparkLogs' own agent health also files under `rmm` (value); separate it with `app = sparklogs_agent` (LQL). |
+| `rmm` (value) | RMM agent health only (Automate/Kaseya/Ninja/Datto). An RMM-generated alert ticket routes by its underlying evidence class (a drive-space alert is `storage` (value)). SparkLogs' own agent health also files under `rmm` (value); separate it with `app = sparklogs_agent` (LQL) and the System-channel `sparklogs_agent_started` (value) and `sparklogs_agent_stopped` (value) reasons. |
 | `endpoint_protection` (value) | Defender/AV/EDR. |
 | `device_management` (value) | GPO/Intune/SCCM/MDM/Autopilot management plane (enrollment/sync/policy apply). The payload outcome of an install is `patching` (value). |
 | `directory_services` (value) | AD DS/DFSR/Netlogon, Entra Connect sync. |

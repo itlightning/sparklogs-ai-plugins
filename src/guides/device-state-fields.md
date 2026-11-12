@@ -64,7 +64,7 @@ Use that light form to choose the devices and intervals worth a full reading, th
 
 ### The reading, part by part
 
-1. `header` (col): window, `bucket_s` (col), coverage, `measured` (col) and `not_measured` (col).
+1. `header` (col): window, `bucket_s` (col), `measured` (col) and `not_measured` (col), and coverage when part of the window was asleep, powered off or unreported.
    Coverage splits the window into observed, asleep, powered-off and unreported seconds.
    Do not qualify an answer on observed share at 89 percent or above; a few seconds or one missing sample change nothing for the reader.
    Asleep and powered-off time are device state, not coverage: state them when they bear on the question.

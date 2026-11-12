@@ -26,9 +26,9 @@ You do NOT:
 - Confabulate.
 
 You DO:
-- Gather evidence aggregation-first (Section 8), grouping by the scope ladder and curated reasons as the primary shallow-triage lever (Section 9).
-- Cite every claim with a `query_url` (col), band its confidence honestly, and enumerate what was not checked (Sections 5, 6, 7).
-- Read an empty result as a claim about the query, never as a clean bill of health: know which fields the source actually carries (Section 8).
+- Gather evidence aggregation-first (Section 7), grouping by the scope ladder and curated reasons as the primary shallow-triage lever (Section 8).
+- Cite every claim with a `query_url` (col), band its confidence honestly, and enumerate what was not checked (Sections 4, 5, 6).
+- Read an empty result as a claim about the query, never as a clean bill of health: know which fields the source actually carries (Section 7).
 - Offer the separate **`sparklogs-analyze-cause`** skill at the end if the engineer wants candidate cause hypotheses; do not perform cause analysis here beyond that invitation. Likely causes, labeled as analysis, belong there.
 
 **This goal framing is non-negotiable.** A confidently-wrong root-cause conclusion damages trust in a way that takes a long time to recover. A defensible factual summary builds trust on every investigation.
@@ -41,7 +41,7 @@ Bounded discovery first, aggregate before detail, and refine a cached result bef
 
 ---
 
-## Section 3b. Where to look next
+## Section 2. Where to look next
 
 <!-- BEGIN GENERATED INDEX:corpus-navigation -->
 ## Live tool reference
@@ -167,7 +167,7 @@ Detail: `playbooks/playbooks.md`.
 
 ---
 
-## Section 4. Output structure - what every investigation produces
+## Section 3. Output structure - what every investigation produces
 
 Canonical template (field definitions, right-vs-wrong examples): `references/output-template.md`. Voice: `guides/writing-voice.md`.
 
@@ -177,7 +177,7 @@ Canonical template (field definitions, right-vs-wrong examples): `references/out
 
 ---
 
-## Section 5. Citation discipline - every claim links to verifiable evidence
+## Section 4. Citation discipline - every claim links to verifiable evidence
 
 Every factual claim cites a `query_url` (col) from the MCP response; record `query_id` (arg) beside it when several queries share a window. URLs scope org and time in explore, not your cached filter: copy verbatim. Quote `message` (LQL) bytes exactly when a Finding rests on log text. No query, no claim, or use `insufficient_evidence` (value).
 A Finding from a device view cites the reading's `query_url` (col) and names the result set and `filter_lql` (col) that return its rows; cite the refine's `query_url` (col) when you read those rows.
@@ -188,7 +188,7 @@ Right/wrong shapes: `references/output-template.md`.
 
 ---
 
-## Section 6. Confidence calibration - be honest about uncertainty
+## Section 5. Confidence calibration - be honest about uncertainty
 
 Every Finding carries Confidence (`high` (value) / `medium` (value) / `low` (value) / `insufficient_evidence` (value)). Pick the highest band defensible with cited evidence; `insufficient_evidence` (value) when you looked but lack support is valid.
 
@@ -196,14 +196,14 @@ Patterns and examples: `references/output-template.md`.
 
 ---
 
-## Section 7. Visibility limits - explicit, every time
+## Section 6. Visibility limits - explicit, every time
 
 Every summary lists WHAT WAS NOT CHECKED: off-endpoint and declined checks for this scope (`guides/off-endpoint-causes.md`). Name checks you skipped and why. Brief is fine when on-endpoint evidence is sufficient.
 A device view's `not_measured` (col) and unreported seconds name on-endpoint gaps for that window; list the ones a Finding could depend on.
 
 ---
 
-## Section 8. Investigation methodology - aggregation-first, progressive disclosure
+## Section 7. Investigation methodology - aggregation-first, progressive disclosure
 
 **Funnel before raw:** scope lightly, aggregate to narrow, then `query_logs` (tool) only over the narrowed slice.
 
@@ -219,11 +219,11 @@ A device view's `not_measured` (col) and unreported seconds name on-endpoint gap
 
 **Empty field results:** universal vs curated vs module fields differ; empty `sparklogs.*` on an event means uncurated (not a health finding). Per-source field lists: `guides/generated-reference-router.md`.
 
-Symptom playbooks: Section 3b and `playbooks/playbooks.md`.
+Symptom playbooks: Section 2 and `playbooks/playbooks.md`.
 
 ---
 
-## Section 9. The scope ladder - your primary shallow-triage lever, available today
+## Section 8. The scope ladder - your primary shallow-triage lever, available today
 
 Group before you read: the event-shape ladder (`service` (LQL) -> `app` (LQL) -> `subsource` (LQL) -> `category` (LQL) -> `pattern_hash` (LQL), `source` (LQL) beside it), curated identity (`sparklogs.reason` (LQL), `sparklogs.reason_variant` (LQL), `sparklogs.class` (LQL), `sparklogs.instance` (LQL)), and device conditions. Fields, availability and the rules that change counts: `guides/scope-ladder.md`. An empty group is a field the source does not set, not a Finding.
 
@@ -233,7 +233,7 @@ Full ladder, worked shapes, RCA usage: `guides/scope-ladder.md`. Controlled `ser
 
 ---
 
-## Section 10. Scope resolution and source discovery
+## Section 9. Scope resolution and source discovery
 
 Before deep investigation: resolve org / sources / time window, then confirm data in that window via `list_sources` (tool). Full sequence, sender vs origin, completeness, missed events, fleet hunt: `guides/scope-resolution.md`.
 
@@ -248,15 +248,15 @@ Before deep investigation: resolve org / sources / time window, then confirm dat
 
 ---
 
-## Section 13. Working through an ongoing investigation
+## Section 10. Working through an ongoing investigation
 
 Follow-ups extend the same investigation: reuse `external_investigation_id` (arg), reuse caches (`refine_query_result` (tool)), update `./investigations/<external_investigation_id>.md`. New id only for a clearly different problem.
 
-Fresh report → re-render per Section 4 with all Findings so far. Explore further → their direction on existing caches. Explain a Finding → evidence, refute paths, limits. Causes → offer `sparklogs-analyze-cause` (not here).
+Fresh report → re-render per Section 3 with all Findings so far. Explore further → their direction on existing caches. Explain a Finding → evidence, refute paths, limits. Causes → offer `sparklogs-analyze-cause` (not here).
 
 ---
 
-## Section 14. Error handling - recover gracefully
+## Section 11. Error handling - recover gracefully
 
 **Cache expired on `refine_query_result` (tool):** a cold `query_logs` (tool) cache regenerates automatically under the SAME `query_id` (arg) when you refine it (`summary.cache_status` (col) reflects it). Grouped handles can be refined within their returned shape; use a raw-event query when the question needs underlying events. A `cache_invalidated` (value) handle is dead: `guides/mcp-tool-decision-tree.md` (large responses). If the server reports the cache cannot be restored (`expired` (value)), re-issue the original backing query.
 
@@ -268,7 +268,7 @@ Fresh report → re-render per Section 4 with all Findings so far. Explore furth
 
 **Partial page:** read the header counts and `page.next` (col). Prefer one refine with `offset: 0` and the desired total limit, or follow the next-page call. See `guides/mcp-tool-decision-tree.md` before combining pages.
 
-**Source has been emitting `sparklogs.kind = agent_op` (LQL) rows during your window:** your evidence is incomplete. Read what they say was not collected, suppressed or truncated, flag it explicitly in WHAT WAS NOT CHECKED, and qualify the findings that depended on the affected window. An EMPTY `agent_op` (value) result is inconclusive rather than reassuring - see Section 8 (before "no evidence").
+**Source has been emitting `sparklogs.kind = agent_op` (LQL) rows during your window:** your evidence is incomplete. Read what they say was not collected, suppressed or truncated, flag it explicitly in WHAT WAS NOT CHECKED, and qualify the findings that depended on the affected window. An EMPTY `agent_op` (value) result is inconclusive rather than reassuring - see Section 7 (before "no evidence").
 
 **`external_investigation_id` (arg) validation error:** fix the length (8 to 200 characters) and resend; do not retry the same value.
 
@@ -276,7 +276,7 @@ Fresh report → re-render per Section 4 with all Findings so far. Explore furth
 
 ---
 
-## Section 15. When to stop - bounded investigation depth
+## Section 12. When to stop - bounded investigation depth
 
 Heuristics for stopping:
 
@@ -287,7 +287,7 @@ Heuristics for stopping:
 
 ---
 
-## Section 16. Context management - make the long investigation work
+## Section 13. Context management - make the long investigation work
 
 Maintain `./investigations/<external_investigation_id>.md` (scope, Findings, audit trail, open questions, not-checked). Re-read after compaction; `get_query_metadata` (tool) is per `query_id` (arg), not per investigation.
 
@@ -295,13 +295,13 @@ Bulk raw reads (>~500 events): delegate per `guides/subagent-definitions.md` whe
 
 ---
 
-## Section 17. Common mistakes
+## Section 14. Common mistakes
 
 See `guides/common-mistakes.md` (e.g. cause analysis in this skill, claims without `query_url` (col), `query_logs` (tool) first, coverage inferred from counts, "no problem" instead of "no evidence in scope"). Open it when you suspect an anti-pattern; do not hold the full catalog in context.
 
 ---
 
-## Section 18. Reference files
+## Section 15. Reference files
 
 | When | File |
 |---|---|
@@ -323,7 +323,7 @@ See `guides/common-mistakes.md` (e.g. cause analysis in this skill, claims witho
 ---
 
 <!-- BEGIN HOSTVARIANT:commands -->
-## Section 19. Related skills and slash commands
+## Section 16. Related skills and slash commands
 
 Three SparkLogs skills divide this work. You may be routed to any of them by what the engineer asks for.
 
@@ -336,7 +336,7 @@ Slash commands on this host:
 - `/sparklogs:sparklogs-summary <external_investigation_id>` - Re-render the system condition summary for an existing investigation, incorporating everything found so far.
 - `/sparklogs:sparklogs-explain <claim or finding>` - Engineer asks you to explain your reasoning for a specific claim. Walk through what evidence supports it (cited `query_url` (col)s) and what would refute it. Honest about limits.
 <!-- ELSE HOSTVARIANT:commands -->
-## Section 19. Related workflows
+## Section 16. Related workflows
 
 Three SparkLogs skills divide this work. You may be routed to any of them by what the engineer asks for; there is nothing to type.
 

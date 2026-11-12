@@ -126,7 +126,8 @@ Process charts use the same tool with `view` (arg) `top_processes_over_time` (va
 |---|---|
 | Output template + examples | `references/output-template.md` |
 | Hypothesis procedure | `references/hypothesis-generation.md` |
-| Guides (tools, LQL, scope, device state, mistakes, voice) | the corpus block above (Where to look); feeds: `guides/generated-reference-router.md` |
+| Tools, LQL, scope, off-endpoint | `guides/mcp-tool-decision-tree.md`, `guides/lql-reference.md`, `guides/scope-resolution.md`, `guides/off-endpoint-causes.md` |
+| Device state, fields, feeds | the corpus block above; feeds: `guides/generated-reference-router.md` |
 
 <!-- BEGIN GENERATED INDEX:themes -->
 | Topic | File |

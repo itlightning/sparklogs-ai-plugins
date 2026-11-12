@@ -118,10 +118,10 @@ Format: `<subject> was <state> at <time>`, or `<event class> occurred N times in
 - "Backups are failing."
 
 ### Evidence
-One or more `query_url` (col) values from the MCP tool responses that produced the evidence for this Finding. The engineer clicks these to verify in the SparkLogs cached-query explorer. **If you don't have a query_url, you don't have the evidence - don't make the claim.** A Finding about a device also links the device's page (SKILL.md Section 5).
+One or more `query_url` (col) values from the MCP tool responses that produced the evidence for this Finding. The engineer clicks these to verify in the SparkLogs cached-query explorer. **If you don't have a query_url, you don't have the evidence - don't make the claim.** A Finding about a device also links the device's page (SKILL.md Section 4).
 
 ### Confidence
-One of: `high` (value), `medium` (value), `low` (value), `insufficient_evidence` (value). See SKILL.md Section 6 for calibration guidance.
+One of: `high` (value), `medium` (value), `low` (value), `insufficient_evidence` (value). See SKILL.md Section 5 for calibration guidance.
 
 ### Sources contributing
 The specific source(s) whose data supports this finding. Important when the investigation spans multiple sources.
@@ -293,7 +293,7 @@ Finding 2: No SMB Server channel error or warning events in the window
   Sources contributing: srv-fileshare02
   Time window of evidence: 2026-04-23 06:00 to 14:30 UTC
 
-Finding 3: Defender real-time scanning was active but with no scan-related events in the window
+Finding 3: No Defender detection or scan events on srv-fileshare02 in the window
   Evidence: <query_url as returned> (query_id: qR8m2p4n7k1t9c5y)
   Confidence: high
   Sources contributing: srv-fileshare02

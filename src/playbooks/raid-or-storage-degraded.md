@@ -19,9 +19,9 @@ Header coverage says whether the device kept reporting through the window.
 **Events, for what health named.**
 
 ```lql
-source = "<host>" AND service = storage AND sparklogs.reason!
+source = "<host>" AND service = storage AND sparklogs.kind not in (inventory, delta) AND severity >= info
 ```
 
-Group by `sparklogs.reason` (LQL) over the interval the disk heat or episodes named, and read the highest-severity reasons first. `sparklogs.reason!` (LQL) drops the device-state inventory rows that also file under `storage` (value).
+Group by `sparklogs.reason` (LQL) over the interval the disk heat or episodes named, and read the highest-severity reasons first. Then group the empty-reason rows by `provider_name` (LQL). The kind filter drops the device-state inventory rows that also file under `storage` (value); uncurated controller and disk events stay.
 
 **Off-endpoint** (HM7): array management plane, out-of-band controller firmware, SAN fabric.

@@ -132,7 +132,7 @@ Required on every data call, 8 to 200 characters of free text you choose; one va
 
 **Why it's wrong.** Investigation continuity breaks. Re-investigating from scratch duplicates work that maintaining state would have avoided.
 
-**Recovery.** At minimum, write the document at investigation start (scope, time window, external_investigation_id) and update after each major Finding accumulates. Use the host's filesystem tool. Contents: `sparklogs-investigate` Section 16.
+**Recovery.** At minimum, write the document at investigation start (scope, time window, external_investigation_id) and update after each major Finding accumulates. Use the host's filesystem tool. Contents: `sparklogs-investigate` Section 13.
 
 ---
 
@@ -183,7 +183,7 @@ The rules, the one-sentence green case, and what an absent `agent_complete_throu
 
 **Why it's wrong.** Most WEL rows have no curated reason. Empty `sparklogs.*` fields on an event mean the event is uncurated (this is not a health finding). Empty means this predicate did not match, never "no problem found" and never "the box is unhealthy." Uncurated raw text and sibling providers can still carry the ticket.
 
-**Recovery.** Drop the curated predicate. Group the host by `subsource` (LQL), then follow `guides/stream-kinds.md`. Use `query_event_counts_by_severity` (tool) on `severity` (LQL) or `pattern` (LQL) for volume. Say in WHAT WAS NOT CHECKED which curated filters you tried. Corpus block in skill restates the rule.
+**Recovery.** Drop the curated predicate. Group the host by `subsource` (LQL), then follow `guides/stream-kinds.md`. Use `query_event_counts_by_severity` (tool) on `severity` (LQL) or `pattern` (LQL) for volume. Say in WHAT WAS NOT CHECKED which curated filters you tried.
 
 ### Loading a whole `enums.md` or `reasons.md`
 
@@ -255,7 +255,7 @@ The rules, the one-sentence green case, and what an absent `agent_complete_throu
 
 **Why it's wrong.** The engineer's wall-clock budget is gone, and it usually means the investigation is structurally stuck.
 
-**Recovery.** Stop and produce the interim summary `sparklogs-investigate` Section 15 describes.
+**Recovery.** Stop and produce the interim summary `sparklogs-investigate` Section 12 describes.
 
 ---
 
