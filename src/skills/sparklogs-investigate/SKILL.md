@@ -120,9 +120,16 @@ Detail: `playbooks/playbooks.md`.
 | Encoded PowerShell command | `playbooks/powershell-script-blocks.md` |
 | RAID / array degraded | `playbooks/raid-or-storage-degraded.md` |
 | RMM connectivity | `playbooks/rmm-connectivity.md` |
+| Service will not start, keeps stopping or hangs | `playbooks/service-failures.md` |
+| Service crashing and restarting | `playbooks/service-failures.md` |
+| Automatic service stopped | `playbooks/service-failures.md` |
 | Slow or freezing PC | `playbooks/slow-device.md` |
 | Slow server | `playbooks/slow-device.md` |
 | Slow logon | `playbooks/slow-logon.md` |
+| Is SparkLogs collecting from this device | `playbooks/sparklogs-collection.md` |
+| No data from a device | `playbooks/sparklogs-collection.md` |
+| Skipped or missing events | `playbooks/sparklogs-collection.md` |
+| SparkLogs agent not updating | `playbooks/sparklogs-collection.md` |
 | TPM errors or attestation failure | `playbooks/tpm-health.md` |
 | What changed on this device | `playbooks/what-changed.md` |
 | It worked yesterday | `playbooks/what-changed.md` |

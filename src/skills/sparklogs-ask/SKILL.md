@@ -37,7 +37,7 @@ Funnel, scope, LQL errors: `guides/mcp-tool-decision-tree.md`, `guides/scope-res
 - Open problems across a client, or how many devices have one → same tool, omit `view` (arg), or `group_by_reason` (arg) for device counts
 - Which processes or devices stand out across the fleet → same tool, `view` (arg) `fleet_processes` (value) or `fleet_performance` (value)
 - What is installed or configured now → same tool, `view` (arg) `latest_state` (value), or refine an overview's `state` (value) result set
-- Collection problems → `resolve_scope` (tool) with `unhealthy_collection_only` (arg)
+- Collection problems → `resolve_scope` (tool) with `unhealthy_collection_only` (arg); "no data from this device": `playbooks/sparklogs-collection.md`
 - Counts, patterns, when → `query_event_counts_by_severity` (tool) grouped by the fields in `guides/scope-ladder.md` (`sparklogs.reason` (LQL) first on curated data), `describe_pattern` (tool), `query_scope_activity` (tool)
 - Raw event lines → `query_logs` (tool) last, then refine
 - Collector debug → `sparklogs.agent.vector` (value) / `sparklogs.agent.log` (value) only
@@ -119,9 +119,16 @@ Playbooks are incomplete recipes. If a recipe LQL produces empty results: widen 
 | Encoded PowerShell command | `playbooks/powershell-script-blocks.md` |
 | RAID / array degraded | `playbooks/raid-or-storage-degraded.md` |
 | RMM connectivity | `playbooks/rmm-connectivity.md` |
+| Service will not start, keeps stopping or hangs | `playbooks/service-failures.md` |
+| Service crashing and restarting | `playbooks/service-failures.md` |
+| Automatic service stopped | `playbooks/service-failures.md` |
 | Slow or freezing PC | `playbooks/slow-device.md` |
 | Slow server | `playbooks/slow-device.md` |
 | Slow logon | `playbooks/slow-logon.md` |
+| Is SparkLogs collecting from this device | `playbooks/sparklogs-collection.md` |
+| No data from a device | `playbooks/sparklogs-collection.md` |
+| Skipped or missing events | `playbooks/sparklogs-collection.md` |
+| SparkLogs agent not updating | `playbooks/sparklogs-collection.md` |
 | TPM errors or attestation failure | `playbooks/tpm-health.md` |
 | What changed on this device | `playbooks/what-changed.md` |
 | It worked yesterday | `playbooks/what-changed.md` |

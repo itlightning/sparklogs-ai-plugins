@@ -23,7 +23,7 @@ Agent-debug feeds describe collection problems, not the device's workload health
 | Which processes use the most CPU, RAM or I/O across devices | `fleet_processes` (value), `metric` (arg) `cpu` (value), `ram` (value), `io_read` (value) or `io_write` (value). `image` (arg) narrows to one executable; `group_by` (arg) `device` (value) ranks the devices instead. |
 | How one reading spreads across devices (outliers) | `fleet_performance` (value), `metric` (arg) naming the reading (default `cpu_busy_pct_avg` (value)); `group_by` (arg) `device` (value) lists the outlying devices. |
 
-Collection problems are not device health: call `resolve_scope` (tool) with `unhealthy_collection_only` (arg) (`guides/scope-resolution.md`).
+Collection problems are not device health: call `resolve_scope` (tool) with `unhealthy_collection_only` (arg) (`guides/scope-resolution.md`). The symptom walk ("no data from this device") is `playbooks/sparklogs-collection.md`.
 
 For current conditions, use a window of days: an open episode with no event in a narrow window will be absent.
 Latest state is an observation, not a live inspection of the endpoint.

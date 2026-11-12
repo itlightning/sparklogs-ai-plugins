@@ -16,7 +16,7 @@ Application and System channels: service crashes, unexpected shutdowns, disk and
 Open `feeds/<id>/reasons.md` and search for the reason. Same reason on two feeds is one fact (example: `disk_failure_predicted` (value) on System and `win.eventlog.storage` (value)).
 Explore: `guides/stream-kinds/wel-classic.md` (`subsource` (LQL), then `origin` (LQL) on the multi-channel feeds, then `provider_name` (LQL)).
 
-**Pivots.** Service will not stay up: `service_crashed` (value), `service_start_failed` (value), `service_hang` (value). Disk filling is state (`themes/device-health-and-state.md`) plus these disk reasons if the stream shows IO faults.
+**Pivots.** Service will not start, keeps stopping or hangs: `playbooks/service-failures.md`. Disk filling is state (`themes/device-health-and-state.md`) plus these disk reasons if the stream shows IO faults.
 
 Patching: `themes/windows-updates-and-patching.md`. What changed on the device before it broke: `playbooks/what-changed.md`. Who changed it: `themes/windows-security-and-audit.md`.
 

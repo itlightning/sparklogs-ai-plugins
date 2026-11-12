@@ -178,6 +178,26 @@ The list is **not exhaustive** - it's a starting set covering common patterns. I
 - **The application's server or tenant.** A SaaS tenant setting, a server-side update or a license change can break a client that did not change.
 - **Hardware and firmware changed with the device off.** A dock, monitor or card swapped, or a firmware setting changed and changed back between two readings.
 
+## HM16 - Service will not start, keeps stopping or hangs
+
+**Off-endpoint causes:**
+
+- **The vendor's own logs and back end.** Many services write why they failed only to their own log files, which SparkLogs does not collect, or depend on a vendor cloud, license server or update service.
+- **Directory account policy.** A service account's password change, expiry, lockout or lost Log on as a service right is set in the directory or Group Policy; a domain controller without the agent shows none of it.
+- **Resources on other hosts.** A database, file share or application server the service waits for at start is a separate machine that needs its own reading.
+- **Vendor driver and product fixes.** A blocked driver or a crash in the vendor's code is fixed by the vendor; known issues and fixed versions are in the vendor's documentation.
+
+---
+
+## HM17 - Is SparkLogs collecting from this device
+
+**Off-endpoint causes:**
+
+- **The network path to SparkLogs.** Firewalls, proxies and TLS inspection between the device and SparkLogs block delivery and updates; the device shows only that sending failed.
+- **Endpoint protection.** A security product that blocks or quarantines the agent or its collector records that in its own console.
+- **RMM and Group Policy actions.** A policy that stops, removes or reinstalls the agent, or changes event log sizes and access, is configured in the RMM or the directory.
+- **Machine state while silent.** Whether a device with no signal was powered off, asleep or off the network is the RMM's and the user's to say.
+
 ---
 
 ## Cross-cutting off-endpoint patterns
