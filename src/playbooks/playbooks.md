@@ -23,6 +23,8 @@ A symptom that lives on a device starts from device health (a device view, a con
 | Memory or handle leak | `playbooks/memory-or-handle-leak.md` |
 | Internet down, slow or dropping | `playbooks/network-connectivity.md` |
 | Wi-Fi drops | `playbooks/network-connectivity.md` |
+| Suspicious PowerShell / script blocks | `playbooks/powershell-script-blocks.md` |
+| Encoded PowerShell command | `playbooks/powershell-script-blocks.md` |
 | RAID / array degraded | `playbooks/raid-or-storage-degraded.md` |
 | RMM connectivity | `playbooks/rmm-connectivity.md` |
 | Slow or freezing PC | `playbooks/slow-device.md` |

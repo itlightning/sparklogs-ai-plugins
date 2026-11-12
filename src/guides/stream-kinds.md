@@ -25,6 +25,7 @@ Product tokens on `app` (LQL): `guides/app-vocabulary.md`.
 | `win.eventlog.identity_security` (value) | WEL multi-channel | `guides/stream-kinds/wel-classic.md` |
 | `win.eventlog.management` (value) | WEL multi-channel | `guides/stream-kinds/wel-classic.md` |
 | `win.eventlog.apps` (value) | WEL multi-channel | `guides/stream-kinds/wel-classic.md` |
+| `win.powershell.eventlog` (value) | WEL multi-channel (script blocks: `playbooks/powershell-script-blocks.md`) | `guides/stream-kinds/wel-classic.md` |
 | `win.eventlog.security` (value) | WEL Security | `guides/stream-kinds/wel-security.md` |
 | `win.eventlog.setup` (value) | WEL Setup | `guides/stream-kinds/wel-setup.md` |
 | `win.defender.eventlog` (value) | WEL Defender | `guides/stream-kinds/wel-defender.md` |

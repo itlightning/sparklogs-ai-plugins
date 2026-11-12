@@ -300,6 +300,27 @@
       ]
     },
     {
+      "module": "win.powershell.eventlog",
+      "artifacts": [
+        {
+          "file": "README.md",
+          "summary": "feed index: what each artifact answers and the order to read them in"
+        },
+        {
+          "file": "fields.md",
+          "summary": "what exists at rest, what curates it, and the raw fallback when nothing does"
+        },
+        {
+          "file": "enums.md",
+          "summary": "the closed token vocabularies that are safe to group by"
+        },
+        {
+          "file": "reasons.md",
+          "summary": "what each reason means (public summary, severity, impact)"
+        }
+      ]
+    },
+    {
       "module": "win.servicing.cbs",
       "artifacts": [
         {

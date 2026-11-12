@@ -6,7 +6,7 @@ Scope with **`subsource` (LQL)**.
 Two shapes share this ladder:
 
 - **Single channel:** `win.eventlog.application` (value) and `win.eventlog.system` (value). One `origin` (LQL) per feed, so `origin` (LQL) is not the split.
-- **Multi-channel:** `win.eventlog.platform` (value), `win.eventlog.storage` (value), `win.eventlog.network` (value), `win.eventlog.identity_security` (value), `win.eventlog.management` (value) and `win.eventlog.apps` (value) each collect many Operational and Admin channels. `origin` (LQL) names the channel (for example `Microsoft-Windows-TaskScheduler/Operational`), and it is the first split. A few chatty channels carry most of the volume, most of it at Debug.
+- **Multi-channel:** `win.eventlog.platform` (value), `win.eventlog.storage` (value), `win.eventlog.network` (value), `win.eventlog.identity_security` (value), `win.eventlog.management` (value), `win.eventlog.apps` (value) and `win.powershell.eventlog` (value) each collect many Operational and Admin channels. `origin` (LQL) names the channel (for example `Microsoft-Windows-TaskScheduler/Operational`), and it is the first split. A few chatty channels carry most of the volume, most of it at Debug.
 
 ## Explore
 

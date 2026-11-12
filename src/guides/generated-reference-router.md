@@ -159,6 +159,13 @@ provider payload, and say in your findings when you were reading uncurated text.
 - `feeds/win.eventlog.apps/enums.md`: the closed token vocabularies that are safe to group by
 - `feeds/win.eventlog.apps/reasons.md`: what each reason means (public summary, severity, impact)
 
+### `win.powershell.eventlog`
+
+- `feeds/win.powershell.eventlog/README.md`: feed index: what each artifact answers and the order to read them in
+- `feeds/win.powershell.eventlog/fields.md`: what exists at rest, what curates it, and the raw fallback when nothing does
+- `feeds/win.powershell.eventlog/enums.md`: the closed token vocabularies that are safe to group by
+- `feeds/win.powershell.eventlog/reasons.md`: what each reason means (public summary, severity, impact)
+
 ### `win.servicing.cbs`
 
 - `feeds/win.servicing.cbs/README.md`: feed index: what each artifact answers and the order to read them in

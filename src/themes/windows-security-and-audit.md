@@ -8,6 +8,7 @@ index: Who changed what (Security)
 Explore: `guides/stream-kinds/wel-security.md`.
 
 Defender is not this theme. Use `themes/endpoint-protection.md`.
+PowerShell script blocks (`win.powershell.eventlog` (value)): `playbooks/powershell-script-blocks.md`.
 
 ## Change analysis: what changed, and who
 

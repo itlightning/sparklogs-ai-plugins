@@ -116,6 +116,8 @@ Detail: `playbooks/playbooks.md`.
 | Memory or handle leak | `playbooks/memory-or-handle-leak.md` |
 | Internet down, slow or dropping | `playbooks/network-connectivity.md` |
 | Wi-Fi drops | `playbooks/network-connectivity.md` |
+| Suspicious PowerShell / script blocks | `playbooks/powershell-script-blocks.md` |
+| Encoded PowerShell command | `playbooks/powershell-script-blocks.md` |
 | RAID / array degraded | `playbooks/raid-or-storage-degraded.md` |
 | RMM connectivity | `playbooks/rmm-connectivity.md` |
 | Slow or freezing PC | `playbooks/slow-device.md` |
@@ -154,6 +156,7 @@ Detail: `playbooks/playbooks.md`.
 | `win.eventlog.identity_security` | Identity and security channels: code integrity, exploit protection, Group Policy, Entra and TPM | `feeds/win.eventlog.identity_security/` |
 | `win.eventlog.management` | Management channels: Task Scheduler, BITS, WinRM, WMI, Windows Update client | `feeds/win.eventlog.management/` |
 | `win.eventlog.apps` | Apps channels: packaged apps, app model, application compatibility | `feeds/win.eventlog.apps/` |
+| `win.powershell.eventlog` | PowerShell engine, module and script-block channels: merged script blocks, watchlisted commands | `feeds/win.powershell.eventlog/` |
 | `win.servicing.cbs` | CBS servicing internals: component store, packages | `feeds/win.servicing.cbs/` |
 | `win.servicing.dism` | DISM operations and image health | `feeds/win.servicing.dism/` |
 | `win.defender.eventlog` | Defender: threats, protection state | `feeds/win.defender.eventlog/` |

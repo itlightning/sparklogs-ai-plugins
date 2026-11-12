@@ -32,7 +32,6 @@ export const ROUTER_END = '<!-- END GENERATED INVENTORY -->';
 // here is not synced; a module listed here that the library does not produce is a sync failure.
 // Order is curated investigation salience (highest-signal feeds first); the sync logic does not
 // depend on it.
-// win.powershell.eventlog is deliberately excluded here: see HELD_BACK_MODULES below.
 export const MODULES = [
   'win.eventlog.security',
   'win.eventlog.system',
@@ -44,6 +43,7 @@ export const MODULES = [
   'win.eventlog.identity_security',
   'win.eventlog.management',
   'win.eventlog.apps',
+  'win.powershell.eventlog',
   'win.servicing.cbs',
   'win.servicing.dism',
   'win.defender.eventlog',
@@ -65,6 +65,7 @@ export const FEED_WHAT = {
   'win.eventlog.identity_security': 'Identity and security channels: code integrity, exploit protection, Group Policy, Entra and TPM',
   'win.eventlog.management': 'Management channels: Task Scheduler, BITS, WinRM, WMI, Windows Update client',
   'win.eventlog.apps': 'Apps channels: packaged apps, app model, application compatibility',
+  'win.powershell.eventlog': 'PowerShell engine, module and script-block channels: merged script blocks, watchlisted commands',
   'win.servicing.cbs': 'CBS servicing internals: component store, packages',
   'win.servicing.dism': 'DISM operations and image health',
   'win.defender.eventlog': 'Defender: threats, protection state',
@@ -77,9 +78,7 @@ export const FEED_WHAT = {
 // the reason. Distinct from a module simply missing from MODULES (a sync failure): an entry here is
 // a standing decision, checked so the reason travels with the exclusion instead of living only in a
 // commit message.
-export const EXCLUDED_MODULES = {
-  'win.powershell.eventlog': 'source.yaml declares ship: false; the fleet has never been measured on these channels, so it does not ship in the built pack',
-};
+export const EXCLUDED_MODULES = {};
 
 // A declared-but-absent or present-but-undeclared row here is a defect the moment it happens,
 // not something to catch on next read: check both directions at load, before anything renders.
