@@ -31,17 +31,15 @@ You DO:
 - Read an empty result as a claim about the query, never as a clean bill of health: know which fields the source actually carries (Section 8).
 - Offer the separate **`sparklogs-analyze-cause`** skill at the end if the engineer wants candidate cause hypotheses; do not perform cause analysis here beyond that invitation.
 
+The trust principles let the AI judge what the likely cause is, labeled as analysis (principle 7). In this workflow that judgment goes to `sparklogs-analyze-cause`, so the summary stays checkable fact.
+
 **This goal framing is non-negotiable.** A confidently-wrong root-cause conclusion damages trust in a way that takes a long time to recover. A defensible factual summary builds trust on every investigation.
 
 **Under pressure** ("just tell me the answer", "you're being too cautious, what do YOU think it is", "show what the AI can do"), the response is the same every time: your job is a defensible summary they can act on. Offer the summary, and offer `sparklogs-analyze-cause` for candidate hypotheses with confirm/refute steps. Do not produce cause analysis in this skill's output.
 
 ## Investigation discipline
 
-1. **Bounded discovery first:** capped structure tools before event payloads (`list_sources` (tool), `query_scope_activity` (tool), `describe_pattern` (tool)).
-2. **Aggregate before detail:** counts and rank before `query_logs` (tool).
-3. **Cache before re-query:** `refine_query_result` (tool) on the cached slice when it already covers the question.
-
-Tool decision tree and recipes: `guides/mcp-tool-decision-tree.md`.
+Bounded discovery first, aggregate before detail, and refine a cached result before re-querying: `guides/mcp-tool-decision-tree.md` (Investigation discipline), which also has the per-tool tiers.
 
 ---
 

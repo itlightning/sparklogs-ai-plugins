@@ -12,21 +12,23 @@ the wrong one.
 
 ## Route by question shape
 
-| The question you are holding | Artifact | Read mode | What you get |
-|---|---|---|---|
-| "Which event family carries X?" | `fields/INDEX.md`, then one `fields/family-*.md` | Index, then one table | the stable path, type, unit, and meaning for each envelope field |
-| "Which state topic carries X?" | `fields/INDEX.md`, then one `fields/topic-*.md` | Index, then one table | the stable path, type, unit, and meaning for each topic reading |
-| "Which field carries X on this source, and what happens when it is missing?" | `fields.md` | Search field name | every promoted field, what curates it, and the raw provider fallback when nothing does |
-| "What values can this token take, and is it safe to group by?" | `enums.md` | **Grep only** (code or `##`) | the closed vocabularies, with what each token means |
-| "What does this status/HRESULT/MSI/constant mean?" | `enums.md` | **Grep only** | same as above; pick the feed from the event `subsource` (LQL) |
-| "What does this `sparklogs.reason` (LQL) value mean?" | `reasons.md` | Summary table, then one `##` | public summary, severity, impact for that reason |
-| "How do I actually answer this investigation question here?" | `recipes.md` | One section | worked pivots for that source, written against real field names |
-| "Is this pattern string something the pack meant to produce?" | `patterns.md` | Search one heading | a decision procedure: expected, unexpected, or uncurated |
-| "I know this data as ECS or OCSF, what is it called here?" | `mapping-ecs.md` / `mapping-ocsf.md` | One section | anchors from the external taxonomy onto these fields |
-| "What is on this box right now?" | none of the above | n/a | inventory rows from the MCP tools, not reference content |
-| "How do I explore this kind of stream?" | `guides/stream-kinds.md` | One guide | feed → kind → explore ladder. Not `fields.md` |
-| "What does this `app` (LQL) token mean?" | `guides/app-vocabulary.md` | Search token | pack-minted product identity; empty is normal |
-| "Unfamiliar `pattern_hash` (LQL), what is this shape?" | MCP `describe_pattern` (tool) first | Tool, then grep | pattern text, examples, fleet spread; then `reasons.md` / `recipes.md` if needed |
+| The question you are holding | Artifact | What you get |
+|---|---|---|
+| "Which event family carries X?" | `fields/INDEX.md`, then one `fields/family-*.md` | the stable path, type, unit, and meaning for each envelope field |
+| "Which state topic carries X?" | `fields/INDEX.md`, then one `fields/topic-*.md` | the stable path, type, unit, and meaning for each topic reading |
+| "Which field carries X on this source, and what happens when it is missing?" | `fields.md` | every promoted field, what curates it, and the raw provider fallback when nothing does |
+| "What values can this token take, and is it safe to group by?" | `enums.md` | the closed vocabularies, with what each token means |
+| "What does this status/HRESULT/MSI/constant mean?" | `enums.md` | same as above; pick the feed from the event `subsource` (LQL) |
+| "What does this `sparklogs.reason` (LQL) value mean?" | `reasons.md` | public summary, severity, impact for that reason |
+| "How do I actually answer this investigation question here?" | `recipes.md` | worked pivots for that source, written against real field names |
+| "Is this pattern string something the pack meant to produce?" | `patterns.md` | a decision procedure: expected, unexpected, or uncurated |
+| "I know this data as ECS or OCSF, what is it called here?" | `mapping-ecs.md` / `mapping-ocsf.md` | anchors from the external taxonomy onto these fields |
+| "What is on this box right now?" | none of the above | inventory rows from the MCP tools, not reference content |
+| "How do I explore this kind of stream?" | `guides/stream-kinds.md` | feed → kind → explore ladder. Not `fields.md` |
+| "What does this `app` (LQL) token mean?" | `guides/app-vocabulary.md` | pack-minted product identity; empty is normal |
+| "Unfamiliar `pattern_hash` (LQL), what is this shape?" | MCP `describe_pattern` (tool) first | pattern text, examples, fleet spread; then `reasons.md` / `recipes.md` if needed |
+
+How much of each artifact to read (grep, one section, summary table first): the read-mode table in the skill's corpus block.
 
 Two shapes deserve their own line because they are the ones people get wrong:
 

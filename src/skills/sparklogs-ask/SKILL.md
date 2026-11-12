@@ -16,11 +16,7 @@ No output template. No WHAT WAS NOT CHECKED catalog. Go as deep as the question 
 
 ## Investigation discipline
 
-1. **Bounded discovery first:** capped structure tools before event payloads (`list_sources` (tool), `query_scope_activity` (tool), `describe_pattern` (tool)).
-2. **Aggregate before detail:** counts and rank before `query_logs` (tool).
-3. **Cache before re-query:** `refine_query_result` (tool) on the cached slice when it already covers the question.
-
-Tool decision tree and recipes: `guides/mcp-tool-decision-tree.md`.
+Bounded discovery first, aggregate before detail, and refine a cached result before re-querying: `guides/mcp-tool-decision-tree.md` (Investigation discipline), which also has the per-tool tiers.
 
 ## How to answer
 
