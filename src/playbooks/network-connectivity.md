@@ -38,7 +38,7 @@ Then drill down:
 **Events, for what health named.** Network channels on that device over the outage or drop interval:
 
 ```lql
-source: "<host>" AND service = networking
+source = "<host>" AND service = networking
 ```
 
 Group by `sparklogs.reason` (LQL).

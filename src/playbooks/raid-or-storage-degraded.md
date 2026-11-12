@@ -20,7 +20,7 @@ Header coverage says whether the device kept reporting through the window.
 **Events, for what health named.**
 
 ```lql
-source: "<host>" AND service = storage
+source = "<host>" AND service = storage
 ```
 
 Group by `sparklogs.reason` (LQL), worst first, over the interval the disk heat or episodes named.

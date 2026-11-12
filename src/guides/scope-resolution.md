@@ -206,10 +206,10 @@ Do not filter `list_sources` (tool) by "reporting now" when the engineer asked a
 
 After scope resolution, prefer **`agent_id` (LQL)** filters when the question is about everything one sender shipped. Call `query_event_counts_by_severity` (tool) with an `lql` (arg) filter such as `agent_id = "<uuid from resolve_scope or list_sources>"` (LQL) and a `group_by` (arg) such as `pattern` (LQL).
 
-Use **`source: "hostname"` (LQL)**, with the name as the tools returned it, when the question is about the origin host label, or combine both when you need on-host events from one agent:
+Use **`source = "hostname"` (LQL)**, with the name exactly as the tools returned it, when the question is about the origin host label, or combine both when you need on-host events from one agent:
 
 ```
-lql: 'agent_id = "<uuid>" AND source: "<hostname>"'
+lql: 'agent_id = "<uuid>" AND source = "<hostname>"'
 ```
 
 Ingest-key-shipped events use the ingest key's UUID as `agent_id` (LQL); filter the same way.

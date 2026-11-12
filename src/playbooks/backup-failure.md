@@ -23,7 +23,7 @@ The device-health reading describes the machine around the job; the job's outcom
 **Events, for what health named.** Errors in the failure window, including any job text the vendor wrote to Application or System:
 
 ```lql
-source: "<host>" AND severity >= error
+source = "<host>" AND severity >= error
 ```
 
 Group by `pattern` (LQL).

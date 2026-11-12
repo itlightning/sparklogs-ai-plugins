@@ -16,7 +16,7 @@ A machine "behind on updates" that has not scanned is a different ticket from on
 **Events, for what health named.**
 
 ```lql
-source: "<host>" AND service = patching
+source = "<host>" AND service = patching
 ```
 
 Group by `sparklogs.reason` (LQL), worst first.
@@ -24,7 +24,7 @@ Group by `sparklogs.reason` (LQL), worst first.
 Failing install in sequence:
 
 ```lql
-source: "<host>" AND service = patching AND severity >= error
+source = "<host>" AND service = patching AND severity >= error
 ```
 
 Fleet: one noun `group_by=["source"]` over a pinned reason ("is it just us").

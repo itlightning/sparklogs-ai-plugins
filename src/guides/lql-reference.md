@@ -332,10 +332,9 @@ Compare severity by name with `>=`.
 
 ```lql
 source = "srv-fileshare01"       <- exact, case included
-source: "SRV-FILESHARE01"        <- contains, any case
 ```
 
-`source` (LQL) equality is case-sensitive; payload leaves and `subsource` (LQL) are not. Copy the host name from `resolve_scope` (tool) or `list_sources` (tool), or use `:`.
+`source` (LQL) equality is case-sensitive; payload leaves and `subsource` (LQL) are not. Copy the host name from `resolve_scope` (tool) or `list_sources` (tool). `source:` (LQL) is a contains match (it also matches `srv-fileshare01-old`): use it only to find the spelling, then group by `source` (LQL).
 
 Combined with the `start` (arg) / `end` (arg) window parameters (which are separate from the LQL filter).
 

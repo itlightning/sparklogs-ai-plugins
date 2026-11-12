@@ -147,8 +147,8 @@ Always use the hash verbatim as the drill-down filter value.
 
 ## Worked shape: localize then land
 
-1. `query_scope_activity` (tool) or `query_event_counts_by_severity(group_by=["subsource"], lql='source: "<host>" AND severity >= warning', ...)`: which feeds carry the failure side.
-2. `query_event_counts_by_severity(group_by=["sparklogs.reason", "sparklogs.reason_variant"], lql='source: "<host>" AND subsource = "<feed>" AND severity >= warning', ...)`: which curated reasons dominate. The empty-reason group is uncurated: group it by `pattern_hash` (LQL).
+1. `query_scope_activity` (tool) or `query_event_counts_by_severity(group_by=["subsource"], lql='source = "<host>" AND severity >= warning', ...)`: which feeds carry the failure side.
+2. `query_event_counts_by_severity(group_by=["sparklogs.reason", "sparklogs.reason_variant"], lql='source = "<host>" AND subsource = "<feed>" AND severity >= warning', ...)`: which curated reasons dominate. The empty-reason group is uncurated: group it by `pattern_hash` (LQL).
 3. Compare against a healthy baseline window: is the top reason or pattern new, or normal volume?
 4. `describe_pattern(pattern_hashes=["<h>"])` on the surviving hash, then `query_logs(lql='pattern_hash = "<h>"', ...)` for event-level evidence.
 

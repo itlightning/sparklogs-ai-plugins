@@ -8,7 +8,7 @@ Widen: what subsources this host actually emits (`query_scope_activity` (tool) /
 WEL classic: `provider_name` (LQL) before `pattern` (LQL). File logs: `origin` (LQL). Device state: `query_device_health` (tool) for latest-in-window; logs group `sparklogs.kind` (LQL) / `sparklogs.topic` (LQL) / `sparklogs.reason` (LQL).
 Curated `service` (LQL) / `sparklogs.reason` (LQL) filters miss uncurated raw text and sibling providers; look there before you stop.
 Playbooks assume MCP fluency: LQL, field meaning, and claim strength, not tool walkthroughs.
-`<host>` in a playbook query is the `source` (LQL) name exactly as `resolve_scope` (tool) or `list_sources` (tool) returned it. `source: "<host>"` (LQL) matches it whatever the case; `source = "<host>"` (LQL) is exact and case-sensitive.
+`<host>` in a playbook query is the `source` (LQL) name exactly as `resolve_scope` (tool) or `list_sources` (tool) returned it. `source = "<host>"` (LQL) is exact, case included; when the spelling is unknown, see `guides/mcp-tool-decision-tree.md` (paste-back rules).
 A symptom that lives on a device starts from device health (a device view, a condition or the latest state) and narrows events to the device and interval that reading named.
 
 <!-- BEGIN GENERATED INDEX:playbooks -->

@@ -12,7 +12,7 @@ Data comes from Windows systems across your fleet through the [SparkLogs Agent](
 
 - Investigate one device end to end: what changed, what failed, and what it means, with every claim tied to the events behind it. See [skills/sparklogs-investigate](plugins/claude/sparklogs/skills/sparklogs-investigate/SKILL.md).
 - Triage the whole fleet: what needs attention today, what is new this week, and who else is affected.
-- Follow guided steps for common MSP situations such as backup failures, patch failures, slow logon, and degraded storage. See [playbooks](plugins/claude/sparklogs/skills/sparklogs-investigate/references/playbooks/playbooks.md).
+- Follow guided steps for common MSP situations such as patch failures, slow logon, degraded storage, and the server side of a failed backup (VSS, disk space, the backup product's services; the job result itself stays in the backup console). See [playbooks](plugins/claude/sparklogs/skills/sparklogs-investigate/references/playbooks/playbooks.md).
 - Read per-feed reference knowledge for Windows Event Log, servicing, and Defender data, so answers cite what an event actually means instead of guessing from an event ID. See [feeds](plugins/claude/sparklogs/skills/sparklogs-investigate/references/feeds).
 - Write ticket-ready summaries, and explain any single finding back to the evidence it came from. See [commands](plugins/claude/sparklogs/commands).
 
@@ -21,7 +21,7 @@ Data comes from Windows systems across your fleet through the [SparkLogs Agent](
 ```
 What needs attention in my fleet today?
 Investigate why <server> has been unhealthy this week.
-Backups failed on <server> three nights running. Why?
+Backups failed on <server> three nights running. What did the server show during the backup windows?
 What new failures are happening this week that we have not seen before?
 ```
 

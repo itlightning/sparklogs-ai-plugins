@@ -31,7 +31,7 @@ For delay above the lowest round trip, `fieldset` (arg) `detail` (value) adds `r
 **Events, for what health named.** The application's own errors and the VPN client's events over the stall interval:
 
 ```lql
-source: "<host>" AND (service = vpn OR service = networking)
+source = "<host>" AND (service = vpn OR service = networking)
 ```
 
 Group by `sparklogs.reason` (LQL); then the Application channel for the program itself.

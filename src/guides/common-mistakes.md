@@ -175,7 +175,7 @@ The rules, the one-sentence green case, and what an absent `agent_complete_throu
 
 **Why it's wrong.** The agent may have been behind, stuck or blocked during the window, in which case "no evidence" might just mean "data was incomplete."
 
-**Recovery.** Before any "no evidence found" conclusion, read `agent_complete_through` (col), `stuck_reason` (col) and `advisories` (col) on the agent row, then query `source: "<X>" AND sparklogs.kind = agent_op` (LQL) over the window. If any of them says data on that host is suspect, qualify the Finding's confidence and surface it in WHAT WAS NOT CHECKED. An empty `agent_op` (value) result is inconclusive (`guides/lql-reference.md`, Ingest-health check). `list_sources` (tool) event-count trends are a prompt to look, never a coverage measurement.
+**Recovery.** Before any "no evidence found" conclusion, read `agent_complete_through` (col), `stuck_reason` (col) and `advisories` (col) on the agent row, then query `source = "<X>" AND sparklogs.kind = agent_op` (LQL) over the window. If any of them says data on that host is suspect, qualify the Finding's confidence and surface it in WHAT WAS NOT CHECKED. An empty `agent_op` (value) result is inconclusive (`guides/lql-reference.md`, Ingest-health check). `list_sources` (tool) event-count trends are a prompt to look, never a coverage measurement.
 
 ### Reading empty `sparklogs.*` fields as a health finding
 

@@ -39,7 +39,7 @@ Several devices slow on one network (same network key, `guides/device-state-fiel
 **Events, for what health named.** Crashes, hangs and errors on that device over the span's interval:
 
 ```lql
-source: "<host>" AND severity >= error
+source = "<host>" AND severity >= error
 ```
 
 Group by `subsource` (LQL), then `pattern` (LQL) inside the dominant one.
