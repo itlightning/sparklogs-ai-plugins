@@ -549,6 +549,15 @@ values:
     - firewall_rule
     - kernel_driver
     - device_driver
+    - windows_service
+    - installed_product
+    - network_adapter
+  # sparklogs.config_change.basis and .category values
+  config_change_basis:
+    - recorded
+    - observed
+  config_change_category:
+    - maintenance
   device_health_metrics:
     - net_rx
     - net_tx

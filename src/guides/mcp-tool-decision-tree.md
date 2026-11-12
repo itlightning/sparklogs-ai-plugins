@@ -105,7 +105,7 @@ Every rendered cell is meant to go back into a filter unchanged.
 - **`t` (LQL), `ingested_t` (LQL) and `org_id` (LQL) are filter names.** They are the names in every response and the names LQL accepts, in `lql` (arg) and in `filter_lql` (arg). Inside an element scope they are payload keys, not the standard fields.
 - **A rendered severity name is a filter literal.** `severity >= warning` (LQL) is the readable form; prefer the name over the number.
 - **Array items need item-aligned expressions.** Use `path[](leaf=value)` (LQL) to filter items and the documented item grammar to group their leaves. A whole-event filter can retain other items in the same event.
-- **`source` (LQL) equality is exact, case included.** A host the engineer typed as `SRV-FILE01` matches nothing when the data says `srv-file01`. Write `source = "<name>"` (LQL) with the name exactly as `resolve_scope` (tool) (`reported_hostname` (col)) or `list_sources` (tool) returned it: the tools return the stored spelling. More robust still: `agent_id = "<uuid>"` (LQL) in a filter, or the `agent_ids` (arg) and `sources` (arg) arguments on `query_logs` (tool). Use `source:` (LQL), a contains match that ignores case, only to discover the spelling, then group by `source` (LQL) and filter on the exact name: `source: "dc01"` (LQL) also matches dc01-old and dc01-b. `subsource` (LQL) and payload leaves compare case-insensitively.
+- **`source` (LQL) equality is exact, case included.** A host the engineer typed as `SRV-FILE01` matches nothing when the data says `srv-file01`. Write `source = "<name>"` (LQL) with the name exactly as `resolve_scope` (tool) (`reported_hostname` (col)) or `list_sources` (tool) returned it: the tools return the stored spelling. Safer still: `agent_id = "<uuid>"` (LQL) in a filter, or the `agent_ids` (arg) and `sources` (arg) arguments on `query_logs` (tool). Use `source:` (LQL), a contains match that ignores case, only to discover the spelling, then group by `source` (LQL) and filter on the exact name: `source: "dc01"` (LQL) also matches dc01-old and dc01-b. `subsource` (LQL) and payload leaves compare case-insensitively.
 - **A bare 15 or 16 digit integer can be a timestamp.** Known datetime fields render as RFC3339; a leftover digit string that long, quoted or not, may be epoch microseconds UTC. Do not treat other numbers as times.
 
 ## When the response is large
@@ -144,7 +144,7 @@ Every rendered cell is meant to go back into a filter unchanged.
 
 ## Questions with no single tool
 
-- **What changed between two windows** -> run `query_event_counts_by_severity` (tool) over each window (`group_by=["sparklogs.reason"]` or `["pattern_hash"]`) and compare the two grouped results.
+- **What changed between two windows** -> run `query_event_counts_by_severity` (tool) over each window (`group_by=["sparklogs.reason"]` or `["pattern_hash"]`) and compare the two grouped results. What changed on one device before an onset: `playbooks/what-changed.md`.
 - **What differs between broken and working devices** -> run `query_event_counts_by_severity` (tool) over each population separately (via distinct `lql` (arg)) and compare.
 - **Which contexts surround these events** -> `query_logs` (tool) narrowed to the pattern and window, then `refine_query_result` (tool) with `group_by` (arg) over the surrounding fields.
 

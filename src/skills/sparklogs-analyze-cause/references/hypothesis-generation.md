@@ -26,7 +26,7 @@ This file gives detailed guidance on the analytic step: converting the prior inv
 
 When the prior investigation surfaced "X happened concurrent with Y" Findings:
 
-- **Recent change + new symptom** -> hypothesis "the recent change caused the symptom." Discriminator: rollback test, or finding sources without the change but with the symptom.
+- **Recent change + new symptom** -> hypothesis "the recent change caused the symptom." Discriminator: rollback test, or finding sources without the change but with the symptom. Bounding the window and ranking the device's changes: `playbooks/what-changed.md`.
 - **Cyclical timing (same time every day/week)** -> hypothesis "scheduled job or external recurrence is the cause." Discriminator: identify the schedule; correlate with Task Scheduler events (`subsource = "win.eventlog.management"` (LQL), `service = scheduled_tasks` (LQL)).
 - **Sudden onset without obvious change** -> hypothesis "external trigger (network event, cloud service issue, time-of-day boundary)." Discriminator: cross-source pivot ("did it happen on other sources at the same time?").
 

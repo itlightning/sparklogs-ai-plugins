@@ -17,7 +17,7 @@ Each reason's arm is on `sparklogs.reason_variant` (LQL).
 
 **Device health first.** `latest_state` (value) on the `system_info` (value) topic: `sparklogs.data.system_info.tpm_present` (col) and `sparklogs.data.system_info.tpm_version` (col) say whether Windows sees a TPM now and which specification it reports.
 `device_overview` (value) over the window: its `events` (col) carry `tpm_presence_changed` (value) (a TPM appeared or disappeared, usually a firmware setting, firmware update or board replacement), `tpm_version_changed` (value) and `bios_version_changed` (value).
-A TPM that disappeared or changed version explains every TPM error after it. Look for that change before reading event 17.
+A TPM that disappeared or changed version explains every TPM error after it. Look for that change before reading event 17; other changes before the first error: `playbooks/what-changed.md`.
 
 **Event 17: routine or failing.**
 

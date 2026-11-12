@@ -18,7 +18,7 @@ Explore: `guides/stream-kinds/wel-classic.md` (`subsource` (LQL), then `origin` 
 
 **Pivots.** Service will not stay up: `service_crashed` (value), `service_start_failed` (value), `service_hang` (value). Disk filling is state (`themes/device-health-and-state.md`) plus these disk reasons if the stream shows IO faults.
 
-Patching: `themes/windows-updates-and-patching.md`. Who changed it: `themes/windows-security-and-audit.md`.
+Patching: `themes/windows-updates-and-patching.md`. What changed on the device before it broke: `playbooks/what-changed.md`. Who changed it: `themes/windows-security-and-audit.md`.
 
 Installed products: `themes/device-health-and-state.md`.
 VSS plumbing (writers, snapshots, shadow-copy rotation): `playbooks/windows-vss.md`.

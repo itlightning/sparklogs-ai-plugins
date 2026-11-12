@@ -24,7 +24,7 @@ Several devices slow, or a client-wide complaint: start with `fleet_performance`
   Disk heat is busy time pushed up by queue depth. Latency is not in it: read `disk_latency_ms` (col) in `domains` (col) for slow I/O at moderate busy time.
 - `top_processes` (col): `window_rank_by` (col) says whether a row was kept for CPU, memory, disk I/O or network.
   Process I/O includes I/O that does not reach the disk. Storage readings carry disk load.
-- `events` (col): episodes such as `cpu_busy` (value), `cpu_throttled_under_load` (value), `ram_pressure` (value), `disk_latency_degraded` (value) and `disk_saturated` (value), and the changes (driver, product, configuration) that overlapped a span.
+- `events` (col): episodes such as `cpu_busy` (value), `cpu_throttled_under_load` (value), `ram_pressure` (value), `disk_latency_degraded` (value) and `disk_saturated` (value), and the changes (driver, product, configuration) that overlapped a span. Ranking those changes against the onset: `playbooks/what-changed.md`.
 - When the complaint names times, call again with a narrow `bucket` (arg) over those hours. A freeze shorter than `bucket_s` (col) leaves no span.
 
 Then drill down from what the reading named:

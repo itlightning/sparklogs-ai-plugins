@@ -124,6 +124,8 @@ Detail: `playbooks/playbooks.md`.
 | Slow server | `playbooks/slow-device.md` |
 | Slow logon | `playbooks/slow-logon.md` |
 | TPM errors or attestation failure | `playbooks/tpm-health.md` |
+| What changed on this device | `playbooks/what-changed.md` |
+| It worked yesterday | `playbooks/what-changed.md` |
 | Windows Update / patch failure | `playbooks/windows-update-failure.md` |
 | VSS / shadow copies / backup plumbing | `playbooks/windows-vss.md` |
 <!-- END GENERATED INDEX:playbooks -->

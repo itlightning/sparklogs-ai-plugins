@@ -42,5 +42,6 @@ source = "<host>" AND service = networking AND sparklogs.kind not in (inventory,
 ```
 
 Group by `sparklogs.reason` (LQL). The filter drops inventory rows and firewall-rule churn, and keeps Wi-Fi, DHCP, DNS and adapter reasons (many are Notice) plus uncurated network rows: group those by `provider_name` (LQL).
+Adapter, DNS, proxy and firewall changes before the onset: `playbooks/what-changed.md` (**Firewall and network policy**).
 
 **Off-endpoint** (HM11): the router, firewall and access points, the ISP circuit, other devices without the agent, cloud services the user was reaching.

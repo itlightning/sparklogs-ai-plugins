@@ -169,6 +169,17 @@ The list is **not exhaustive** - it's a starting set covering common patterns. I
 
 ---
 
+## HM15 - What changed on this device
+
+**Off-endpoint causes:**
+
+- **Pushed policy and management.** Group Policy objects edited on a domain controller, Intune profiles and RMM policies are changed in their consoles. The device shows the effects (rules, services, settings), and often not who changed the policy or when.
+- **Network and security gear.** Router, firewall, DHCP and DNS server, Wi-Fi controller and VPN concentrator changes leave nothing on the endpoint until traffic fails.
+- **The application's server or tenant.** A SaaS tenant setting, a server-side update or a license change can break a client that did not change.
+- **Hardware and firmware changed with the device off.** A dock, monitor or card swapped, or a firmware setting changed and changed back between two readings.
+
+---
+
 ## Cross-cutting off-endpoint patterns
 
 Some off-endpoint causes apply across many symptom categories and are worth flagging when investigations span multiple potential causes:

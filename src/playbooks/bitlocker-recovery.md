@@ -84,13 +84,14 @@ source = "<host>" AND subsource = "win.eventlog.identity_security" AND event_id 
 <!-- confirmed with data on 2026-11-12 -->
 
 
-**Events, for what health named.** What changed before the reboot:
+**Events, for what health named.** What changed between the last good boot and the recovery boot: the sweep, ranking and timing limits are in `playbooks/what-changed.md`.
+For a recovery prompt the types that matter are `bios` (value), `operating_system` (value), `kernel_driver` (value) and `device_driver` (value):
 
 ```lql
-source = "<host>" AND sparklogs.kind = config_change AND sparklogs.config_change.type != firewall_rule
+source = "<host>" AND sparklogs.kind = config_change AND sparklogs.config_change.type in (bios, operating_system, kernel_driver, device_driver)
 ```
 
-Group by `sparklogs.config_change.type` (LQL) first, then `sparklogs.config_change.target` (LQL) inside the types that matter (`bios` (value), `operating_system` (value), `kernel_driver` (value), `device_driver` (value)). Firewall rules are excluded: Store app updates churn them by the hundred.
+Group by `sparklogs.config_change.type` (LQL), then `sparklogs.config_change.target` (LQL).
 
 Patching and firmware in the same window: servicing as in `playbooks/windows-update-failure.md`.
 BitLocker that could not tie its key to Secure Boot on a boot: `bitlocker_secure_boot_unavailable` (value). Protection left suspended after a planned change: `bitlocker_protection_resume_failed` (value). Both are on `win.eventlog.identity_security` (value).
