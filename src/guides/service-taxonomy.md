@@ -2,7 +2,7 @@
 
 `service` (LQL) is the curated cross-source ticket-class taxonomy: the MSP ticket class an event or
 snapshot is **evidence for**. It is cross-OS and cross-vendor on purpose (Veeam, Acronis, and
-Windows Server Backup all emit `service = "backup"`), so fleet-wide analysis spans vendors.
+Windows Server Backup all emit `service = "backup"` (LQL)), so fleet-wide analysis spans vendors.
 `app` (LQL) is the complementary axis (product identity): `guides/app-vocabulary.md`. A vendor spans services and a
 service spans vendors; neither nests in the other.
 
@@ -13,7 +13,7 @@ below is the whole vocabulary.
 `service` (LQL) is a conditional scope-ladder field: present when the source's shaping carries it, absent
 otherwise (see `scope-ladder.md` for the degrade-gracefully rule). It is set per event; CONTEXT
 (unlabeled) events can carry a service too (for example, Outlook context events on the Application
-channel carry `service = "email"`).
+channel carry `service = "email"` (LQL)).
 
 ## The vocabulary
 
@@ -53,7 +53,7 @@ channel carry `service = "email"`).
 
 ## Audit-adjacent events homed elsewhere (demarcation list)
 
-`service = "security_audit"` is **not** the complete set of audit-related events. An event gets exactly one
+`service = "security_audit"` (LQL) is **not** the complete set of audit-related events. An event gets exactly one
 `service` (LQL): the ticket class it is evidence for. Security-channel evidence whose consequence belongs
 to a ticket class is homed under that class; the security/forensic angle is carried by `sparklogs.reason` (LQL),
 channel, and `category` (LQL), never duplicated into a second event or a second service.
@@ -68,7 +68,7 @@ Maintained list (grows as Windows Event Log modules land):
   directory object changes (-> `directory_services` (value)) as those rows ship.
 
 **Rule for forensic/audit sweeps: pivot on `sparklogs.reason` (LQL), channel (`subsource` (LQL)), and `category` (LQL),
-never on `service = "security_audit"` alone.**
+never on `service = "security_audit"` (LQL) alone.**
 
 ## Coverage
 

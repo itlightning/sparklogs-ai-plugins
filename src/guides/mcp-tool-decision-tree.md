@@ -104,8 +104,8 @@ Every rendered cell is meant to go back into a filter unchanged.
 - **`""` means no value.** In a TSV cell and in a group key it covers missing, SQL null and the empty string alike; a JSONL row omits an absent field and carries `""` for a stored empty one. Paste `""` back as `col=""` and you get exactly the rows that cell came from. TSV carries no null marker, and a pasted null matches the four-character string.
 - **Hash twins paste into either name.** A `*_hash` value works as `pattern_hash` (LQL) `= "<hash>"` and as `pattern` (LQL) `= "<hash>"`; an equality on the base field whose literal has the hash token shape widens to cover both. The twins are listed by `list_fields` (tool) because they are meant to be pasted.
 - **`t` (LQL), `ingested_t` (LQL) and `org_id` (LQL) are filter names.** They are the names in every response and the names LQL accepts, in `lql` (arg) and in `filter_lql` (arg). Inside an element scope they are payload keys, not the standard fields.
-- **A rendered severity name is a filter literal.** `severity >= warning` is the readable form; prefer the name over the number.
-- **Array items need item-aligned expressions.** Use `path[](leaf=value)` to filter items and the documented item grammar to group their leaves. A whole-event filter can retain other items in the same event.
+- **A rendered severity name is a filter literal.** `severity >= warning` (LQL) is the readable form; prefer the name over the number.
+- **Array items need item-aligned expressions.** Use `path[](leaf=value)` (LQL) to filter items and the documented item grammar to group their leaves. A whole-event filter can retain other items in the same event.
 - **String equality ignores case** on resident columns and on payload leaves alike.
 - **A bare 15 or 16 digit integer can be a timestamp.** Known datetime fields render as RFC3339; a leftover digit string that long, quoted or not, may be epoch microseconds UTC. Do not treat other numbers as times.
 

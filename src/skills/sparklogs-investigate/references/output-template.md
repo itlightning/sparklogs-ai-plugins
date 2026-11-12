@@ -34,15 +34,6 @@ OBSERVED CONDITIONS
   Finding 2: ...
   ... (typically 3-7 findings)
 
-ANOMALY SIGNALS USED (if any; normally absent, see below)
-[brief enumeration, with explicit framing: "These anomaly indicators helped focus the investigation
- on signal-rich events. They are internal investigation tools, not standalone problem alerts."]
-
-  `anomaly_max_score` / `anomaly_max_score_confidence` are designed and not emitted anywhere in
-  the product today, so this section is normally absent. Include it only when you actually read an
-  anomaly field and it carried a value. Do not model a Finding on one: a citation for a signal no
-  source emits is the exact confidently-wrong shape this template exists to prevent.
-
 WHAT WAS EXAMINED
 - Backing queries: <N>
 - Cached refinements: <M>
@@ -147,11 +138,6 @@ The actual window the cited evidence covers. May be tighter than the overall inv
 NOT:
 - "Note: this is likely caused by..."  <- speculation; move to POSSIBLE NEXT DIRECTIONS or cause-analysis skill
 - "Note: recommend restarting the service" <- recommendation; not this skill's role
-
-### Anomaly Signals Used
-Optional section, and **normally absent**: `anomaly_max_score` (other) / `anomaly_max_score_confidence` (other) are designed and not emitted anywhere in the product today, so the canonical context-reduction filter reduces to its `severity` (LQL) half on every source. Omitting the section is the usual correct outcome, and the missing anomaly half is never "no anomalies."
-
-Include it only if you actually read an anomaly field and it carried a value. Then list briefly, with the required framing: anomalies are internal investigation tools, not standalone problem alerts. Never build a Finding on one: a citation for a signal no source emits is the confidently-wrong shape this template exists to prevent.
 
 ### What Was Examined
 Track the running counts (backing queries, refinements, sources/orgs covered, matched population) in your local investigation-state document as you go. All figures here come from server-returned query summaries, not self-reported estimates. This section shows the engineer how much evidence backs the summary: how many queries ran, how broad a scope they covered, how many events were in the matched population.

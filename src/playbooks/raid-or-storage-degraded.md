@@ -6,7 +6,7 @@ index: RAID / array degraded
 
 **Trigger.** "Array reports degraded", or a controller alert reached the RMM.
 
-**Accuracy.** Controller and disk-subsystem events are curated on System under `service = storage`.
+**Accuracy.** Controller and disk-subsystem events are curated on System under `service = storage` (LQL).
 Vendor array tools that never write a Windows channel are invisible here.
 Any critical+ row in scope is fetch-first, whatever the ticket said.
 A degraded array often keeps serving I/O at higher latency. Disk heat grades busy time and queue depth, not latency, so high latency at moderate load can show no disk heat.
@@ -19,7 +19,7 @@ Header coverage says whether the device kept reporting through the window.
 
 **Events, for what health named.**
 
-```
+```lql
 source = "<host>" AND service = storage
 ```
 

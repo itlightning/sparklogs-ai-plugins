@@ -16,13 +16,13 @@ State in WHAT WAS NOT CHECKED that replication topology and latency were not exa
 
 Authentication failures by cause and by DC:
 
-```
+```lql
 sparklogs.reason in (kerberos_ticket_failed, kerberos_preauth_failed, ntlm_validation_failed)
 ```
 
 Group by `source` (LQL), `win.eventlog.security.status_meaning` (LQL).
 `clock_skew` (value) concentrated on one DC is a different story from `client_unknown` (value) spread evenly.
 
-Directory object changes: `sparklogs.reason = directory_object_changed`.
+Directory object changes: `sparklogs.reason = directory_object_changed` (LQL).
 
 **Off-endpoint** (HM8): the directory service itself, site links and paths between DCs, anything on a DC without the agent.

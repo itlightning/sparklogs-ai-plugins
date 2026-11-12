@@ -256,6 +256,8 @@ cols:
 
 # Resident LQL: query-engine / wire fields the pack field tables do not own.
 # Module paths (win.eventlog.*) come from the library harvest.
+# Each entry must be in scripts/fixtures/lql-live-fields.txt or the pack harvest, and each
+# lql_families prefix must prefix a field in one of them (lint-identifier-tags.mjs checks).
 lql_resident:
   - agent_id
   - app
@@ -292,10 +294,15 @@ lql_resident:
   - t
   - trace_id
   - event_id
-  # Pedagogical custom paths in lql-reference.md
-  - correlation_id
-  - x.foo
-  - x.tags
+
+# Made-up names the guides use to teach syntax, each marked illustrative where it is used.
+# Entry is an exact name or prefix.* (the prefix and every path under it).
+# Never put a name here that a real event might carry; add real names to lql_resident.
+lql_pedagogical:
+  - x.*
+  - path.*
+  - field
+  - processes
 
 lql_families:
   - event_data
@@ -312,7 +319,6 @@ lql_families:
   - sparklogs.result
   - sparklogs.running_as
   - sparklogs.target
-  - sparklogs.error
   - sparklogs.destination
 
 # Small closed vocabs. Feed ids come from MODULES. Apps from registry.yaml.

@@ -42,10 +42,10 @@ Two shapes deserve their own line because they are the ones people get wrong:
 
 1. Resolve the source. A ticket names a machine and a symptom; a query result names a `subsource` (LQL).
    The `subsource` (LQL) IS the module id, and it works in both directions. Given an event carrying
-   `subsource = win.eventlog.security`, the module is `feeds/win.eventlog.security/`. Given a
+   `subsource = win.eventlog.security` (LQL), the module is `feeds/win.eventlog.security/`. Given a
    module you want to query, the module id IS the LQL scoping predicate:
 
-   ```
+   ```lql
    subsource = "win.eventlog.security"
    ```
 

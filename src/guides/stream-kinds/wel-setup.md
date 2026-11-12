@@ -1,6 +1,6 @@
 # Kind: WEL Setup
 
-Scope **`subsource = "win.eventlog.setup"`**.
+Scope **`subsource = "win.eventlog.setup"` (LQL)**.
 Group **`event_id` (LQL) / `pattern` (LQL) / `sparklogs.reason` (LQL)**.
 Payload is often **`user_data.*`**.
 

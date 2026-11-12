@@ -1,6 +1,6 @@
 # Kind: WEL Defender
 
-Scope **`subsource = "win.defender.eventlog"`**.
+Scope **`subsource = "win.defender.eventlog"` (LQL)**.
 Group **`event_id` (LQL) / `sparklogs.reason` (LQL) / `pattern` (LQL)**.
 **`event_data.*` is expected** on this channel.
 

@@ -145,11 +145,11 @@ If any answer is "no/single/stale/uncertain," downgrade to `medium` (value) or `
 
 ## Mistakes against customization/tunability
 
-### Assuming default thresholds are universal
+### Assuming the default filter is universal
 
-**Symptom.** You apply the canonical context-reduction filter (`severity in (error, critical) OR (anomaly_max_score >= 60 AND anomaly_max_score_confidence >= 70)`) without considering whether this workspace's tuning differs.
+**Symptom.** You apply the canonical context-reduction filter (`severity in (error, critical)` (LQL)) without considering whether this workspace's tuning differs.
 
-**Why it's wrong.** Some environments are noisier and want tighter thresholds; some want looser. Default-blind investigation will miss signal at one and overload at the other.
+**Why it's wrong.** Some environments are noisier and want a tighter severity floor; some want a looser one. Default-blind investigation will miss signal at one and overload at the other.
 
 **Recovery.** The canonical filter is a default, not a universal. If feedback during the investigation suggests the default isn't working, surface in the summary and use a different filter for the next refinement.
 
@@ -371,7 +371,7 @@ Don't keep retrying with slightly different broken expressions. If the LQL parse
 
 ### Skipping required sections
 
-Every summary MUST have: EXECUTIVE SUMMARY (at top), SCOPE CHECKED, OBSERVED CONDITIONS, WHAT WAS NOT CHECKED (which lives inside SCOPE CHECKED), WHAT WAS EXAMINED, AUDIT TRAIL, POSSIBLE NEXT DIRECTIONS (with the explore-or-analyze invitation). ANOMALY SIGNALS USED is required only if you used anomaly fields, which nothing emits today, so it is normally absent.
+Every summary MUST have: EXECUTIVE SUMMARY (at top), SCOPE CHECKED, OBSERVED CONDITIONS, WHAT WAS NOT CHECKED (which lives inside SCOPE CHECKED), WHAT WAS EXAMINED, AUDIT TRAIL, POSSIBLE NEXT DIRECTIONS (with the explore-or-analyze invitation).
 
 ### Making the POSSIBLE NEXT DIRECTIONS section longer than 3 sentences
 

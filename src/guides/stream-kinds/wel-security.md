@@ -1,6 +1,6 @@
 # Kind: WEL Security
 
-Scope **`subsource = "win.eventlog.security"`**.
+Scope **`subsource = "win.eventlog.security"` (LQL)**.
 Then **`sparklogs.actor.*`**, **`sparklogs.reason` (LQL)**, **`event_id` (LQL)**, then `pattern` (LQL).
 
 `provider_name` (LQL) exists but this channel has few publishers. Grouping by it is a weak split.

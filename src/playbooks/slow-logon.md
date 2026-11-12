@@ -18,7 +18,7 @@ Logon is short, so read `evidence` (col) and `events` (col) as well as heat: a p
 
 **Events, for what health named.** Sign-in shape for the account:
 
-```
+```lql
 source = "<host>" AND sparklogs.actor.name = "<account>"
 ```
 
@@ -27,7 +27,7 @@ Failing-then-retrying looks nothing like a slow single `logon_cached_interactive
 
 Decoded auth failures (`win.eventlog.security.status_meaning` (LQL) is the cause without opening the body):
 
-```
+```lql
 sparklogs.reason in (sign_in_failed, kerberos_preauth_failed, kerberos_ticket_failed, ntlm_validation_failed)
 AND sparklogs.actor.name = "<account>"
 ```

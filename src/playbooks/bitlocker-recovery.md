@@ -30,7 +30,7 @@ A TPM that disappeared, or a TPM failing on its own, is `playbooks/tpm-health.md
 - `bitlocker_tpm_binding_mismatch` (value): `win.eventlog.system.bitlocker_mismatched_pcr` (LQL) names the PCR that changed, and `win.eventlog.system.bitlocker_binding_pcr_bitmap` (LQL) the PCRs the protector is bound to (0x880 is PCRs 7 and 11).
 - `bitlocker_recovery_password_used` (value): someone typed the recovery password and Windows started. Whoever typed it knows it now.
 
-```
+```lql
 source = "<host>" AND subsource = "win.eventlog.system" AND service = encryption
 ```
 
@@ -41,7 +41,7 @@ Group by `sparklogs.reason` (LQL), `sparklogs.reason_variant` (LQL).
 `win.eventlog.system.boot_pcrs` (LQL) lists each PCR with its index, its value and, on a UEFI boot, its role: PCR 0 firmware code, 2 option ROMs, 4 boot manager, 5 partition table, 7 Secure Boot state and keys, 11 BitLocker access control.
 `win.eventlog.system.boot_pcr_indices` (LQL) lists which PCRs were recorded. The `pcr_values_unreadable` (value) arm carries the indices but no values or fingerprint.
 
-```
+```lql
 source = "<host>" AND sparklogs.reason = tpm_boot_pcr_values_recorded
 ```
 
@@ -52,7 +52,7 @@ If they differ, compare `win.eventlog.system.boot_pcrs` (LQL) entry by entry and
 BitLocker-API event 892 in the BitLocker management log, uncurated, names them: "BitLocker successfully sealed a key to the TPM. PCRs measured include [7,11]."
 Take the newest 892 before the prompt:
 
-```
+```lql
 source = "<host>" AND subsource = "win.eventlog.identity_security" AND event_id = 892
 ```
 
@@ -61,7 +61,7 @@ A boot manager update changes PCR 4 on every boot after it, and a key sealed to 
 Name a PCR as the cause only when it changed and it is in the sealed list, or when `win.eventlog.system.bitlocker_mismatched_pcr` (LQL) names it.
 Many devices also log BitLocker-Driver event 24711, uncurated, when a TPM protector started Windows. Some never log it, so read it against the device's own history:
 
-```
+```lql
 source = "<host>" AND subsource = "win.eventlog.system" AND event_id in (24709, 24711, 24652)
 ```
 
@@ -76,14 +76,14 @@ Group by `event_id` (LQL). On a device whose boots usually carry 24711, a boot w
 
 BitLocker-API event 793 in the BitLocker management log, uncurated, reads "BitLocker resealed boot settings to the TPM". BitLocker bound the drive key to the boot measurements of that moment. A 793 after a firmware or Secure Boot update means the key already follows the new measurements, so that update did not cause the prompt:
 
-```
+```lql
 source = "<host>" AND subsource = "win.eventlog.identity_security" AND event_id = 793
 ```
 
 
 **Events, for what health named.** What changed before the reboot:
 
-```
+```lql
 source = "<host>" AND sparklogs.kind = config_change
 ```
 
@@ -91,7 +91,7 @@ Group by `sparklogs.config_change.type` (col), `sparklogs.config_change.target` 
 
 Patching and firmware in the same window: servicing as in `playbooks/windows-update-failure.md`.
 BitLocker that could not tie its key to Secure Boot on a boot: `bitlocker_secure_boot_unavailable` (value). Protection left suspended after a planned change: `bitlocker_protection_resume_failed` (value). Both are on `win.eventlog.identity_security` (value).
-Boot integrity on Security: `sparklogs.reason = win_insecure_boot_config`, with its flags in `win.eventlog.security.insecure_boot_flags` (LQL).
+Boot integrity on Security: `sparklogs.reason = win_insecure_boot_config` (LQL), with its flags in `win.eventlog.security.insecure_boot_flags` (LQL).
 
 **One device or many.** Before calling a cause, run the same reason over the organization: one noun `group_by=["source"]` over `bitlocker_tpm_unlock_failed` (value) or `bitlocker_tpm_binding_mismatch` (value).
 The same mismatched PCR on many devices after one firmware or Secure Boot rollout is the rollout. One device alone points at that device's own change.

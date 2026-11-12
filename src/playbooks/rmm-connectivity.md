@@ -12,7 +12,7 @@ That is a different question from whether it is reporting to the RMM.
 `offline` (value) means no signal reached SparkLogs, never that the machine is down.
 The customer's RMM is the authority on up/down.
 `row_kind=silent_device` is an exact counted fact (no state rows), not "healthy" and not "agent down".
-`sparklogs.kind = agent_op` empty is inconclusive, not reassuring.
+`sparklogs.kind = agent_op` (LQL) empty is inconclusive, not reassuring.
 
 Data flowing here while the RMM shows offline localizes to the RMM path.
 No data here either: you cannot distinguish agent, machine, and network; say so.
@@ -26,13 +26,13 @@ Unreported time over that interval leaves both questions open.
 
 **Events, for what health named.**
 
-```
+```lql
 source = "<host>" AND sparklogs.kind = agent_op
 ```
 
 RMM vendor errors on the box:
 
-```
+```lql
 source = "<host>" AND service = rmm
 ```
 

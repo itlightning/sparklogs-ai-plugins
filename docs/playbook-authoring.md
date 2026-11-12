@@ -37,6 +37,7 @@ Keep this order. Drop a heading if it would be empty.
 ## Queries
 
 Write LQL the agent can paste into `query_event_counts_by_severity` or `query_logs`.
+Put each query in a ```` ```lql ```` block: every field it names must be a real field (see `guides/names.md`).
 Group-by is part of the question: one noun, one field; two nouns, a cross-tab.
 Name the field that carries the discriminator (`reason`, `vss_writer`, `instance`, `status_meaning`).
 Do not teach `describe_pattern` or `refine_query_result` here; the skill already knows those.

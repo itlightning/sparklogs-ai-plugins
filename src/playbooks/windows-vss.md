@@ -18,7 +18,7 @@ Do not recommend deleting shadow copies; restore-chain integrity belongs to the 
 Query both.
 `feeds/win.eventlog.application/{fields,reasons,enums}.md` and the System siblings.
 Group by `sparklogs.reason` (LQL) first.
-`service = backup` is the family; `app` (LQL) is left blank on OS VSS so the backup vendor can occupy it.
+`service = backup` (LQL) is the family; `app` (LQL) is left blank on OS VSS so the backup vendor can occupy it.
 
 ## Field schema
 
@@ -54,10 +54,10 @@ Documented abort budgets: writers may not stay frozen longer than **60 seconds**
 
 ## Queries
 
-Unregistered provider (`0x80040154`) on a handful of hosts can dominate `service = backup` counts.
+Unregistered provider (`0x80040154`) on a handful of hosts can dominate `service = backup` (LQL) counts.
 Pin those hosts before reading an estate histogram as one story.
 
-```
+```lql
 source = "<host>" AND service = backup AND subsource in (win.eventlog.application, win.eventlog.system)
 ```
 
@@ -65,7 +65,7 @@ Group by `sparklogs.reason` (LQL).
 
 Who is snapshotting (stays Info so default sweeps see it):
 
-```
+```lql
 source = "<host>" AND subsource = win.eventlog.application AND event_id = 8231
 ```
 
@@ -74,7 +74,7 @@ Group attempts by `win.eventlog.application.vss_snapshot_set` (LQL).
 
 Writer × code:
 
-```
+```lql
 source = "<host>" AND subsource = win.eventlog.application AND sparklogs.result.code!
 ```
 
@@ -82,7 +82,7 @@ Group by `win.eventlog.application.vss_writer` (LQL), `sparklogs.result.code_nam
 
 Intent:
 
-```
+```lql
 source = "<host>" AND subsource = win.eventlog.application AND win.eventlog.application.vss_operation_intent!
 ```
 
@@ -90,7 +90,7 @@ Group by `win.eventlog.application.vss_operation_intent` (LQL).
 
 Volsnap reclamation (space 33, count 58, delete-pending 95):
 
-```
+```lql
 source = "<host>" AND subsource = win.eventlog.system AND event_id in (33, 58, 95)
 ```
 
@@ -101,7 +101,7 @@ The log stream does not carry the standing copy count.
 
 Fleet Error+ (two nouns: which reason, which host):
 
-```
+```lql
 service = backup AND subsource in (win.eventlog.application, win.eventlog.system) AND severity >= 17
 ```
 

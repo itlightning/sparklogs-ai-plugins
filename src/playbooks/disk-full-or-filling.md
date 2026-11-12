@@ -20,7 +20,7 @@ Process write bytes include writes that do not reach the disk: they rank writers
 
 **Events, for what health named.** Storage errors when the volume is filling because something is failing:
 
-```
+```lql
 source = "<host>" AND service = storage
 ```
 

@@ -197,7 +197,7 @@ Detail: `playbooks/playbooks.md`.
 
 Canonical template (field definitions, right-vs-wrong examples): `references/output-template.md`. Voice: `guides/writing-voice.md`.
 
-**Produce in this order:** title + `external_investigation_id` (arg) → EXECUTIVE SUMMARY → SCOPE CHECKED (incl. WHAT WAS NOT CHECKED) → OBSERVED CONDITIONS (Findings) → ANOMALY SIGNALS USED (only if used; normally absent) → WHAT WAS EXAMINED → AUDIT TRAIL → POSSIBLE NEXT DIRECTIONS (explore-or-analyze invitation).
+**Produce in this order:** title + `external_investigation_id` (arg) → EXECUTIVE SUMMARY → SCOPE CHECKED (incl. WHAT WAS NOT CHECKED) → OBSERVED CONDITIONS (Findings) → WHAT WAS EXAMINED → AUDIT TRAIL → POSSIBLE NEXT DIRECTIONS (explore-or-analyze invitation).
 
 **Non-negotiable:** every Finding cites `query_url` (col); Confidence on every Finding; WHAT WAS NOT CHECKED every time; POSSIBLE NEXT DIRECTIONS invites `sparklogs-analyze-cause`, never performs cause analysis.
 
@@ -253,7 +253,7 @@ Symptom playbooks: Section 3b and `playbooks/playbooks.md`.
 
 Climb coarse to fine: `service` (LQL) -> `app` (LQL) -> `subsource` (LQL) -> `category` (LQL) -> `pattern_hash` (LQL); `source` (LQL) is the host pivot beside the ladder. `pattern_hash` (LQL) is always present; other ladder fields are conditional (empty group = field absent on this source, fall back to `pattern_hash` (LQL), not a Finding).
 
-**Use it:** `query_event_counts_by_severity` (tool) with `group_by` (arg) to localize; cross-tab with 2-3 fields when the pairing is the question; drill with `pattern_hash = "..."` or refine on cache; resolve `_hash` via `lookups` (col) before citing. Baseline-vs-incident hash compare: mind source-pack releases that recompute pattern identity.
+**Use it:** `query_event_counts_by_severity` (tool) with `group_by` (arg) to localize; cross-tab with 2-3 fields when the pairing is the question; drill with `pattern_hash = "..."` (LQL) or refine on cache; resolve `_hash` via `lookups` (col) before citing. Baseline-vs-incident hash compare: mind source-pack releases that recompute pattern identity.
 
 Full ladder, worked shapes, RCA usage: `guides/scope-ladder.md`. Controlled `service` (LQL) vocabulary: `guides/service-taxonomy.md`.
 
@@ -306,7 +306,7 @@ Fresh report → re-render per Section 4 with all Findings so far. Explore furth
 
 **Partial page:** read the header counts and `page.next` (col). Prefer one refine with `offset: 0` and the desired total limit, or follow the next-page call. See `guides/mcp-tool-decision-tree.md` before combining pages.
 
-**Source has been emitting `sparklogs.kind = agent_op` rows during your window:** your evidence is incomplete. Read what they say was not collected, suppressed or truncated, flag it explicitly in WHAT WAS NOT CHECKED, and qualify the findings that depended on the affected window. An EMPTY `agent_op` (value) result is inconclusive rather than reassuring - see Section 8 (before "no evidence").
+**Source has been emitting `sparklogs.kind = agent_op` (LQL) rows during your window:** your evidence is incomplete. Read what they say was not collected, suppressed or truncated, flag it explicitly in WHAT WAS NOT CHECKED, and qualify the findings that depended on the affected window. An EMPTY `agent_op` (value) result is inconclusive rather than reassuring - see Section 8 (before "no evidence").
 
 **`external_investigation_id` (arg) validation error:** the id is out of bounds (must be 8-200 chars, free text). Read the tool's error message and fix the id - don't retry with the same value. Pick something human-meaningful (embed a ticket/incident id).
 

@@ -119,9 +119,9 @@ The process instance key is pid plus create time, so it changes on every restart
 
 ## Step 2: find the devices
 
-`path[](pred)` matches an event when at least ONE element satisfies the whole predicate. `path[].leaf=v` is sugar for the single-term form.
+`path[](pred)` matches an event when at least ONE element satisfies the whole predicate. `path[].leaf=v` (LQL) is sugar for the single-term form.
 
-```
+```lql
 sparklogs.data.processes[](image_name="svchost.exe")
 sparklogs.data.services[](current_state="stopped" AND start_type="auto_delayed")
 sparklogs.data.disk_volumes[](volume_role="os" AND free_pct<25)
@@ -138,8 +138,8 @@ Two terms inside one `[]()` bind to the SAME element. The same two terms written
 
 | Query | Means |
 |---|---|
-| `sparklogs.data.processes[](image_name="svchost.exe" AND resident_bytes>200000000)` | one svchost process is over 200 MB |
-| `sparklogs.data.processes[].image_name="svchost.exe" AND sparklogs.data.processes[].resident_bytes>200000000` | the box runs svchost, and something on the box is over 200 MB |
+| `sparklogs.data.processes[](image_name="svchost.exe" AND resident_bytes>200000000)` (LQL) | one svchost process is over 200 MB |
+| `sparklogs.data.processes[].image_name="svchost.exe" AND sparklogs.data.processes[].resident_bytes>200000000` (LQL) | the box runs svchost, and something on the box is over 200 MB |
 
 On a two-device dev fleet over 30 hours the bound form matched 0 events and the uncorrelated form matched 56. The same pair on services (stopped with auto_delayed) gave 76 bound against 94 uncorrelated. Reporting the uncorrelated count as the bound one overstates by whatever that gap happens to be.
 
@@ -147,7 +147,7 @@ Write the bound form whenever the two facts have to be true of one process, one 
 
 Presence and negation follow the same scope:
 
-```
+```lql
 sparklogs.data.processes[]!                        the array is present, empty array included
 NOT sparklogs.data.processes[](image_name="x")     no element matches, and absent arrays match too
 sparklogs.data.processes[]! AND NOT sparklogs.data.processes[](image_name="x")

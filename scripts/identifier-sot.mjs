@@ -2,20 +2,26 @@
 // See LICENSE.
 
 // Load identifier-sot.yaml and harvest LQL paths / reason values / app tokens from committed
-// src/feeds (same as GitHub CI). Optional SPARKLOGS_IDENTIFIER_SOT_INCLUDE_LIBRARY=1 merges
+// src/feeds and src/fields (same as GitHub CI). Optional SPARKLOGS_IDENTIFIER_SOT_INCLUDE_LIBRARY=1 merges
 // identifiers from a sibling sparklogs-source-library checkout for pre-sync authoring.
+// Also loads the committed list_fields snapshot (`live`), which vets LQL field names.
 
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import yaml from 'js-yaml';
 import {
   DEFAULT_SOURCE_LIBRARY_DIR,
+  FIELD_GENERATED_DIR,
+  FIELD_SOURCE_DIR,
   GENERATED_DIR,
   IDENTIFIER_SOT_INCLUDE_LIBRARY_ENV,
   LIBRARY_GENERATED_SUBPATH,
   MODULES,
   SOURCE_LIBRARY_DIR_ENV,
 } from './generated-references.config.mjs';
+import { parseLiveFields, pedagogicalMatch } from './lql-field-refs.mjs';
+
+export const LIVE_FIELDS_FILE = 'scripts/fixtures/lql-live-fields.txt';
 
 const APP_VOCAB_BEGIN = '<!-- BEGIN GENERATED APP_VOCABULARY -->';
 const APP_VOCAB_END = '<!-- END GENERATED APP_VOCABULARY -->';
@@ -88,7 +94,8 @@ function markdownSection(text, heading) {
   return next < 0 ? from : from.slice(0, next + 3);
 }
 
-export async function harvestPublicTree(publicRoot) {
+// fieldsRoot: the generated family and topic field reference (src/fields when committed).
+export async function harvestPublicTree(publicRoot, fieldsRoot) {
   const lql = new Set();
   const families = new Set();
   const reasons = new Set();
@@ -111,6 +118,10 @@ export async function harvestPublicTree(publicRoot) {
     if (await exists(enumsPath)) {
       addAll(reasons, parseAllBacktickIdentifiers(await fs.readFile(enumsPath, 'utf8')));
     }
+  }
+  if (!await exists(fieldsRoot)) throw new Error(`missing field reference tree at ${fieldsRoot}`);
+  for (const name of (await fs.readdir(fieldsRoot)).sort()) {
+    if (name.endsWith('.md')) addAll(lql, parseTableIdentifiers(await fs.readFile(path.join(fieldsRoot, name), 'utf8')));
   }
   return { lql, families, reasons };
 }
@@ -146,7 +157,7 @@ export async function harvestLibrary(libRoot) {
   if (!await exists(publicRoot)) {
     throw new Error(`source-library has no ${LIBRARY_GENERATED_SUBPATH} at ${publicRoot}`);
   }
-  const tree = await harvestPublicTree(publicRoot);
+  const tree = await harvestPublicTree(publicRoot, path.join(publicRoot, FIELD_SOURCE_DIR));
   const apps = await harvestAppsFromRegistry(libRoot);
   return { ...tree, apps };
 }
@@ -156,7 +167,7 @@ export async function harvestCommittedPlugin(root) {
   if (!await exists(publicRoot)) {
     throw new Error(`committed feed tree missing at ${publicRoot}`);
   }
-  const tree = await harvestPublicTree(publicRoot);
+  const tree = await harvestPublicTree(publicRoot, path.join(root, FIELD_GENERATED_DIR));
   const apps = await harvestAppsFromPluginGuide(root);
   return { ...tree, apps };
 }
@@ -165,8 +176,11 @@ export function mergeSot(fileDoc, harvested, modules) {
   const tools = new Set(asList(fileDoc.tools, 'tools'));
   const args = new Set(asList(fileDoc.args, 'args'));
   const cols = new Set(asList(fileDoc.cols, 'cols'));
-  const lql = new Set(asList(fileDoc.lql_resident, 'lql_resident'));
-  const families = new Set(asList(fileDoc.lql_families, 'lql_families'));
+  const resident = asList(fileDoc.lql_resident, 'lql_resident');
+  const familyList = asList(fileDoc.lql_families, 'lql_families');
+  const pedagogical = asList(fileDoc.lql_pedagogical, 'lql_pedagogical');
+  const lql = new Set(resident);
+  const families = new Set(familyList);
   const values = new Set();
   addAll(lql, harvested.lql);
   addAll(families, harvested.families);
@@ -181,11 +195,14 @@ export function mergeSot(fileDoc, harvested, modules) {
   for (const [name, list] of Object.entries(groups)) {
     addAll(values, asList(list, `values.${name}`));
   }
-  return { tools, args, cols, lql, families, values };
+  return {
+    tools, args, cols, lql, families, values, resident, familyList, pedagogical, packLql: harvested.lql,
+  };
 }
 
 export function lqlMember(sot, body) {
   if (sot.lql.has(body)) return true;
+  if (sot.pedagogical && pedagogicalMatch(sot.pedagogical, body)) return true;
   if (body.endsWith('.*')) return sot.families.has(body.slice(0, -2));
   return false;
 }
@@ -242,5 +259,7 @@ export async function loadIdentifierSot(root) {
     console.log(`identifier membership: using committed ${GENERATED_DIR}`);
     harvested = await harvestCommittedPlugin(root);
   }
-  return mergeSot(doc, harvested, MODULES);
+  const live = parseLiveFields(await fs.readFile(path.join(root, LIVE_FIELDS_FILE), 'utf8'));
+  if (live.size === 0) throw new Error(`${LIVE_FIELDS_FILE} is empty; the LQL field vet would be vacuous`);
+  return { ...mergeSot(doc, harvested, MODULES), live };
 }

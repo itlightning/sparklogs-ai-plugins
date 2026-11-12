@@ -12,7 +12,7 @@ The MCP server instructions define every term used here, in learning order. This
 
 Every log event carries two distinct identity fields:
 
-- **`agent_id` (LQL)** (sender): the UUID of the SparkLogs Agent or ingest key that shipped the event. Filter with `agent_id = "<uuid>"` in LQL when you mean "everything this sender shipped," regardless of how the origin host is labeled.
+- **`agent_id` (LQL)** (sender): the UUID of the SparkLogs Agent or ingest key that shipped the event. Filter with `agent_id = "<uuid>"` (LQL) in LQL when you mean "everything this sender shipped," regardless of how the origin host is labeled.
 - **`source` (LQL)** (origin): the hostname or device label the event is about. Under on-host agent collection, sender and origin usually match. Relay, syslog, and key-ingested data can diverge: one sender, many origins, or origin labels that do not match the sender name.
 
 **"Collector" means one thing only:** the log-shipping process on the device that the agent supervises. It is not a synonym for the sender and not a synonym for the agent.
@@ -207,9 +207,9 @@ Do not filter `list_sources` (tool) by "reporting now" when the engineer asked a
 
 ## Sender-first LQL scoping
 
-After scope resolution, prefer **`agent_id` (LQL)** filters when the question is about everything one sender shipped. Call `query_event_counts_by_severity` (tool) with an `lql` (arg) filter such as `agent_id = "<uuid from resolve_scope or list_sources>"` and a `group_by` (arg) such as `pattern` (LQL).
+After scope resolution, prefer **`agent_id` (LQL)** filters when the question is about everything one sender shipped. Call `query_event_counts_by_severity` (tool) with an `lql` (arg) filter such as `agent_id = "<uuid from resolve_scope or list_sources>"` (LQL) and a `group_by` (arg) such as `pattern` (LQL).
 
-Use **`source = "hostname"`** when the question is about the origin host label, or combine both when you need on-host events from one agent:
+Use **`source = "hostname"` (LQL)** when the question is about the origin host label, or combine both when you need on-host events from one agent:
 
 ```
 lql: 'agent_id = "<uuid>" AND source = "<hostname>"'

@@ -6,7 +6,7 @@ This file gives detailed guidance on the analytic step: converting the prior inv
 
 ## The core analytic approach
 
-1. **Re-read the prior summary's Findings.** Treat each Finding as a fact. Note temporal patterns (when did things start? did multiple events cluster in time?), source distribution (one source or fleet-wide?), anomaly signals used, and not-checked flags.
+1. **Re-read the prior summary's Findings.** Treat each Finding as a fact. Note temporal patterns (when did things start? did multiple events cluster in time?), source distribution (one source or fleet-wide?), and not-checked flags.
 
 2. **For each Finding, ask: "what could explain this?"** Generate 2-5 candidate causes per Finding without filtering yet. Be generous in this brainstorming step - the filtering happens in step 4.
 
@@ -52,15 +52,6 @@ When the prior investigation flagged off-endpoint causes in WHAT WAS NOT CHECKED
 
 - **Off-endpoint cause is plausible** -> include it as a hypothesis with `Off-endpoint check needed: yes` and explicit pointer to what to check.
 - **Off-endpoint cause is implausible given on-endpoint evidence** -> either omit or include at `low` (value) confidence with explicit reasoning.
-
-### Anomaly-signal patterns
-
-When the prior investigation cited anomaly signals (with detector + baseline information):
-
-- **`rule_state_expectation` (other) violation** -> hypothesis "the entity is in a state the rule says it shouldn't be." Strong signal even at low detector confidence.
-- **`value_distribution` (other) outlier** -> hypothesis "the entity's value is unusual relative to its history." Less strong; could be a legitimate workload spike.
-- **`expected_change_missing` (other)** -> hypothesis "something that should have happened didn't." e.g., "cert auto-renewal didn't fire at the expected time."
-- **Multiple anomalies on same snapshot with shared category** -> hypothesis "system-level event affecting multiple components simultaneously."
 
 ---
 

@@ -36,7 +36,7 @@ Several devices slow at one site: name up to 25 in `agent_ids` (arg) for the lig
 
 **Events, for what health named.** Crashes, hangs and errors on that device over the span's interval:
 
-```
+```lql
 source = "<host>" AND severity >= 17
 ```
 

@@ -18,7 +18,7 @@ The device-health reading describes the machine around the job; the job's outcom
 
 **Events, for what health named.** Vendor / Windows Backup errors in the failure window:
 
-```
+```lql
 source = "<host>" AND severity >= 17
 ```
 
@@ -28,7 +28,7 @@ Narrow Windows Backup with `provider_name: Microsoft-Windows-Backup*` on the cac
 
 Same pattern across the client:
 
-```
+```lql
 pattern_hash = "<h>"
 ```
 
