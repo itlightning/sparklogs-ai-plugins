@@ -37,9 +37,13 @@ Stored flat under the `win.eventlog.management.` prefix.
 | `win.eventlog.management.driver_install_stage` | string | Stage the print spooler had reached when a driver install failed, from `Label` on the PrintService driver events. |
 | `win.eventlog.management.driver_install_message` | string | Spooler call that failed during a driver install, from `Message` on the PrintService driver events. Tells a real driver add or import from a lookup in the driver store. |
 | `win.eventlog.management.bitlocker_drive_role` | string | Kind of drive a BitLocker compliance check was about, from `Message1` on DeviceManagement BitLocker events, such as the operating-system drive or a fixed data drive. |
-| `win.eventlog.management.bitlocker_fve_status` | string | BitLocker status flags the device management client reported with a compliance failure, from `HexInt1`, as the hex value Windows wrote. SparkLogs does not decode it. |
+| `win.eventlog.management.bitlocker_fve_status` | string | BitLocker volume status flags the device management client reported with a compliance failure, from `HexInt1`, as the hex value Windows wrote. SparkLogs does not decode it. |
+| `win.eventlog.management.bitlocker_compliance_status` | string | Compliance status word on DeviceManagement event 2900, from `HRESULT`, as the hex value Windows wrote. Each set bit is one compliance issue. A zero word has not been observed on this event. |
+| `win.eventlog.management.bitlocker_status_issues` | array | Compliance issues the 2900 status word names, one per set bit, in bit order: for example the OS drive not protected, a required TPM protector missing, the OS drive cipher or encryption scope differing from policy, a fixed drive not protected, a failed recovery key backup, or the TPM not ready. A set bit with no documented meaning is listed as unrecognized. |
 | `win.eventlog.management.bitlocker_method_found` | string | Encryption method the operating-system drive is using, from `HexInt1` on DeviceManagement event 2902, as the hex value Windows wrote. |
 | `win.eventlog.management.bitlocker_method_wanted` | string | Encryption method policy requires for the operating-system drive, from `HexInt2` on DeviceManagement event 2902, as the hex value Windows wrote. |
+| `win.eventlog.management.bitlocker_method_found_name` | string | Name of the encryption method the operating-system drive is using on event 2902: AES-CBC or XTS-AES, 128 or 256 bit. Absent for a value BitLocker does not list. |
+| `win.eventlog.management.bitlocker_method_wanted_name` | string | Name of the encryption method policy requires on event 2902: AES-CBC or XTS-AES, 128 or 256 bit. Absent for a value BitLocker does not list. |
 | `win.eventlog.management.mdm_csp_uri` | string | Configuration setting path (CSP URI) an MDM command was sent to, from `Message5` on the DeviceManagement-Enterprise-Diagnostics-Provider failure events. Says which setting did not apply. |
 | `win.eventlog.management.mdm_policy_area` | string | Policy area of the MDM setting that failed, from `Message1` on PolicyManager events 806 and 821. |
 | `win.eventlog.management.mdm_policy_name` | string | Name of the MDM policy setting that failed to apply, from `Message2` on PolicyManager events 806 and 821. |
@@ -65,6 +69,12 @@ Each key names one field; that field is where the value is queried.
 |---|---|
 | `component` | not queryable as a field |
 | `result_code` | not queryable as a field |
+| `drive` | not queryable as a field |
+| `issues` | not queryable as a field |
+| `status` | not queryable as a field |
+| `method_found` | not queryable as a field |
+| `method_wanted` | not queryable as a field |
+| `fve_status` | not queryable as a field |
 
 ## What sets each field
 
@@ -75,7 +85,13 @@ The last column is different in kind: it is the author's account of the row or e
 
 | Surface | Event ids | Fields set | Row fields |
 |---|---|---|---|
-| `bitlocker_policy_noncompliant` / `default` | 2900, 2902, 2903, 2904, 2905, 2906, 2910, 2914 | `win.eventlog.management.bitlocker_drive_role` `win.eventlog.management.bitlocker_fve_status` `win.eventlog.management.bitlocker_method_found` `win.eventlog.management.bitlocker_method_wanted` |  |
+| `bitlocker_os_drive_encrypted_beyond_policy_scope` / `default` | 2903 | `win.eventlog.management.bitlocker_fve_status` |  |
+| `bitlocker_policy_noncompliant` / `data_drive_unprotected` | 2900, 2902, 2904, 2905, 2906, 2910, 2914 | `win.eventlog.management.bitlocker_compliance_status` `win.eventlog.management.bitlocker_drive_role` `win.eventlog.management.bitlocker_status_issues` |  |
+| `bitlocker_policy_noncompliant` / `encryption_differs` | 2900, 2902, 2904, 2905, 2906, 2910, 2914 | `win.eventlog.management.bitlocker_compliance_status` `win.eventlog.management.bitlocker_drive_role` `win.eventlog.management.bitlocker_method_found` `win.eventlog.management.bitlocker_method_found_name` `win.eventlog.management.bitlocker_method_wanted` `win.eventlog.management.bitlocker_method_wanted_name` `win.eventlog.management.bitlocker_status_issues` |  |
+| `bitlocker_policy_noncompliant` / `os_drive_unprotected` | 2900, 2902, 2904, 2905, 2906, 2910, 2914 | `win.eventlog.management.bitlocker_compliance_status` `win.eventlog.management.bitlocker_drive_role` `win.eventlog.management.bitlocker_fve_status` `win.eventlog.management.bitlocker_status_issues` |  |
+| `bitlocker_policy_noncompliant` / `requirement_unmet` | 2900, 2902, 2904, 2905, 2906, 2910, 2914 | `win.eventlog.management.bitlocker_compliance_status` `win.eventlog.management.bitlocker_drive_role` `win.eventlog.management.bitlocker_status_issues` |  |
+| `bitlocker_policy_noncompliant` / `tpm_protector_missing` | 2900, 2902, 2904, 2905, 2906, 2910, 2914 | `win.eventlog.management.bitlocker_compliance_status` `win.eventlog.management.bitlocker_drive_role` `win.eventlog.management.bitlocker_fve_status` `win.eventlog.management.bitlocker_status_issues` |  |
+| `bitlocker_policy_noncompliant` / `used_space_only` | 2900, 2902, 2904, 2905, 2906, 2910, 2914 | `win.eventlog.management.bitlocker_fve_status` |  |
 | `bits_transfer_failed` / `default` | 61 | `win.eventlog.management.job_name` |  |
 | `dfsr_partner_communication_failed` / `default` | 5002, 5008, 5012, 5014 | **fields: none** |  |
 | `dfsr_replication_stopped` / `config_unreachable` | 1202 | **fields: none** |  |

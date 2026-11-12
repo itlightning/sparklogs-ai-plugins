@@ -15,6 +15,7 @@ Search for the heading "## `<code>`" or a word from the reason's label. Do not r
 | `device_security_assessment_passed` | device security assessment passed | event | Info to Notice | `hardware` |  |
 | `device_software_install_failed` | device software install failed | event | Info to Warning | `hardware` | benign possible |
 | `device_start_failed` | device start failed | event | Warning | `hardware` |  |
+| `fasr_pcr_validation_mismatch` | fasr pcr validation mismatch | event | Verbose to Notice | `os_stability` | benign possible |
 | `firmware_event_store_unavailable` | firmware event store unavailable | event | Notice to Warning | `hardware` |  |
 | `firmware_verification_scan_failed` | firmware verification scan failed | event | Info to Notice | `hardware` | benign possible |
 | `font_load_allowed` | font load allowed | event | Info | `os_stability` | benign |
@@ -31,7 +32,7 @@ Search for the heading "## `<code>`" or a word from the reason's label. Do not r
 | `ram_commit_exhausted` | ram commit exhausted | event | Info to Warning | `performance` |  |
 | `secure_boot_revocation_update_failed` | secure boot revocation update failed | event | Info | `os_stability` |  |
 | `thermal_cooling_engaged` | thermal cooling engaged | event | Info to Notice | `hardware` |  |
-| `tpm_initialization_failed` | tpm initialization failed | event | Warning | `os_stability` |  |
+| `tpm_initialization_failed` | tpm initialization failed | event | Display to Warning | `os_stability` |  |
 | `usb_controller_error` | usb controller error | event | Notice | `hardware` |  |
 | `win_trace_session_failed` | win trace session failed | event | Info to Warning | `os_stability` | benign possible |
 
@@ -213,6 +214,32 @@ Windows enumerated a device and its driver refused to start it.
 **Example:** After a Windows feature update, a laptop's fingerprint reader fails to start with problem code 10.
 
 **Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/feeds/eventlog-platform#device_start_failed, https://sparklogs.com/reference/reasons/device_start_failed.json
+
+## `fasr_pcr_validation_mismatch`: fasr pcr validation mismatch
+
+Windows checked this boot against the FASR firmware manifest. The line says whether a PCR differed.
+
+**Severity:** Notice or Verbose
+
+**Why it matters:** None when no PCR differed. A mismatch means this boot did not take the certified boot path, so the device does not count as Secured-core for that boot.
+
+**In practice:** Windows writes event 80 in Microsoft-Windows-Kernel-Boot/Operational at every boot. Its text lists FASR certificate, signature and PCR validation fields, which reads like a failure even when nothing is wrong. A PCR mismatch index of -1 means no PCR differed, which is what devices without FASR firmware report. An index of 0 or more names the PCR that differed from the firmware's FASR manifest. Firmware updates and visits to firmware setup cause it.
+
+**When to ignore:** Always when the mismatch index is -1.
+
+**What to check:**
+
+- For a mismatch, check whether the device had a firmware update or a firmware setup visit before that boot.
+- If mismatches repeat with no firmware change, ask the device maker about the FASR firmware.
+
+**Related:**
+
+- `measured_boot_failed`: the boot measurement library failing
+- `tpm_initialization_failed`: the TPM failing to initialize at boot
+
+**Example:** At boot, a laptop without FASR firmware reports PCR mismatch index -1.
+
+**Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/feeds/eventlog-platform#fasr_pcr_validation_mismatch, https://sparklogs.com/reference/reasons/fasr_pcr_validation_mismatch.json
 
 ## `firmware_event_store_unavailable`: firmware event store unavailable
 
@@ -605,11 +632,13 @@ The platform reached a temperature trip point and engaged cooling.
 
 Windows reported a TPM initialization failure during boot.
 
-**Severity:** Warning
+**Severity:** Warning or Display
 
-**Why it matters:** Features that need the TPM during boot, such as BitLocker unlocking with the TPM or device health attestation, can fail or fall back for this boot.
+**Why it matters:** Features that need the TPM during boot, such as BitLocker opening the drive with the TPM or device health attestation, can fail or fall back for this boot.
 
-**In practice:** Windows writes event 235 in Microsoft-Windows-Kernel-Boot/Operational when the boot environment cannot initialize the TPM, with a position code and a status code. The event does not show that the TPM is absent, that BitLocker is affected or that the boot chain was attacked.
+**In practice:** Windows writes event 235 in Microsoft-Windows-Kernel-Boot/Operational when the boot environment cannot initialize the TPM, with a position code and a status code. The event does not show that the TPM is absent, that BitLocker is affected or that the boot chain was attacked. StatusCode 0xC0000002 (STATUS_NOT_IMPLEMENTED) means there is no TPM the boot environment can use. A virtual machine without a virtual TPM logs it at every boot.
+
+**When to ignore:** StatusCode 0xC0000002 on a virtual machine or device that is not meant to use a TPM.
 
 **What to check:**
 

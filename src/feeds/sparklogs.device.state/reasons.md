@@ -2203,14 +2203,14 @@ The SparkLogs agent stopped.
 
 **Severity:** Notice when the agent stopped on an error, Display for an update, a shutdown, or someone stopping the service.
 
-**Why it matters:** The machine is not collecting until the agent starts again.
+**Why it matters:** The agent takes no device or performance readings until it starts again. After a crash, logs keep arriving. After an update, a shutdown or someone stopping the service, logs written in the gap arrive once collection starts again. They are lost if the agent is uninstalled or never started again. Event log records can also be lost if Windows overwrites them before the agent starts again; the agent then reports them as skipped events.
 
-**In practice:** The event names the cause: an agent update, Windows shutting down, someone stopping the service (an administrator, an RMM tool or an uninstall), or an error inside the agent. A machine whose last event is this one is not collecting, which explains missing logs and readings until the next start. When the agent dies without stopping, the Service Control Manager records it in the System log, and SparkLogs reports that record under this reason at Error.
+**In practice:** The event names the cause: an agent update, Windows shutting down, someone stopping the service (an administrator, an RMM tool or an uninstall), or an error inside the agent. When the agent dies without stopping, the Service Control Manager records it in the System log, and SparkLogs reports that record under this reason at Error.
 
 **What to check:**
 
 - The cause in the event, and for a stop by someone, which administrator or RMM policy stopped it.
-- The time to the next SparkLogs agent started: how long the machine was not collecting.
+- The time to the next SparkLogs agent started: how long the machine had no readings.
 - Repeated error stops: report them to SparkLogs support with the device name.
 
 **Related:**

@@ -8,6 +8,7 @@ Search for the heading "## `<code>`" or a word from the reason's label. Do not r
 
 | reason | label | kind | severity | service | benign |
 |---|---|---|---|---|---|
+| `bitlocker_os_drive_encrypted_beyond_policy_scope` | bitlocker os drive encrypted beyond policy scope | event | Verbose | `device_management` | benign |
 | `bitlocker_policy_noncompliant` | bitlocker policy noncompliant | event | Info to Warning | `device_management` |  |
 | `bits_transfer_failed` | bits transfer failed | event | Info | `patching` |  |
 | `dfsr_partner_communication_failed` | dfsr partner communication failed | event | Warning | `directory_services` |  |
@@ -29,32 +30,57 @@ Search for the heading "## `<code>`" or a word from the reason's label. Do not r
 | `scheduled_task_start_failed` | scheduled task start failed | event | Debug to Warning | `scheduled_tasks` |  |
 | `win_locale_registry_read_failed` | win locale registry read failed | event | Warning | `user_profiles` |  |
 
-## `bitlocker_policy_noncompliant`: bitlocker policy noncompliant
+## `bitlocker_os_drive_encrypted_beyond_policy_scope`: bitlocker os drive encrypted beyond policy scope
 
-A device does not match the BitLocker encryption policy set for it: a drive is unencrypted, or encrypted with a method or scope the policy does not allow.
+The operating-system drive is encrypted in full where the BitLocker policy asks for used space only.
 
-**Severity:** Warning where the operating-system volume is the one out of compliance. Notice for a data volume, where the event cannot say which drive it is about, or where the OS drive uses a different cipher strength than policy names, or encrypts only its used space where policy wants the full drive. Info where the OS drive is encrypted in full and policy asks for used space only.
+**Severity:** Verbose
 
-**Why it matters:** An unencrypted operating-system volume means every file on the machine is readable to anyone who takes it.
+**Why it matters:** None for protection: every sector the policy wants encrypted is encrypted.
 
-**In practice:** The Windows MDM client checks the BitLocker policy from Intune or another MDM service at each sync and writes events 2900 to 2914 in Microsoft-Windows-DeviceManagement-Enterprise-Diagnostics-Provider/Admin when the device does not match. Event 2900 carries the drive role (OSV for the operating-system volume) and the drive's status bits; 2902 carries the encryption method found and the one the policy wants. Events 2910 and 2914 carry no details and cannot say which drive they are about. An OS drive encrypted in full where policy asks for used space only (event 2903) is protected beyond what the policy needs, and is recorded at Info. An OS drive with only its used space encrypted where policy wants the full drive (event 2904) has its data encrypted, but space freed before encryption may still hold readable remnants; it is recorded at Notice. The client restates the same mismatch at every sync, so one device produces many records for one finding.
+**In practice:** The Windows MDM client logs event 2903 in Microsoft-Windows-DeviceManagement-Enterprise-Diagnostics-Provider/Admin with the text "Wrong encryption type for OS Drives used. MDM requires DataOnly." The drive was encrypted in full, often before the policy arrived, and the policy names used-space encryption, which is a smaller target. The client restates it at every sync, and the device's 2900 summary carries the issue os_scope_differs beside it.
 
-**When to ignore:** Info rows (full-disk encryption where policy asks for used space only) need no action.
+**When to ignore:** Always safe to pass over: the drive is protected beyond what the policy asks.
 
 **What to check:**
 
-- Read the drive role first, then the status bits; on 2902, compare the method found with the method wanted.
-- Run `manage-bde -status` on the device to see each volume's encryption state and method.
-- For an unencrypted OS drive, check TPM readiness and the BitLocker event log for why encryption did not start.
-- For 2910 and 2914, use the device's own encryption state to find the drive.
-- For 2904, decide whether full encryption is really required; if it is, decrypt and re-encrypt the OS drive with full encryption, since BitLocker cannot change an encrypted drive from used space only to full.
+- Nothing to fix on the device. To stop the record, align the policy's encryption type with how the fleet is actually encrypted.
 
 **Related:**
 
+- `bitlocker_policy_noncompliant`: a drive that is not protected, or encrypted with a cipher or scope that leaves less protected than policy asks
+
+**Example:** A laptop encrypted in full at imaging logs event 2903 after Intune applies a used-space-only policy.
+
+**Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/feeds/eventlog-management#bitlocker_os_drive_encrypted_beyond_policy_scope, https://sparklogs.com/reference/reasons/bitlocker_os_drive_encrypted_beyond_policy_scope.json
+
+## `bitlocker_policy_noncompliant`: bitlocker policy noncompliant
+
+A device does not match the BitLocker encryption policy set for it: a drive is not protected, lacks a protector the policy requires, or is encrypted with a method or scope the policy does not allow.
+
+**Severity:** Warning when the operating-system drive is not protected. Notice for a missing TPM protector, an unprotected data drive, used-space-only encryption where policy wants the full drive, and other unmet requirements. Display for a summary whose only issues are cipher strength or encryption scope, and Info for the cipher-strength event itself.
+
+**Why it matters:** An unprotected operating-system drive means every file on the machine is readable to anyone who takes it.
+
+**In practice:** The Windows MDM client checks the BitLocker policy from Intune or another MDM service at each sync and writes events 2900 to 2914 in Microsoft-Windows-DeviceManagement-Enterprise-Diagnostics-Provider/Admin when the device does not match. Event 2900 is the summary: it names the drive (OSV for the operating-system drive, FDV for a fixed data drive) and a status word with one bit per issue, which SparkLogs lists as issues on the line, for example os_drive_unprotected or os_cipher_differs. Event 2914 says the operating-system drive is not protected. It covers a drive that was never encrypted, one whose encryption did not finish, and one whose protection is suspended. Event 2902 names the encryption method found and the one the policy wants, such as xts_aes_128 against xts_aes_256. Events 2905 and 2906 say the drive is not using the TPM protector type the policy requires, and 2910 that a fixed data drive is not protected. The client restates the same mismatch at every sync, so one device produces many records for one finding.
+
+**When to ignore:** Display and Info rows (a cipher strength or encryption scope other than the policy names) need no action unless the MSP wants the stronger cipher. The drive is encrypted.
+
+**What to check:**
+
+- Read the issues list first: os_drive_unprotected is the one to act on today.
+- Run `manage-bde -status` on the device to see each volume's protection status, encryption method and whether protection is suspended.
+- For an unprotected OS drive, resume protection if it is suspended (`manage-bde -protectors -enable C:`), or check TPM readiness and the BitLocker-API log for why encryption did not start.
+- For a missing TPM protector, compare `manage-bde -protectors -get C:` with the protector the policy requires.
+- For 2904, decide whether full encryption is really required. If it is, decrypt and re-encrypt the OS drive with full encryption, since BitLocker cannot change an encrypted drive from used space only to full.
+
+**Related:**
+
+- `bitlocker_os_drive_encrypted_beyond_policy_scope`: an OS drive encrypted in full where policy asks for used space only, which is not a compliance failure
 - `bitlocker_recovery_key_backup_failed`: encryption that ran but whose recovery key did not reach the directory
 - `device_encryption_enable_failed`: the automatic-encryption failure that can leave a device in this noncompliant state
 
-**Example:** A laptop's operating-system drive is still unencrypted, and the MDM client logs event 2900 for drive role OSV at its next sync.
+**Example:** A laptop's operating-system drive is still unencrypted, and the MDM client logs event 2900 with the issue os_drive_unprotected at its next sync.
 
 **Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/feeds/eventlog-management#bitlocker_policy_noncompliant, https://sparklogs.com/reference/reasons/bitlocker_policy_noncompliant.json
 

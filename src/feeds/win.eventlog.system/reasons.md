@@ -10,9 +10,13 @@ Search for the heading "## `<code>`" or a word from the reason's label. Do not r
 |---|---|---|---|---|---|
 | `av_unsigned_code_blocked` | av unsigned code blocked | event | Serious | `endpoint_protection` |  |
 | `bitlocker_key_retrieval_code_reported` | bitlocker key retrieval code reported | event | Verbose | `encryption` | benign |
+| `bitlocker_recovery_password_used` | bitlocker recovery password used | event | Warning | `encryption` |  |
+| `bitlocker_tpm_binding_mismatch` | bitlocker tpm binding mismatch | event | Warning | `encryption` |  |
+| `bitlocker_tpm_unlock_failed` | bitlocker tpm unlock failed | event | Warning | `encryption` |  |
 | `dcom_activation_timeout` | dcom activation timeout | event | Minor | `app_stability` |  |
 | `dcom_register_timeout` | dcom register timeout | event | Notice | `app_stability` |  |
 | `dcom_start_failed` | dcom start failed | event | Minor | `app_stability` |  |
+| `device_health_cert_service_unreachable` | device health cert service unreachable | event | Verbose to Notice | `networking` | benign possible |
 | `disk_bad_block` | disk bad block | event | Warning to Serious | `storage` |  |
 | `disk_controller_error` | disk controller error | event | Notice to Error | `storage` |  |
 | `disk_failure_predicted` | disk failure predicted | event | Error to Serious | `storage` |  |
@@ -72,6 +76,8 @@ Search for the heading "## `<code>`" or a word from the reason's label. Do not r
 | `rds_license_tracking_failed` | rds license tracking failed | event | Warning | `licensing` |  |
 | `rds_licensing_service_failed` | rds licensing service failed | event | Error | `licensing` |  |
 | `secure_boot_cert_update_pending` | secure boot cert update pending | event | Warning | `hardware` |  |
+| `secure_boot_certs_current` | secure boot certs current | event | Info | `hardware` | benign |
+| `secure_boot_update_failed` | secure boot update failed | event | Notice | `hardware` |  |
 | `security_agent_service_start_failed` | security agent service start failed | event | Warning | `endpoint_protection` |  |
 | `security_agent_service_terminated` | security agent service terminated | event | Minor | `endpoint_protection` |  |
 | `service_crashed` | service crashed | event | Error | `app_stability` |  |
@@ -94,7 +100,15 @@ Search for the heading "## `<code>`" or a word from the reason's label. Do not r
 | `tls_cipher_mismatch` | tls cipher mismatch | event | Warning | `certificates` |  |
 | `tls_client_credential_failed` | tls client credential failed | event | Warning to Error | `certificates` |  |
 | `tls_server_credential_failed` | tls server credential failed | event | Error | `certificates` |  |
+| `tpm_attestation_check_failed` | tpm attestation check failed | event | Notice | `hardware` |  |
 | `tpm_attestation_failed` | tpm attestation failed | event | Error | `hardware` |  |
+| `tpm_authorization_refused` | tpm authorization refused | event | Notice to Warning | `hardware` |  |
+| `tpm_boot_pcr_values_recorded` | tpm boot pcr values recorded | event | Info | `encryption` |  |
+| `tpm_capability_probe_declined` | tpm capability probe declined | event | Debug | `hardware` | benign |
+| `tpm_command_failed` | tpm command failed | event | Notice to Warning | `hardware` |  |
+| `tpm_command_retry_requested` | tpm command retry requested | event | Verbose | `hardware` | benign |
+| `tpm_counter_reset_on_resume` | tpm counter reset on resume | event | Verbose | `hardware` | benign |
+| `tpm_hardware_failed` | tpm hardware failed | event | Error | `hardware` |  |
 | `unexpected_shutdown` | unexpected shutdown | event | Warning to Serious | `os_stability` |  |
 | `vpn_connected` | vpn connected | event | Notice | `vpn` |  |
 | `vss_shadow_aborted` | vss shadow aborted | event | Warning to Error | `backup` |  |
@@ -155,6 +169,92 @@ BitLocker reported an error code while retrieving the volume master key during r
 **Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/feeds/eventlog-system#bitlocker_key_retrieval_code_reported, https://sparklogs.com/reference/reasons/bitlocker_key_retrieval_code_reported.json
 
 The code this event carries has no public decode, so it is shown as written.
+
+## `bitlocker_recovery_password_used`: bitlocker recovery password used
+
+Someone typed the BitLocker recovery password at the recovery screen to start Windows.
+
+**Severity:** Warning
+
+**Why it matters:** The user was stopped at the BitLocker recovery screen until the recovery password was found and typed. Whoever typed it now knows the password for that drive.
+
+**In practice:** BitLocker-Driver writes event 24652 in the System log when Windows starts after someone typed the recovery password for the OS drive. The time of the event is the recovery boot. The cause is usually on the same boot as bitlocker_tpm_unlock_failed, and the PCR that changed as bitlocker_tpm_binding_mismatch.
+
+**When to ignore:** When an administrator forced recovery on purpose, such as before handing the device to a new user.
+
+**What to check:**
+
+- Find the cause on the same boot: bitlocker_tpm_unlock_failed and bitlocker_tpm_binding_mismatch.
+- Rotate the recovery password if users should not keep it (`manage-bde -protectors -add C: -RecoveryPassword`, then remove the old one and back up the new one).
+- If the cause was a planned firmware or boot change, suspend BitLocker before the next one.
+
+**Related:**
+
+- `bitlocker_tpm_binding_mismatch`: which PCR no longer matched the sealed values
+- `bitlocker_tpm_unlock_failed`: the TPM refusing the key at boot, which led to the recovery screen
+- `tpm_boot_pcr_values_recorded`: the boot measurements after the recovery boot
+
+**Example:** A user typed the recovery password for drive C: after a firmware update, and Windows started.
+
+**Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/feeds/eventlog-system#bitlocker_recovery_password_used, https://sparklogs.com/reference/reasons/bitlocker_recovery_password_used.json
+
+## `bitlocker_tpm_binding_mismatch`: bitlocker tpm binding mismatch
+
+At boot, the measurements a BitLocker TPM protector was sealed to did not match the TPM, so the TPM would not release the drive key.
+
+**Severity:** Warning
+
+**Why it matters:** The device most likely stopped at the BitLocker recovery screen for this boot. The PCR number shows which part of the boot changed.
+
+**In practice:** BitLocker-Driver writes event 24706 in the System log on the next boot that reaches Windows. The mismatched PCR names what changed: 7 is the Secure Boot state and certificates, 4 the boot manager, 0 and 2 the firmware code, 11 BitLocker access control. PCR 7 changes after a Secure Boot certificate or revocation update or a firmware Secure Boot setting change. PCR 0 and 2 change after a firmware update.
+
+**When to ignore:** When the change was planned and the next boot started with the TPM alone again.
+
+**What to check:**
+
+- Read the mismatched PCR and look for the matching change: a firmware update (0, 2), a boot manager change (4), a Secure Boot update or setting (7).
+- Compare event 24709 for this boot and the previous one.
+- Suspend BitLocker before the next planned firmware or Secure Boot change.
+
+**Related:**
+
+- `bitlocker_recovery_password_used`: the recovery password that started Windows
+- `bitlocker_tpm_unlock_failed`: the TPM refusing the key on the same boot
+- `tpm_boot_pcr_values_recorded`: the PCR values to compare across boots
+
+**Example:** After a Secure Boot certificate update, the protector bound to PCRs 7 and 11 no longer matched in PCR 7.
+
+**Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/feeds/eventlog-system#bitlocker_tpm_binding_mismatch, https://sparklogs.com/reference/reasons/bitlocker_tpm_binding_mismatch.json
+
+## `bitlocker_tpm_unlock_failed`: bitlocker tpm unlock failed
+
+At boot, the TPM would not release the BitLocker key for the OS drive, so the drive had to be unlocked another way: often the recovery password, sometimes a retried PIN or another protector.
+
+**Severity:** Warning
+
+**Why it matters:** When no other protector unlocked the drive, the user saw the BitLocker recovery screen and needed the recovery password to start Windows. A refused TPM and PIN unlock (24638, 24643) can also be a mistyped PIN the user then retried. When a boot measurement changed, it happens again at every restart until the cause is fixed or BitLocker reseals the key.
+
+**In practice:** The boot manager writes these events into the System log when Windows next starts, because nothing can log while the recovery screen is up. Event 24636 says the TPM refused, 24635 that the PCR values did not match, 24657 that Secure Boot was turned off, 24658 that the Secure Boot configuration changed, and 24721 that the TPM protector could not be used. Events 24638 and 24643 are the same refusal for a TPM and PIN protector, which a wrong PIN also causes. The usual causes are a firmware update, a firmware setting change, a Secure Boot certificate update, or a TPM clear, applied without suspending BitLocker first.
+
+**When to ignore:** When the device was deliberately put into recovery, for example before handing it to a new user.
+
+**What to check:**
+
+- Look for bitlocker_recovery_password_used and bitlocker_tpm_binding_mismatch on the same device around the same time.
+- Compare the PCR values in event 24709 for this boot and the boot before it to see which measurement changed.
+- Check for a recent firmware update, firmware setting change or Secure Boot update, and suspend BitLocker (`Suspend-BitLocker -RebootCount 2`) before the next one.
+- Run `manage-bde -protectors -get C:` and confirm the TPM protector is present.
+
+**Related:**
+
+- `bitlocker_recovery_password_used`: the recovery password that started Windows after this failure
+- `bitlocker_tpm_binding_mismatch`: which PCR no longer matched the sealed values
+- `secure_boot_cert_update_pending`: a Secure Boot certificate update that changes PCR 7 when it is applied
+- `tpm_boot_pcr_values_recorded`: the boot measurements to compare with the previous boot
+
+**Example:** After a firmware update, the boot manager could not get the key for drive C: from the TPM because the Secure Boot configuration had changed.
+
+**Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/feeds/eventlog-system#bitlocker_tpm_unlock_failed, https://sparklogs.com/reference/reasons/bitlocker_tpm_unlock_failed.json
 
 ## `dcom_activation_timeout`: dcom activation timeout
 
@@ -234,6 +334,31 @@ DCOM got an error while starting a service or server for a COM request.
 **Example:** DCOM gets error 1053 when it tries to start a service to serve a COM request.
 
 **Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/feeds/eventlog-system#dcom_start_failed, https://sparklogs.com/reference/reasons/dcom_start_failed.json
+
+## `device_health_cert_service_unreachable`: device health cert service unreachable
+
+Windows could not reach Microsoft's health attestation service to get a device health certificate.
+
+**Severity:** Notice or Verbose
+
+**Why it matters:** Usually none: Windows asks again later. A device that never gets the certificate fails Intune compliance checks that require device health attestation.
+
+**In practice:** TPM-WMI writes event 1538 in the System log, with the service name and the error code, when the certificate request cannot connect. 0x80072EE7 means the service name did not resolve, which happens when the request runs before the network or VPN is up. Other codes, such as 0x80072EE2 (timed out) or 0x80072EFD (could not connect), point at a firewall, proxy or filtering rule.
+
+**When to ignore:** For 0x80072EE7 on a device whose network works once it has started.
+
+**What to check:**
+
+- For codes other than 0x80072EE7, check that the device can reach the health attestation service through the proxy and firewall.
+- If Intune reports the device as not compliant for health attestation, compare with this record.
+
+**Related:**
+
+- `tpm_attestation_check_failed`: a TPM check failing before attestation
+
+**Example:** At startup, before Wi-Fi connects, the request for has.spserv.microsoft.com fails with 0x80072EE7.
+
+**Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/feeds/eventlog-system#device_health_cert_service_unreachable, https://sparklogs.com/reference/reasons/device_health_cert_service_unreachable.json
 
 ## `disk_bad_block`: disk bad block
 
@@ -1804,6 +1929,60 @@ A Secure Boot certificate update has not been applied on this device.
 
 **Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/feeds/eventlog-system#secure_boot_cert_update_pending, https://sparklogs.com/reference/reasons/secure_boot_cert_update_pending.json
 
+## `secure_boot_certs_current`: secure boot certs current
+
+The device has the 2023 Secure Boot certificates and the boot manager signed with them.
+
+**Severity:** Info
+
+**Why it matters:** None. The device can keep taking boot security updates after the 2011 certificates expired.
+
+**In practice:** TPM-WMI writes event 1808 in the System log when every needed 2023 certificate is in the firmware and the boot manager is signed by the Windows UEFI CA 2023. BucketConfidenceLevel is Microsoft's rating of the update for this hardware model during the rollout. Once 1808 is logged it needs no action, even when it reads "No Data Observed - Action Required".
+
+**When to ignore:** Always. This is the finished state.
+
+**What to check:**
+
+- No action. Use it to confirm which devices are current on the 2023 Secure Boot certificates.
+
+**Related:**
+
+- `secure_boot_cert_update_pending`: certificates available but not yet applied
+- `secure_boot_update_failed`: an update that did not apply
+
+**Example:** A laptop reports the KEK 2023, DB certificates and the 2023 boot manager in place.
+
+**Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/feeds/eventlog-system#secure_boot_certs_current, https://sparklogs.com/reference/reasons/secure_boot_certs_current.json
+
+## `secure_boot_update_failed`: secure boot update failed
+
+A Secure Boot certificate or revocation update from Windows did not apply to the firmware.
+
+**Severity:** Notice
+
+**Why it matters:** The device keeps its older Secure Boot certificates. The 2011 Microsoft certificates expired in 2026, so a device that never takes the 2023 certificates stops receiving boot security updates.
+
+**In practice:** TPM-WMI writes these events in the System log when the Secure Boot servicing task cannot apply an update. Event 1795 means the firmware returned an error and 1796 an unexpected error. Windows tries again at the next restart. Event 1797 means the revocation of the 2011 Windows certificate waits until the Windows UEFI CA 2023 certificate is in the firmware DB. Event 1802 means Microsoft blocked the update for a known firmware issue (SkipReason names it), and 1803 that no Key Exchange Key signed by the device maker's platform key exists for this device.
+
+**When to ignore:** 1797 on a device that has not yet taken the 2023 certificates: it clears once they apply.
+
+**What to check:**
+
+- For 1795, 1802 and 1803, check the device maker for a firmware update and apply it.
+- For 1803 on a virtual machine, check the hypervisor vendor's guidance for updating the Secure Boot keys.
+- For 1796, read the error code. Windows retries the update at the next restart.
+- Suspend BitLocker before a firmware update so the Secure Boot change does not trigger recovery.
+
+**Related:**
+
+- `secure_boot_cert_update_pending`: certificates waiting to be applied to the firmware
+- `secure_boot_certs_current`: the device has the 2023 certificates and boot manager
+- `secure_boot_revocation_update_failed`: the SBAT update failure as the boot environment reports it
+
+**Example:** On a laptop with a known firmware issue, the KEK 2023 update is blocked with SkipReason KI_7.
+
+**Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/feeds/eventlog-system#secure_boot_update_failed, https://sparklogs.com/reference/reasons/secure_boot_update_failed.json
+
 ## `security_agent_service_start_failed`: security agent service start failed
 
 A sub-service of an endpoint protection agent failed to start.
@@ -2136,7 +2315,7 @@ The SparkLogs agent service started.
 
 **Severity:** Display
 
-**Why it matters:** The record marks when collection resumed; the time since the agent last stopped is a gap with no events or readings from this machine.
+**Why it matters:** The record marks when the agent resumed; the time since it last stopped has no device or performance readings from this machine. Logs written in that gap arrive after the start, unless Windows overwrote them first, which the agent reports as skipped events.
 
 **In practice:** Service Control Manager logs event 7036 in the System log when the SparkLogs agent service enters the running state, at every boot, after every agent update and after a manual restart. This row is Windows' record of the start, with `reported_by` set to `os`; the agent also reports its own start, and the two describe one start. The Windows record matters most after a stop the agent could not report, such as a crash or a power loss. Only the service this agent runs as counts here; other services entering the running state are ordinary 7036 records.
 
@@ -2144,7 +2323,7 @@ The SparkLogs agent service started.
 
 **What to check:**
 
-- Read the span since the previous sparklogs_agent_stopped as time the agent was not collecting.
+- Read the span since the previous sparklogs_agent_stopped as time without agent readings; logs from that span arrive after the start unless Windows overwrote them first (the agent reports those as skipped events).
 - A start with no stop before it points at a crash, a killed process or a power loss: look for unexpected_shutdown or a terminated sparklogs_agent_stopped row before it.
 
 **Related:**
@@ -2163,16 +2342,16 @@ The SparkLogs agent stopped.
 
 **Severity:** Error or Display
 
-**Why it matters:** The machine is not collecting until the agent starts again.
+**Why it matters:** The agent takes no device or performance readings until it starts again. After a crash, logs keep arriving. After an update, a shutdown or someone stopping the service, logs written in the gap arrive once collection starts again. They are lost if the agent is uninstalled or never started again. Event log records can also be lost if Windows overwrites them before the agent starts again; the agent then reports them as skipped events.
 
-**In practice:** Service Control Manager writes event 7036 in the System log when the agent service stops, and 7031 or 7034 when it terminates unexpectedly; these records name no cause. A machine whose last event is this one is not collecting, which explains missing logs and readings until the next start. When the agent dies without stopping, the Service Control Manager records it in the System log, and SparkLogs reports that record under this reason at Error.
+**In practice:** Service Control Manager writes event 7036 in the System log when the agent service stops, and 7031 or 7034 when it terminates unexpectedly; these records name no cause. A machine whose last event is this one has no device or performance readings from the agent until the next start. When the agent dies without stopping, the Service Control Manager records it in the System log, and SparkLogs reports that record under this reason at Error.
 
 **When to ignore:** A stop beside an agent update or a shutdown, followed by a start.
 
 **What to check:**
 
 - The cause in the event, and for a stop by someone, which administrator or RMM policy stopped it.
-- The time to the next SparkLogs agent started: how long the machine was not collecting.
+- The time to the next SparkLogs agent started: how long the machine had no readings.
 - Repeated error stops: report them to SparkLogs support with the device name.
 
 **Related:**
@@ -2394,6 +2573,33 @@ The private key behind this host's TLS server certificate could not be accessed.
 
 **Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/feeds/eventlog-system#tls_server_credential_failed, https://sparklogs.com/reference/reasons/tls_server_credential_failed.json
 
+## `tpm_attestation_check_failed`: tpm attestation check failed
+
+A TPM health check Windows runs before device attestation failed.
+
+**Severity:** Notice
+
+**Why it matters:** Device health attestation, and the Intune compliance or conditional access that rely on it, can fail on this device.
+
+**In practice:** TPM-WMI writes event 1041 in the System log with the results of its pre-attestation checks. A failed Required check, most often EkCertIsAvailable (the TPM has no endorsement key certificate), means the device cannot pass attestation. It is common on virtual machines and some older TPMs. A failed Expected check, usually PcrsMatchTcgLog, means the TPM values do not match the boot log, so attestation may fail for this boot. The other checks in the event, such as Secured-core and VSM, are often false on healthy devices and are not counted here.
+
+**When to ignore:** On a virtual machine or device that is not enrolled in a service that uses device health attestation.
+
+**What to check:**
+
+- For EkCertIsAvailable, check that the TPM firmware is current. On a virtual machine, check whether the host provides an endorsement key certificate.
+- For PcrsMatchTcgLog, restart the device and check whether the next 1041 passes.
+- Run `Get-Tpm` to confirm the TPM is ready.
+
+**Related:**
+
+- `tpm_attestation_failed`: the error Windows logs beside a failed Required check
+- `tpm_hardware_failed`: a TPM hardware failure, which also fails attestation
+
+**Example:** A virtual machine's TPM has no endorsement key certificate, so its health status is Cannot be attested.
+
+**Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/feeds/eventlog-system#tpm_attestation_check_failed, https://sparklogs.com/reference/reasons/tpm_attestation_check_failed.json
+
 ## `tpm_attestation_failed`: tpm attestation failed
 
 The TPM could not attest to a critical component of this machine.
@@ -2417,6 +2623,194 @@ The TPM could not attest to a critical component of this machine.
 **Example:** After a BIOS update, a laptop reports that TPM attestation of a critical component failed.
 
 **Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/feeds/eventlog-system#tpm_attestation_failed, https://sparklogs.com/reference/reasons/tpm_attestation_failed.json
+
+## `tpm_authorization_refused`: tpm authorization refused
+
+The TPM refused the authorization, policy or PCR check a command presented, or is in lockout.
+
+**Severity:** Notice for a refused authorization or policy on one command. Warning when the TPM is in lockout and refuses every authorization.
+
+**Why it matters:** The refused operation did not happen: a key did not unseal, or a PIN check failed. In lockout, Windows Hello PIN sign-in and TPM-protected unlocks fail until the lockout clears.
+
+**In practice:** The TPM logs event 17 in the System log for every command it refuses. TPM2_RC_AUTH_FAIL and TPM2_RC_BAD_AUTH mean the authorization value was wrong, often a mistyped PIN, and each failure counts toward the TPM's dictionary-attack lockout. TPM2_RC_POLICY_FAIL and TPM2_RC_PCR_CHANGED mean a policy did not match, often because the boot measurements changed since the key was sealed. TPM2_RC_LOCKOUT means too many failures have locked the TPM. The session or parameter position says which authorization the TPM refused. The common row, TPM2_CC_Unseal refused with TPM2_RC_AUTH_FAIL at session 1, is a wrong value presented to unseal a key.
+
+**When to ignore:** An occasional Notice row on a device with no sign-in or BitLocker complaint.
+
+**What to check:**
+
+- Check whether the user reports a Windows Hello PIN or BitLocker unlock problem at the same time.
+- For TPM2_RC_LOCKOUT, run `Get-Tpm` and check LockedOut. Wait for the lockout to clear or reset it with `Unblock-Tpm` or the TPM management console (tpm.msc).
+- For TPM2_RC_AUTH_FAIL or TPM2_RC_BAD_AUTH, check whether the user mistyped a PIN, and run `Get-Tpm` to compare LockoutCount with LockoutMax.
+- For TPM2_RC_POLICY_FAIL or TPM2_RC_PCR_CHANGED, compare the device's boot measurements before and after (BitLocker-Driver event 24709).
+
+**Related:**
+
+- `tpm_capability_probe_declined`: routine refusals of an unsupported value or a missing handle, which need no action
+- `tpm_command_failed`: a TPM command that failed in the driver, in TPM failure mode, or with a response that is not a known routine refusal
+
+**Example:** Windows asks the TPM to unseal a key, and the TPM answers TPM2_RC_AUTH_FAIL for session 1.
+
+**Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/feeds/eventlog-system#tpm_authorization_refused, https://sparklogs.com/reference/reasons/tpm_authorization_refused.json
+
+## `tpm_boot_pcr_values_recorded`: tpm boot pcr values recorded
+
+The TPM measurements of a boot that reached Windows: one value per PCR, and one fingerprint over all of them.
+
+**Severity:** Info
+
+**Why it matters:** None by itself. It is the record to compare when a device asks for its BitLocker recovery key: the PCR whose value changed between two boots points at what changed in the boot path.
+
+**In practice:** The BitLocker driver logs event 24709 in the System log after every boot that reaches Windows, with the final values of the PCRs BitLocker can bind to. SparkLogs lists each PCR with its value and, on a UEFI device, what it measures: PCR 0 the firmware code, PCR 2 option ROM and other pluggable firmware code, PCR 4 the boot manager, PCR 5 the partition table, PCR 7 the Secure Boot state and keys, PCR 11 BitLocker access control. The fingerprint is the same on every boot of a device whose boot path did not change. A boot that stopped at the BitLocker recovery screen did not reach Windows and writes no event. It shows only through the next boot's values. A PCR 7 change points at Secure Boot policy or key updates, PCR 0 and 2 at firmware or option ROMs, PCR 4 at the boot manager.
+
+**When to ignore:** Safe to pass over unless you are explaining a BitLocker recovery prompt or a TPM-related BitLocker failure on this device.
+
+**What to check:**
+
+- To explain a recovery prompt, compare the fingerprint of the last boot before the prompt with the first boot after it. If they differ, compare boot_pcrs to find which PCR changed.
+- A PCR 7 change: check for Secure Boot certificate or DBX updates (Microsoft-Windows-TPM-WMI events in the System log, such as 1801) and firmware setting changes.
+- A PCR 0 or 2 change: check for a firmware update or a docking station or graphics card with its own option ROM.
+
+**Related:**
+
+- `bitlocker_key_retrieval_code_reported`: the driver's own statement about the restart key retrieval
+- `bitlocker_recovery_password_used`: the recovery password that started Windows after a refused unlock
+- `bitlocker_tpm_binding_mismatch`: the boot where a PCR no longer matched what BitLocker sealed the key to
+- `bitlocker_tpm_unlock_failed`: the TPM refusing the BitLocker key at boot
+- `tpm_authorization_refused`: a TPM policy or PCR check refused after the boot measurements changed
+
+**Example:** A laptop boots and logs its PCR 0, 2, 4, 5, 7 and 11 values with Secure Boot on.
+
+**Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/feeds/eventlog-system#tpm_boot_pcr_values_recorded, https://sparklogs.com/reference/reasons/tpm_boot_pcr_values_recorded.json
+
+## `tpm_capability_probe_declined`: tpm capability probe declined
+
+Windows asked the TPM whether it supports a value, algorithm or handle, and the TPM said no.
+
+**Severity:** Debug
+
+**Why it matters:** None. These records are common on healthy devices and are not evidence of a TPM, BitLocker or Windows Hello fault.
+
+**In practice:** The TPM logs event 17 in the System log, "The Trusted Platform Module (TPM) hardware failed to execute a TPM command.", for every command the TPM refuses. Windows and its components learn what a TPM supports by asking: TPM2_CC_TestParms checks a set of parameters, TPM2_CC_ECC_Parameters a curve, TPM2_CC_ReadPublic whether a key handle exists. A refusal with TPM2_RC_VALUE, TPM2_RC_CURVE, TPM2_RC_HASH or TPM2_RC_HANDLE is the answer "not supported" or "not there", and Windows moves on. A device can log hundreds of these without anything being wrong.
+
+**When to ignore:** Always, on its own. Look elsewhere when the device also logs tpm_command_failed or tpm_authorization_refused, or BitLocker or Windows Hello errors.
+
+**What to check:**
+
+- No action. If a TPM problem is suspected, look for tpm_command_failed on the same device instead.
+
+**Related:**
+
+- `tpm_authorization_refused`: the TPM refusing an authorization or policy for a command
+- `tpm_command_failed`: a TPM command that failed in the driver, in TPM failure mode, or with a response that is not a known routine refusal
+
+**Example:** At boot, Windows asks the TPM whether it supports a parameter set and the TPM answers TPM2_RC_VALUE for parameter 1.
+
+**Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/feeds/eventlog-system#tpm_capability_probe_declined, https://sparklogs.com/reference/reasons/tpm_capability_probe_declined.json
+
+## `tpm_command_failed`: tpm command failed
+
+A TPM command failed in the Windows TPM driver, the TPM is in failure mode, or the TPM refused it with a response that is not a known routine refusal.
+
+**Severity:** Warning or Notice
+
+**Why it matters:** When the driver or the TPM itself is failing, features that need the TPM fail too: BitLocker TPM unlock, Windows Hello, device attestation and Intune compliance checks.
+
+**In practice:** The TPM logs event 17 in the System log for every command that does not succeed. When the response field holds a Windows status such as STATUS_DEVICE_PROTOCOL_ERROR (0xC0000186), the command got no answer from the TPM. A device that logs these for many different commands, over and over, has a TPM, firmware or driver that is not responding correctly. TPM2_RC_FAILURE means the TPM itself has stopped and answers only status commands until restart. The rest are responses outside the routine probe, retry and authorization groups. The command and response names on the line say what was refused.
+
+**When to ignore:** A rare Notice row on a device whose BitLocker and Windows Hello work.
+
+**What to check:**
+
+- For a driver status, run `Get-Tpm` and check TpmReady. Update the TPM firmware and the chipset or platform driver from the device maker.
+- For TPM2_RC_FAILURE, restart the device. If it returns, update the TPM firmware or replace the board.
+- Check whether BitLocker, Windows Hello or Intune compliance report errors on the same device.
+
+**Related:**
+
+- `tpm_authorization_refused`: the TPM refusing an authorization or policy for a command
+- `tpm_capability_probe_declined`: routine refusals of an unsupported value or a missing handle, which need no action
+- `tpm_initialization_failed`: the TPM failing to initialize at boot
+
+**Example:** The TPM driver reports STATUS_DEVICE_PROTOCOL_ERROR for TPM2_CC_StartAuthSession, many times an hour on one device.
+
+**Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/feeds/eventlog-system#tpm_command_failed, https://sparklogs.com/reference/reasons/tpm_command_failed.json
+
+## `tpm_command_retry_requested`: tpm command retry requested
+
+The TPM was busy or short of working memory and asked Windows to retry the command.
+
+**Severity:** Verbose
+
+**Why it matters:** None on its own. Windows retries the command.
+
+**In practice:** The TPM logs event 17 in the System log for every command it does not complete, including the ones it answers with a warning. TPM2_RC_RETRY, TPM2_RC_YIELDED, TPM2_RC_TESTING and TPM2_RC_CANCELED mean the TPM was busy or self-testing. TPM2_RC_NV_RATE means it is limiting writes to its own memory. The memory and handle warnings mean Windows has to free an object or session before trying again.
+
+**When to ignore:** When it appears now and then. A device logging these continuously alongside TPM errors in BitLocker or Windows Hello is worth a look.
+
+**What to check:**
+
+- No action for occasional rows.
+
+**Related:**
+
+- `tpm_command_failed`: a TPM command that failed in the driver, in TPM failure mode, or with a response that is not a known routine refusal
+
+**Example:** The TPM answers TPM2_RC_RETRY to a command while it finishes another one.
+
+**Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/feeds/eventlog-system#tpm_command_retry_requested, https://sparklogs.com/reference/reasons/tpm_command_retry_requested.json
+
+## `tpm_counter_reset_on_resume`: tpm counter reset on resume
+
+The TPM was reset while the device was asleep or hibernating, so its reset counter moved.
+
+**Severity:** Verbose
+
+**Why it matters:** None on its own. TPM services keep working after the resume.
+
+**In practice:** The TPM driver writes event 30 in the System log, "Reset and/or resume count do not match expected values after hibernate/resume.", with the counters before and after. A reset count one higher after the resume means the firmware reset the TPM during the sleep, which many devices do.
+
+**When to ignore:** Always, unless the same device also logs tpm_hardware_failed or tpm_command_failed.
+
+**What to check:**
+
+- No action. Look at tpm_hardware_failed or tpm_command_failed on the same device if a TPM fault is suspected.
+
+**Related:**
+
+- `tpm_hardware_failed`: a TPM hardware failure, which this is not
+
+**Example:** After the laptop resumes from hibernate, the TPM reset counter has gone from 535 to 536.
+
+**Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/feeds/eventlog-system#tpm_counter_reset_on_resume, https://sparklogs.com/reference/reasons/tpm_counter_reset_on_resume.json
+
+## `tpm_hardware_failed`: tpm hardware failed
+
+The Windows TPM driver found a non-recoverable error in the TPM hardware and stopped TPM services.
+
+**Severity:** Error
+
+**Why it matters:** BitLocker cannot use the TPM, so the next restart may stop at the recovery screen. Windows Hello, device attestation and Intune compliance checks that need the TPM fail.
+
+**In practice:** The TPM driver writes event 15 in the System log when the TPM stops answering correctly. A device that logs it usually also logs many tpm_command_failed records with a driver status such as STATUS_DEVICE_PROTOCOL_ERROR. The cause is the TPM chip, its firmware, or the platform driver that talks to it.
+
+**When to ignore:** Not on its own. A single record that a restart and a firmware update cleared needs no further action.
+
+**What to check:**
+
+- Run `Get-Tpm` and check TpmPresent and TpmReady.
+- Install the TPM firmware and chipset driver update from the device maker.
+- Back up the BitLocker recovery password before clearing or replacing the TPM.
+- If it returns after a firmware update, have the device maker replace the board.
+
+**Related:**
+
+- `bitlocker_tpm_unlock_failed`: the TPM refusing the BitLocker key at boot
+- `tpm_attestation_failed`: device attestation failing because the TPM is not usable
+- `tpm_command_failed`: the TPM commands that failed in the driver on the same device
+
+**Example:** The TPM driver reports STATUS_DEVICE_PROTOCOL_ERROR and stops TPM services on a laptop.
+
+**Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/feeds/eventlog-system#tpm_hardware_failed, https://sparklogs.com/reference/reasons/tpm_hardware_failed.json
 
 ## `unexpected_shutdown`: unexpected shutdown
 

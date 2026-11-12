@@ -95,6 +95,8 @@ Stored flat under the `win.eventlog.platform.` prefix.
 | `win.eventlog.platform.device_software_name` | string | Device companion software Windows tried to install or remove, from `Prop_SoftwareName` on DeviceSetupManager Admin events. |
 | `win.eventlog.platform.device_software_exit_code` | int | Exit code of the device companion software installer, from `Error` on DeviceSetupManager Admin events, as Windows wrote it. |
 | `win.eventlog.platform.intel_graphics_category` | string | Category the Intel Graphics Software event gives for itself, read from the JSON the Intel service writes. |
+| `win.eventlog.platform.fasr_pcr_mismatch_index` | int | PCR that differed from the FASR manifest at boot, from `PcrMismatchIndex` on Kernel-Boot event 80. -1 means no PCR differed. |
+| `win.eventlog.platform.fasr_cert_present` | bool | Whether the firmware supplied a FASR certificate at boot, from `IsFasrCertPresent` on Kernel-Boot event 80. Most devices have none. |
 
 ## Portable families
 
@@ -113,6 +115,7 @@ Each key names one field; that field is where the value is queried.
 | Tail key | Queryable as |
 |---|---|
 | `device_class` | not queryable as a field |
+| `mismatch_pcr` | not queryable as a field |
 
 ## What sets each field
 
@@ -134,6 +137,8 @@ The last column is different in kind: it is the author's account of the row or e
 | `device_software_install_failed` / `transient` | 121, 151, 152, 163, 164, 172, 191 | `win.eventlog.platform.device_class` `win.eventlog.platform.device_software_exit_code` `win.eventlog.platform.device_software_name` |  |
 | `device_software_install_failed` / `update_service_stopped` | 121, 151, 152, 163, 164, 172, 191 | `win.eventlog.platform.device_class` `win.eventlog.platform.device_software_exit_code` `win.eventlog.platform.device_software_name` |  |
 | `device_start_failed` / `default` | 411 | `win.eventlog.platform.device_class` `win.eventlog.platform.device_service` `win.eventlog.platform.driver_inf` `win.eventlog.platform.pnp_problem_code` `win.eventlog.platform.pnp_problem_code_name` |  |
+| `fasr_pcr_validation_mismatch` / `no_mismatch` | 80 | `win.eventlog.platform.fasr_cert_present` `win.eventlog.platform.fasr_pcr_mismatch_index` |  |
+| `fasr_pcr_validation_mismatch` / `pcr_mismatch` | 80 | `win.eventlog.platform.fasr_cert_present` `win.eventlog.platform.fasr_pcr_mismatch_index` |  |
 | `firmware_event_store_unavailable` / `keys_missing` | 21, 45 | `win.eventlog.platform.firmware_event_store` |  |
 | `firmware_event_store_unavailable` / `repair_failed` | 21, 45 | `win.eventlog.platform.firmware_event_store` |  |
 | `firmware_verification_scan_failed` / `unreachable` | 2, 20, 42, 43, 47 | `win.eventlog.platform.firmware_scan_name` `win.eventlog.platform.firmware_scan_result` `win.eventlog.platform.firmware_scan_result_code` |  |
@@ -164,7 +169,8 @@ The last column is different in kind: it is the author's account of the row or e
 | `thermal_cooling_engaged` / `active` | 114, 116 | `win.eventlog.platform.thermal_active_trip_k` `win.eventlog.platform.thermal_min_throttle` `win.eventlog.platform.thermal_passive_trip_k` `win.eventlog.platform.thermal_temperature_k` `win.eventlog.platform.thermal_zone` |  |
 | `thermal_cooling_engaged` / `disengaged` | 114, 116 | `win.eventlog.platform.thermal_active_trip_k` `win.eventlog.platform.thermal_min_throttle` `win.eventlog.platform.thermal_passive_trip_k` `win.eventlog.platform.thermal_temperature_k` `win.eventlog.platform.thermal_zone` |  |
 | `thermal_cooling_engaged` / `passive` | 114, 116 | `win.eventlog.platform.thermal_active_trip_k` `win.eventlog.platform.thermal_min_throttle` `win.eventlog.platform.thermal_passive_trip_k` `win.eventlog.platform.thermal_temperature_k` `win.eventlog.platform.thermal_zone` |  |
-| `tpm_initialization_failed` / `default` | 235 | `win.eventlog.platform.tpm_init_position` |  |
+| `tpm_initialization_failed` / `init_failed` | 235 | `win.eventlog.platform.tpm_init_position` |  |
+| `tpm_initialization_failed` / `no_usable_tpm` | 235 | `win.eventlog.platform.tpm_init_position` |  |
 | `usb_controller_error` / `default` | 1, 50, 62 | `win.eventlog.platform.usb_error_reason` `win.eventlog.platform.usb_failure_subtype` `win.eventlog.platform.usb_failure_type` `win.eventlog.platform.usb_ucsi_command` |  |
 | `win_trace_session_failed` / `already_running` | 0, 1, 2, 3, 4, 28 | `win.eventlog.platform.trace_session_name` |  |
 | `win_trace_session_failed` / `disk_full` | 0, 1, 2, 3, 4, 28 | `win.eventlog.platform.trace_session_name` |  |

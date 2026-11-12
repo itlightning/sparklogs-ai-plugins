@@ -6,7 +6,7 @@ Full inventory every 15 minutes. Supported changes are reported when the agent o
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
 | `sparklogs.data.disk_volumes.volume` | string |  | The volume's GUID, lowercased. It stays the same when the drive letter changes, so it is the key to follow a volume by. |
-| `sparklogs.data.disk_volumes.display_name` | string |  | The volume's drive letter, or its mount path when it has no letter. |
+| `sparklogs.data.disk_volumes.display_name` | string |  | The volume's drive letter. Absent when the volume has no drive letter. |
 | `sparklogs.data.disk_volumes.volume_label` | string |  | The volume's label, as File Explorer shows it. |
 | `sparklogs.data.disk_volumes.aliases` | string_array |  | Other names the volume is known by, such as its label, besides its drive letter or mount path and its GUID. |
 | `sparklogs.data.disk_volumes.drive_type` | string |  | The kind of drive Windows reports for the volume, such as `fixed` or `removable`. |
