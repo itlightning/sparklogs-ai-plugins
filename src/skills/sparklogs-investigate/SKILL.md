@@ -74,7 +74,8 @@ Process charts use the same tool with `view` (arg) `top_processes_over_time` (va
 - **Curated events** carry `sparklogs.reason` (LQL), `sparklogs.class` (LQL), and module fields. Empty `sparklogs.*` on an event means **uncurated** (not a collection-health finding).
 - **Reason** (`sparklogs.reason` (LQL)) = our curated vocabulary. **Vendor code** = NTSTATUS, HRESULT, MSI exit, Kerberos result, etc. **pattern_hash** (LQL) = stable shape id on every event.
 - **Device row** (`query_device_health` (tool), feed health, `agent_complete_through` (col)) is authoritative for collection and completeness. Event volume is not coverage.
-- **Playbooks** = symptom recipes. **Themes** = investigation topic bundles (not customer marketing themes).
+- **Playbooks** = symptom recipes. **Themes** = investigation topic bundles.
+- **Tags in the guides:** a name tagged (arg) is a tool input (`agent_ids` (arg)), (col) a response column (`event_count` (col)), and (LQL) a field you can filter or group on (`subsource` (LQL)).
 
 ## What is in the pack
 
@@ -83,7 +84,7 @@ Process charts use the same tool with `view` (arg) `top_processes_over_time` (va
 ## After you pick a `subsource` (LQL)
 
 1. Open `feeds/<id>/README.md` (short index).
-2. **Stream kind** and exploration order: `guides/stream-kinds.md`. Classic WEL: `provider_name` (LQL) before `pattern` (LQL); device state: `query_device_health` (tool) with `sparklogs.kind` (LQL) / `sparklogs.topic` (LQL) / `sparklogs.reason` (LQL).
+2. **Stream kind** and exploration order: `guides/stream-kinds.md`. Classic WEL: `provider_name` (LQL) before `pattern` (LQL); device state: `query_device_health` (tool) with `kinds` (arg) / `topics` (arg) / `reasons` (arg).
 3. Open **one** artifact (read-mode table below). Rich feeds (especially `win.eventlog.security` (value)) often need `recipes.md` or `reasons.md` first, not only `fields.md` or `enums.md`. Security also carries `patterns.md` and `mapping-ecs.md` / `mapping-ocsf.md` when shape or external taxonomy is the question.
 
 **Reason meaning:** the `sparklogs.reason` (LQL) value and the event `message` (col) together; grep `reasons.md` for the matching `##` heading (summary table first, one section only).
@@ -238,13 +239,13 @@ A device view's `not_measured` (col) and unreported seconds name on-endpoint gap
 
 **Query shape (lightest first):** (e.g., whose scope? what arrived? what's on the box? what's noisy and where? what do the events say?)
 1. **Scope and coverage:** `resolve_scope` (tool), `list_sources` (tool); then `query_device_health` (tool) when agents are in scope; `query_scope_activity` (tool) when the estate is unfamiliar.
-2. **Device health first** when the ticket is about one device or a few: `view` (arg) `device_overview` (value) or `device_network` (value) over the complaint window, then refine the result sets it points at. Narrow events to the devices and intervals it names (`guides/device-state-fields.md`, **Read a device view**). Follow-ups on one device's inventory refine the overview's `state` (value) result set instead of new calls. `latest_state` (value) answers current state: do not merge changes into it yourself, and a topic reported empty is evidence of none.
+2. **Device health first** when the ticket is about one device or a few: `view` (arg) `device_overview` (value) or `device_network` (value) over the complaint window, then refine the result sets it points at. Narrow events to the devices and intervals it names (`guides/device-state-fields.md`, **Read a device view**). Follow-ups on one device's inventory refine the overview's `state` (value) result set instead of new calls; its topic column is `topic` (col), not `sparklogs.topic` (LQL) (`guides/device-state-fields.md`, **Result sets**). `latest_state` (value) answers current state: do not merge changes into it yourself, and a topic reported empty is evidence of none.
 3. **Pattern mining:** `query_event_counts_by_severity` (tool) and `describe_pattern` (tool) before citing hashes.
 4. **Raw events (last resort):** one broad `query_logs` (tool) slice, then `refine_query_result` (tool) (not another backing query). `list_fields` (tool) is rare.
 
 **Before "no evidence":** read `agent_complete_through` (col) / `advisories` (col), check `sparklogs.kind = agent_op` (value) rows, treat volume as a prompt only (not coverage). Empty `agent_op` (value) is inconclusive; name what you could not rule out in WHAT WAS NOT CHECKED.
 
-**Empty field results:** universal vs curated vs module fields differ; empty `sparklogs.*` on an event means uncurated (not a health finding). Per-source field lists: `guides/generated-reference-router.md`. Retired names (`event_kind` (other), `SLAAgentOp` (other), `worst_severity` (col), etc.) resolve to nothing; morphology is `sparklogs.kind` (LQL).
+**Empty field results:** universal vs curated vs module fields differ; empty `sparklogs.*` on an event means uncurated (not a health finding). Per-source field lists: `guides/generated-reference-router.md`. Morphology is `sparklogs.kind` (LQL).
 
 Symptom playbooks: Section 3b and `playbooks/playbooks.md`.
 
@@ -254,7 +255,7 @@ Symptom playbooks: Section 3b and `playbooks/playbooks.md`.
 
 Group before you read: the event-shape ladder (`service` (LQL) -> `app` (LQL) -> `subsource` (LQL) -> `category` (LQL) -> `pattern_hash` (LQL), `source` (LQL) beside it), curated identity (`sparklogs.reason` (LQL), `sparklogs.reason_variant` (LQL), `sparklogs.class` (LQL), `sparklogs.instance` (LQL)), and device conditions. Fields, availability and the rules that change counts: `guides/scope-ladder.md`. An empty group is a field the source does not set, not a Finding.
 
-**Use it:** `query_event_counts_by_severity` (tool) with `group_by` (arg) to localize; cross-tab with 2-3 fields when the pairing is the question; drill with `pattern_hash = "..."` (LQL) or refine on cache; resolve `_hash` via `lookups` (col) before citing. Baseline-vs-incident hash compare: mind source-pack releases that recompute pattern identity.
+**Use it:** `query_event_counts_by_severity` (tool) with `group_by` (arg) to localize; cross-tab with 2-3 fields when the pairing is the question; drill with `pattern_hash = "..."` (LQL) or refine on cache; resolve `_hash` via `lookups` (col) before citing. Baseline-vs-incident hash compare: mind source-pack releases that recompute pattern identity or add reasons (events before the release carry raw text only: `guides/scope-ladder.md`).
 
 Full ladder, worked shapes, RCA usage: `guides/scope-ladder.md`. Controlled `service` (LQL) vocabulary: `guides/service-taxonomy.md`.
 
@@ -269,9 +270,9 @@ Before deep investigation: resolve org / sources / time window, then confirm dat
 **Resolution in brief:** explicit UUID or name via `resolve_scope` (tool); host-first when they name a device; ranked by `match_kind` (col) (`exact` (value) proceeds; ties or weak-only matches: ask). Read `agent_status` (col), collection group, `advisories` (col), `agent_complete_through` (col) on agent rows. Reuse `external_investigation_id` (arg) when scope expands.
 
 **Operational gates (skill-local):**
-- **Critical+ fetch-first:** non-zero `cnt_critical_plus` (col) in scope means read those events before proceeding (`guides/category-classes.md`).
+- **Critical+ fetch-first** on curated data: `guides/category-classes.md` (Severity).
 - **Agent row vs event stream can disagree:** trust arrived events; name disagreements in WHAT WAS NOT CHECKED; never assert the machine is down. Halt on collection only when offline/stuck AND no events in window.
-- **Completeness:** only from feed reports (`agent_complete_through` (col)), never from counts or first/last bounds; ongoing issues often need no completeness paragraph.
+- **Completeness:** `guides/scope-resolution.md` (Completeness).
 
 ---
 
@@ -297,7 +298,7 @@ Fresh report → re-render per Section 4 with all Findings so far. Explore furth
 
 ## Section 14. Error handling - recover gracefully
 
-**Cache expired on `refine_query_result` (tool):** a cold `query_logs` (tool) cache regenerates automatically under the SAME `query_id` (arg) when you refine it (`summary.cache_status` (col) reflects it). Grouped handles can be refined within their returned shape; use a raw-event query when the question needs underlying events. If `summary.cache_status` (col) is `cache_invalidated` (value), issue a new data-tool call rather than retrying refine on this id. If the server reports the cache cannot be restored (`expired` (value)), re-issue the original backing query.
+**Cache expired on `refine_query_result` (tool):** a cold `query_logs` (tool) cache regenerates automatically under the SAME `query_id` (arg) when you refine it (`summary.cache_status` (col) reflects it). Grouped handles can be refined within their returned shape; use a raw-event query when the question needs underlying events. A `cache_invalidated` (value) handle is dead: `guides/mcp-tool-decision-tree.md` (large responses). If the server reports the cache cannot be restored (`expired` (value)), re-issue the original backing query.
 
 **Rate or capacity errors:** if a tool call fails with a retryable server error, retry up to 2x with a brief backoff, then surface to the engineer rather than hammering the same call.
 
@@ -309,9 +310,9 @@ Fresh report → re-render per Section 4 with all Findings so far. Explore furth
 
 **Source has been emitting `sparklogs.kind = agent_op` (LQL) rows during your window:** your evidence is incomplete. Read what they say was not collected, suppressed or truncated, flag it explicitly in WHAT WAS NOT CHECKED, and qualify the findings that depended on the affected window. An EMPTY `agent_op` (value) result is inconclusive rather than reassuring - see Section 8 (before "no evidence").
 
-**`external_investigation_id` (arg) validation error:** the id is out of bounds (must be 8-200 chars, free text). Read the tool's error message and fix the id - don't retry with the same value. Pick something human-meaningful (embed a ticket/incident id).
+**`external_investigation_id` (arg) validation error:** fix the length (8 to 200 characters) and resend; do not retry the same value.
 
-**LQL parser errors:** read the structured error and fix the specific issue (`guides/lql-reference.md`, parser-errors section). After 2 failed retries on the same query shape, surface to the engineer rather than continuing to retry.
+**Unexpected zero or a parser error on hand-written LQL:** most malformed filters return zero rows silently (`guides/lql-reference.md`, last section). After 2 failed attempts at the same query shape, surface to the engineer rather than continuing to retry.
 
 ---
 

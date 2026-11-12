@@ -40,7 +40,6 @@ WHAT WAS EXAMINED
 - Sources covered: <list or count>
 - Org(s) covered: <list or count>
 - Matched population examined: <total rows/events, from query summaries>
-- Wall-clock: <minutes>
 
 AUDIT TRAIL
 <the per-query query_id + query_url list from the local investigation-state document; inspect any one with get_query_metadata(query_id="<qid>"); every call is also tagged external_investigation_id="<id>" in the server-side audit>
@@ -177,7 +176,7 @@ after the Application channel logged VSS error 0x80042308 (Findings 1, 2). The e
 first appeared in the investigation window and fired on 7 other sources in the fleet (Findings 3, 6).
 KB5034441 was installed about 30 minutes before the failure (Finding 4); timing is observed, cause
 is not asserted. The device was observed throughout the backup window, with one hot disk span
-during the snapshot (Finding 5), and its data is complete through the end of the window (Finding 7).
+during the snapshot (Finding 5).
 
 SCOPE CHECKED
 - Source(s): srv-fileshare01
@@ -235,20 +234,12 @@ Finding 6: The same pattern_hash fired on 7 other sources in this MSP fleet duri
                         srv-web01, srv-print01
   Time window of evidence: 2026-04-22 00:00 to 2026-04-23 14:00 UTC
 
-Finding 7: srv-fileshare01 reported agent_complete_through 2026-04-23 14:00 UTC, advisories empty
-  Evidence: <query_url as returned> (query_id: qH6l1p5n2k7t3m8r)
-  Confidence: high
-  Sources contributing: srv-fileshare01
-  Time window of evidence: 2026-04-22 00:00 to 2026-04-23 14:00 UTC
-  Note: The agent's own feed reports carry this. Event counts and first/last bounds do not.
-
 WHAT WAS EXAMINED
-- Backing queries: 5
+- Backing queries: 6
 - Cached refinements: 6
 - Sources covered: srv-fileshare01 (primary); 8 fleet sources for the cross-source pivot (Finding 6)
 - Org(s) covered: org_acme_dental
-- Matched population examined: 8,614 events across the 5 backing queries
-- Wall-clock: 4 minutes
+- Matched population examined: 8,614 events across the 6 backing queries
 
 AUDIT TRAIL
 Backing queries (from the investigation-state document; every call tagged external_investigation_id="investigate-ticket-4781-veeam-backup"):
@@ -272,10 +263,8 @@ external_investigation_id: investigate-srv-fileshare02-slow-share
 EXECUTIVE SUMMARY
 The on-endpoint perf and event data for srv-fileshare02 in the user-reported window shows no signs
 of resource saturation, SMB-server-side errors, or AV-induced spikes (Findings 1-3). The source's
-agent reported its data complete through the window (Finding 4). However, the user reported
-slowness - the absence of server-side evidence does not mean the user is wrong; it suggests the
-slowness may have a cause outside this server's visibility. Common causes outside scope (see WHAT WAS NOT CHECKED) include client-side
-issues, network path issues, and per-workstation AV scanning each opened file.
+agent reported its data complete through the window (Finding 4), so the absence is not a
+collection gap. The user reported slowness; this server's data does not show it.
 
 SCOPE CHECKED
 - Source(s): srv-fileshare02
@@ -314,27 +303,19 @@ Finding 4: srv-fileshare02 reported agent_complete_through 2026-04-23 14:30 UTC,
   Evidence: <query_url as returned> (query_id: qY1k9p2m7n4t3r6c)
   Confidence: high
 
-Finding 5: No evidence of slowness, congestion, or unusual activity on srv-fileshare02 in the
-           investigation window from on-endpoint data
-  Evidence: synthesis of Findings 1-4
-  Confidence: insufficient_evidence (the question is "why is it slow"; the on-endpoint data does
-              not show slowness - but the user reported slowness, which suggests the cause may be
-              outside this server's visibility)
-
 WHAT WAS EXAMINED
-- Backing queries: 1
-- Cached refinements: 4
+- Backing queries: 4
+- Cached refinements: 1
 - Sources covered: srv-fileshare02
 - Org(s) covered: org_acme_dental
 - Matched population examined: 142 events
-- Wall-clock: 2 minutes
 
 AUDIT TRAIL
 Backing-query query_id + query_url list in the investigation-state document (calls tagged external_investigation_id="investigate-srv-fileshare02-slow-share"); per-query detail via get_query_metadata(query_id="<qid>").
 
 POSSIBLE NEXT DIRECTIONS
-The pattern of "user reports slow, server looks fine" frequently traces to client-side or
-network-path causes rather than the server itself. Investigating the user's workstation directly,
+The pattern of "user reports slow, server looks fine" frequently traces to client-side causes
+(per-workstation AV scanning each opened file), the network path, or the application itself. Investigating the user's workstation directly,
 or checking switch/AP/firewall logs between the user and the server, may reveal the cause.
 
 Would you like to (1) explore the user's workstation (give me the workstation name), check

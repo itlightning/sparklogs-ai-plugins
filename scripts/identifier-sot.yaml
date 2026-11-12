@@ -71,6 +71,7 @@ args:
   - rmm_client_id
   - sample
   - select
+  - source
   - session_detail
   - start
   - subject
@@ -83,6 +84,21 @@ args:
 # whenever a tool renders it under that dotted name (device-health does, for
 # every wire field it lifts); resolve_scope's own flat "kind" is unrelated.
 cols:
+  - busy_pct_avg
+  - class
+  - collector_source_kind
+  - cpu_pct_avg
+  - entry
+  - instance
+  - is_busiest_disk
+  - is_open
+  - label
+  - media
+  - queue_depth_avg
+  - reason
+  - resident_bytes_avg
+  - summary.query_scope
+  - topic
   - advisories
   - clearing_since
   - closes_in_about

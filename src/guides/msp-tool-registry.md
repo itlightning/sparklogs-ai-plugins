@@ -1,15 +1,15 @@
 # MSP Tool Registry
 
-Common MSP tools, their Windows service names, and the `app` (LQL) token SparkLogs stamps on their events when the pack curates them.
+Common MSP tools, their Windows service names, and the `app` (LQL) token SparkLogs stamps on events about those services (a vendor service that crashed, stopped or failed to start).
 
 Use it two ways:
 
-- A symptom names a product ("Veeam reports backup failed"): filter on its `app` (LQL) token when it has one, and check its services in device state.
+- A symptom names a product ("Veeam reports backup failed"): filter on its `app` (LQL) token for its service events, and check its services in device state. A product's own job or detection results are not curated; vendor text the product writes to Application or System arrives uncurated with an empty `app` (LQL).
 - Device state lists a service you do not recognize: find the product here before treating it as unknown.
 
 Service names are the vendors' install defaults and change between versions.
 Before saying a product is absent or stopped, read the device's `latest_state` (value) on topics `services` (value) and `installed_products` (value), and match on what the device reported (`sparklogs.data.services[].name` (LQL)).
-An empty token cell means the pack has no curated stream for that product: its events, if any, arrive on the Windows Event Log feeds with an empty `app` (LQL).
+An empty token cell means the pack stamps no token for that product: its events, if any, arrive on the Windows Event Log feeds with an empty `app` (LQL).
 The full token list is `guides/app-vocabulary.md`.
 
 ## RMM (Remote Monitoring and Management)

@@ -8,7 +8,7 @@ index: RAID / array degraded
 
 **Accuracy.** Controller and disk-subsystem events are curated on System and `win.eventlog.storage` (value) (StorPort and disk-subsystem channels) under `service = storage` (LQL).
 Vendor array tools that never write a Windows channel are invisible here.
-Any critical+ row in scope is fetch-first, whatever the ticket said.
+A critical+ row in scope is fetch-first, whatever the ticket said (`guides/category-classes.md`).
 A degraded array often keeps serving I/O at higher latency. Disk heat grades busy time and queue depth, not latency, so high latency at moderate load can show no disk heat.
 
 **Device health first.** `device_overview` (value) from before the alert through now.
@@ -20,7 +20,7 @@ Header coverage says whether the device kept reporting through the window.
 **Events, for what health named.**
 
 ```lql
-source = "<host>" AND service = storage
+source: "<host>" AND service = storage
 ```
 
 Group by `sparklogs.reason` (LQL), worst first, over the interval the disk heat or episodes named.

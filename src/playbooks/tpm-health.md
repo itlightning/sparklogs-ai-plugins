@@ -27,7 +27,7 @@ A TPM that disappeared or changed version explains every TPM error after it. Loo
 - `tpm_hardware_failed` (value): TPM event 15, the driver found a non-recoverable TPM error and stopped TPM services. `win.eventlog.system.tpm_error_data` (LQL) holds the status.
 
 ```lql
-source = "<host>" AND subsource = "win.eventlog.system" AND sparklogs.reason in (tpm_command_failed, tpm_authorization_refused, tpm_hardware_failed)
+source: "<host>" AND subsource = "win.eventlog.system" AND sparklogs.reason in (tpm_command_failed, tpm_authorization_refused, tpm_hardware_failed)
 ```
 
 Group by `sparklogs.reason` (LQL), `sparklogs.reason_variant` (LQL).
@@ -45,7 +45,7 @@ For `tpm_authorization_refused` (value), read `win.eventlog.system.tpm_response_
 - `device_health_cert_service_unreachable` (value): TPM-WMI event 1538, the health certificate request could not reach Microsoft's service. Arm `name_not_resolved` (value) is the request running before the network is up and is routine. Arm `other_error` (value) points at a firewall, proxy or filtering rule.
 
 ```lql
-source = "<host>" AND subsource = "win.eventlog.system" AND sparklogs.reason in (tpm_attestation_check_failed, tpm_attestation_failed, device_health_cert_service_unreachable)
+source: "<host>" AND subsource = "win.eventlog.system" AND sparklogs.reason in (tpm_attestation_check_failed, tpm_attestation_failed, device_health_cert_service_unreachable)
 ```
 
 Group by `sparklogs.reason` (LQL), `win.eventlog.system.tpm_attestation_health_status` (LQL).

@@ -84,7 +84,8 @@ Process charts use the same tool with `view` (arg) `top_processes_over_time` (va
 - **Curated events** carry `sparklogs.reason` (LQL), `sparklogs.class` (LQL), and module fields. Empty `sparklogs.*` on an event means **uncurated** (not a collection-health finding).
 - **Reason** (`sparklogs.reason` (LQL)) = our curated vocabulary. **Vendor code** = NTSTATUS, HRESULT, MSI exit, Kerberos result, etc. **pattern_hash** (LQL) = stable shape id on every event.
 - **Device row** (`query_device_health` (tool), feed health, `agent_complete_through` (col)) is authoritative for collection and completeness. Event volume is not coverage.
-- **Playbooks** = symptom recipes. **Themes** = investigation topic bundles (not customer marketing themes).
+- **Playbooks** = symptom recipes. **Themes** = investigation topic bundles.
+- **Tags in the guides:** a name tagged (arg) is a tool input (`agent_ids` (arg)), (col) a response column (`event_count` (col)), and (LQL) a field you can filter or group on (`subsource` (LQL)).
 
 ## What is in the pack
 
@@ -93,7 +94,7 @@ Process charts use the same tool with `view` (arg) `top_processes_over_time` (va
 ## After you pick a `subsource` (LQL)
 
 1. Open `feeds/<id>/README.md` (short index).
-2. **Stream kind** and exploration order: `guides/stream-kinds.md`. Classic WEL: `provider_name` (LQL) before `pattern` (LQL); device state: `query_device_health` (tool) with `sparklogs.kind` (LQL) / `sparklogs.topic` (LQL) / `sparklogs.reason` (LQL).
+2. **Stream kind** and exploration order: `guides/stream-kinds.md`. Classic WEL: `provider_name` (LQL) before `pattern` (LQL); device state: `query_device_health` (tool) with `kinds` (arg) / `topics` (arg) / `reasons` (arg).
 3. Open **one** artifact (read-mode table below). Rich feeds (especially `win.eventlog.security` (value)) often need `recipes.md` or `reasons.md` first, not only `fields.md` or `enums.md`. Security also carries `patterns.md` and `mapping-ecs.md` / `mapping-ocsf.md` when shape or external taxonomy is the question.
 
 **Reason meaning:** the `sparklogs.reason` (LQL) value and the event `message` (col) together; grep `reasons.md` for the matching `##` heading (summary table first, one section only).

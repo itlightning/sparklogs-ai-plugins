@@ -26,13 +26,13 @@ Unreported time over that interval leaves both questions open.
 **Events, for what health named.**
 
 ```lql
-source = "<host>" AND sparklogs.kind = agent_op
+source: "<host>" AND sparklogs.kind = agent_op
 ```
 
 RMM vendor errors on the box:
 
 ```lql
-source = "<host>" AND service = rmm
+source: "<host>" AND service = rmm
 ```
 
 Group by `sparklogs.reason` (LQL).

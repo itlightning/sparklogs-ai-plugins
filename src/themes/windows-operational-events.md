@@ -13,7 +13,7 @@ Application and System channels: service crashes, unexpected shutdowns, disk and
 | `win.eventlog.storage` (value) | StorPort and disk-subsystem channels: bad blocks, predicted failure, controller resets, I/O failures (`disk_failure_predicted` (value), `storage_controller_reset` (value)). |
 | `win.eventlog.platform` (value) | PnP, device setup, firmware and kernel channels: devices that failed to start or install drivers (`device_start_failed` (value), `device_software_install_failed` (value)). |
 
-Open `feeds/<id>/reasons.md` and search for the reason. Same reason on two channels is one fact (example: `iis_worker_crash` (value) System WAS / Application IIS).
+Open `feeds/<id>/reasons.md` and search for the reason. Same reason on two feeds is one fact (example: `disk_failure_predicted` (value) on System and `win.eventlog.storage` (value)).
 Explore: `guides/stream-kinds/wel-classic.md` (`subsource` (LQL), then `origin` (LQL) on the multi-channel feeds, then `provider_name` (LQL)).
 
 **Pivots.** Service will not stay up: `service_crashed` (value), `service_start_failed` (value), `service_hang` (value). Disk filling is state (`themes/device-health-and-state.md`) plus these disk reasons if the stream shows IO faults.

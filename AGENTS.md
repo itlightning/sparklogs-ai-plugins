@@ -2,7 +2,7 @@
 
 This repository contains public SparkLogs AI plugin content. It must not receive private SparkLogs implementation details.
 
-Read `README.md`, `docs/public-scope.md`, `CONTRIBUTING.md`, and `docs/maintainer-guide.md` before editing.
+Read `README.md`, `docs/public-scope.md`, `CONTRIBUTING.md`, and (on the `source` branch) `docs/maintainer-guide.md` before editing.
 Before adding or rewriting `src/playbooks/*.md`, read `docs/playbook-authoring.md`.
 
 Rules:
@@ -24,4 +24,4 @@ yarn run validate
 yarn run build
 ```
 
-`make precommit` (or `yarn precommit`) is the fast gate agents run before commit: layout, identifier tags (membership against identifier-sot.yaml + sibling library) and the LQL field vet (every field in ```` ```lql ```` blocks and `(LQL)` spans is in `scripts/fixtures/lql-live-fields.txt`, the pack, or `lql_pedagogical`), stitch check, and `sync-generated --check` (fail-closed if the library is missing or dirty). GitHub CI `yarn validate` still SKIPPED-passes the drift half when the library is absent. After render, `validate-rendered` forbids leftover `(tool)` / `(value)` / `(other)` and requires kept `(arg)` / `(col)` / `(LQL)` in each host pack.
+`make precommit` (or `yarn precommit`) is the fast gate agents run before commit: layout, identifier tags (membership against identifier-sot.yaml and the source-library checkout) and the LQL field vet (every field in ```` ```lql ```` blocks and `(LQL)` spans is in `scripts/fixtures/lql-live-fields.txt`, the pack, or `lql_pedagogical`), stitch check, and `sync-generated --check` (fail-closed if the library is missing or dirty). GitHub CI `yarn validate` still SKIPPED-passes the drift half when the library is absent. After render, `validate-rendered` forbids leftover `(tool)` / `(value)` / `(other)` and requires kept `(arg)` / `(col)` / `(LQL)` in each host pack.

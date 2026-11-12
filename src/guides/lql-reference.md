@@ -316,7 +316,7 @@ any: "credit card"                       <- search all fields for "credit card"
 
 ## Canonical recurring patterns
 
-**Field-availability note.** `sparklogs.*` curated fields exist on events a source pack curated, and only on the streams that carry them; module-prefixed fields are narrower still. An empty result on a curated or module field may mean the source never writes that field, so check what the source carries before reading anything into it, and fall back to `severity` (LQL) / `message` (LQL) / `pattern` (LQL), which every source carries. The retired names event_kind, `SLASnapshot`, `SLAAgentOp`, `event_summary` (other), `snapshot_id` (other) and `state.*` resolve to nothing at all: an empty result there is a spelling problem, not a health signal.
+**Field-availability note.** `sparklogs.*` curated fields exist on events a source pack curated, and only on the streams that carry them; module-prefixed fields are narrower still. An empty result on a curated or module field may mean the source never writes that field, so check what the source carries before reading anything into it, and fall back to `severity` (LQL) / `message` (LQL) / `pattern` (LQL), which every source carries.
 
 ### Failure-side filter (the most common starting filter)
 
@@ -331,8 +331,11 @@ Compare severity by name with `>=`.
 ### Single-source single-time-window scope
 
 ```lql
-source = "srv-fileshare01"
+source = "srv-fileshare01"       <- exact, case included
+source: "SRV-FILESHARE01"        <- contains, any case
 ```
+
+`source` (LQL) equality is case-sensitive; payload leaves and `subsource` (LQL) are not. Copy the host name from `resolve_scope` (tool) or `list_sources` (tool), or use `:`.
 
 Combined with the `start` (arg) / `end` (arg) window parameters (which are separate from the LQL filter).
 
@@ -426,7 +429,7 @@ t between 2026-04-23T03:00:00Z and 2026-04-23T04:00:00Z
 7. **Quoting unquoted terms unnecessarily.** `severity = "error"` (LQL) works but `severity = error` (LQL) is fine and more readable.
 8. **Forgetting parentheses around OR with implicit AND.** `severity = error OR event_id = 7031 source = "x"` (LQL) parses unexpectedly. Use parentheses: `(severity = error OR event_id = 7031) AND source = "x"` (LQL).
 9. **Mixing `&&` / `||` with `AND` / `OR` in the same expression.** Both work but consistency reads better.
-10. **Hallucinating field names.** A name nothing has emitted is not refused; it reads as empty, and the response lists it under `schema.empty_requested_columns` (col). That is a normal outcome rather than an error, so treat it as a prompt to check the spelling, not as something to report. Use canonical field names from `mcp-tool-decision-tree.md` or `list_fields` (tool). `list_fields` (tool) omits unstable process-id paths; it is the workspace catalog for names you have not seen (`guides/stream-kinds/device-state.md`).
+10. **Hallucinating field names.** A name nothing has emitted is not refused; it reads as empty, and the response lists it under `schema.empty_requested_columns` (col). That is a normal outcome rather than an error, so treat it as a prompt to check the spelling, not as something to report. Take field names from `list_fields` (tool), `fields/INDEX.md` or the feed's `fields.md`. `list_fields` (tool) omits unstable process-id paths; it is the workspace catalog for names you have not seen (`guides/stream-kinds/device-state.md`).
 11. **Bare terms inside `[]()`.** Name a field on the element (`pid=1234` (LQL)). `processes!` (LQL) is not array presence; use `path[]!` (LQL).
 
 ---

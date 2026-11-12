@@ -25,8 +25,6 @@ returns zero rows on a fleet full of context rows. To select them, test for the 
 `NOT sparklogs.class!`. To select context rows of a given morphology, filter on the kind instead,
 which IS written: `sparklogs.kind = inventory`.
 
-`NOISE` never reaches you: it is the one class that drops an event, so no query can return one.
-
 **BENIGN is about TEXT, not outcome.** A routine success is `CONTEXT`, not `BENIGN`. `BENIGN` means a
 naive reader would think the line is bad and it is not.
 
@@ -138,15 +136,14 @@ that carries them is not hiding the quiet traffic: it never counted it.
 datum: paraphrasing `WARN3` as "warning" breaks the link between your finding and the row. Both fit
 in one sentence: `severity WARN3 (minor)`.
 
-**Use the rung names.** Write `serious` (value), `minor` (value), `severe` (value). Do not write `error2` (value), `error4` (value),
-`warn4` (value) or the other OTel short forms in prose, filters or findings; they exist only as ingest
-aliases that normalize third-party logs onto this ladder, and they are worth naming only when you are
-explaining that normalization to someone.
+**Use the rung names.** Write `serious` (value), `minor` (value), `severe` (value) in prose, filters and findings.
 
-**Critical+ is a fetch-first contract.** Any non-zero critical+ count in scope means: fetch those
-events before proceeding, whatever the ticket was about. Producers admit `Critical` only for facts an
-engineer working an unrelated issue must always be told, so the count is small and always material.
-The Info through Error bands carry no such mandate: read and weigh them on their evidence.
+**Critical+ is a fetch-first contract on curated rows.** Any non-zero critical+ count in scope on agent
+feeds (or rows with `sparklogs.reason!` (LQL)) means: fetch those events before proceeding, whatever the
+ticket was about. Source packs admit `Critical` only for facts an engineer working an unrelated issue must
+always be told, so the count is small and always material. On ingest-key data critical is the sender's own
+level: read it and weigh it like any other row. The Info through Error bands carry no such mandate: read
+and weigh them on their evidence.
 
 **Severity is not the provider's opinion.** Windows logging a routine auth denial at Error is that
 vendor's taxonomy. A curated pack re-grades by consequence.

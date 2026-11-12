@@ -34,12 +34,12 @@ Then drill down from what the reading named:
 - A process over the whole window: `top_processes_over_time` (value) with `rank_by` (arg).
 - Network-bound slowness (file shares, line-of-business apps): `device_network` (value) and `playbooks/network-connectivity.md`.
 
-Several devices slow at one site: name up to 25 in `agent_ids` (arg) for the light form, compare their worst bands and first hot times, then take up to 5 for full readings.
+Several devices slow on one network (same network key, `guides/device-state-fields.md` **Network outages**): name up to 25 in `agent_ids` (arg) for the light form, compare their worst bands and first hot times, then take up to 5 for full readings.
 
 **Events, for what health named.** Crashes, hangs and errors on that device over the span's interval:
 
 ```lql
-source = "<host>" AND severity >= error
+source: "<host>" AND severity >= error
 ```
 
 Group by `subsource` (LQL), then `pattern` (LQL) inside the dominant one.

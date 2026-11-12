@@ -1,7 +1,7 @@
 # Kind: device state
 
 **One device or a few, over a window:** `query_device_health` (tool) `view` (arg) `device_overview` (value) or `device_network` (value). How to read the answer: `guides/device-state-fields.md` (**Read a device view**).
-**Standing / latest of each episode:** `query_device_health` (tool), omit `view` (arg) (`fieldset` (arg) = `rca` (value) for one host).
+**Standing / latest of each episode:** `query_device_health` (tool), omit `view` (arg).
 Columns: the response `schema.columns` (col) or the tool description. Episode and observation limits: `guides/device-state-fields.md`.
 A default-view row is the latest event of each episode that emitted inside the requested window, not the latest event of each subject.
 What is on the box is `view` (arg) `latest_state` (value).
@@ -104,7 +104,7 @@ installed_products:  {"name":"Microsoft Edge","publisher":"Microsoft Corporation
                       "install_context":"machine","instance":"product:microsoft edge"}
 ```
 
-Values are stored as lowercase tokens: current_state is running or stopped, start_type is manual, auto_delayed or disabled, volume_role is os, drive_type is fixed, mount_state is mounted. String equality ignores case, so a literal typed STOPPED matches the same events as stopped.
+Values are stored as lowercase tokens: current_state is running or stopped, start_type is manual, auto_delayed or disabled, volume_role is os, drive_type is fixed, mount_state is mounted. Equality on payload leaves ignores case, so a literal typed STOPPED matches the same events as stopped. `source` (LQL) equality does not: see `guides/mcp-tool-decision-tree.md` (paste-back rules).
 
 A stopped_exit_code of 1077 means the service has not been started since boot. It is not a failure code.
 

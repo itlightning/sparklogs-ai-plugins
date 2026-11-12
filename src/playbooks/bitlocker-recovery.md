@@ -31,7 +31,7 @@ A TPM that disappeared, or a TPM failing on its own, is `playbooks/tpm-health.md
 - `bitlocker_recovery_password_used` (value): someone typed the recovery password and Windows started. Whoever typed it knows it now.
 
 ```lql
-source = "<host>" AND subsource = "win.eventlog.system" AND service = encryption
+source: "<host>" AND subsource = "win.eventlog.system" AND service = encryption
 ```
 
 Group by `sparklogs.reason` (LQL), `sparklogs.reason_variant` (LQL).
@@ -42,10 +42,11 @@ Group by `sparklogs.reason` (LQL), `sparklogs.reason_variant` (LQL).
 `win.eventlog.system.boot_pcr_indices` (LQL) lists which PCRs were recorded. The `pcr_values_unreadable` (value) arm carries the indices but no values or fingerprint.
 
 ```lql
-source = "<host>" AND sparklogs.reason = tpm_boot_pcr_values_recorded
+source: "<host>" AND sparklogs.reason = tpm_boot_pcr_values_recorded
 ```
 
 Read the rows in time order and compare the fingerprint of the last boot before the prompt with the first boot after it.
+A boot logged before the device's source pack added this reason carries only the raw System event 24709: read its message for the PCR values.
 If they differ, compare `win.eventlog.system.boot_pcrs` (LQL) entry by entry and name the PCR whose value changed.
 
 **Which PCRs the key depends on.** The fingerprint covers every recorded PCR, but the TPM releases the key against only the PCRs it was sealed to.
@@ -53,7 +54,7 @@ BitLocker-API event 892 in the BitLocker management log, uncurated, names them: 
 Take the newest 892 before the prompt:
 
 ```lql
-source = "<host>" AND subsource = "win.eventlog.identity_security" AND event_id = 892
+source: "<host>" AND subsource = "win.eventlog.identity_security" AND event_id = 892
 ```
 <!-- confirmed with data on 2026-11-12 -->
 
@@ -63,7 +64,7 @@ Name a PCR as the cause only when it changed and it is in the sealed list, or wh
 Many devices also log BitLocker-Driver event 24711, uncurated, when a TPM protector started Windows. Some never log it, so read it against the device's own history:
 
 ```lql
-source = "<host>" AND subsource = "win.eventlog.system" AND event_id in (24709, 24711, 24652)
+source: "<host>" AND subsource = "win.eventlog.system" AND event_id in (24709, 24711, 24652)
 ```
 <!-- confirmed with data on 2026-11-12 -->
 
@@ -79,7 +80,7 @@ Group by `event_id` (LQL). On a device whose boots usually carry 24711, a boot w
 BitLocker-API event 793 in the BitLocker management log, uncurated, reads "BitLocker resealed boot settings to the TPM". BitLocker bound the drive key to the boot measurements of that moment. A 793 after a firmware or Secure Boot update means the key already follows the new measurements, so that update did not cause the prompt:
 
 ```lql
-source = "<host>" AND subsource = "win.eventlog.identity_security" AND event_id = 793
+source: "<host>" AND subsource = "win.eventlog.identity_security" AND event_id = 793
 ```
 <!-- confirmed with data on 2026-11-12 -->
 
@@ -87,7 +88,7 @@ source = "<host>" AND subsource = "win.eventlog.identity_security" AND event_id 
 **Events, for what health named.** What changed before the reboot:
 
 ```lql
-source = "<host>" AND sparklogs.kind = config_change
+source: "<host>" AND sparklogs.kind = config_change
 ```
 
 Group by `sparklogs.config_change.type` (col), `sparklogs.config_change.target` (col).

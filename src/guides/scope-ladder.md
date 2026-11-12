@@ -33,7 +33,7 @@ service -> app -> subsource -> category -> pattern (finest: pattern_hash)
 
 | Rung | What it is | Present |
 |---|---|---|
-| `service` (LQL) | Ticket class the event is evidence for (`backup` (value), `patching` (value)): `guides/service-taxonomy.md` | When the shaping sets it; many raw events have none |
+| `service` (LQL) | Ticket class the event is evidence for (`backup` (value), `patching` (value)): `guides/service-taxonomy.md` | Most agent events carry it; ingest-key data may not |
 | `app` (LQL) | Product that owns the stream: `guides/app-vocabulary.md` | Often empty, on purpose, on OS channels |
 | `subsource` (LQL) | Feed id (above) | Always on agent data |
 | `category` (LQL) | Projection of topic, reason and class (`disk_volumes.volume_fill_rate_high.ELEVATED`): `guides/category-classes.md` | Often empty. Never parse it: read the fields it was built from |
@@ -53,15 +53,16 @@ Events a source pack curated carry the names below. Uncurated events have none o
 | `sparklogs.reason` (LQL) | The curated name of what happened (`vss_writer_failed` (value), `os_volume_space_low` (value)). Meaning: `feeds/<id>/reasons.md` |
 | `sparklogs.reason_variant` (LQL) | Which form of that reason this row is (for example `outbound` (other) or `sspi_probe` (other)), when the reason has more than one |
 | `sparklogs.class` (LQL) | Temporal shape: `NOTABLE` (value), `ELEVATED` (value), `RECOVERED` (value), `ENDED` (value), `BENIGN` (value): `guides/category-classes.md` |
-| `sparklogs.kind` (LQL) | Row morphology: `inventory` (value), `monitor` (value), `occurrence` (value), `delta` (value), `config_change` (value), `agent_op` (value) |
+| `sparklogs.kind` (LQL) | Row morphology (`inventory` (value), `monitor` (value), `occurrence` (value) and the rest): the list and its caveats are in `guides/category-classes.md` (Kind) |
 | `sparklogs.instance` (LQL) | The subject: which volume, writer, service or adapter. Show `sparklogs.display_name` (LQL) when present |
 
 Rules that change counts:
 
-- **Reason before subsource when counting incidents.** One reason can arrive on several feeds (`vss_writer_failed` (value) on Application, System and device state): that is one fact with several witnesses. Group `sparklogs.reason` (LQL) first.
+- **Reason before subsource when counting incidents.** One reason can arrive on several feeds (`vss_writer_failed` (value) on Application and device state, `disk_failure_predicted` (value) on System and `win.eventlog.storage` (value)): that is one fact with several witnesses. Group `sparklogs.reason` (LQL) first.
 - **Variant before messages.** Group `["sparklogs.reason", "sparklogs.reason_variant"]` before reading any message: variants of one reason often differ in severity and meaning.
 - **Instance before hosts.** Two volumes on one host share a reason; `sparklogs.instance` (LQL) tells them apart.
 - **Recovery.** The recovery of a fault is the same `sparklogs.reason` (LQL) with `sparklogs.class = RECOVERED` (LQL). Group by reason to collapse onset, hold and recovery into one finding.
+- **Reasons have a start date.** A reason added in a newer source pack is absent from events logged before the device ran that pack; those events carry the raw text only. Before reading the absence of a reason as an answer, check `feed_pack_version` (col) on the `resolve_scope` (tool) agent row and when the device moved to it.
 - **Reason inventory of a scope.** `query_scope_activity` (tool) with `group_by` (arg) `["sparklogs.reason"]` lists every reason in scope with its failure-side severity counts in one call. The empty-reason row is the uncurated traffic.
 
 ---
@@ -81,6 +82,13 @@ Data sent with an ingest key carries `source` (LQL), `pattern_hash` (LQL) and wh
 There is no feed health and no `agent_complete_through` (col), and curated `sparklogs.*` fields are usually absent.
 Climb the event-shape ladder; skip the curated and device-state sets.
 
+Third-party logs as evidence (a firewall, identity provider or EDR console sending syslog or an export):
+
+1. `list_sources` (tool) over the window: rows with `sent_via` (col) `ingest_key` (value) are the key-sent senders; `source` (LQL) on those rows is whatever the sender named.
+2. Scope by `agent_id` (LQL) (the key) and `source` (LQL), then group by `pattern_hash` (LQL) and read the top patterns with `describe_pattern` (tool).
+3. Severity is the sender's own level, mapped onto the SparkLogs scale: weigh it as the sender's opinion.
+4. No sender for the system in scope means it was not checked: say so in WHAT WAS NOT CHECKED.
+
 ---
 
 ## Treat every `_hash` as opaque
@@ -98,8 +106,8 @@ See `mcp-tool-decision-tree.md` (Investigation discipline) for why order matters
 **`query_scope_activity` (tool)** (**bounded discovery**, not LQL-filtered):
 - Capped, pre-aggregated structure for app / service / subsource, or reasons, in org scope and time window.
 - Per-row triage: `event_count` (col), `cnt_interesting` (col), one count per failure-side severity band (`cnt_warning` (col) through `cnt_critical_plus` (col); the bands are defined in `category-classes.md`), `distinct_interesting` (col), `first_event_at` (col), `last_event_at` (col).
-- Critical+ fetch-first: a non-zero `cnt_critical_plus` (col) in any row in scope means fetch those events before proceeding, whatever the investigation topic (`category-classes.md`, Query notes).
-- Narrow with `agent_ids` (arg) (collector UUIDs), `source` (LQL) substring, or `field_match` (arg) over dimension names.
+- Non-zero `cnt_critical_plus` (col) on curated data: fetch-first (`category-classes.md`, Severity).
+- Narrow with `agent_ids` (arg) (collector UUIDs), `source` (arg) substring, or `field_match` (arg), which matches the source, app, service and subsource values (not field names).
 - Summary may include `top_interesting_patterns` (col) teaser; call **`describe_pattern` (tool)** before citing any teaser pattern.
 
 **`query_event_counts_by_severity` (tool)** (**LQL-filtered measure**):
@@ -139,8 +147,8 @@ Always use the hash verbatim as the drill-down filter value.
 
 ## Worked shape: localize then land
 
-1. `query_scope_activity` (tool) or `query_event_counts_by_severity(group_by=["subsource"], lql='source = "<host>" AND severity >= warning', ...)`: which feeds carry the failure side.
-2. `query_event_counts_by_severity(group_by=["sparklogs.reason", "sparklogs.reason_variant"], lql='source = "<host>" AND subsource = "<feed>" AND severity >= warning', ...)`: which curated reasons dominate. The empty-reason group is uncurated: group it by `pattern_hash` (LQL).
+1. `query_scope_activity` (tool) or `query_event_counts_by_severity(group_by=["subsource"], lql='source: "<host>" AND severity >= warning', ...)`: which feeds carry the failure side.
+2. `query_event_counts_by_severity(group_by=["sparklogs.reason", "sparklogs.reason_variant"], lql='source: "<host>" AND subsource = "<feed>" AND severity >= warning', ...)`: which curated reasons dominate. The empty-reason group is uncurated: group it by `pattern_hash` (LQL).
 3. Compare against a healthy baseline window: is the top reason or pattern new, or normal volume?
 4. `describe_pattern(pattern_hashes=["<h>"])` on the surviving hash, then `query_logs(lql='pattern_hash = "<h>"', ...)` for event-level evidence.
 

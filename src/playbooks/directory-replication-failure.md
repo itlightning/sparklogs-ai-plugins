@@ -6,13 +6,23 @@ index: Directory replication
 
 **Trigger.** "Domain controllers are out of sync", or authentication behaves differently per site.
 
-**Accuracy.** There is no curated replication-health source.
-What is curated is the consequence on the authentication path.
+**Accuracy.** SYSVOL replication (DFS Replication) and Entra Connect sync are curated.
+AD DS object replication (the Directory Service channel) is not collected, so replication topology and latency stay unexamined: say so in WHAT WAS NOT CHECKED.
+"DCs out of sync" is most often SYSVOL: Group Policy differs per DC.
 Scope every DC the client has, not just the one named.
 A DC that reported nothing is the finding; it is not a claim that the DC is down.
-State in WHAT WAS NOT CHECKED that replication topology and latency were not examined.
 
 **Queries.**
+
+Replication and sync failures by reason and by DC:
+
+```lql
+service = directory_services AND severity >= warning
+```
+
+Group by `sparklogs.reason` (LQL), `source` (LQL).
+DFS Replication on `win.eventlog.management` (value): `dfsr_replication_stopped` (value), `dfsr_partner_communication_failed` (value), `dfsr_sysvol_initial_sync_pending` (value).
+Entra Connect on the sync server's `win.eventlog.application` (value): `entra_sync_run_failed` (value), `entra_password_hash_sync_failed` (value), `entra_sync_scheduler_aborted` (value).
 
 Authentication failures by cause and by DC:
 

@@ -30,7 +30,7 @@ Wi-Fi drops often leave no heat, because traffic stops. They show as evidence an
 
 Then drill down:
 
-- This device alone or others too: the `next_reads` (col) entry over a confirmed outage's `compare_start` (col) and `compare_end` (col) reads every device in the org. Keep to the devices at this site. Other devices down in the same buckets points at the shared connection or at the probe target.
+- This device alone or others too: the `next_reads` (col) entry over a confirmed outage's `compare_start` (col) and `compare_end` (col) reads every device in the org. Keep to the devices on this network (`guides/device-state-fields.md`, **Network outages**: the network key). Other devices down in the same buckets points at the shared connection or at the probe target.
 - Wi-Fi quality: the `adapters` (value) result set, with signal, retry and failed-frame shares beside their frame counts.
 - Per-bucket probe attempts, failures and down seconds: the `network_buckets` (value) result set with the outage's `filter_lql` (col).
 - DNS, proxy and adapter configuration: `latest_state` (value), as the `next_reads` (col) entry gives it.
@@ -38,7 +38,7 @@ Then drill down:
 **Events, for what health named.** Network channels on that device over the outage or drop interval:
 
 ```lql
-source = "<host>" AND service = networking
+source: "<host>" AND service = networking
 ```
 
 Group by `sparklogs.reason` (LQL).

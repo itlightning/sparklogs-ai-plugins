@@ -1,6 +1,6 @@
 # Writing Voice
 
-Style rules for every user-visible SparkLogs answer: chat (`sparklogs-ask`), system condition summaries (`sparklogs-investigate`), and cause analyses (`sparklogs-analyze-cause`). Consistency here is what makes SparkLogs output read as engineered, not generated.
+Style rules for every user-visible SparkLogs answer: chat (`sparklogs-ask`), system condition summaries (`sparklogs-investigate`), and cause analyses (`sparklogs-analyze-cause`). The same rules apply in every skill.
 
 ---
 
@@ -20,7 +20,7 @@ Style rules for every user-visible SparkLogs answer: chat (`sparklogs-ask`), sys
 
 ## Core rules shared with all SparkLogs public writing
 
-These apply to every answer as well. They are kept in sync with the SparkLogs writing core; do not edit them here.
+These apply to every answer as well.
 
 <!-- core-block:start (synced 2026-11-11) -->
 - Every sentence earns its place: if it would not change what the reader does, cut it.

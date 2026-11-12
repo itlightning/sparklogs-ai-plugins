@@ -65,7 +65,7 @@ Unregistered provider (`0x80040154`) on a handful of hosts can dominate `service
 Pin those hosts before reading an estate histogram as one story.
 
 ```lql
-source = "<host>" AND service = backup AND subsource in (win.eventlog.application, win.eventlog.system)
+source: "<host>" AND service = backup AND subsource in (win.eventlog.application, win.eventlog.system)
 ```
 
 Group by `sparklogs.reason` (LQL).
@@ -73,7 +73,7 @@ Group by `sparklogs.reason` (LQL).
 Who is snapshotting (stays Info so default sweeps see it):
 
 ```lql
-source = "<host>" AND subsource = win.eventlog.application AND event_id = 8231
+source: "<host>" AND subsource = win.eventlog.application AND event_id = 8231
 ```
 <!-- confirmed with data on 2026-11-12 -->
 
@@ -83,7 +83,7 @@ Group attempts by `win.eventlog.application.vss_snapshot_set` (LQL).
 Writer × code:
 
 ```lql
-source = "<host>" AND subsource = win.eventlog.application AND sparklogs.result.code!
+source: "<host>" AND subsource = win.eventlog.application AND sparklogs.result.code!
 ```
 
 Group by `win.eventlog.application.vss_writer` (LQL), `sparklogs.result.code_name` (LQL).
@@ -91,7 +91,7 @@ Group by `win.eventlog.application.vss_writer` (LQL), `sparklogs.result.code_nam
 Intent:
 
 ```lql
-source = "<host>" AND subsource = win.eventlog.application AND win.eventlog.application.vss_operation_intent!
+source: "<host>" AND subsource = win.eventlog.application AND win.eventlog.application.vss_operation_intent!
 ```
 
 Group by `win.eventlog.application.vss_operation_intent` (LQL).
@@ -99,7 +99,7 @@ Group by `win.eventlog.application.vss_operation_intent` (LQL).
 Volsnap reclamation (space 33, count 58, delete-pending 95):
 
 ```lql
-source = "<host>" AND subsource = win.eventlog.system AND event_id in (33, 58, 95)
+source: "<host>" AND subsource = win.eventlog.system AND event_id in (33, 58, 95)
 ```
 <!-- confirmed with data on 2026-11-12 -->
 

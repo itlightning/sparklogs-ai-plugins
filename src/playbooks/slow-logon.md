@@ -19,7 +19,7 @@ Logon is short, so read `evidence` (col) and `events` (col) as well as heat: a p
 **Events, for what health named.** Sign-in shape for the account:
 
 ```lql
-source = "<host>" AND sparklogs.actor.name = "<account>"
+source: "<host>" AND sparklogs.actor.name = "<account>"
 ```
 
 Group by `sparklogs.reason` (LQL), `win.eventlog.security.logon_type_name` (LQL).

@@ -13,7 +13,7 @@ Window must include the renewal attempt.
 **Queries.**
 
 ```lql
-source = "<host>" AND service = certificates
+source: "<host>" AND service = certificates
 ```
 
 Group by `sparklogs.reason` (LQL).

@@ -36,6 +36,12 @@ Product tokens on `app` (LQL): `guides/app-vocabulary.md`.
 
 A `subsource` (LQL) not in this table comes from an ingest key or another non-agent sender: it is freeform, carries no feed health, and is uncurated text (`message` (LQL) / `pattern` (LQL) / `severity` (LQL)).
 
+## Which channels are collected
+
+To see which Windows Event Log channels a host sends, count its events grouped by `subsource` (LQL) and `origin` (LQL) over a few days (`query_event_counts_by_severity` (tool) with `group_by=["subsource", "origin"]` and `source: "<host>"` (LQL)).
+On a host whose feeds report current, a channel absent from that list is not collected, or logged nothing in the window. Quiet channels exist, so widen the window before saying a channel is not collected.
+The Windows Event Log feeds collect Microsoft channels plus a few vendor channels; a backup, EDR or RMM vendor's own channel is not among them.
+
 ## Portable fields
 
 Curated fields (`sparklogs.reason` (LQL), `sparklogs.reason_variant` (LQL), `sparklogs.class` (LQL), `sparklogs.kind` (LQL), `sparklogs.instance` (LQL), `sparklogs.topic` (LQL), Security `sparklogs.actor.*`) mean the same on every feed: `guides/scope-ladder.md`.

@@ -38,7 +38,7 @@ Choose by the question: device state, process trends, event counts or raw eviden
 | Tool | Reach for it when |
 |---|---|
 | `resolve_scope` (tool) | You have a name (client, host, ticket) and need an `org_id` (col). Always first. Collection/completeness live here. Multiple rows at the same best `match_kind` (col): confirm with the engineer before proceeding, don't guess. |
-| `list_sources` (tool) | Before concluding anything from an absence: did this source send data in THIS window? Any source type, including ingest keys. Any non-zero `cnt_critical_plus` (col) in scope: fetch those events before proceeding, whatever the investigation topic. |
+| `list_sources` (tool) | Before concluding anything from an absence: did this source send data in THIS window? Any source type, including ingest keys. Non-zero `cnt_critical_plus` (col) on curated data: fetch-first (`guides/category-classes.md`). |
 | `query_device_health` (tool) | Device conditions, inventories and trends. For one device or a few, start with `view` (arg) `device_overview` (value) or `device_network` (value), then drill down. Across devices: omit the view for open conditions, `group_by_reason` (arg) for device counts, `fleet_processes` (value) / `fleet_performance` (value) for outliers. Crash or app problem: `event_timeline` (value) with `kinds` (arg) `["occurrence"]` (value). Every view: `guides/device-state-fields.md` (**Choose the view**). |
 | `query_scope_activity` (tool) | You do not know what this client HAS: which apps, services and subsources exist at all. Orientation on an unfamiliar estate. |
 | `query_event_counts_by_severity` (tool) | "What is going on here", at any altitude. The default mid-tier tool. `group_by=["sparklogs.reason"]` or `["pattern_hash"]`; pass two fields when the question has two nouns in it. |
@@ -105,7 +105,7 @@ Every rendered cell is meant to go back into a filter unchanged.
 - **`t` (LQL), `ingested_t` (LQL) and `org_id` (LQL) are filter names.** They are the names in every response and the names LQL accepts, in `lql` (arg) and in `filter_lql` (arg). Inside an element scope they are payload keys, not the standard fields.
 - **A rendered severity name is a filter literal.** `severity >= warning` (LQL) is the readable form; prefer the name over the number.
 - **Array items need item-aligned expressions.** Use `path[](leaf=value)` (LQL) to filter items and the documented item grammar to group their leaves. A whole-event filter can retain other items in the same event.
-- **String equality ignores case** on resident columns and on payload leaves alike.
+- **`source` (LQL) equality is exact, case included.** A host the engineer typed as `SRV-FILE01` matches nothing when the data says `srv-file01`. Write `source: "<name>"` (LQL) with the full name as `resolve_scope` (tool) (`reported_hostname` (col)) or `list_sources` (tool) returned it, or scope with `agent_ids` (arg). `:` is contains, ignoring case: when one host name contains another (`srv-01`, `srv-01b`), group by `source` (LQL) to check. `subsource` (LQL) and payload leaves compare case-insensitively.
 - **A bare 15 or 16 digit integer can be a timestamp.** Known datetime fields render as RFC3339; a leftover digit string that long, quoted or not, may be epoch microseconds UTC. Do not treat other numbers as times.
 
 ## When the response is large
@@ -123,7 +123,7 @@ Every rendered cell is meant to go back into a filter unchanged.
   Other tools may refuse TSV for array or object columns. Follow the returned format and schema.
 - If the host reports truncation, inspect the saved output or retrieve a smaller response.
   Do not count lines after every call.
-- A handle marked `cache_invalidated` (value) cannot be refined again. Reissue the original data query.
+- A handle whose `summary.cache_status` (col) is `cache_invalidated` (value) is dead for this token: refining it again cannot revive it, and it is not a `scope_violation` (value) from a bad org list. Issue a new `query_logs` (tool) or counts call and use its fresh `query_id` (arg).
 
 
 ---
@@ -132,7 +132,7 @@ Every rendered cell is meant to go back into a filter unchanged.
 
 **Reaching for `query_logs` (tool) first.** Aggregation first. Almost always.
 
-**Skipping `list_sources` (tool).** Source might not have data in the investigation's window. Always confirm with `list_sources` (tool) scoped to the investigation's `start` (arg)/`end` (arg).
+**Concluding from an absence without `list_sources` (tool).** Before saying a source has nothing, confirm with `list_sources` (tool) over the investigation's `start` (arg)/`end` (arg) that it sent data in that window.
 
 **Refining beyond the result shape.** A grouped handle contains grouped rows. Refine can page or analyze those rows, but cannot recover their raw events. Use `query_logs` (tool) for the underlying evidence.
 

@@ -41,7 +41,7 @@ They do not recommend remediation or assert a root cause.
 - The rows, plus the `query_url` (col) of the result they came from.
 - A focusing question: "what unusual events happened in this set?", "which patterns dominate?", "are there any errors I should know about?"
 
-**The orchestrator uses the structured output as evidence in Findings, citing the same query_urls.** The orchestrator never receives the raw events back - only the summary. Keep exact severities in the orchestrator's own reading when a Finding turns on the rung.
+**The orchestrator uses the structured output as evidence in Findings, citing the same query_urls.** The subagent returns a summary, not the raw events; the orchestrator keeps the rows it needs when a Finding turns on an exact severity rung.
 
 **Delegation heuristic:** if a step would require reading >500 raw events whose content the final summary won't need, delegate. If the step's likely output is a large volume of intermediate data the orchestrator doesn't need to see directly, delegate.
 
@@ -49,7 +49,7 @@ They do not recommend remediation or assert a root cause.
 
 ## Subagent: `sparklogs-pattern-enumerator`
 
-**Purpose.** Given a `query_event_counts_by_severity` (tool) result with many pattern groups, enumerate the top N with likely meanings and produce structured input for Findings.
+**Purpose.** Given a `query_event_counts_by_severity` (tool) result with many pattern groups, summarize the top N from the pattern text and reasons the orchestrator supplied, leaving meaning empty where none was supplied.
 
 **Model tier:** fast, lightweight tier.
 
@@ -58,7 +58,7 @@ They do not recommend remediation or assert a root cause.
 - Pattern text for the top N hashes, from `describe_pattern` (tool) called by the orchestrator.
 - Top N (default 10).
 
-**Delegation heuristic:** when `query_event_counts_by_severity` (tool) returns 50+ groups and you need the top N enumerated with meanings.
+**Delegation heuristic:** when `query_event_counts_by_severity` (tool) returns 50+ groups and you need the top N summarized.
 
 ---
 

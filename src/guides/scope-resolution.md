@@ -30,7 +30,7 @@ Approach in order of preference; stop at the first step that gives an unambiguou
 
 ### Step 1: Parse the engineer's message for an explicit ID
 
-If the message includes a customer ID, org ID, agent UUID, or workspace identifier (e.g. "ACME-DENT", "client_id=42", a full UUID), pass it as `org_ids` (arg) when it is already a UUID you recognize, or as the `query` (arg) substring otherwise. Call `resolve_scope` (tool) with that value and the session `external_investigation_id` (arg).
+If the message includes an org ID, agent UUID, or customer name or code (e.g. "ACME-DENT", a full UUID), pass it as `org_ids` (arg) when it is already a UUID you recognize, or as `query` (arg) otherwise. An RMM or PSA client id goes in `rmm_client_id` (arg) or `psa_client_id` (arg) (Correlation ids, above). Call `resolve_scope` (tool) with that value and the session `external_investigation_id` (arg).
 
 If `resolve_scope` (tool) returns a single row with `match_kind` (col) **`exact` (value)**, proceed with that scope.
 
@@ -105,11 +105,10 @@ Use these readings in the cross-check below; do not treat a silent source as hea
 
 ### Step 9: Sub-org expansion
 
-When a single org is identified, by default include all sub-orgs underneath it.
-Pass `include_sub_orgs: true` (default) on org-scoped MCP calls so the server expands the tree. Then call `list_sources` (tool) with the resolved `org_ids` (arg), the investigation `start` (arg)/`end` (arg) (RFC3339 UTC), and the session `external_investigation_id` (arg).
+A name matching one org returns that org's tree in `summary.query_scope` (col), every org listed by id. Pass it to the data tools, with the investigation `start` (arg)/`end` (arg) (RFC3339 UTC) and the session `external_investigation_id` (arg).
 
 If the engineer scopes to one sub-org only, set `org_ids` (arg) to that sub-org.
-Keep `include_sub_orgs` (arg) true unless they explicitly want a single node with no descendants.
+Pass the `summary.query_scope` (col) that `resolve_scope` (tool) returned, unchanged: it already lists every org to query. Set `include_sub_orgs` (arg) yourself only when the engineer named a parent org and wants its descendants.
 
 ### Step 10: Scope can expand during the investigation
 
@@ -121,16 +120,16 @@ Note scope changes in the EXECUTIVE SUMMARY.
 
 ## Source discovery with `list_sources` (tool)
 
-After resolving scope, confirm the source(s) of interest have data in the investigation window.
+Before concluding anything from an absence, confirm the source(s) of interest sent data in the investigation window. For one device, the `resolve_scope` (tool) agent row (`last_data_at` (col), feed health) and the device view's coverage often answer this already.
 
 Use the investigation's actual **`start` (arg)** / **`end` (arg)** (RFC3339 UTC).
 Do **not** infer scope from recent heartbeat alone; historical windows need historical event presence.
 
-Call `list_sources` (tool) with org scope from `resolve_scope` (tool), default `include_sub_orgs: true` (arg), the investigation window, `include_top_interesting_patterns: true` (arg) when you want the teaser, and the session `external_investigation_id` (arg).
+Call `list_sources` (tool) with the `query_scope` (arg) from `resolve_scope` (tool), the investigation window, `include_top_interesting_patterns: true` (arg) when you want the teaser, and the session `external_investigation_id` (arg).
 
 ### Per-row fields (shipped)
 
-Each row is one **(sender, source)** pair in the window:
+Each row is one **(sender, source, `collector_source_kind` (col))** combination in the window:
 
 | Field | Role |
 |---|---|
@@ -141,7 +140,7 @@ Each row is one **(sender, source)** pair in the window:
 | `event_count` (col), `bytes_ingested` (col) | Volume in the window |
 | `cnt_interesting` (col), `distinct_interesting` (col) | Triage: how much is going on here |
 | `cnt_warning` (col) .. `cnt_severe` (col) | One count per failure-side band, 13 through 19 (the ladder is in `category-classes.md`) |
-| `cnt_critical_plus` (col) | Severity 20 and above. Rare, and fetch-first whatever the ticket was about |
+| `cnt_critical_plus` (col) | Severity 20 and above; fetch-first on curated data (`category-classes.md`) |
 | `first_event_at` (col), `last_event_at` (col) | Exact window bounds for this pair |
 
 The summary may include **`top_interesting_patterns` (col)**: a short ranked teaser (~8 entries) of high-signal patterns in scope.
@@ -177,10 +176,11 @@ When a feed is behind, stuck or blocked, an advisory explains the lag and carrie
 
 ## Missed events
 
-Collection sometimes has to skip over events because the underlying collection engine could not provide them; in v1 that engine is the Windows event log itself. Call this **missed events** or **skipped events**, bounded by a **skip window**. It is a limitation of collection, never a fault of the machine or the operator, and the tone is measured: a skip is a notice, not an incident.
+Collection sometimes has to skip over events because the underlying collection engine could not provide them; today that engine is the Windows event log itself. Call this **missed events** or **skipped events**, bounded by a **skip window**. It is a limitation of collection, never a fault of the machine or the operator, and the tone is measured: a skip is a notice, not an incident.
 
-- State what happened and its bounds, then stop. The events may still exist in the device's local Windows event log; SparkLogs does not re-collect them, so never offer or imply recovery.
-- The skip cause code decides whether a count is exact. `skip_record` (value) is exactly one event. `+1s` through `+30m` are an unknown count inside a window whose width the code names. `future_only` (value) is everything from the last event sent up to the new subscription. Render an unfamiliar code verbatim and state the window bounds.
+- State what happened and its bounds, then stop. SparkLogs does not re-collect skipped events, so never offer or imply recovery.
+- The skip rows are `sparklogs.kind = agent_op` (LQL) on `sparklogs.agent.vector` (value). `log_collection_skipped_to_recover` (value): the collector could not read from its saved position and stepped forward; the events may still be in the device's own log. `log_collection_skipped_records_overwritten` (value): Windows overwrote the records before they were read, so they are gone from the device too.
+- `resume_rung` (other) says how far collection jumped: `skip_record` (value), `isolate_one` (value) and `boundary_tick` (value) are one record or moment; `+1s` (other) through `+30m` (other) a jump of that width; `future_only` (value) everything up to the new subscription. `missing_records` (other) carries the count when the collector reports it. Render an unfamiliar value verbatim and state the window bounds. Meaning of each: `feeds/sparklogs.agent.vector/reasons.md`.
 - **An ABSENT skips entry means the source type does not detect skips at all**, never that none occurred. Today only Windows event log feeds detect them.
 - **Skips are orthogonal to feed health.** A current, advancing feed can carry a skip window. Freshness never disproves a skip, and a skip never means the feed is unhealthy now.
 - Never write "gap", "data loss" or "lost" for this. A delayed feed is `behind` (value) or `stuck` (value), which is a different thing from skipped.
@@ -206,10 +206,10 @@ Do not filter `list_sources` (tool) by "reporting now" when the engineer asked a
 
 After scope resolution, prefer **`agent_id` (LQL)** filters when the question is about everything one sender shipped. Call `query_event_counts_by_severity` (tool) with an `lql` (arg) filter such as `agent_id = "<uuid from resolve_scope or list_sources>"` (LQL) and a `group_by` (arg) such as `pattern` (LQL).
 
-Use **`source = "hostname"` (LQL)** when the question is about the origin host label, or combine both when you need on-host events from one agent:
+Use **`source: "hostname"` (LQL)**, with the name as the tools returned it, when the question is about the origin host label, or combine both when you need on-host events from one agent:
 
 ```
-lql: 'agent_id = "<uuid>" AND source = "<hostname>"'
+lql: 'agent_id = "<uuid>" AND source: "<hostname>"'
 ```
 
 Ingest-key-shipped events use the ingest key's UUID as `agent_id` (LQL); filter the same way.
@@ -248,7 +248,7 @@ If timezone is unclear, **ask**; do not assume.
 
 **Citing teaser patterns without `describe_pattern` (tool).** Teaser previews are not evidence-grade pattern text.
 
-**Forgetting sub-orgs.** Default `include_sub_orgs: true` unless the engineer scopes narrower.
+**Rewriting the returned scope.** Pass `summary.query_scope` (col) as returned; add sub-orgs only for a named parent org.
 
 **New `external_investigation_id` (arg) on scope expansion.** Same investigation, same id.
 

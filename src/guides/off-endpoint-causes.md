@@ -9,7 +9,8 @@ The list is **not exhaustive** - it's a starting set covering common patterns. I
 1. When you start an investigation, identify which symptom category the engineer's request falls under.
 2. Read the relevant section(s) below.
 3. In your WHAT WAS NOT CHECKED section, list the items from below that are *actually relevant* to the specific investigation scope. **Do not list every item generically - that becomes boilerplate noise.** List what wasn't checked for *this* investigation.
-4. If on-endpoint evidence is sufficient and off-endpoint causes are not implicated, the section can be brief: "The off-endpoint causes typically associated with this kind of investigation were considered but the on-endpoint evidence is sufficient to characterize the observed conditions - see Findings."
+4. Before naming a third-party source as not checked, look for it in `list_sources` (tool): firewalls, identity providers and EDR consoles can send to SparkLogs with an ingest key (`guides/scope-ladder.md`, Ingest-key data). Name it as not checked only when no sender for it is in scope.
+5. If on-endpoint evidence is sufficient and off-endpoint causes are not implicated, the section can be brief: "The off-endpoint causes typically associated with this kind of investigation were considered but the on-endpoint evidence is sufficient to characterize the observed conditions - see Findings."
 
 ---
 
@@ -18,7 +19,7 @@ The list is **not exhaustive** - it's a starting set covering common patterns. I
 **Off-endpoint causes the AI agent should flag when on-endpoint evidence is insufficient:**
 
 - **Backup target health (NAS, cloud destination, SAN).** Veeam/Datto/Acronis often write to a NAS or cloud target. If the target is failing, slow, or out of space, the on-endpoint side sees "VSS error" but the cause is upstream. Backup target typically does not run a SparkLogs Agent.
-- **EDR cloud blocking VSS operations.** SentinelOne, Sophos, CrowdStrike, Defender for Endpoint may flag VSS operations as suspicious and block them. The block is recorded in the EDR cloud audit, NOT on-endpoint. EDR cloud is outside SparkLogs ingestion currently.
+- **EDR cloud blocking VSS operations.** SentinelOne, Sophos, CrowdStrike, Defender for Endpoint may flag VSS operations as suspicious and block them. The block is recorded in the EDR cloud audit, NOT on-endpoint. The agent does not collect the EDR cloud audit.
 - **Backup vendor's own logs.** Vendor events reach SparkLogs only through the Windows Event Log channels the pack collects; the vendor's own log files are not collected. A vendor (or custom backup script) that writes its job detail only to its own files is invisible here.
 - **Backup credential expiry.** Veeam/Datto runs as a service account whose credentials live in vault/AD. Credential expiry manifests as auth failure earlier in the backup pipeline; the VSS error is a downstream symptom. Credential vault is outside on-endpoint state.
 - **Hyper-V / VMware guest writers.** When the source is a hypervisor host but the failed writer is in a guest, on-endpoint state shows host healthy but guest writers are not visible from host. Cross-host correlation is not currently in scope.
@@ -30,11 +31,11 @@ The list is **not exhaustive** - it's a starting set covering common patterns. I
 
 **Off-endpoint causes:**
 
-- **Azure AD / Entra conditional-access policy.** Policy changes can silently block logon for a subset of users. On-prem AD shows healthy; the failure is in the cloud identity layer. Azure AD audit logs are outside SparkLogs ingestion currently.
-- **MFA cloud (Duo, Microsoft Authenticator).** Rate-limits, outages, user-side MFA issues. From the endpoint, looks like generic auth failure. MFA cloud audit is outside SparkLogs ingestion currently.
+- **Azure AD / Entra conditional-access policy.** Policy changes can silently block logon for a subset of users. On-prem AD shows healthy; the failure is in the cloud identity layer. The agent does not collect Entra audit logs.
+- **MFA cloud (Duo, Microsoft Authenticator).** Rate-limits, outages, user-side MFA issues. From the endpoint, looks like generic auth failure. The agent does not collect MFA cloud audit logs.
 - **Federation server (ADFS) cert expiry or outage.** Federation servers are sometimes on a separate machine that may or may not run a SparkLogs Agent. If not, ADFS issues are invisible from on-endpoint state.
 - **Time drift on the PDC emulator.** If the PDC's clock is drifting, Kerberos fails silently for clients. The PDC needs to be in scope for the investigation; if only the workstation is investigated, the PDC's time state is invisible.
-- **Azure AD Connect sync break.** Users get silently dropped from on-prem replica. Sync state lives in Entra Connect's own logs on the sync server, which SparkLogs does not collect, not in on-prem AD itself.
+- **Azure AD Connect sync break.** Users get silently dropped from on-prem replica. Entra Connect writes sync-run and password-hash-sync failures to the Application log of the sync server; they are curated when that server runs the agent (`entra_sync_run_failed` (value), `entra_password_hash_sync_failed` (value)). Its detailed run history stays on the server.
 - **Network path between user and DC.** Packet loss, latency, intermittent DNS - visible from network monitoring, not from endpoint state alone.
 - **Cellular / coffee-shop WiFi for laptops.** Some "slow logon" reports are devices with intermittent network paths to the DC. The agent's probes cover the gateway, an internet target and DNS, not the path to a DC.
 
@@ -57,7 +58,7 @@ The list is **not exhaustive** - it's a starting set covering common patterns. I
 
 - **WSUS server health.** If the MSP uses WSUS, server-side issues (storage, content sync, SUSDB) are at the WSUS server, not on the endpoint.
 - **Microsoft Update service / CDN status.** When endpoints update directly from MS, MS-side issues are off-endpoint.
-- **Update content-sync issues.** Endpoint reports "needs reboot" but the actual servicing-stack failure may be in CBS detail the pack does not curate; read the curated `win.servicing.cbs` (value) and `win.servicing.dism` (value) reasons first, then the device's own CBS log.
+- **Update content-sync issues.** Endpoint reports "needs reboot" but the actual servicing-stack failure may be in CBS lines the pack collects without a reason: read the curated `win.servicing.cbs` (value) and `win.servicing.dism` (value) reasons first, then the uncurated rows of the same feeds.
 - **Driver vendor's parallel update channel.** If Intel/Realtek/NVIDIA pushed a driver update independently of WU, the conflict source is outside WU's view.
 
 ---
@@ -118,7 +119,7 @@ The list is **not exhaustive** - it's a starting set covering common patterns. I
 
 **Off-endpoint causes:**
 
-- **RMM cloud service health.** ConnectWise/NinjaOne/Datto/Kaseya cloud outages appear as endpoint-can't-reach-RMM from the endpoint perspective. RMM cloud audit is outside SparkLogs ingestion currently.
+- **RMM cloud service health.** ConnectWise/NinjaOne/Datto/Kaseya cloud outages appear as endpoint-can't-reach-RMM from the endpoint perspective. The agent does not collect RMM cloud audit logs.
 - **EDR cloud quarantine of RMM agent.** SentinelOne or Defender flags RMM agent as suspicious and quarantines it. The quarantine is in EDR cloud audit, not on endpoint.
 - **Network path between endpoint and RMM cloud.** Firewall, proxy, ISP, WAN, DNS - all off-endpoint.
 - **Corporate proxy / TLS inspection.** Some corporate networks MITM-inspect TLS; if the proxy doesn't understand the RMM protocol, it can break the connection.
@@ -175,7 +176,7 @@ Some off-endpoint causes apply across many symptom categories and are worth flag
 ### Network
 
 - **Network monitoring tools** (Auvik, Domotz, PRTG, LogicMonitor) collect network-path data not visible from endpoints.
-- **Switch / AP / firewall logs** (FortiGate, SonicWall, Meraki, etc.) - generally outside on-endpoint visibility.
+- **Switch / AP / firewall logs** (FortiGate, SonicWall, Meraki, etc.) - not collected by the agent; present only when the client sends them with an ingest key.
 
 ### Identity
 
@@ -202,7 +203,7 @@ The point of enumeration is to support the engineer's decision about where to in
 
 **Right (specific, actionable):**
 - "Backup target NAS-01 was not checked (it does not run a SparkLogs Agent). Recommend checking NAS-01 health logs directly to confirm or rule out a target-side cause."
-- "Azure AD audit logs are outside SparkLogs ingestion currently. If on-endpoint evidence does not explain the logon failures (Findings 1-3 are inconclusive), check the Azure AD admin center for recent conditional-access policy changes."
+- "Entra audit logs are not in this scope (no sender for them in list_sources). If on-endpoint evidence does not explain the logon failures (Findings 1-3 are inconclusive), check the Azure AD admin center for recent conditional-access policy changes."
 
 **Wrong (generic boilerplate):**
 - "Many off-endpoint causes are possible."

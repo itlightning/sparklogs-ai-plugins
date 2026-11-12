@@ -47,7 +47,6 @@ WHAT WAS EXAMINED (incremental over the prior investigation)
 - Additional backing queries: <N>
 - Additional cached refinements: <M>
 - Additional matched population examined: <rows/events, from query summaries, if any additional queries ran>
-- Wall-clock: <minutes>
 ```
 
 ---
@@ -116,7 +115,7 @@ Concrete things the engineer could do. Framed as suggestions, not prescriptions.
 
 **Right:**
 - "If Hypothesis #1 is the working theory, consider testing rollback on one staging source."
-- "Pulling the installed-products list for the 7 affected sources via SparkLogs would help confirm whether they share KB5034441 specifically or some other factor."
+- "Grouping `service = patching` (LQL) events on the 7 affected sources by `source` (LQL) would show whether they all installed KB5034441; installed products (Programs and Features) do not list Windows updates."
 - "Running a network probe to NAS-01 during a future scheduled backup window could confirm or rule out target-side latency."
 
 **Wrong:**
@@ -197,7 +196,6 @@ WHAT WAS EXAMINED
 - Additional backing queries: 0
 - Additional cached refinements: 2 (reused the prior investigation's cached queries)
 - Additional matched population examined: none (refinements only, no new backing query)
-- Wall-clock: 1.5 minutes
 ```
 
 This worked example shows:

@@ -115,6 +115,18 @@ A result set read after its stored rows expired is rebuilt by re-running the ori
 Every set leads with `agent_id` (col) and `org_id` (col), and bucketed sets with `bucket_start` (col).
 Paste a reading's `filter_lql` (col) into `refine_query_result` (tool) with that set's `query_id` (arg).
 For follow-ups on one device's inventory (is a service running, is a product installed, which drivers are loaded), refine the overview's `state` (value) set instead of new calls.
+
+Result-set columns use short names, not the `sparklogs.*` paths of events: a `sparklogs.topic` (LQL) filter on a result set matches nothing, with no warning.
+Key columns per set:
+
+| Set | Key columns |
+|---|---|
+| `state` (value) | `topic` (col), `instance` (col), `row_kind` (col), `kind` (col), `observed_at` (col), and the payload as `sparklogs.data.<topic>[]`. Filter `topic = installed_products AND sparklogs.data.installed_products[](name: "Edge")` |
+| `events` (value) | `entry` (col) (episode or change), `reason` (col), `topic` (col), `instance` (col), `class` (col), `severity` (col), `is_open` (col), `clearing_since` (col), `observed_at` (col) |
+| `processes` (value) | `bucket_start` (col), `image_name` (col), `cpu_pct_avg` (col), `resident_bytes_avg` (col), `private_commit_bytes_avg` (col), per-process read, write and TCP rates |
+| `storage` (value) | `bucket_start` (col), `kind` (col) (disk or volume), `instance` (col), `label` (col), `media` (col), `is_busiest_disk` (col), `latency_ms_p90_10s` (col), `queue_depth_avg` (col), `busy_pct_avg` (col) |
+
+Every set lists its own columns in the refine response's `schema.columns` (col): read it before writing a filter.
 A ratio or percent column sits beside its numerator and denominator: to combine buckets, sum both and divide.
 An average of a ratio column weights a near-idle bucket the same as a busy one.
 
@@ -145,7 +157,7 @@ On `device_network` (value), a gateway that ignores ping still lists its attempt
 `ownership` (col) says where an outage sits, from the device's own evidence: its own link, between it and its gateway, beyond the gateway, or at the DNS resolver. It reads not placed when no gateway probe was counted during the outage.
 Beyond the gateway covers both the router's internet connection and the ISP. Endpoint data cannot tell those apart, so do not name the ISP as the cause.
 `compare_start` (col) and `compare_end` (col) bound a comparison: the matching `next_reads` (col) entry reads every device in the org over those buckets.
-The org can span several sites: compare only the devices at the same site. Several devices down together can also mean the probe target itself was down.
+The org can span several sites. Devices on the same network share `sparklogs.data.performance.network_context_key` (LQL), carried on `fleet_performance` (value) rows and the performance topic: compare devices with the outage device's key. A `vpn_` (other) key is a device whose main connection runs over a VPN. The key is kept while a device is offline, so it is not proof of the current network. Several devices down together can also mean the probe target itself was down.
 
 ## Report installed software
 
@@ -230,10 +242,8 @@ Missing data does not establish that the device is healthy, offline or affected 
 Topic absence can reflect availability, collection state or the selected window.
 Check device and feed status when the distinction matters.
 
-`agent_complete_through` (col) on the `resolve_scope` (tool) agent row bounds the device's reported data completeness.
-Read its advisories for the affected feeds.
-Event counts and first/last timestamps cannot establish continuous coverage inside the window.
 A device missing from a report remains unknown until its scope and data coverage are established.
+Completeness comes from `agent_complete_through` (col) on the agent row, never from event counts: `guides/scope-resolution.md` (Completeness).
 
 ## Other event families
 
