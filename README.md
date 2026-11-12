@@ -50,7 +50,7 @@ Install from the GitHub repository marketplace root, not from a raw `marketplace
 
 ## Trust And Safety
 
-SparkLogs AI assists investigation; the MSP technician remains accountable for operational decisions. Every factual claim should cite evidence. Cause analysis is opt-in and labeled as speculative. Read the [AI trust principles](docs/principles/ai-trust-principles.md).
+SparkLogs AI accelerates investigation, and the engineer decides what to do. Every factual claim cites its data, and likely causes are labeled as analysis. Read the [AI Trust Principles](https://sparklogs.com/docs/it-fleet-intelligence/trust-principles), and [what they ask of this plugin](docs/principles/ai-trust-principles.md).
 
 ## Contributing
 
