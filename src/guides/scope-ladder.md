@@ -53,7 +53,7 @@ Events a source pack curated carry the names below. Uncurated events have none o
 | `sparklogs.reason` (LQL) | The curated name of what happened (`vss_writer_failed` (value), `os_volume_space_low` (value)). Meaning: `feeds/<id>/reasons.md` |
 | `sparklogs.reason_variant` (LQL) | Which form of that reason this row is (for example `outbound` (other) or `sspi_probe` (other)), when the reason has more than one |
 | `sparklogs.class` (LQL) | Temporal shape: `NOTABLE` (value), `ELEVATED` (value), `RECOVERED` (value), `ENDED` (value), `BENIGN` (value): `guides/category-classes.md` |
-| `sparklogs.kind` (LQL) | Row morphology (`inventory` (value), `monitor` (value), `occurrence` (value) and the rest): the list and its caveats are in `guides/category-classes.md` (Kind) |
+| `sparklogs.kind` (LQL) | Row morphology (`inventory` (value), `monitor` (value), `occurrence` (value) and the rest): most Windows Event Log reasons carry none; the list and where it is set: `guides/category-classes.md` (Kind) |
 | `sparklogs.instance` (LQL) | The subject: which volume, writer, service or adapter. Show `sparklogs.display_name` (LQL) when present |
 
 Rules that change counts:

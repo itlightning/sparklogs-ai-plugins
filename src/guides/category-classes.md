@@ -127,8 +127,8 @@ spelling to trust:
 
 Severity bands, same on every tool: cnt_debug_or_below (severity 6 and below), cnt_verbose (7-8), cnt_info_or_notice (9-12), cnt_warning (13-15), cnt_minor (16), cnt_error (17), cnt_serious (18), cnt_severe (19), cnt_critical_plus (20 and above). Listings of problems carry the failure side only (cnt_warning and above). Tools that count all traffic carry every band.
 
-`summary.severity_histogram` (col) is an ORDERED list of `{band, count}` over those bands, worst-last,
-worst-last. `query_event_counts_by_severity` (tool) lists every band, with zeros; `list_sources` (tool) and `query_scope_activity` (tool) list only the bands present. A missing band is a zero.
+`summary.severity_histogram` (col) is an ORDERED list of `{band, count}` over those bands, worst-last.
+`query_event_counts_by_severity` (tool) lists every band, with zeros; `list_sources` (tool) and `query_scope_activity` (tool) list only the bands present. A missing band is a zero.
 The failure-side subset is the five columns `cnt_warning` (col) through `cnt_critical_plus` (col), and a listing
 that carries them is not hiding the quiet traffic: it never counted it.
 
@@ -152,6 +152,8 @@ vendor's taxonomy. A curated pack re-grades by consequence.
 
 `sparklogs.kind` (LQL) says what MORPHOLOGY a row is: `inventory` (value), `monitor` (value), `occurrence` (value), `delta` (value), `agent_op` (value),
 `config_change` (value), `malformed` (value). An `occurrence` (value) is a one-off event the agent observed, such as a process crash. It is a different question from class and from severity.
+
+**Where kind is set.** Device-state rows always carry a kind. On Windows Event Log feeds only two shapes do: `config_change` (value) (firewall rules, service installs, group membership, Defender settings) and `occurrence` (value) on System (boot, shutdown, sleep, wake and restart marks, SCM 7036 agent start and stop, SCM 7034 `service_crashed` (value)), plus `agent_op` (value) rows. Most other Windows Event Log reasons, `app_crash` (value) and `app_hang` (value) among them, carry no kind: group them by `sparklogs.reason` (LQL), and read an empty kind group as normal.
 
 `malformed` (value) marks a row that did not parse cleanly, and it does not stand alone: a row can keep a
 valid `sparklogs.kind` (LQL) and still carry `sparklogs.malformed_event=true`, so a `sparklogs.kind=malformed` filter by itself misses

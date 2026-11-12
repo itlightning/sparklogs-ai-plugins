@@ -1,7 +1,7 @@
 ---
 name: sparklogs-analyze-cause
 description: From a prior SparkLogs investigation summary, derive candidate cause hypotheses with confirm/refute steps and confidence. Use when the engineer wants cause analysis after findings exist.
-indexes: [corpus-navigation, themes, feeds]
+indexes: [corpus-navigation, themes]
 ---
 
 
@@ -99,19 +99,7 @@ Process charts use the same tool with `view` (arg) `top_processes_over_time` (va
 
 **Reason meaning:** the `sparklogs.reason` (LQL) value and the event `message` (col) together; grep `reasons.md` for the matching `##` heading (summary table first, one section only).
 
-## Decode tables (`enums.md`)
-
-Per-feed closed vocabularies. **Grep** the code, constant, or `##` heading; never load a whole file.
-
-| Table | Feed | Use when |
-|---|---|---|
-| `win_status_codes` (value), `kerberos` (value) | `win.eventlog.security` (value) | NTSTATUS and Kerberos result codes on logon and auth failures |
-| `win_logon_types` (value), `win_nps_reason_codes` (value) | `win.eventlog.security` (value) | Logon type on 4624/4625; NPS reason codes |
-| `msi_error_codes` (value) | `win.eventlog.application` (value) | Installer exit codes |
-| `scsi_sense_key` (value), `scsi_additional_sense` (value), `srb_status` (value), `storage_bus_type` (value) | `win.eventlog.storage` (value) | StorPort and disk-subsystem error codes |
-| `code_integrity_signing_levels` (value) | `win.eventlog.identity_security` (value) | Code Integrity requested and validated signing levels |
-
-Feeds without a table carry the raw code on a field: Setup's HRESULT is `win.eventlog.setup.error_code` (LQL); a curated result is `sparklogs.result.code` (LQL).
+**Vendor codes:** grep `feeds/<id>/enums.md` for the code or `##` heading, never the whole file (Security: NTSTATUS, Kerberos, logon types, NPS; Application: MSI; Storage: SCSI, SRB; identity_security: code-integrity levels). Setup's HRESULT is `win.eventlog.setup.error_code` (LQL); a curated result is `sparklogs.result.code` (LQL).
 
 ## How much to read
 
@@ -138,11 +126,7 @@ Feeds without a table carry the raw code on a field: Setup's HRESULT is `win.eve
 |---|---|
 | Output template + examples | `references/output-template.md` |
 | Hypothesis procedure | `references/hypothesis-generation.md` |
-| Symptom playbooks | `sparklogs-investigate` skill (§3b) |
-| Theme / feed routing | generated indexes below |
-| Tool tiers, LQL, scope | `guides/mcp-tool-decision-tree.md`, `guides/lql-reference.md`, `guides/scope-resolution.md`, `guides/scope-ladder.md` |
-| Category / device state / fields | `guides/category-classes.md`, `guides/device-state-fields.md`, `guides/generated-reference-router.md`, `guides/stream-kinds.md`, `guides/app-vocabulary.md` |
-| Off-endpoint, mistakes, voice | `guides/off-endpoint-causes.md`, `guides/common-mistakes.md`, `guides/writing-voice.md` |
+| Guides (tools, LQL, scope, device state, mistakes, voice) | the corpus block above (Where to look); feeds: `guides/generated-reference-router.md` |
 
 <!-- BEGIN GENERATED INDEX:themes -->
 | Topic | File |
@@ -154,27 +138,6 @@ Feeds without a table carry the raw code on a field: Setup's HRESULT is `win.eve
 | CPU, RAM, disk, network, installed software, monitors | `themes/device-health-and-state.md` |
 | Named backup product (Veeam etc.): installed products. Not operational events. | `themes/device-health-and-state.md` |
 <!-- END GENERATED INDEX:themes -->
-
-<!-- BEGIN GENERATED INDEX:feeds -->
-| Feed | What | Path |
-|---|---|---|
-| `win.eventlog.security` | Security auditing: logons, account and policy changes, actors | `feeds/win.eventlog.security/` |
-| `win.eventlog.system` | System channel: services, drivers, kernel, VSS, storage | `feeds/win.eventlog.system/` |
-| `win.eventlog.application` | Application channel: app crashes, hangs, vendor app events | `feeds/win.eventlog.application/` |
-| `win.eventlog.setup` | Windows Update results per update | `feeds/win.eventlog.setup/` |
-| `win.eventlog.platform` | Platform channels: kernel, PnP, boot, power, drivers | `feeds/win.eventlog.platform/` |
-| `win.eventlog.storage` | Storage channels: disks, volumes, NTFS, storage drivers | `feeds/win.eventlog.storage/` |
-| `win.eventlog.network` | Network channels: SMB client and server, DHCP, DNS client, Wi-Fi, firewall | `feeds/win.eventlog.network/` |
-| `win.eventlog.identity_security` | Identity and security channels: code integrity, exploit protection, Group Policy, Entra and TPM | `feeds/win.eventlog.identity_security/` |
-| `win.eventlog.management` | Management channels: Task Scheduler, BITS, WinRM, WMI, Windows Update client | `feeds/win.eventlog.management/` |
-| `win.eventlog.apps` | Apps channels: packaged apps, app model, application compatibility | `feeds/win.eventlog.apps/` |
-| `win.servicing.cbs` | CBS servicing internals: component store, packages | `feeds/win.servicing.cbs/` |
-| `win.servicing.dism` | DISM operations and image health | `feeds/win.servicing.dism/` |
-| `win.defender.eventlog` | Defender: threats, protection state | `feeds/win.defender.eventlog/` |
-| `sparklogs.device.state` | Device health and state snapshots: CPU, RAM, disk, installed software, monitors | `feeds/sparklogs.device.state/` |
-| `sparklogs.agent.vector` | Collector debug only: data collector internals | `feeds/sparklogs.agent.vector/` |
-| `sparklogs.agent.log` | Collector debug only: agent supervisor log | `feeds/sparklogs.agent.log/` |
-<!-- END GENERATED INDEX:feeds -->
 
 ---
 

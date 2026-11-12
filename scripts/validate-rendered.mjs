@@ -258,7 +258,8 @@ async function validateShippedMarkdown(host, base) {
   }
   for (const skill of ['sparklogs-ask', 'sparklogs-investigate', 'sparklogs-analyze-cause']) {
     const text = await fs.readFile(path.join(base, 'skills', skill, 'SKILL.md'), 'utf8');
-    for (const id of MODULES) {
+    // analyze-cause reasons from a prior summary and reaches feeds through the router guide.
+    for (const id of skill === 'sparklogs-analyze-cause' ? [] : MODULES) {
       if (!text.includes(`feeds/${id}/`)) {
         throw new Error(`${host} ${skill} missing generated feed ${id}`);
       }

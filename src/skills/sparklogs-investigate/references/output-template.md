@@ -264,13 +264,13 @@ EXECUTIVE SUMMARY
 The on-endpoint perf and event data for srv-fileshare02 in the user-reported window shows no signs
 of resource saturation, SMB-server-side errors, or AV-induced spikes (Findings 1-3). The source's
 agent reported its data complete through the window (Finding 4), so the absence is not a
-collection gap. The user reported slowness; this server's data does not show it.
+collection gap. The user reported slowness, and this server's data does not show it.
 
 SCOPE CHECKED
 - Source(s): srv-fileshare02
 - Org(s): org_acme_dental
 - Time window: 2026-04-23 06:00 UTC to 2026-04-23 14:30 UTC
-- Data sources queried: query_device_health; sparklogs.device.state; win.eventlog.system; win.defender.eventlog; sparklogs.kind=agent_op
+- Data sources queried: query_device_health; sparklogs.device.state; win.eventlog.system; win.eventlog.network (SMB server); win.defender.eventlog; sparklogs.kind=agent_op
 - WHAT WAS NOT CHECKED:
   - User workstations making SMB requests (only the file server is in scope).
   - Network path between user workstations and srv-fileshare02 (switches, APs, firewall).

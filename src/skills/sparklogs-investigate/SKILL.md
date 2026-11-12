@@ -29,9 +29,7 @@ You DO:
 - Gather evidence aggregation-first (Section 8), grouping by the scope ladder and curated reasons as the primary shallow-triage lever (Section 9).
 - Cite every claim with a `query_url` (col), band its confidence honestly, and enumerate what was not checked (Sections 5, 6, 7).
 - Read an empty result as a claim about the query, never as a clean bill of health: know which fields the source actually carries (Section 8).
-- Offer the separate **`sparklogs-analyze-cause`** skill at the end if the engineer wants candidate cause hypotheses; do not perform cause analysis here beyond that invitation.
-
-The trust principles let the AI judge what the likely cause is, labeled as analysis (the SparkLogs AI trust principle "Likely causes are labeled as analysis"). In this workflow that judgment goes to `sparklogs-analyze-cause`, so the summary stays checkable fact.
+- Offer the separate **`sparklogs-analyze-cause`** skill at the end if the engineer wants candidate cause hypotheses; do not perform cause analysis here beyond that invitation. Likely causes, labeled as analysis, belong there.
 
 **This goal framing is non-negotiable.** A confidently-wrong root-cause conclusion damages trust in a way that takes a long time to recover. A defensible factual summary builds trust on every investigation.
 
@@ -40,20 +38,6 @@ The trust principles let the AI judge what the likely cause is, labeled as analy
 ## Investigation discipline
 
 Bounded discovery first, aggregate before detail, and refine a cached result before re-querying: `guides/mcp-tool-decision-tree.md` (Investigation discipline), which also has the per-tool tiers.
-
----
-
-## Section 2. Trust principles
-
-`guides/common-mistakes.md` groups mistakes by principle. This skill adds: cite every factual claim with a `query_url` (col); WHAT WAS NOT CHECKED is required every time; do not assert root cause here (offer `sparklogs-analyze-cause` instead).
-
----
-
-## Section 3. The two-step investigation pattern
-
-**This skill (opt-in full investigation):** System condition summary. Factual, evidence-anchored, with citations and confidence bands. Output template: `references/output-template.md`. Not the default for a simple question; that is `sparklogs-ask`.
-
-**Separate `sparklogs-analyze-cause` skill (opt-in):** Candidate cause hypotheses derived from this skill's summary, each with confirm/refute steps. The engineer must explicitly invoke `sparklogs-analyze-cause <external_investigation_id>` to receive cause-analysis output. You do NOT produce cause-analysis output from this skill; the POSSIBLE NEXT DIRECTIONS section carries the invitation instead.
 
 ---
 
@@ -89,19 +73,7 @@ Process charts use the same tool with `view` (arg) `top_processes_over_time` (va
 
 **Reason meaning:** the `sparklogs.reason` (LQL) value and the event `message` (col) together; grep `reasons.md` for the matching `##` heading (summary table first, one section only).
 
-## Decode tables (`enums.md`)
-
-Per-feed closed vocabularies. **Grep** the code, constant, or `##` heading; never load a whole file.
-
-| Table | Feed | Use when |
-|---|---|---|
-| `win_status_codes` (value), `kerberos` (value) | `win.eventlog.security` (value) | NTSTATUS and Kerberos result codes on logon and auth failures |
-| `win_logon_types` (value), `win_nps_reason_codes` (value) | `win.eventlog.security` (value) | Logon type on 4624/4625; NPS reason codes |
-| `msi_error_codes` (value) | `win.eventlog.application` (value) | Installer exit codes |
-| `scsi_sense_key` (value), `scsi_additional_sense` (value), `srb_status` (value), `storage_bus_type` (value) | `win.eventlog.storage` (value) | StorPort and disk-subsystem error codes |
-| `code_integrity_signing_levels` (value) | `win.eventlog.identity_security` (value) | Code Integrity requested and validated signing levels |
-
-Feeds without a table carry the raw code on a field: Setup's HRESULT is `win.eventlog.setup.error_code` (LQL); a curated result is `sparklogs.result.code` (LQL).
+**Vendor codes:** grep `feeds/<id>/enums.md` for the code or `##` heading, never the whole file (Security: NTSTATUS, Kerberos, logon types, NPS; Application: MSI; Storage: SCSI, SRB; identity_security: code-integrity levels). Setup's HRESULT is `win.eventlog.setup.error_code` (LQL); a curated result is `sparklogs.result.code` (LQL).
 
 ## How much to read
 
@@ -170,8 +142,6 @@ Detail: `playbooks/playbooks.md`.
 
 ### Feed id → lookup
 
-`subsource` (LQL) is the directory name. Follow **After you pick a `subsource` (LQL)** in the corpus block above (`stream-kinds.md`, then `README.md`, then one artifact).
-
 <!-- BEGIN GENERATED INDEX:feeds -->
 | Feed | What | Path |
 |---|---|---|
@@ -201,7 +171,7 @@ Canonical template (field definitions, right-vs-wrong examples): `references/out
 
 **Produce in this order:** title + `external_investigation_id` (arg) → EXECUTIVE SUMMARY → SCOPE CHECKED (incl. WHAT WAS NOT CHECKED) → OBSERVED CONDITIONS (Findings) → WHAT WAS EXAMINED → AUDIT TRAIL → POSSIBLE NEXT DIRECTIONS (explore-or-analyze invitation).
 
-**Non-negotiable:** every Finding cites `query_url` (col); Confidence on every Finding; WHAT WAS NOT CHECKED every time; POSSIBLE NEXT DIRECTIONS invites `sparklogs-analyze-cause`, never performs cause analysis.
+**Non-negotiable, check before delivering:** every Finding cites `query_url` (col); Confidence on every Finding; the Executive Summary tracks Findings only; WHAT WAS NOT CHECKED is specific, every time; POSSIBLE NEXT DIRECTIONS invites `sparklogs-analyze-cause`, never performs cause analysis. Anti-patterns: `guides/common-mistakes.md`.
 
 ---
 
@@ -233,7 +203,7 @@ A device view's `not_measured` (col) and unreported seconds name on-endpoint gap
 
 ## Section 8. Investigation methodology - aggregation-first, progressive disclosure
 
-**Funnel before raw:** scope lightly, aggregate to narrow, then `query_logs` (tool) only over the narrowed slice. Investigation discipline (bounded discovery, aggregate before detail, cache before re-query) is above; per-tool tiers and recipes: `guides/mcp-tool-decision-tree.md`.
+**Funnel before raw:** scope lightly, aggregate to narrow, then `query_logs` (tool) only over the narrowed slice.
 
 **Rows returned are not the population.** Read matched TOTAL and `last_event_at` (col) before any how-much / how-long claim. A missing total is not zero.
 
@@ -245,7 +215,7 @@ A device view's `not_measured` (col) and unreported seconds name on-endpoint gap
 
 **Before "no evidence":** read `agent_complete_through` (col) / `advisories` (col), check `sparklogs.kind = agent_op` (value) rows, treat volume as a prompt only (not coverage). Empty `agent_op` (value) is inconclusive; name what you could not rule out in WHAT WAS NOT CHECKED.
 
-**Empty field results:** universal vs curated vs module fields differ; empty `sparklogs.*` on an event means uncurated (not a health finding). Per-source field lists: `guides/generated-reference-router.md`. Morphology is `sparklogs.kind` (LQL).
+**Empty field results:** universal vs curated vs module fields differ; empty `sparklogs.*` on an event means uncurated (not a health finding). Per-source field lists: `guides/generated-reference-router.md`.
 
 Symptom playbooks: Section 3b and `playbooks/playbooks.md`.
 
@@ -273,18 +243,6 @@ Before deep investigation: resolve org / sources / time window, then confirm dat
 - **Critical+ fetch-first** on curated data: `guides/category-classes.md` (Severity).
 - **Agent row vs event stream can disagree:** trust arrived events; name disagreements in WHAT WAS NOT CHECKED; never assert the machine is down. Halt on collection only when offline/stuck AND no events in window.
 - **Completeness:** `guides/scope-resolution.md` (Completeness).
-
----
-
-## Section 11. MCP tools
-
-Cross-cutting terms, funnel, and prohibitions: MCP server instructions (loaded with the session). Tool decision tree, paste-back rules, large-response handling, and failure modes: `guides/mcp-tool-decision-tree.md`. Per-tool parameters and response shape: the live tool description, authoritative for each call.
-
----
-
-## Section 12. LQL
-
-Complete syntax, operators, edge cases, and examples: `guides/lql-reference.md`.
 
 ---
 
@@ -322,7 +280,7 @@ Heuristics for stopping:
 
 - **Found enough for the summary:** you have 3-7 cited findings, the WHAT WAS NOT CHECKED section is honestly populated, and the executive summary fits in one paragraph. Produce the summary.
 - **Hit the ~15 tool-call mark without converging:** stop and produce an interim summary. State explicitly: "Investigation has examined N findings without converging on a coherent picture; here's what was found and the next investigative directions worth taking." Don't spend another 15 tool calls if the first 15 didn't yield clarity.
-- **Backing-query ceiling exceeded:** if your local investigation-state document shows backing queries >20, pause and assess. (Most investigations need fewer; the higher ceiling exists so you can be thorough when the symptom legitimately requires it. Backing queries are the meaningful unit to track - keep the running count yourself as you issue them.)
+- **Backing-query ceiling exceeded:** past 20 backing queries (keep the count in the investigation-state document), pause and assess.
 - **Source not reporting:** if `list_sources` (tool) shows the source sent no telemetry in the relevant window, stop after a brief summary saying no data arrived and that the cause was not established.
 
 ---
@@ -342,8 +300,6 @@ See `guides/common-mistakes.md` (e.g. cause analysis in this skill, claims witho
 ---
 
 ## Section 18. Reference files
-
-**Routing indexes (symptom, theme, feed): Section 3b** (corpus contract stitched there). Load one file when the step needs it.
 
 | When | File |
 |---|---|
@@ -388,9 +344,3 @@ Three SparkLogs skills divide this work. You may be routed to any of them by wha
 
 Two follow-up requests stay inside this skill. Re-rendering: the engineer names an existing `external_investigation_id` (arg) and wants the system condition summary produced again, incorporating everything found since. Explaining: the engineer names one claim and wants your reasoning for it, so walk through the evidence that supports it (cited `query_url` (col)s) and what would refute it, honest about limits.
 <!-- END HOSTVARIANT:commands -->
-
----
-
-## Section 20. Calibration
-
-Before delivering: Executive Summary tracks Findings only; every Finding has a valid `query_url` (col); WHAT WAS NOT CHECKED is specific; no cause analysis here; funnel before `query_logs` (tool); collection/completeness gates (§8, §10) respected. Anti-patterns: `guides/common-mistakes.md`.

@@ -104,7 +104,7 @@ installed_products:  {"name":"Microsoft Edge","publisher":"Microsoft Corporation
                       "install_context":"machine","instance":"product:microsoft edge"}
 ```
 
-Values are stored as lowercase tokens: current_state is running or stopped, start_type is manual, auto_delayed or disabled, volume_role is os, drive_type is fixed, mount_state is mounted. Equality on payload leaves ignores case, so a literal typed STOPPED matches the same events as stopped. `source` (LQL) equality does not: see `guides/mcp-tool-decision-tree.md` (paste-back rules).
+Values are stored as lowercase tokens: current_state is running or stopped, start_type is auto, auto_delayed, manual or disabled, volume_role is os, drive_type is fixed, mount_state is mounted. Equality on payload leaves ignores case, so a literal typed STOPPED matches the same events as stopped. `source` (LQL) equality does not: see `guides/mcp-tool-decision-tree.md` (paste-back rules).
 
 A stopped_exit_code of 1077 means the service has not been started since boot. It is not a failure code.
 

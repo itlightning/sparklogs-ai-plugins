@@ -36,7 +36,6 @@ Funnel, scope, LQL errors: `guides/mcp-tool-decision-tree.md`, `guides/scope-res
 - Crash or app problem → same tool, `view` (arg) `event_timeline` (value) with `kinds` (arg) `["occurrence"]` (value); app hangs are only in Application-channel events (`guides/device-state-fields.md`, **Choose the view**)
 - Open problems across a client, or how many devices have one → same tool, omit `view` (arg), or `group_by_reason` (arg) for device counts
 - Which processes or devices stand out across the fleet → same tool, `view` (arg) `fleet_processes` (value) or `fleet_performance` (value)
-- Every other device question (inventory, process trends, raw samples, episode history): the view table in `guides/device-state-fields.md` (**Choose the view**)
 - Collection problems → `resolve_scope` (tool) with `unhealthy_collection_only` (arg)
 - Counts, patterns, when → `query_event_counts_by_severity` (tool) grouped by the fields in `guides/scope-ladder.md` (`sparklogs.reason` (LQL) first on curated data), `describe_pattern` (tool), `query_scope_activity` (tool)
 - Named backup product → installed products with `query_device_health` (tool); the job verdict comes from the backup console unless the vendor wrote it to Application or System (`playbooks/backup-failure.md`)
@@ -75,19 +74,7 @@ Process charts use the same tool with `view` (arg) `top_processes_over_time` (va
 
 **Reason meaning:** the `sparklogs.reason` (LQL) value and the event `message` (col) together; grep `reasons.md` for the matching `##` heading (summary table first, one section only).
 
-## Decode tables (`enums.md`)
-
-Per-feed closed vocabularies. **Grep** the code, constant, or `##` heading; never load a whole file.
-
-| Table | Feed | Use when |
-|---|---|---|
-| `win_status_codes` (value), `kerberos` (value) | `win.eventlog.security` (value) | NTSTATUS and Kerberos result codes on logon and auth failures |
-| `win_logon_types` (value), `win_nps_reason_codes` (value) | `win.eventlog.security` (value) | Logon type on 4624/4625; NPS reason codes |
-| `msi_error_codes` (value) | `win.eventlog.application` (value) | Installer exit codes |
-| `scsi_sense_key` (value), `scsi_additional_sense` (value), `srb_status` (value), `storage_bus_type` (value) | `win.eventlog.storage` (value) | StorPort and disk-subsystem error codes |
-| `code_integrity_signing_levels` (value) | `win.eventlog.identity_security` (value) | Code Integrity requested and validated signing levels |
-
-Feeds without a table carry the raw code on a field: Setup's HRESULT is `win.eventlog.setup.error_code` (LQL); a curated result is `sparklogs.result.code` (LQL).
+**Vendor codes:** grep `feeds/<id>/enums.md` for the code or `##` heading, never the whole file (Security: NTSTATUS, Kerberos, logon types, NPS; Application: MSI; Storage: SCSI, SRB; identity_security: code-integrity levels). Setup's HRESULT is `win.eventlog.setup.error_code` (LQL); a curated result is `sparklogs.result.code` (LQL).
 
 ## How much to read
 

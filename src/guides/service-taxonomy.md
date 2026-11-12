@@ -2,7 +2,7 @@
 
 `service` (LQL) is the curated cross-source ticket-class taxonomy: the MSP ticket class an event or
 snapshot is **evidence for**. It is cross-OS and cross-vendor on purpose (Veeam, Acronis, and
-Windows Server Backup all emit `service = "backup"` (LQL)), so fleet-wide analysis spans vendors.
+Windows Server Backup service events all carry `service = "backup"` (LQL)), so fleet-wide analysis spans vendors.
 `app` (LQL) is the complementary axis (product identity): `guides/app-vocabulary.md`. A vendor spans services and a
 service spans vendors; neither nests in the other.
 

@@ -29,13 +29,15 @@ Unreported time over that interval leaves both questions open.
 source = "<host>" AND sparklogs.kind = agent_op
 ```
 
-RMM vendor errors on the box:
+RMM vendor errors on the box, without SparkLogs' own agent health (which also files under `service = rmm` (LQL)):
 
 ```lql
-source = "<host>" AND service = rmm
+source = "<host>" AND service = rmm AND app != sparklogs_agent AND severity >= warning
 ```
 
-Group by `sparklogs.reason` (LQL).
-Read the Application channel for the vendor's own errors.
+Group by `app` (LQL), `sparklogs.reason` (LQL).
+The vendor's Windows service events carry its token: `app in (connectwise, ninjaone, datto, atera, nable)` (LQL); `guides/msp-tool-registry.md` names each product's services.
+Rows with an empty `app` (LQL) under `service = rmm` (LQL) are Windows remote-management plumbing (WinRM, WMI), not the RMM product.
+The vendor's own agent log is not collected; read the Application channel for any errors it writes there.
 
 **Off-endpoint** (HM10): RMM cloud, RMM agent health, EDR quarantine of the RMM agent, network path.

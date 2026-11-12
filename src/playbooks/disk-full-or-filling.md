@@ -21,9 +21,9 @@ Process write bytes include writes that do not reach the disk: they rank writers
 **Events, for what health named.** Storage errors when the volume is filling because something is failing:
 
 ```lql
-source = "<host>" AND service = storage
+source = "<host>" AND service = storage AND sparklogs.reason!
 ```
 
-Group by `sparklogs.reason` (LQL).
+Group by `sparklogs.reason` (LQL). `sparklogs.reason!` (LQL) drops the device-state inventory rows that also file under `storage` (value).
 
 **Off-endpoint** (HM5): mounted network shares, backup shadow locations, sync clients.

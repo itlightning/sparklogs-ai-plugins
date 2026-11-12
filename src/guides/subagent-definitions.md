@@ -49,7 +49,7 @@ They do not recommend remediation or assert a root cause.
 
 ## Subagent: `sparklogs-pattern-enumerator`
 
-**Purpose.** Given a `query_event_counts_by_severity` (tool) result with many pattern groups, summarize the top N from the pattern text and reasons the orchestrator supplied, leaving meaning empty where none was supplied.
+**Purpose.** Given a `query_event_counts_by_severity` (tool) result with many pattern groups, summarize the top N from the pattern text and reasons the orchestrator supplied.
 
 **Model tier:** fast, lightweight tier.
 

@@ -38,9 +38,9 @@ Then drill down:
 **Events, for what health named.** Network channels on that device over the outage or drop interval:
 
 ```lql
-source = "<host>" AND service = networking
+source = "<host>" AND service = networking AND sparklogs.reason! AND severity >= info
 ```
 
-Group by `sparklogs.reason` (LQL).
+Group by `sparklogs.reason` (LQL). The floor drops firewall-rule churn (Debug and Verbose) and keeps Wi-Fi, DHCP, DNS and adapter reasons, many of which are Notice.
 
 **Off-endpoint** (HM11): the router, firewall and access points, the ISP circuit, other devices without the agent, cloud services the user was reaching.

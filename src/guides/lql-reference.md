@@ -368,7 +368,7 @@ sparklogs.topic = vss_writers                                   <- a device-stat
 sparklogs.kind = inventory
 sparklogs.kind in (inventory, delta)                   <- what is on the box, or what changed
 sparklogs.kind = monitor                               <- a tracked condition
-sparklogs.kind = occurrence                            <- a one-off event the agent observed (crash, failure)
+sparklogs.kind = occurrence                            <- device-state crashes, boot and shutdown marks, service crashes; not app_crash or app_hang
 sparklogs.kind = agent_op                              <- agent self-observability
 ```
 

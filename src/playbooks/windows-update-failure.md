@@ -19,9 +19,9 @@ A machine "behind on updates" that has not scanned is a different ticket from on
 source = "<host>" AND service = patching
 ```
 
-Group by `sparklogs.reason` (LQL), worst first.
+Group by `sparklogs.reason` (LQL), then read the highest-severity reasons first.
 
-Failing install in sequence (Setup `patch_install_failed` (value) is Error; the System copy, scan and download failures run Info to Warning):
+Failing install in sequence (Setup `patch_install_failed` (value) is Error; the System copy runs Info to Minor, scan and download failures Info to Warning; `>= warning` drops `bits_transfer_failed` (value), which is Info, so query it by reason when downloads are the question):
 
 ```lql
 source = "<host>" AND service = patching AND severity >= warning

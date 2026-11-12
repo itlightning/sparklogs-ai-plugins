@@ -93,7 +93,7 @@ Use that light form to choose the devices and intervals worth a full reading, th
 6. `events` (col): the most relevant episodes and changes, open episodes first.
    An episode appears only when it had an event inside the window. One open since before the start with no event in the window is absent, so use a window of days for what is open now.
    Changes also cover the 48 hours before the window.
-   On `device_overview` (value), crashes and other occurrences are in neither this part nor the `events` (value) result set, which carries only the boot, sleep, shutdown and agent start and stop marks: read them with the `next_reads` (col) `event_timeline` (value) call (`kinds` (arg) `["occurrence"]` (value)). On `device_network` (value) the `events` (value) set holds networking occurrences and those marks.
+   On `device_overview` (value), crashes and other occurrences are in neither this part nor the `events` (value) result set, whose only occurrences are the boot, sleep, shutdown and agent start and stop marks: read them with the `next_reads` (col) `event_timeline` (value) call (`kinds` (arg) `["occurrence"]` (value)). On `device_network` (value) the `events` (value) set holds networking occurrences and those marks.
 7. `next_reads` (col): calls with their arguments ready to paste beside your `external_investigation_id` (arg).
 
 A list that left rows out counts them in `omitted` (col).
@@ -228,7 +228,7 @@ No change rows then says nothing about whether anything changed.
 
 ## Network adapters
 
-`sparklogs.data.network_adapters.adapter_class` (col) separates `physical` (value) adapters from virtual switches, other virtual adapters (VPN, TAP, Wi-Fi Direct), tunnels, WAN miniports, loopback and `not_present` (value) ones.
+`sparklogs.data.network_adapters[].adapter_class` (LQL) separates `physical` (value) adapters from virtual switches, other virtual adapters (VPN, TAP, Wi-Fi Direct), tunnels, WAN miniports, loopback and `not_present` (value) ones.
 Filter to physical adapters (`sparklogs.data.network_adapters[](adapter_class="physical")` (LQL)) before judging a device's wired or wireless connectivity.
 `network_adapter_dhcp_failed` (value) is open while an adapter holds only a self-assigned 169.254 address; it rates higher on a server and when no other default route keeps the device online.
 `network_adapter_link_downshifted` (value) is open while a wired link runs at half or less of its seven-day peak speed; cables, ports, docks and power policy are the usual causes.

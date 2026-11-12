@@ -27,19 +27,7 @@ Process charts use the same tool with `view` (arg) `top_processes_over_time` (va
 
 **Reason meaning:** the `sparklogs.reason` (LQL) value and the event `message` (col) together; grep `reasons.md` for the matching `##` heading (summary table first, one section only).
 
-## Decode tables (`enums.md`)
-
-Per-feed closed vocabularies. **Grep** the code, constant, or `##` heading; never load a whole file.
-
-| Table | Feed | Use when |
-|---|---|---|
-| `win_status_codes` (value), `kerberos` (value) | `win.eventlog.security` (value) | NTSTATUS and Kerberos result codes on logon and auth failures |
-| `win_logon_types` (value), `win_nps_reason_codes` (value) | `win.eventlog.security` (value) | Logon type on 4624/4625; NPS reason codes |
-| `msi_error_codes` (value) | `win.eventlog.application` (value) | Installer exit codes |
-| `scsi_sense_key` (value), `scsi_additional_sense` (value), `srb_status` (value), `storage_bus_type` (value) | `win.eventlog.storage` (value) | StorPort and disk-subsystem error codes |
-| `code_integrity_signing_levels` (value) | `win.eventlog.identity_security` (value) | Code Integrity requested and validated signing levels |
-
-Feeds without a table carry the raw code on a field: Setup's HRESULT is `win.eventlog.setup.error_code` (LQL); a curated result is `sparklogs.result.code` (LQL).
+**Vendor codes:** grep `feeds/<id>/enums.md` for the code or `##` heading, never the whole file (Security: NTSTATUS, Kerberos, logon types, NPS; Application: MSI; Storage: SCSI, SRB; identity_security: code-integrity levels). Setup's HRESULT is `win.eventlog.setup.error_code` (LQL); a curated result is `sparklogs.result.code` (LQL).
 
 ## How much to read
 

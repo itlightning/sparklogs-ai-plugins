@@ -535,6 +535,11 @@ values:
     - episode
     - episode_step
     - change
+  # sparklogs.config_change.type values the guides name
+  config_change_types:
+    - bios
+    - operating_system
+    - firewall_rule
   device_health_metrics:
     - net_rx
     - net_tx

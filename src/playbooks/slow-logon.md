@@ -16,10 +16,16 @@ CPU or disk heat spans that start at the logon times, and their contributors, sh
 Logon is short, so read `evidence` (col) and `events` (col) as well as heat: a pressure stretch shorter than `bucket_s` (col) leaves no span.
 `device_network` (value) over the same window: DNS and gateway outages, link drops and network changes at logon time separate a path problem from a busy machine.
 
-**Events, for what health named.** Sign-in shape for the account:
+**Events, for what health named.** First find every spelling of the account: on an Entra-joined or hybrid device one user signs in as the SAM name, the UPN and `AzureAD\<UPN>`.
 
 ```lql
-source = "<host>" AND sparklogs.actor.name = "<account>"
+source = "<host>" AND sparklogs.actor.name: "<user part>"
+```
+
+Group by `sparklogs.actor.name` (LQL), then take the names that are this user. Sign-in shape for the account:
+
+```lql
+source = "<host>" AND sparklogs.actor.name in ("<sam>", "<upn>", "AzureAD\\<upn>")
 ```
 
 Group by `sparklogs.reason` (LQL), `win.eventlog.security.logon_type_name` (LQL).
@@ -29,7 +35,7 @@ Decoded auth failures (`win.eventlog.security.status_meaning` (LQL) is the cause
 
 ```lql
 sparklogs.reason in (sign_in_failed, kerberos_preauth_failed, kerberos_ticket_failed, ntlm_validation_failed)
-AND sparklogs.actor.name = "<account>"
+AND sparklogs.actor.name in ("<sam>", "<upn>", "AzureAD\\<upn>")
 ```
 
 Several users on one site slow, others not: same filter, group by `source` (LQL).

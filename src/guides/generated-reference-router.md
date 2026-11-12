@@ -56,14 +56,16 @@ Two shapes deserve their own line because they are the ones people get wrong:
 2. Open that module's `README.md`. It is the module index and it is short.
 3. Open the one artifact the table above points at.
 
-If no module directory exists for a subsource, the source is uncurated or its reference set has not
-been generated yet. Fall back to `message` (LQL), `pattern` (LQL), `severity` (LQL) and the raw provider payload, and
-say in your findings that you were reading uncurated text.
+If no module directory exists for a subsource, it is ingest-key data or an agent feed whose reference
+is not in this plugin: `sent_via` (col) on `list_sources` (tool) says which. An agent feed can still carry
+`sparklogs.reason` (LQL); group by it before falling back to `message` (LQL), `pattern` (LQL), `severity` (LQL) and the raw
+provider payload, and say in your findings when you were reading uncurated text.
 
 ## What this content is not
 
 - **Not separate device-health column names.** The generated field reference uses the same paths as
-  `query_device_health` (tool) columns and `query_logs` (tool) filters.
+  `query_device_health` (tool) condition, timeline and latest_state columns and `query_logs` (tool) filters.
+  The device-view result sets use short names instead (`guides/device-state-fields.md`, **Result sets**).
 - **Not a severity table.** Severity is a shared ladder across every source and is documented once,
   in `category-classes.md`. A module never defines its own bands.
 - **Not exhaustive about what exists at rest.** A field is listed once curation promotes

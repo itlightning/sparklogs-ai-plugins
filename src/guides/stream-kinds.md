@@ -34,7 +34,7 @@ Product tokens on `app` (LQL): `guides/app-vocabulary.md`.
 | `sparklogs.agent.vector` (value) | Collector debug | `guides/stream-kinds/collector-debug.md` |
 | `sparklogs.agent.log` (value) | Collector debug | `guides/stream-kinds/collector-debug.md` |
 
-A `subsource` (LQL) not in this table comes from an ingest key or another non-agent sender: it is freeform, carries no feed health, and is uncurated text (`message` (LQL) / `pattern` (LQL) / `severity` (LQL)).
+A `subsource` (LQL) not in this table is either ingest-key data or an agent feed whose reference is not in this plugin. Check `sent_via` (col) on `list_sources` (tool) before treating it as uncurated: an agent feed still has feed health and may carry `sparklogs.reason` (LQL); explore a Windows Event Log one with `guides/stream-kinds/wel-classic.md`. Ingest-key data is freeform and uncurated text (`message` (LQL) / `pattern` (LQL) / `severity` (LQL)).
 
 ## Which channels are collected
 
@@ -44,7 +44,7 @@ The Windows Event Log feeds collect Microsoft channels plus a few vendor channel
 
 ## Portable fields
 
-Curated fields (`sparklogs.reason` (LQL), `sparklogs.reason_variant` (LQL), `sparklogs.class` (LQL), `sparklogs.kind` (LQL), `sparklogs.instance` (LQL), `sparklogs.topic` (LQL), Security `sparklogs.actor.*`) mean the same on every feed: `guides/scope-ladder.md`.
+Curated fields (`sparklogs.reason` (LQL), `sparklogs.reason_variant` (LQL), `sparklogs.class` (LQL), `sparklogs.kind` (LQL) (set on few Windows Event Log reasons: `guides/category-classes.md`, Kind), `sparklogs.instance` (LQL), `sparklogs.topic` (LQL), Security `sparklogs.actor.*`) mean the same on every feed: `guides/scope-ladder.md`.
 Most WEL rows do not carry them; absence is a missing promotion, not a missing event.
 
 ## Device state vs events
