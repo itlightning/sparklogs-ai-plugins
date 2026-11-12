@@ -17,7 +17,7 @@
 
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import { GENERATED_BLOCK_RE } from './skill-indexes.mjs';
+import { DATA_CONFIRMED_MARKER_RE, GENERATED_BLOCK_RE } from './skill-indexes.mjs';
 import {
   LIVE_FIELDS_FILE,
   loadIdentifierSot,
@@ -368,6 +368,47 @@ export async function vetLqlFieldsInTree(root, sot) {
     }
   }
   return { errors, warnings, packOnly };
+}
+
+// A playbook query naming a raw event id (`event_id = 4625`, `event_id in (33, 58)`) is a claim
+// that Windows logs that id; it must carry a data-confirmed marker on the line after its fence.
+const RAW_EVENT_ID_RE = /\bevent_id\s*(?:=|in\b)\s*\(?\s*\d/;
+
+export function unmarkedEventIdQueries(text) {
+  const { text: masked, fences } = proseRanges(text);
+  const lineOf = lineIndex(text);
+  const hits = [];
+  for (const fence of fences) {
+    if (fence.info !== 'lql') continue;
+    const body = masked.slice(fence.body[0], fence.body[1]);
+    if (!body.split('\n').some((line) => RAW_EVENT_ID_RE.test(stripAnnotation(line)))) continue;
+    const afterClose = text.indexOf('\n', fence.body[1]);
+    const next = afterClose < 0 ? '' : text.slice(afterClose + 1).split('\n', 1)[0];
+    if (!DATA_CONFIRMED_MARKER_RE.test(next)) hits.push(lineOf(fence.body[0]));
+  }
+  return hits;
+}
+
+export async function unmarkedEventIdQueriesInPlaybooks(root) {
+  const errors = [];
+  for (const { rel, full } of await srcMarkdownFiles(root)) {
+    if (!rel.startsWith('src/playbooks/')) continue;
+    for (const line of unmarkedEventIdQueries(await fs.readFile(full, 'utf8'))) {
+      errors.push(`${rel}:${line}: query names a raw event_id with no "<!-- confirmed with data on YYYY-MM-DD -->" line after its fence`);
+    }
+  }
+  return errors;
+}
+
+export function proveUnmarkedEventIdQueries() {
+  const marked = '```lql\nevent_id = 1\n```\n<!-- confirmed with data on 2026-01-02 -->\n';
+  const unmarked = '```lql\nsource = x AND event_id in (33, 58)\n```\n\nText.\n';
+  const noId = '```lql\nsparklogs.reason = x\n```\n';
+  const noted = '```lql\nsource = x   <- event_id = 7 is not the filter\n```\n';
+  if (unmarkedEventIdQueries(marked).length !== 0) throw new Error('event_id gate flagged a marked query');
+  if (unmarkedEventIdQueries(unmarked).length !== 1) throw new Error('event_id gate missed an unmarked query');
+  if (unmarkedEventIdQueries(noId).length !== 0) throw new Error('event_id gate flagged a query with no event_id');
+  if (unmarkedEventIdQueries(noted).length !== 0) throw new Error('event_id gate read an annotation as the filter');
 }
 
 export function proveLqlRefsInMarkdown() {

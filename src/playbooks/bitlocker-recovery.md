@@ -55,6 +55,7 @@ Take the newest 892 before the prompt:
 ```lql
 source = "<host>" AND subsource = "win.eventlog.identity_security" AND event_id = 892
 ```
+<!-- confirmed with data on 2026-11-12 -->
 
 A changed PCR outside that list did not cause the prompt.
 A boot manager update changes PCR 4 on every boot after it, and a key sealed to PCRs 7 and 11 still unlocks.
@@ -64,6 +65,7 @@ Many devices also log BitLocker-Driver event 24711, uncurated, when a TPM protec
 ```lql
 source = "<host>" AND subsource = "win.eventlog.system" AND event_id in (24709, 24711, 24652)
 ```
+<!-- confirmed with data on 2026-11-12 -->
 
 Group by `event_id` (LQL). On a device whose boots usually carry 24711, a boot with 24709 and 24652 but no 24711 is the recovery boot.
 
@@ -79,6 +81,7 @@ BitLocker-API event 793 in the BitLocker management log, uncurated, reads "BitLo
 ```lql
 source = "<host>" AND subsource = "win.eventlog.identity_security" AND event_id = 793
 ```
+<!-- confirmed with data on 2026-11-12 -->
 
 
 **Events, for what health named.** What changed before the reboot:

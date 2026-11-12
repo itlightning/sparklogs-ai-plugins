@@ -149,6 +149,14 @@ export function formatFrontmatter(data) {
   return `${lines.join('\n')}`;
 }
 
+// An authored note that a playbook query's raw event id was seen in real data, on its own line
+// after the query's closing fence. Authoring evidence only: render drops the line.
+export const DATA_CONFIRMED_MARKER_RE = /^<!-- confirmed with data on \d{4}-\d{2}-\d{2} -->$/;
+
+function stripDataConfirmedMarkers(text) {
+  return text.split('\n').filter((line) => !DATA_CONFIRMED_MARKER_RE.test(line)).join('\n');
+}
+
 export function unwrapGeneratedBlocks(text) {
   return text.replace(GENERATED_BLOCK_RE, (_, name, inner) => `${inner.replace(/^\n+|\n+$/g, '')}\n`);
 }
@@ -189,7 +197,7 @@ export function shipMarkdown(text, file = 'markdown') {
   for (const key of SHIP_FRONTMATTER_KEYS) {
     if (data[key] != null && data[key] !== '') shipped[key] = data[key];
   }
-  const unwrapped = unwrapGeneratedBlocks(body).replace(/^\n+/, '');
+  const unwrapped = stripDataConfirmedMarkers(unwrapGeneratedBlocks(body)).replace(/^\n+/, '');
   const head = formatFrontmatter(shipped);
   return head ? `${head}\n${unwrapped}` : unwrapped;
 }
@@ -416,6 +424,9 @@ description: Example agent.
 
 # Agent
 `;
+  const marked = shipMarkdown('# Playbook\n\n```lql\nevent_id = 1\n```\n<!-- confirmed with data on 2026-01-02 -->\n', 'p.md');
+  if (marked.includes('confirmed with data')) throw new Error('shipMarkdown kept a data-confirmed marker');
+  if (!marked.includes('event_id = 1')) throw new Error('shipMarkdown dropped the query beside a marker');
   const agentShipped = shipMarkdown(agent, 'agent.md');
   if (!agentShipped.includes('model: haiku')) throw new Error('shipMarkdown dropped model');
   if (agentShipped.includes('index:')) throw new Error('shipMarkdown kept authoring key on agent');

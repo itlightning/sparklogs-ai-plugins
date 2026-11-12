@@ -217,7 +217,7 @@ async function validateShippedMarkdown(host, base) {
       leftoverHits.push(`${relative}: ${hit}`);
     }
     for (const kind of keepTagKindsFound(text)) keepKinds.add(kind);
-    if (/BEGIN GENERATED|END GENERATED|HOSTVARIANT/.test(text)) markerHits.push(relative);
+    if (/BEGIN GENERATED|END GENERATED|HOSTVARIANT|confirmed with data/.test(text)) markerHits.push(relative);
     const { data } = parseFrontmatter(text, `${host}:${relative}`);
     for (const key of Object.keys(data)) {
       if (AUTHORING_FRONTMATTER_KEYS.has(key)) authoringHits.push(`${relative} key ${key}`);
@@ -240,7 +240,7 @@ async function validateShippedMarkdown(host, base) {
     }
   });
   if (markerHits.length) {
-    throw new Error(`${host} shipped GENERATED markers:\n  ${markerHits.join('\n  ')}`);
+    throw new Error(`${host} shipped authoring markers (GENERATED, HOSTVARIANT or data-confirmed):\n  ${markerHits.join('\n  ')}`);
   }
   if (authoringHits.length) {
     throw new Error(`${host} shipped authoring frontmatter:\n  ${authoringHits.join('\n  ')}`);

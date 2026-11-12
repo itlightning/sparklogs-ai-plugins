@@ -38,6 +38,9 @@ Keep this order. Drop a heading if it would be empty.
 
 Write LQL the agent can paste into `query_event_counts_by_severity` or `query_logs`.
 Put each query in a ```` ```lql ```` block: every field it names must be a real field (see `guides/names.md`).
+A query that names a raw `event_id` (`event_id = 892`, `event_id in (33, 58)`) claims Windows logs that id on these feeds.
+Confirm every id in real SparkLogs data, then put `<!-- confirmed with data on YYYY-MM-DD -->` on the line right after the block's closing fence.
+`yarn precommit` fails on a playbook query with a raw `event_id` and no marker; render strips the marker from every package.
 Group-by is part of the question: one noun, one field; two nouns, a cross-tab.
 Name the field that carries the discriminator (`reason`, `vss_writer`, `instance`, `status_meaning`).
 Do not teach `describe_pattern` or `refine_query_result` here; the skill already knows those.

@@ -7,6 +7,8 @@ import {
   lintSrcTree,
   proveIdentifierTags,
   proveLqlRefsInMarkdown,
+  proveUnmarkedEventIdQueries,
+  unmarkedEventIdQueriesInPlaybooks,
   vetLqlFieldsInTree,
 } from './identifier-tags.mjs';
 import { proveLqlFieldRefs } from './lql-field-refs.mjs';
@@ -19,6 +21,7 @@ const FIX = process.argv.includes('--fix-safe');
 proveIdentifierTags();
 proveLqlFieldRefs();
 proveLqlRefsInMarkdown();
+proveUnmarkedEventIdQueries();
 console.log('identifier-tag and LQL field guards: planted negatives all fired');
 
 const committed = await harvestCommittedPlugin(ROOT);
@@ -44,3 +47,9 @@ if (lql.errors.length > 0) {
   throw new Error(`LQL field vet failed:\n  ${lql.errors.join('\n  ')}\nUse a real field (list_fields), or a name on lql_pedagogical in scripts/identifier-sot.yaml marked illustrative in the guide.`);
 }
 console.log(`LQL fields: every name in src/ is vetted (${sot.live.size} live, ${sot.packLql.size} pack-declared)`);
+
+const unmarked = await unmarkedEventIdQueriesInPlaybooks(ROOT);
+if (unmarked.length > 0) {
+  throw new Error(`playbook event ids lack a data-confirmed marker:\n  ${unmarked.join('\n  ')}\nConfirm each id in real data, then add the marker (docs/playbook-authoring.md, Queries).`);
+}
+console.log('playbook event ids: every query carries a data-confirmed marker');
