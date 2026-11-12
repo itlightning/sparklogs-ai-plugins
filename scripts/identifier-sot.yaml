@@ -153,6 +153,8 @@ cols:
   - sparklogs.config_change.target_name
   - sparklogs.config_change.type
   - sparklogs.data.network_adapters.adapter_class
+  - sparklogs.data.system_info.tpm_present
+  - sparklogs.data.system_info.tpm_version
   - sparklogs.delta.id
   - sparklogs.delta.prev_id
   - sparklogs.display_name
@@ -281,6 +283,7 @@ lql_resident:
   - sparklogs.instance
   - sparklogs.kind
   - sparklogs.reason
+  - sparklogs.reason_variant
   - sparklogs.result.code
   - sparklogs.result.code_name
   - sparklogs.topic
@@ -445,6 +448,26 @@ values:
     - pending
   process_grouping:
     - process_instance
+  # sparklogs.reason_variant arm ids the playbooks name (surface rows in feeds/<id>/fields.md).
+  reason_arms:
+    - below_tpm
+    - enhanced_pin_refused
+    - expected_check_failed
+    - failure_mode
+    - init_failed
+    - name_not_resolved
+    - no_mismatch
+    - no_usable_tpm
+    - other_error
+    - pcr_mismatch
+    - pcr_values_unreadable
+    - pcrs_mismatched
+    - protector_unusable
+    - required_check_failed
+    - secure_boot_changed
+    - tpm_pin_refused
+    - tpm_refused
+    - unrecognized
   # sparklogs.topic values observed on sparklogs.device.state in a live workspace.
   topics:
     - agent_overhead
@@ -477,6 +500,7 @@ values:
     - device_management
     - directory_services
     - email
+    - encryption
     - endpoint_protection
     - file_sharing
     - file_sync

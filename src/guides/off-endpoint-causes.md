@@ -157,6 +157,17 @@ The list is **not exhaustive** - it's a starting set covering common patterns. I
 
 ---
 
+## HM14 - TPM errors or attestation failure
+
+**Off-endpoint causes:**
+
+- **Compliance verdict.** Whether Intune or conditional access marked the device noncompliant is decided in the management service. The device logs only its own checks and requests.
+- **Attestation service.** Microsoft's health attestation service and the network path to it are off-endpoint. The device logs only that its request failed.
+- **TPM firmware advisories.** Device-maker TPM firmware updates and known TPM defects are published by the vendor, not logged on the device.
+- **Virtual TPM provisioning.** A virtual machine's TPM and endorsement key certificate come from the host, which needs its own reading.
+
+---
+
 ## Cross-cutting off-endpoint patterns
 
 Some off-endpoint causes apply across many symptom categories and are worth flagging when investigations span multiple potential causes:

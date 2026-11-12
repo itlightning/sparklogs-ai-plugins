@@ -134,6 +134,7 @@ Playbooks are incomplete recipes. If a recipe LQL produces empty results: widen 
 | Slow or freezing PC | `playbooks/slow-device.md` |
 | Slow server | `playbooks/slow-device.md` |
 | Slow logon | `playbooks/slow-logon.md` |
+| TPM errors or attestation failure | `playbooks/tpm-health.md` |
 | Windows Update / patch failure | `playbooks/windows-update-failure.md` |
 | VSS / shadow copies / backup plumbing | `playbooks/windows-vss.md` |
 <!-- END GENERATED INDEX:playbooks -->

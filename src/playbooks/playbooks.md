@@ -28,6 +28,7 @@ A symptom that lives on a device starts from device health (a device view, a con
 | Slow or freezing PC | `playbooks/slow-device.md` |
 | Slow server | `playbooks/slow-device.md` |
 | Slow logon | `playbooks/slow-logon.md` |
+| TPM errors or attestation failure | `playbooks/tpm-health.md` |
 | Windows Update / patch failure | `playbooks/windows-update-failure.md` |
 | VSS / shadow copies / backup plumbing | `playbooks/windows-vss.md` |
 <!-- END GENERATED INDEX:playbooks -->
