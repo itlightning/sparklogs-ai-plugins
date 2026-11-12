@@ -84,6 +84,8 @@ args:
 # every wire field it lifts); resolve_scope's own flat "kind" is unrelated.
 cols:
   - advisories
+  - clearing_since
+  - closes_in_about
   - bytes_ingested
   - summary.feed_health
   - update_failure_reason
@@ -508,9 +510,14 @@ values:
     - vss_shadowstorage
     - vss_writers
     - windows_update_agent_state
-  rank_by:
+  # rank_by, fleet metric and fleet group_by values on query_device_health
+  device_health_metrics:
     - net_rx
     - net_tx
+    - io_read
+    - io_write
+    - cpu_busy_pct_avg
+    - device
   aggregate_fn:
     - count
     - count_distinct

@@ -84,7 +84,7 @@ Process charts use the same tool with `view` (arg) `top_processes_over_time` (va
 
 ## Curated data (read this before opening reference files)
 
-- **`subsource` (LQL) = feed id.** Scope filters before `query_logs` (tool): `service` (LQL) → `app` (LQL) → `subsource` (LQL) → `category` (LQL) → `pattern_hash` (LQL).
+- **`subsource` (LQL) = feed id.** Group before `query_logs` (tool): the scope ladder plus `sparklogs.reason` (LQL), in `guides/scope-ladder.md`.
 - **Curated events** carry `sparklogs.reason` (LQL), `sparklogs.class` (LQL), and module fields. Empty `sparklogs.*` on an event means **uncurated** (not a collection-health finding).
 - **Reason** (`sparklogs.reason` (LQL)) = our curated vocabulary. **Vendor code** = NTSTATUS, HRESULT, MSI exit, Kerberos result, etc. **pattern_hash** (LQL) = stable shape id on every event.
 - **Device row** (`query_device_health` (tool), feed health, `agent_complete_through` (col)) is authoritative for collection and completeness. Event volume is not coverage.

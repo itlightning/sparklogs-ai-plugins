@@ -36,13 +36,13 @@ Funnel, scope, LQL errors: `guides/mcp-tool-decision-tree.md`, `guides/scope-res
 
 ## Which tool (quick route)
 
-- Something wrong with one device or a few (slow, dropping, filling, failing) → `query_device_health` (tool), `view` (arg) `device_overview` (value), or `device_network` (value) for network trouble; then refine its result sets and read events only for the device and interval it points at (`guides/device-state-fields.md`, **Read a device view**)
-- Standing / latest event of each episode → `query_device_health` (tool), omit `view` (arg) (`fieldset` (arg) `rca` (value) for one host; `min_severity` (arg) `warning` (value) means that latest event is still warning or worse)
-- Inventory / what is on the box → same tool, `view` (arg) `latest_state` (value), which answers current state: do not merge changes into it yourself, and a topic reported empty is evidence of none. Follow-ups on one device's inventory: refine the overview's `state` (value) result set instead of new calls
-- Process CPU, memory or I/O trends → same tool, `view` (arg) `top_processes_over_time` (value), with `rank_by` (arg)
-- Raw device measurements over time → same tool, `view` (arg) `series` (value) with `topics` (arg); `view` (arg) `topics` (value) discovers available topics and fields
-- Episode series / RCA → same tool, `view` (arg) `event_timeline` (value), same `min_severity` (arg); peak in the window, then every in-window event of those episodes
-- Counts, patterns, when → `query_event_counts_by_severity` (tool), `describe_pattern` (tool), `query_scope_activity` (tool)
+- Something wrong with one device or a few (slow, dropping, filling, failing) → `query_device_health` (tool), `view` (arg) `device_overview` (value), or `device_network` (value) for network trouble; then refine its result sets and read events only for the device and interval it points at
+- Crash or app problem → same tool, `view` (arg) `event_timeline` (value) with `kinds` (arg) `["occurrence"]` (value)
+- Open problems across a client, or how many devices have one → same tool, omit `view` (arg), or `group_by_reason` (arg) for device counts
+- Which processes or devices stand out across the fleet → same tool, `view` (arg) `fleet_processes` (value) or `fleet_performance` (value)
+- Every other device question (inventory, process trends, raw samples, episode history): the view table in `guides/device-state-fields.md` (**Choose the view**)
+- Collection problems → `resolve_scope` (tool) with `unhealthy_collection_only` (arg)
+- Counts, patterns, when → `query_event_counts_by_severity` (tool) grouped by the fields in `guides/scope-ladder.md` (`sparklogs.reason` (LQL) first on curated data), `describe_pattern` (tool), `query_scope_activity` (tool)
 - Named backup product installed → `query_device_health` (tool) first; job verdict in events, not VSS alone
 - Raw event lines → `query_logs` (tool) last, then refine
 - Collector debug → `sparklogs.agent.vector` (value) / `sparklogs.agent.log` (value) only
@@ -60,7 +60,7 @@ Process charts use the same tool with `view` (arg) `top_processes_over_time` (va
 
 ## Curated data (read this before opening reference files)
 
-- **`subsource` (LQL) = feed id.** Scope filters before `query_logs` (tool): `service` (LQL) → `app` (LQL) → `subsource` (LQL) → `category` (LQL) → `pattern_hash` (LQL).
+- **`subsource` (LQL) = feed id.** Group before `query_logs` (tool): the scope ladder plus `sparklogs.reason` (LQL), in `guides/scope-ladder.md`.
 - **Curated events** carry `sparklogs.reason` (LQL), `sparklogs.class` (LQL), and module fields. Empty `sparklogs.*` on an event means **uncurated** (not a collection-health finding).
 - **Reason** (`sparklogs.reason` (LQL)) = our curated vocabulary. **Vendor code** = NTSTATUS, HRESULT, MSI exit, Kerberos result, etc. **pattern_hash** (LQL) = stable shape id on every event.
 - **Device row** (`query_device_health` (tool), feed health, `agent_complete_through` (col)) is authoritative for collection and completeness. Event volume is not coverage.

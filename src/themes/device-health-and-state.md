@@ -9,14 +9,9 @@ aliases:
 
 Use `query_device_health` (tool) for agent-reported conditions, inventories and measurements from `sparklogs.device.state` (value).
 
-- One device or a few over a window: `view` (arg) `device_overview` (value) (CPU, memory, disk, processes, storage, episodes and changes) or `device_network` (value) (link, Wi-Fi, probes, TCP by route, connections, network events). Start here and drill down from what the reading points at.
-- Process charts: `view` (arg) `top_processes_over_time` (value), with `rank_by` (arg).
-- Installed software and latest subject readings: `latest_state` (value).
-- Raw performance, memory and storage samples: `series` (value).
-- Available topics and sampled fields: `topics` (value).
-- Episode history: `event_timeline` (value). Omit the view for the latest event of each episode or occurrence.
-
-Read `guides/device-state-fields.md` for the device views, inventory observation time, multipart identity and limits on absence claims.
+One device or a few over a window: start with `view` (arg) `device_overview` (value) or `device_network` (value), and drill down from what the reading points at.
+Across a client or the fleet: omit `view` (arg) for open conditions, `group_by_reason` (arg) for device counts, `fleet_processes` (value) and `fleet_performance` (value) for outliers.
+Every view and when to use it: `guides/device-state-fields.md` (**Choose the view**), which also covers inventory observation time, multipart identity and limits on absence claims.
 Use `guides/stream-kinds/device-state.md` for chart and field-query recipes.
 If the visible tool description omits details you need, `server_info` (tool) with `describe_tool: "query_device_health"` returns the full reference.
 

@@ -17,15 +17,8 @@ Start at `fields/INDEX.md`, then open the topic table for its exact names, types
 
 ## Which reading
 
-| Question | Tool |
-|---|---|
-| What happened on this device over a window (performance, storage, processes, network, episodes and changes) | `query_device_health` (tool), `view` (arg) `device_overview` (value) or `device_network` (value), then refine its result sets |
-| Standing conditions / latest event of each episode in this window | `query_device_health` (tool), omit `view` (arg) (`fieldset` (arg) = `rca` (value) for one host). Episode and observation limits: `guides/device-state-fields.md` |
-| What is on the box / how it last read | `query_device_health` (tool), `view` (arg) `latest_state` (value) |
-| Process CPU, memory or I/O trends | `query_device_health` (tool), `view` (arg) `top_processes_over_time` (value). See the chart recipe below. |
-| Raw device measurements over time | `query_device_health` (tool), `view` (arg) `series` (value) with `topics` (arg). Use `topics` (value) to discover topics and sampled fields. |
-| Series of those episodes, or repeating change points | `query_device_health` (tool) `view` (arg) `event_timeline` (value). `min_severity` (arg) filters by the episode peak, then returns every in-window event of those episodes. Fieldset `fleet` (value) when duration / `sparklogs.episode.cleared_ts` (col) / `sparklogs.class` (col) matter |
-| Underlying log events and fields outside the health projection | `query_logs` (tool) on this `subsource` (LQL). |
+Which `query_device_health` (tool) view answers which question: `guides/device-state-fields.md` (**Choose the view**).
+Underlying log events and fields outside the health projection: `query_logs` (tool) on this `subsource` (LQL), as below.
 
 MCP column names paste straight into LQL now: `sparklogs.kind` (col) on a device-health row is `sparklogs.kind` (LQL) in logs, same spelling.
 `subsource` (col) on health rows is the feed id `sparklogs.device.state` (value), the same stamp as logs.

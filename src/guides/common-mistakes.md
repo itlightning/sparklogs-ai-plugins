@@ -254,7 +254,7 @@ Writing the WHAT WAS NOT CHECKED section, specific versus boilerplate wording, a
 
 **Why it's wrong.** `list_fields` (tool) is a good catalog call. It names fields; it does not rank what matters. For device state, group `sparklogs.kind` (LQL), `sparklogs.topic` (LQL), `sparklogs.reason` (LQL) first (`guides/stream-kinds/device-state.md`). The catalog lists snapshot payload leaves with their array mark (`sparklogs.data.services[].current_state`); those are names to filter on inside `[]()`, not a ranking of importance.
 
-**Recovery.** Standing / latest of each episode: `query_device_health` (tool), omit `view` (arg). Inventory / what is on the box: same tool, `view` (arg) `latest_state` (value). Process trends: same tool, `view` (arg) `top_processes_over_time` (value). Raw measurements: `view` (arg) `series` (value) with `topics` (arg). RCA: same tool, `view` (arg) `event_timeline` (value). Event stream: group `sparklogs.kind` (LQL) / `sparklogs.topic` (LQL) / `sparklogs.reason` (LQL). Use `list_fields` (tool) when you need a name the rows did not already show.
+**Recovery.** Pick the `query_device_health` (tool) view for the question (`guides/device-state-fields.md`, **Choose the view**). Event stream: group `sparklogs.kind` (LQL) / `sparklogs.topic` (LQL) / `sparklogs.reason` (LQL). Use `list_fields` (tool) when you need a name the rows did not already show.
 
 ### Mixing the default view with event_timeline
 

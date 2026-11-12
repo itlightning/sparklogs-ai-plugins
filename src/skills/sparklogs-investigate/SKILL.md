@@ -26,7 +26,7 @@ You do NOT:
 - Confabulate.
 
 You DO:
-- Gather evidence aggregation-first (Section 8), leaning on the scope ladder (`service` (LQL)/`app` (LQL)/`subsource` (LQL)/`category` (LQL)/`pattern` (LQL) and their `_hash` companions) as the primary shallow-triage lever (Section 9).
+- Gather evidence aggregation-first (Section 8), grouping by the scope ladder and curated reasons as the primary shallow-triage lever (Section 9).
 - Cite every claim with a `query_url` (col), band its confidence honestly, and enumerate what was not checked (Sections 5, 6, 7).
 - Read an empty result as a claim about the query, never as a clean bill of health: know which fields the source actually carries (Section 8).
 - Offer the separate **`sparklogs-analyze-cause`** skill at the end if the engineer wants candidate cause hypotheses; do not perform cause analysis here beyond that invitation.
@@ -72,7 +72,7 @@ Process charts use the same tool with `view` (arg) `top_processes_over_time` (va
 
 ## Curated data (read this before opening reference files)
 
-- **`subsource` (LQL) = feed id.** Scope filters before `query_logs` (tool): `service` (LQL) → `app` (LQL) → `subsource` (LQL) → `category` (LQL) → `pattern_hash` (LQL).
+- **`subsource` (LQL) = feed id.** Group before `query_logs` (tool): the scope ladder plus `sparklogs.reason` (LQL), in `guides/scope-ladder.md`.
 - **Curated events** carry `sparklogs.reason` (LQL), `sparklogs.class` (LQL), and module fields. Empty `sparklogs.*` on an event means **uncurated** (not a collection-health finding).
 - **Reason** (`sparklogs.reason` (LQL)) = our curated vocabulary. **Vendor code** = NTSTATUS, HRESULT, MSI exit, Kerberos result, etc. **pattern_hash** (LQL) = stable shape id on every event.
 - **Device row** (`query_device_health` (tool), feed health, `agent_complete_through` (col)) is authoritative for collection and completeness. Event volume is not coverage.
@@ -254,7 +254,7 @@ Symptom playbooks: Section 3b and `playbooks/playbooks.md`.
 
 ## Section 9. The scope ladder - your primary shallow-triage lever, available today
 
-Climb coarse to fine: `service` (LQL) -> `app` (LQL) -> `subsource` (LQL) -> `category` (LQL) -> `pattern_hash` (LQL); `source` (LQL) is the host pivot beside the ladder. `pattern_hash` (LQL) is always present; other ladder fields are conditional (empty group = field absent on this source, fall back to `pattern_hash` (LQL), not a Finding).
+Group before you read: the event-shape ladder (`service` (LQL) -> `app` (LQL) -> `subsource` (LQL) -> `category` (LQL) -> `pattern_hash` (LQL), `source` (LQL) beside it), curated identity (`sparklogs.reason` (LQL), `sparklogs.reason_variant` (LQL), `sparklogs.class` (LQL), `sparklogs.instance` (LQL)), and device conditions. Fields, availability and the rules that change counts: `guides/scope-ladder.md`. An empty group is a field the source does not set, not a Finding.
 
 **Use it:** `query_event_counts_by_severity` (tool) with `group_by` (arg) to localize; cross-tab with 2-3 fields when the pairing is the question; drill with `pattern_hash = "..."` (LQL) or refine on cache; resolve `_hash` via `lookups` (col) before citing. Baseline-vs-incident hash compare: mind source-pack releases that recompute pattern identity.
 

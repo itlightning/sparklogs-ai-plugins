@@ -38,20 +38,11 @@ A `subsource` (LQL) not in this table comes from an ingest key or another non-ag
 
 ## Portable fields
 
-Prefer these **when present**:
-
-- Under `sparklogs.*`: `sparklogs.kind` (LQL), `sparklogs.topic` (LQL), `sparklogs.episode.*`, Security `sparklogs.actor.*`
-- Top-level (same facts, usual LQL/`group_by` (arg) names): `sparklogs.reason` (LQL), `sparklogs.class` (LQL)
-
-Most WEL rows do not carry them.
-Absence is a missing promotion, not a missing event.
+Curated fields (`sparklogs.reason` (LQL), `sparklogs.reason_variant` (LQL), `sparklogs.class` (LQL), `sparklogs.kind` (LQL), `sparklogs.instance` (LQL), `sparklogs.topic` (LQL), Security `sparklogs.actor.*`) mean the same on every feed: `guides/scope-ladder.md`.
+Most WEL rows do not carry them; absence is a missing promotion, not a missing event.
 
 ## Device state vs events
 
-"What happened on this device" is `query_device_health` (tool) with `view` (arg) `device_overview` (value), or `device_network` (value) for network trouble.
-"Latest event of each episode in this window" is `query_device_health` (tool) with `view` (arg) omitted.
-"What is on the box / how it last read" is the same tool with `view` (arg) `latest_state` (value).
-Episode series, or repeating change points, is the same tool with `view` (arg) `event_timeline` (value). Process trends use `view` (arg) `top_processes_over_time` (value).
-Raw device measurements use `series` (value) with `topics` (arg).
+Device questions go to `query_device_health` (tool): which view answers which question is `guides/device-state-fields.md` (**Choose the view**).
 The event stream of the same feed is `query_logs` (tool) scoped to `subsource` (LQL) `=` `"sparklogs.device.state"`.
 MCP column names (`sparklogs.kind` (col), `sparklogs.instance` (col), `sparklogs.episode.replaced_id` (col)) are the same dotted `sparklogs.*` spelling as the LQL path. Detail: `guides/device-state-fields.md`.

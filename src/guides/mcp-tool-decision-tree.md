@@ -16,7 +16,7 @@ There are **fourteen** tools: `resolve_scope` (tool), `list_sources` (tool), `qu
 - **Funnel:** coverage before claims (`resolve_scope` (tool) → `list_sources` (tool) → device health or activity → counts/patterns → `query_logs` (tool) last). For one device or a few, device health starts with a device view.
 - **`external_investigation_id` (arg):** required on every scoped/data call except `server_info` (tool); reuse within one investigation, mint fresh for a new one.
 - **Time windows:** flat `start` (arg) / `end` (arg) in RFC3339 UTC; no relative shorthand.
-- **Scope filters:** service → app → subsource → category → pattern; an empty rung is not a finding.
+- **Scope filters:** service → app → subsource → category → pattern, plus curated `sparklogs.reason` (LQL): `guides/scope-ladder.md`. An empty rung is not a finding.
 - **Prohibitions:** volume and first/last bounds never prove interior coverage; absence of a feed report is not evidence.
 
 ## Investigation discipline (tool order)
@@ -39,7 +39,7 @@ Choose by the question: device state, process trends, event counts or raw eviden
 |---|---|
 | `resolve_scope` (tool) | You have a name (client, host, ticket) and need an `org_id` (col). Always first. Collection/completeness live here. Multiple rows at the same best `match_kind` (col): confirm with the engineer before proceeding, don't guess. |
 | `list_sources` (tool) | Before concluding anything from an absence: did this source send data in THIS window? Any source type, including ingest keys. Any non-zero `cnt_critical_plus` (col) in scope: fetch those events before proceeding, whatever the investigation topic. |
-| `query_device_health` (tool) | Device conditions, inventories and trends. For one device or a few, start with `view` (arg) `device_overview` (value) or `device_network` (value), then drill down. Process charts: `view` (arg) `top_processes_over_time` (value). Raw samples: `series` (value). Topic discovery: `topics` (value). Current inventory state: `latest_state` (value). Episode history: `event_timeline` (value). Omit the view for the latest event per episode or occurrence. See `guides/device-state-fields.md` for interpretation. |
+| `query_device_health` (tool) | Device conditions, inventories and trends. For one device or a few, start with `view` (arg) `device_overview` (value) or `device_network` (value), then drill down. Across devices: omit the view for open conditions, `group_by_reason` (arg) for device counts, `fleet_processes` (value) / `fleet_performance` (value) for outliers. Crash or app problem: `event_timeline` (value) with `kinds` (arg) `["occurrence"]` (value). Every view: `guides/device-state-fields.md` (**Choose the view**). |
 | `query_scope_activity` (tool) | You do not know what this client HAS: which apps, services and subsources exist at all. Orientation on an unfamiliar estate. |
 | `query_event_counts_by_severity` (tool) | "What is going on here", at any altitude. The default mid-tier tool. `group_by=["sparklogs.reason"]` or `["pattern_hash"]`; pass two fields when the question has two nouns in it. |
 | `describe_pattern` (tool) | You are about to cite a pattern and need its text and spread. Pass `pattern_hashes` (arg) (a list). Required before citing any teaser pattern. Mid-tier with counts. |
