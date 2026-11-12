@@ -16,6 +16,8 @@ A span whose peak sat `within` (value) the device's typical range is not new for
 
 **Device health first.** `device_overview` (value) over the complaint window, up to 30 days and 1 hour.
 
+Several devices slow, or a client-wide complaint: start with `fleet_performance` (value) on the reading that matches the symptom (`group_by` (arg) `device` (value) lists the outliers) and `fleet_processes` (value) for the executables using the most CPU, RAM or I/O across the devices, then read `device_overview` (value) on the outliers.
+
 - Header: coverage (an asleep or unreported stretch is not a quiet one), `measured` (col) and `not_measured` (col).
 - `heat_spans` (col) by `domain` (col) (`cpu` (value), `ram` (value), `disk` (value)), each with its `driver` (col), peak, typical placement and contributors.
   Paging stall drives memory heat: programs waited on the disk for memory they were using.
