@@ -405,14 +405,6 @@ sparklogs.kind = agent_op
 
 `agent_op` (value) rows are stamped when an investigator must distrust or re-interpret other data on that host. Treat an EMPTY result as inconclusive rather than reassuring: a healthy agent, an agent that is not reporting, and a topic disabled for that agent's rollout ring look identical from here.
 
-### Detector lifecycle awareness
-
-```lql
-sparklogs.kind = agent_op AND subsource: anomaly_detector_*
-```
-
-Identifies warmup-complete and baseline-reset events. Same caveat: empty is inconclusive.
-
 ### Time-range narrowing within an LQL filter
 
 The `start` (arg) / `end` (arg) window is the primary time scope. To narrow further inside a cached scan via `refine_query_result` (tool)'s `filter_lql` (arg):

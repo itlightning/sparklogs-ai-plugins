@@ -93,7 +93,6 @@ The mistakes are grouped by the operating principle they violate.
 - Is the evidence direct (you observed the actual state) or inferred (you concluded from related evidence)?
 - Is it corroborated across multiple sources / snapshots / time windows, or single-point?
 - Is it recent (within the investigation window) or stale?
-- Has the relevant detector completed warmup and avoided recent baseline reset?
 
 If any answer is "no/single/stale/uncertain," downgrade to `medium` (value) or `low` (value).
 
