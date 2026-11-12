@@ -497,6 +497,8 @@ values:
   # sparklogs.reason_variant arm ids the playbooks name (surface rows in feeds/<id>/fields.md).
   reason_arms:
     - below_tpm
+    - event_log
+    - kernel_power
     - enhanced_pin_refused
     - expected_check_failed
     - failure_mode
@@ -518,13 +520,17 @@ values:
   topics:
     - agent_overhead
     - agent_pipeline
+    - app_crashes
     - collector_health
     - crash_dump_config
+    - crashes
     - disk_volumes
     - drivers
     - feed_health
     - installed_products
     - installed_products_summary
+    - kernel_crashes
+    - lifecycle
     - performance
     - processes
     - services
@@ -558,6 +564,21 @@ values:
     - observed
   config_change_category:
     - maintenance
+  # crash analysis, timing and dump vocabularies (fields/topic-crashes.md, topic-crash-dump-config.md)
+  crash_analysis:
+    - complete
+    - dump_unavailable
+    - budget_skipped
+    - resource_limited
+  crash_time_basis:
+    - dump_header
+    - estimated_bounds
+  crash_dump_format:
+    - kernel_triage
+    - kernel_bitmap
+    - kernel_full
+  crash_dump_type:
+    - mini
   device_health_metrics:
     - net_rx
     - net_tx

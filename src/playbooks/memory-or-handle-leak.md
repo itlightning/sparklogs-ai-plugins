@@ -10,7 +10,7 @@ index: Memory or handle leak
 An executable row combines every instance with that name: growth on the row does not prove that one instance leaks.
 Instance identity is PID plus creation time. Read it from the process trend with instance grouping.
 Paging heat and a leak are separate facts: a process can grow for days with no paging heat on a host with spare memory.
-Crashes and hangs are the consequence trail. A rising count of one `pattern_hash` (LQL) is a rising crash rate, not a leak.
+Crashes and hangs are the consequence trail. A rising crash count for one program is a rising crash rate, not a leak.
 Read open conditions with `sparklogs.episode.age_basis` (col): `observed` (value) supports "for at least N days"; `unknown_ongoing` (value) supports no duration.
 
 **Device health first.** `device_overview` (value) over days, covering the slowdown and the last reboot if you can.
@@ -32,7 +32,7 @@ Read open conditions with `sparklogs.episode.age_basis` (col): `observed` (value
 source = "<host>" AND sparklogs.reason in (app_crash, app_hang, process_crash)
 ```
 
-Group by `sparklogs.reason` (LQL), then read the rows for the executable. `app_crash` (value) and `app_hang` (value) are the Application-channel records; `process_crash` (value) is the device-state occurrence for the same crash. Where crashes and hangs live: `guides/device-state-fields.md` (**Choose the view**).
+Group by `sparklogs.reason` (LQL), then read the rows for the executable. `app_crash` (value) and `app_hang` (value) are the Application-channel records; `process_crash` (value) is the device-state occurrence for the same crash. A crash out of memory shows as `ram_commit_near_limit` (value) at Serious or above beside it. Reading the crashes themselves (faulting module, exception, one device or many): `playbooks/crashes-and-restarts.md`.
 
 **Findings.** Lead with the measured curve and its interval, then the consequence.
 Name the executable; say one instance leaks only when instance grouping showed it.

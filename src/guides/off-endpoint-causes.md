@@ -198,6 +198,15 @@ The list is **not exhaustive** - it's a starting set covering common patterns. I
 - **RMM and Group Policy actions.** A policy that stops, removes or reinstalls the agent, or changes event log sizes and access, is configured in the RMM or the directory.
 - **Machine state while silent.** Whether a device with no signal was powered off, asleep or off the network is the RMM's and the user's to say.
 
+## HM18 - Crashes and unexpected restarts
+
+**Off-endpoint causes:**
+
+- **Power.** UPS, power distribution and building power events are logged on those devices. A power loss leaves the endpoint only an unclean-stop record at the next boot.
+- **Virtualization host.** A host crash, reset or maintenance restarts its guests; each guest logs an unexpected shutdown and no crash. The host needs its own reading.
+- **Hardware diagnostics.** Memory tests, the device maker's diagnostics and a server's management controller log (iDRAC, iLO) hold results the operating system never saw.
+- **Vendor crash telemetry.** A software vendor's crash reports and known issues for a release are published by the vendor; the device logs only its own crashes.
+
 ---
 
 ## Cross-cutting off-endpoint patterns

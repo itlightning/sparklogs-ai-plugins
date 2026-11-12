@@ -33,7 +33,7 @@ Funnel, scope, LQL errors: `guides/mcp-tool-decision-tree.md`, `guides/scope-res
 ## Which tool (quick route)
 
 - Something wrong with one device or a few (slow, dropping, filling, failing) → `query_device_health` (tool), `view` (arg) `device_overview` (value), or `device_network` (value) for network trouble; then refine its result sets and read events only for the device and interval it points at
-- Crash or app problem → same tool, `view` (arg) `event_timeline` (value) with `kinds` (arg) `["occurrence"]` (value); app hangs are only in Application-channel events (`guides/device-state-fields.md`, **Choose the view**)
+- Blue screen, app crash or unexpected restart → `playbooks/crashes-and-restarts.md`; the device's crash timeline is the same tool, `view` (arg) `event_timeline` (value) with `kinds` (arg) `["occurrence"]` (value); app hangs are only in Application-channel events (`guides/device-state-fields.md`, **Choose the view**)
 - Open problems across a client, or how many devices have one → same tool, omit `view` (arg), or `group_by_reason` (arg) for device counts
 - Which processes or devices stand out across the fleet → same tool, `view` (arg) `fleet_processes` (value) or `fleet_performance` (value)
 - What is installed or configured now → same tool, `view` (arg) `latest_state` (value), or refine an overview's `state` (value) result set
@@ -110,6 +110,10 @@ Playbooks are incomplete recipes. If a recipe LQL produces empty results: widen 
 | App slow over VPN | `playbooks/application-network-stall.md` |
 | BitLocker recovery | `playbooks/bitlocker-recovery.md` |
 | Certificate expiry | `playbooks/certificate-expiry.md` |
+| Blue screens, app crashes, unexpected restarts | `playbooks/crashes-and-restarts.md` |
+| Blue screen (BSOD) | `playbooks/crashes-and-restarts.md` |
+| App keeps crashing | `playbooks/crashes-and-restarts.md` |
+| Server restarted on its own | `playbooks/crashes-and-restarts.md` |
 | Directory replication | `playbooks/directory-replication-failure.md` |
 | Disk full or filling | `playbooks/disk-full-or-filling.md` |
 | Memory or handle leak | `playbooks/memory-or-handle-leak.md` |

@@ -111,6 +111,10 @@ Detail: `playbooks/playbooks.md`.
 | App slow over VPN | `playbooks/application-network-stall.md` |
 | BitLocker recovery | `playbooks/bitlocker-recovery.md` |
 | Certificate expiry | `playbooks/certificate-expiry.md` |
+| Blue screens, app crashes, unexpected restarts | `playbooks/crashes-and-restarts.md` |
+| Blue screen (BSOD) | `playbooks/crashes-and-restarts.md` |
+| App keeps crashing | `playbooks/crashes-and-restarts.md` |
+| Server restarted on its own | `playbooks/crashes-and-restarts.md` |
 | Directory replication | `playbooks/directory-replication-failure.md` |
 | Disk full or filling | `playbooks/disk-full-or-filling.md` |
 | Memory or handle leak | `playbooks/memory-or-handle-leak.md` |

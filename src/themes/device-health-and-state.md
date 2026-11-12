@@ -13,6 +13,7 @@ One device or a few over a window: start with `view` (arg) `device_overview` (va
 Across a client or the fleet: omit `view` (arg) for open conditions, `group_by_reason` (arg) for device counts, `fleet_processes` (value) and `fleet_performance` (value) for outliers.
 Every view and when to use it: `guides/device-state-fields.md` (**Choose the view**), which also covers inventory observation time, multipart identity and limits on absence claims.
 Use `guides/stream-kinds/device-state.md` for chart and field-query recipes.
+Crashes, blue screens and unexpected restarts (topics `crashes` (value), `kernel_crashes` (value), `app_crashes` (value), `crash_dump_config` (value), `lifecycle` (value)): `playbooks/crashes-and-restarts.md`.
 If the visible tool description omits details you need, `server_info` (tool) with `describe_tool: "query_device_health"` returns the full reference.
 
 Collection status and `agent_complete_through` (col) qualify coverage.
