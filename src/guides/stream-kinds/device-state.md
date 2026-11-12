@@ -177,8 +177,8 @@ Item leaves group and aggregate: `group_by` (arg) on `sparklogs.data.services[].
 
 ```
 source              samples  cpu_avg   commit_max
-lakeside-srv01-s01  12       0.256666  57.55
-summit-app01-s01    12       0.129166  48.65
+srv-app01           12       0.256666  57.55
+ws-022              12       0.129166  48.65
 ```
 
 `select` (arg) on step 1 shrinks the response only. The cache keeps every column, so step 2 can aggregate the commit_pct path even though step 1 never returned it.

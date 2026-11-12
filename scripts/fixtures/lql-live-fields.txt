@@ -1,10 +1,10 @@
 # LQL fields seen on real events: the vet list for scripts/lql-field-refs.mjs.
-# Captured 2026-11-12 from the SparkLogs dev-cloud MCP tool list_fields with
+# Captured 2026-11-12 with the SparkLogs MCP tool list_fields, with
 # query_scope {"all_orgs": true}, a 30-day window, limit 10000, every page.
 # One field per line, as list_fields spells it: array items as a[].b, scalar arrays as a[].
 # Test-only fields are excluded: every x.* path (custom-field examples in the guides
 # are pedagogical, see lql_pedagogical in scripts/identifier-sot.yaml), agent_id2, keyword_names[].
-# This is lab data: fields only rare events emit are missing, which is why pack-declared
+# One capture cannot see every field: fields only rare events emit are missing, which is why pack-declared
 # fields also pass. Refresh: an agent with the MCP re-runs list_fields with these
 # arguments, drops the test-only fields above, and replaces the list below.
 accum_presence

@@ -57,6 +57,7 @@ Every name must match the live tool: check it against the tool's input schema an
 - Dump a feed directory; one artifact per question (`guides/generated-reference-router.md`).
 - Copy a stream-kind ladder into every playbook; point at `guides/stream-kinds.md`.
 - Copy private design-doc maps, Layer labels, or unreleased pack internals. Field names and public Microsoft vocabulary are fine.
+- Name internal processes, environments, hosts or customers. Describe the product and its data only.
 
 ## Length
 
