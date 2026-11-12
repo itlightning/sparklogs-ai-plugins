@@ -63,7 +63,7 @@ The plugin is mostly readable markdown. Browse it here before you install:
 - [Guides](plugins/claude/sparklogs/skills/sparklogs-investigate/references/guides): query language, tool selection, scope resolution, feed reference routing.
 - [Feed references](plugins/claude/sparklogs/skills/sparklogs-investigate/references/feeds): fields, enums, and reason codes per data feed.
 - [Themes](plugins/claude/sparklogs/skills/sparklogs-investigate/references/themes): patching, security and audit, endpoint protection, operational events, device health.
-- [Subagents](plugins/claude/sparklogs/agents): pattern enumeration, clustering, and log summarization helpers.
+- [Subagents](plugins/claude/sparklogs/agents): pattern enumeration and log summarization helpers.
 
 Those links point at the Claude package. Every host package under `plugins/<host>/sparklogs/` carries the same skills and the same reference corpus inside each skill's references tree; commands, subagents, and rules ship only where the host documents them.
 

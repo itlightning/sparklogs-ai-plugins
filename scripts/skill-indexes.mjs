@@ -409,9 +409,9 @@ body
     throw new Error('unwrapGeneratedBlocks dropped INVENTORY body');
   }
   const agent = `---
-name: sparklogs-cluster-interpreter
+name: sparklogs-example-agent
 model: haiku
-description: Interprets clusters.
+description: Example agent.
 ---
 
 # Agent

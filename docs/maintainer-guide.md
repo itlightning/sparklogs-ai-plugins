@@ -104,6 +104,9 @@ new arrives unnoticed in either direction.
 A subdirectory under `src/feeds/` that is not in `MODULES` fails `--check` and is deleted on sync
 via `safeRmFeedModule` (that helper only accepts `src/feeds/<feed-id>`).
 
+`parked/` holds guide text that does not fit today's data or tools. It never ships and is not linted;
+`parked/README.md` says how to bring text back.
+
 Published content lives under `src/`. The renderer copies only that tree plus host wrappers and one
 README. That dist root README is authored at `scripts/templates/dist-README.md`; the renderer fills
 `{{version}}` (the release version, or `development build` without `--version`) and `{{docs_url}}`,
