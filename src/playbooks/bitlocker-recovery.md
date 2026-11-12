@@ -62,7 +62,7 @@ Group by `winlog.event_id` (LQL). On a device whose boots usually carry 24711, a
   `fasr_pcr_validation_mismatch` (value) arm `pcr_mismatch` (value) on the platform feed names a PCR that differed from the firmware's certified manifest at boot. Its `no_mismatch` (value) arm is routine.
 - PCR 4 (boot manager): a boot manager update, such as the boot manager signed with the 2023 certificates that `secure_boot_certs_current` (value) reports.
 
-BitLocker-API event 793 in the BitLocker management log, uncurated, is BitLocker resealing its key to new boot measurements. It is the expected companion of a planned boot-component change:
+BitLocker-API event 793 in the BitLocker management log, uncurated, reads "BitLocker resealed boot settings to the TPM". BitLocker bound the drive key to the boot measurements of that moment. A 793 after a firmware or Secure Boot update means the key already follows the new measurements, so that update did not cause the prompt:
 
 ```
 source = "<host>" AND subsource = "win.eventlog.identity_security" AND winlog.event_id = 793
