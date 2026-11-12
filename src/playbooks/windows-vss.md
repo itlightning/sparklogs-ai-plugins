@@ -11,6 +11,7 @@ This file is the Windows plumbing under a backup product; the job result itself 
 Never report a backup failure from VSS evidence alone.
 Take job outcome from the backup product; cite VSS as a possible contributor.
 Do not recommend deleting shadow copies; restore-chain integrity belongs to the backup vendor.
+Shadow copies deleted by a script (`vssadmin` (other), `Remove-CimInstance`): who ran it is in `playbooks/powershell-script-blocks.md`.
 
 ## Feeds
 

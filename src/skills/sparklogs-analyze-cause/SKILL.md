@@ -29,7 +29,7 @@ Bounded discovery first, aggregate before detail, and refine a cached result bef
 
 ## Section 2. Trust principles
 
-AI accelerates engineers, not replaces them: hypotheses are for the engineer to choose. Cite prior Findings and any new `query_url` (col), and link each device you name by its device page (link rules: `sparklogs-investigate` Section 5). Calibrate confidence to evidence (usually looser than the factual summary). Carry forward prior not-checked items. Reuse `external_investigation_id` (arg).
+AI accelerates engineers, not replaces them: hypotheses are for the engineer to choose. Cite prior Findings and any new `query_url` (col), and link each device you name by its device page (link rules: `sparklogs-investigate` Section 4). Calibrate confidence to evidence (usually looser than the factual summary). Carry forward prior not-checked items. Reuse `external_investigation_id` (arg).
 
 ---
 

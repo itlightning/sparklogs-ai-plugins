@@ -326,6 +326,11 @@ lql_resident:
   - t
   - trace_id
   - event_id
+  - level
+  - process_id
+  - sparklogs.throttle.suppressed_prev
+  - user_id
+  - user_name
 
 # Made-up names the guides use to teach syntax, each marked illustrative where it is used.
 # Entry is an exact name or prefix.* (the prefix and every path under it).
