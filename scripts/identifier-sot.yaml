@@ -92,6 +92,8 @@ cols:
   - collector_source_kind
   - cpu_pct_avg
   - entry
+  - changes_capped
+  - occurrence_count
   - instance
   - is_busiest_disk
   - is_open
