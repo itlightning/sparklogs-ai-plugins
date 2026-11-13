@@ -21,26 +21,27 @@ No replication rows is not health: a DC without the agent, or whose DFS Replicat
 Replication and sync failures by reason and by DC:
 
 ```lql
-sparklogs.reason in (dfsr_replication_stopped, dfsr_partner_communication_failed, dfsr_sysvol_initial_sync_pending, entra_sync_run_failed, entra_password_hash_sync_failed, entra_sync_scheduler_aborted)
+sparklogs.reason in (dfsr_replication_stopped, dfsr_partner_communication_failed, dfsr_sysvol_initial_sync_pending, dfsr_dirty_shutdown_detected, entra_sync_run_failed, entra_password_hash_sync_failed, entra_sync_scheduler_aborted)
 ```
 
 Group by `sparklogs.reason` (LQL), `sparklogs.reason_variant` (LQL), `source` (LQL).
 DFS Replication on `win.eventlog.management` (value):
 
-- `dfsr_replication_stopped` (value): arm `offline_too_long` (value) (event 4012) is a member disconnected longer than the allowed offline time, and it will not resume on its own. Arm `folder_stopped` (value) is a folder or volume that stopped, often after database damage. Arm `config_unreachable` (value) (1202) resumes once a domain controller answers.
+- `dfsr_replication_stopped` (value): arm `offline_too_long` (value) (event 4012) is a member disconnected longer than the allowed offline time, and it will not resume on its own. Arm `folder_stopped` (value) is a folder or volume that stopped, often after database damage. Arm `config_unreachable` (value) (1202) resumes once a domain controller answers. Arm `dirty_shutdown_stopped` (value) (2213) waits for a manual resume after an unclean shutdown (below).
 - `dfsr_partner_communication_failed` (value): one link failing while the service retries. Event 5004 for the same partner, uncurated, records the link restored.
 - `dfsr_sysvol_initial_sync_pending` (value): a SYSVOL copy that has never synchronized, normal for a short time after a promotion.
 
 The partner and the replicated folder are in the message text. Entra Connect on the sync server's `win.eventlog.application` (value): `entra_sync_run_failed` (value), `entra_password_hash_sync_failed` (value), `entra_sync_scheduler_aborted` (value).
 
-An unclean shutdown leaves the replication database to be checked, uncurated: 2212 (unexpected shutdown detected) and 2214 (recovered), with 5004 for links coming back:
+An unclean shutdown leaves the replication database to be checked: `dfsr_dirty_shutdown_detected` (value), arm `recovery_started` (value) (2212, unexpected shutdown detected) and `recovered` (value) (2214, recovery finished). On a server with automatic recovery turned off, `dfsr_replication_stopped` (value) arm `dirty_shutdown_stopped` (value) (2213) is replication on the volume paused until someone runs the resume command its message gives:
 
 ```lql
-source = "<host>" AND subsource = "win.eventlog.management" AND provider_name = "DFSR" AND event_id in (2212, 2214, 5004)
+source = "<host>" AND sparklogs.reason in (dfsr_dirty_shutdown_detected, dfsr_replication_stopped)
 ```
-<!-- confirmed with data on 2026-11-12 -->
 
-A 2212 with no 2214 after it is a volume still recovering, or one waiting for an administrator: Microsoft documents event 2213 for a server with automatic recovery turned off, where replication on the volume stays paused until someone runs the resume command its message gives.
+Group by `sparklogs.reason_variant` (LQL) over time.
+A `recovery_started` (value) with no `recovered` (value) after it is a volume still recovering (hours on a large volume), or one waiting for an administrator. The pair at most restarts is a server that cannot stop its services in the time Windows allows.
+Links coming back after the recovery are DFSR event 5004, uncurated, as for `dfsr_partner_communication_failed` (value) above.
 
 Authentication failures by cause and by DC:
 

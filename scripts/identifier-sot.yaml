@@ -566,6 +566,30 @@ values:
     - config_unreachable
     - down
   # sparklogs.data.storage_devices[].presentation values (fields/topic-storage-devices.md).
+    - wsaeacces
+    - credential_failed
+    - entra_daily_certificate
+    - store_certificate
+    - enrollment_failed
+    - dirty_shutdown_stopped
+    - recovery_started
+    - memory_corrected
+    - adapter_start_failed
+    - driver_start_failed
+    - spot_fix_required
+    - online_scan_required
+    - shadow_copy_volume
+    - reconnected
+    - taking_long
+    - took_long
+    - load_failed
+    - backup_profile_used
+    - folder_delete_failed
+    - hive_load_failed
+    - shutdown_in_progress
+    - http_401
+    - http_404
+    - transfer_error
   storage_presentation:
     - local_physical
     - san_lun

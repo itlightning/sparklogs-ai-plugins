@@ -20,7 +20,7 @@ An empty result is not health. A device with no Group Policy rows may be a workg
 The pass and discovery failures on it carry `win.eventlog.identity_security.gp_connectivity_failure` (LQL), `win.eventlog.identity_security.gp_is_machine` (LQL), `win.eventlog.identity_security.gp_elapsed_seconds` (LQL), `win.eventlog.identity_security.gp_dc_discovery_ms` (LQL) and `win.eventlog.identity_security.gp_extension_name` (LQL).
 The Windows error behind each failure is in the first line of the message (`error_code=` with its name) and raw as `event_data.ErrorCode` (LQL). It is the cause: read it before anything else.
 The variant names the shape: `sparklogs.reason_variant` (LQL), such as `domain_unresolved` (other), `access_denied` (value), `share_unreachable` (other), `no_network` (other), `deferred` (other).
-The System log carries the pass result Windows shows administrators (`win.eventlog.system` (value): `group_policy_processing_failed` (value) for 1129, `group_policy_software_install_failed` (value), `domain_secure_channel_failed` (value)) and uncurated Group Policy errors, each with `event_data.ErrorCode` (LQL) and often `event_data.DCName` (LQL) and `event_data.FilePath` (LQL).
+The System log carries the pass result Windows shows administrators (`win.eventlog.system` (value)): `group_policy_processing_failed` (value) for 1129, 1030, 1006 and 1058, `group_policy_domain_controller_unresolved` (value) for 1054, `group_policy_extension_apply_failed` (value) for 1085 and 1130, `group_policy_software_install_failed` (value) and `domain_secure_channel_failed` (value). 1058 names the policy file in `win.eventlog.system.gp_file_path` (LQL); 1085 the extension in `win.eventlog.system.gp_extension_name` (LQL); a failed 1130 script its policy object in `win.eventlog.system.gpo_name` (LQL) and the script's command in `command_line` (LQL). The rest of the System Group Policy errors are uncurated, each with `event_data.ErrorCode` (LQL).
 Group Policy Preferences (drive maps, printers, shortcuts, files, local groups) write to `win.eventlog.application` (value), one provider per extension (`Group Policy Drive Maps`, `Group Policy Printers`, ...): `feeds/win.eventlog.application/reasons.md`. Drive maps carry `win.eventlog.application.drive` (LQL) and `win.eventlog.application.share` (LQL).
 All of it is service `device_management` (value), together with MDM and Intune.
 
@@ -28,22 +28,23 @@ All of it is service `device_management` (value), together with MDM and Intune.
 
 | What failed | Witness | Usual cause |
 |---|---|---|
-| No domain controller found | `group_policy_domain_controller_unresolved` (value) (7017, 7320, 7326), System 1054 or 1055 | Off the corporate network, DNS not pointing at the domain's DNS servers, VPN not up yet |
-| A controller answered and refused the machine (on a domain member) | `group_policy_domain_controller_unresolved` (value) `access_denied` (value), `domain_secure_channel_failed` (value) with a trust code, System 1006 or 1030 with 1326 | Broken machine account or secure channel, clock skew |
-| The whole pass failed | `group_policy_processing_failed` (value) (System 1129, Operational 7000 and 7001), System 1030, 1079, 1125, 1127 | Lost network at boot or logon; on a fixed machine, DNS or a controller problem |
-| A policy object's files could not be read | System 1058 with the GPT.INI path, 7017 naming a SYSVOL file | SYSVOL not reachable, or the object's folder missing from SYSVOL on that controller |
-| One extension failed | `group_policy_extension_apply_failed` (value) (6016, 7016, Application 8194), System 1085 | That extension's own target: a share, a printer driver, an installer, MDM enrollment |
+| No domain controller found | `group_policy_domain_controller_unresolved` (value) (7017, 7320, 7326, System 1054), uncurated System 1055 | Off the corporate network, DNS not pointing at the domain's DNS servers, VPN not up yet |
+| A controller answered and refused the machine (on a domain member) | `group_policy_domain_controller_unresolved` (value) `access_denied` (value), `domain_secure_channel_failed` (value) with a trust code, `group_policy_processing_failed` (value) `directory_read_failed` (other) (System 1006 or 1030) with 1326 | Broken machine account or secure channel, clock skew |
+| The whole pass failed | `group_policy_processing_failed` (value) (System 1129 and 1030, Operational 7000 and 7001), uncurated System 1079, 1125, 1127 | Lost network at boot or logon; on a fixed machine, DNS or a controller problem |
+| A policy object's files could not be read | `group_policy_processing_failed` (value) `sysvol_unreachable` (other) or `sysvol_no_code` (other) (System 1058 with the GPT.INI path in `win.eventlog.system.gp_file_path` (LQL), 7017 naming a SYSVOL file) | SYSVOL not reachable, or the object's folder missing from SYSVOL on that controller |
+| One extension failed | `group_policy_extension_apply_failed` (value) (6016, 7016, Application 8194, System 1085) | That extension's own target: a share, a printer driver, an installer, MDM enrollment |
 | One preference item failed | `group_policy_drive_map_failed` (value), `group_policy_preference_item_failed` (value) | The item's share, path, stored password or drive letter |
 | Software did not install | `group_policy_software_install_failed` (value) | Deferred to the next restart (1274), package share unreadable (1612), the package itself (1603) |
-| A script failed | System 1130 with the script and the error | Script missing (2), share not reachable (53, 67), permissions (5) |
+| A script failed | `group_policy_extension_apply_failed` (value) `script_failed` (other) (System 1130), with the script's command in `command_line` (LQL) and the error | Script missing (2), share not reachable (53, 67), permissions (5) |
 
-7017 is Windows reporting that one call failed, and its message names the call: the account lookup, the LDAP bind to a named controller, or a read of a file on SYSVOL. Read it before trusting the variant: a SYSVOL file read that failed is the files layer, whatever the variant says.
+7017 is Windows reporting that one call failed, and its message names the call: the account lookup, the LDAP bind to a named controller, or a read of a file on SYSVOL. A failed SYSVOL file read (code 53) is filed as `group_policy_processing_failed` (value) `sysvol_unreachable` (other): the files layer.
 
 **Not failures.** Code 1274 (put off to the next foreground pass) and code 1252 (nothing changed) on an extension, and the Software Installation deferral records that come with them, ship at Info.
 7320 with access denied on a workgroup or Entra-only device is Windows' routine access check, written at every refresh, whether or not it carries a reason.
 `group_policy_file_share_unhardened` (value) (9001) is a posture notice: the device reads policy files from a share without the hardened UNC path settings (mutual authentication and integrity). It does not stop a pass. The fix is the Hardened UNC Paths policy for SYSVOL and NETLOGON.
 Discovery and connectivity failures on a laptop away from the office, followed by a successful pass once it is back, are expected.
-The MDM Policy extension failing with 2149056522 (0x8018000A, the device is already enrolled) on every refresh of a hybrid-joined device already in Intune is expected behaviour that Microsoft documents; it does not stop other extensions.
+The MDM Policy extension failing with 2149056522 (0x8018000A, the device is already enrolled) on every refresh of a hybrid-joined device already in Intune is expected behaviour that Microsoft documents; it does not stop other extensions. It is the `mdm_already_enrolled` (other) arm of `group_policy_extension_apply_failed` (value), at Info.
+On a domain controller, 7320 for the connectivity notification the controller does not support is routine: arm `connectivity_notification_unsupported` (other) of `group_policy_domain_controller_unresolved` (value).
 
 **Device health first.** `query_device_health` (tool); views and how to read them: `guides/device-state-fields.md` (**Choose the view**).
 
@@ -59,14 +60,14 @@ source = "<host>" AND sparklogs.reason in (group_policy_domain_controller_unreso
 
 Group by `sparklogs.reason` (LQL) and `sparklogs.reason_variant` (LQL), then read the error code on a few rows of each group.
 
-Windows' own Group Policy errors on the System log that SparkLogs does not curate. Several of these name the cause outright: 1054 (no controller name, often 1355), 1055 (the computer name did not resolve), 1058 (a policy object's GPT.INI could not be read, with its path), 1006 (LDAP bind refused, 49 is invalid credentials), 1030 (the pass could not get new settings), 1096 (registry policy could not be applied, often a damaged Registry.pol), 1110 (user and computer forest could not be compared), 1130 (a logon or startup script failed):
+The System records in that query name the cause outright: 1054 (no controller name, often 1355), 1058 (a policy object's GPT.INI could not be read, with its path), 1006 (LDAP bind refused, 49 is invalid credentials), 1030 (the pass could not get new settings), 1085 (an extension failed), 1130 (a logon or startup script failed).
+Windows' other Group Policy errors on the System log are not curated: 1053 (the user or computer name could not be resolved), 1055 (the computer name did not resolve), 1079, 1125, 1126 and 1127 (the pass failed, with the code), 1096 (registry policy could not be applied, often a damaged Registry.pol), 1110 (user and computer forest could not be compared):
 
 ```lql
-source = "<host>" AND subsource = "win.eventlog.system" AND provider_name = "Microsoft-Windows-GroupPolicy" AND event_id in (1006, 1030, 1053, 1054, 1055, 1058, 1079, 1085, 1096, 1110, 1125, 1126, 1127, 1130)
+source = "<host>" AND subsource = "win.eventlog.system" AND provider_name = "Microsoft-Windows-GroupPolicy" AND NOT sparklogs.reason! AND severity >= warning
 ```
-<!-- confirmed with data on 2026-11-12 -->
 
-Group by `event_id` (LQL) and `event_data.ErrorCode` (LQL). 1058 carries `event_data.FilePath` (LQL) and `event_data.DCName` (LQL).
+Group by `event_id` (LQL) and `event_data.ErrorCode` (LQL). The successes (1500 to 1503) carry no reason either; the severity floor leaves them out.
 
 Did any pass succeed, and how long did each take:
 
@@ -119,7 +120,7 @@ The rest of a slow sign-in, profile load, authentication and the machine's load:
 - **DNS.** A fixed desktop or server with 1355 or 1054 while its network is fine. Read the adapter DNS servers above, then `dns_client_resolution_timed_out` (value) and the DNS probe on the network reading.
 - **Subnet not in a site.** 7320 with 1919 (ERROR_NO_SITENAME, "Computer determined to be not in a site") while 5326 still finds a controller. Policy applies, but the device can pick a distant controller. A new office, VPN pool or Wi-Fi subnet was not added to Active Directory Sites and Services. The domain controllers log NETLOGON 5807 for clients in subnets that map to no site.
 - **Machine account or secure channel broken.** `access_denied` (value) (5) on a domain-joined device, `domain_secure_channel_failed` (value) with a trust code (1789, 1787, 5), System 1006 with 49 or 1030 with 1326. A restored image, a reset computer account, or the same name joined twice. Check the clock too: Kerberos fails beyond five minutes of skew (`time_sync_failed` (value)). Repair is `Test-ComputerSecureChannel -Repair` or a rejoin.
-- **SYSVOL.** System 1058 with the object's GPT.INI path. Error 3 (path not found) is an object that exists in the directory but whose folder is missing from SYSVOL on the controller that answered, a SYSVOL replication problem: `playbooks/directory-replication-failure.md`. 53 or 67 is the share not reachable from this device. Several devices failing on the same object name the object; several objects failing on one controller name the controller.
+- **SYSVOL.** System 1058 (`sysvol_unreachable` (other)) with the object's GPT.INI path in `win.eventlog.system.gp_file_path` (LQL). Error 3 (path not found) is an object that exists in the directory but whose folder is missing from SYSVOL on the controller that answered, a SYSVOL replication problem: `playbooks/directory-replication-failure.md`. 53 or 67 is the share not reachable from this device. Several devices failing on the same object name the object; several objects failing on one controller name the controller.
 - **A failing extension.** Read `win.eventlog.identity_security.gp_extension_name` (LQL) with the code. Printers failing with access denied or a driver error usually meet the Point and Print restrictions Windows tightened for printer drivers: the driver must be preinstalled or the restriction policy set. Software Installation with 1612 cannot read the package share as the computer account. Security extension access denied is a permissions problem on the object itself.
 - **A preference item.** `group_policy_drive_map_failed` (value) by `win.eventlog.application.share` (LQL): 67 (ERROR_BAD_NET_NAME) is a server or share name not found, 53 (ERROR_BAD_NETPATH) the network path not found, 55 (ERROR_DEV_NOT_EXIST) a share that is no longer available, 86 a stored password the server refuses (and a lockout risk), 85 a letter already in use. File share access and SMB problems behind a drive map are their own story, covered by `playbooks/file-share-access.md`.
 - **Policy content.** 1096 or a damaged Registry.pol stops registry policy for every object; Windows logs the path.
@@ -129,7 +130,7 @@ The rest of a slow sign-in, profile load, authentication and the machine's load:
 - **Directory and SYSVOL out of step.** An object edited on one controller and not yet replicated gives devices old settings, or a file read failure, from the controllers that lag. Devices that fail or get old settings only when they reach one controller (5308 names it) point at SYSVOL replication: `playbooks/directory-replication-failure.md`.
 - **The Group Policy Client service.** A sign-in that fails with "The Group Policy Client service failed the sign-in" is usually a damaged user profile or registry permissions on the device, not the domain. The service's own state is in the services rows: `playbooks/service-failures.md`.
 
-**One device or many.** Run the reason or the System query over the organization grouped by `source` (LQL), then by `event_data.FilePath` (LQL) for 1058 or `win.eventlog.application.share` (LQL) for drive maps.
+**One device or many.** Run the reason or the System query over the organization grouped by `source` (LQL), then by `win.eventlog.system.gp_file_path` (LQL) for 1058 or `win.eventlog.application.share` (LQL) for drive maps.
 Many devices at one site failing at once points at what they share: the site's DNS, the link to the controllers, a controller, or one policy object.
 Laptops failing only away from the office and recovering in it are working as designed.
 The domain controllers' own view, when they run the agent: NETLOGON 5807 (clients outside any site), 5781 (the controller could not register its DNS records, so clients cannot find it), 5805 and 5723 (a machine failed to authenticate or has no account):

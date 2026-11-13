@@ -46,7 +46,7 @@ No device-state topic tracks certificates.
 | A program here could not build a TLS client credential | `tls_client_credential_failed` (value) (36871) | **Client credential and protocol** |
 | A client offered nothing this server accepts | `tls_cipher_mismatch` (value) (36874) | **Client credential and protocol** |
 | A certificate in the store is near or past its date | `cert_expiring` (value) (store 1003, autoenrollment 64), `cert_expired` (value) (1002) | **Expiring and expired in the store** |
-| A request or renewal did not complete | `cert_enroll_failed` (value) (autoenrollment 1, 6; enrollment 86, 87); uncurated enrollment 13 and 82 | **Enrollment and autoenrollment** |
+| A request or renewal did not complete | `cert_enroll_failed` (value) (autoenrollment 1, 6; enrollment 13, 82, 86, 87) | **Enrollment and autoenrollment** |
 | A domain controller has no certificate for smart card or Windows Hello sign-in | `kerberos_smartcard_cert_missing` (value) (19, 29) | **Domain controller certificates** |
 | The CA itself is failing or was changed | `adcs_ca_chain_failed` (value), `adcs_crl_publish_failed` (value), `adcs_request_failed` (value), `adcs_config_changed` (value), `adcs_audit_evidence_tampered` (value) | **The certification authority** |
 | A web or WinRM endpoint's certificate was swapped | `http_ssl_binding_deleted` (value), `http_ssl_binding_created` (value) | **Bindings and renewals** |
@@ -98,7 +98,13 @@ The fix is on the device: `netsh http show sslcert` for the bound hash, the cert
 
 **Client credential and protocol.** `tls_client_credential_failed` (value) (36871) is a program that could not build its outbound TLS credential.
 One program, repeating, that needs a client certificate (a VPN, a line-of-business integration) points at that certificate: check it is in the store, valid, and its key readable by the program's account.
-Read the calling program on each row (CallerProcessImageName in the raw payload) and count the distinct programs per device and hour.
+Its arm on `sparklogs.reason_variant` (LQL) splits the two cases: `wsaeacces` (value) is internal error state 10013, at Notice, and `credential_failed` (value) is any other state. `win.eventlog.system.tls_caller_process` (LQL) is the calling program and `win.eventlog.system.tls_error_state` (LQL) the state.
+
+```lql
+source = "<host>" AND sparklogs.reason = tls_client_credential_failed
+```
+
+Group by `sparklogs.reason_variant` (LQL) and `win.eventlog.system.tls_caller_process` (LQL). The 10013 rows are kept at most one per program each hour, so count programs and hours, not rows.
 Internal error state 10013 from most programs on a device at once (Office, browser helpers, OneDrive, updaters) is the device's TLS protocol or cipher settings refusing what those programs ask for: a hardening baseline, TLS 1.0 and 1.1 turned off, or a cipher-suite policy. Most of those programs then connect with an allowed protocol, so it fails nothing by itself. Act when a user reports a program that will not connect, and compare the device's protocol settings with what that program needs.
 `tls_cipher_mismatch` (value) (36874) is on a server: a client offered no suite it accepts. The message gives the TLS version the client asked for, not the client.
 An old device or program (a scanner, a printer, an old Java or .NET build) after the server's ciphers were tightened is the usual cause. A steady trickle on an internet-facing server is scanning.
@@ -124,7 +130,7 @@ Then sort the certificate by its subject:
 
 - **A host name the business serves** (names starting remote, rdweb, mail or vpn, a public name). A public or manually installed certificate: nothing in Windows renews it. Whoever bought it, or the ACME client on the server, renews it, and then the service has to be bound to the new one (**Bindings and renewals**).
 - **The machine's own name, or a template certificate from the domain CA.** Autoenrollment should have renewed it before it got here. A warning that repeats for days means renewal is failing: **Enrollment and autoenrollment**.
-- **Two GUIDs** (`DC=<guid>, CN=<guid>`). A certificate Microsoft Entra ID issues to the device itself. On Entra-joined devices these expire and are replaced about daily, one expired row a day each: routine turnover. Only `entra_device_certificate_update_failed` (value) with a status other than logon failure or network unreachable needs a look.
+- **Two GUIDs** (`DC=<guid>, CN=<guid>`). A certificate Microsoft Entra ID issues to the device itself. On Entra-joined devices these expire and are replaced about daily, one expired row a day each: routine turnover, filed at Info under the `entra_daily_certificate` (value) arm on `sparklogs.reason_variant` (LQL). Every other store certificate is the `store_certificate` (value) arm, so `NOT sparklogs.reason_variant = entra_daily_certificate` (LQL) leaves the daily turnover out. Only `entra_device_certificate_update_failed` (value) with a status other than logon failure or network unreachable needs a look.
 - **A vendor or application name** (a backup server, a remote-management card, a database's self-signed certificate). That product's own certificate; its console renews it.
 - **A root or intermediate CA** (a public CA's root name). Windows root maintenance replaces or removes those; act only if a program still depends on the old one.
 
@@ -139,20 +145,18 @@ source = "<host>" AND subsource = "win.eventlog.identity_security" AND provider_
 
 Group by `event_id` (LQL) over time and read the subject in the message. A 1006 for the same subject after a 1002 is the renewal arriving. Not every installer writes one, so its absence does not prove the certificate was not replaced.
 
-**Enrollment and autoenrollment.** `cert_enroll_failed` (value) has three variants on `sparklogs.reason_variant` (LQL):
+**Enrollment and autoenrollment.** `cert_enroll_failed` (value) has four variants on `sparklogs.reason_variant` (LQL):
 
 - `autoenroll_cycle_failed` (value) (1, 6): autoenrollment could not run a cycle against the directory or the CA. `event_data.ErrorCode` (LQL) says why: 0x800706BA (RPC server unavailable) is the CA unreachable or gone, 0x8007054B the domain unreachable, 0x80070037 a network resource gone. Once on a laptop that was off the corporate network, routine.
 - `failed` (value) (86, 87): an enrollment, such as a SCEP device request from Intune, failed; the message names the URL and status.
 - `retired_aik` (value): attestation enrollment against an endpoint Microsoft retired. It can never succeed and needs no action.
-
-Enrollment also writes uncurated records for the request itself: 13 names the template, the CA and the error, and 82 says it could not authenticate to any enrollment server. On a CA-backed renewal they arrive in the same second as autoenrollment 6.
+- `enrollment_failed` (value) (13, 82): enrollment for a named template failed: 13 against the CA, naming the CA and the error; 82 against every enrollment server. `win.eventlog.application.cert_template` (LQL) is the template. On a CA-backed renewal these arrive in the same second as autoenrollment 6.
 
 ```lql
-source = "<host>" AND subsource = "win.eventlog.application" AND provider_name = "Microsoft-Windows-CertificateServicesClient-CertEnroll" AND event_id in (13, 82)
+source = "<host>" AND sparklogs.reason = cert_enroll_failed
 ```
-<!-- confirmed with data on 2026-11-12 -->
 
-Group by `event_data.ErrorCode` (LQL) and read the template and CA in the message.
+Group by `sparklogs.reason_variant` (LQL), `win.eventlog.application.cert_template` (LQL) and `event_data.ErrorCode` (LQL), and read the CA in the message.
 The pattern to recognize: a template certificate is expiring (`cert_expiring` (value)), and at each cycle enrollment 13 names a CA host that does not answer. The CA was decommissioned or moved and the directory still lists it as the enrollment service for that template, so nothing on the device can renew. The fix is on the CA side: a working enterprise CA publishing that template, then `certutil -pulse` on the device.
 Other well-known causes: the machine or user lacks Enroll and Autoenroll on the template; the template was superseded or removed from the CA; the device cannot reach a domain controller at the cycle (VPN not up yet); the CA's own certificate or revocation list expired (**The certification authority**); a workgroup or Entra-joined device has no domain autoenrollment at all.
 
