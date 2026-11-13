@@ -211,6 +211,16 @@ The list is **not exhaustive** - it's a starting set covering common patterns. I
 - **Hardware diagnostics.** Memory tests, the device maker's diagnostics and a server's management controller log (iDRAC, iLO) hold results the operating system never saw, including the controller's own watchdog resets of a hung server.
 - **Vendor crash telemetry.** A software vendor's crash reports and known issues for a release are published by the vendor; the device logs only its own crashes.
 
+## HM19 - Group Policy not applying
+
+**Off-endpoint causes:**
+
+- **The policy objects in the directory.** Their settings, links, security filtering, WMI filters and edit history live in Active Directory and the Group Policy Management console. The device shows which objects applied or were filtered, not why an object was built that way or who changed it.
+- **Domain controllers and SYSVOL.** A controller without the agent, its DNS records and SYSVOL replication between controllers are visible only on the controllers. A device that cannot read an object's files sees the failure, not which controller holds a stale copy.
+- **DNS servers and AD Sites and Services.** Wrong records, a missing subnet-to-site mapping or a retired controller still in DNS are set on the servers; the device shows the lookup or discovery that failed.
+- **The network between the device and its controllers.** The VPN concentrator, the site link and firewalls between sites decide whether a controller answers. The device sees its own link and probes, not the path beyond them.
+- **Servers that preferences point at.** File servers behind drive maps and file copies, print servers and their drivers, and package shares for software installation each need their own reading.
+
 ---
 
 ## Cross-cutting off-endpoint patterns

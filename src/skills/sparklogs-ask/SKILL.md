@@ -116,6 +116,9 @@ Playbooks are incomplete recipes. If a recipe LQL produces empty results: widen 
 | Server restarted on its own | `playbooks/crashes-and-restarts.md` |
 | Directory replication | `playbooks/directory-replication-failure.md` |
 | Disk full or filling | `playbooks/disk-full-or-filling.md` |
+| Group Policy not applying | `playbooks/group-policy.md` |
+| Group Policy slow at startup or logon | `playbooks/group-policy.md` |
+| Mapped drive, printer or shortcut from policy missing | `playbooks/group-policy.md` |
 | Memory or handle leak | `playbooks/memory-or-handle-leak.md` |
 | Internet down, slow or dropping | `playbooks/network-connectivity.md` |
 | Wi-Fi drops | `playbooks/network-connectivity.md` |

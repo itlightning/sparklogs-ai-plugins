@@ -8,7 +8,7 @@ index: Slow logon
 
 **Accuracy.** Security sign-in events carry `win.eventlog.security.logon_type_name` (LQL), the authenticating package, and `sparklogs.actor.*`.
 That separates cached interactive from network and names the account and origin.
-Group Policy processing time is not curated; if the answer lives there, say so.
+Group Policy records each logon pass with its duration and each extension's time: when the wait is policy processing, `playbooks/group-policy.md` (**Slow startup or logon from Group Policy**).
 The agent's DNS probe times its own lookups, not the lookups a logon makes.
 
 **Device health first.** `device_overview` (value) over a window that holds several slow logons, at a narrow `bucket` (arg).
