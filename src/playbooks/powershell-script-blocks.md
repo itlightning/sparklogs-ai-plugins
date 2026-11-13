@@ -91,7 +91,7 @@ source = "<host>" AND subsource = "win.powershell.eventlog" AND record_id = <fir
 How PowerShell was launched (classic log event 400, throttled per command line):
 
 ```lql
-source = "<host>" AND subsource = "win.powershell.eventlog" AND event_id = 400 AND message: "-EncodedCommand"
+source = "<host>" AND subsource = "win.powershell.eventlog" AND provider_name = "PowerShell" AND event_id = 400 AND message: "-EncodedCommand"
 ```
 <!-- confirmed with data on 2026-11-12 -->
 
@@ -109,7 +109,7 @@ Group by `source` (LQL).
 What else the user ran around it, including unwatched blocks:
 
 ```lql
-source = "<host>" AND subsource = "win.powershell.eventlog" AND event_id = 4104 AND user_name = "<user>" AND NOT sparklogs.reason = win_powershell_script_block_framework_code
+source = "<host>" AND subsource = "win.powershell.eventlog" AND provider_name = "Microsoft-Windows-PowerShell" AND event_id = 4104 AND user_name = "<user>" AND NOT sparklogs.reason = win_powershell_script_block_framework_code
 ```
 <!-- confirmed with data on 2026-11-12 -->
 
@@ -126,15 +126,10 @@ source = "<host>" AND sparklogs.reason in (scheduled_task_created, scheduled_tas
 ```
 
 Group by `sparklogs.reason` (LQL). Scheduled-task and log-clear reasons need Security auditing on; `service_installed` (value) also comes from the System log.
-Tasks registered, updated or deleted in the Task Scheduler log (106, 140, 141; Windows updates its own tasks often, so keep to the block's minutes):
-
-```lql
-source = "<host>" AND subsource = win.eventlog.management AND origin = "Microsoft-Windows-TaskScheduler/Operational" AND event_id in (106, 140, 141)
-```
-<!-- confirmed with data on 2026-11-12 -->
-
+Task Scheduler's own records of a task registered, updated or deleted are kept whether or not auditing is on: `playbooks/scheduled-task-failures.md` (**Changed, disabled or deleted**). Windows updates its own tasks often, so keep to the block's minutes.
+A service the block installed or reconfigured that then fails to start: `playbooks/service-failures.md`.
 Shadow copies: no event names a shadow-copy deletion itself; the volsnap events and shadow storage use in `playbooks/windows-vss.md` show what changed.
 Egress: `uri=` and `host=` entries in `win.powershell.eventlog.block_targets` (LQL) name where the block meant to send; whether anything left is off-endpoint.
-For the wider window, the what-changed playbook sweeps every change on the host.
+For the wider window, `playbooks/what-changed.md` sweeps every change on the host.
 
 **Off-endpoint:** what the EDR console saw or blocked, the script library of the RMM that may have sent it, the proxy or firewall record of an egress target, and the remote host named in a remoting target.
