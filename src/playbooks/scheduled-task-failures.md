@@ -48,7 +48,7 @@ Is the product the task belongs to still installed? Its `installed_products` (va
 **Events.** Every Task Scheduler failure on the device:
 
 ```lql
-source = "<host>" AND subsource = "win.eventlog.management" AND service = scheduled_tasks AND sparklogs.reason!
+source = "<host>" AND sparklogs.reason in (scheduled_task_start_failed, scheduled_task_action_failed, scheduled_task_sign_in_failed, scheduled_task_load_failed, scheduled_task_engine_failed)
 ```
 
 Group by `sparklogs.reason` (LQL), `win.eventlog.management.task_name` (LQL) and `sparklogs.result.code_name` (LQL).

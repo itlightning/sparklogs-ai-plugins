@@ -60,9 +60,8 @@ Group by `sparklogs.reason` (LQL), `sparklogs.reason_variant` (LQL), `win.eventl
 WHEA-Logger also writes records SparkLogs collects without a reason:
 
 ```lql
-source = "<host>" AND subsource = "win.eventlog.system" AND provider_name = "Microsoft-Windows-WHEA-Logger" AND NOT event_id in (1, 17, 18, 19, 20, 47)
+source = "<host>" AND subsource = "win.eventlog.system" AND provider_name = "Microsoft-Windows-WHEA-Logger" AND NOT sparklogs.reason!
 ```
-<!-- confirmed with data on 2026-11-12 -->
 
 Group by `event_id` (LQL). Event 3 is an informational hardware record whose details are only in its binary data.
 
@@ -149,9 +148,8 @@ source = "<host>" AND subsource = "win.eventlog.system" AND sparklogs.reason in 
 Windows also writes Kernel-Processor-Power 37, without a reason: the firmware held a processor below its top speed, with the seconds in `win.eventlog.system.reduced_state_s` (LQL).
 
 ```lql
-source = "<host>" AND subsource = "win.eventlog.system" AND provider_name = "Microsoft-Windows-Kernel-Processor-Power" AND event_id = 37
+source = "<host>" AND subsource = "win.eventlog.system" AND provider_name = "Microsoft-Windows-Kernel-Processor-Power" AND win.eventlog.system.reduced_state_s!
 ```
-<!-- confirmed with data on 2026-11-12 -->
 
 - Count devices, not rows. It is common on laptops on battery or warm. On a server under load it is heat, a power supply fault or a power cap, which `cpu_throttled_under_load` (value) reads from the clock: `playbooks/slow-device.md`.
 
