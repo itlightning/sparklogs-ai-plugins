@@ -20,4 +20,14 @@ Process write bytes include writes that do not reach the disk: they rank writers
 
 **Events, for what health named.** A volume that fills because something is failing (a backup retrying, a log growing on errors) shows those errors on the device. Disk, controller and file system errors on the volume itself: `playbooks/raid-or-storage-degraded.md`.
 
+**Well-known causes.** Where the space usually goes, and what points at it:
+
+- Shadow copies: shadow storage use against its limit on the `vss_shadowstorage` (value) topic, in `playbooks/windows-vss.md`.
+- Windows Update: the download cache, a feature update that keeps downloading and failing (`playbooks/windows-update-failure.md`, **Feature updates**), and the previous Windows kept for rollback after an upgrade. The component store grows with each cumulative update until cleanup removes superseded versions.
+- Memory dumps: a full dump is about the size of RAM and is rewritten at each blue screen (`playbooks/crashes-and-restarts.md`).
+- The page file and the hibernation file on the OS volume, both sized from RAM.
+- Logs growing on errors: a web server, database, backup or vendor tool writing to its own folder. The top writer in `top_processes` (col) names the program.
+- User data: Outlook data files, sync clients pulling cloud files down, and profiles and temp folders on a terminal server.
+- An install or a new product at the start of the fill: `playbooks/what-changed.md`.
+
 **Off-endpoint** (HM5): mounted network shares, backup shadow locations, sync clients.
