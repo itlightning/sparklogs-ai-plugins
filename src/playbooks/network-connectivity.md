@@ -41,7 +41,7 @@ Then drill down:
 source = "<host>" AND sparklogs.reason in (wlan_disconnected, wlan_disconnected_by_request, wlan_connect_failed, wlan_security_handshake_failed, wlan_limited_connectivity, nic_link_down, nic_driver_fault_reported, dhcp_lease_failed, dhcp_lease_denied, ip_address_conflict_detected, ncsi_internet_lost, dns_client_resolution_timed_out)
 ```
 
-Group by `sparklogs.reason` (LQL), `sparklogs.reason_variant` (LQL). `wlan_disconnected` (value) is the driver dropping the connection, the Wi-Fi drop itself. `wlan_disconnected_by_request` (value) is a user, a policy or a switch to another network. `nic_link_down` (value) has a down and a recovered arm on `sparklogs.reason_variant` (LQL): the pair bounds the link outage.
+Group by `sparklogs.reason` (LQL), `sparklogs.reason_variant` (LQL). `wlan_disconnected` (value) is the driver dropping the connection, the Wi-Fi drop itself. `wlan_disconnected_by_request` (value) is a user, a policy or a switch to another network. `nic_link_down` (value) has a `down` (value) and a `recovered` (value) arm: the pair bounds the link outage.
 An empty result does not clear the network: the reasons above are only the curated part, and a channel that is not collected or a feed that is not current logs nothing (`playbooks/sparklogs-collection.md`).
 
 Adapter drivers write their own records, mostly uncurated (Intel Wi-Fi drivers log under `Netwtw` (other) provider names). The sweep keeps every network row except inventory and firewall-rule churn:
