@@ -46,7 +46,12 @@ One device or many: count the symptom's own signature across the client by `sour
 | Wi-Fi drops | `playbooks/network-connectivity.md` |
 | Suspicious PowerShell / script blocks | `playbooks/powershell-script-blocks.md` |
 | Encoded PowerShell command | `playbooks/powershell-script-blocks.md` |
+| Disk or RAID array failing | `playbooks/raid-or-storage-degraded.md` |
 | RAID / array degraded | `playbooks/raid-or-storage-degraded.md` |
+| Disk errors or bad blocks | `playbooks/raid-or-storage-degraded.md` |
+| Chkdsk or file system corruption | `playbooks/raid-or-storage-degraded.md` |
+| Volume missing, offline or RAW | `playbooks/raid-or-storage-degraded.md` |
+| SAN or iSCSI disk lost | `playbooks/raid-or-storage-degraded.md` |
 | RMM connectivity | `playbooks/rmm-connectivity.md` |
 | Scheduled task did not run or failed | `playbooks/scheduled-task-failures.md` |
 | Nightly script did not run | `playbooks/scheduled-task-failures.md` |

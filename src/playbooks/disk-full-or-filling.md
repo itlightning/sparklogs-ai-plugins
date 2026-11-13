@@ -18,12 +18,6 @@ Its `top_processes` (col) carry `io_write_mb` (col) per executable, and `storage
 Process write bytes include writes that do not reach the disk: they rank writers without measuring what landed on the volume.
 `events` (col) on the same reading show the changes that overlapped the start of the fill, such as a product install or a new network share.
 
-**Events, for what health named.** Storage errors when the volume is filling because something is failing:
-
-```lql
-source = "<host>" AND service = storage AND sparklogs.kind not in (inventory, delta) AND severity >= info
-```
-
-Group by `sparklogs.reason` (LQL). Then group the empty-reason rows by `provider_name` (LQL). The kind filter drops the device-state inventory rows that also file under `storage` (value); uncurated controller and disk events stay.
+**Events, for what health named.** A volume that fills because something is failing (a backup retrying, a log growing on errors) shows those errors on the device. Disk, controller and file system errors on the volume itself: `playbooks/raid-or-storage-degraded.md`.
 
 **Off-endpoint** (HM5): mounted network shares, backup shadow locations, sync clients.

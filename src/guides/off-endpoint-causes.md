@@ -83,13 +83,17 @@ The list is **not exhaustive** - it's a starting set covering common patterns. I
 
 ---
 
-## HM7 - RAID array degraded
+## HM7 - Disk, RAID array or storage path failing
 
 **Off-endpoint causes:**
 
-- **SAN / NAS health.** When storage is networked (iSCSI, NFS, SMB), the storage device's own health logs are off-endpoint. Storage devices typically don't run a SparkLogs Agent.
-- **Vendor RAID controller firmware advisories.** Known firmware bugs and recommended updates are vendor-portal information.
-- **Disk vendor SMART thresholds.** Some disk vendors define "failing" differently; vendor utilities may report problems before SMART thresholds trigger.
+- **RAID controller log and console.** Member drive state, rebuilds, patrol reads, the cache battery and the controller's own event log live in the controller. They reach SparkLogs only when the vendor's agent writes a Windows log; a controller with no agent installed is invisible.
+- **Server management controller** (iDRAC, iLO, XClarity and similar). Its hardware log records drive, backplane, power supply and controller faults that Windows never sees.
+- **SMART counters and the drive maker's tools.** SparkLogs does not read reallocated or pending sector counts or wear levels; a drive behind a RAID controller hides them from Windows entirely. Some makers' tools report a drive failing before its SMART threshold trips.
+- **Storage Spaces pool state.** Pool, virtual disk and physical disk health (`Get-StoragePool`, `Get-VirtualDisk`, `Get-PhysicalDisk`) are not collected; only the driver's event records are.
+- **SAN / NAS health.** When storage is networked (iSCSI, Fibre Channel, SMB), the array's own logs, its maintenance and the storage switches are off-endpoint. Storage arrays do not run a SparkLogs Agent.
+- **Hypervisor host storage.** A virtual machine's disk errors are often the host's storage being slow or full; the host's logs and the hypervisor's monitoring hold the cause.
+- **Firmware advisories.** Known drive, controller and backplane firmware bugs and their fixes are vendor-portal information.
 
 ---
 

@@ -540,6 +540,25 @@ values:
     - autoenroll_cycle_failed
     - failed
     - retired_aik
+    - correction_required
+    - corruption_discovered
+    - device_gone
+    - device_offline
+    - mount_failed
+    - offline_repair_required
+    - removable_verify
+    - repair_activity
+    - repair_posting_throttled
+    - state_error
+    - state_warning
+    - torn_write_detected
+  # sparklogs.data.storage_devices[].presentation values (fields/topic-storage-devices.md).
+  storage_presentation:
+    - local_physical
+    - san_lun
+    - guest_virtual
+    - software_virtual
+    - removable
   # sparklogs.topic values observed on sparklogs.device.state in a live workspace.
   topics:
     - agent_overhead
