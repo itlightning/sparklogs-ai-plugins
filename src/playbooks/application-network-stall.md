@@ -28,13 +28,27 @@ Then drill down on that program alone: the `connections` (value) result set with
 Other programs to the same remote address with no trouble point at the program; trouble across programs in the same buckets, with the VPN route's timeouts and resends up in `network_buckets` (value), points at the route.
 For delay above the lowest round trip, the wider column set (`guides/device-state-fields.md`) adds `rtt_min_ms` (col).
 
-**Events, for what health named.** The application's own errors and the VPN client's events over the stall interval:
+**Events, for what health named.** The VPN and connection reasons over the stall interval:
 
 ```lql
-source = "<host>" AND (service = vpn OR service = networking) AND sparklogs.kind not in (inventory, delta) AND NOT sparklogs.reason in (firewall_rule_created, firewall_rule_deleted, firewall_rule_changed) AND severity >= info
+source = "<host>" AND sparklogs.reason in (vpn_dial_failed, vpn_connected, ephemeral_port_alloc_failed, nic_link_down, wlan_disconnected, ncsi_internet_lost, dns_client_resolution_timed_out)
 ```
 
-Group by `sparklogs.reason` (LQL); then the Application channel for the program itself.
+Group by `sparklogs.reason` (LQL). `vpn_dial_failed` (value) and `vpn_connected` (value) come from the VPN client built into Windows. `ephemeral_port_alloc_failed` (value) is Windows out of outbound ports, so new connections from every program fail until ports free up.
+Third-party VPN clients write under their own provider names, mostly in the Application log, and the pack files those rows under no service:
+
+```lql
+source = "<host>" AND subsource = "win.eventlog.application" AND NOT sparklogs.reason! AND NOT service!
+```
+
+Group by `provider_name` (LQL) and read the VPN client's rows at the stall times. Then read the program's own rows in the Application log, by its `provider_name` (LQL). Many programs log nothing about a slow server, so no rows does not clear the application.
+
+**Well-known causes.**
+
+- Packets too large for the tunnel (an MTU mismatch over the VPN): small requests work and large transfers stall, with retransmission timeouts on that program's connections and other traffic fine.
+- Split tunnelling that sends the program's server address outside the tunnel, or DNS over the VPN returning the wrong address: the connections' remote address and `scope` (col) show where the traffic went.
+- A proxy or TLS inspection in the path: `winhttp_proxy_changed` (value) before the onset (`playbooks/what-changed.md`).
+- The server or the far site: trouble across programs to the same remote address in the same buckets, with the device's own path quiet.
 
 A file share or mapped drive that stalls: `playbooks/file-share-access.md` reads the SMB client and server records first.
 
