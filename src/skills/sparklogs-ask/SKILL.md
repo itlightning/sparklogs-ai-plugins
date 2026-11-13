@@ -99,7 +99,7 @@ Process charts use the same tool with `view` (arg) `top_processes_over_time` (va
 
 Routing indexes below. Open one file when the step needs it.
 
-Playbooks are incomplete recipes. If a recipe LQL produces empty results: widen by `subsource` (LQL), then `guides/stream-kinds.md`, then raw logs.
+Playbooks are incomplete recipes. Empty recipe LQL: widen per `guides/common-mistakes.md` (**Treating a playbook as the event catalog**).
 
 **Playbooks** (symptom recipes):
 
@@ -116,9 +116,10 @@ Playbooks are incomplete recipes. If a recipe LQL produces empty results: widen 
 | HTTPS site or Remote Desktop certificate error | `playbooks/certificate-expiry.md` |
 | Blue screens, app crashes, unexpected restarts | `playbooks/crashes-and-restarts.md` |
 | Blue screen (BSOD) | `playbooks/crashes-and-restarts.md` |
-| App keeps crashing | `playbooks/crashes-and-restarts.md` |
 | Server restarted on its own | `playbooks/crashes-and-restarts.md` |
 | Directory replication | `playbooks/directory-replication-failure.md` |
+| SYSVOL or DFSR replication | `playbooks/directory-replication-failure.md` |
+| Domain controllers out of sync | `playbooks/directory-replication-failure.md` |
 | Disk full or filling | `playbooks/disk-full-or-filling.md` |
 | File share or mapped drive unreachable or slow | `playbooks/file-share-access.md` |
 | Mapped drive disconnected | `playbooks/file-share-access.md` |
@@ -128,28 +129,29 @@ Playbooks are incomplete recipes. If a recipe LQL produces empty results: widen 
 | Group Policy slow at startup or logon | `playbooks/group-policy.md` |
 | Mapped drive, printer or shortcut from policy missing | `playbooks/group-policy.md` |
 | Hardware faults (WHEA, GPU, devices, heat) | `playbooks/hardware-faults.md` |
-| WHEA hardware errors | `playbooks/hardware-faults.md` |
 | Display driver stopped responding | `playbooks/hardware-faults.md` |
 | Device not working (Code 10, 43) | `playbooks/hardware-faults.md` |
 | Overheating or thermal shutdown | `playbooks/hardware-faults.md` |
 | Memory or handle leak | `playbooks/memory-or-handle-leak.md` |
+| Slows over days, fine after a reboot | `playbooks/memory-or-handle-leak.md` |
 | Internet down, slow or dropping | `playbooks/network-connectivity.md` |
 | Wi-Fi drops | `playbooks/network-connectivity.md` |
 | Suspicious PowerShell / script blocks | `playbooks/powershell-script-blocks.md` |
 | Encoded PowerShell command | `playbooks/powershell-script-blocks.md` |
 | Disk or RAID array failing | `playbooks/raid-or-storage-degraded.md` |
-| RAID / array degraded | `playbooks/raid-or-storage-degraded.md` |
 | Disk errors or bad blocks | `playbooks/raid-or-storage-degraded.md` |
 | Chkdsk or file system corruption | `playbooks/raid-or-storage-degraded.md` |
 | Volume missing, offline or RAW | `playbooks/raid-or-storage-degraded.md` |
 | SAN or iSCSI disk lost | `playbooks/raid-or-storage-degraded.md` |
 | RMM connectivity | `playbooks/rmm-connectivity.md` |
+| Device offline in the RMM | `playbooks/rmm-connectivity.md` |
 | Scheduled task did not run or failed | `playbooks/scheduled-task-failures.md` |
 | Nightly script did not run | `playbooks/scheduled-task-failures.md` |
 | Scheduled task disabled or missing | `playbooks/scheduled-task-failures.md` |
 | Service will not start, keeps stopping or hangs | `playbooks/service-failures.md` |
 | Service crashing and restarting | `playbooks/service-failures.md` |
 | Automatic service stopped | `playbooks/service-failures.md` |
+| Print spooler stopped or will not start | `playbooks/service-failures.md` |
 | Slow or freezing PC | `playbooks/slow-device.md` |
 | Slow server | `playbooks/slow-device.md` |
 | Slow boot or shutdown | `playbooks/slow-device.md` |
@@ -169,6 +171,7 @@ Playbooks are incomplete recipes. If a recipe LQL produces empty results: widen 
 | Feature update (upgrade) failed | `playbooks/windows-update-failure.md` |
 | Component store corruption (DISM, SFC) | `playbooks/windows-update-failure.md` |
 | VSS / shadow copies / backup plumbing | `playbooks/windows-vss.md` |
+| Backup fails with a VSS error | `playbooks/windows-vss.md` |
 <!-- END GENERATED INDEX:playbooks -->
 
 **Themes** (domain context):
@@ -178,6 +181,7 @@ Playbooks are incomplete recipes. If a recipe LQL produces empty results: widen 
 |---|---|
 | Patches / CBS / DISM / Setup | `themes/windows-updates-and-patching.md` |
 | Who changed what (Security) | `themes/windows-security-and-audit.md` |
+| Account locked out or failed sign-ins | `themes/windows-security-and-audit.md` |
 | Defender | `themes/endpoint-protection.md` |
 | App / System crashes and services | `themes/windows-operational-events.md` |
 | CPU, RAM, disk, network, installed software, monitors | `themes/device-health-and-state.md` |

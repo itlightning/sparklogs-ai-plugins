@@ -3,6 +3,7 @@ index: Service will not start, keeps stopping or hangs
 aliases:
   - label: Service crashing and restarting
   - label: Automatic service stopped
+  - label: Print spooler stopped or will not start
 ---
 
 # Windows service will not start, keeps stopping or hangs

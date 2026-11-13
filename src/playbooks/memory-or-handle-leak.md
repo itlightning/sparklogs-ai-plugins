@@ -1,5 +1,7 @@
 ---
 index: Memory or handle leak
+aliases:
+  - label: Slows over days, fine after a reboot
 ---
 
 # Memory or handle leak

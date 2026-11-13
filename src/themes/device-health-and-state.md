@@ -20,6 +20,10 @@ Collection status and `agent_complete_through` (col) qualify coverage.
 An open condition alone does not establish a problem; read its severity and lifecycle.
 A slow or freezing device (CPU, interrupt and kernel time, throttling, paging, committed memory, disk latency, boot and shutdown time): `playbooks/slow-device.md`.
 Devices with a Device Manager problem (topic `devices` (value)), the drivers and heat behind interrupt storms and throttling, and memory or CPU that changed: `playbooks/hardware-faults.md`.
+A volume full or filling: `playbooks/disk-full-or-filling.md`.
+A process whose memory or handles grow until a restart: `playbooks/memory-or-handle-leak.md`.
+Internet, Wi-Fi or the local network down, slow or dropping: `playbooks/network-connectivity.md`.
+One application slow or stalling over the network while others work: `playbooks/application-network-stall.md`.
 Changes on a device before an onset (drivers, products, services, adapters, firmware): `playbooks/what-changed.md`.
 Use `query_logs` (tool) for underlying application or system events, scoped to the device and interval the health reading named.
 A VSS writer failure does not establish a backup job's outcome; the job result lives in the backup console.

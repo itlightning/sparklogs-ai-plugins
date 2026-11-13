@@ -1,7 +1,6 @@
 ---
 index: Disk or RAID array failing
 aliases:
-  - label: RAID / array degraded
   - label: Disk errors or bad blocks
   - label: Chkdsk or file system corruption
   - label: Volume missing, offline or RAW

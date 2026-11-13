@@ -1,5 +1,7 @@
 ---
 index: RMM connectivity
+aliases:
+  - label: Device offline in the RMM
 ---
 
 # RMM connectivity

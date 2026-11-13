@@ -2,7 +2,6 @@
 index: Blue screens, app crashes, unexpected restarts
 aliases:
   - label: Blue screen (BSOD)
-  - label: App keeps crashing
   - label: Server restarted on its own
 ---
 

@@ -99,7 +99,7 @@ An object missing from both lists is not linked to the device's or user's organi
 Loopback mode (5311) changes which user settings apply on terminal servers and kiosks.
 A setting that applied but did not hold is something else writing the same key: Intune, a script, the RMM, or the user. Compare the change's time against `playbooks/what-changed.md`.
 
-**Slow startup or logon from Group Policy.** Long `event_data.PolicyElaspedTimeInSeconds` (LQL) on 8000 or 8001 is time the user waited.
+**Slow startup or logon from Group Policy.** A long `event_data.PolicyElaspedTimeInSeconds` (LQL) on 8000 or 8001 is time the user waited only when that pass ran in the foreground: 5340 says synchronous, or a 6006 naming `GPClient` (other) carries the same seconds (`playbooks/slow-logon.md`). An asynchronous pass runs behind the desktop.
 Find the extension that took it:
 
 ```lql

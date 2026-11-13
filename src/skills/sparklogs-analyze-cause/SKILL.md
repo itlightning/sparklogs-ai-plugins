@@ -134,6 +134,7 @@ Process charts use the same tool with `view` (arg) `top_processes_over_time` (va
 |---|---|
 | Patches / CBS / DISM / Setup | `themes/windows-updates-and-patching.md` |
 | Who changed what (Security) | `themes/windows-security-and-audit.md` |
+| Account locked out or failed sign-ins | `themes/windows-security-and-audit.md` |
 | Defender | `themes/endpoint-protection.md` |
 | App / System crashes and services | `themes/windows-operational-events.md` |
 | CPU, RAM, disk, network, installed software, monitors | `themes/device-health-and-state.md` |

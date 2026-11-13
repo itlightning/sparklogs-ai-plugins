@@ -1,5 +1,8 @@
 ---
 index: Directory replication
+aliases:
+  - label: SYSVOL or DFSR replication
+  - label: Domain controllers out of sync
 ---
 
 # Directory replication failure

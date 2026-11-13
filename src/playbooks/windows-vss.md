@@ -1,5 +1,7 @@
 ---
 index: VSS / shadow copies / backup plumbing
+aliases:
+  - label: Backup fails with a VSS error
 ---
 
 # Windows VSS
@@ -136,6 +138,4 @@ Two products competing for snapshots shows there, not in VSS prose.
 - A small recovery or system partition with too little free space for its snapshot during an image or system-state backup.
 - A writer that began failing after an update or a new product: `playbooks/what-changed.md`.
 
-## Off-endpoint
-
-Backup retention and whether the product reclaims its own snapshots; backup target; EDR blocking VSS; guest writers; server-side job state.
+**Off-endpoint** (HM1): backup retention and whether the product reclaims its own snapshots; backup target; EDR blocking VSS; guest writers; server-side job state.

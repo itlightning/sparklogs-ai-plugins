@@ -1,7 +1,6 @@
 ---
 index: Hardware faults (WHEA, GPU, devices, heat)
 aliases:
-  - label: WHEA hardware errors
   - label: Display driver stopped responding
   - label: Device not working (Code 10, 43)
   - label: Overheating or thermal shutdown
@@ -156,7 +155,7 @@ source = "<host>" AND subsource = "win.eventlog.system" AND ((provider_name = "M
 - Kernel-Processor-Power 37: the firmware held a processor below its top speed, one row per logical processor, so count devices, not rows. It is common on laptops on battery or warm. On a server under load it is heat, a power supply fault or a power cap, which `cpu_throttled_under_load` (value) reads from the clock: `playbooks/slow-device.md`.
 
 `power_wake_loop` (value) is a machine waking itself from sleep: a wake timer, a network adapter or a USB device. The condition's prose names the commands that list them.
-Repeated unclean stops with no blue screen and no record before them are power: `playbooks/crashes-and-restarts.md`.
+Repeated unclean stops with no blue screen and no record before them point at power or a hang ended at the power button. Tell them apart in `playbooks/crashes-and-restarts.md` (**Unexpected restart with no blue screen**).
 
 ## One device or many
 

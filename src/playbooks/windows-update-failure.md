@@ -215,7 +215,7 @@ Windows 10 22H2 is out of support. A Windows 10 device whose revision stopped at
 ## Recovery environment and Secure Boot
 
 - `winre_servicing_failed` (value): an update could not service the recovery image, most often because the recovery partition is too small. The update that carries the change can keep failing, often with 0x80070643. `reagentc /info` and the partition sizes come next.
-- Secure Boot certificate updates are applied by a Windows servicing task, not as Windows Update installs: `secure_boot_cert_update_pending` (value), `secure_boot_update_failed` (value) and `secure_boot_certs_current` (value) on System, `secure_boot_revocation_update_failed` (value) on `win.eventlog.platform` (value). A pending or failed one usually needs a firmware update from the device maker. Applying them changes what the TPM measures and can trigger BitLocker recovery: `playbooks/bitlocker-recovery.md`.
+- Secure Boot certificate updates are applied by a Windows servicing task, not as Windows Update installs: `secure_boot_cert_update_pending` (value), `secure_boot_update_failed` (value) and `secure_boot_certs_current` (value) on System, `secure_boot_revocation_update_failed` (value) on `win.eventlog.platform` (value). Pending is normal until the servicing task reaches the device: install the latest cumulative update and look for `secure_boot_certs_current` (value) (1808). Pending that persists after that, or `secure_boot_update_failed` (value) 1795, 1802 or 1803, points at firmware from the device maker. Suspend BitLocker before a firmware update. Applying them changes what the TPM measures and can trigger BitLocker recovery: `playbooks/bitlocker-recovery.md`.
 
 ## Store apps and software installers
 

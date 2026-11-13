@@ -18,7 +18,7 @@ One symptom, one file.
 It teaches *how to reason about this failure class* and *which predicates and fields to use*.
 It is not a numbered MCP session.
 It is not complete and not authoritative: example LQL is a start, not the event universe.
-Do not put a copied disclaimer in every leaf. Completeness lives once in `playbooks/playbooks.md`, the skills, and `guides/common-mistakes.md`.
+Do not put a copied disclaimer in every leaf. The completeness rule lives once, in `guides/common-mistakes.md` (**Treating a playbook as the event catalog**). `playbooks/playbooks.md` and the skills point at it.
 Leaf Accuracy covers *this symptom's* claim limits (job vs plumbing, state vs logs), not a second copy of the index rule.
 
 ## Structure

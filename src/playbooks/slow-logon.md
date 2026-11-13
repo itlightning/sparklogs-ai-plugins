@@ -83,13 +83,13 @@ Group by `event_data.Win32Status` (LQL): 1326 wrong password or unknown user, 13
 The decoded Security records for the account (`win.eventlog.security.status_meaning` (LQL) is the cause without opening the body):
 
 ```lql
-sparklogs.reason in (sign_in_failed, kerberos_preauth_failed, kerberos_ticket_failed, ntlm_validation_failed, account_locked_out)
+sparklogs.reason in (sign_in_failed, kerberos_preauth_failed, kerberos_ticket_failed, ntlm_validation_failed)
 AND sparklogs.actor.name in ("<sam>", "<upn>", "AzureAD\\<upn>")
 ```
 
 Group by `sparklogs.reason` (LQL) and `win.eventlog.security.status_meaning` (LQL).
 Failing then retrying looks nothing like one slow sign-in: a run of failures followed by success is the user waiting on the network or a password, not a slow machine.
-A lockout is written on the domain controllers and names the machine that sent the bad attempts (`win.eventlog.security.caller_computer` (LQL)). A separate playbook on account lockouts follows that trail.
+A lockout is written on the domain controllers and names the machine that sent the bad attempts: `themes/windows-security-and-audit.md` (**Sign-in failures and lockouts**) and `feeds/win.eventlog.security/recipes.md` (**Find the machine holding the stale credential**).
 
 Profile failures on the device:
 
@@ -135,7 +135,7 @@ Read the component and the seconds in the message. Many devices of one client he
 
 **What changed before it started.** A new or edited policy object, a new printer or drive map, a profile server move, a new VPN client, an update or new security software just before the first slow sign-in: `playbooks/what-changed.md`.
 
-**Not this playbook.** Policy that does not apply at all: `playbooks/group-policy.md`. A machine that is slow all day, not only at sign-in: `playbooks/slow-device.md`. Account lockouts get their own playbook.
+**Not this playbook.** Policy that does not apply at all: `playbooks/group-policy.md`. A machine that is slow all day, not only at sign-in: `playbooks/slow-device.md`. Account lockouts and repeated failed sign-ins: `themes/windows-security-and-audit.md` (**Sign-in failures and lockouts**).
 
 **When to stop.** The timeline names the step and the component, and the Windows records name the code. When the cause is a policy object, a profile server, a print server, Entra or a domain controller without the agent, report the step, the component, its seconds and the time, and hand off to `gpresult /h` on the device, the profile or print server's own logs, or the Entra sign-in logs.
 
