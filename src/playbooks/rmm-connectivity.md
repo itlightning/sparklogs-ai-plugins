@@ -10,6 +10,10 @@ index: RMM connectivity
 The vendor's own agent log is not collected, and the RMM console is the authority on what the RMM saw.
 Whether SparkLogs itself is still collecting from the device is a separate question: `playbooks/sparklogs-collection.md`.
 
+**Was the device up and online.** Read the SparkLogs agent's status and when its data arrived over the RMM's offline interval: SparkLogs' own receipt, not the RMM's path.
+Log events and agent check-ins arriving through that interval mean the device was running and reaching the internet then, which localizes the problem to the RMM agent or the path to the RMM's servers.
+No data here either: the agent, the machine and the network cannot be told apart from SparkLogs alone; say so.
+
 **Was the device's network up.** Read the device's network view in `query_device_health` (tool) over the interval the RMM showed the device offline.
 Its coverage separates asleep and powered-off stretches, from the device's own lifecycle marks, from unreported time.
 The probe outages and the link-down and network-change evidence say whether the device's link and its gateway, internet and DNS probes were up in that interval.

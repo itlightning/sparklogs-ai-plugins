@@ -21,7 +21,7 @@ Observed changes from a reboot, a sleep or a stretch with the agent off all land
 A cumulative update's new OS revision, and the drivers its restart refreshed, can carry a time after a crash that happened during that restart. Inside such a gap the order is unknown.
 An empty list proves nothing changed only on topics the agent watches for changes on that device (`guides/device-state-fields.md`, **Episodes and changes**). A setting changed and changed back between two readings leaves nothing.
 
-`sparklogs.config_change.category = maintenance` (LQL) marks upkeep the pack positively recognized: product self-updates, driver refreshes, Windows servicing.
+`sparklogs.config_change.category = maintenance` (LQL) marks upkeep SparkLogs positively recognized: product self-updates, driver refreshes, Windows servicing.
 It is not proof the change was harmless. A cumulative update and the driver refresh at its reboot are maintenance, and a new driver fault often starts there.
 Rank maintenance last and keep it in the list. Filter it out only to shorten a long list, and say in the finding that you did.
 A change made off the device (Group Policy on a domain controller, Intune, an RMM policy, a router or firewall, a SaaS tenant) reaches the device only as its effects.
@@ -109,19 +109,33 @@ source = "<host>" AND sparklogs.reason in (win_msi_product_install_succeeded, wi
 
 Office, runtimes and agents repair themselves through MSI often: read the product name before ranking one.
 
-**Firewall and network policy, for a connectivity symptom.** Firewall rules a person or script made, that block:
+**Firewall and network policy, for a connectivity symptom.** Firewall rules changed through the tools people and scripts use: netsh, PowerShell (its firewall commands run in the WMI provider host, `WmiPrvSE.exe`), the Windows Firewall console and cmd:
+
+```lql
+source = "<host>" AND sparklogs.config_change.type = firewall_rule AND sparklogs.process.name in ("netsh.exe", "powershell.exe", "pwsh.exe", "WmiPrvSE.exe", "mmc.exe", "cmd.exe")
+```
+
+Group by `sparklogs.reason` (LQL), `win.eventlog.network.rule_name` (LQL) and `win.eventlog.network.firewall_rule_action` (LQL). The action is the number Windows Firewall writes: 2 blocks, 3 allows. A deleted allow rule breaks a connection as surely as a new block rule, and a deletion carries no action.
+Installers call netsh too: read the rule name and `win.eventlog.network.firewall_rule_application_path` (LQL) before ranking a rule.
+Then widen to block rules not marked maintenance:
 
 ```lql
 source = "<host>" AND sparklogs.config_change.type = firewall_rule AND sparklogs.config_change.category != maintenance AND win.eventlog.network.firewall_rule_action = 2
 ```
 
-The action is the number Windows Firewall writes: 2 blocks, 3 allows.
-Store and AppX packages add their own block and allow rules on install, so read `win.eventlog.network.rule_name` (LQL), `win.eventlog.network.firewall_rule_application_path` (LQL) and the actor before ranking a rule.
-The pack marks as maintenance the rule changes made by the firewall service, or by a SYSTEM service through a program other than netsh, PowerShell, cmd, WMI or the console. A change through netsh or PowerShell is the one to read first (`feeds/win.eventlog.network/reasons.md`, `firewall_rule_changed` (value)).
+Store and AppX packages add their own block and allow rules by the thousand through svchost, many not marked maintenance, and they dominate that wider list (`feeds/win.eventlog.network/reasons.md`, `firewall_rule_changed` (value)).
 Besides rules, read the adapter changes that move traffic: `network_adapter_static_dns_changed` (value), `network_adapter_ipv4_dhcp_changed` (value), `network_adapter_static_gateway_changed` (value), `network_adapter_metric_changed` (value), `network_adapter_mtu_changed` (value), `primary_dns_suffix_changed` (value) and `winhttp_proxy_changed` (value). VPN clients flip DNS and DHCP settings on their own adapters at every connect: compare the adapter with the one that failed.
 Then `playbooks/network-connectivity.md`.
 
 **Who made it.** Recorded changes carry `sparklogs.actor.name` (LQL) where the log names one. Joining that session and everything else it touched: `themes/windows-security-and-audit.md` (**Change analysis**).
+
+**Not a change.** Some causes of "it worked yesterday" leave no change record. Check them before calling the onset unexplained:
+
+- Something expired: a certificate (`playbooks/certificate-expiry.md`), a service account or user password (failed sign-ins; for a service, `playbooks/service-failures.md`), a licence or trial, or the computer account's trust with the domain.
+- The disk filled: `playbooks/disk-full-or-filling.md`.
+- Endpoint protection quarantined or blocked a file. That is a detection, not a Defender setting change: `themes/endpoint-protection.md`.
+- An update installed and waits for its restart, so the device runs a mix of old and new files until it restarts: `playbooks/windows-update-failure.md`.
+- The clock or time zone moved: Kerberos sign-ins fail once the clock is more than a few minutes off the domain, and certificates read as not yet valid or expired.
 
 **One device or many.** Take the top candidate and count it across the organization, grouped by `source` (LQL):
 
@@ -132,12 +146,12 @@ sparklogs.kind = config_change AND sparklogs.config_change.type = kernel_driver 
 Use the type and target exactly as the sweep returned them. Then count the symptom over the same devices and window.
 
 - The change on many devices and the symptom only on this one: the change alone does not explain it. Look for what else differs on this device (hardware, a second product, a setting).
-- The change and the symptom together on several devices, and the symptom absent where the change is: the strongest case, often a rollout.
-- The same symptom on several devices at the same time with no shared change: the cause is shared and probably off the devices (the application's server or licensing, DHCP or DNS on that network, a pushed policy). Note the devices and the minute it started.
+- The change and the symptom together on several devices, and the symptom absent where the change is not: the strongest case, often a rollout.
+- The same symptom on several devices at the same time with no shared change: the application's server or licensing, DHCP or DNS on that network, a pushed policy. Note the devices and the minute it started.
 
 **Findings.** Lead with the onset time and how it is known, then the window.
 List candidates in rank order, each with its basis, its time or time range against the onset, what links it to the failing component, and the fleet contrast.
-"No change on this device explains the onset" is a finding when only routine churn precedes it; say which kinds of change were checked.
+"No change on this device explains the onset" is a finding when only routine churn precedes it and expiry, disk space and security detections (**Not a change**, above) were checked; say which kinds of change were checked.
 Never call a change the cause on timing alone. The discriminators are a device with the change and without the symptom, a device with the symptom and without the change, and a rollback (`skills/sparklogs-analyze-cause/references/hypothesis-generation.md`).
 
 **Off-endpoint** (HM15): changes pushed from Group Policy, Intune or the RMM; network and firewall gear; the application's server or SaaS tenant; firmware or hardware changed with the device off.

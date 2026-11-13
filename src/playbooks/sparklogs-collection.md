@@ -10,11 +10,8 @@ aliases:
 
 **Trigger.** "There is no data from this PC since Tuesday", "is SparkLogs still collecting from the file server", "the events from last night are missing", or a device that shows offline or unhealthy in SparkLogs.
 
-**Accuracy.** Two questions with two answers: is the agent there (its status), and what is it collecting (its collection status and feed health). Keep them as two statements.
-A device with no signal reads offline. Offline says nothing about whether the machine is running: the customer's RMM is the authority on that.
-Only the agent's own feed reports bound what is missing. Event counts, a quiet time series or the first and last event never do, and a quiet, healthy machine can have old log data.
-Skipped events are a notice about collection, never the machine's or the operator's fault, and SparkLogs does not collect them later.
-The rules behind each statement are in `guides/scope-resolution.md` (**Step 8**, **Completeness**, **Missed events**, **State cross-check**). Read them before writing about a device's collection.
+**Accuracy.** Offline means no signal reached SparkLogs. It says nothing about whether the machine is running: the customer's RMM is the authority on that.
+The rules for writing about agent status, collection, completeness and skipped events are in `guides/scope-resolution.md` (**Step 8**, **Completeness**, **Missed events**, **State cross-check**). Read them before writing about a device's collection.
 
 **Feeds.** The agent reports on itself on three feeds: its collector's notices on `sparklogs.agent.vector` (value) (`feeds/sparklogs.agent.vector/reasons.md`), the agent's own log on `sparklogs.agent.log` (value) (`feeds/sparklogs.agent.log/reasons.md`), and its device-state topics on `sparklogs.device.state` (value): feed health (`fields/topic-feed-health.md`), agent pipeline (`fields/topic-agent-pipeline.md`), agent overhead and lifecycle.
 Its own service starts and stops are also on `win.eventlog.system` (value).
@@ -36,7 +33,7 @@ Feed health is the agent's own report. Do not derive it from event volume.
 - Unknown: the agent cannot tell, or the feed has not reported. Never read it as healthy.
 
 A feed that is not current can name the channels holding it back and why. For the full detail of one device's feeds, read the feed health rows in its current state with `query_device_health` (tool): each row carries the feed's health, reason, lag, the channels withholding it and their Windows error, and a count of skip ranges.
-A feed count below the pack's full set on a device whose collection is healthy is a feed that does not apply there, such as Defender on an older server. The feed missing from the device's feed health rows is the one.
+A feed count below SparkLogs' full set on a device whose collection is healthy is a feed that does not apply there, such as Defender on an older server. The feed missing from the device's feed health rows is the one.
 
 **3. What the collector and the agent said.** The agent's notices over the window:
 
@@ -55,12 +52,15 @@ Notices from older agents can carry earlier reason names: render an unfamiliar o
 | `log_collection_feed_not_collecting` (value) | A listed channel is not read, for the cause in `sparklogs.agent.vector.skip_cause` (LQL). A channel that exists only with a server role is normal on other machines |
 | `log_collection_read_failed` (value), `log_collection_stream_not_started` (value) | A source could not be read or never started; that stream has a gap |
 | `log_delivery_failed` (value) | Data was read and could not be sent: the network path from the device to SparkLogs |
+| `log_collection_restarted_from_oldest` (value) | The collector could not resume a channel and read it again from its oldest record. Nothing is lost; the channel's records arrive twice, so counts on it spike until the read catches up |
+| `log_collection_query_filter_rejected` (value) | Windows refused the filtered query for a channel, so the collector reads it unfiltered. Nothing is lost; that channel can fall behind on a busy machine |
 | `sparklogs_agent_spool_dropped` (value), `sparklogs_agent_emission_capped` (value), `sparklogs_agent_event_too_large_dropped` (value) | Device-state data the agent did not send: the oldest queued file, routine changes over the period's limit, one oversized event |
+| `sparklogs_agent_spool_expired` (value) | An older agent deleted queued device-state data that stayed unsent too long, after the device could not send for over a day. That data is lost |
 
-Overwritten records on one channel point at the channel being too small for what writes to it, or at a burst. Find the burst on that channel and device over the skip window:
+Overwritten records on one channel point at the channel being too small for what writes to it, or at a burst. Find the burst on that channel and device over the skip window, with the channel exactly as the notice names it:
 
 ```lql
-source = "<host>" AND subsource = "<feed of that channel>"
+source = "<host>" AND origin = "<channel>"
 ```
 
 Group by `pattern_hash` (LQL). One pattern by the hundred thousand, such as a driver service whose start fails in a loop, is the cause to fix (`playbooks/service-failures.md`). The skips stop when the flood does.
@@ -82,7 +82,7 @@ A queue that grows while `log_delivery_failed` (value) repeats is a device that 
 
 **6. Updates.** The agent's row carries its reported update status and failure reason only after the updater reported a failure. Render the reason as written.
 An agent status of upgrading overdue is an update that started and did not come back; read it with the last contact time, since a machine that went dark mid-update reads the same.
-An agent that stays on an old version without reporting any failure is not flagged there. Compare its version with the rest of the client in the same `resolve_scope` (tool) listing, then read the agent's own update lines:
+An agent that stays on an old version without reporting any failure is not flagged there. Compare its version with the rest of the client in the same `resolve_scope` (tool) listing, and with devices in other clients: every device in the client on the same older version is an update that has not reached them yet, not a fault on this device. For one device behind its neighbors, read the agent's own update lines:
 
 ```lql
 source = "<host>" AND subsource = "sparklogs.agent.log" AND message: update

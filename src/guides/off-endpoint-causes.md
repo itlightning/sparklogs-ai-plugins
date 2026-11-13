@@ -178,6 +178,8 @@ The list is **not exhaustive** - it's a starting set covering common patterns. I
 - **The application's server or tenant.** A SaaS tenant setting, a server-side update or a license change can break a client that did not change.
 - **Hardware and firmware changed with the device off.** A dock, monitor or card swapped, or a firmware setting changed and changed back between two readings.
 
+---
+
 ## HM16 - Service will not start, keeps stopping or hangs
 
 **Off-endpoint causes:**
@@ -198,13 +200,15 @@ The list is **not exhaustive** - it's a starting set covering common patterns. I
 - **RMM and Group Policy actions.** A policy that stops, removes or reinstalls the agent, or changes event log sizes and access, is configured in the RMM or the directory.
 - **Machine state while silent.** Whether a device with no signal was powered off, asleep or off the network is the RMM's and the user's to say.
 
-## HM18 - Crashes and unexpected restarts
+---
+
+## HM18 - Blue screens, app crashes, unexpected restarts
 
 **Off-endpoint causes:**
 
 - **Power.** UPS, power distribution and building power events are logged on those devices. A power loss leaves the endpoint only an unclean-stop record at the next boot.
 - **Virtualization host.** A host crash, reset or maintenance restarts its guests; each guest logs an unexpected shutdown and no crash. The host needs its own reading.
-- **Hardware diagnostics.** Memory tests, the device maker's diagnostics and a server's management controller log (iDRAC, iLO) hold results the operating system never saw.
+- **Hardware diagnostics.** Memory tests, the device maker's diagnostics and a server's management controller log (iDRAC, iLO) hold results the operating system never saw, including the controller's own watchdog resets of a hung server.
 - **Vendor crash telemetry.** A software vendor's crash reports and known issues for a release are published by the vendor; the device logs only its own crashes.
 
 ---
