@@ -37,13 +37,13 @@ Blue screens: `playbooks/crashes-and-restarts.md`. Hardware errors on the PCI Ex
 | `volume_unreadable` (value), `volume_mount_failed` (value), `disk_taken_offline` (value), `disk_read_only_changed` (value) | The volume or disk is not usable | **Volume missing, offline or read-only** |
 | Vendor RAID records, Storage Spaces records, a server's management agent | The array | **Array controllers and vendor tools** |
 | iSCSI initiator errors, resets through iScsiPrt, a SAN disk slow or gone | The storage network | **SAN and iSCSI** |
-| `disk_latency_degraded` (value), `disk_unresponsive` (value) | Slow or stalled I/O, cause open | **Device health first**, then the layer the events name |
-| `disk_saturated` (value) | Load on a working disk | `playbooks/slow-device.md` |
+| `disk_latency_degraded` (value), `disk_unresponsive` (value), Windows' slow-I/O records | Slow or stalled I/O, cause open | **Slow or stalled disk**, then the layer the events name |
+| `disk_saturated` (value) | Load on a working disk | `playbooks/slow-device.md` (**Disk busy or disk slow**) |
 
 **Device health first.** `query_device_health` (tool). Views are in `guides/device-state-fields.md` (**Choose the view**).
 
-- The device overview over the complaint's window. Its storage readings carry `latency_ms_p90_10s` (col), `queue_depth_avg` (col) and `busy_pct_avg` (col) per disk and volume per bucket, and `disk_latency_ms` (col) in `domains` (col) shows when I/O slowed. Disk heat is busy time and queue depth, not latency: a failing drive at light load can leave no disk heat at all.
-  Its episodes carry `disk_latency_degraded` (value) (slow answers at a short queue: the drive or its path), `disk_unresponsive` (value) (requests waiting, almost nothing completing) and `volume_unreadable` (value) (a fixed volume unmounted, RAW or unreadable for 15 minutes). Its changes carry `disk_taken_offline` (value), `disk_brought_online` (value), `disk_read_only_changed` (value) and `disk_partition_layout_changed` (value).
+- The device overview over the complaint's window. Its storage readings carry `latency_ms_p90_10s` (col), `queue_depth_avg` (col) and `busy_pct_avg` (col) per disk and volume per bucket, and its disk latency reading, `disk_latency_ms` (col), shows when I/O slowed (`guides/device-state-fields.md`, **Read a device view**). Disk heat is busy time and queue depth, not latency: a failing drive at light load can leave no disk heat at all.
+  Its episodes carry `disk_latency_degraded` (value), `disk_unresponsive` (value) (**Slow or stalled disk**) and `volume_unreadable` (value) (a fixed volume unmounted, RAW or unreadable). Its changes carry `disk_taken_offline` (value), `disk_brought_online` (value), `disk_read_only_changed` (value) and `disk_partition_layout_changed` (value).
   A disk condition's instance is the disk, labelled as Windows numbers it ("Disk 1"), so the episode names the disk the events must be read on.
 - The device's current `storage_devices` (value) inventory names each disk: `sparklogs.data.storage_devices[].disk_number` (LQL), `sparklogs.data.storage_devices[].model` (LQL), `sparklogs.data.storage_devices[].vendor` (LQL), `sparklogs.data.storage_devices[].transport` (LQL), `sparklogs.data.storage_devices[].presentation` (LQL) and `sparklogs.data.storage_devices[].removable` (LQL).
   Event records name disks by number: `\Device\Harddisk2` (other) and "Disk 2" in a message, and `win.eventlog.storage.device_number` (LQL) on the class driver's records, are disk number 2. Windows renumbers disks when they come and go, so match against the inventory from the same day.
@@ -60,6 +60,27 @@ Group by `sparklogs.reason` (LQL), then `subsource` (LQL) and `provider_name` (L
 The kind filter drops the device-state inventory rows that also file under `storage` (value). Event log rows carry no kind and stay, curated or not.
 Vendor RAID tools, ReFS and some management agents write rows the pack files under no service, so this sweep misses them: run the blocks in **Array controllers and vendor tools** as well.
 
+## Slow or stalled disk
+
+- `disk_latency_degraded` (value): operations take a second or more while only a few requests wait. Slow answers with little load point at the drive or its path: a drive retrying bad sectors, a cable or controller fault, old controller drivers or drive firmware, or an unstable path to SAN or iSCSI storage.
+- `disk_unresponsive` (value): requests waiting and almost none completing. Anything touching the disk hangs, and on the Windows disk the whole machine freezes.
+
+The condition's instance names the disk. Run **Failing drive** and **Controller and path** over the same hours, and on a `san_lun` (value) disk **SAN and iSCSI**. The records there name the layer.
+Windows also writes slow-I/O records that SparkLogs keeps without a reason:
+
+```lql
+source = "<host>" AND subsource = "win.eventlog.storage" AND ((provider_name = "Microsoft-Windows-Ntfs" AND event_id in (146, 147, 149, 170)) OR (provider_name = "Microsoft-Windows-StorPort" AND event_id in (504, 554, 557)))
+```
+<!-- confirmed with data on 2026-11-12 -->
+
+Group by `provider_name` (LQL) and `event_id` (LQL).
+
+- Ntfs 147 is one file system I/O that took more than 30 seconds, naming the process and the file it was for. The file name can carry user document paths: quote no more of it than the ticket needs.
+- Ntfs 146, 149 and 170 are hourly summaries for one volume. 149 counts high-latency I/O, failed reads, failed writes and bad clusters relocated. SparkLogs drops the 146 and 170 hours that counted none. Failed reads hour after hour on the boot volume are a drive losing data.
+- StorPort 557 is an I/O that took more than 30 seconds at the storage port, naming the port, path, target and LUN. 554 is a queue past its threshold. 504 is the period's error summary, and SparkLogs drops the periods that counted none.
+
+These records also appear on healthy workstations, often across sleep and resume or from a single program's slow write. Weight them only beside a disk condition or a disk or controller error on the same disk, or when they repeat hour after hour on one disk. Beside a failing drive they confirm the fault and name the volume and the program that waited.
+
 ## Failing drive
 
 ```lql
@@ -75,16 +96,7 @@ Group by `sparklogs.reason` (LQL), `sparklogs.reason_variant` (LQL), `win.eventl
 - **Removable media and the device leaving.** The variants `device_gone` (value) and `removable_verify` (value), and Info and Debug rows, are a USB drive or card pulled during I/O. Pass over them unless a copy or backup to that device failed at the same minute.
 - **No SMART behind a RAID controller.** Windows asks each disk for SMART data, and a RAID virtual disk answers that it has none (the pack does not keep those refusals). A drive behind a hardware controller never raises Disk event 52: its predictive failure is in the controller's log (**Array controllers and vendor tools**).
 
-NTFS and Storport also write summaries the pack keeps without a reason. On a failing drive they confirm the fault and name the volume and the program that waited:
-
-```lql
-source = "<host>" AND subsource = "win.eventlog.storage" AND ((provider_name = "Microsoft-Windows-Ntfs" AND event_id in (147, 149)) OR (provider_name = "Microsoft-Windows-StorPort" AND event_id in (504, 554, 557)))
-```
-<!-- confirmed with data on 2026-11-12 -->
-
-- Ntfs 149 is the hourly count of high-latency I/O, failed reads, failed writes and bad clusters relocated on one volume. Failed reads hour after hour on the boot volume are a drive losing data.
-- Ntfs 147 is one I/O that took more than 30 seconds, with the process and the file it was for. The file name can carry user document paths: quote no more of it than the ticket needs.
-- Storport 557 is the same 30-second wait seen from the port driver, 554 a queue past its threshold, and 504 the period's error summary (kept only when it counted an error).
+The NTFS and Storport slow-I/O summaries for the same disk confirm a failing drive and name the volume and the program that waited: **Slow or stalled disk**.
 
 **0x7A and other stop codes from the disk.** A blue screen can be the only record when the system disk fails:
 
@@ -92,7 +104,7 @@ source = "<host>" AND subsource = "win.eventlog.storage" AND ((provider_name = "
 source = "<host>" AND sparklogs.reason = kernel_crash AND sparklogs.data.crashes.bugcheck_code in ("0x0000007A", "0x00000077", "0x000000F4", "0x00000024", "0x000000ED", "0x0000007B")
 ```
 
-Read `sparklogs.data.crashes.bugcheck_param2` (LQL) on 0x7A (KERNEL_DATA_INPAGE_ERROR) and 0x77 (KERNEL_STACK_INPAGE_ERROR): it is the I/O status (Microsoft's bug check reference). 0xC000009C is a bad block, 0xC000016A a disk operation that failed, 0xC0000185 an I/O device error (cable, controller or a drive that stopped answering), 0xC000009D a disk that disconnected. 0xC000009A is insufficient resources, not the disk.
+Read `sparklogs.data.crashes.bugcheck_param2` (LQL) on 0x7A (KERNEL_DATA_INPAGE_ERROR) and 0x77 (KERNEL_STACK_INPAGE_ERROR): it is the I/O status (Microsoft's bug check reference). The value can arrive in lower case, without leading zeros or sign-extended to 64 bits, so read its last eight hex digits. 0xC000009C is a bad block, 0xC000016A a disk operation that failed, 0xC0000185 an I/O device error (cable, controller or a drive that stopped answering), 0xC000009D a disk that disconnected. 0xC000009A is insufficient resources, not the disk.
 0xF4 (CRITICAL_OBJECT_TERMINATION) after paging errors is a Windows process that could not page in its code. 0x24 (NTFS_FILE_SYSTEM) and 0xED (UNMOUNTABLE_BOOT_VOLUME) are the file system. 0x7B (INACCESSIBLE_BOOT_DEVICE) is the boot disk lost while starting, usually a storage driver or controller mode change: `playbooks/crashes-and-restarts.md`.
 A failing system disk can also stop Windows writing the dump, so the crash shows only as an unexpected shutdown.
 
@@ -139,7 +151,7 @@ Repair: check the backup first. `chkdsk <volume> /scan` or `Repair-Volume -Scan`
 
 ## Volume missing, offline or read-only
 
-- `volume_unreadable` (value) is a fixed volume the agent has seen almost always for 30 days that is now unmounted, RAW or unreadable. Do not format or initialize it. Read the disk and file system records from when it started, then the cables, controller or SAN path.
+- `volume_unreadable` (value) is a fixed volume the agent has seen on nearly every check for weeks that is now unmounted, RAW or unreadable. Do not format or initialize it. Read the disk and file system records from when it started, then the cables, controller or SAN path.
 - `volume_mount_failed` (value): the variant `device_offline` (value) is Windows probing an empty card reader, bay or detached image, and floods on a few devices; pass over it. `mount_failed` (value) is a volume that would not come up: read `win.eventlog.storage.volume_name` (LQL) and the status.
 - `disk_taken_offline` (value) and `disk_brought_online` (value) are an administrator, a script, the SAN policy or a cluster failover. A shared SAN disk online on two servers outside a cluster gets its file system corrupted.
 - `disk_read_only_changed` (value): every write fails while it is set. A SAN snapshot presented for a restore is often read-only.

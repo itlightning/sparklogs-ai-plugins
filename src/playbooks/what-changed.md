@@ -37,7 +37,7 @@ Change signals that carry no kind:
 
 - MSI installs and removals on `win.eventlog.application` (value): `win_msi_product_install_succeeded` (value), `win_msi_product_removal_succeeded` (value), `win_msi_product_reconfigure_succeeded` (value).
 - Windows Update: patching signals are `operating_system_changed` (value) (the OS build or revision moved), Windows Update client event 19 below, and `patch_install_failed` (value) / `patch_install_deferred` (value). Servicing detail: `playbooks/windows-update-failure.md`.
-- Secure Boot certificate servicing on System (`secure_boot_cert_update_pending` (value), `secure_boot_certs_current` (value)): `playbooks/bitlocker-recovery.md`.
+- Secure Boot certificate servicing on System (`secure_boot_cert_update_pending` (value), `secure_boot_certs_current` (value)): `playbooks/windows-update-failure.md` (**Recovery environment and Secure Boot**), and its effect on BitLocker in `playbooks/bitlocker-recovery.md`.
 
 **Bound the window.**
 

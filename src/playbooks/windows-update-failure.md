@@ -63,8 +63,9 @@ Group by the hex field to ask which code. Filter on the normalized field only fo
 
 ## Scanning
 
-`patch_scan_stale` (value) reads the date of the last search by Windows' own automatic updates.
-An RMM or patch tool that turns automatic updates off and scans through the Windows Update programming interface leaves that date old while its own scans succeed every day.
+`patch_scan_stale` (value) reads the date of the last successful search by Windows' own automatic updates.
+Other programs search through the same update client: an RMM or patch tool, Defender checking for new security intelligence, the Microsoft Store, Office. Their searches do not move that date.
+A stale reading can mean automatic updates are turned off while another tool scans, or that automatic updates' own search fails against its configured service while another caller succeeds.
 Before calling a stale device unscanned, count its completed scans by update service:
 
 ```lql
@@ -73,6 +74,7 @@ source = "<host>" AND subsource = "win.eventlog.management" AND provider_name = 
 <!-- confirmed with data on 2026-11-12 -->
 
 Group by `event_id` (LQL) and `event_data.serviceGuid` (LQL) (raw, in either letter case). Event 26 is a completed scan and 25 a failed one (`patch_scan_failed` (value)).
+Count scans by device and day, not rows: one scan can write a 26 for each service in the same instant.
 Microsoft documents these service identifiers:
 
 | Service id | Service |
@@ -84,7 +86,7 @@ Microsoft documents these service identifiers:
 | 8B24B027-1DEE-BABB-9A95-3517DFB9C552 | OS flighting |
 | 00000000-0000-0000-0000-000000000000 | Default: whichever service policy selects |
 
-- Daily completed scans against Microsoft Update, Windows Update or WSUS: the device is scanning. A stale reading on it means only that automatic updates are off. Whether updates install is the RMM's policy to judge, from the install records below.
+- Daily completed scans against Microsoft Update, Windows Update or WSUS say some program on the device is scanning. The record does not name which one, and a Defender or Office check counts too. A stale reading then says Windows' automatic updates are not searching. Whether the device is patched comes from its revision: compare `sparklogs.data.system_info.os_revision` (LQL) and the last `operating_system_changed` (value) with the current cumulative update for its build before closing it.
 - Failures only against the Store or flighting services, with OS scans completing, are Store app traffic, often on devices where policy blocks Microsoft's internet endpoints. They are not an OS patching problem.
 - No completed OS scan in days: read the failure code.
   0x80240438 is an endpoint the device could not reach: a WSUS server that is down, renamed or retired but still named in policy (`WUServer` under `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate`), or a proxy or firewall in the way.
@@ -119,7 +121,7 @@ source = "<host>" AND sparklogs.reason = patch_install_failed
 ```
 
 Group by `subsource` (LQL), `win.eventlog.system.update_title` (LQL), `win.eventlog.setup.package` (LQL), `event_data.errorCode` (LQL) and `win.eventlog.setup.error_code` (LQL).
-On the System copy, `sparklogs.reason_variant` (LQL) `failed` (value) is a real failure and `interrupted` (other) (0x8024001E shutdown, 0x80242008 cancelled) changed nothing. Records from older agents can also file a package in use here. The code 0x80073D02 says it was only deferred, the fact `patch_install_deferred` (value) carries now.
+On the System copy, `sparklogs.reason_variant` (LQL) `failed` (value) is a real failure and `interrupted` (value) (0x8024001E shutdown, 0x80242008 cancelled) changed nothing. Records from older agents can also file a package in use here. The code 0x80073D02 says it was only deferred, the fact `patch_install_deferred` (value) carries now.
 
 The Setup package can carry a different KB from the Windows Update title: a monthly update is staged as several packages, so an update titled with one KB can fail on a companion package. Match a Setup record to its install outcome by the minute, not by KB.
 Read the device's servicing sequence around the failure: each package's begin (1), success (2), failure (3) and wait for a restart (4), and the automatic store scan Windows starts after a failure (1013 start, 1014 counts, 1015 damage left unrepaired):
@@ -162,10 +164,11 @@ source = "<host>" AND subsource in ("win.servicing.cbs", "win.servicing.dism", "
 
 Group by `sparklogs.reason` (LQL) and `sparklogs.reason_variant` (LQL), then read the rows in time order around the failed install.
 
-- `win_component_store_corruption` (value) is one fact with two witnesses, Setup and CBS: count one incident, not one per witness. Its arms, on `sparklogs.reason_variant` (LQL):
-  - `scan_found` (other): a scan counted damage, in `win.servicing.cbs.detected_corruption` (LQL).
-  - `unrepaired` (other): what a repair left, `win.eventlog.setup.corruption_total` (LQL) against `win.eventlog.setup.corruption_repaired` (LQL). A detection-only scan (`win.eventlog.setup.detection_only` (LQL) true) repairs nothing by design.
-  - `operation_failed` (other) and `package_blocked` (other): an operation stopped on the damage.
+- `win_component_store_corruption` (value) is one fact with two witnesses, Setup and CBS: count one incident, not one per witness. Its variants, on `sparklogs.reason_variant` (LQL):
+  - `scan_found` (value): a scan counted damage, in `win.servicing.cbs.detected_corruption` (LQL).
+  - `unrepaired` (value): what a repair left, `win.eventlog.setup.corruption_total` (LQL) against `win.eventlog.setup.corruption_repaired` (LQL).
+  - `detection_only` (value): a scan that only looked for damage (`win.eventlog.setup.detection_only` (LQL) true) and repairs nothing by design. Its counts say what is damaged, not what a repair left.
+  - `operation_failed` (value) and `package_blocked` (value): an operation stopped on the damage.
   - `recovered` (value): the damage was fixed.
 - An automatic scan that reports zero corruption does not clear the store. Devices failing with 0x8007370D or 0x800736B3 have shown a zero count on Setup event 1014 while CBS logged files it could not repair in the same run.
 - `win_component_store_payload_corrupt` (value) and `win_component_store_payload_unrepairable` (value) arrive one row per file, hundreds from one repair. Group by `win.servicing.cbs.corrupt_component` (LQL) or `win.servicing.cbs.unrepairable_file` (LQL) to see what is damaged.

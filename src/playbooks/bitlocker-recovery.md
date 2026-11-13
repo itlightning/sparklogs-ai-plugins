@@ -71,7 +71,7 @@ Group by `event_id` (LQL). On a device whose boots usually carry 24711, a boot w
 
 **From the PCR to the change.** Look on the same device around the boot before the prompt:
 
-- PCR 7 (Secure Boot state and keys): `secure_boot_disabled` (value) or `secure_boot_enabled` (value) on device state, the `secure_boot_disabled` (value) or `secure_boot_changed` (value) unlock arm, and Secure Boot certificate servicing in the System log: `secure_boot_cert_update_pending` (value) changes PCR 7 when it applies, `secure_boot_certs_current` (value) says it has applied, `secure_boot_update_failed` (value) says an attempt did not.
+- PCR 7 (Secure Boot state and keys): `secure_boot_disabled` (value) or `secure_boot_enabled` (value) on device state, the `secure_boot_disabled` (value) or `secure_boot_changed` (value) unlock arm, and Secure Boot certificate servicing in the System log: `secure_boot_cert_update_pending` (value) changes PCR 7 when it applies, `secure_boot_certs_current` (value) says it has applied, `secure_boot_update_failed` (value) says an attempt did not. A pending or failed update itself: `playbooks/windows-update-failure.md` (**Recovery environment and Secure Boot**).
 - PCR 0 and 2 (firmware code, option ROMs): `bios_version_changed` (value) on device state, a new dock or graphics card with its own option ROM.
   `fasr_pcr_validation_mismatch` (value) arm `pcr_mismatch` (value) on the platform feed names a PCR that differed from the firmware's certified manifest at boot. Its `no_mismatch` (value) arm is routine.
 - PCR 4 (boot manager): a boot manager update, such as the boot manager signed with the 2023 certificates that `secure_boot_certs_current` (value) reports.

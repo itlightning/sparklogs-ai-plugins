@@ -67,7 +67,7 @@ The message names the expected server name on 36884 ("The server name we were ex
 source = "<host>" AND sparklogs.reason in (tls_cert_expired, tls_cert_name_mismatch, tls_cert_untrusted_ca)
 ```
 
-Group by `sparklogs.reason` (LQL) over time, then read the messages for the program and the name.
+Group by `sparklogs.reason` (LQL) over time, then read the messages for the name and the payload for the program (CallerProcessImageName). One program rejecting one name is that connection. Many programs rejecting at once is the device (its clock, its trusted roots, an inspection proxy).
 
 - **Expired or not yet valid** (36881). The server's certificate expired, or this device's clock is wrong. A clock off by days or years makes every current certificate fail at once, across many programs: check `os_clock_drift` (value), `host_clock_stepped` (value) and `time_sync_failed` (value) on the device first. A dead CMOS battery and a virtual machine restored from an old snapshot are the classic cases.
 - **Name mismatch** (36884). The program connected by a name the certificate does not list: a short name or IP address where the certificate holds the full DNS name, a server renamed or moved behind a new alias, or a proxy or inspection device answering with its own certificate. A Microsoft or SaaS service name here usually means something in the path answered instead.
@@ -79,10 +79,10 @@ source = "<host>" AND subsource = "win.eventlog.system" AND provider_name = "Sch
 ```
 <!-- confirmed with data on 2026-11-12 -->
 
-Group by `event_id` (LQL). 36887 says the other end sent a fatal TLS alert, 36888 that this device sent one; the alert number is in the message.
+Group by `event_id` (LQL). 36887 says the other end sent a fatal TLS alert, 36888 that this device sent one. The alert number is in the message.
 Common alert numbers: 40 handshake failure (no shared protocol or cipher), 42 bad certificate, 44 certificate revoked, 45 certificate expired, 46 certificate unknown, 48 unknown CA, 70 protocol version, 80 internal error.
 On a server, 36887 with 45, 46 or 48 is a client refusing this server's certificate: the only server-side trace of an expired or untrusted server certificate, and only for clients that send the alert.
-36928 is a revocation response Windows could not fetch. Windows treats that as soft and it is capped low; it matters only next to a rejection.
+36928 is a revocation response Windows could not fetch. Windows treats that as soft and it is capped low. It matters only next to a rejection.
 
 **Cannot use its own certificate.** `tls_server_credential_failed` (value) (36870) says a service here has a certificate but cannot reach its private key.
 With error 0x8009030D (SEC_E_UNKNOWN_CREDENTIALS) and an `http_ssl_config_failed` (value) for an endpoint such as 0.0.0.0:443 in the same second, the HTTPS binding points at a certificate whose key is unusable: the certificate was renewed and the binding still names the old thumbprint, the certificate was deleted, it was imported without its private key, or the service account lost read access to the key.
@@ -93,25 +93,26 @@ source = "<host>" AND sparklogs.reason in (tls_server_credential_failed, http_ss
 ```
 
 Group by `sparklogs.reason` (LQL) over time. The first 36870 after a binding change or a certificate's expiry date names the change; a run already going at the start of the window began before it, so widen.
-On a domain controller the same 36870 breaks LDAPS; on a Remote Desktop host, Remote Desktop's certificate.
+On a domain controller the same 36870 breaks LDAPS, and on a Remote Desktop host, Remote Desktop's certificate.
 The fix is on the device: `netsh http show sslcert` for the bound hash, the certificate and its key in certlm.msc, then rebind.
 
 **Client credential and protocol.** `tls_client_credential_failed` (value) (36871) is a program that could not build its outbound TLS credential.
 One program, repeating, that needs a client certificate (a VPN, a line-of-business integration) points at that certificate: check it is in the store, valid, and its key readable by the program's account.
+Read the calling program on each row (CallerProcessImageName in the raw payload) and count the distinct programs per device and hour.
 Internal error state 10013 from most programs on a device at once (Office, browser helpers, OneDrive, updaters) is the device's TLS protocol or cipher settings refusing what those programs ask for: a hardening baseline, TLS 1.0 and 1.1 turned off, or a cipher-suite policy. Most of those programs then connect with an allowed protocol, so it fails nothing by itself. Act when a user reports a program that will not connect, and compare the device's protocol settings with what that program needs.
 `tls_cipher_mismatch` (value) (36874) is on a server: a client offered no suite it accepts. The message gives the TLS version the client asked for, not the client.
-An old device or program (a scanner, a printer, an old Java or .NET build) after the server's ciphers were tightened is the usual cause; a steady trickle on an internet-facing server is scanning.
+An old device or program (a scanner, a printer, an old Java or .NET build) after the server's ciphers were tightened is the usual cause. A steady trickle on an internet-facing server is scanning.
 
 ```lql
 source = "<host>" AND sparklogs.reason = tls_cipher_mismatch
 ```
 
-Group by `event_data.Protocol` (LQL) over time. TLS 1.0 and 1.1 requests are old clients; the client's address is in the service's own log (IIS, firewall) at the same times.
+Group by `event_data.Protocol` (LQL) over time. TLS 1.0 and 1.1 requests are old clients. The client's address is in the service's own log (IIS, firewall) at the same times.
 
 **Expiring and expired in the store.** Two components report the same certificate:
 
 - The certificate store's lifecycle client writes 1003 (expiring) and 1002 (expired) for the machine store and each user's store, with the expiry date and the store. Machine-store rows carry the subject; user-store rows name the user in `user_name` (LQL) and often carry no subject.
-- The autoenrollment client writes 64 (expiring or expired, it does not say which) for a machine certificate, with only its thumbprint. In SparkLogs data it arrives in the same minute as a machine-store 1003 for the same certificate, at every autoenrollment cycle (at startup and about every eight hours), so read the 1003 for the subject and date.
+- The autoenrollment client writes 64 (expiring or expired, it does not say which) for a machine certificate, with only its thumbprint. It arrives in the same minute as a machine-store 1003 for the same certificate, at every autoenrollment cycle (at startup and about every eight hours), so read the 1003 for the subject and date.
 
 ```lql
 source = "<host>" AND subsource = "win.eventlog.identity_security" AND sparklogs.reason in (cert_expiring, cert_expired)
@@ -123,7 +124,7 @@ Then sort the certificate by its subject:
 
 - **A host name the business serves** (names starting remote, rdweb, mail or vpn, a public name). A public or manually installed certificate: nothing in Windows renews it. Whoever bought it, or the ACME client on the server, renews it, and then the service has to be bound to the new one (**Bindings and renewals**).
 - **The machine's own name, or a template certificate from the domain CA.** Autoenrollment should have renewed it before it got here. A warning that repeats for days means renewal is failing: **Enrollment and autoenrollment**.
-- **Two GUIDs** (`DC=<guid>, CN=<guid>`). A certificate Microsoft Entra ID issues to the device itself. In SparkLogs data these expire and are replaced about daily on Entra-joined devices, one expired row a day each: routine turnover. Only `entra_device_certificate_update_failed` (value) with a status other than logon failure or network unreachable needs a look.
+- **Two GUIDs** (`DC=<guid>, CN=<guid>`). A certificate Microsoft Entra ID issues to the device itself. On Entra-joined devices these expire and are replaced about daily, one expired row a day each: routine turnover. Only `entra_device_certificate_update_failed` (value) with a status other than logon failure or network unreachable needs a look.
 - **A vendor or application name** (a backup server, a remote-management card, a database's self-signed certificate). That product's own certificate; its console renews it.
 - **A root or intermediate CA** (a public CA's root name). Windows root maintenance replaces or removes those; act only if a program still depends on the old one.
 
@@ -138,7 +139,7 @@ source = "<host>" AND subsource = "win.eventlog.identity_security" AND provider_
 
 Group by `event_id` (LQL) over time and read the subject in the message. A 1006 for the same subject after a 1002 is the renewal arriving. Not every installer writes one, so its absence does not prove the certificate was not replaced.
 
-**Enrollment and autoenrollment.** `cert_enroll_failed` (value) has three arms on `sparklogs.reason_variant` (LQL):
+**Enrollment and autoenrollment.** `cert_enroll_failed` (value) has three variants on `sparklogs.reason_variant` (LQL):
 
 - `autoenroll_cycle_failed` (value) (1, 6): autoenrollment could not run a cycle against the directory or the CA. `event_data.ErrorCode` (LQL) says why: 0x800706BA (RPC server unavailable) is the CA unreachable or gone, 0x8007054B the domain unreachable, 0x80070037 a network resource gone. Once on a laptop that was off the corporate network, routine.
 - `failed` (value) (86, 87): an enrollment, such as a SCEP device request from Intune, failed; the message names the URL and status.
@@ -203,7 +204,7 @@ A host using a template or public certificate (set by Group Policy, or RD Gatewa
 The same server name rejected by many devices is that server's certificate. `tls_cert_untrusted_ca` (value) on many devices from one day is an inspection device or a root deployment. Enrollment failing on every device against one CA is the CA. One subject expiring on one server is that server's certificate.
 
 **Not this playbook.**
-Secure Boot certificate servicing (`secure_boot_cert_update_pending` (value), `secure_boot_certs_current` (value)): `playbooks/bitlocker-recovery.md`.
+Secure Boot certificate servicing (`secure_boot_cert_update_pending` (value), `secure_boot_certs_current` (value)): `playbooks/windows-update-failure.md` (**Recovery environment and Secure Boot**).
 Device health attestation certificates (`device_health_cert_service_unreachable` (value)): `playbooks/tpm-health.md`.
 A service that fails at start because its certificate expired: the service side is `playbooks/service-failures.md`.
 Sign-in that is slow with no certificate failure in the path: `playbooks/slow-logon.md`.

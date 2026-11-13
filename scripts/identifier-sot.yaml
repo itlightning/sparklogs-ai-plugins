@@ -552,6 +552,12 @@ values:
     - state_error
     - state_warning
     - torn_write_detected
+    - interrupted
+    - scan_found
+    - unrepaired
+    - detection_only
+    - operation_failed
+    - package_blocked
   # sparklogs.data.storage_devices[].presentation values (fields/topic-storage-devices.md).
   storage_presentation:
     - local_physical
