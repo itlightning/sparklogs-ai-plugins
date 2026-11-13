@@ -9,6 +9,7 @@ Explore: `guides/stream-kinds/wel-security.md`.
 
 Defender is not this theme. Use `themes/endpoint-protection.md`.
 PowerShell script blocks (`win.powershell.eventlog` (value)): `playbooks/powershell-script-blocks.md`.
+Certificate authority audit (`adcs_config_changed` (value), `adcs_audit_evidence_tampered` (value)) and domain controller smart card certificates: `playbooks/certificate-expiry.md`.
 
 ## Change analysis: what changed, and who
 

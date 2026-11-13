@@ -537,6 +537,9 @@ values:
     - timeout
     - wrong_principal
     - wudf_reflector_entry
+    - autoenroll_cycle_failed
+    - failed
+    - retired_aik
   # sparklogs.topic values observed on sparklogs.device.state in a live workspace.
   topics:
     - agent_overhead

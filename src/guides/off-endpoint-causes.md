@@ -104,14 +104,17 @@ The list is **not exhaustive** - it's a starting set covering common patterns. I
 
 ---
 
-## HM9 - Certificate expiry
+## HM9 - Certificate, TLS and enrollment failures
 
 **Off-endpoint causes:**
 
-- **Public CA cert lifecycle.** Public certs are managed via vendor portals (DigiCert, Let's Encrypt, Sectigo); renewal state is outside endpoint.
-- **Federation server certs.** If ADFS is on a separate server without a SparkLogs Agent, federation certs are invisible.
-- **Internal CA infrastructure.** If the internal CA is on a server without a SparkLogs Agent, CA-issued cert state and renewal cycles are off-endpoint.
-- **Third-party SaaS app certs.** Cert expiry on a SaaS-hosted app is off-endpoint by definition.
+- **Public CA and ACME accounts.** A purchased or ACME-issued certificate is ordered and renewed in the CA's portal or the ACME account; whether a renewal was issued is recorded there.
+- **The certificate a remote server presents.** A client's rejection says why it refused, not the server's certificate in full; the server, or a test against its name and port, shows the chain and dates.
+- **Load balancers, reverse proxies and firewalls.** They hold their own copy of a site's certificate, and a TLS-inspecting firewall presents its own; renewing the server's copy does not change theirs.
+- **The internal CA without an agent.** Its issued, denied and failed requests, its templates and its revocation list publication are visible only on the CA server.
+- **Directory configuration.** Certificate templates, their permissions and the enrollment services the directory lists are set in Active Directory; a decommissioned CA still listed there shows only as failed enrollment on the devices.
+- **Federation and SaaS certificates.** Token-signing certificates on a federation server, and certificates of SaaS services, are managed in those systems.
+- **Programs with their own TLS.** Browsers and runtimes with their own certificate checks log rejections only in their own logs.
 
 ---
 

@@ -109,7 +109,11 @@ Playbooks are incomplete recipes. If a recipe LQL produces empty results: widen 
 | One application slow or stalling over the network | `playbooks/application-network-stall.md` |
 | App slow over VPN | `playbooks/application-network-stall.md` |
 | BitLocker recovery | `playbooks/bitlocker-recovery.md` |
-| Certificate expiry | `playbooks/certificate-expiry.md` |
+| Certificate, TLS and enrollment failures | `playbooks/certificate-expiry.md` |
+| Certificate expired or expiring | `playbooks/certificate-expiry.md` |
+| TLS or Schannel errors | `playbooks/certificate-expiry.md` |
+| Certificate autoenrollment failing | `playbooks/certificate-expiry.md` |
+| HTTPS site or Remote Desktop certificate error | `playbooks/certificate-expiry.md` |
 | Blue screens, app crashes, unexpected restarts | `playbooks/crashes-and-restarts.md` |
 | Blue screen (BSOD) | `playbooks/crashes-and-restarts.md` |
 | App keeps crashing | `playbooks/crashes-and-restarts.md` |
