@@ -94,12 +94,13 @@ Agent rows carry `agent_status` (col), `stuck_reason` (col), the collection grou
 The server instructions (IS THE AGENT ONLINE AND COLLECTING?) define each one: read them before writing about a device's state.
 Keep `agent_status` (col) and `collection_status` (col) as two statements, and keep an offline device's last-reported collection group with the time it was reported.
 
-For collection problems across a client, call `resolve_scope` (tool) with `unhealthy_collection_only` (arg) set: it lists only devices whose collection is neither healthy nor onboarding, worst first.
+For collection problems across a client, call `resolve_scope` (tool) with `unhealthy_collection_only` (arg) set: it lists only devices whose collection is neither healthy nor onboarding, worst first. When none matches, the response says so and carries no `summary.query_scope` (col): report that, and do not widen to every org.
 `summary.feed_health` (col) on `resolve_scope` (tool) and `list_sources` (tool) gives one line per device: how many feeds are current, and each feed that is not, with its reason and last event time.
 
 Ingest-key rows have no heartbeat, no feeds and no collection group: read `last_data_at` (col) for freshness and stop there.
 
 Filter devices with **`host_classes` (arg)** (today `workstation` (value) or `server` (value)) and **`host_roles` (arg)** (for example `domain_controller` (value)) rather than guessing from hostnames: a workstation named `srv-laptop` is how a hostname guess puts the wrong device in a server answer. A device that reported no class matches no `host_classes` (arg) filter.
+With these filters, or with `unhealthy_collection_only` (arg), `summary.query_scope` (col) lists the orgs of the matched devices. Every device in those orgs is then in scope, matched or not, so pass the matched devices' ids as `agent_ids` (arg) where the data tool takes them.
 
 Use these readings in the cross-check below; do not treat a silent source as healthy when the agent row says it was not collecting.
 

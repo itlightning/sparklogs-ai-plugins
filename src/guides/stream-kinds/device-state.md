@@ -2,7 +2,7 @@
 
 **One device or a few, over a window:** `query_device_health` (tool) `view` (arg) `device_overview` (value) or `device_network` (value). How to read the answer: `guides/device-state-fields.md` (**Read a device view**).
 **Standing / latest of each episode:** `query_device_health` (tool), omit `view` (arg).
-Columns: the response `schema.columns` (col) or the tool description. Episode and observation limits: `guides/device-state-fields.md`.
+Columns: the response `schema.columns` (col) on TSV, the row keys on JSONL, or the tool description. Episode and observation limits: `guides/device-state-fields.md`.
 A default-view row is the latest event of each episode that emitted inside the requested window, not the latest event of each subject.
 What is on the box is `view` (arg) `latest_state` (value).
 Process charts: `view` (arg) `top_processes_over_time` (value). Raw measurements: `series` (value) with `topics` (arg). RCA: `view` (arg) `event_timeline` (value) on the same tool.

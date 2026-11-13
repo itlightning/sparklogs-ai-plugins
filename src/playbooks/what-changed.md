@@ -47,7 +47,8 @@ Change signals that carry no kind:
 4. The window runs from last known good to onset, and at least 48 hours before the onset. Widen it to the reading before for an observed change near its start.
 5. A change after the onset is not a cause. Reinstalls and rollbacks right after it are someone's reaction; they say what people already suspected.
 
-**Device health first.** The device overview over the window lists the changes that overlapped each heat span and the episodes, and also covers the 48 hours before the window.
+**Device health first.** The device overview over the window links each heat span to the changes observed in it or just before it, and lists the episodes and changes, including the 48 hours before the window.
+On a busy device it keeps only the newest changes and says so: `changes_capped` (col) on its `device_summary` (value) row, and the `events` (value) set's `truncated` (col) note saying the oldest changes were dropped. The changes before an onset can then be missing from it: never conclude from that list that nothing changed before the onset.
 For the full list, read the device's change timeline, oldest first. For what is on the device now against an earlier day, read the latest state with the changes after it.
 Which `query_device_health` (tool) reading answers each: `guides/device-state-fields.md` (**Choose the view**).
 
