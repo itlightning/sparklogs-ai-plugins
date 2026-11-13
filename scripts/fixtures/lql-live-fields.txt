@@ -2326,6 +2326,7 @@ event_data.proxy
 event_data.psz
 event_data.resourceUri
 event_data.runningAppsList
+event_data.serviceGuid
 event_data.shellId
 event_data.status
 event_data.subjectName

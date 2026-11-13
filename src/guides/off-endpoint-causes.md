@@ -56,10 +56,12 @@ The list is **not exhaustive** - it's a starting set covering common patterns. I
 
 **Off-endpoint causes:**
 
-- **WSUS server health.** If the MSP uses WSUS, server-side issues (storage, content sync, SUSDB) are at the WSUS server, not on the endpoint.
-- **Microsoft Update service / CDN status.** When endpoints update directly from MS, MS-side issues are off-endpoint.
-- **Update content-sync issues.** Endpoint reports "needs reboot" but the actual servicing-stack failure may be in CBS lines the pack collects without a reason: read the curated `win.servicing.cbs` (value) and `win.servicing.dism` (value) reasons first, then the uncurated rows of the same feeds.
-- **Driver vendor's parallel update channel.** If Intel/Realtek/NVIDIA pushed a driver update independently of WU, the conflict source is outside WU's view.
+- **WSUS or Configuration Manager server.** Its approvals, content sync, storage and database health are on the server. A device whose update is not approved logs no failure; it reports nothing to install.
+- **The RMM's patch policy.** Approvals, deferrals, maintenance windows and forced-restart settings live in the RMM, and its patch report is built from its own scans.
+- **Microsoft's side.** Release health, known issues and safeguard holds for a KB or feature update are published by Microsoft; an outage of the update service is visible only as scan and download failures.
+- **The path to the update service.** Proxies, TLS inspection and firewalls between the device and Microsoft or WSUS are configured off the device.
+- **The device's own servicing logs.** CBS.log is collected only for its curated lines; the full log, `Get-WindowsUpdateLog` output and a feature update's Setup logs (Panther folder, SetupDiag) stay on the device.
+- **Device makers' update tools.** Drivers and firmware pushed by a device maker's own updater, outside Windows Update, can conflict with what Windows Update offers.
 
 ---
 

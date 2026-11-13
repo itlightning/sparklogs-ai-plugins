@@ -162,6 +162,9 @@ Detail: `playbooks/playbooks.md`.
 | What changed on this device | `playbooks/what-changed.md` |
 | It worked yesterday | `playbooks/what-changed.md` |
 | Windows Update / patch failure | `playbooks/windows-update-failure.md` |
+| Device behind on updates or not scanning | `playbooks/windows-update-failure.md` |
+| Feature update (upgrade) failed | `playbooks/windows-update-failure.md` |
+| Component store corruption (DISM, SFC) | `playbooks/windows-update-failure.md` |
 | VSS / shadow copies / backup plumbing | `playbooks/windows-vss.md` |
 <!-- END GENERATED INDEX:playbooks -->
 
