@@ -559,6 +559,17 @@ values:
     - guest_virtual
     - software_virtual
     - removable
+    - component
+    - diagnosed
+    - dialog
+    - measured
+    - whole_boot
+    - whole_shutdown
+  # sparklogs.data.performance.pagefile_growth_limit values (fields/topic-performance.md)
+  pagefile_growth_limit:
+    - at_max
+    - disk_space
+    - no_pagefile
   # sparklogs.topic values observed on sparklogs.device.state in a live workspace.
   topics:
     - agent_overhead
@@ -583,6 +594,7 @@ values:
     - storage_devices
     - storage_io
     - system_info
+    - top_processes
     - volume_map
     - vss_shadowstorage
     - vss_writers

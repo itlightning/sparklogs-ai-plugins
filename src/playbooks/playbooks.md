@@ -61,6 +61,8 @@ One device or many: count the symptom's own signature across the client by `sour
 | Automatic service stopped | `playbooks/service-failures.md` |
 | Slow or freezing PC | `playbooks/slow-device.md` |
 | Slow server | `playbooks/slow-device.md` |
+| Slow boot or shutdown | `playbooks/slow-device.md` |
+| High CPU, memory or disk use | `playbooks/slow-device.md` |
 | Slow logon | `playbooks/slow-logon.md` |
 | Temporary profile or profile will not load | `playbooks/slow-logon.md` |
 | Sign-in stuck at Welcome or Please wait | `playbooks/slow-logon.md` |

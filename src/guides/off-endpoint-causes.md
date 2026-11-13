@@ -155,7 +155,9 @@ The list is **not exhaustive** - it's a starting set covering common patterns. I
 
 - **Application servers and SaaS backends.** An application waiting on its server looks idle on the device; the agent does not measure application response time.
 - **File servers and mapped drives.** A slow share stalls Explorer and Office on the device; the share's host needs its own reading.
-- **Virtualization host contention.** A VM's CPU ready time and the host's storage latency are measured on the host, not in the guest.
+- **Virtualization host contention.** A VM's CPU ready time, memory the host reclaims and the host's storage latency are measured on the host, not in the guest.
+- **SAN and iSCSI storage.** The array, its switches and the multipath configuration keep their own logs; the device sees only slow or lost I/O on its disk.
+- **Management controller.** A server's iDRAC, iLO or XClarity log holds the temperatures, fan and power supply faults and power caps behind a throttled CPU.
 
 ---
 
