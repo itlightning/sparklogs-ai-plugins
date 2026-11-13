@@ -100,6 +100,11 @@ function skipRel(rel) {
     || n.startsWith('src/fields/') || n.includes('/fields/');
 }
 
+// Playbooks carry the recipe, not tool-call plumbing: tool input names belong in the tool guides.
+function isPlaybook(file) {
+  return file.replaceAll('\\', '/').startsWith('src/playbooks/');
+}
+
 function bodyStartOf(text) {
   if (!text.startsWith('---\n')) return 0;
   const end = text.indexOf('\n---\n', 4);
@@ -124,6 +129,10 @@ export function lintMarkdown(text, file, sot) {
     }
     if (!ALL_TAGS.has(tag)) {
       errors.push(`${file}: unknown tag (${tag}) on \`${body}\``);
+      continue;
+    }
+    if (tag === 'arg' && isPlaybook(file)) {
+      errors.push(`${file}: tool input \`${body}\` (arg) in a playbook; say it in plain words and leave call details to the tool guides`);
       continue;
     }
     const hits = setsContaining(sot, body);
@@ -157,7 +166,7 @@ export function applySafeTags(text, sot) {
 function fixtureSot() {
   return {
     tools: new Set(['query_logs']),
-    args: new Set([]),
+    args: new Set(['lql']),
     cols: new Set(['reason']),
     lql: new Set(['sparklogs.reason', 'pattern_hash']),
     families: new Set(['sparklogs.episode']),
@@ -185,6 +194,10 @@ export function proveIdentifierTags() {
   if (!english.some((e) => e.includes('untagged `pattern_hash`'))) {
     throw new Error('english parenthetical was parsed as a tag');
   }
+  const argPlaybook = lintMarkdown('pass `lql` (arg)', 'src/playbooks/t.md', sot);
+  if (!argPlaybook.some((e) => e.includes('in a playbook'))) throw new Error('(arg) in a playbook not caught');
+  const argGuide = lintMarkdown('pass `lql` (arg)', 'src/guides/t.md', sot);
+  if (argGuide.length) throw new Error(`(arg) in a guide should pass: ${argGuide.join('; ')}`);
   const otherOk = lintMarkdown('operator `in` (other)', 't.md', sot);
   if (otherOk.length) throw new Error(`in (other) should pass: ${otherOk.join('; ')}`);
   const otherCol = lintMarkdown('launder `reason` (other)', 't.md', sot);

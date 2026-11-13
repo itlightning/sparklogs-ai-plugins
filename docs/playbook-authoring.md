@@ -52,7 +52,7 @@ Every name must match the live tool: check it against the tool's input schema an
 ## Do not
 
 - Walk through `resolve_scope` / `list_sources` / "then confirm data in the window".
-- Repeat MCP parameter grammar.
+- Repeat MCP parameter grammar: no parameter names, argument values, flags or call plumbing. Tool names, view names, result-set columns and field names are fine. `yarn precommit` fails on an `(arg)` tag under `src/playbooks/`.
 - Infer job or product outcome from plumbing that does not carry it.
 - Dump a feed directory; one artifact per question (`guides/generated-reference-router.md`).
 - Copy a stream-kind ladder into every playbook; point at `guides/stream-kinds.md`.

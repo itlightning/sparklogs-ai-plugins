@@ -26,7 +26,7 @@ The agent does not measure the application's own response time, its server, or U
 
 Then drill down on that program alone: the `connections` (value) result set with `image_name` (col) in the filter, by `bucket_start` (col), reading `tcp_timeouts` (col), `retransmit_pct_peak` (col), `dup_ack_per_1k_segments` (col) beside its counts, and `rtt_ms_avg` (col).
 Other programs to the same remote address with no trouble point at the program; trouble across programs in the same buckets, with the VPN route's timeouts and resends up in `network_buckets` (value), points at the route.
-For delay above the lowest round trip, `fieldset` (arg) `detail` (value) adds `rtt_min_ms` (col).
+For delay above the lowest round trip, the wider column set (`guides/device-state-fields.md`) adds `rtt_min_ms` (col).
 
 **Events, for what health named.** The application's own errors and the VPN client's events over the stall interval:
 

@@ -22,7 +22,7 @@ Read open conditions with `sparklogs.episode.age_basis` (col): `observed` (value
 - `heat_spans` (col) with `domain` (col) `ram` (value): when memory pressure reached the machine as a whole.
 - `events` (col): `ram_commit_near_limit` (value), `ram_pressure` (value) and `process_handle_count_high` (value) episodes.
 - The reboot that ended a slowdown: `powered_off` (value) evidence, and its shutdown and boot marks in the `events` (value) result set.
-- One instance or a restart cycle: `top_processes_over_time` (value) with `rank_by` (arg) `ram` (value) and `grouping` (arg) `process_instance` (value).
+- One instance or a restart cycle: `top_processes_over_time` (value), ranked by memory with one row per process instance (`guides/device-state-fields.md`).
   A curve that starts over with each new instance is a restart cycle. One instance climbing until it exits is the leak shape.
 - Handles: `sparklogs.data.processes[].handle_count` (LQL) on `latest_state` (value) rows for the `processes` (value) topic.
 
