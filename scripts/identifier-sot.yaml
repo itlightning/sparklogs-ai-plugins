@@ -649,6 +649,12 @@ values:
     - kernel_full
   crash_dump_type:
     - mini
+  crash_stack_stop:
+    - no_image
+    - image_unavailable
+  crash_stack_stop_image:
+    - identity_mismatch
+    - not_found
   device_health_metrics:
     - net_rx
     - net_tx
