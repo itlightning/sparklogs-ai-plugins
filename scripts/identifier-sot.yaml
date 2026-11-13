@@ -237,6 +237,12 @@ cols:
   - filter_lql
   - summary.refinable_results
   - refine_example
+  - holds
+  - narrow_by
+  - pid
+  - untrusted_data_block_tag
+  - untrusted_data_json_paths
+  - connections
   - unavailable
   - truncated
   - header

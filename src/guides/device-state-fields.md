@@ -81,7 +81,7 @@ Use that light form to choose the devices and intervals worth a full reading, th
 4. `domains` (col): the window in coarse buckets with each domain's reading and band.
    `heat_spans` (col): stretches where a domain's heat was above `ok` (value), found at `bucket_s` (col).
    Bands are `ok` (value), `warm` (value), `hot` (value) and `very_hot` (value).
-   Each span carries its peak band and time, the `driver` (col) reading that set the peak and its value, on `device_overview` (value) where the peak sat against the device's typical range from before the window (`device_network` (value) spans carry `medium` (col) instead) (`below` (value), `within` (value), `above` (value)), up to 3 contributors with their share, and the episodes and changes that overlapped it.
+   Each span carries its peak band and time, the `driver` (col) reading that set the peak and its value, on `device_overview` (value) where the peak sat against the device's typical range from before the window (`device_network` (value) spans carry `medium` (col) instead) (`below` (value), `within` (value), `above` (value)), up to 3 contributors with their share, the episodes that opened or took a step in the span or the bucket before it, and the changes observed there. An episode open since before the span with no step in it is not linked.
    A span says when a measure ran high, not why. Contributors ran at the same time and are not proven causes.
    Disk heat is the busiest disk's busy time, pushed up by its queue depth. Latency is not an input, so slow I/O at moderate busy time can leave no disk span.
    Read `disk_latency_ms` (col) in `domains` (col) and `latency_ms_p90_10s` (col) in the `storage` (value) result set for latency. A span names no disk: `busiest_disk` (col) in the `buckets` (value) result set does.
@@ -89,10 +89,11 @@ Use that light form to choose the devices and intervals worth a full reading, th
 5. `top_processes` (col) (`device_overview` (value)) or `top_connections` (col) (`device_network` (value)): window figures over the observations the agent retained.
    The agent reports its top processes and connections per window, so these figures are lower bounds and a short burst can be missing.
    `window_rank_by` (col) names the rankings a row led. It is empty for a row kept further down a ranking.
-   A `top_processes` (col) row combines every instance of one executable. A `top_connections` (col) row is one connection, with its PID.
+   A `top_processes` (col) row combines every instance of one executable. A `top_connections` (col) row folds one process's connections to one remote end and port, counted in `connections` (col); `pid` (col) is set only when they all came from one process instance.
+   To read a row's connections per bucket, filter the `connections` (value) result set on the columns the header's `top_connections` (col) pivot names in `narrow_by` (col), with the row's values; leave out a term whose cell is empty.
 6. `events` (col): the most relevant episodes and changes, open episodes first.
    An episode appears only when it had an event inside the window. One open since before the start with no event in the window is absent, so use a window of days for what is open now.
-   Changes also cover the 48 hours before the window.
+   Changes also cover the 48 hours before the window. Each device keeps its newest 200 changes (on `device_network` (value), network changes only); when older ones were dropped the `events` (value) entry's `truncated` (col) says so, and the listed changes are complete only from the oldest one listed. For an onset before that, read the change timeline.
    On `device_overview` (value), crashes and other occurrences are in neither this part nor the `events` (value) result set, whose only occurrences are the boot, sleep, shutdown and agent start and stop marks: read them with the `next_reads` (col) `event_timeline` (value) call (`kinds` (arg) `["occurrence"]` (value)). On `device_network` (value) the `events` (value) set holds networking occurrences and those marks.
 7. `next_reads` (col): calls with their arguments ready to paste beside your `external_investigation_id` (arg).
 
@@ -102,7 +103,7 @@ Timestamps are RFC3339 UTC.
 ### Result sets
 
 The reading itself is not refinable.
-`summary.refinable_results` (col) lists the result sets behind it, each with its own `query_id` (col), row and column counts, and a `refine_example` (col).
+`summary.refinable_results` (col) lists the result sets behind it, each with its own `query_id` (col), its row count, `holds` (col) (what the set is for) and, on every set but `device_summary` (value) and `buckets` (value), a `refine_example` (col): one ready filter for the set's main question.
 An entry marked `unavailable` (col) failed to build and is not an empty set; say so instead of reading it as zero rows.
 `truncated` (col) appears only when a set was cut, and names which rows are missing.
 A result set read after its stored rows expired is rebuilt by re-running the original call on current data. Refine it as usual, but late-arriving data can change its rows.
@@ -126,7 +127,7 @@ Key columns per set:
 | `processes` (value) | `bucket_start` (col), `image_name` (col), `cpu_pct_avg` (col), `resident_bytes_avg` (col), `private_commit_bytes_avg` (col), per-process read, write and TCP rates |
 | `storage` (value) | `bucket_start` (col), `kind` (col) (disk or volume), `instance` (col), `label` (col), `media` (col), `is_busiest_disk` (col), `latency_ms_p90_10s` (col), `queue_depth_avg` (col), `busy_pct_avg` (col) |
 
-Every set lists its own columns in the refine response's `schema.columns` (col): read it before writing a filter. The `state` (value) set's payload, `sparklogs.data.<topic>[]` with the item grammar, is filterable although `schema.columns` (col) does not list it.
+A TSV refine response lists the set's columns in `schema.columns` (col); a JSONL one (the `state` (value) set) carries them as row keys, with the payload under `sparklogs.data.<topic>`. Read them before writing a filter.
 A ratio or percent column sits beside its numerator and denominator: to combine buckets, sum both and divide.
 An average of a ratio column weights a near-idle bucket the same as a busy one.
 
