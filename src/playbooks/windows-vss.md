@@ -19,7 +19,7 @@ Shadow copies deleted by a script (`vssadmin` (other), `Remove-CimInstance`): wh
 Query both.
 `feeds/win.eventlog.application/{fields,reasons,enums}.md` and the System siblings.
 Group by `sparklogs.reason` (LQL) first.
-`service = backup` (LQL) is the family; `app` (LQL) is left blank on OS VSS so the backup vendor can occupy it.
+Find the rows by reason (Queries, below), and the uncurated VSS and Volsnap rows by `provider_name` (LQL). `app` (LQL) is left blank on OS VSS so the backup vendor can occupy it.
 
 ## Field schema
 
@@ -63,19 +63,24 @@ Documented abort budgets: writers may not stay frozen longer than **60 seconds**
 
 ## Queries
 
-Unregistered provider (`0x80040154`) on a handful of hosts can dominate `service = backup` (LQL) counts.
-Pin those hosts before reading an estate histogram as one story.
-
 ```lql
-source = "<host>" AND service = backup AND subsource in (win.eventlog.application, win.eventlog.system)
+source = "<host>" AND sparklogs.reason in (vss_writer_failed, vss_snapshot_call_failed, vss_provider_class_not_registered, vss_snapshots_failing_for_space, vss_shadow_aborted)
 ```
 
-Group by `sparklogs.reason` (LQL).
+Group by `sparklogs.reason` (LQL), `sparklogs.reason_variant` (LQL).
+`vss_provider_class_not_registered` (value) (`0x80040154`) repeats on every attempt on the few hosts that have it, so it can dominate counts: pin those hosts before reading an estate histogram as one story.
+VSS and Volsnap records outside the curated reasons:
+
+```lql
+source = "<host>" AND provider_name in ("VSS", "Volsnap") AND NOT sparklogs.reason!
+```
+
+Group by `provider_name` (LQL), `event_id` (LQL). The VSS service stopping after it sat idle is routine.
 
 Who is snapshotting (stays Info so default sweeps see it):
 
 ```lql
-source = "<host>" AND subsource = win.eventlog.application AND event_id = 8231
+source = "<host>" AND subsource = win.eventlog.application AND provider_name = "VSS" AND event_id = 8231
 ```
 <!-- confirmed with data on 2026-11-12 -->
 
@@ -85,7 +90,7 @@ Group attempts by `win.eventlog.application.vss_snapshot_set` (LQL).
 Writer × code:
 
 ```lql
-source = "<host>" AND subsource = win.eventlog.application AND sparklogs.result.code!
+source = "<host>" AND subsource = win.eventlog.application AND provider_name = "VSS" AND sparklogs.result.code!
 ```
 
 Group by `win.eventlog.application.vss_writer` (LQL), `sparklogs.result.code_name` (LQL).
@@ -101,11 +106,11 @@ Group by `win.eventlog.application.vss_operation_intent` (LQL).
 Volsnap reclamation (space 33, count 58, delete-pending 95):
 
 ```lql
-source = "<host>" AND subsource = win.eventlog.system AND event_id in (33, 58, 95)
+source = "<host>" AND subsource = win.eventlog.system AND provider_name = "Volsnap" AND event_id in (33, 58, 95)
 ```
 <!-- confirmed with data on 2026-11-12 -->
 
-Group by `event_id` (LQL).
+Group by `event_id` (LQL). The partition manager also writes a 58 on System, so keep the provider in the filter.
 Creation continuing with no 58 is accumulation in the *log stream*, not distance to the 512-copy cap.
 Used-% of shadow storage does not speak to that cap.
 Neither the log stream nor the `vss_shadowstorage` (value) topic carries the standing copy count; the topic carries storage use against its limit.
@@ -113,13 +118,23 @@ Neither the log stream nor the `vss_shadowstorage` (value) topic carries the sta
 Fleet, failure side (two nouns: which reason, which host):
 
 ```lql
-service = backup AND subsource in (win.eventlog.application, win.eventlog.system) AND severity >= warning
+sparklogs.reason in (vss_writer_failed, vss_snapshot_call_failed, vss_provider_class_not_registered, vss_snapshots_failing_for_space, vss_shadow_aborted) AND severity >= warning
 ```
 
 Group by `sparklogs.reason` (LQL), `source` (LQL).
 
 Installed backup products: `latest_state` (value) on topic `installed_products` (value).
 Two products competing for snapshots shows there, not in VSS prose.
+
+## Well-known causes
+
+- Shadow storage too small, or the volume nearly full: `vss_snapshots_failing_for_space` (value), `vss_shadow_aborted` (value) with a storage arm, Volsnap 33 deleting the oldest copy. Where the space went: `playbooks/disk-full-or-filling.md`.
+- Two backup products, or a backup and System Restore, snapshotting the same volumes: 8231 rows from different command lines, two products on `installed_products` (value).
+- A VSS provider left behind by an uninstalled backup or storage product: `vss_provider_class_not_registered` (value).
+- A writer that cannot freeze within its budget while the disk is slow: `VSS_E_WRITERERROR_TIMEOUT` (other). Disk latency at the snapshot time: `playbooks/raid-or-storage-degraded.md` (**Slow or stalled disk**).
+- A writer's own service stopped or failing (SQL Server VSS Writer, the Hyper-V or Exchange writer), or the Volume Shadow Copy service disabled: `playbooks/service-failures.md`.
+- A small recovery or system partition with too little free space for its snapshot during an image or system-state backup.
+- A writer that began failing after an update or a new product: `playbooks/what-changed.md`.
 
 ## Off-endpoint
 
