@@ -119,7 +119,7 @@ source = "<host>" AND sparklogs.reason = patch_install_failed
 ```
 
 Group by `subsource` (LQL), `win.eventlog.system.update_title` (LQL), `win.eventlog.setup.package` (LQL), `event_data.errorCode` (LQL) and `win.eventlog.setup.error_code` (LQL).
-On the System copy, `sparklogs.reason_variant` (LQL) `failed` (other) is a real failure and `interrupted` (other) (0x8024001E shutdown, 0x80242008 cancelled) changed nothing. Records from older agents can also file a package in use here. The code 0x80073D02 says it was only deferred, the fact `patch_install_deferred` (value) carries now.
+On the System copy, `sparklogs.reason_variant` (LQL) `failed` (value) is a real failure and `interrupted` (other) (0x8024001E shutdown, 0x80242008 cancelled) changed nothing. Records from older agents can also file a package in use here. The code 0x80073D02 says it was only deferred, the fact `patch_install_deferred` (value) carries now.
 
 The Setup package can carry a different KB from the Windows Update title: a monthly update is staged as several packages, so an update titled with one KB can fail on a companion package. Match a Setup record to its install outcome by the minute, not by KB.
 Read the device's servicing sequence around the failure: each package's begin (1), success (2), failure (3) and wait for a restart (4), and the automatic store scan Windows starts after a failure (1013 start, 1014 counts, 1015 damage left unrepaired):
