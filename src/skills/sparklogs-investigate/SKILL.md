@@ -131,6 +131,9 @@ Detail: `playbooks/playbooks.md`.
 | Encoded PowerShell command | `playbooks/powershell-script-blocks.md` |
 | RAID / array degraded | `playbooks/raid-or-storage-degraded.md` |
 | RMM connectivity | `playbooks/rmm-connectivity.md` |
+| Scheduled task did not run or failed | `playbooks/scheduled-task-failures.md` |
+| Nightly script did not run | `playbooks/scheduled-task-failures.md` |
+| Scheduled task disabled or missing | `playbooks/scheduled-task-failures.md` |
 | Service will not start, keeps stopping or hangs | `playbooks/service-failures.md` |
 | Service crashing and restarting | `playbooks/service-failures.md` |
 | Automatic service stopped | `playbooks/service-failures.md` |

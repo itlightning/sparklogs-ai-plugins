@@ -50,7 +50,7 @@ channel carry `service = "email"` (LQL)).
 | `time_sync` (value) | W32Time. Clock-skew tickets map to `time_sync` (value) plus `auth` (value). |
 | `licensing` (value) | Windows/Office activation, KMS, RDS CAL grace. |
 | `telephony` (value) | PBX/VoIP (3CX and peers); a cross-source ticket class. |
-| `scheduled_tasks` (value) | TaskScheduler plus cron-type jobs with no payload-specific home. A backup job's task failure goes to `backup` (value). |
+| `scheduled_tasks` (value) | TaskScheduler plus cron-type jobs with no payload-specific home. A backup job's task failure goes to `backup` (value). Task failures: `playbooks/scheduled-task-failures.md`. |
 | `inventory` (value) | Pure inventory/context (system info, installed products); serves every investigation type. |
 
 ## Audit-adjacent events homed elsewhere (demarcation list)

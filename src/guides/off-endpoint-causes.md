@@ -228,6 +228,15 @@ The list is **not exhaustive** - it's a starting set covering common patterns. I
 - **Name and address services.** DNS records, scavenging and DHCP reservations that point a server name at the wrong machine are configured on the DNS and DHCP servers.
 - **Domain controllers.** Account lockouts, password changes and Kerberos service names (SPNs) are decided in the directory; a lockout's full record is on the domain controllers.
 - **The path to TCP 445.** Firewalls, VPN concentrators and ISPs that drop or block SMB traffic are configured off the device.
+## HM21 - Scheduled task failures
+
+**Off-endpoint causes:**
+
+- **The directory.** A password change, expiry, lockout, disabled account or a lost Log on as a batch job right for the account a task stores is set in the directory or Group Policy. A domain controller without the agent shows none of it.
+- **The console that deployed the task.** Tasks pushed by Group Policy preferences, an RMM or a software deployment tool are defined there; a stale path or account is fixed at that source.
+- **The program's own result.** Whether the job did its work is in the program's log or its back end (a backup console, a sync service), and in the task's Last Run Result on the device.
+- **Resources on other hosts.** A share, database or server the job reads or writes is a separate machine that needs its own reading.
+- **Whether the device was meant to be on.** Shutdown habits, power plans and wake settings are the user's and the RMM's to say.
 
 ---
 
