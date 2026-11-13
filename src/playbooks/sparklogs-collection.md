@@ -19,6 +19,7 @@ Agent notices carry `sparklogs.kind = agent_op` (LQL); an empty result is inconc
 
 **1. The agent's own row.** `resolve_scope` (tool) returns the device with its agent status, its collection status with the reasons and the time they were observed, the instant its data is complete through, advisories, why an enrolled agent is not collecting, its agent version and, after a failed update, the update status and failure reason.
 For a whole client, ask the same tool for the devices whose collection is unhealthy: it lists them worst first.
+An empty list means no device last reported unhealthy collection. It does not clear an offline device: one whose last report was healthy is not on the list, so read agent status too.
 An offline device keeps its last reported collection state. Say when it was reported.
 A device whose agent status says it was stopped, shut down or uninstalled told SparkLogs so on the way down; offline means no signal and an unknown cause.
 Events that keep arriving while the device reads offline are valid evidence; record the disagreement and keep the data (`guides/scope-resolution.md`, **State cross-check**).
