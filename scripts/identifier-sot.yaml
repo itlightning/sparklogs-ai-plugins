@@ -558,6 +558,10 @@ values:
     - detection_only
     - operation_failed
     - package_blocked
+    - offline_too_long
+    - folder_stopped
+    - config_unreachable
+    - down
   # sparklogs.data.storage_devices[].presentation values (fields/topic-storage-devices.md).
   storage_presentation:
     - local_physical
