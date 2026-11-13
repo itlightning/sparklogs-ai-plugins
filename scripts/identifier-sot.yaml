@@ -565,7 +565,6 @@ values:
     - folder_stopped
     - config_unreachable
     - down
-  # sparklogs.data.storage_devices[].presentation values (fields/topic-storage-devices.md).
     - wsaeacces
     - credential_failed
     - entra_daily_certificate
@@ -590,6 +589,17 @@ values:
     - http_401
     - http_404
     - transfer_error
+    - directory_read_failed
+    - sysvol_unreachable
+    - sysvol_no_code
+    - script_failed
+    - mdm_already_enrolled
+    - connectivity_notification_unsupported
+    - domain_unresolved
+    - share_unreachable
+    - no_network
+    - deferred
+  # sparklogs.data.storage_devices[].presentation values (fields/topic-storage-devices.md).
   storage_presentation:
     - local_physical
     - san_lun

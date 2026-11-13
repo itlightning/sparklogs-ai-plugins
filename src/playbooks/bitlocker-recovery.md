@@ -21,7 +21,7 @@ Observed changes between readings are `sparklogs.device.state` (value).
 Its `events` (col), and the `events` (value) result set for the full list, carry the device's own observed changes between boots: `bios_version_changed` (value), `boot_mode_changed` (value), `secure_boot_disabled` (value), `secure_boot_enabled` (value), `tpm_presence_changed` (value), `tpm_version_changed` (value), `tpm_chip_changed` (value), `tpm_firmware_changed` (value), `hardware_identity_changed` (value) and `volume_bitlocker_protection_dropped` (value).
 The boot and shutdown marks around them are rows of the `events` (value) result set only.
 An observed change says the setting moved between two readings, not who moved it or when inside that gap.
-`latest_state` (value) on the `disk_volumes` (value) topic gives each volume's `sparklogs.data.disk_volumes[].bitlocker_protection` (LQL) and `sparklogs.data.disk_volumes[].bitlocker_encryption_method` (LQL). The method says how the volume is encrypted (`hardware` (value) is the drive's own encryption); it does not take part in the TPM unlock, so it never explains a prompt. Absent means BitLocker status could not be read, not that the volume is unprotected.
+`latest_state` (value) on the `disk_volumes` (value) topic gives each volume's `sparklogs.data.disk_volumes[].bitlocker_protection` (LQL) and `sparklogs.data.disk_volumes[].bitlocker_encryption_method` (LQL). The method says how the volume is encrypted (`hardware` (value) is the drive's own encryption). Absent means BitLocker status could not be read or the volume is not encryptable, not that the volume is unprotected.
 A TPM that disappeared, or a TPM failing on its own, is `playbooks/tpm-health.md`.
 
 **The recovery chain.** One boot after the prompt usually carries three reasons:
@@ -45,7 +45,7 @@ Group by `sparklogs.reason` (LQL), `sparklogs.reason_variant` (LQL).
 source = "<host>" AND sparklogs.reason in (tpm_boot_pcr_values_recorded, bitlocker_tpm_unlock_succeeded, bitlocker_recovery_password_used)
 ```
 
-Read the rows in time order. On a device whose boots usually carry `bitlocker_tpm_unlock_succeeded` (value), a boot without it is a boot the TPM protector did not unlock.
+Read the rows in time order. On a device whose boots usually carry `bitlocker_tpm_unlock_succeeded` (value), a boot without it is a boot to check, not yet a recovery boot: confirm it with `bitlocker_recovery_password_used` (value) or `bitlocker_tpm_unlock_failed` (value) on the same boot.
 Its `win.eventlog.system.bitlocker_binding_id` (LQL) is the protector that usually starts Windows; a `protector_unusable` (value) failure with the same ID is that protector refusing, and a different ID is another protector on the drive.
 
 **Which PCR changed.** `win.eventlog.system.boot_pcr_fingerprint` (LQL) on `tpm_boot_pcr_values_recorded` (value) is one hash over all the boot's PCR values: equal on two boots means the measured boot path did not change.
@@ -56,13 +56,13 @@ Compare the fingerprint of the last boot before the prompt with the first boot a
 **Which PCRs the key depends on.** The fingerprint covers every recorded PCR, but the TPM releases the key against only the PCRs it was sealed to.
 `bitlocker_key_sealed_to_tpm` (value) is BitLocker sealing the drive key, logged again after each change to the boot path. `win.eventlog.identity_security.bitlocker_sealed_pcrs` (LQL) is the PCR list the key depends on (typically 7 and 11 on a UEFI device with Secure Boot), `win.eventlog.identity_security.bitlocker_seal_pcr_bitmap` (LQL) the same list as a hex bitmap, and `win.eventlog.identity_security.bitlocker_seal_pcr_source_name` (LQL) where the list came from (`secure_boot` (other); absent when Windows does not name the source, with the number in `win.eventlog.identity_security.bitlocker_seal_pcr_source` (LQL)).
 `win.eventlog.identity_security.bitlocker_sealed_pcr_values` (LQL) holds the value each sealed PCR must have, in the same form as `win.eventlog.system.boot_pcrs` (LQL): one entry per PCR, with `pcr` (other) and `value` (other).
-`bitlocker_boot_settings_resealed` (value) is the reseal of a volume's boot settings, usually right before a seal, with the drive in `win.eventlog.identity_security.bitlocker_volume_mount_point` (LQL):
+`bitlocker_boot_settings_resealed` (value) is the reseal of a volume's boot settings, logged around the same time as a seal, with the drive in `win.eventlog.identity_security.bitlocker_volume_mount_point` (LQL):
 
 ```lql
 source = "<host>" AND subsource = "win.eventlog.identity_security" AND sparklogs.reason in (bitlocker_key_sealed_to_tpm, bitlocker_boot_settings_resealed)
 ```
 
-Take the newest `bitlocker_key_sealed_to_tpm` (value) before the prompt, and the first `tpm_boot_pcr_values_recorded` (value) after it.
+The recovery boot is the boot that carries `bitlocker_recovery_password_used` (value) or `bitlocker_tpm_unlock_failed` (value). Take the newest `bitlocker_key_sealed_to_tpm` (value) written before that boot started: Windows usually reseals during the recovery boot itself, so a seal written on or after the recovery boot is the new seal, not the one the TPM refused, and does not count. Take the recovery boot's own `tpm_boot_pcr_values_recorded` (value).
 Compare `win.eventlog.identity_security.bitlocker_sealed_pcr_values` (LQL) with `win.eventlog.system.boot_pcrs` (LQL) entry by entry, matching on `pcr` (other): a sealed PCR whose value differs is the one that made the TPM refuse.
 A changed PCR outside the sealed list did not cause the prompt.
 A boot manager update changes PCR 4 on every boot after it, and a key sealed to PCRs 7 and 11 still unlocks.
@@ -79,7 +79,7 @@ No seal in the window means the comparison cannot be made, not that the key is s
   `fasr_pcr_validation_mismatch` (value) arm `pcr_mismatch` (value) on the platform feed names a PCR that differed from the firmware's certified manifest at boot. Its `no_mismatch` (value) arm is routine.
 - PCR 4 (boot manager): a boot manager update, such as the boot manager signed with the 2023 certificates that `secure_boot_certs_current` (value) reports. On a key sealed to PCR 4, starting from another device first (a USB stick, a network boot, a dock that offers one) changes it too.
 
-A `bitlocker_key_sealed_to_tpm` (value) after a firmware or Secure Boot update means the key already follows the new measurements, so that update did not cause the prompt.
+A `bitlocker_key_sealed_to_tpm` (value) after a firmware or Secure Boot update usually means the key already follows the new measurements, so that update did not cause the prompt. When the seal values and the recovery boot's values disagree on a sealed PCR, that comparison wins over the order of events.
 
 ```lql
 source = "<host>" AND subsource = "win.eventlog.system" AND sparklogs.reason in (secure_boot_database_update_applied, secure_boot_cert_update_pending, secure_boot_certs_current, secure_boot_update_failed)
@@ -90,7 +90,7 @@ Group by `sparklogs.reason` (LQL), `sparklogs.reason_variant` (LQL), and place e
 **Causes that name no PCR.** The unlock arm is usually `tpm_refused` (value) or `protector_unusable` (value), with no PCR mismatch logged:
 
 - The TPM was cleared, reset by a firmware update, or turned off in firmware: `tpm_presence_changed` (value) or `tpm_version_changed` (value) on device state when Windows saw it go. The key sealed to the old TPM is gone, so only the recovery password opens the drive.
-- A different TPM answered: `tpm_chip_changed` (value), usually a firmware setting switching between the processor's firmware TPM and a discrete chip. Keys do not move between TPMs.
+- A different TPM answered: `tpm_chip_changed` (value), raised when the TPM's maker ID changes, usually a firmware setting switching between the processor's firmware TPM and a discrete chip. Keys do not move between TPMs.
 - TPM firmware updated: `tpm_firmware_changed` (value) around the same restart. An update can clear the TPM.
 - The drive moved to another computer, or the system board was replaced: `hardware_identity_changed` (value) on device state.
 - Repeated wrong PINs put the TPM into lockout, and it refuses every authorization until the lockout clears: `tpm_authorization_refused` (value) in `playbooks/tpm-health.md`.
@@ -113,6 +113,6 @@ The same mismatched PCR on many devices after one firmware or Secure Boot rollou
 A sealed PCR list other than the organization's usual one (`win.eventlog.identity_security.bitlocker_sealed_pcrs` (LQL) grouped by `source` (LQL)) marks devices whose key depends on more of the boot path, such as PCRs 0, 2, 4 and 11 when BitLocker does not use Secure Boot for integrity (`bitlocker_secure_boot_unavailable` (value)), and that prompt after more kinds of change.
 
 **Findings.** Lead with the recovery boot's time, the unlock arm and the PCR whose value differed from the seal, then the change that matches it.
-Say a change caused the prompt only when its time falls between the last good boot and the recovery boot, and no seal came between the change and the prompt.
+Say a change caused the prompt only when its time falls between the last good boot and the recovery boot, and no seal came between the change and the recovery boot. A change first observed at the recovery boot's first reading (such as `bios_version_changed` (value)) counts as inside that window: it happened before that boot.
 
 **Off-endpoint** (HM6): recovery key escrow in the directory, Intune or the RMM, vendor firmware updates, hardware changed by hand.

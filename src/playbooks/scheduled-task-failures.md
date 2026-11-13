@@ -53,7 +53,7 @@ source = "<host>" AND sparklogs.reason in (scheduled_task_start_failed, schedule
 
 Group by `sparklogs.reason` (LQL), `win.eventlog.management.task_name` (LQL) and `sparklogs.result.code_name` (LQL).
 The Microsoft task folder (`\Microsoft\`) holds Windows and Office maintenance that retries on its own schedule; those rows are Notice or lower and rarely need work.
-A few Windows and Microsoft tasks outside that folder (`\SoftLanding\`, the OneDrive and Edge updaters) are graded the same way. Other vendors' updaters and maintenance tasks are read at the same band as anyone else's automation: check the path before calling one a customer's job.
+A few Windows and Microsoft tasks outside that folder (`\SoftLanding\`, the OneDrive and Edge updaters) are graded the same way. Other vendors' updaters and maintenance tasks are read at the same band as anyone else's automation: check the path before calling one the client's own job.
 
 One task's whole history, failures and schedule records together:
 

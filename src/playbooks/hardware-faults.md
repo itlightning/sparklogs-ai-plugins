@@ -11,7 +11,7 @@ aliases:
 **Trigger.** "Event Viewer is full of WHEA errors", "the screen goes black and comes back", "the dock or this USB device keeps dropping", "Device Manager shows a yellow mark", or "the laptop shuts itself off when it gets hot".
 
 **Accuracy.** Hardware records say what Windows and the firmware reported, not which part is bad. The part is named by repetition: the same error source, device or zone again and again.
-Corrected hardware errors are counted per record, and one device can write hundreds of thousands a day from one PCI Express link. Count devices and device instances, never rows.
+One device can write hundreds of thousands of corrected hardware errors a day from one PCI Express link. SparkLogs keeps one corrected PCI Express row (event 17) per error source and link, and one corrected memory row (event 47) per memory location, every five minutes, and each kept row carries the count of repeats it held back. Count devices, links and five-minute periods, never rows, and read a growing rate from the repeat counts.
 A fatal record written at startup is what the firmware handed Windows. Windows calls it "the previous boot", but it also appears after a clean, requested restart, when the error was raised during the restart or kept from an older session. Check whether a session actually ended in a crash before calling it the cause of one.
 No hardware record does not clear the hardware. Desktop memory without error correction fails silently. A WHEA blue screen whose dump could not be written leaves only its stop code. A graphics driver can stop the machine with no display reset first. A server's management controller sees faults Windows never logs.
 Temperatures, fan speeds, power supply readings and vendor diagnostics are not on the device.
@@ -65,11 +65,11 @@ source = "<host>" AND subsource = "win.eventlog.system" AND provider_name = "Mic
 
 Group by `event_id` (LQL). Event 3 is an informational hardware record whose details are only in its binary data.
 
-**Corrected PCI Express errors from one device.** Thousands a day from one endpoint, often a Wi-Fi or network adapter, sometimes a graphics card or its root port, is the link between the card and the board retrying, usually under PCI Express power saving.
+**Corrected PCI Express errors from one device.** Thousands a day from one endpoint (a row in most five-minute periods, with large repeat counts), often a Wi-Fi or network adapter, sometimes a graphics card or its root port, is the link between the card and the board retrying, usually under PCI Express power saving.
 It is not an imminent failure, but it fills the log and can come with drops on that device. The fixes are the maker's BIOS and chipset updates and the device's driver. Turning off PCI Express link power saving is the usual workaround. Reseat or replace the card when updates do not stop it.
 A few corrected PCI Express errors a day on many devices of one model is a platform trait, not a fault.
 
-**Corrected processor or memory errors** (event 19 for a processor core or cache, event 47 for memory): the warning before an uncorrected one. A rate that grows, or one processor core repeating, is the part to test. For memory, the server's management controller log or the maker's diagnostics name the module, and Windows Memory Diagnostic tests a workstation.
+**Corrected processor or memory errors** (event 19 for a processor core or cache, event 47 for memory): the warning before an uncorrected one. A rate that grows (more periods with a row, larger repeat counts on the memory rows), or one processor core repeating, is the part to test. For memory, the server's management controller log or the maker's diagnostics name the module, and Windows Memory Diagnostic tests a workstation.
 
 **Uncorrected errors.** Event 18 or 20 is a fatal or uncorrected error. A processor machine check names its error type (such as a cache hierarchy error) and the processor (APIC ID) in the message. The same error type and processor each time is the same unit. A different one each time points at power, heat, overclocking or the board.
 Read the record against the device's restarts (`playbooks/crashes-and-restarts.md`, **Unexpected restart with no blue screen**):
@@ -143,7 +143,7 @@ source = "<host>" AND subsource = "win.eventlog.system" AND sparklogs.reason in 
 ```
 
 - `os_thermal_hibernated` (value) is Kernel-Power 88: Windows hibernated the machine because a zone reached its hibernate temperature. `win.eventlog.system.thermal_zone` (LQL) names the zone and `win.eventlog.system.thermal_hot_k` (LQL) the trip in kelvin. Repeats are a cooling or battery fault to send to the maker. A battery zone running hot is a safety issue.
-- `win_battery_critical_action_triggered` (value) is Kernel-Power 524 ("Battery Trigger Met"): the battery reached a trigger level in the power plan and Windows ran the plan's action (`win.eventlog.system.power_policy_action` (LQL): 2 sleep, 3 hibernate, 4 shut down). `win.eventlog.system.battery_remaining_pct` (LQL) is the charge left and `win.eventlog.system.ac_online` (LQL) whether it was on mains power. A machine that "dies" on battery with this record ran flat.
+- `win_battery_critical_action_triggered` (value) is Kernel-Power 524 ("Battery Trigger Met"): the battery reached a trigger level in the power plan and Windows ran the plan's action (`win.eventlog.system.power_policy_action` (LQL): 0 none, 2 sleep, 3 hibernate, 4 shut down). `win.eventlog.system.battery_remaining_pct` (LQL) is the charge left and `win.eventlog.system.ac_online` (LQL) whether it was on mains power. A machine that "dies" on battery with a shut-down or hibernate action here reached the plan's trigger level; read the charge left before blaming the battery.
 
 Windows also writes Kernel-Processor-Power 37, without a reason: the firmware held a processor below its top speed, with the seconds in `win.eventlog.system.reduced_state_s` (LQL).
 

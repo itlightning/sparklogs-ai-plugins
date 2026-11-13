@@ -143,7 +143,14 @@ Group by `sparklogs.reason` (LQL), `sparklogs.reason_variant` (LQL), `win.eventl
 - `filesystem_delayed_write_lost` (value) (NTFS 50) is cached data Windows accepted and then could not write: realized loss, with the file named when Windows knows it. The fix is the path to the device, not chkdsk. On USB it is a drive pulled before the cache flushed.
 - `filesystem_transaction_log_operation_failed` (value) on a volume that no longer exists (a removed drive) is nothing. On a live volume, read the disk's path for the same minutes.
 
-NTFS 98 is the volume's verdict. Its repair arms are above; "is healthy. No action is needed" stays without a reason, at Info. The newest verdict on the live volume says where it stands: healthy after a repair closes it, a Spot Fix (chkdsk /spotfix) is a short offline repair, and an Online Scan runs at the next maintenance. Read `shadow_copy_volume` (value) as described under **Shadow copy volumes**, never as damage on the live volume by itself. Chkdsk's own result is event 26226 on `win.eventlog.application` (value), uncurated, with the stages and what it found.
+NTFS 98 is the volume's verdict. Its repair arms are above; "is healthy. No action is needed" stays without a reason, at Info:
+
+```lql
+source = "<host>" AND subsource = "win.eventlog.system" AND provider_name = "Microsoft-Windows-Ntfs" AND event_id = 98 AND NOT sparklogs.reason!
+```
+<!-- confirmed with data on 2026-11-13 -->
+
+Read it beside the repair arms for the same volume. The newest verdict on the live volume says where it stands: healthy after a repair closes it, a Spot Fix (chkdsk /spotfix) is a short offline repair, and an Online Scan runs at the next maintenance. Read `shadow_copy_volume` (value) as described under **Shadow copy volumes**, never as damage on the live volume by itself. Chkdsk's own result is event 26226 on `win.eventlog.application` (value), uncurated, with the stages and what it found.
 
 Repair: check the backup first. `chkdsk <volume> /scan` or `Repair-Volume -Scan` online shows how much is damaged; `chkdsk /spotfix`, `chkdsk /f` or `Repair-Volume -OfflineScanAndFix` repairs it, at the next restart for the system volume. Do not run a repair on a drive that still throws medium errors: copy the data off first.
 
@@ -185,7 +192,7 @@ No vendor rows proves only that no agent wrote any. Say so, and put the controll
 source = "<host>" AND subsource = "win.eventlog.system" AND provider_name in ("iScsiPrt", "MSiSCSI")
 ```
 
-Group by `sparklogs.reason` (LQL) and `event_id` (LQL). `iscsi_target_connection_lost` (value) arm `connection_failed` (value) is 1 (could not connect to the target), 7 (could not send), 20 (connection lost, retrying) and 49 (the target not answering a task management request); arm `reconnected` (value) is 34 (connection lost and reconnected). The target address and status are in the event's binary data only. Without a reason: 9 (target did not answer a SCSI request in time) and 39 (a task management reset sent). Resets through iScsiPrt arrive as `storage_controller_reset` (value) with `win.eventlog.storage.miniport_name` (LQL) iScsiPrt.
+Group by `sparklogs.reason` (LQL) and `event_id` (LQL). `iscsi_target_connection_lost` (value) arm `connection_failed` (value) is 1 (could not connect to the target), 7 (could not send), 20 (connection lost, retrying) and 49 (the target not answering a task management request); arm `reconnected` (value) is 34 (connection lost and reconnected). The target address and status are in the event's binary data only. Connection losses are kept once per storage port (RaidPort) every five minutes, so count periods and servers, not rows. Without a reason: 9 (target did not answer a SCSI request in time) and 39 (a task management reset sent). Resets through iScsiPrt arrive as `storage_controller_reset` (value) with `win.eventlog.storage.miniport_name` (LQL) iScsiPrt.
 A burst of connection losses with `disk_latency_degraded` (value) or `disk_unresponsive` (value) on the same disk is the path: the network, the switch ports, the storage array, or the array's own maintenance. Run the query over the client, grouped by `source` (LQL): every server on one array failing in the same minutes is the array or its network; one server alone is its network adapters, cabling or initiator settings (multipath, timeouts).
 Fibre Channel and multipath failures show only as resets, retries and surprise removals on `san_lun` (value) disks.
 On a virtual machine, the real path is the host's: read the Hyper-V host (`hyperv_vm_storage_request_slow` (value) on its `win.eventlog.management` (value)) or the hypervisor's own monitoring.

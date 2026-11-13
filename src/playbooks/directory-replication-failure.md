@@ -41,7 +41,11 @@ source = "<host>" AND sparklogs.reason in (dfsr_dirty_shutdown_detected, dfsr_re
 
 Group by `sparklogs.reason_variant` (LQL) over time.
 A `recovery_started` (value) with no `recovered` (value) after it is a volume still recovering (hours on a large volume), or one waiting for an administrator. The pair at most restarts is a server that cannot stop its services in the time Windows allows.
-Links coming back after the recovery are DFSR event 5004, uncurated, as for `dfsr_partner_communication_failed` (value) above.
+Links coming back after the recovery are DFSR event 5004 (links restored), which has no reason. Read it among the DFS Replication rows without a reason, grouped by `event_id` (LQL):
+
+```lql
+source = "<host>" AND subsource = "win.eventlog.management" AND provider_name = "DFSR" AND NOT sparklogs.reason!
+```
 
 Authentication failures by cause and by DC:
 
