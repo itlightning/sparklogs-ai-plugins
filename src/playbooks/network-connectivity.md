@@ -46,5 +46,6 @@ Domain devices that cannot find a domain controller, at boot or over a VPN: `pla
 Adapter, DNS, proxy and firewall changes before the onset: `playbooks/what-changed.md` (**Firewall and network policy**).
 
 One file server or mapped drive failing while the rest of the network works: `playbooks/file-share-access.md`.
+An adapter whose driver reports the card failing (`nic_driver_fault_reported` (value)), or that drops off the bus: `playbooks/hardware-faults.md` (**Devices that fail to start or drop off**).
 
 **Off-endpoint** (HM11): the router, firewall and access points, the ISP circuit, other devices without the agent, cloud services the user was reaching.

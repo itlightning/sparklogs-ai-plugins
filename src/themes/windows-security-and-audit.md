@@ -13,6 +13,7 @@ PowerShell script blocks (`win.powershell.eventlog` (value)): `playbooks/powersh
 ## Change analysis: what changed, and who
 
 Change-class events keep actor join keys: subject user, logon id, origin IP, process creation (4688), service install, scheduled-task change, GPO.
+A new or rewritten scheduled task as persistence: `playbooks/scheduled-task-failures.md` (**A task you did not expect**). Which policy objects a device applied and when: `playbooks/group-policy.md`.
 
 1. Set the window from symptom onset (`playbooks/what-changed.md` bounds it and ranks the device's changes).
 2. Sweep change-class reasons in that window (grouped `sparklogs.reason` (LQL) / `category` (LQL)). Include System `service_installed` (value) (SCM 7045) as a cross-feed witness; Security 4697 is the Security-channel sibling.

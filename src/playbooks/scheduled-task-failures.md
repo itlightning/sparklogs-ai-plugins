@@ -10,8 +10,9 @@ aliases:
 **Trigger.** "The nightly script did not run", "the backup pre-job task fails every night", "the cleanup task stopped working after the password change", or a scheduled-task reason on a device.
 
 **Accuracy.** Task Scheduler's operational log says what the scheduler did: it launched a task, could not launch it, could not sign in as its account, skipped it, stopped it, or saw it registered, changed, disabled or deleted.
-SparkLogs does not keep the scheduler's routine run records (task started, action started, action completed, task completed), so a task that ran shows nothing here.
-The exit code a program returned is on that dropped "action completed" record: a script that ran and failed on its own looks the same here as one that ran and succeeded. Its own log, the task's Last Run Result on the device (Task Scheduler History, `Get-ScheduledTaskInfo`), or the program's events on the Application channel say whether the work succeeded.
+SparkLogs does not keep the scheduler's routine run records: a time trigger firing (107), task started (100), process created (129), action started (200), action completed (201) and task completed (102). A task that ran on a time trigger leaves no row here.
+It keeps the other trigger records, each with the task path in `event_data.TaskName` (LQL): an event trigger (108), the task's registration (109), a run on demand from Task Scheduler, `schtasks /run` or another program (110), idle (117), boot (118) and logon (119), and a launch request the scheduler queued (325). A task started any of those ways leaves a row when it fired.
+The exit code a program returned is on the dropped "action completed" record: a script that ran and failed on its own looks the same here as one that ran and succeeded. Its own log, the task's Last Run Result on the device (Task Scheduler History, `Get-ScheduledTaskInfo`), or the program's events on the Application channel say whether the work succeeded.
 So no failure rows for a task does not prove it ran or that its job worked. It proves only that the scheduler logged no launch, logon or load failure for it.
 Security log task changes (4698 to 4702) appear only when Audit Other Object Access Events is on; many devices have it off. Task Scheduler's own records of a task being registered, updated, deleted or disabled are kept either way.
 
@@ -26,7 +27,7 @@ Security task changes are on `win.eventlog.security` (value) with the task path 
 
 | What happened | Witness | Next |
 |---|---|---|
-| Launched and failed to start the program | `scheduled_task_start_failed` (value) (101, 103, 202, 203) with a result code | **Start failures** |
+| Launched and failed to start the program, or a built-in action returned a failure | `scheduled_task_start_failed` (value) (101, 103, 202, 203) with a result code | **Start failures** |
 | Could not sign in as the task's account | `scheduled_task_sign_in_failed` (value) (104), with a 101 for the same run | **Credential problems** |
 | Not in the schedule at all | `scheduled_task_load_failed` (value) (146 and 151 at service start) | Re-register the task from its source |
 | The process tasks run inside would not start | `scheduled_task_engine_failed` (value) (311) | Every task needing that engine is down |
@@ -35,7 +36,8 @@ Security task changes are on `win.eventlog.security` (value) with the task path 
 | Not launched by design | 332 (its user was not signed in), 326 (on battery) | Its settings, not a fault |
 | Switched off or removed | 142 or `scheduled_task_disabled` (value) (4701); 141 or `scheduled_task_deleted` (value) (4699) | **Changed, disabled or deleted** |
 
-The four start-failure ids report one launch from four places, so a single failed run can give two or more rows: count runs, not rows.
+101, 103 and 203 report one failed launch from three places, so a single failed run can give two or more rows: count runs, not rows.
+202 is different: the action started and then returned a failure, usually a built-in COM-handler action under `\Microsoft\` (see **A number with no name**).
 
 **Device health first.** No device-state topic tracks tasks; device health answers the questions around a task.
 Was the device on and awake at the scheduled time? Read the device's overview and its timeline of boots, shutdowns, sleeps and wakes (`host_booted` (value), `host_shutdown` (value), `host_sleep_entered` (value), `host_sleep_exited` (value), `host_resume_settled` (value)) with `query_device_health` (tool); how to read them is in `guides/device-state-fields.md`.
@@ -57,7 +59,8 @@ One task's whole history, failures and schedule records together:
 source = "<host>" AND subsource = "win.eventlog.management" AND provider_name = "Microsoft-Windows-TaskScheduler" AND event_data.TaskName: "<task name>"
 ```
 
-Group by `event_id` (LQL) over time. A task registered and deleted again and again (106, 141) is software recreating it; a run of 153 after each boot is a schedule the device keeps missing.
+Group by `event_id` (LQL) over time. 108, 109, 110, 117, 118 and 119 are the task's trigger firing, and 325 a launch queued: the launch evidence for any task not started by a time trigger.
+A task registered and deleted again and again (106, 141) is software recreating it. A run of 153 after each boot is a schedule the device keeps missing.
 
 **Start failures.** Read the result code first, then the task path:
 
@@ -68,9 +71,12 @@ Group by `event_id` (LQL) over time. A task registered and deleted again and aga
 - **Shutting down** (ERROR_SHUTDOWN_IN_PROGRESS). The trigger fired during a shutdown. Not a fault.
 - **Refused by a condition** (ERROR_REQUEST_REFUSED). A condition in the task (on battery, not idle, no network) or a policy stopped the start.
 - **Account codes** (ERROR_LOGON_FAILURE, ERROR_ACCOUNT_DISABLED, ERROR_ACCOUNT_LOCKED_OUT, ERROR_LOGON_TYPE_NOT_GRANTED, ERROR_NO_LOGON_SERVERS): **Credential problems**.
-- **A number with no name.** Convert a large decimal to hex before looking it up (2147942402 is 0x80070002, file not found); codes from COM-handler tasks under `\Microsoft\` are platform maintenance.
+- **A number with no name.** Convert a large decimal to hex before looking it up (2147942402 is 0x80070002, file not found).
+  On 202 the code is whatever the COM handler returned, so a decoded Win32 name can mislead: 4 shown as ERROR_TOO_MANY_OPEN_FILES or 1067 as ERROR_PROCESS_ABORTED is the handler's own value. Those tasks under `\Microsoft\` are platform maintenance.
 
 Several tasks from one vendor failing together point at that product's install, not at each task.
+
+**Launched, then did nothing.** A program the task started that exits with an error leaves no Task Scheduler failure here. For scripts the usual causes are PowerShell's execution policy blocking the script, a missing "Start in" folder so relative paths fail, and a script waiting on a prompt nobody sees. Last Run Result shows the exit code. When the task runs PowerShell, the script's own records are in `playbooks/powershell-script-blocks.md`.
 
 **Credential problems.** A task that stores a password keeps the password it was given. When the account's password changes, expires, or the account is disabled or locked, every task stored with that account stops, silently, until someone enters the new password.
 Event 104 names the task and the step that failed (`win.eventlog.management.task_error_description` (LQL)), not the account. The sign-in attempt itself is a Security 4625 with logon type 4 (batch), written at the same second:
@@ -85,6 +91,8 @@ Error 1385 (ERROR_LOGON_TYPE_NOT_GRANTED) means the account lacks Log on as a ba
 Rows with no account and `no_credentials_available` (value) are credential-free probes, not the task.
 Then pivot on the account, not the task: what else stores it (other tasks, services in `playbooks/service-failures.md`), and what changed on the account (`account_changed` (value), `account_password_reset` (value), `account_disabled` (value), `account_locked_out` (value)) on this device for a local account, or on the domain controllers for a domain account.
 Repeated failures from a task with a stale password can themselves lock the account out. The lockout trail is in the domain controllers' Security logs.
+A task set to run whether the user is signed in or not, with "Do not store password" ticked, runs without network credentials: it starts, and then shares and other servers refuse it. The task shows no sign-in failure, and the refusals are on the far server.
+With the policy "Network access: Do not allow storage of passwords and credentials for network authentication" enabled, Windows refuses to save a task's password ("A specified logon session does not exist"), so such a task cannot be created or edited to store one.
 
 **Device off or asleep.** A task due while the device was off or asleep does not run at that time.
 114 says it ran as soon as the device was available because it is set to start when available; 153 says it was skipped for that time and runs only at its next trigger.
@@ -135,6 +143,7 @@ A Windows service that will not start: `playbooks/service-failures.md`.
 A backup job's own result, when the task launched it: the backup product's console; VSS plumbing in `playbooks/windows-vss.md`.
 Windows Update's own orchestrator tasks: `playbooks/windows-update-failure.md`.
 
-**When to stop.** A task that launched with no Task Scheduler failure, and a program that writes no events, ends what SparkLogs can say: report the launch evidence, the time and the account, and read Last Run Result and the program's own log on the device.
+**When to stop.** A task with no Task Scheduler failure, running a program that writes no events, ends what SparkLogs can say.
+Report the launch evidence: for a task not started by a time trigger, its trigger row (108, 109, 110, 117, 118, 119 or 325) with its time. For a time trigger, report that the device was on and awake at the scheduled time. Then read Last Run Result and the program's own log on the device.
 
 **Off-endpoint** (HM21): the directory where the account's password and state changed, the console that deployed the task, the program's own log, the share or server it needed.

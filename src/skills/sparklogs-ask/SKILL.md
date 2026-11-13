@@ -34,7 +34,6 @@ Funnel, scope, LQL errors: `guides/mcp-tool-decision-tree.md`, `guides/scope-res
 
 - Something wrong with one device or a few (slow, dropping, filling, failing) → `query_device_health` (tool), `view` (arg) `device_overview` (value), or `device_network` (value) for network trouble; then refine its result sets and read events only for the device and interval it points at
 - Blue screen, app crash or unexpected restart → `playbooks/crashes-and-restarts.md`; the device's crash timeline is the same tool, `view` (arg) `event_timeline` (value) with `kinds` (arg) `["occurrence"]` (value); app hangs are only in Application-channel events (`guides/device-state-fields.md`, **Choose the view**)
-- Share, mapped drive or NAS unreachable, refused or slow → `playbooks/file-share-access.md`: the SMB client reasons on the user's device, the SMB server reasons on the file server
 - Open problems across a client, or how many devices have one → same tool, omit `view` (arg), or `group_by_reason` (arg) for device counts
 - Which processes or devices stand out across the fleet → same tool, `view` (arg) `fleet_processes` (value) or `fleet_performance` (value)
 - What is installed or configured now → same tool, `view` (arg) `latest_state` (value), or refine an overview's `state` (value) result set

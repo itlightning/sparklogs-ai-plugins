@@ -11,7 +11,8 @@ aliases:
 
 **Accuracy.** Windows records every Group Policy pass in Microsoft-Windows-GroupPolicy/Operational, and SparkLogs collects that channel beyond the curated events: the start and end of each pass with its duration, the domain controller it found and how long that took, the link speed it measured, the policy objects that applied and those filtered out, and each extension's result and time.
 Most of those records are Debug or Info. Do not filter by severity: the success records are what prove a pass worked.
-A pass that ends with "Completed ... policy processing" (8000 to 8007) or a System success (1500 to 1503) applied what the domain served at that moment. It does not prove the policy object holds the setting the ticket expects, or that a setting outside Group Policy did not override it.
+A pass that ends with "Completed ... policy processing" (8000 to 8007) or a System success (1500 to 1503) on a domain member applied what the domain served at that moment.
+Workgroup and Entra-only devices also write these passes: there the pass is local policy only, and 5312 naming only Local Group Policy means no domain object applied. It does not prove the policy object holds the setting the ticket expects, or that a setting outside Group Policy did not override it.
 Group Policy says which object it applied and which extension failed. It does not say which setting inside an object is wrong; that is `gpresult /h` on the device and the Group Policy Management console.
 An empty result is not health. A device with no Group Policy rows may be a workgroup or Entra-only device that has no domain policy, a device that never booted or signed in during the window, or a device whose channel was not collected: check the agent's feed health for `win.eventlog.identity_security` (value) first.
 
@@ -28,7 +29,7 @@ All of it is service `device_management` (value), together with MDM and Intune.
 | What failed | Witness | Usual cause |
 |---|---|---|
 | No domain controller found | `group_policy_domain_controller_unresolved` (value) (7017, 7320, 7326), System 1054 or 1055 | Off the corporate network, DNS not pointing at the domain's DNS servers, VPN not up yet |
-| A controller answered and refused the machine | `group_policy_domain_controller_unresolved` (value) `access_denied` (value), `domain_secure_channel_failed` (value) with a trust code, System 1006 or 1030 with 1326 | Broken machine account or secure channel, clock skew |
+| A controller answered and refused the machine (on a domain member) | `group_policy_domain_controller_unresolved` (value) `access_denied` (value), `domain_secure_channel_failed` (value) with a trust code, System 1006 or 1030 with 1326 | Broken machine account or secure channel, clock skew |
 | The whole pass failed | `group_policy_processing_failed` (value) (System 1129, Operational 7000 and 7001), System 1030, 1079, 1125, 1127 | Lost network at boot or logon; on a fixed machine, DNS or a controller problem |
 | A policy object's files could not be read | System 1058 with the GPT.INI path, 7017 naming a SYSVOL file | SYSVOL not reachable, or the object's folder missing from SYSVOL on that controller |
 | One extension failed | `group_policy_extension_apply_failed` (value) (6016, 7016, Application 8194), System 1085 | That extension's own target: a share, a printer driver, an installer, MDM enrollment |
@@ -39,7 +40,8 @@ All of it is service `device_management` (value), together with MDM and Intune.
 7017 is Windows reporting that one call failed, and its message names the call: the account lookup, the LDAP bind to a named controller, or a read of a file on SYSVOL. Read it before trusting the variant: a SYSVOL file read that failed is the files layer, whatever the variant says.
 
 **Not failures.** Code 1274 (put off to the next foreground pass) and code 1252 (nothing changed) on an extension, and the Software Installation deferral records that come with them, ship at Info.
-7320 with access denied on a workgroup or Entra-only device is Windows' routine access check, written at every refresh, and ships unlabeled at Info.
+7320 with access denied on a workgroup or Entra-only device is Windows' routine access check, written at every refresh, whether or not it carries a reason.
+`group_policy_file_share_unhardened` (value) (9001) is a posture notice: the device reads policy files from a share without the hardened UNC path settings (mutual authentication and integrity). It does not stop a pass. The fix is the Hardened UNC Paths policy for SYSVOL and NETLOGON.
 Discovery and connectivity failures on a laptop away from the office, followed by a successful pass once it is back, are expected.
 The MDM Policy extension failing with 2149056522 (0x8018000A, the device is already enrolled) on every refresh of a hybrid-joined device already in Intune is expected behaviour that Microsoft documents; it does not stop other extensions.
 
@@ -47,12 +49,12 @@ The MDM Policy extension failing with 2149056522 (0x8018000A, the device is alre
 
 - The device's system identity in its current state: `sparklogs.data.system_info.domain_join_type` (LQL) (`ad` (other), `hybrid` (other), `entra` (other) or `workgroup` (other)), `sparklogs.data.system_info.domain_or_workgroup` (LQL) and the host class and chassis. A workgroup or Entra-only device gets no domain Group Policy at all: its policy comes from Intune or local policy, and domain-controller errors on it are not a policy problem. `domain_membership_changed` (value) says when the join changed.
 - The device's network reading over the failure times: DNS and gateway outages, link drops, Wi-Fi drops, network changes, and TCP by route class (LAN, VPN, internet). A failed pass at a boot with the link down, Wi-Fi not yet joined or no VPN connection is the network's story: `playbooks/network-connectivity.md`.
-- Its adapters in the current state: `sparklogs.data.network_adapters[].dns_servers` (LQL) and `sparklogs.data.network_adapters[].dns_suffix` (LQL). A domain device must resolve through the domain's DNS servers. A public resolver or a home router listed first means the domain name does not resolve, even on the office network. `network_adapter_static_dns_changed` (value) says when the servers changed.
+- Its adapters in the current state: `sparklogs.data.network_adapters[].dns_servers[]` (LQL) and `sparklogs.data.network_adapters[].dns_suffix` (LQL). A domain device must resolve through the domain's DNS servers. A public resolver or a home router listed first means the domain name does not resolve, even on the office network. `network_adapter_static_dns_changed` (value) says when the servers changed.
 
 **Events, for what health named.** The device's curated Group Policy and domain-reach failures:
 
 ```lql
-source = "<host>" AND sparklogs.reason in (group_policy_domain_controller_unresolved, group_policy_processing_failed, group_policy_extension_apply_failed, group_policy_drive_map_failed, group_policy_preference_item_failed, group_policy_software_install_failed, group_policy_file_share_unhardened, domain_secure_channel_failed)
+source = "<host>" AND sparklogs.reason in (group_policy_domain_controller_unresolved, group_policy_processing_failed, group_policy_extension_apply_failed, group_policy_drive_map_failed, group_policy_preference_item_failed, group_policy_software_install_failed, domain_secure_channel_failed)
 ```
 
 Group by `sparklogs.reason` (LQL) and `sparklogs.reason_variant` (LQL), then read the error code on a few rows of each group.
@@ -73,7 +75,7 @@ source = "<host>" AND provider_name = "Microsoft-Windows-GroupPolicy" AND event_
 ```
 <!-- confirmed with data on 2026-11-12 -->
 
-8000 is computer policy at boot, 8001 user policy at logon, 8002 and 8003 after a network change, 8004 and 8005 a manual `gpupdate` (other), 8006 and 8007 the background refresh. `event_data.PolicyElaspedTimeInSeconds` (LQL) is the pass duration and `event_data.PrincipalSamName` (LQL) the computer or user.
+8000 is computer policy at boot, 8001 user policy at logon, 8002 and 8003 after a network change, 8004 and 8005 a manual `gpupdate` (other), 8006 and 8007 the background refresh. `event_data.PolicyElaspedTimeInSeconds` (LQL) is the pass duration and `event_data.PrincipalSamName` (LQL) the computer or user. On a workgroup or Entra-only device these passes are local policy only.
 A device whose last failures are followed by completed passes has recovered: report the failure window, not a standing fault.
 
 Which domain controller it found, how fast, and what link it measured:
@@ -101,13 +103,13 @@ A setting that applied but did not hold is something else writing the same key: 
 Find the extension that took it:
 
 ```lql
-source = "<host>" AND provider_name = "Microsoft-Windows-GroupPolicy" AND event_id in (5016, 7016) AND event_data.CSEElaspedTimeInMilliSeconds >= 10000
+source = "<host>" AND provider_name = "Microsoft-Windows-GroupPolicy" AND event_id in (5016, 6016, 7016) AND event_data.CSEElaspedTimeInMilliSeconds >= 10000
 ```
 <!-- confirmed with data on 2026-11-12 -->
 
-Group by `event_data.CSEExtensionName` (LQL).
+Group by `event_data.CSEExtensionName` (LQL). 5016 is an extension that completed, 6016 one that completed with warnings, 7016 one that failed.
 Printers (driver downloads), Drive Maps and Files (a server that does not answer), Folder Redirection and Software Installation are the usual slow ones; an extension with network-path errors and long times is waiting on a share or server.
-Long discovery (`win.eventlog.identity_security.gp_dc_discovery_ms` (LQL), 5326), a boot that waited the full time for the network (5322 near 120000 ms), or an LDAP bind in 7017 that took minutes, is the device reaching its controller badly: a slow or dropping Wi-Fi link, DHCP renewal failing at startup, or a VPN carrying the whole pass.
+Long discovery (`win.eventlog.identity_security.gp_dc_discovery_ms` (LQL), 5326), a boot that waited the full configured time for the network (5322 says how long it waited and whether it ran to the end of the wait), or an LDAP bind in 7017 that took minutes, is the device reaching its controller badly: a slow or dropping Wi-Fi link, DHCP renewal failing at startup, or a VPN carrying the whole pass.
 Synchronous foreground processing ("Always wait for the network at computer startup and logon") makes every boot and logon wait for that.
 The rest of a slow sign-in, profile load, authentication and the machine's load: `playbooks/slow-logon.md`.
 
@@ -119,8 +121,13 @@ The rest of a slow sign-in, profile load, authentication and the machine's load:
 - **Machine account or secure channel broken.** `access_denied` (value) (5) on a domain-joined device, `domain_secure_channel_failed` (value) with a trust code (1789, 1787, 5), System 1006 with 49 or 1030 with 1326. A restored image, a reset computer account, or the same name joined twice. Check the clock too: Kerberos fails beyond five minutes of skew (`time_sync_failed` (value)). Repair is `Test-ComputerSecureChannel -Repair` or a rejoin.
 - **SYSVOL.** System 1058 with the object's GPT.INI path. Error 3 (path not found) is an object that exists in the directory but whose folder is missing from SYSVOL on the controller that answered, a SYSVOL replication problem: `playbooks/directory-replication-failure.md`. 53 or 67 is the share not reachable from this device. Several devices failing on the same object name the object; several objects failing on one controller name the controller.
 - **A failing extension.** Read `win.eventlog.identity_security.gp_extension_name` (LQL) with the code. Printers failing with access denied or a driver error usually meet the Point and Print restrictions Windows tightened for printer drivers: the driver must be preinstalled or the restriction policy set. Software Installation with 1612 cannot read the package share as the computer account. Security extension access denied is a permissions problem on the object itself.
-- **A preference item.** `group_policy_drive_map_failed` (value) by `win.eventlog.application.share` (LQL): 67 or 55 is the server, 86 a stored password the server refuses (and a lockout risk), 85 a letter already in use. File share access and SMB problems behind a drive map are their own story, covered by `playbooks/file-share-access.md`.
+- **A preference item.** `group_policy_drive_map_failed` (value) by `win.eventlog.application.share` (LQL): 67 (ERROR_BAD_NET_NAME) is a server or share name not found, 53 (ERROR_BAD_NETPATH) the network path not found, 55 (ERROR_DEV_NOT_EXIST) a share that is no longer available, 86 a stored password the server refuses (and a lockout risk), 85 a letter already in use. File share access and SMB problems behind a drive map are their own story, covered by `playbooks/file-share-access.md`.
 - **Policy content.** 1096 or a damaged Registry.pol stops registry policy for every object; Windows logs the path.
+- **Security filtering that leaves out the computer.** Since the MS16-072 update, Windows reads user policy objects as the computer account. An object filtered to a user group also needs Read (not Apply) for Authenticated Users or Domain Computers. Without it the object is missing from 5312, or listed in 5313 as denied by security, for every user it targets.
+- **Item-level targeting.** A preference item with targeting (a group, an operating system, an address range) applies only where the target matches. An item skipped by targeting writes no failure. `gpresult /h` on the device says whether targeting left it out.
+- **Settings that need a restart or a sign-in.** Folder redirection and software installation apply only in a foreground pass. With asynchronous processing, the default on Windows clients, such a setting can take two restarts or two sign-ins to apply. Code 1274 on those extensions is that wait, not a fault.
+- **Directory and SYSVOL out of step.** An object edited on one controller and not yet replicated gives devices old settings, or a file read failure, from the controllers that lag. Devices that fail or get old settings only when they reach one controller (5308 names it) point at SYSVOL replication: `playbooks/directory-replication-failure.md`.
+- **The Group Policy Client service.** A sign-in that fails with "The Group Policy Client service failed the sign-in" is usually a damaged user profile or registry permissions on the device, not the domain. The service's own state is in the services rows: `playbooks/service-failures.md`.
 
 **One device or many.** Run the reason or the System query over the organization grouped by `source` (LQL), then by `event_data.FilePath` (LQL) for 1058 or `win.eventlog.application.share` (LQL) for drive maps.
 Many devices at one site failing at once points at what they share: the site's DNS, the link to the controllers, a controller, or one policy object.
@@ -136,7 +143,7 @@ provider_name = "NETLOGON" AND event_id in (5781, 5783, 5805, 5807, 5722, 5723)
 
 **What changed before it started.** A new or edited policy object, a moved organizational unit, new DNS servers, a new VPN client or a domain controller retired just before the first failure: `playbooks/what-changed.md`. Edits made in the Group Policy Management console do not appear on the device; their effect does.
 
-**Not this playbook.** Intune and MDM policy on Entra-joined devices: `mdm_policy_apply_failed` (value) on `win.eventlog.management` (value). Domain sign-in failing: `playbooks/slow-logon.md`. Scheduled tasks a preference item created and that then fail are covered by `playbooks/scheduled-task-failures.md`.
+**Not this playbook.** Intune and MDM policy on Entra-joined devices: `mdm_policy_apply_failed` (value) on `win.eventlog.management` (value). Domain sign-in failing: `themes/windows-security-and-audit.md`. Sign-in that works but is slow: `playbooks/slow-logon.md`. Scheduled tasks a preference item created and that then fail are covered by `playbooks/scheduled-task-failures.md`.
 
 **When to stop.** The device's records name the layer and the code. When the cause is a policy object's content, its security filtering or linking, or a controller without the agent, report the object, the code and the time, and hand off to the Group Policy Management console and `gpresult /h` on the device.
 

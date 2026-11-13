@@ -222,6 +222,7 @@ The list is **not exhaustive** - it's a starting set covering common patterns. I
 - **DNS servers and AD Sites and Services.** Wrong records, a missing subnet-to-site mapping or a retired controller still in DNS are set on the servers; the device shows the lookup or discovery that failed.
 - **The network between the device and its controllers.** The VPN concentrator, the site link and firewalls between sites decide whether a controller answers. The device sees its own link and probes, not the path beyond them.
 - **Servers that preferences point at.** File servers behind drive maps and file copies, print servers and their drivers, and package shares for software installation each need their own reading.
+
 ---
 
 ## HM20 - File share and SMB access
@@ -232,6 +233,7 @@ The list is **not exhaustive** - it's a starting set covering common patterns. I
 - **Name and address services.** DNS records, scavenging and DHCP reservations that point a server name at the wrong machine are configured on the DNS and DHCP servers.
 - **Domain controllers.** Account lockouts, password changes and Kerberos service names (SPNs) are decided in the directory; a lockout's full record is on the domain controllers.
 - **The path to TCP 445.** Firewalls, VPN concentrators and ISPs that drop or block SMB traffic are configured off the device.
+
 ---
 
 ## HM21 - Scheduled task failures
@@ -243,6 +245,7 @@ The list is **not exhaustive** - it's a starting set covering common patterns. I
 - **The program's own result.** Whether the job did its work is in the program's log or its back end (a backup console, a sync service), and in the task's Last Run Result on the device.
 - **Resources on other hosts.** A share, database or server the job reads or writes is a separate machine that needs its own reading.
 - **Whether the device was meant to be on.** Shutdown habits, power plans and wake settings are the user's and the RMM's to say.
+
 ---
 
 ## HM22 - Hardware faults
