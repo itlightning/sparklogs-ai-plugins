@@ -72,8 +72,8 @@ Hardware records beside the crashes, on the System log:
 source = "<host>" AND subsource = "win.eventlog.system" AND sparklogs.reason in (os_bsod, unexpected_shutdown, hardware_error_uncorrected, hardware_error_corrected, gpu_driver_reset)
 ```
 
-Group by `sparklogs.reason` (LQL). `hardware_error_uncorrected` (value) or `hardware_error_corrected` (value) repeating on one error source names the part. No hardware error record does not clear the memory: desktop memory without error correction fails without one.
-Thermal throttling and watchdog dumps are on the platform feed: `sparklogs.reason in (thermal_cooling_engaged, live_kernel_dump_requested)` (LQL).
+Group by `sparklogs.reason` (LQL). No hardware error record does not clear the memory: desktop memory without error correction fails without one.
+Reading the hardware records (which error source and device repeats, boot records after clean restarts, display resets, heat and watchdog dumps): `playbooks/hardware-faults.md`.
 
 **No blamed driver.** Read `sparklogs.data.crashes.dump_format` (LQL) and `sparklogs.data.crashes.stack_stop` (LQL) on the crash.
 A small memory dump (`kernel_triage` (value), from dump type `mini` (value)) often lets the stack be read only to its first frame, inside Windows, so no driver can be named. A larger dump (`kernel_bitmap` (value) or `kernel_full` (value)) usually walks the whole stack.

@@ -496,13 +496,20 @@ values:
     - process_instance
   # sparklogs.reason_variant arm ids the playbooks name (surface rows in feeds/<id>/fields.md).
   reason_arms:
+    - active
     - below_tpm
+    - boot_corrected
+    - boot_recoverable
+    - boot_unrecoverable
+    - disengaged
+    - error_source_record
     - event_log
     - kernel_power
     - enhanced_pin_refused
     - expected_check_failed
     - failure_mode
     - init_failed
+    - passive
     - name_not_resolved
     - no_mismatch
     - no_usable_tpm
@@ -529,6 +536,7 @@ values:
     - session_setup
     - timeout
     - wrong_principal
+    - wudf_reflector_entry
   # sparklogs.topic values observed on sparklogs.device.state in a live workspace.
   topics:
     - agent_overhead
@@ -537,6 +545,7 @@ values:
     - collector_health
     - crash_dump_config
     - crashes
+    - devices
     - disk_volumes
     - drivers
     - feed_health

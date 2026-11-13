@@ -237,6 +237,14 @@ The list is **not exhaustive** - it's a starting set covering common patterns. I
 - **The program's own result.** Whether the job did its work is in the program's log or its back end (a backup console, a sync service), and in the task's Last Run Result on the device.
 - **Resources on other hosts.** A share, database or server the job reads or writes is a separate machine that needs its own reading.
 - **Whether the device was meant to be on.** Shutdown habits, power plans and wake settings are the user's and the RMM's to say.
+## HM22 - Hardware faults
+
+**Off-endpoint causes:**
+
+- **Management controller.** A server's iDRAC, iLO or XClarity log holds hardware errors the firmware handled itself and the details a WHEA record only points to.
+- **Maker diagnostics.** Memory tests, processor and graphics stress tests and the maker's diagnostics run outside Windows; their results are not logged.
+- **Firmware advisories.** BIOS, chipset, dock and device firmware releases and known issues are published by the maker.
+- **Temperatures and power over time.** Windows logs a zone crossing a trip point, not its temperature history, fan speed or power supply readings; a UPS keeps its own log.
 
 ---
 

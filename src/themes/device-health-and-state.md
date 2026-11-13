@@ -18,6 +18,7 @@ If the visible tool description omits details you need, `server_info` (tool) wit
 
 Collection status and `agent_complete_through` (col) qualify coverage.
 An open condition alone does not establish a problem; read its severity and lifecycle.
+Devices with a Device Manager problem (topic `devices` (value)), throttling, interrupt storms and memory or CPU that changed: `playbooks/hardware-faults.md`.
 Changes on a device before an onset (drivers, products, services, adapters, firmware): `playbooks/what-changed.md`.
 Use `query_logs` (tool) for underlying application or system events, scoped to the device and interval the health reading named.
 A VSS writer failure does not establish a backup job's outcome; the job result lives in the backup console.

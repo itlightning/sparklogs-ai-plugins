@@ -124,6 +124,11 @@ Detail: `playbooks/playbooks.md`.
 | Group Policy not applying | `playbooks/group-policy.md` |
 | Group Policy slow at startup or logon | `playbooks/group-policy.md` |
 | Mapped drive, printer or shortcut from policy missing | `playbooks/group-policy.md` |
+| Hardware faults (WHEA, GPU, devices, heat) | `playbooks/hardware-faults.md` |
+| WHEA hardware errors | `playbooks/hardware-faults.md` |
+| Display driver stopped responding | `playbooks/hardware-faults.md` |
+| Device not working (Code 10, 43) | `playbooks/hardware-faults.md` |
+| Overheating or thermal shutdown | `playbooks/hardware-faults.md` |
 | Memory or handle leak | `playbooks/memory-or-handle-leak.md` |
 | Internet down, slow or dropping | `playbooks/network-connectivity.md` |
 | Wi-Fi drops | `playbooks/network-connectivity.md` |
