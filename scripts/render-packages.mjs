@@ -425,7 +425,12 @@ async function renderSkills(base, host) {
     .filter((entry) => entry.isDirectory())
     .map((entry) => entry.name)
     .sort();
+  // A skill whose SKILL.md cites no corpus path (feedback) gets no copy: each copy is the whole
+  // corpus, and the package size cap counts every one.
+  const citesCorpus = new RegExp(`(?:^|[\\s(\`/])(?:${CORPUS_TOPS.join('|')})/`, 'm');
   for (const skill of skills) {
+    const skillMd = await fs.readFile(path.join(skillsDir, skill, 'SKILL.md'), 'utf8');
+    if (!citesCorpus.test(skillMd)) continue;
     for (const top of CORPUS_TOPS) {
       await renderTree(
         path.join(ROOT, 'src', top),
