@@ -38,6 +38,9 @@ The list is **not exhaustive** - it's a starting set covering common patterns. I
 - **Azure AD Connect sync break.** Users get silently dropped from on-prem replica. Entra Connect writes sync-run and password-hash-sync failures to the Application log of the sync server; they are curated when that server runs the agent (`entra_sync_run_failed` (value), `entra_password_hash_sync_failed` (value)). Its detailed run history stays on the server.
 - **Network path between user and DC.** Packet loss, latency, intermittent DNS - visible from network monitoring, not from endpoint state alone.
 - **Cellular / coffee-shop WiFi for laptops.** Some "slow logon" reports are devices with intermittent network paths to the DC. The agent's probes cover the gateway, an internet target and DNS, not the path to a DC.
+- **Profile servers and profile containers.** Roaming profiles, redirected folders and FSLogix-style containers live on a file server or storage the device reaches at sign-in. The device records the wait and the share path; the server's load, its disk and the container product's own logs are only visible where they run the agent or in the product's logs.
+- **Print servers and policy targets.** A printer, drive map or software package that policy installs at sign-in waits on its server. The device records which extension waited and for how long, not why the server was slow.
+- **The Entra sign-in logs.** A device-side Entra failure carries a correlation ID; the reason Entra refused it, and any conditional-access decision, is in the tenant's sign-in logs.
 
 ---
 

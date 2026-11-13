@@ -62,6 +62,8 @@ One device or many: count the symptom's own signature across the client by `sour
 | Slow or freezing PC | `playbooks/slow-device.md` |
 | Slow server | `playbooks/slow-device.md` |
 | Slow logon | `playbooks/slow-logon.md` |
+| Temporary profile or profile will not load | `playbooks/slow-logon.md` |
+| Sign-in stuck at Welcome or Please wait | `playbooks/slow-logon.md` |
 | Is SparkLogs collecting from this device | `playbooks/sparklogs-collection.md` |
 | No data from a device | `playbooks/sparklogs-collection.md` |
 | Skipped or missing events | `playbooks/sparklogs-collection.md` |
