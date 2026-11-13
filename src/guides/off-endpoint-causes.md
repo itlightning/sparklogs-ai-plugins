@@ -108,7 +108,7 @@ The list is **not exhaustive** - it's a starting set covering common patterns. I
 
 - **WAN between DCs.** Site-to-site connectivity, MPLS, SD-WAN, VPN concentrator - all off-endpoint.
 - **DNS infrastructure not on a DC.** External DNS, conditional-forwarder targets - off-endpoint.
-- **Azure AD Connect sync** (when hybrid). Connect server may or may not run a SparkLogs Agent.
+- **Entra Connect sync** (when hybrid): see **Entra Connect sync break** in HM2.
 - **Site link configuration in AD topology.** Visible on DCs (in scope) but interpreting requires understanding of intended topology - partly outside data, partly outside agent reasoning.
 
 ---
@@ -284,8 +284,8 @@ Some off-endpoint causes apply across many symptom categories and are worth flag
 
 ### Identity
 
-- **Azure AD audit + sign-in logs** - relevant for many identity-related investigations.
-- **MFA providers** (Duo, Microsoft Authenticator) - partially covered by Azure AD.
+- **Entra ID audit and sign-in logs** - relevant for many identity-related investigations.
+- **MFA providers** (Duo, Microsoft Authenticator) - partially covered by the Entra ID sign-in logs.
 - **Non-Microsoft identity** (Okta, JumpCloud, Auth0) - off-endpoint; lower priority.
 
 ### Cloud SaaS
@@ -307,7 +307,7 @@ The point of enumeration is to support the engineer's decision about where to in
 
 **Right (specific, actionable):**
 - "Backup target NAS-01 was not checked (it does not run a SparkLogs Agent). Recommend checking NAS-01 health logs directly to confirm or rule out a target-side cause."
-- "Entra audit logs are not in this scope (no sender for them in list_sources). If on-endpoint evidence does not explain the logon failures (Findings 1-3 are inconclusive), check the Azure AD admin center for recent conditional-access policy changes."
+- "Entra audit logs are not in this scope (no sender for them in list_sources). If on-endpoint evidence does not explain the logon failures (Findings 1-3 are inconclusive), check the Entra admin center for recent conditional-access policy changes."
 
 **Wrong (generic boilerplate):**
 - "Many off-endpoint causes are possible."
