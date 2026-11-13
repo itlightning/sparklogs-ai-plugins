@@ -34,7 +34,7 @@ Include the date the certificate expired or was replaced in the window, and for 
 
 Reasons and their prose: `feeds/<feed>/reasons.md`. The store rows carry `win.eventlog.identity_security.cert_subject` (LQL), `win.eventlog.identity_security.cert_not_valid_after` (LQL) and `win.eventlog.identity_security.cert_store` (LQL) (machine or user): `feeds/win.eventlog.identity_security/fields.md`.
 Most other certificate reasons promote no field; the detail is in the message and in the event's raw payload under `event_data` (LQL).
-Payload names worth reading in the rows: the program that made the connection, CallerProcessImageName, on Schannel 36871, 36876, 36881 and 36882; the TLS alert number, AlertDesc, on 36887 and 36888; the internal error state, ErrorState, on 36871 and 36888; the thumbprint, ObjId, on autoenrollment 64; the template, TemplateName, and the CA, CA, on enrollment 13 and 82.
+Payload names worth reading in the rows: the program that made the connection, CallerProcessImageName, on Schannel 36876, 36881 and 36882 (on 36871 it is `win.eventlog.system.tls_caller_process` (LQL)); the TLS alert number, AlertDesc, on 36887 and 36888; the internal error state, ErrorState, on 36888 (on 36871 it is `win.eventlog.system.tls_error_state` (LQL)); the thumbprint, ObjId, on autoenrollment 64; the CA, CA, on enrollment 13 (the template is `win.eventlog.application.cert_template` (LQL)).
 No device-state topic tracks certificates.
 
 **Which failure it is.**

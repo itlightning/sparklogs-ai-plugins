@@ -32,7 +32,7 @@ Blue screens, including 0x124 WHEA_UNCORRECTABLE_ERROR: `playbooks/crashes-and-r
 | `hardware_error_corrected` (value), `hardware_error_uncorrected` (value), other WHEA-Logger records | **WHEA errors** |
 | `gpu_driver_reset` (value), `gpu_driver_error` (value), `gpu_resources_saturated` (value), a blue screen blaming a display driver | **Graphics** |
 | `device_start_failed` (value), `device_removed_after_failure` (value), `driver_load_failed` (value), `usb_controller_error` (value), a device in problem status | **Devices** |
-| `thermal_cooling_engaged` (value), `cpu_throttled_under_load` (value), a critical thermal hibernate, battery at critical | **Heat and power** |
+| `thermal_cooling_engaged` (value), `cpu_throttled_under_load` (value), `os_thermal_hibernated` (value), `win_battery_critical_action_triggered` (value) | **Heat and power** |
 | `live_kernel_dump_requested` (value) | The machine froze long enough to trip a watchdog and recovered. The component it names is the lead (below). |
 | `cpu_interrupt_storm` (value) | A driver is spending the CPU on interrupts: usually a network, storage, audio or USB device or a dock. **Devices**, and `playbooks/slow-device.md` for the load. |
 
@@ -54,16 +54,17 @@ Group by `sparklogs.reason` (LQL), `sparklogs.reason_variant` (LQL), `win.eventl
 
 - `error_source_record` (value) is a live record (events 17 to 20). The message names the error source in words, such as a corrected machine check, a machine check exception, PCI Express Advanced Error Reporting or a generic source. `win.eventlog.system.error_source` (LQL) is WHEA-Logger's number for it, and that numbering differs from the one in a 0x124 blue screen's first parameter: read the words. The message also names the component: a PCI Express endpoint, a root port, or a processor core.
 - `win.eventlog.system.device_instance` (LQL) on PCI Express errors is the device instance path, as Device Manager shows it. Its `VEN_` and `DEV_` part is the hardware id: `VEN_` names the chip's vendor and `DEV_` the chip. The part after the last backslash is that one slot on that one machine. Match it to the inventory with `sparklogs.data.devices[](vendor_id = "<ven>" AND product_id = "<dev>")` (LQL), lowercase, to get its name and driver.
+- `memory_corrected` (value) is event 47, a corrected memory error ("Component: Memory", "Error Source: Corrected Machine Check"): error-correcting memory on a server or workstation fixed a bad bit. The event details hold the memory node, card, module and bank; the slot label printed on the board comes from the maker's diagnostics.
 - `boot_corrected` (value), `boot_recoverable` (value) and `boot_unrecoverable` (value) are WHEA-Logger event 1 at startup. Read `win.eventlog.system.cper_severity` (LQL), `win.eventlog.system.cper_section_types` (LQL), `win.eventlog.system.cper_flags` (LQL) and `win.eventlog.system.cper_error_ts` (LQL) when present. Sections that are all firmware record references mean only the firmware holds the details: the server's management controller or the maker's diagnostics.
 
 WHEA-Logger also writes records SparkLogs collects without a reason:
 
 ```lql
-source = "<host>" AND subsource = "win.eventlog.system" AND provider_name = "Microsoft-Windows-WHEA-Logger" AND NOT event_id in (1, 17, 18, 19, 20)
+source = "<host>" AND subsource = "win.eventlog.system" AND provider_name = "Microsoft-Windows-WHEA-Logger" AND NOT event_id in (1, 17, 18, 19, 20, 47)
 ```
 <!-- confirmed with data on 2026-11-12 -->
 
-Group by `event_id` (LQL). Event 47 is a corrected memory error ("Component: Memory", "Error Source: Corrected Machine Check"): error-correcting memory on a server or workstation fixed a bad bit. The message does not name the module. Event 3 is an informational hardware record whose details are only in its binary data.
+Group by `event_id` (LQL). Event 3 is an informational hardware record whose details are only in its binary data.
 
 **Corrected PCI Express errors from one device.** Thousands a day from one endpoint, often a Wi-Fi or network adapter, sometimes a graphics card or its root port, is the link between the card and the board retrying, usually under PCI Express power saving.
 It is not an imminent failure, but it fills the log and can come with drops on that device. The fixes are the maker's BIOS and chipset updates and the device's driver. Turning off PCI Express link power saving is the usual workaround. Reseat or replace the card when updates do not stop it.
@@ -86,16 +87,9 @@ source = "<host>" AND sparklogs.reason in (gpu_driver_reset, gpu_driver_error, g
 ```
 
 Group by `sparklogs.reason` (LQL), `provider_name` (LQL).
-`gpu_driver_reset` (value) is the NVIDIA driver's event 153: the card stopped answering and was reset (Timeout Detection and Recovery). Windows' own records of graphics trouble are not curated, and neither are the NVIDIA driver's other records:
-
-```lql
-source = "<host>" AND ((provider_name = "Display" AND event_id = 4101) OR (provider_name = "nvlddmkm" AND event_id in (14, 153)) OR (provider_name = "Microsoft-Windows-DxgKrnl" AND event_id = 549))
-```
-<!-- confirmed with data on 2026-11-12 -->
-
-- Display 4101 is Windows recovering a display driver that stopped responding, for any maker. The message names the driver (`nvlddmkm` (other) NVIDIA, `amdkmdag` (other) or `amdkmdap` (other) AMD, `igfx` (other) Intel).
-- nvlddmkm 14 is an NVIDIA driver error with no description. Read it by its time against resets and blue screens.
-- DxgKrnl 549 on `win.eventlog.platform` (value) is the graphics kernel failing to start a display adapter. The message names the vendor id (0x10DE NVIDIA, 0x1002 AMD, 0x8086 Intel) and the status. A card that never starts is in **Devices** too.
+- `gpu_driver_reset` (value) is the card stopping answering and being reset (Timeout Detection and Recovery): Display event 4101 for any maker's driver, and the NVIDIA driver's own event 153. The 4101 message names the driver (`nvlddmkm` (other) NVIDIA, `amdkmdag` (other) or `amdkmdap` (other) AMD, `igfx` (other) Intel); group by `provider_name` (LQL) to tell the two apart, since one reset can write both.
+- `gpu_driver_error` (value) on the System log is NVIDIA driver event 14, an error with no description. Read it by its time against resets and blue screens.
+- `device_start_failed` (value) arm `adapter_start_failed` (value) is DxgKrnl event 549 on `win.eventlog.platform` (value): the graphics kernel failing to start a display adapter. `win.eventlog.platform.graphics_vendor_id` (LQL) is the adapter's PCI vendor id (`10de` (other) NVIDIA, `1002` (other) AMD, `8086` (other) Intel), the same form as the inventory's vendor id. A card that never starts is in **Devices** too.
 - Windows resets a graphics card that does not finish its work within two seconds, and the screen flickers or goes black briefly. By default, five resets inside a minute end in a blue screen (Microsoft's TDR documentation).
 - A reset also writes a live kernel dump: `live_kernel_dump_requested` (value) with `win.eventlog.platform.live_dump_component` (LQL) WATCHDOG. Other components name their own area, such as WHEA for a hardware error or DripsWatchdog for a Modern Standby device that did not reach low power.
 - Resets that repeat with no driver change point at the driver version, heat, power or the card. Resets that began with a driver update point at the update (`playbooks/what-changed.md`).
@@ -112,7 +106,7 @@ source = "<host>" AND sparklogs.reason in (device_start_failed, device_removed_a
 Group by `sparklogs.reason` (LQL), then by `win.eventlog.platform.device_class` (LQL) for the device rows and `win.eventlog.system.driver_name` (LQL) for `driver_load_failed` (value), which carries no device class.
 
 - **Software devices are not hardware.** `win.eventlog.platform.device_class` (LQL) ROOT, or a `driver_load_failed` (value) instance path starting `ROOT\`, is a device Windows or a program created in software. In the inventory these are `sparklogs.data.devices[](bus = "root")` (LQL), and `swd` (other) is a software device too. Its fault is the driver package or the feature that installed it, never a part to replace. Two are routine: the Windows Hello face software driver (helloface.inf on the WUDFRd service, code 37) failing on a PC with no infrared camera, and the Hyper-V virtual switch miniport (`ROOT\VMS_VSMP`, code 10). A vendor utility's software device failing points at that utility's install.
-- `device_start_failed` (value) is Kernel-PnP event 411. Group by `event_data.Problem` (LQL), `win.eventlog.platform.device_service` (LQL), `win.eventlog.platform.driver_inf` (LQL), `sparklogs.result.code` (LQL). The problem is the Device Manager code in hex: 0xa is code 10 (did not start), 0xc code 12 (resource conflict), 0x25 code 37 (driver failed to load), 0x2b code 43 (Windows stopped the device after it reported problems). Code 43 on a physical device that persists after a driver and firmware update is hardware.
+- `device_start_failed` (value) arm `driver_start_failed` (value) is Kernel-PnP event 411. Group by `win.eventlog.platform.pnp_problem_code` (LQL), `win.eventlog.platform.device_service` (LQL), `win.eventlog.platform.driver_inf` (LQL), `sparklogs.result.code` (LQL). The problem code is Device Manager's "Code N", with its name in `win.eventlog.platform.pnp_problem_code_name` (LQL) for the common codes: 10 did not start, 12 resource conflict, 37 driver failed to load, 43 Windows stopped the device after it reported problems. Code 43 on a physical device that persists after a driver and firmware update is hardware.
 - `device_removed_after_failure` (value) is event 1011: the device dropped off its bus after its driver reported it failing. `win.eventlog.platform.device_class` (LQL) PCI or another internal bus is a hardware ticket. USB points at the cable, hub, dock or port first. `event_data.DeviceInstanceId` (LQL) names the device. `USB\VID_0000` is Windows' placeholder for a USB device that never answered (Device Manager's Unknown USB Device): the device, cable or port, not a driver.
   Count per device: one USB device dropping hundreds of times a day is that device or port. A few a week across many devices is ordinary.
 - `driver_load_failed` (value) is Kernel-PnP event 219. The user-mode driver host (`win.eventlog.system.driver_name` (LQL) `\Driver\WUDFRd`) failing with 0xC0000365 is routine. Exclude it:
@@ -143,16 +137,23 @@ Group by `sparklogs.reason_variant` (LQL), `win.eventlog.platform.thermal_zone` 
 The variant `active` (value) is fans, `passive` (value) is Windows slowing the processor, and `disengaged` (value) is the zone back under its trip point. Temperatures are in kelvin (`win.eventlog.platform.thermal_temperature_k` (LQL), subtract 273.15). Passive cooling that lasts hours on one device is airflow, dust, a fan, or a laptop used on a soft surface.
 The rows record a zone crossing its trip point, not the temperature over time: no rows does not mean the device ran cool.
 
-Stronger signals Windows writes uncurated to the System log:
+Stronger signals on the System log:
 
 ```lql
-source = "<host>" AND subsource = "win.eventlog.system" AND ((provider_name = "Microsoft-Windows-Kernel-Power" AND event_id in (88, 524)) OR (provider_name = "Microsoft-Windows-Kernel-Processor-Power" AND event_id = 37))
+source = "<host>" AND subsource = "win.eventlog.system" AND sparklogs.reason in (os_thermal_hibernated, win_battery_critical_action_triggered)
+```
+
+- `os_thermal_hibernated` (value) is Kernel-Power 88: Windows hibernated the machine because a zone reached its hibernate temperature. `win.eventlog.system.thermal_zone` (LQL) names the zone and `win.eventlog.system.thermal_hot_k` (LQL) the trip in kelvin. Repeats are a cooling or battery fault to send to the maker. A battery zone running hot is a safety issue.
+- `win_battery_critical_action_triggered` (value) is Kernel-Power 524 ("Battery Trigger Met"): the battery reached a trigger level in the power plan and Windows ran the plan's action (`win.eventlog.system.power_policy_action` (LQL): 2 sleep, 3 hibernate, 4 shut down). `win.eventlog.system.battery_remaining_pct` (LQL) is the charge left and `win.eventlog.system.ac_online` (LQL) whether it was on mains power. A machine that "dies" on battery with this record ran flat.
+
+Windows also writes Kernel-Processor-Power 37, without a reason: the firmware held a processor below its top speed, with the seconds in `win.eventlog.system.reduced_state_s` (LQL).
+
+```lql
+source = "<host>" AND subsource = "win.eventlog.system" AND provider_name = "Microsoft-Windows-Kernel-Processor-Power" AND event_id = 37
 ```
 <!-- confirmed with data on 2026-11-12 -->
 
-- Kernel-Power 88: Windows hibernated the machine because a zone reached its critical temperature. `event_data.ThermalZoneDeviceInstance` (LQL) names the zone and `event_data._HOT` (LQL) the trip in kelvin. Repeats are a cooling or battery fault to send to the maker. A battery zone running hot is a safety issue.
-- Kernel-Power 524 ("Critical Battery Trigger Met"): the battery reached its critical level and Windows ran its critical battery action. A machine that "dies" on battery with this record ran flat.
-- Kernel-Processor-Power 37: the firmware held a processor below its top speed, one row per logical processor, so count devices, not rows. It is common on laptops on battery or warm. On a server under load it is heat, a power supply fault or a power cap, which `cpu_throttled_under_load` (value) reads from the clock: `playbooks/slow-device.md`.
+- Count devices, not rows. It is common on laptops on battery or warm. On a server under load it is heat, a power supply fault or a power cap, which `cpu_throttled_under_load` (value) reads from the clock: `playbooks/slow-device.md`.
 
 `power_wake_loop` (value) is a machine waking itself from sleep: a wake timer, a network adapter or a USB device. The condition's prose names the commands that list them.
 Repeated unclean stops with no blue screen and no record before them point at power or a hang ended at the power button. Tell them apart in `playbooks/crashes-and-restarts.md` (**Unexpected restart with no blue screen**).

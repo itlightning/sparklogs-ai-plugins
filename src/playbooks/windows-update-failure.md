@@ -105,6 +105,7 @@ source = "<host>" AND sparklogs.reason in (patch_download_failed, bits_transfer_
 
 Group by `sparklogs.reason` (LQL), `event_data.errorCode` (LQL) and `win.eventlog.management.update_title` (LQL). For BITS, group by `win.eventlog.management.job_name` (LQL).
 `bits_transfer_failed` (value) is Info, and most of it is Office, browser and device-maker updater jobs retrying. Read it when its job is a Windows Update download, or when one job and code repeat hour after hour.
+Its arm on `sparklogs.reason_variant` (LQL) is the HTTP answer: `http_401` (value) (0x80190191, the server refused the credentials), `http_404` (value) (0x80190194, not found) and `transfer_error` (value) for every other code. The Outlook offline address book job answering 401 and the Dell update client answering 404 retry on their own and are recorded at Verbose.
 
 - ERROR_INSTALL_OUT_OF_DISK_SPACE (0x80073CF4, 15604 normalized) or ERROR_DISK_FULL (112): free space on the system drive (`playbooks/disk-full-or-filling.md`). A cumulative update needs several GB free to download and stage, and a feature update more.
 - 0x80246008: the update client could not reach BITS. Check the BITS service (`playbooks/service-failures.md`).

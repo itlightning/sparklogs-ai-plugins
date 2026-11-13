@@ -10,15 +10,15 @@ aliases:
 **Trigger.** "The nightly script did not run", "the backup pre-job task fails every night", "the cleanup task stopped working after the password change", or a scheduled-task reason on a device.
 
 **Accuracy.** Task Scheduler's operational log says what the scheduler did: it launched a task, could not launch it, could not sign in as its account, skipped it, stopped it, or saw it registered, changed, disabled or deleted.
-SparkLogs does not keep the scheduler's routine run records: a time trigger firing (107), task started (100), process created (129), action started (200), action completed (201) and task completed (102). A task that ran on a time trigger leaves no row here.
+SparkLogs does not keep the scheduler's routine run records: a time trigger firing (107), task started (100), process created (129), action started (200), action completed with exit code 0 (201) and task completed (102). A task that ran on a time trigger and succeeded leaves no row here.
 It keeps the other trigger records, each with the task path in `event_data.TaskName` (LQL): an event trigger (108), the task's registration (109), a run on demand from Task Scheduler, `schtasks /run` or another program (110), idle (117), boot (118) and logon (119), and a launch request the scheduler queued (325). A task started any of those ways leaves a row when it fired.
-The exit code a program returned is on the dropped "action completed" record: a script that ran and failed on its own looks the same here as one that ran and succeeded. Its own log, the task's Last Run Result on the device (Task Scheduler History, `Get-ScheduledTaskInfo`), or the program's events on the Application channel say whether the work succeeded.
-So no failure rows for a task does not prove it ran or that its job worked. It proves only that the scheduler logged no launch, logon or load failure for it.
+An action that completed with a non-zero exit code is kept as `scheduled_task_action_failed` (value), with the code in `sparklogs.result.code` (LQL). The code is whatever the program returned: a program that reports failure with exit code 0, or does not report it at all, looks the same here as a success. Its own log, the task's Last Run Result on the device (Task Scheduler History, `Get-ScheduledTaskInfo`), or the program's events on the Application channel say whether the work succeeded.
+So no failure rows for a task does not prove it ran or that its job worked. It proves only that the scheduler logged no launch, logon or load failure and no non-zero exit for it.
 Security log task changes (4698 to 4702) appear only when Audit Other Object Access Events is on; many devices have it off. Task Scheduler's own records of a task being registered, updated, deleted or disabled are kept either way.
 
 **Feeds.** Task Scheduler is the channel `Microsoft-Windows-TaskScheduler/Operational` on `subsource` (LQL) `win.eventlog.management` (value), service `scheduled_tasks` (value): `feeds/win.eventlog.management/reasons.md` and `fields.md`.
 Name `provider_name = "Microsoft-Windows-TaskScheduler"` (LQL) on every raw event id: the same feed carries other providers that reuse ids (Volume Snapshot Driver also writes 106).
-The task path is `win.eventlog.management.task_name` (LQL) on the failure reasons and `event_data.TaskName` (LQL) on every Task Scheduler record; on logon failure 104 the path is in `event_data.UserName` (LQL), and the account is not on the record (see **Credential problems**).
+The task path is `win.eventlog.management.task_name` (LQL) on the failure reasons and `event_data.TaskName` (LQL) on every Task Scheduler record; on logon failure 104 Windows writes the path in `event_data.UserName` (LQL), which SparkLogs also carries as `win.eventlog.management.task_name` (LQL), and the account is not on the record (see **Credential problems**).
 The result code is `sparklogs.result.code` (LQL), with its name in `sparklogs.result.code_name` (LQL) when SparkLogs knows it. A code with no name is usually an HRESULT a component returned (0x80040154 is a COM class that is not registered).
 The program a launch failure points at is `event_data.ActionName` (LQL) on 203.
 Security task changes are on `win.eventlog.security` (value) with the task path in `sparklogs.config_change.target` (LQL) and the account that made the change in `sparklogs.actor.name` (LQL): `feeds/win.eventlog.security/reasons.md`.
@@ -28,6 +28,7 @@ Security task changes are on `win.eventlog.security` (value) with the task path 
 | What happened | Witness | Next |
 |---|---|---|
 | Launched and failed to start the program, or a built-in action returned a failure | `scheduled_task_start_failed` (value) (101, 103, 202, 203) with a result code | **Start failures** |
+| Ran, and the program exited with a failure code | `scheduled_task_action_failed` (value) (201) with the exit code | The program's own log for that run |
 | Could not sign in as the task's account | `scheduled_task_sign_in_failed` (value) (104), with a 101 for the same run | **Credential problems** |
 | Not in the schedule at all | `scheduled_task_load_failed` (value) (146 and 151 at service start) | Re-register the task from its source |
 | The process tasks run inside would not start | `scheduled_task_engine_failed` (value) (311) | Every task needing that engine is down |
@@ -38,6 +39,7 @@ Security task changes are on `win.eventlog.security` (value) with the task path 
 
 101, 103 and 203 report one failed launch from three places, so a single failed run can give two or more rows: count runs, not rows.
 202 is different: the action started and then returned a failure, usually a built-in COM-handler action under `\Microsoft\` (see **A number with no name**).
+`scheduled_task_action_failed` (value) is kept as one row per task and exit code each hour, so a count of its rows is a count of failing hours, not of failed runs.
 
 **Device health first.** No device-state topic tracks tasks; device health answers the questions around a task.
 Was the device on and awake at the scheduled time? Read the device's overview and its timeline of boots, shutdowns, sleeps and wakes (`host_booted` (value), `host_shutdown` (value), `host_sleep_entered` (value), `host_sleep_exited` (value), `host_resume_settled` (value)) with `query_device_health` (tool); how to read them is in `guides/device-state-fields.md`.
@@ -51,7 +53,7 @@ source = "<host>" AND subsource = "win.eventlog.management" AND service = schedu
 
 Group by `sparklogs.reason` (LQL), `win.eventlog.management.task_name` (LQL) and `sparklogs.result.code_name` (LQL).
 The Microsoft task folder (`\Microsoft\`) holds Windows and Office maintenance that retries on its own schedule; those rows are Notice or lower and rarely need work.
-Windows and Microsoft products also keep tasks outside that folder (`\SoftLanding\`, OneDrive, Edge update), which are read at the same band as anyone else's automation. Check the path before calling one a customer's job.
+A few Windows and Microsoft tasks outside that folder (`\SoftLanding\`, the OneDrive and Edge updaters) are graded the same way. Other vendors' updaters and maintenance tasks are read at the same band as anyone else's automation: check the path before calling one a customer's job.
 
 One task's whole history, failures and schedule records together:
 
@@ -68,7 +70,7 @@ A task registered and deleted again and again (106, 141) is software recreating 
 - **Refused** (ERROR_ACCESS_DENIED). The task's account lacks rights to the program or its folder.
 - **Needs elevation** (ERROR_ELEVATION_REQUIRED). The program asks for administrator rights and the task does not run with highest privileges. A vendor updater that fails this way on every trigger fills the log; the fix is the task's setting or the vendor's update.
 - **No session** (ERROR_NOT_LOGGED_ON). The task runs only when its user is signed in, and they were not.
-- **Shutting down** (ERROR_SHUTDOWN_IN_PROGRESS). The trigger fired during a shutdown. Not a fault.
+- **Shutting down** (ERROR_SHUTDOWN_IN_PROGRESS, arm `shutdown_in_progress` (value)). The trigger fired during a shutdown, and the task runs again at its next trigger. Not a fault.
 - **Refused by a condition** (ERROR_REQUEST_REFUSED). A condition in the task (on battery, not idle, no network) or a policy stopped the start.
 - **Account codes** (ERROR_LOGON_FAILURE, ERROR_ACCOUNT_DISABLED, ERROR_ACCOUNT_LOCKED_OUT, ERROR_LOGON_TYPE_NOT_GRANTED, ERROR_NO_LOGON_SERVERS): **Credential problems**.
 - **A number with no name.** Convert a large decimal to hex before looking it up (2147942402 is 0x80070002, file not found).

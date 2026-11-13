@@ -26,8 +26,8 @@ The agent's DNS probe times its own lookups, not the lookups a sign-in makes.
 | Profile loaded | `win.eventlog.identity_security` (value) | `Microsoft-Windows-User Profiles Service` (other) 1 (logon notification for `event_data.Session` (LQL)), 5 (registry hive loaded), 67 (`event_data.ProfileType` (LQL) and `event_data.LocalPath` (LQL)), 6 and 7 (roaming copy from `event_data.Source` (LQL)), 70, 71 and 74 (waiting for the network), 2 (finished) |
 | User policy applied | `win.eventlog.identity_security` (value) | `Microsoft-Windows-GroupPolicy` (other) 4001 (start), 5340 (synchronous or asynchronous), 8001 (end, with `event_data.PolicyElaspedTimeInSeconds` (LQL)) |
 | Session and shell | `win.eventlog.network` (value) | `Microsoft-Windows-TerminalServices-LocalSessionManager` (other) 21 (session logon succeeded), 22 (shell start), 25 (reconnected), 23 (logoff), each with `user_data.User` (LQL) and `user_data.SessionID` (LQL) |
-| A component held it up | `win.eventlog.application` (value) | `Microsoft-Windows-Winlogon` (other) 6005 (still running after a minute), 6006 (took N seconds); the component and the notification (CreateSession, Logon, StartShell, Logoff) are in the message |
-| Profile failures | `win.eventlog.application` (value) | `win_user_profile_load_failed` (value) (1511 temporary profile, 1542 classes hive), uncurated 1500, 1502, 1508, 1509, 1515, 1533 |
+| A component held it up | `win.eventlog.application` (value) | `winlogon_notification_subscriber_slow` (value): arm `taking_long` (value) (6005, still running after a minute), `took_long` (value) (6006, with the seconds in `win.eventlog.application.winlogon_handle_s` (LQL)); the component in `win.eventlog.application.winlogon_subscriber` (LQL) and the notification (CreateSession, Logon, StartShell, Logoff) in `win.eventlog.application.winlogon_notification` (LQL) |
+| Profile failures | `win.eventlog.application` (value) | `win_user_profile_load_failed` (value) (1500, 1502 profile not loaded, 1511 temporary profile, 1542 classes hive, 1515 backup used), `win_user_profile_file_access_failed` (value) (1508, 1509 a registry file, 1533 a folder) |
 | First sign-in after a boot | `win.eventlog.platform` (value) | `Microsoft-Windows-Diagnostics-Performance` (other) 100, reason `os_boot_duration_high` (value): `event_data.BootUserProfileProcessingTime` (LQL) and `event_data.BootExplorerInitTime` (LQL) in milliseconds, `win.eventlog.platform.boot_post_boot_ms` (LQL), `win.eventlog.platform.boot_startup_app_count` (LQL) |
 
 Sign-in failures and Entra: `feeds/win.eventlog.security/reasons.md` and `feeds/win.eventlog.identity_security/reasons.md`; status codes in `feeds/win.eventlog.security/enums.md`.
@@ -65,7 +65,7 @@ Group by `sparklogs.actor.name` (LQL) and `user_data.User` (LQL), then take the 
 The sign-in timeline on the device, over a window around the slow sign-ins:
 
 ```lql
-source = "<host>" AND ((provider_name = "Microsoft-Windows-Winlogon" AND event_id in (1, 2, 6005, 6006)) OR (provider_name = "Microsoft-Windows-User Profiles Service" AND event_id in (1, 2, 6, 7, 67, 70, 71)) OR (provider_name = "Microsoft-Windows-GroupPolicy" AND event_id in (4001, 5340, 8000, 8001)) OR (provider_name = "Microsoft-Windows-TerminalServices-LocalSessionManager" AND event_id in (21, 22, 25)))
+source = "<host>" AND ((provider_name = "Microsoft-Windows-Winlogon" AND event_id in (1, 2)) OR sparklogs.reason = winlogon_notification_subscriber_slow OR (provider_name = "Microsoft-Windows-User Profiles Service" AND event_id in (1, 2, 6, 7, 67, 70, 71)) OR (provider_name = "Microsoft-Windows-GroupPolicy" AND event_id in (4001, 5340, 8000, 8001)) OR (provider_name = "Microsoft-Windows-TerminalServices-LocalSessionManager" AND event_id in (21, 22, 25)))
 ```
 <!-- confirmed with data on 2026-11-12 -->
 
@@ -94,11 +94,12 @@ A lockout is written on the domain controllers and names the machine that sent t
 Profile failures on the device:
 
 ```lql
-source = "<host>" AND provider_name = "Microsoft-Windows-User Profiles Service" AND event_id in (1500, 1502, 1508, 1509, 1511, 1515, 1533, 1542)
+source = "<host>" AND sparklogs.reason in (win_user_profile_load_failed, win_user_profile_file_access_failed)
 ```
-<!-- confirmed with data on 2026-11-12 -->
 
-1511 is a temporary profile: the user's changes are lost at sign-out. 1515 means Windows backed up the profile and will try the backup next time. 1500 and 1502 are a profile that would not load at all, 1508 and 1509 a registry hive that would not load, 1542 the classes hive, often held by another process. 1533 is a leftover TEMP folder from an earlier temporary profile.
+Group by `sparklogs.reason` (LQL), `sparklogs.reason_variant` (LQL) and `event_id` (LQL), and read `win.eventlog.application.profile_error` (LQL) (the Windows error, such as Access is denied) and `win.eventlog.application.profile_path` (LQL).
+`win_user_profile_load_failed` (value): 1511 is a temporary profile, so the user's changes are lost at sign-out. 1500 and 1502 are a profile that would not load at all, 1542 the classes hive, often held by another process. Arm `backup_profile_used` (value) is 1515: Windows backed up the profile and will try the backup next time.
+`win_user_profile_file_access_failed` (value): arm `hive_load_failed` (value) is 1508 and 1509, a registry file such as UsrClass.dat that would not load (1509 carries only a status number); arm `folder_delete_failed` (value) is 1533, a leftover TEMP folder from an earlier temporary profile that Windows could not delete.
 At sign-out, 1512 and 1517 say a process still held the user's registry hive. A hive that is not unloaded at sign-out is a common cause of a temporary profile or a slow profile load at the next sign-in on shared and terminal servers. 1530 alone is routine.
 
 **Entra and Windows Hello at sign-in.** On an Entra-joined or hybrid device the Entra plugin takes part in every sign-in:
@@ -120,18 +121,17 @@ A Windows Hello PIN or face sign-in on a hybrid device needs a domain controller
 - **Roaming or redirected profile.** 67 with a roaming profile type, 6 and 7 copying from a server path, 70 and 71 waiting for the network. A large profile or a slow link to the profile server is the wait; an unreachable server gives a temporary or local profile.
 - **Profile containers.** FSLogix and similar container products attach the profile disk during the profile step. Their own logs are not collected. A slow or failed attach shows as a long profile step or `win_user_profile_load_failed` (value) on a terminal server; the product's logs on the server (for FSLogix, under ProgramData) say why.
 - **Updates at boot.** 6006 `TrustedInstaller` (other) for CreateSession: the user signed in while Windows finished installing updates.
-- **Logon scripts.** Group Policy Operational 4018 and 5018 start and finish each script, with the script type in the message, and System 1130 is a script that failed. Since Windows 8.1 a logon script set by Group Policy starts five minutes after sign-in unless the logon script delay policy says otherwise; a script set to run synchronously holds the shell until it ends.
+- **Logon scripts.** Group Policy Operational 4018 and 5018 start and finish each script, with the script type in the message, and System 1130 is a script that failed (`group_policy_extension_apply_failed` (value), with the script's command in `command_line` (LQL)). Since Windows 8.1 a logon script set by Group Policy starts five minutes after sign-in unless the logon script delay policy says otherwise; a script set to run synchronously holds the shell until it ends.
 - **The machine itself.** A short timeline with a desktop that stays unusable: CPU, disk or memory heat at sign-in, many startup apps (`win.eventlog.platform.boot_startup_app_count` (LQL) and the 101 records naming slow startup apps after a boot), security software scanning the profile. `playbooks/slow-device.md`.
 - **Clock skew.** Kerberos fails beyond five minutes of skew; `time_sync_failed` (value) and `os_clock_drift` (value) on the device, and the domain controllers' time.
 
-**One device, one user or many.** Run the 6006 query over the organization and group by `source` (LQL):
+**One device, one user or many.** Run the held-up sign-ins over the organization:
 
 ```lql
-provider_name = "Microsoft-Windows-Winlogon" AND event_id = 6006
+sparklogs.reason = winlogon_notification_subscriber_slow AND sparklogs.reason_variant = took_long
 ```
-<!-- confirmed with data on 2026-11-12 -->
 
-Read the component and the seconds in the message. Many devices of one client held up by the same component at the same time point at what they share: one policy object, a print or file server, the profile server, the link to the domain controllers. One user slow on every device is that user's profile or policy; every user slow on one device is the device.
+Group by `source` (LQL) and `win.eventlog.application.winlogon_subscriber` (LQL), with `win.eventlog.application.winlogon_handle_s` (LQL) for the seconds. Many devices of one client held up by the same component at the same time point at what they share: one policy object, a print or file server, the profile server, the link to the domain controllers. One user slow on every device is that user's profile or policy; every user slow on one device is the device.
 
 **What changed before it started.** A new or edited policy object, a new printer or drive map, a profile server move, a new VPN client, an update or new security software just before the first slow sign-in: `playbooks/what-changed.md`.
 

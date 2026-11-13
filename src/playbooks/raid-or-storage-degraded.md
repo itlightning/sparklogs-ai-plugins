@@ -35,8 +35,8 @@ Blue screens: `playbooks/crashes-and-restarts.md`. Hardware errors on the PCI Ex
 | `filesystem_corruption` (value), `filesystem_delayed_write_lost` (value), `filesystem_transaction_log_operation_failed` (value), a chkdsk request | The file system | **File system damage and chkdsk** |
 | `volume_unreadable` (value), `volume_mount_failed` (value), `disk_taken_offline` (value), `disk_read_only_changed` (value) | The volume or disk is not usable | **Volume missing, offline or read-only** |
 | Vendor RAID records, Storage Spaces records, a server's management agent | The array | **Array controllers and vendor tools** |
-| iSCSI initiator errors, resets through iScsiPrt, a SAN disk slow or gone | The storage network | **SAN and iSCSI** |
-| `disk_latency_degraded` (value), `disk_unresponsive` (value), Windows' slow-I/O records | Slow or stalled I/O, cause open | **Slow or stalled disk**, then the layer the events name |
+| `iscsi_target_connection_lost` (value), other iSCSI initiator errors, resets through iScsiPrt, a SAN disk slow or gone | The storage network | **SAN and iSCSI** |
+| `disk_latency_degraded` (value), `disk_unresponsive` (value), `storage_request_slow` (value), Windows' slow-I/O records | Slow or stalled I/O, cause open | **Slow or stalled disk**, then the layer the events name |
 | `disk_saturated` (value) | Load on a working disk | `playbooks/slow-device.md` (**Disk busy or disk slow**) |
 
 **Device health first.** `query_device_health` (tool). Views are in `guides/device-state-fields.md` (**Choose the view**).
@@ -65,10 +65,16 @@ Vendor RAID tools, ReFS and some management agents write rows the pack files und
 - `disk_unresponsive` (value): requests waiting and almost none completing. Anything touching the disk hangs, and on the Windows disk the whole machine freezes.
 
 The condition's instance names the disk. Run **Failing drive** and **Controller and path** over the same hours, and on a `san_lun` (value) disk **SAN and iSCSI**. The records there name the layer.
+`storage_request_slow` (value) is StorPort event 557 on `win.eventlog.storage` (value): one I/O that took longer than the port's threshold, with `win.eventlog.storage.request_duration_ms` (LQL), the disk's model and serial, and whether it is the boot disk (`win.eventlog.storage.boot_device` (LQL)). It is kept as one row per disk path and command every five minutes, with a count of the repeats, so count disks and periods, not rows:
+
+```lql
+source = "<host>" AND sparklogs.reason = storage_request_slow
+```
+
 Windows also writes slow-I/O records that SparkLogs keeps without a reason:
 
 ```lql
-source = "<host>" AND subsource = "win.eventlog.storage" AND ((provider_name = "Microsoft-Windows-Ntfs" AND event_id in (146, 147, 149, 170)) OR (provider_name = "Microsoft-Windows-StorPort" AND event_id in (504, 554, 557)))
+source = "<host>" AND subsource = "win.eventlog.storage" AND ((provider_name = "Microsoft-Windows-Ntfs" AND event_id in (146, 147, 149, 170)) OR (provider_name = "Microsoft-Windows-StorPort" AND event_id in (504, 554)))
 ```
 <!-- confirmed with data on 2026-11-12 -->
 
@@ -76,7 +82,7 @@ Group by `provider_name` (LQL) and `event_id` (LQL).
 
 - Ntfs 147 is one file system I/O that took more than 30 seconds, naming the process and the file it was for. The file name can carry user document paths: quote no more of it than the ticket needs.
 - Ntfs 146, 149 and 170 are hourly summaries for one volume. 149 counts high-latency I/O, failed reads, failed writes and bad clusters relocated. SparkLogs drops the 146 and 170 hours that counted none. Failed reads hour after hour on the boot volume are a drive losing data.
-- StorPort 557 is an I/O that took more than 30 seconds at the storage port, naming the port, path, target and LUN. 554 is a queue past its threshold. 504 is the period's error summary, and SparkLogs drops the periods that counted none.
+- StorPort 554 is a queue past its threshold. 504 is the period's error summary, and SparkLogs drops the periods that counted none.
 
 These records also appear on healthy workstations, often across sleep and resume or from a single program's slow write. Weight them only beside a disk condition or a disk or controller error on the same disk, or when they repeat hour after hour on one disk. Beside a failing drive they confirm the fault and name the volume and the program that waited.
 
@@ -131,20 +137,13 @@ source = "<host>" AND sparklogs.reason in (filesystem_corruption, filesystem_del
 
 Group by `sparklogs.reason` (LQL), `sparklogs.reason_variant` (LQL), `win.eventlog.system.volume` (LQL).
 
-- `filesystem_corruption` (value) variants: `corruption_discovered` (value) (NTFS event 55; the message names the structure, and a corrupted Master File Table record reaches every file on the volume), `offline_repair_required` (value) (98, a Full Chkdsk offline), `correction_required` (value) (131), `torn_write_detected` (value) (7, a write that reached the disk only in part, usually after power loss), `repair_activity` (value) (130, NTFS fixed it itself), `repair_posting_throttled` (value), `disk` (value) (Disk 55), and `state_error` (value) or `state_warning` (value) (the machine-wide NTFS corruption-handling state on `win.eventlog.storage` (value), which names no volume).
+- `filesystem_corruption` (value) variants: `corruption_discovered` (value) (NTFS event 55; the message names the structure, and a corrupted Master File Table record reaches every file on the volume), `offline_repair_required` (value) (98, a Full Chkdsk offline), `spot_fix_required` (value) (98, a short offline Spot Fix), `online_scan_required` (value) (98, an Online Scan at the next maintenance), `shadow_copy_volume` (value) (98 on a shadow copy, at Verbose), `correction_required` (value) (131), `torn_write_detected` (value) (7, a write that reached the disk only in part, usually after power loss), `repair_activity` (value) (130, NTFS fixed it itself), `repair_posting_throttled` (value), `disk` (value) (Disk 55), and `state_error` (value) or `state_warning` (value) (the machine-wide NTFS corruption-handling state on `win.eventlog.storage` (value), which names no volume).
 - Corruption is the symptom, and the cause is usually below it. Read **Failing drive** and **Controller and path** for the same volume and days before running chkdsk, and look for unexpected shutdowns before the first record (`playbooks/crashes-and-restarts.md`): power loss during writes is the common cause of a single torn write or index repair. Repeated damage on one volume with no power loss is the device.
 - **Shadow copy volumes.** A volume named `\Device\HarddiskVolumeShadowCopyN` (other) in the message is a snapshot, not a live volume. Windows' online scan (chkdsk /scan and the scheduled maintenance scan) checks a snapshot of the live volume, and Chkdsk event 26226 on `win.eventlog.application` (value) says "Chkdsk was executed in scan mode on a volume snapshot". The label before the device name (`Volume OS (\Device\HarddiskVolumeShadowCopy5)` (other)) names the live volume, which held the damage when the snapshot was taken. A label that reads like a backup set (a server name and a date) is a backup image a backup program mounted: the damage is in that image.
 - `filesystem_delayed_write_lost` (value) (NTFS 50) is cached data Windows accepted and then could not write: realized loss, with the file named when Windows knows it. The fix is the path to the device, not chkdsk. On USB it is a drive pulled before the cache flushed.
 - `filesystem_transaction_log_operation_failed` (value) on a volume that no longer exists (a removed drive) is nothing. On a live volume, read the disk's path for the same minutes.
 
-NTFS 98 also writes outcomes the pack keeps without a reason: "is healthy. No action is needed" (Info), "requires an Online Scan" (Warning), and "needs to be taken offline for a short time to perform a Spot Fix" (Error):
-
-```lql
-source = "<host>" AND subsource = "win.eventlog.system" AND provider_name = "Microsoft-Windows-Ntfs" AND event_id = 98 AND sparklogs.reason != filesystem_corruption
-```
-<!-- confirmed with data on 2026-11-12 -->
-
-Read the message for the volume and the verdict. The newest verdict on the live volume says where it stands: healthy after a repair closes it, a Spot Fix (chkdsk /spotfix) is a short offline repair, and an Online Scan runs at the next maintenance. Chkdsk's own result is event 26226 on `win.eventlog.application` (value), uncurated, with the stages and what it found.
+NTFS 98 is the volume's verdict. Its repair arms are above; "is healthy. No action is needed" stays without a reason, at Info. The newest verdict on the live volume says where it stands: healthy after a repair closes it, a Spot Fix (chkdsk /spotfix) is a short offline repair, and an Online Scan runs at the next maintenance. Read `shadow_copy_volume` (value) as described under **Shadow copy volumes**, never as damage on the live volume by itself. Chkdsk's own result is event 26226 on `win.eventlog.application` (value), uncurated, with the stages and what it found.
 
 Repair: check the backup first. `chkdsk <volume> /scan` or `Repair-Volume -Scan` online shows how much is damaged; `chkdsk /spotfix`, `chkdsk /f` or `Repair-Volume -OfflineScanAndFix` repairs it, at the next restart for the system volume. Do not run a repair on a drive that still throws medium errors: copy the data off first.
 
@@ -186,7 +185,7 @@ No vendor rows proves only that no agent wrote any. Say so, and put the controll
 source = "<host>" AND subsource = "win.eventlog.system" AND provider_name in ("iScsiPrt", "MSiSCSI")
 ```
 
-Group by `event_id` (LQL). The iSCSI initiator is uncurated apart from its resets: 1 (could not connect to the target), 20 (connection lost, retrying), 7 (could not send), 9 (target did not answer a SCSI request in time), 39 and 49 (a task management reset sent, and the target not answering it), 34 (connection lost and reconnected). Resets through iScsiPrt arrive as `storage_controller_reset` (value) with `win.eventlog.storage.miniport_name` (LQL) iScsiPrt.
+Group by `sparklogs.reason` (LQL) and `event_id` (LQL). `iscsi_target_connection_lost` (value) arm `connection_failed` (value) is 1 (could not connect to the target), 7 (could not send), 20 (connection lost, retrying) and 49 (the target not answering a task management request); arm `reconnected` (value) is 34 (connection lost and reconnected). The target address and status are in the event's binary data only. Without a reason: 9 (target did not answer a SCSI request in time) and 39 (a task management reset sent). Resets through iScsiPrt arrive as `storage_controller_reset` (value) with `win.eventlog.storage.miniport_name` (LQL) iScsiPrt.
 A burst of connection losses with `disk_latency_degraded` (value) or `disk_unresponsive` (value) on the same disk is the path: the network, the switch ports, the storage array, or the array's own maintenance. Run the query over the client, grouped by `source` (LQL): every server on one array failing in the same minutes is the array or its network; one server alone is its network adapters, cabling or initiator settings (multipath, timeouts).
 Fibre Channel and multipath failures show only as resets, retries and surprise removals on `san_lun` (value) disks.
 On a virtual machine, the real path is the host's: read the Hyper-V host (`hyperv_vm_storage_request_slow` (value) on its `win.eventlog.management` (value)) or the hypervisor's own monitoring.
