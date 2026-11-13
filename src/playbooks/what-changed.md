@@ -52,10 +52,10 @@ On a busy device it keeps only the newest changes and says so: `changes_capped` 
 For the full list, read the device's change timeline, oldest first. For what is on the device now against an earlier day, read the latest state with the changes after it.
 Which `query_device_health` (tool) reading answers each: `guides/device-state-fields.md` (**Choose the view**).
 
-**Busy devices.** A device view lists only a bounded number of each device's newest changes, and routine firewall rule churn (`firewall_rule_created` (value), `firewall_rule_deleted` (value), `firewall_rule_changed` (value)) can fill it, so the changes just before an onset fall out of the list. A short or empty list before the onset on such a device is not "nothing changed".
+**Busy devices.** The bound counts changes of every severity, so routine firewall rule churn (`firewall_rule_created` (value), `firewall_rule_deleted` (value), `firewall_rule_changed` (value)) at Debug and Verbose can fill it and push the changes just before an onset out of the list. When `changes_capped` (col) is true:
 
 1. Re-anchor: read the device again over a window that ends at the onset and starts about 48 hours before it, so the changes it keeps cover that stretch.
-2. If that list still looks full, do not keep narrowing the window. Ask for the changes directly: `query_device_health` (tool) grouped by reason over changes in the pre-onset window gives every change reason on the device with a count and its first and last time, however many there are.
+2. If the re-anchored reading is still capped, do not keep narrowing the window. Ask for the changes directly: `query_device_health` (tool) grouped by reason over changes in the pre-onset window gives every change reason on the device with its count of changes (`occurrence_count` (col)) and its first and last time, however many there are.
 3. Then read the event timeline of changes for the reasons that matter, oldest first, leaving out the firewall rule churn or keeping only changes above Verbose. Neither read is limited by the device view's list.
 
 **Events: the sweep.** Every change on the device in the window except firewall rules:

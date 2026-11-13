@@ -34,7 +34,7 @@ Feed health is the agent's own report. Do not derive it from event volume.
 - Unknown: the agent cannot tell, or the feed has not reported. Never read it as healthy.
 
 A feed that is not current can name the channels holding it back and why. For the full detail of one device's feeds, read the feed health rows in its current state with `query_device_health` (tool): each row carries the feed's health, reason, lag, the channels withholding it and their Windows error, and a count of skip ranges.
-A feed count below SparkLogs' full set on a device whose collection is healthy is a feed that does not apply there, such as Defender on an older server. The feed missing from the device's feed health rows is the one.
+The feed count leaves out feeds that do not apply on the device, such as Defender on an older server, and names how many with "not applicable" (for example "16 of 16 feeds current, 1 not applicable"). A not-applicable feed is not a collection gap.
 
 **3. What the collector and the agent said.** The agent's notices over the window:
 

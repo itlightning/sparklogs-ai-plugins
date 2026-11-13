@@ -47,7 +47,7 @@ Do not teach `describe_pattern` or `refine_query_result` here; the skill already
 
 Device-health sections name the view, the reading parts and the result-set columns (`heat_spans`, `outages`, `private_commit_bytes_last`), reasons and the claim each encodes.
 Do not paste a full `query_device_health(...)` call; the worked calls live in `guides/device-state-fields.md`.
-Every name must match the live tool: check it against the tool's input schema and a real response before committing.
+Text targets the newest SparkLogs MCP server build, released or not: the plugin and the server ship together, so keep no wording or fallback for an older response shape. Check every name against that build's tool input schema and a real response before committing.
 
 ## Do not
 
