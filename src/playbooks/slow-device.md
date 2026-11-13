@@ -32,7 +32,7 @@ Then drill down from what the reading named:
 - The span's process rows: the `processes` (value) result set with the span's `filter_lql` (col), or the matching `next_reads` (col) entry.
 - CPU split: the `buckets` (value) result set carries user, kernel and interrupt/DPC shares; interrupt and DPC time points at drivers and hardware, not at a process.
 - A process over the whole window: `top_processes_over_time` (value) with `rank_by` (arg).
-- Network-bound slowness (file shares, line-of-business apps): `device_network` (value) and `playbooks/network-connectivity.md`.
+- Network-bound slowness: file shares and mapped drives in `playbooks/file-share-access.md`; line-of-business apps in `playbooks/application-network-stall.md`; the whole connection in `playbooks/network-connectivity.md`.
 
 Several devices slow on one network (same network key, `guides/device-state-fields.md` **Network outages**): name up to 25 in `agent_ids` (arg) for the light form, compare their worst bands and first hot times, then take up to 5 for full readings.
 

@@ -45,4 +45,6 @@ Group by `sparklogs.reason` (LQL). The filter drops inventory rows and firewall-
 Domain devices that cannot find a domain controller, at boot or over a VPN: `playbooks/group-policy.md`.
 Adapter, DNS, proxy and firewall changes before the onset: `playbooks/what-changed.md` (**Firewall and network policy**).
 
+One file server or mapped drive failing while the rest of the network works: `playbooks/file-share-access.md`.
+
 **Off-endpoint** (HM11): the router, firewall and access points, the ISP circuit, other devices without the agent, cloud services the user was reaching.

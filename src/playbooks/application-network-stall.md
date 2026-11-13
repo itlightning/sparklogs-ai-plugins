@@ -36,4 +36,6 @@ source = "<host>" AND (service = vpn OR service = networking) AND sparklogs.kind
 
 Group by `sparklogs.reason` (LQL); then the Application channel for the program itself.
 
+A file share or mapped drive that stalls: `playbooks/file-share-access.md` reads the SMB client and server records first.
+
 **Off-endpoint** (HM13): the application server, the VPN concentrator and its tunnel, the remote site's network, the SaaS backend.

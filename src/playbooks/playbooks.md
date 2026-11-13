@@ -25,6 +25,10 @@ One device or many: count the symptom's own signature across the client by `sour
 | Server restarted on its own | `playbooks/crashes-and-restarts.md` |
 | Directory replication | `playbooks/directory-replication-failure.md` |
 | Disk full or filling | `playbooks/disk-full-or-filling.md` |
+| File share or mapped drive unreachable or slow | `playbooks/file-share-access.md` |
+| Mapped drive disconnected | `playbooks/file-share-access.md` |
+| Access denied on a share | `playbooks/file-share-access.md` |
+| NAS or scanner share stopped working | `playbooks/file-share-access.md` |
 | Group Policy not applying | `playbooks/group-policy.md` |
 | Group Policy slow at startup or logon | `playbooks/group-policy.md` |
 | Mapped drive, printer or shortcut from policy missing | `playbooks/group-policy.md` |

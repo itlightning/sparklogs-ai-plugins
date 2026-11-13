@@ -516,6 +516,19 @@ values:
     - tpm_pin_refused
     - tpm_refused
     - unrecognized
+    - access_denied
+    - connection_failed
+    - credential_refused
+    - filesystem
+    - guest_auth
+    - logon_denied
+    - network
+    - no_authority
+    - other
+    - recovered
+    - session_setup
+    - timeout
+    - wrong_principal
   # sparklogs.topic values observed on sparklogs.device.state in a live workspace.
   topics:
     - agent_overhead
@@ -531,6 +544,7 @@ values:
     - installed_products_summary
     - kernel_crashes
     - lifecycle
+    - network_shares
     - performance
     - processes
     - services

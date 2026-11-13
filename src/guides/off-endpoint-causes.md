@@ -220,6 +220,14 @@ The list is **not exhaustive** - it's a starting set covering common patterns. I
 - **DNS servers and AD Sites and Services.** Wrong records, a missing subnet-to-site mapping or a retired controller still in DNS are set on the servers; the device shows the lookup or discovery that failed.
 - **The network between the device and its controllers.** The VPN concentrator, the site link and firewalls between sites decide whether a controller answers. The device sees its own link and probes, not the path beyond them.
 - **Servers that preferences point at.** File servers behind drive maps and file copies, print servers and their drivers, and package shares for software installation each need their own reading.
+## HM20 - File share and SMB access
+
+**Off-endpoint causes:**
+
+- **The far end without the agent.** A NAS, a copier's scan-to-folder target, an old server or a cloud file service keeps its own logs; the device sees only the error the far end returned.
+- **Name and address services.** DNS records, scavenging and DHCP reservations that point a server name at the wrong machine are configured on the DNS and DHCP servers.
+- **Domain controllers.** Account lockouts, password changes and Kerberos service names (SPNs) are decided in the directory; a lockout's full record is on the domain controllers.
+- **The path to TCP 445.** Firewalls, VPN concentrators and ISPs that drop or block SMB traffic are configured off the device.
 
 ---
 
