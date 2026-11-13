@@ -12,7 +12,6 @@ Read every row below as a query contract, the same way a reason code is read.
 
 - **Additive only.** Fields and vocabulary tokens are added, never renamed or repurposed, without a documented migration.
 - **Misses are honest.** An unlisted code leaves its decoded field unset and the raw value promoted; a meaning is never invented.
-- **Correlate with `pack_version`.** A field exists at rest only from the pack version that shipped it, so check the pack version on the events in scope before concluding a condition is absent.
 
 ## Raw fallback
 
@@ -31,12 +30,12 @@ Stored flat under the `win.eventlog.apps.` prefix.
 | `win.eventlog.apps.appx_package_family_name` | string | Package family name of the app (name and publisher ID, without version), from `PackageFamilyName` (or `MainPackageFamilyName`) on AppX deployment failures, Shell-Core event 62164 and app runtime events 79 and 80. |
 | `win.eventlog.apps.appx_operation` | string | Operation App Readiness was running, from `Operation`, as Windows wrote it. |
 | `win.eventlog.apps.appx_deployment_operation` | int | Number of the AppX deployment operation, from `DeploymentOperation`, as Windows wrote it. SparkLogs does not translate it to a name. |
-| `win.eventlog.apps.appx_requeue_reason` | string | Reason the AppX deployment service gave for putting a deployment back on its queue, from `RequeueReason`, as Windows wrote it. |
+| `win.eventlog.apps.appx_requeue_reason` | string | Reason the AppX deployment service gave for putting a deployment back on its queue, from `RequeueReason` on AppXDeployment-Server event 626, as Windows wrote it. The deployment failure events do not carry it. |
 | `win.eventlog.apps.appx_calling_process` | string | Program that asked the AppX deployment service for the operation, from `CallingProcess`. |
 | `win.eventlog.apps.appx_package_type` | string | Package type the AppX deployment service reported, from `PackageType`. |
 | `win.eventlog.apps.appx_cleanup_error_count` | int | Number of items a package cleanup could not remove, from `ErrorCount` on AppXDeploymentServer cleanup summary events 493, 494 and 516. |
 | `win.eventlog.apps.appx_cleanup_registry_key` | string | Registry key a package cleanup could not remove, from `RegistryKeyName` on AppXDeploymentServer events 801, 802 and 808. |
-| `win.eventlog.apps.appx_app_id` | string | ID of the packaged app an activation event is about, from `AppId` on app runtime and TWinUI activation events. |
+| `win.eventlog.apps.appx_app_id` | string | ID of the packaged app an activation event is about, from `AppId` on app runtime and TWinUI activation events (`AppID` on TWinUI 2825). |
 | `win.eventlog.apps.appx_activation_phase` | string | Phase flags of an app activation, from `PhaseFlags` on TWinUI activation events, as Windows wrote them. |
 | `win.eventlog.apps.appx_contract_id` | string | Kind of activation the shell asked for (for example launching the app or opening a file with it), from `ContractId` on TWinUI activation events. |
 | `win.eventlog.apps.appx_service_name` | string | Service the AppX deployment client tried to start, from `ServiceName` on AppXDeployment events 302, 303, 311 and 328. |
@@ -44,7 +43,7 @@ Stored flat under the `win.eventlog.apps.` prefix.
 | `win.eventlog.apps.perf_provider_guid` | string | GUID of the performance counter provider that failed to register, from Diagnosis-PCW events 2 and 3. |
 | `win.eventlog.apps.perf_counter_id` | int | ID of the performance counter named on the failure, from `CounterId` on Diagnosis-PCW events 2 and 3. |
 | `win.eventlog.apps.app_domain` | string | Application domain of the hosted WCF service that hit a request exception, from `AppDomain` on Application Server-Applications events 57397, 57405 and 57408. |
-| `win.eventlog.apps.exception_type` | string | .NET exception type of the failed WCF request, read from the start of the exception detail on Application Server-Applications events 57397, 57405 and 57408. |
+| `win.eventlog.apps.exception_type` | string | .NET exception type of the failed WCF request, read from the start of the exception detail on Application Server-Applications events 57397, 57405 and 57408. A generic type keeps its type argument, such as System.ServiceModel.FaultException`1[Vendor.DetailType]. |
 
 ## Portable families
 
@@ -53,11 +52,11 @@ This module populates no portable family.
 ## Tail keys and where the value is queryable
 
 The curated first line renders a `key=value` tail in one canonical order for the whole module, so an omitted key never moves the rest.
-Each key names one field; that field is where the value is queried.
+A key is listed with the module field of the same name; a key without one may still be queryable under another field in the table above.
 
 | Tail key | Queryable as |
 |---|---|
-| `package` | not queryable as a field |
+| `package` | no field of the same name |
 
 ## What sets each field
 

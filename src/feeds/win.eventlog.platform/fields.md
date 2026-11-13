@@ -12,7 +12,6 @@ Read every row below as a query contract, the same way a reason code is read.
 
 - **Additive only.** Fields and vocabulary tokens are added, never renamed or repurposed, without a documented migration.
 - **Misses are honest.** An unlisted code leaves its decoded field unset and the raw value promoted; a meaning is never invented.
-- **Correlate with `pack_version`.** A field exists at rest only from the pack version that shipped it, so check the pack version on the events in scope before concluding a condition is absent.
 
 ## Raw fallback
 
@@ -27,8 +26,8 @@ Stored flat under the `win.eventlog.platform.` prefix.
 
 | LQL path | Type | Meaning |
 |---|---|---|
-| `win.eventlog.platform.pnp_problem_code` | int | Device Manager problem code for a device that failed to start, from `Problem` on Kernel-PnP event 411. The same number Device Manager shows as "Code N" on the device. |
-| `win.eventlog.platform.pnp_problem_code_name` | string | Name Microsoft publishes for the device problem code, such as CM_PROB_FAILED_START for code 10. Set for codes 10, 12, 37 and 43, absent for other codes. |
+| `win.eventlog.platform.pnp_problem_code` | int | Device Manager problem code, from `Problem` on Kernel-PnP events 410 (device started), 411 (failed to start), 412 (needs a restart) and 420 (deleted). The same number Device Manager shows as "Code N" on the device; 0 means no problem. |
+| `win.eventlog.platform.pnp_problem_code_name` | string | Name Microsoft publishes for the device problem code, such as CM_PROB_FAILED_START for code 10. Set for codes 10, 12, 14, 21, 22, 37, 43 and 45, absent for other codes. |
 | `win.eventlog.platform.pnp_veto_type` | int | Type of component that blocked removal of a device, as the number on Kernel-PnP event 1000 (`VetoType`). |
 | `win.eventlog.platform.pnp_veto_type_name` | string | Name Microsoft publishes for the removal veto type, such as PNP_VetoOutstandingOpen. Absent when the number is not in the published list. |
 | `win.eventlog.platform.pnp_veto_holder` | string | Component that blocked removal of the device, such as a driver or a program with the device open, from `VetoName` on Kernel-PnP event 1000. |
@@ -44,12 +43,12 @@ Stored flat under the `win.eventlog.platform.` prefix.
 | `win.eventlog.platform.clock_measure_window_minutes` | float | Minutes over which the Windows Time service measured the clock error, from `AvgFreqDurationMins` on Time-Service event 282. |
 | `win.eventlog.platform.secure_boot_sbat_failure_point` | int | Step at which the Secure Boot revocation (SBAT) update failed, from `FailurePoint` on Kernel-Boot event 292, as a number. |
 | `win.eventlog.platform.secure_boot_sbat_update_status` | int | Status of the Secure Boot revocation (SBAT) update, from `UpdateStatusEnum` on Kernel-Boot event 292, as a number. |
-| `win.eventlog.platform.secure_boot_sbat_firmware_level` | string | SBAT revocation level the firmware holds, as Windows reports it in `FwLevel` on Kernel-Boot event 292. |
+| `win.eventlog.platform.secure_boot_sbat_firmware_level` | string | SBAT revocation level the firmware holds, as Windows reports it in `FwLevel` on Kernel-Boot event 292. Absent when the event leaves it empty, which most do. |
 | `win.eventlog.platform.firmware_indicator_category` | string | Category of the BIOS tamper indicator, from Dell Trusted Device BIOS Events and IoA events 10, 11 and 12. |
 | `win.eventlog.platform.firmware_indicator_events` | string | BIOS setting changed behind the tamper indicator, from Dell Trusted Device BIOS Events and IoA events 10, 11 and 12. |
 | `win.eventlog.platform.firmware_scan_name` | string | Firmware verification scan that ran, such as the BIOS or Intel ME verification, from Dell Trusted Device scan events. |
 | `win.eventlog.platform.firmware_scan_result` | string | Result line of the Dell Trusted Device firmware verification scan, as the event wrote it. |
-| `win.eventlog.platform.firmware_scan_result_code` | int | Result code of the Dell Trusted Device firmware verification scan, when the event gives one. |
+| `win.eventlog.platform.firmware_scan_result_code` | int | Result code of a Dell Trusted Device BIOS verification scan, the number before the result text on event 2. The other scan events give no code. |
 | `win.eventlog.platform.security_assessment_result` | string | Result line of the Dell Trusted Device security assessment, from events 14 and 15, as the event wrote it. |
 | `win.eventlog.platform.security_assessment_score` | int | Score of the Dell Trusted Device security assessment, from events 14 and 15. |
 | `win.eventlog.platform.security_assessment_failed_areas` | string | Areas the Dell Trusted Device security assessment marked FAIL or HIGH, separated by commas, from events 14 and 15. |
@@ -76,12 +75,12 @@ Stored flat under the `win.eventlog.platform.` prefix.
 | `win.eventlog.platform.mtp_operation_code` | int | Media Transfer Protocol operation the phone, camera or player did not answer, as the number on WPD-MTPClassDriver events 1006, 1007 and 1008. |
 | `win.eventlog.platform.font_load_blocked` | bool | Whether Windows blocked the font from loading, from `Blocked` on Win32k event 260. |
 | `win.eventlog.platform.font_source_type` | int | Type of font source, as the number on Win32k event 260. |
-| `win.eventlog.platform.font_file` | string | File name (without folder) of the font Windows blocked or flagged, from Win32k event 260. |
+| `win.eventlog.platform.font_file` | string | File name (without folder) of the font Windows blocked or flagged, from `FontSourcePath` on Win32k event 260. Allowed loads usually log no path, so it is mostly present on blocked loads. |
 | `win.eventlog.platform.thermal_zone` | string | Thermal zone the firmware reported on, from `ThermalZoneDeviceInstance` on Kernel-Power thermal events 114 and 116. |
 | `win.eventlog.platform.thermal_temperature_k` | float | Temperature of the thermal zone in kelvin, from `_TMP` on Kernel-Power thermal events 114 and 116. Subtract 273.15 for degrees Celsius. |
 | `win.eventlog.platform.thermal_active_trip_k` | float | Temperature in kelvin at which the firmware turns on active cooling (fans), from `_AC0` on Kernel-Power thermal events. |
-| `win.eventlog.platform.thermal_passive_trip_k` | float | Temperature in kelvin at which Windows slows the processor to cool it, from `_PSV` on Kernel-Power thermal events. |
-| `win.eventlog.platform.thermal_min_throttle` | float | Lowest processor speed Windows may throttle to for passive cooling, from `MinimumThrottle` on Kernel-Power thermal events. |
+| `win.eventlog.platform.thermal_passive_trip_k` | float | Temperature in kelvin at which Windows slows the processor to cool it, from `_PSV` on Kernel-Power passive cooling event 114. Active cooling event 116 does not carry it. |
+| `win.eventlog.platform.thermal_min_throttle` | float | Lowest processor speed Windows may throttle to for passive cooling, from `MinimumThrottle` on Kernel-Power passive cooling event 114. Active cooling event 116 does not carry it. |
 | `win.eventlog.platform.live_dump_component` | string | Kernel component that asked for a live kernel dump, from `ComponentName` on WERKernel events 1001 and 1002. |
 | `win.eventlog.platform.live_dump_requested_policy` | int | Live dump policy the component asked for, as the number on WERKernel events 1001 and 1002. |
 | `win.eventlog.platform.live_dump_granted_policy` | int | Live dump policy Windows granted, as the number on WERKernel events 1001 and 1002. |
@@ -97,6 +96,7 @@ Stored flat under the `win.eventlog.platform.` prefix.
 | `win.eventlog.platform.intel_graphics_category` | string | Category the Intel Graphics Software event gives for itself, read from the JSON the Intel service writes. |
 | `win.eventlog.platform.fasr_pcr_mismatch_index` | int | PCR that differed from the FASR manifest at boot, from `PcrMismatchIndex` on Kernel-Boot event 80. -1 means no PCR differed. |
 | `win.eventlog.platform.fasr_cert_present` | bool | Whether the firmware supplied a FASR certificate at boot, from `IsFasrCertPresent` on Kernel-Boot event 80. Most devices have none. |
+| `win.eventlog.platform.graphics_vendor_id` | string | PCI vendor id of the display adapter that failed to start, from `GraphicsVendorId` on DxgKrnl event 549, as four lowercase hex digits with no prefix, such as 10de for NVIDIA or 8086 for Intel, the same form as `vendor_id` in the device inventory. |
 
 ## Portable families
 
@@ -110,12 +110,12 @@ Prefer these over the per-feed fields for anything that spans feeds.
 ## Tail keys and where the value is queryable
 
 The curated first line renders a `key=value` tail in one canonical order for the whole module, so an omitted key never moves the rest.
-Each key names one field; that field is where the value is queried.
+A key is listed with the module field of the same name; a key without one may still be queryable under another field in the table above.
 
 | Tail key | Queryable as |
 |---|---|
-| `device_class` | not queryable as a field |
-| `mismatch_pcr` | not queryable as a field |
+| `device_class` | `win.eventlog.platform.device_class` |
+| `mismatch_pcr` | no field of the same name |
 
 ## What sets each field
 
@@ -136,7 +136,8 @@ The last column is different in kind: it is the author's account of the row or e
 | `device_software_install_failed` / `removal_failed` | 121, 151, 152, 163, 164, 172, 191 | `win.eventlog.platform.device_class` `win.eventlog.platform.device_software_exit_code` `win.eventlog.platform.device_software_name` |  |
 | `device_software_install_failed` / `transient` | 121, 151, 152, 163, 164, 172, 191 | `win.eventlog.platform.device_class` `win.eventlog.platform.device_software_exit_code` `win.eventlog.platform.device_software_name` |  |
 | `device_software_install_failed` / `update_service_stopped` | 121, 151, 152, 163, 164, 172, 191 | `win.eventlog.platform.device_class` `win.eventlog.platform.device_software_exit_code` `win.eventlog.platform.device_software_name` |  |
-| `device_start_failed` / `default` | 411 | `win.eventlog.platform.device_class` `win.eventlog.platform.device_service` `win.eventlog.platform.driver_inf` `win.eventlog.platform.pnp_problem_code` `win.eventlog.platform.pnp_problem_code_name` |  |
+| `device_start_failed` / `adapter_start_failed` | 411, 549 | `win.eventlog.platform.graphics_vendor_id` |  |
+| `device_start_failed` / `driver_start_failed` | 411, 549 | `win.eventlog.platform.device_class` `win.eventlog.platform.device_service` `win.eventlog.platform.driver_inf` `win.eventlog.platform.pnp_problem_code` `win.eventlog.platform.pnp_problem_code_name` |  |
 | `fasr_pcr_validation_mismatch` / `no_mismatch` | 80 | `win.eventlog.platform.fasr_cert_present` `win.eventlog.platform.fasr_pcr_mismatch_index` |  |
 | `fasr_pcr_validation_mismatch` / `pcr_mismatch` | 80 | `win.eventlog.platform.fasr_cert_present` `win.eventlog.platform.fasr_pcr_mismatch_index` |  |
 | `firmware_event_store_unavailable` / `keys_missing` | 21, 45 | `win.eventlog.platform.firmware_event_store` |  |

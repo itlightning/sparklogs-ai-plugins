@@ -197,7 +197,7 @@ Windows enumerated a device and its driver refused to start it.
 
 **Why it matters:** The device does not work until someone fixes the driver or the hardware conflict.
 
-**In practice:** Windows writes event 411 in Microsoft-Windows-Kernel-PnP/Configuration when a device fails to start, with the Device Manager problem code, the driver's inf, the driver service and a status code. The problem code names the stage that failed: code 10 means the device did not start, code 12 is a resource conflict, code 37 means the driver failed to load, and code 43 means Windows stopped the device after it reported problems. A driver that does not match the hardware or the Windows version, failing hardware, or two devices claiming the same resources is the usual cause.
+**In practice:** Windows writes event 411 in Microsoft-Windows-Kernel-PnP/Configuration when a device fails to start, with the Device Manager problem code, the driver's inf, the driver service and a status code. The problem code names the stage that failed: code 10 means the device did not start, code 12 is a resource conflict, code 37 means the driver failed to load, and code 43 means Windows stopped the device after it reported problems. A driver that does not match the hardware or the Windows version, failing hardware, or two devices claiming the same resources is the usual cause. Windows writes event 549 in Microsoft-Windows-DxgKrnl-Admin when a display adapter fails to start, with the adapter vendor id and the status code; the machine falls back to another adapter or the basic display driver.
 
 **What to check:**
 
@@ -205,6 +205,7 @@ Windows enumerated a device and its driver refused to start it.
 - Code 10 or 37: reinstall or update the driver from the hardware vendor.
 - Code 12: resolve the resource conflict, often by updating the BIOS or moving a card.
 - Code 43: update the driver and firmware; if it persists, suspect the hardware.
+- Event 549: reinstall the graphics driver from the adapter vendor named by the vendor id, then check the card is seated and powered.
 
 **Related:**
 

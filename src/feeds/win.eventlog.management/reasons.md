@@ -10,7 +10,8 @@ Search for the heading "## `<code>`" or a word from the reason's label. Do not r
 |---|---|---|---|---|---|
 | `bitlocker_os_drive_encrypted_beyond_policy_scope` | bitlocker os drive encrypted beyond policy scope | event | Verbose | `device_management` | benign |
 | `bitlocker_policy_noncompliant` | bitlocker policy noncompliant | event | Info to Warning | `device_management` |  |
-| `bits_transfer_failed` | bits transfer failed | event | Info | `patching` |  |
+| `bits_transfer_failed` | bits transfer failed | event | Verbose to Info | `patching` |  |
+| `dfsr_dirty_shutdown_detected` | DFSR dirty shutdown detected | event | Info to Notice | `directory_services` |  |
 | `dfsr_partner_communication_failed` | dfsr partner communication failed | event | Warning | `directory_services` |  |
 | `dfsr_replication_stopped` | dfsr replication stopped | event | Warning to Serious | `directory_services` |  |
 | `dfsr_sysvol_initial_sync_pending` | dfsr sysvol initial sync pending | event | Warning | `directory_services` |  |
@@ -24,10 +25,11 @@ Search for the heading "## `<code>`" or a word from the reason's label. Do not r
 | `patch_scan_failed` | patch scan failed | event | Info to Warning | `patching` | benign possible |
 | `print_connection_reopen_failed` | print connection reopen failed | event | Info to Warning | `printing` | benign possible |
 | `printer_driver_install_failed` | printer driver install failed | event | Notice to Warning | `printing` |  |
+| `scheduled_task_action_failed` | scheduled task action failed | event | Display to Notice | `scheduled_tasks` |  |
 | `scheduled_task_engine_failed` | scheduled task engine failed | event | Info to Warning | `scheduled_tasks` | benign possible |
 | `scheduled_task_load_failed` | scheduled task load failed | event | Notice to Warning | `scheduled_tasks` |  |
 | `scheduled_task_sign_in_failed` | scheduled task sign in failed | event | Warning | `scheduled_tasks` |  |
-| `scheduled_task_start_failed` | scheduled task start failed | event | Debug to Warning | `scheduled_tasks` |  |
+| `scheduled_task_start_failed` | scheduled task start failed | event | Debug to Warning | `scheduled_tasks` | benign possible |
 | `win_locale_registry_read_failed` | win locale registry read failed | event | Warning | `user_profiles` |  |
 
 ## `bitlocker_os_drive_encrypted_beyond_policy_scope`: bitlocker os drive encrypted beyond policy scope
@@ -90,11 +92,11 @@ The management client is the authority on what the policy requires. The device's
 
 A Background Intelligent Transfer Service job reported an error on one transfer attempt.
 
-**Severity:** Info
+**Severity:** Info or Verbose
 
 **Why it matters:** One attempt inside a transfer that BITS keeps retrying. The record names the job and the error code; whether the download finally failed is reported by the program that asked for it.
 
-**In practice:** BITS writes event 61 in Microsoft-Windows-Bits-Client/Operational when it stops a transfer attempt on an error, with the job name and the result code. Office applications fetching configuration and address books, Windows Update and other software downloaders all use BITS, and BITS retries failed transfers on its own. A name that does not resolve, a proxy or server refusing the request, or a server that closes the connection is the usual cause. A Windows Update download that ends in failure is reported by Windows Update itself.
+**In practice:** BITS writes event 61 in Microsoft-Windows-Bits-Client/Operational when it stops a transfer attempt on an error, with the job name and the result code. Office applications fetching configuration and address books, Windows Update and other software downloaders all use BITS, and BITS retries failed transfers on its own. A name that does not resolve, a proxy or server refusing the request, or a server that closes the connection is the usual cause. A Windows Update download that ends in failure is reported by Windows Update itself. Two families are routine and recorded at Verbose: the Outlook offline address book job answered 401 (0x80190191) and the Dell update client answered 404 (0x80190194); both retry on their own.
 
 **When to ignore:** Occasional failures from Office or other applications that later complete are routine retries.
 
@@ -113,6 +115,31 @@ A Background Intelligent Transfer Service job reported an error on one transfer 
 **Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/feeds/eventlog-management#bits_transfer_failed, https://sparklogs.com/reference/reasons/bits_transfer_failed.json
 
 BITS retries a failed transfer, so these records come in runs. The stream is rate-bounded: one record per job and result code per device per hour, with the count of what an hour suppressed carried on the next hour's first record. A job and code that reappear hour after hour, with no completed transfer between them, is the pattern worth reading.
+
+## `dfsr_dirty_shutdown_detected`: DFSR dirty shutdown detected
+
+DFS Replication found its database on a volume was not shut down cleanly and is recovering it.
+
+**Severity:** Notice or Info
+
+**Why it matters:** Replication on that volume is slower until recovery finishes, so changes reach the other members later than usual.
+
+**In practice:** DFS Replication writes event 2212 in the DFS Replication log when it detects an unexpected shutdown on a volume, such as a power loss or the service being killed, and starts recovering its database. Event 2214 follows when recovery has finished. A server that needs more time to stop than Windows allows writes the pair at most restarts. If replication stops instead, the service writes event 2213, which waits for a manual resume.
+
+**When to ignore:** A 2212 followed by a 2214 on the same volume.
+
+**What to check:**
+
+- Look for event 2214 on the same volume after the 2212; recovery can take hours on a large volume.
+- If the pair appears at every restart, check what keeps the server from shutting down cleanly.
+
+**Related:**
+
+- `dfsr_replication_stopped`: replication stopped on the volume and waiting for a manual resume
+
+**Example:** A file server loses power, and at the next start DFS Replication logs event 2212 for volume D:.
+
+**Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/feeds/eventlog-management#dfsr_dirty_shutdown_detected, https://sparklogs.com/reference/reasons/dfsr_dirty_shutdown_detected.json
 
 ## `dfsr_partner_communication_failed`: dfsr partner communication failed
 
@@ -146,11 +173,11 @@ The partner and the replication group are named in the message text rather than 
 
 DFS Replication stopped replicating a folder or a volume, or stopped because it could not read its own configuration.
 
-**Severity:** Serious or Warning
+**Severity:** Serious, Error or Warning
 
 **Why it matters:** Every member of that replication group keeps serving its own copy, and the copies drift apart with nothing visible to the people using them. On a domain controller this can stop Group Policy and logon scripts reaching other controllers.
 
-**In practice:** DFS Replication writes these events in the DFS Replication log. Event 4012 means the member was disconnected from its partners for longer than the allowed offline time, so the service stopped replicating the folder and will not resume on its own. Events 4004 and 2004 mean it stopped replicating a folder or a whole volume, and 2104 that it could not recover from a database error on a volume. Event 6104 means it could not register its WMI providers, and replication is disabled until that is fixed. Event 1202 means it could not read its configuration from a domain controller; it resumes once a controller answers, and is recorded at Warning. A server offline for weeks, an unclean shutdown that damaged the replication database, or a domain controller it cannot reach is the usual cause.
+**In practice:** DFS Replication writes these events in the DFS Replication log. Event 4012 means the member was disconnected from its partners for longer than the allowed offline time, so the service stopped replicating the folder and will not resume on its own. Events 4004 and 2004 mean it stopped replicating a folder or a whole volume, and 2104 that it could not recover from a database error on a volume. Event 2213 means the database on a volume was not shut down cleanly and replication on it stays stopped until someone runs the resume command the event names. Event 6104 means it could not register its WMI providers, and replication is disabled until that is fixed. Event 1202 means it could not read its configuration from a domain controller; it resumes once a controller answers, and is recorded at Warning. A server offline for weeks, an unclean shutdown that damaged the replication database, or a domain controller it cannot reach is the usual cause.
 
 **When to ignore:** A single 1202 that clears when the domain controller answers again needs no action.
 
@@ -160,6 +187,7 @@ DFS Replication stopped replicating a folder or a volume, or stopped because it 
 - For 4012 on a domain controller's SYSVOL, run a non-authoritative SYSVOL sync on that controller. DFS Management cannot edit SYSVOL replication.
 - For a database or volume failure (2004, 2104), the replication database on that volume needs to be rebuilt.
 - For 6104, repair the WMI repository and restart the DFS Replication service.
+- For 2213, back up the replicated folders on that volume, then run the `ResumeReplication` WMI command the event gives, and look for event 2214 to confirm recovery finished.
 - Check the folder's other members before resuming, so the copy that wins is the one you want.
 
 **Related:**
@@ -483,6 +511,34 @@ A printer driver did not install, and the stage and code say which part of the i
 
 One install attempt can report from several of these ids, on both print channels.
 
+## `scheduled_task_action_failed`: scheduled task action failed
+
+A scheduled task ran, and the program it started exited with a failure code.
+
+**Severity:** Notice for anyone else's task. Display for a task Windows or a Microsoft component registered for itself.
+
+**Why it matters:** Whatever that run was meant to do may not have happened. On a backup pre-job or an update task, nothing else reports it.
+
+**In practice:** Task Scheduler writes event 201 in Microsoft-Windows-TaskScheduler/Operational when a task's action finishes, with the task path and the exit code of the program it ran. Only runs that exited with a non-zero code are collected; a zero exit is an ordinary completed run. The code is whatever the program returned. Codes such as 0x8007050B read as Windows errors; a small number such as 1 is the program's own convention and means only that it reported failure. Tasks Windows and Microsoft components register for themselves are maintenance that runs again on its own schedule, so they are recorded lower than anyone else's task. SparkLogs keeps one row per task and exit code per hour, so a count of rows is a count of failing hours, not of failed runs; each kept row carries how many repeats the hour before held back.
+
+**When to ignore:** Display rows for Windows and Microsoft component tasks, and vendor utilities whose own logs show the run is harmless, unless the same task fails for weeks.
+
+**What to check:**
+
+- Read the exit code, then what the program itself logs for that run.
+- Pivot on the task path to see whether the same task fails every run or only sometimes.
+- Run the task's action by hand as the same account to see the failure directly.
+
+**Related:**
+
+- `scheduled_task_start_failed`: the task did not start at all, rather than starting and failing
+
+**Example:** A backup vendor's pre-job script exits with code 1 every night, and Task Scheduler logs event 201 each time.
+
+**Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/feeds/eventlog-management#scheduled_task_action_failed, https://sparklogs.com/reference/reasons/scheduled_task_action_failed.json
+
+Some programs exit non-zero for a warning rather than a failure, so read the program's own log before treating a single row as a broken job.
+
 ## `scheduled_task_engine_failed`: scheduled task engine failed
 
 Task Scheduler could not start the host process a scheduled task runs inside.
@@ -515,13 +571,13 @@ A per-user task engine only starts when that user has a session, so this line is
 
 A scheduled task definition could not be read at service start, so the task is not in the schedule at all.
 
-**Severity:** Notice for a Microsoft task whose definition is not found, Warning for any other code or task.
+**Severity:** Notice for a Windows or Microsoft component task whose definition is not found, Warning for any other code or task.
 
 **Why it matters:** The task is gone rather than failing, so nothing else reports that its work has stopped.
 
-**In practice:** Task Scheduler writes events 146 and 151 in Microsoft-Windows-TaskScheduler/Operational, as a pair for the same task, when it cannot load a task definition as the service starts. The task then does not run and does not show failed runs later: it is absent until it is registered again. A not-found result on a task under \Microsoft\ is a Windows or Microsoft component task the current build no longer carries, restated at every service start, and is recorded at Notice. Any other task is a job that fell off the schedule, often one a product installed and then left behind or a definition damaged on disk.
+**In practice:** Task Scheduler writes events 146 and 151 in Microsoft-Windows-TaskScheduler/Operational, as a pair for the same task, when it cannot load a task definition as the service starts. The task then does not run and does not show failed runs later: it is absent until it is registered again. A not-found result on a Windows or Microsoft component task, under \Microsoft\ or one of the few registered outside it such as the Edge and OneDrive updaters, is a task the current build no longer carries, restated at every service start, and is recorded at Notice. Any other task is a job that fell off the schedule, often one a product installed and then left behind or a definition damaged on disk.
 
-**When to ignore:** Notice rows for Microsoft tasks whose definition is not found are leftovers of earlier Windows or Office builds.
+**When to ignore:** Notice rows for Windows and Microsoft component tasks whose definition is not found are leftovers of earlier Windows or Office builds.
 
 **What to check:**
 
@@ -547,11 +603,11 @@ Task Scheduler could not log on as the account a scheduled task stores, so the t
 
 **Why it matters:** Every task registered to that account is in the same state, and none of them is running.
 
-**In practice:** Task Scheduler writes event 104 in Microsoft-Windows-TaskScheduler/Operational when it cannot log on as the run-as account a task stores, with the account name and the result code. A logon failure result (0x8007052E) usually means the account's password changed or expired after the task stored it, or the account was disabled or locked out. The task does not run again until someone enters a current password.
+**In practice:** Task Scheduler writes event 104 in Microsoft-Windows-TaskScheduler/Operational when it cannot log on as the run-as account a task stores, with the task path and the result code. The account is not on this event: the matching Security event 4625, logon type 4, names it when failed logons are audited. A logon failure result (0x8007052E) usually means the account's password changed or expired after the task stored it. Other results name the cause directly, such as the account locked out (0x80070775) or disabled (0x80070533). The task does not run again until someone enters a current password.
 
 **What to check:**
 
-- Pivot on the account rather than the task: one changed password stops every task that stores it.
+- Find the account on the matching Security 4625 (logon type 4) or in the task's properties: one changed password stops every task that stores it.
 - Check the account for an expired password, a lockout or a disabled state.
 - Re-enter the credential in each task's properties, or with `Set-ScheduledTask -User -Password`.
 
@@ -569,13 +625,13 @@ A service-account password change is the usual cause, and the tasks stop silentl
 
 A scheduled task did not run, and the result code says whether the program was missing, the identity was refused, or the action itself failed.
 
-**Severity:** Warning where a named automation stopped running. Notice where a task in the Microsoft task folder failed or was refused, and lower still where Windows removed the program it points at.
+**Severity:** Warning where a named automation stopped running. Notice where a Windows or Microsoft component task failed or was refused, and lower still where Windows removed the program it points at. Info where the task was not started because Windows was shutting down.
 
 **Why it matters:** Whatever that task does is not being done. On a backup pre-job or a patch orchestration task, that is a gap nothing else reports.
 
-**In practice:** Task Scheduler writes events 101, 103, 202 and 203 in Microsoft-Windows-TaskScheduler/Operational when a task fails to start or its action fails, at the provider's Error level, with the task path and the result code. A file-not-found or path-not-found result (0x80070002, 0x80070003) means the program the task points at is not there. Access denied (0x80070005) means the account the task runs as was refused. Tasks under \Microsoft\ are Windows and Microsoft component maintenance that retries on its own schedule, so they are recorded lower than anyone else's task. Not collected: the Windows Update orchestrator notification broker task (USO_UxBroker) reporting its own program missing, which Windows removed and nobody can fix.
+**In practice:** Task Scheduler writes events 101, 103, 202 and 203 in Microsoft-Windows-TaskScheduler/Operational when a task fails to start or its action fails, at the provider's Error level, with the task path and the result code. A file-not-found or path-not-found result (0x80070002, 0x80070003) means the program the task points at is not there. Access denied (0x80070005) means the account the task runs as was refused. A shutdown-in-progress result (0x8007045B) means the trigger fired while Windows was shutting down, and the task runs again on its next trigger. Tasks Windows and Microsoft components register for themselves are maintenance that retries on its own schedule, so they are recorded lower than anyone else's task: tasks under \Microsoft\, and a few registered outside it, such as the Edge and OneDrive updaters and the Windows Spotlight tasks under \SoftLanding\. Not collected: the Windows Update orchestrator notification broker task (USO_UxBroker) reporting its own program missing, which Windows removed and nobody can fix.
 
-**When to ignore:** Debug and Notice rows for tasks under \Microsoft\ are Windows maintenance retrying on its own schedule, unless the same task fails for weeks.
+**When to ignore:** Debug and Notice rows for Windows and Microsoft component tasks are maintenance retrying on its own schedule, unless the same task fails for weeks. Info rows with a shutdown-in-progress result are starts skipped while the machine shut down.
 
 **What to check:**
 

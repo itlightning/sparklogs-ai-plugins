@@ -12,7 +12,6 @@ Read every row below as a query contract, the same way a reason code is read.
 
 - **Additive only.** Fields and vocabulary tokens are added, never renamed or repurposed, without a documented migration.
 - **Misses are honest.** An unlisted code leaves its decoded field unset and the raw value promoted; a meaning is never invented.
-- **Correlate with `pack_version`.** A field exists at rest only from the pack version that shipped it, so check the pack version on the events in scope before concluding a condition is absent.
 
 ## Raw fallback
 
@@ -56,12 +55,12 @@ This module populates no portable family.
 ## Tail keys and where the value is queryable
 
 The curated first line renders a `key=value` tail in one canonical order for the whole module, so an omitted key never moves the rest.
-Each key names one field; that field is where the value is queried.
+A key is listed with the module field of the same name; a key without one may still be queryable under another field in the table above.
 
 | Tail key | Queryable as |
 |---|---|
-| `host_application` | not queryable as a field |
-| `fully_qualified_error_id` | not queryable as a field |
+| `host_application` | no field of the same name |
+| `fully_qualified_error_id` | no field of the same name |
 
 ## What sets each field
 

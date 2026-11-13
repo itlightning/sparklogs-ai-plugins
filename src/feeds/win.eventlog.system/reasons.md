@@ -13,6 +13,7 @@ Search for the heading "## `<code>`" or a word from the reason's label. Do not r
 | `bitlocker_recovery_password_used` | bitlocker recovery password used | event | Warning | `encryption` |  |
 | `bitlocker_tpm_binding_mismatch` | bitlocker tpm binding mismatch | event | Warning | `encryption` |  |
 | `bitlocker_tpm_unlock_failed` | bitlocker tpm unlock failed | event | Warning | `encryption` |  |
+| `bitlocker_tpm_unlock_succeeded` | bitlocker tpm unlock succeeded | event | Verbose | `encryption` |  |
 | `dcom_activation_timeout` | dcom activation timeout | event | Minor | `app_stability` |  |
 | `dcom_register_timeout` | dcom register timeout | event | Notice | `app_stability` |  |
 | `dcom_start_failed` | dcom start failed | event | Minor | `app_stability` |  |
@@ -36,10 +37,13 @@ Search for the heading "## `<code>`" or a word from the reason's label. Do not r
 | `failover_cluster_resource_hang` | failover cluster resource hang | event | Serious | `clustering` |  |
 | `failover_cluster_resource_host_crash` | failover cluster resource host crash | event | Serious | `clustering` |  |
 | `failover_cluster_service_down` | failover cluster service down | event | Severe | `clustering` |  |
-| `filesystem_corruption` | filesystem corruption | event | Warning to Critical | `storage` |  |
+| `filesystem_corruption` | filesystem corruption | event | Verbose to Critical | `storage` |  |
 | `filesystem_delayed_write_lost` | filesystem delayed write lost | event | Error to Serious | `storage` |  |
 | `filesystem_transaction_log_operation_failed` | filesystem transaction log operation failed | event | Notice to Error | `storage` |  |
+| `gpu_driver_error` | GPU driver error | event | Notice | `hardware` |  |
 | `gpu_driver_reset` | gpu driver reset | event | Notice | `hardware` |  |
+| `group_policy_domain_controller_unresolved` | group policy domain controller unresolved | event | Notice | `device_management` |  |
+| `group_policy_extension_apply_failed` | group policy extension apply failed | event | Info to Minor | `device_management` | benign possible |
 | `group_policy_processing_failed` | group policy processing failed | event | Notice to Warning | `device_management` |  |
 | `group_policy_software_install_failed` | group policy software install failed | event | Info to Warning | `device_management` | benign possible |
 | `hardware_error_corrected` | hardware error corrected | event | Notice | `hardware` |  |
@@ -53,6 +57,7 @@ Search for the heading "## `<code>`" or a word from the reason's label. Do not r
 | `iis_apppool_worker_start_failed` | iis apppool worker start failed | event | Warning to Error | `web` |  |
 | `iis_worker_crash` | iis worker crash | event | Warning | `web` |  |
 | `ip_address_conflict_detected` | IP address conflict | event | Warning | `networking` |  |
+| `iscsi_target_connection_lost` | iSCSI target connection lost | event | Info to Warning | `storage` |  |
 | `kerberos_cert_domain_unresolved` | kerberos cert domain unresolved | event | Info | `auth` |  |
 | `kerberos_etype_unsupported` | kerberos etype unsupported | event | Warning | `auth` |  |
 | `kerberos_pac_verify_failed` | kerberos pac verify failed | event | Warning | `auth` |  |
@@ -66,6 +71,7 @@ Search for the heading "## `<code>`" or a word from the reason's label. Do not r
 | `os_restart_requested` | os restart requested | event | Notice | `os_stability` |  |
 | `os_shutdown` | os shutdown | event | Info | `os_stability` |  |
 | `os_sleep` | os sleep | event | Info | `hardware` |  |
+| `os_thermal_hibernated` | Critical thermal hibernate | event | Warning to Error | `hardware` |  |
 | `os_wake` | os wake | event | Info | `hardware` |  |
 | `pagefile_extended` | pagefile extended | event | Notice | `performance` |  |
 | `patch_install_deferred` | patch install deferred | event | Verbose to Info | `patching` | benign |
@@ -77,6 +83,7 @@ Search for the heading "## `<code>`" or a word from the reason's label. Do not r
 | `rds_licensing_service_failed` | rds licensing service failed | event | Error | `licensing` |  |
 | `secure_boot_cert_update_pending` | secure boot cert update pending | event | Warning | `hardware` |  |
 | `secure_boot_certs_current` | secure boot certs current | event | Info | `hardware` | benign |
+| `secure_boot_database_update_applied` | secure boot database update applied | event | Verbose | `hardware` |  |
 | `secure_boot_update_failed` | secure boot update failed | event | Notice | `hardware` |  |
 | `security_agent_service_start_failed` | security agent service start failed | event | Warning | `endpoint_protection` |  |
 | `security_agent_service_terminated` | security agent service terminated | event | Minor | `endpoint_protection` |  |
@@ -98,7 +105,7 @@ Search for the heading "## `<code>`" or a word from the reason's label. Do not r
 | `tls_cert_name_mismatch` | tls cert name mismatch | event | Error | `certificates` |  |
 | `tls_cert_untrusted_ca` | tls cert untrusted ca | event | Error | `certificates` |  |
 | `tls_cipher_mismatch` | tls cipher mismatch | event | Warning | `certificates` |  |
-| `tls_client_credential_failed` | tls client credential failed | event | Warning to Error | `certificates` |  |
+| `tls_client_credential_failed` | tls client credential failed | event | Notice to Error | `certificates` |  |
 | `tls_server_credential_failed` | tls server credential failed | event | Error | `certificates` |  |
 | `tpm_attestation_check_failed` | tpm attestation check failed | event | Notice | `hardware` |  |
 | `tpm_attestation_failed` | tpm attestation failed | event | Error | `hardware` |  |
@@ -114,6 +121,7 @@ Search for the heading "## `<code>`" or a word from the reason's label. Do not r
 | `vss_shadow_aborted` | vss shadow aborted | event | Warning to Error | `backup` |  |
 | `vss_snapshots_failing_for_space` | vss snapshots failing for space | event | Error | `backup` |  |
 | `win_app_error_dialog_shown` | win app error dialog shown | event | Minor | `app_stability` |  |
+| `win_battery_critical_action_triggered` | Battery trigger action | event | Notice | `hardware` |  |
 | `winre_servicing_failed` | winre servicing failed | event | Error | `patching` |  |
 | `wlan_limited_connectivity` | wlan limited connectivity | event | Warning | `networking` |  |
 
@@ -150,7 +158,7 @@ BitLocker reported an error code while retrieving the volume master key during r
 
 **Why it matters:** The record by itself does not show the volume failing to open at boot. It keeps the volume and the code for a later BitLocker question about this machine.
 
-**In practice:** The BitLocker driver logs event 24641 in the System log at the Error level, with the sentence "An unexpected error was encountered attempting to retrieve the BitLocker volume master key during restart." The record carries the volume and an error code, and Microsoft publishes no meaning for the codes it logs here. When BitLocker really cannot open the volume, the user sees a recovery key prompt at boot, or Windows logs BitLocker-Driver event 24635 or BitLocker-API errors about protectors. The same event with error code 0x0 reports success and is kept under a lower severity, outside this reason.
+**In practice:** The BitLocker driver logs event 24641 in the System log at the Error level, with the sentence "An unexpected error was encountered attempting to retrieve the BitLocker volume master key during restart." The record carries the volume and an error code, and Microsoft publishes no meaning for the codes it logs here. When the code is 0x02 followed by a nonzero bitmap, such as 0x2000880, SparkLogs lists the PCRs in those low bits. On devices that also logged BitLocker-API event 892, these PCRs matched the PCRs the drive key was sealed to. When BitLocker really cannot open the volume, the user sees a recovery key prompt at boot, or Windows logs BitLocker-Driver event 24635 or BitLocker-API errors about protectors. The same event with error code 0x0 reports success and is kept under a lower severity, outside this reason.
 
 **When to ignore:** When the machine booted normally and no recovery prompt or protector error is logged near the same restart.
 
@@ -255,6 +263,32 @@ At boot, the TPM would not release the BitLocker key for the OS drive, so the dr
 **Example:** After a firmware update, the boot manager could not get the key for drive C: from the TPM because the Secure Boot configuration had changed.
 
 **Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/feeds/eventlog-system#bitlocker_tpm_unlock_failed, https://sparklogs.com/reference/reasons/bitlocker_tpm_unlock_failed.json
+
+## `bitlocker_tpm_unlock_succeeded`: bitlocker tpm unlock succeeded
+
+The TPM released the BitLocker drive key at boot and Windows started normally.
+
+**Severity:** Verbose
+
+**Why it matters:** None. The drive opened without its recovery key on this boot.
+
+**In practice:** The BitLocker driver writes event 24711 in the System log when a V2 TPM protector releases the drive key and Windows starts. Not every device with a TPM protector logs it. The text names the protector's binding ID, which SparkLogs also carries as a field. On a device whose boots usually carry it, a boot without it, or with event 24652 (a recovery password was used) instead, is a boot to check for a recovery prompt.
+
+**When to ignore:** Safe to pass over unless you are checking whether a device needed its BitLocker recovery key.
+
+**What to check:**
+
+- On a device whose boots usually carry bitlocker_tpm_unlock_succeeded, a boot (os_boot, Kernel-General event 12) without it is a boot to check: look for bitlocker_recovery_password_used or bitlocker_tpm_unlock_failed beside it.
+
+**Related:**
+
+- `bitlocker_recovery_password_used`: the recovery password that started Windows instead
+- `bitlocker_tpm_unlock_failed`: the TPM refusing the key at boot, the failing half of this event
+- `tpm_boot_pcr_values_recorded`: the PCR values recorded on the same boot
+
+**Example:** A laptop starts Windows with its TPM protector, binding ID {00000000-0000-0000-0000-000000000004}.
+
+**Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/feeds/eventlog-system#bitlocker_tpm_unlock_succeeded, https://sparklogs.com/reference/reasons/bitlocker_tpm_unlock_succeeded.json
 
 ## `dcom_activation_timeout`: dcom activation timeout
 
@@ -886,11 +920,11 @@ NTFS found damage in the file system structures on a volume, could not correct i
 
 **Also reported by:** `win.eventlog.storage`
 
-**Severity:** Critical (corrupted MFT record, MFT torn write, volume cannot be corrected, disk-provider corruption marker) / Serious (corruption in a directory index or another structure, offline Full Chkdsk required) / Error (torn write on a data file) / Warning (repair completed, repair posting throttled)
+**Severity:** Critical (corrupted MFT record, MFT torn write, volume cannot be corrected, disk-provider corruption marker) / Serious (corruption in a directory index or another structure, offline Full Chkdsk required) / Error (torn write on a data file) / Warning (repair completed, repair posting throttled, spot fix required) / Notice (online scan required) / Verbose (any repair request on a shadow copy)
 
 **Why it matters:** Files on the volume may be unreadable, missing or silently wrong until it is repaired, and the damage can spread as the volume keeps taking writes. Damage to the Master File Table reaches every file on the volume, because it holds the record of where each of them lives.
 
-**In practice:** NTFS writes these to the System log under the Ntfs provider, with the volume named in the event. Event 55 is NTFS finding a corrupted structure, and the message names which one: a Master File Table (MFT) record, a directory index, or another structure. Event 98 says the volume needs to be taken offline for a Full Chkdsk, event 131 that NTFS could not correct the structure and chkdsk must run, and event 7 a torn write, a write that reached the disk only in part, on the MFT or on one file. Event 130 is a repair NTFS finished on its own, and 132 and 133 mean it paused and then resumed logging repairs because so many arrived at once. Event 55 from the disk provider reports corruption from the layer below the file system. Failing disks, controller or cable faults, and power loss during writes are the usual causes. A torn write on one data file after a power cut is often rolled back from the NTFS log; repeated damage on one volume points at the device.
+**In practice:** NTFS writes these to the System log under the Ntfs provider, with the volume named in the event. Event 55 is NTFS finding a corrupted structure, and the message names which one: a Master File Table (MFT) record, a directory index, or another structure. Event 98 says what the volume needs: an online scan, which runs by itself during automatic maintenance, a brief offline spot fix, or an offline Full Chkdsk. On a shadow copy (a `\Device\HarddiskVolumeShadowCopy` device) event 98 describes the snapshot, not the live volume, and is recorded at Verbose. Event 131 says NTFS could not correct the structure and chkdsk must run, and event 7 is a torn write, a write that reached the disk only in part, on the MFT or on one file. Event 130 is a repair NTFS finished on its own, and 132 and 133 mean it paused and then resumed logging repairs because so many arrived at once. Event 55 from the disk provider reports corruption from the layer below the file system. Failing disks, controller or cable faults, and power loss during writes are the usual causes. A torn write on one data file after a power cut is often rolled back from the NTFS log; repeated damage on one volume points at the device.
 
 **When to ignore:** A single completed repair (event 130) on a volume that logs no further damage.
 
@@ -963,15 +997,42 @@ The NTFS transaction log on a volume could not be written, replayed, or brought 
 
 **Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/feeds/eventlog-system#filesystem_transaction_log_operation_failed, https://sparklogs.com/reference/reasons/filesystem_transaction_log_operation_failed.json
 
+## `gpu_driver_error`: GPU driver error
+
+The NVIDIA display driver recorded an error.
+
+**Also reported by:** `win.eventlog.application`
+
+**Severity:** Notice at most.
+
+**Why it matters:** Usually nothing visible on its own; repeated errors can come with screen freezes or display driver resets.
+
+**In practice:** The NVIDIA kernel driver (nvlddmkm) writes event 14 to the System log with the video device and a hex dump of driver data. Windows has no message text for it unless the NVIDIA driver registers one, so Event Viewer often shows only the raw inserts. The Application log carries other NVIDIA driver errors under the same reason.
+
+**When to ignore:** Occasional records with no display resets and no user complaint.
+
+**What to check:**
+
+- Look for display driver resets on the same device at the same time.
+- Check the driver version against NVIDIA's current release.
+
+**Related:**
+
+- `gpu_driver_reset`: the display driver was reset and recovered
+
+**Example:** A workstation with an NVIDIA card logs driver error records with no message text.
+
+**Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/feeds/eventlog-system#gpu_driver_error, https://sparklogs.com/reference/reasons/gpu_driver_error.json
+
 ## `gpu_driver_reset`: gpu driver reset
 
-The NVIDIA display driver reset the graphics card.
+A display driver stopped responding, and Windows or the NVIDIA driver reset the graphics card.
 
 **Severity:** Notice
 
 **Why it matters:** The screen can go black or freeze for a few seconds, and games, video, 3D or GPU-accelerated applications running at the time can crash or lose work.
 
-**In practice:** The NVIDIA kernel driver (nvlddmkm) logs event 153 in the System log when it resets the GPU, the kind of reset Windows Timeout Detection and Recovery (TDR) starts when the graphics card stops responding. The machine recovered: a reset Windows could not recover ends in a blue screen instead. Repeated resets point at the driver version, overheating, unstable overclocking or power, or a failing card.
+**In practice:** The NVIDIA kernel driver (nvlddmkm) logs event 153 in the System log when it resets the GPU, the kind of reset Windows Timeout Detection and Recovery (TDR) starts when the graphics card stops responding. Windows logs event 4101 under the Display source, "Display driver ... stopped responding and has successfully recovered", for the same reset on any vendor's driver, and names the driver. The machine recovered: a reset Windows could not recover ends in a blue screen instead. Repeated resets point at the driver version, overheating, unstable overclocking or power, or a failing card.
 
 **When to ignore:** A single reset now and then with no user complaint.
 
@@ -990,17 +1051,72 @@ The NVIDIA display driver reset the graphics card.
 
 **Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/feeds/eventlog-system#gpu_driver_reset, https://sparklogs.com/reference/reasons/gpu_driver_reset.json
 
-## `group_policy_processing_failed`: group policy processing failed
+## `group_policy_domain_controller_unresolved`: group policy domain controller unresolved
 
-Group Policy could not reach a domain controller and did not apply for that pass.
+The machine could not find a domain controller, so Group Policy did not run.
 
 **Also reported by:** `win.eventlog.identity_security`
 
-**Severity:** Notice on a workstation, Warning on a server or an unknown host class.
+**Severity:** Notice
 
-**Why it matters:** The machine runs whatever policy it last cached until a later refresh reaches a domain controller, so new or changed settings, including security settings, do not reach it.
+**Why it matters:** No Group Policy refresh happens, so the machine keeps the settings it last applied and gets no new ones.
 
-**In practice:** The Group Policy client logs event 1129 in the System log when a processing pass fails for lack of network connectivity to a domain controller. Windows logs a success once the machine reaches a domain controller and policy applies. A laptop that starts up at home or on guest Wi-Fi without a VPN writes this at every boot. On a server or a desktop that never moves, the usual causes are DNS settings that do not point at the domain's DNS servers, a firewall between the machine and the domain controllers, or a network that is not up yet when policy starts.
+**In practice:** The Group Policy client logs event 1054 in the System log when it cannot obtain the name of a domain controller. ERROR_NO_SUCH_DOMAIN (1355) means the domain name did not resolve, the normal state of a laptop off the corporate network. The Microsoft-Windows-GroupPolicy/Operational log reports the same failure as event 7017 or 7320.
+
+**When to ignore:** On a laptop off the corporate network, when policy refreshes once it is back.
+
+**What to check:**
+
+- Check whether the device was off the corporate network or VPN at the time.
+- Check that the device uses the domain's DNS servers and can find a controller with `nltest /dsgetdc:<domain>`.
+
+**Related:**
+
+- `group_policy_processing_failed`: a pass that started and failed
+
+**Example:** A laptop at home with no VPN cannot resolve its domain name (1355) when policy refreshes.
+
+**Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/feeds/eventlog-system#group_policy_domain_controller_unresolved, https://sparklogs.com/reference/reasons/group_policy_domain_controller_unresolved.json
+
+## `group_policy_extension_apply_failed`: group policy extension apply failed
+
+A Group Policy extension or policy script failed to apply.
+
+**Also reported by:** `win.eventlog.application`, `win.eventlog.identity_security`
+
+**Severity:** Minor, Notice or Info
+
+**Why it matters:** The settings from that extension, or the work the script does, did not reach the user or machine on this refresh.
+
+**In practice:** The Group Policy client logs event 1085 in the System log when one client-side extension, such as Deployed Printer Connections or Folder Redirection, fails to apply its settings, and event 1130 when a startup, shutdown, logon or logoff script fails. The extension or the script is named in the event, with the error code. On the MDM Policy extension, 0x8018000A (MENROLL_E_DEVICE_ALREADY_ENROLLED) means the device is already enrolled in device management; Windows writes it at every refresh on hybrid-joined machines and it ships at Info. For scripts, file not found (2) and network name not found (67) mean the script path in the policy object no longer exists. The Microsoft-Windows-GroupPolicy/Operational log reports extension failures as events 6016 and 7016.
+
+**When to ignore:** 0x8018000A on the MDM Policy extension, which ships at Info.
+
+**What to check:**
+
+- Read the extension or script name and the code together.
+- For a script failure, open the script path from the device as the user it runs for.
+- Run `gpresult /h report.html` to see which policy objects applied and which extension reported errors.
+
+**Related:**
+
+- `group_policy_processing_failed`: the whole policy pass failing rather than one extension
+
+**Example:** A logon script assigned by a policy object points at a file that was deleted from the share.
+
+**Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/feeds/eventlog-system#group_policy_extension_apply_failed, https://sparklogs.com/reference/reasons/group_policy_extension_apply_failed.json
+
+## `group_policy_processing_failed`: group policy processing failed
+
+A Group Policy pass failed and did not apply.
+
+**Also reported by:** `win.eventlog.identity_security`
+
+**Severity:** Connectivity failures are Notice on a workstation and Warning on a server or an unknown host class. Directory and SYSVOL read failures are Warning; a SYSVOL read reported with no error code is Notice.
+
+**Why it matters:** The machine runs whatever policy it last cached until a later refresh succeeds, so new or changed settings, including security settings, do not reach it.
+
+**In practice:** The Group Policy client logs these in the System log when a processing pass fails. Event 1129 means no domain controller was reachable; a laptop that starts up at home or on guest Wi-Fi without a VPN writes it at every boot. Event 1030 means new settings could not be read from the directory, and event 1006 that the LDAP bind to a domain controller failed; a wrong password code (1326) points at the machine account. Event 1058 means the policy file named in the event (gpt.ini on the domain's SYSVOL share) could not be read; the code says why, such as path not found or network path not found. On a server or a desktop that never moves, the usual causes are DNS settings that do not point at the domain's DNS servers, a firewall between the machine and the domain controllers, a broken machine account, or SYSVOL that has not replicated to the controller the machine asked.
 
 **When to ignore:** On a laptop or other portable device that was off the corporate network, when later passes succeed.
 
@@ -1008,7 +1124,9 @@ Group Policy could not reach a domain controller and did not apply for that pass
 
 - Check whether the device was off the corporate network or VPN at the time.
 - On a fixed machine, check its DNS servers and run `nltest /dsgetdc:<domain>` to confirm it can find a domain controller.
-- Run `gpupdate /force`, then `gpresult /r`, to confirm policy applies once connectivity is back.
+- For a wrong password or LDAP bind failure, run `Test-ComputerSecureChannel` and repair the machine account with `-Repair`.
+- For a SYSVOL read failure, open the path in the event from the device and check DFS Replication on the domain controllers.
+- Run `gpupdate /force`, then `gpresult /r`, to confirm policy applies once the cause is fixed.
 
 **Related:**
 
@@ -1053,7 +1171,7 @@ Windows Hardware Error Architecture (WHEA) reported a hardware error that the ha
 
 **Why it matters:** Nothing has failed yet: the hardware caught and fixed the fault. Repeated corrected errors on one device are the early warning for a memory module, processor or PCIe device that may later fail outright.
 
-**In practice:** WHEA-Logger writes event 17 (a PCI Express error) or event 19 (a processor machine check) to the System log when the hardware corrects an error, with the error source and, for PCIe, the device. Event 1 at startup reports a corrected error kept by the firmware from the previous session; the line names where the details are, such as processor, memory or pcie, or details_in_firmware when only the firmware holds them.
+**In practice:** WHEA-Logger writes event 17 (a PCI Express error) or event 19 (a processor machine check) to the System log when the hardware corrects an error, with the error source and, for PCIe, the device. Event 47 is a corrected memory error, with the memory node, card, module and bank in the event details. Event 1 at startup reports a corrected error kept by the firmware from the previous session; the line names where the details are, such as processor, memory or pcie, or details_in_firmware when only the firmware holds them.
 
 **When to ignore:** An occasional corrected error with no growing rate and no uncorrected errors on the same device.
 
@@ -1333,6 +1451,33 @@ Another device on the network is using the same IP address as this machine.
 **Example:** A laptop joins the office network and finds a printer already using its address.
 
 **Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/feeds/eventlog-system#ip_address_conflict_detected, https://sparklogs.com/reference/reasons/ip_address_conflict_detected.json
+
+## `iscsi_target_connection_lost`: iSCSI target connection lost
+
+The iSCSI initiator lost its connection to a storage target, or could not connect to it.
+
+**Severity:** Warning or Info
+
+**Why it matters:** Disks on that target stall or disappear while the path is down; applications using them, such as file shares, databases or virtual machines, hang or fail until it reconnects.
+
+**In practice:** The iSCSI initiator (iScsiPrt) logs these in the System log. Event 1 means it could not connect to the target, event 7 that it could not send a request, event 20 that the connection was lost and will be retried, and event 49 that the target did not answer a task management request in time. Event 34 means it reconnected. The target address and error status are in the event's binary data. A network problem between the server and the storage, a storage controller failover, or a target that was restarted is the usual cause.
+
+**When to ignore:** A loss followed by event 34 within seconds during planned storage or network maintenance.
+
+**What to check:**
+
+- Look for event 34 after the loss: a reconnect within seconds is a path blip, none is a path that stayed down.
+- Check the iSCSI network: switch ports, cabling and jumbo frame settings on both sides.
+- Check the storage array's logs for a controller failover or a target restart at the same time.
+- On a server with several paths, check MPIO shows every path as healthy (`mpclaim -s -d`).
+
+**Related:**
+
+- `storage_controller_reset`: a local storage controller reset rather than a network path
+
+**Example:** A Hyper-V host loses its connection to the SAN for a few seconds during a switch firmware update, then reconnects.
+
+**Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/feeds/eventlog-system#iscsi_target_connection_lost, https://sparklogs.com/reference/reasons/iscsi_target_connection_lost.json
 
 ## `kerberos_cert_domain_unresolved`: kerberos cert domain unresolved
 
@@ -1670,6 +1815,34 @@ The device went to sleep.
 
 **Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/feeds/eventlog-system#os_sleep, https://sparklogs.com/reference/reasons/os_sleep.json
 
+## `os_thermal_hibernated`: Critical thermal hibernate
+
+Windows hibernated the machine because it reached its critical temperature.
+
+**Severity:** Warning on a workstation, Error on a server or a machine whose type is not known.
+
+**Why it matters:** The machine stopped without warning: the user's session paused and programs on a server stopped serving until it was resumed.
+
+**In practice:** Kernel-Power logs event 88 in the System log when an ACPI thermal zone reaches the hibernate temperature the firmware sets, and Windows hibernates the machine to protect it. The event names the thermal zone and that temperature in kelvin (353 K is 80 °C). Blocked vents or fans, a failed fan, dust, a hot room, or a laptop running heavy work on a soft surface are the usual causes.
+
+**When to ignore:** Never on a server. On a laptop, a single event under unusual conditions.
+
+**What to check:**
+
+- Check the fans and vents, and clean dust from the cooling path.
+- On a server, check the room temperature and the server management controller's fan and temperature logs.
+- Check for a BIOS or firmware update for the model; some fix fan control.
+- Look at what was running at the time: sustained full load on a machine with weak cooling is a common trigger.
+
+**Related:**
+
+- `thermal_cooling_engaged`: a thermal zone engaging cooling while the machine keeps running
+- `unexpected_shutdown`: a machine that stopped without a clean shutdown for any cause
+
+**Example:** A laptop rendering video on a bed overheats, and Windows hibernates it.
+
+**Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/feeds/eventlog-system#os_thermal_hibernated, https://sparklogs.com/reference/reasons/os_thermal_hibernated.json
+
 ## `os_wake`: os wake
 
 The device woke from sleep.
@@ -1953,6 +2126,32 @@ The device has the 2023 Secure Boot certificates and the boot manager signed wit
 **Example:** A laptop reports the KEK 2023, DB certificates and the 2023 boot manager in place.
 
 **Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/feeds/eventlog-system#secure_boot_certs_current, https://sparklogs.com/reference/reasons/secure_boot_certs_current.json
+
+## `secure_boot_database_update_applied`: secure boot database update applied
+
+Windows applied a Secure Boot database update to the firmware.
+
+**Severity:** Verbose
+
+**Why it matters:** None by itself. The firmware now trusts or refuses the boot components the update names.
+
+**In practice:** TPM-WMI writes these events in the System log when Windows servicing writes a Secure Boot database update to the firmware. Events 1034 and 1035 are a revocation list (DBX) update, the list of boot components the firmware refuses. Event 1036 is an allowed list (DB) update, which adds certificates the firmware trusts. Event 1037 is the DBX update that revokes the Microsoft Windows Production PCA 2011. Each update changes the Secure Boot measurements in PCR 7, which a BitLocker key sealed to PCR 7 depends on.
+
+**When to ignore:** Safe to pass over unless you are explaining a BitLocker recovery prompt or a Secure Boot change on this device.
+
+**What to check:**
+
+- If a BitLocker recovery prompt followed, check whether the drive was resealed after this event (BitLocker-API event 793 or 892 in the BitLocker Management log).
+
+**Related:**
+
+- `secure_boot_certs_current`: the 2023 certificates and boot manager in place
+- `secure_boot_update_failed`: a Secure Boot certificate or revocation update that did not apply
+- `tpm_boot_pcr_values_recorded`: the PCR 7 value the next boot records
+
+**Example:** After a monthly update, a desktop applies the latest Secure Boot DBX update.
+
+**Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/feeds/eventlog-system#secure_boot_database_update_applied, https://sparklogs.com/reference/reasons/secure_boot_database_update_applied.json
 
 ## `secure_boot_update_failed`: secure boot update failed
 
@@ -2455,11 +2654,11 @@ A server presented a TLS certificate that does not contain the name this machine
 
 **Why it matters:** The program's connection to that server fails, or, if the program ignores the check, it talks to a server whose identity is not proven.
 
-**In practice:** Schannel, the Windows TLS component, logs event 36884 in the System log, "The certificate received from the remote server does not contain the expected name", when a program on this machine connects to a server whose certificate lists other names. The message names neither the server nor the program. Connecting by IP address or short name to a server whose certificate lists only its full DNS name, a certificate missing one of the server's names, or a proxy or inspection device that presents its own certificate are the usual causes.
+**In practice:** Schannel, the Windows TLS component, logs event 36884 in the System log, "The certificate received from the remote server does not contain the expected name", when a program on this machine connects to a server whose certificate lists other names. The message names the server name the program expected and, on current Windows, the program that connected (the SSPI client process). Connecting by IP address or short name to a server whose certificate lists only its full DNS name, a certificate missing one of the server's names, or a proxy or inspection device that presents its own certificate are the usual causes.
 
 **What to check:**
 
-- Find the program and the name it connects to, from its own logs or settings, and compare it with the certificate's subject and Subject Alternative Names.
+- Read the expected server name and the program from the message, and compare the name with the subject and Subject Alternative Names of the certificate that server presents.
 - Point the program at a name the certificate lists, or reissue the certificate with the missing name.
 - If a proxy or inspection device is in the path, check whether it is meant to intercept this connection.
 
@@ -2527,15 +2726,16 @@ A remote client offered no cipher suite this host accepts, and the TLS handshake
 
 Windows could not create a TLS client credential for a program, so that program's outbound TLS connection could not start.
 
-**Severity:** Error (server) / Warning (workstation)
+**Severity:** Notice (error state 10013) / Error (server, other states) / Warning (workstation, other states)
 
 **Why it matters:** The program that asked for the credential cannot make the TLS connections that need it, so whatever integration it serves stops working; other programs' connections are unaffected.
 
-**In practice:** Schannel, the Windows TLS component, logs event 36871 in the System log, "A fatal error occurred while creating a TLS client credential", with an internal error state number. It is logged on the machine making the connection, and it repeats each time the program tries. On a server the program is usually a service other machines rely on, so it shows as Error; on a workstation, as Warning.
+**In practice:** Schannel, the Windows TLS component, logs event 36871 in the System log, "A fatal error occurred while creating a TLS client credential", with an internal error state number. It is logged on the machine making the connection, and it repeats each time the program tries. Error state 10013 is the Winsock access-denied number: the TLS settings on the device refused what the program asked for. It is by far the most common state and is recorded at Notice, one row per program each hour with the count of the repeats. For other states, on a server the program is usually a service other machines rely on, so it shows as Error; on a workstation, as Warning.
 
 **What to check:**
 
-- Find which program or service fails to connect at the same times, from its own logs.
+- Read the calling program on the event, then find what it fails to connect to from its own logs.
+- For error state 10013, compare the TLS protocol and cipher settings on the device (SCHANNEL keys under `HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders`) with what the program needs.
 - If it uses a client certificate, check that the certificate is in the expected store, is valid, and that its private key is readable by the calling account.
 - Check for a recent change to this machine's TLS protocol or cipher settings.
 
@@ -2667,7 +2867,7 @@ The TPM measurements of a boot that reached Windows: one value per PCR, and one 
 **What to check:**
 
 - To explain a recovery prompt, compare the fingerprint of the last boot before the prompt with the first boot after it. If they differ, compare boot_pcrs to find which PCR changed.
-- A PCR 7 change: check for Secure Boot certificate or DBX updates (Microsoft-Windows-TPM-WMI events in the System log, such as 1801) and firmware setting changes.
+- A PCR 7 change: check for secure_boot_database_update_applied events (TPM-WMI 1034 to 1037 in the System log) before it, and for firmware setting changes.
 - A PCR 0 or 2 change: check for a firmware update or a docking station or graphics card with its own option ROM.
 
 **Related:**
@@ -2676,6 +2876,7 @@ The TPM measurements of a boot that reached Windows: one value per PCR, and one 
 - `bitlocker_recovery_password_used`: the recovery password that started Windows after a refused unlock
 - `bitlocker_tpm_binding_mismatch`: the boot where a PCR no longer matched what BitLocker sealed the key to
 - `bitlocker_tpm_unlock_failed`: the TPM refusing the BitLocker key at boot
+- `secure_boot_database_update_applied`: a Secure Boot database update, which changes PCR 7
 - `tpm_authorization_refused`: a TPM policy or PCR check refused after the boot measurements changed
 
 **Example:** A laptop boots and logs its PCR 0, 2, 4, 5, 7 and 11 values with Secure Boot on.
@@ -2946,6 +3147,32 @@ Windows recorded an error dialog that an application or Windows itself showed.
 **Example:** An application shows a dialog saying it has timed out and should be restarted.
 
 **Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/feeds/eventlog-system#win_app_error_dialog_shown, https://sparklogs.com/reference/reasons/win_app_error_dialog_shown.json
+
+## `win_battery_critical_action_triggered`: Battery trigger action
+
+The battery ran down to a trigger level in the power plan and Windows took the action the plan sets.
+
+**Severity:** Notice
+
+**Why it matters:** When the action is sleep, hibernate or shut down, the machine stopped on its own; unsaved work in programs that do not survive that is lost.
+
+**In practice:** Kernel-Power logs event 524 in the System log when the battery reaches a trigger level in the power plan; its text is a number followed by "Battery Trigger Met". The number is the event's Index field, which Microsoft does not document, so the event does not say which trigger was met. The event carries the charge left, whether the machine was on mains power, and the action the plan takes: 2 sleep, 3 hibernate, 4 shut down. A machine that shut down this way logs an unexpected shutdown at its next start if the action did not complete cleanly.
+
+**When to ignore:** An occasional event on a laptop left on battery.
+
+**What to check:**
+
+- Check the battery health report (`powercfg /batteryreport`) for a worn battery.
+- If the machine was on mains power, check the charger and the charging port.
+- Check the battery levels and actions in the power plan if a different action is wanted.
+
+**Related:**
+
+- `unexpected_shutdown`: the machine stopped without a clean shutdown, which a drained battery can cause
+
+**Example:** A laptop left on battery overnight reaches 5 percent and Windows hibernates it.
+
+**Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/feeds/eventlog-system#win_battery_critical_action_triggered, https://sparklogs.com/reference/reasons/win_battery_critical_action_triggered.json
 
 ## `winre_servicing_failed`: winre servicing failed
 

@@ -1576,9 +1576,9 @@ A scheduled task was created.
 
 **Why it matters:** The task can run a program on a schedule, at startup or at sign-in, as whatever account it was given. An unexpected task is a common way for an intruder to keep access.
 
-**In practice:** Security log, event ID 4698, "A scheduled task was created", with the task name, the account that created it and the task's XML definition: what it runs, when and as whom. It appears only when Audit Other Object Access Events is on. Tasks Windows creates for itself under the \Microsoft\ folder are reported at Display. Any other task is Notice, including the ones management agents and updaters create as SYSTEM.
+**In practice:** Security log, event ID 4698, "A scheduled task was created", with the task name, the account that created it and the task's XML definition: what it runs, when and as whom. It appears only when Audit Other Object Access Events is on. Tasks Windows creates for itself, under the \Microsoft\ folder or as one of the few Microsoft tasks registered outside it such as the Edge and OneDrive updaters, are reported at Display. Any other task is Notice, including the ones management agents and other updaters create as SYSTEM.
 
-**When to ignore:** Tasks Windows creates under \Microsoft\ and tasks from the client's known management, update and security software.
+**When to ignore:** Tasks Windows creates for itself, under \Microsoft\ or as the Edge and OneDrive updaters, and tasks from the client's known management, update and security software.
 
 **What to check:**
 
@@ -1606,7 +1606,7 @@ A scheduled task was deleted.
 
 **Why it matters:** Whatever the task did will not happen again, and nothing restores it. A deleted backup or maintenance job fails silently.
 
-**In practice:** Security log, event ID 4699, "A scheduled task was deleted", with the task name and the account that deleted it. It appears only when Audit Other Object Access Events is on. Uninstalls, updates and management agents delete tasks all the time. A task deleted soon after it was created and ran is what an intruder cleaning up leaves behind. Tasks Windows deletes under its own \Microsoft\ folder are reported at Display; any other task at Notice.
+**In practice:** Security log, event ID 4699, "A scheduled task was deleted", with the task name and the account that deleted it. It appears only when Audit Other Object Access Events is on. Uninstalls, updates and management agents delete tasks all the time. A task deleted soon after it was created and ran is what an intruder cleaning up leaves behind. Tasks Windows deletes for itself, under its own \Microsoft\ folder or as one of the few Microsoft tasks registered outside it such as the Edge and OneDrive updaters, are reported at Display; any other task at Notice.
 
 **When to ignore:** Deletions by uninstalls, updates and the client's management tools.
 
@@ -1661,7 +1661,7 @@ An existing scheduled task's definition was changed.
 
 **Why it matters:** The task keeps its name but can now run something else, on a different schedule or as a different account. Editing a trusted task is a quieter way to persist than creating a new one.
 
-**In practice:** Security log, event ID 4702, "A scheduled task was updated", with the task name, the account and the new XML definition. It appears only when Audit Other Object Access Events is on. Software updates rewrite their own tasks often. Tasks Windows updates under its own \Microsoft\ folder are reported at Display; any other task at Notice.
+**In practice:** Security log, event ID 4702, "A scheduled task was updated", with the task name, the account and the new XML definition. It appears only when Audit Other Object Access Events is on. Software updates rewrite their own tasks often. Tasks Windows updates for itself, under its own \Microsoft\ folder or as one of the few Microsoft tasks registered outside it such as the Edge and OneDrive updaters, are reported at Display; any other task at Notice.
 
 **When to ignore:** Updates by Windows and by the client's known software to their own tasks.
 
