@@ -516,6 +516,9 @@ values:
     - other_error
     - pcr_mismatch
     - pcr_values_unreadable
+    - dbx
+    - db
+    - pca_2011_revoked
     - pcrs_mismatched
     - protector_unusable
     - required_check_failed

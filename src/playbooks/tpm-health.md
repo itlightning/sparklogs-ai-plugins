@@ -16,8 +16,12 @@ Attestation checks run on a schedule and at boot, so one failed check is one rea
 Each reason's arm is on `sparklogs.reason_variant` (LQL).
 
 **Device health first.** `latest_state` (value) on the `system_info` (value) topic: `sparklogs.data.system_info.tpm_present` (col) and `sparklogs.data.system_info.tpm_version` (col) say whether Windows sees a TPM now and which specification it reports.
-`device_overview` (value) over the window: its `events` (col) carry `tpm_presence_changed` (value) (a TPM appeared or disappeared, usually a firmware setting, firmware update or board replacement), `tpm_version_changed` (value) and `bios_version_changed` (value).
-A TPM that disappeared or changed version explains every TPM error after it. Look for that change before reading event 17; other changes before the first error: `playbooks/what-changed.md`.
+On a TPM 2.0 the same row names the chip: `sparklogs.data.system_info.tpm_manufacturer` (LQL) is the maker's vendor ID (`IFX` (other) Infineon, `INTC` (other) Intel firmware TPM, `AMD` (other) AMD firmware TPM, `NTC` (other) Nuvoton, `STM` (other) STMicroelectronics, `MSFT` (other) Microsoft, as a virtual machine's TPM reports), `sparklogs.data.system_info.tpm_firmware_version` (LQL) the firmware the chip runs, and `sparklogs.data.system_info.tpm_spec_revision` (LQL) the specification revision it implements.
+Check the maker and firmware version against the maker's security advisories.
+These three are absent on a TPM 1.2 and when the TPM did not answer the agent: their absence does not mean there is no TPM, which `sparklogs.data.system_info.tpm_present` (col) answers.
+`device_overview` (value) over the window: its `events` (col) carry `tpm_presence_changed` (value) (a TPM appeared or disappeared, usually a firmware setting, firmware update or board replacement), `tpm_version_changed` (value), `tpm_chip_changed` (value) (the TPM now comes from another maker, usually a firmware setting switching between the processor's firmware TPM and a discrete chip), `tpm_firmware_changed` (value) (the same TPM runs another firmware version) and `bios_version_changed` (value).
+Each takes effect at a restart, so it follows the restart that applied it.
+A TPM that disappeared, changed version or changed maker explains every TPM error after it. A firmware change can start or end a firmware defect. Look for that change before reading event 17; other changes before the first error: `playbooks/what-changed.md`.
 
 **Event 17: routine or failing.**
 
@@ -55,13 +59,13 @@ Arm `init_failed` (value) is any other initialization failure, with the boot pos
 
 **Well-known causes.**
 
-- TPM firmware with a known defect, fixed by the device maker's TPM or BIOS update. A failure that starts or stops at `bios_version_changed` (value) points at the firmware.
-- The TPM was cleared, reset or switched between discrete and firmware TPM in the BIOS: `tpm_presence_changed` (value) or `tpm_version_changed` (value). Windows Hello and BitLocker keys sealed to the old TPM stop working, and a BitLocker drive asks for its recovery password: `playbooks/bitlocker-recovery.md`.
+- TPM firmware with a known defect, fixed by the device maker's TPM or BIOS update. A failure that starts or stops at `tpm_firmware_changed` (value) or `bios_version_changed` (value) points at the firmware; `sparklogs.data.system_info.tpm_firmware_version` (LQL) is the version to look up.
+- The TPM was cleared, reset or switched between discrete and firmware TPM in the BIOS: `tpm_presence_changed` (value), `tpm_version_changed` (value) or `tpm_chip_changed` (value). Windows Hello and BitLocker keys sealed to the old TPM stop working, and a BitLocker drive asks for its recovery password: `playbooks/bitlocker-recovery.md`.
 - Dictionary-attack lockout after repeated wrong PINs: `tpm_authorization_refused` (value) at Warning, every authorization refused. It clears after the lockout period, or when the TPM owner resets it.
 - A failing TPM chip or system board: `tpm_hardware_failed` (value), or `failure_mode` (value) that returns after each restart. Other hardware errors on the same device: `playbooks/hardware-faults.md`.
 
 **One device or many.** Before calling a TPM event significant, count `tpm_command_failed` (value) or `tpm_attestation_check_failed` (value) across the organization by `source` (LQL), with the arm beside it.
-The same reason and arm on many devices that work is a model or firmware trait. One device with a high count among peers that log none is that device.
+The same reason and arm on many devices that work is a model or firmware trait: compare the devices' `sparklogs.data.system_info.tpm_manufacturer` (LQL) and `sparklogs.data.system_info.tpm_firmware_version` (LQL) to see whether one maker or firmware carries it. One device with a high count among peers that log none is that device.
 A failed Required check on every virtual machine in the organization is the hypervisor's TPM, not a fault.
 
 **Findings.** Lead with the failing population and its count on the device, then the peer comparison.
