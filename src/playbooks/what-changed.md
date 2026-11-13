@@ -51,6 +51,12 @@ Change signals that carry no kind:
 For the full list, read the device's change timeline, oldest first. For what is on the device now against an earlier day, read the latest state with the changes after it.
 Which `query_device_health` (tool) reading answers each: `guides/device-state-fields.md` (**Choose the view**).
 
+**Busy devices.** A device view lists only a bounded number of each device's newest changes, and routine firewall rule churn (`firewall_rule_created` (value), `firewall_rule_deleted` (value), `firewall_rule_changed` (value)) can fill it, so the changes just before an onset fall out of the list. A short or empty list before the onset on such a device is not "nothing changed".
+
+1. Re-anchor: read the device again over a window that ends at the onset and starts about 48 hours before it, so the changes it keeps cover that stretch.
+2. If that list still looks full, do not keep narrowing the window. Ask for the changes directly: `query_device_health` (tool) grouped by reason over changes in the pre-onset window gives every change reason on the device with a count and its first and last time, however many there are.
+3. Then read the event timeline of changes for the reasons that matter, oldest first, leaving out the firewall rule churn or keeping only changes above Verbose. Neither read is limited by the device view's list.
+
 **Events: the sweep.** Every change on the device in the window except firewall rules:
 
 ```lql
@@ -61,6 +67,7 @@ Group by `sparklogs.config_change.type` (LQL), `sparklogs.config_change.basis` (
 Then group by `sparklogs.config_change.type` (LQL) and `sparklogs.config_change.target` (LQL) inside the types that could reach the failing component, and read `sparklogs.config_change.target_name` (LQL) for the name.
 Then group by `sparklogs.reason` (LQL) and `sparklogs.config_change.action` (LQL), and read what moved in `sparklogs.config_change.changes[].field` (LQL), with its old and new values.
 Firewall rules are left out because applications and Store packages churn them by the hundred; bring them back for a connectivity symptom (below).
+Find changes by `sparklogs.kind = config_change` (LQL) and `severity` (LQL), never by `sparklogs.class` (LQL): firewall rule change rows carry no class.
 
 A product whose name carries its version arrives as `installed_product_removed` (value) and `installed_product_installed` (value) for the old and new name at the same reading: that is one update.
 A driver package renumbered by its update carries `sparklogs.config_change.renamed_from` (LQL).
@@ -150,6 +157,7 @@ Use the type and target exactly as the sweep returned them. Then count the sympt
 - The same symptom on several devices at the same time with no shared change: the application's server or licensing, DHCP or DNS on that network, a pushed policy. Note the devices and the minute it started.
 
 **Findings.** Lead with the onset time and how it is known, then the window.
+Lead the change list with changes at Notice and above. Give the firewall rule churn one line with its count ("N firewall rule changes, not listed") unless the symptom is connectivity.
 List candidates in rank order, each with its basis, its time or time range against the onset, what links it to the failing component, and the fleet contrast.
 "No change on this device explains the onset" is a finding when only routine churn precedes it and expiry, disk space and security detections (**Not a change**, above) were checked; say which kinds of change were checked.
 Never call a change the cause on timing alone. The discriminators are a device with the change and without the symptom, a device with the symptom and without the change, and a rollback (`skills/sparklogs-analyze-cause/references/hypothesis-generation.md`).
