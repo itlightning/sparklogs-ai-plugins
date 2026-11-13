@@ -53,7 +53,14 @@ Group by `sparklogs.reason` (LQL), `win.eventlog.system.tpm_attestation_health_s
 **No usable TPM at boot.** `tpm_initialization_failed` (value) on `win.eventlog.platform` (value) is Kernel-Boot event 235. Arm `no_usable_tpm` (value) means the boot environment found no TPM it could use: a virtual machine without a virtual TPM logs it at every boot.
 Arm `init_failed` (value) is any other initialization failure, with the boot position in `win.eventlog.platform.tpm_init_position` (LQL). It says the boot could not initialize the TPM, not that the TPM is absent.
 
-**One device or many.** Before calling a TPM event significant, run the same reason over the organization: one noun `group_by=["source"]` over `tpm_command_failed` (value) or `tpm_attestation_check_failed` (value).
+**Well-known causes.**
+
+- TPM firmware with a known defect, fixed by the device maker's TPM or BIOS update. A failure that starts or stops at `bios_version_changed` (value) points at the firmware.
+- The TPM was cleared, reset or switched between discrete and firmware TPM in the BIOS: `tpm_presence_changed` (value) or `tpm_version_changed` (value). Windows Hello and BitLocker keys sealed to the old TPM stop working, and a BitLocker drive asks for its recovery password: `playbooks/bitlocker-recovery.md`.
+- Dictionary-attack lockout after repeated wrong PINs: `tpm_authorization_refused` (value) at Warning, every authorization refused. It clears after the lockout period, or when the TPM owner resets it.
+- A failing TPM chip or system board: `tpm_hardware_failed` (value), or `failure_mode` (value) that returns after each restart. Other hardware errors on the same device: `playbooks/hardware-faults.md`.
+
+**One device or many.** Before calling a TPM event significant, count `tpm_command_failed` (value) or `tpm_attestation_check_failed` (value) across the organization by `source` (LQL), with the arm beside it.
 The same reason and arm on many devices that work is a model or firmware trait. One device with a high count among peers that log none is that device.
 A failed Required check on every virtual machine in the organization is the hypervisor's TPM, not a fault.
 
