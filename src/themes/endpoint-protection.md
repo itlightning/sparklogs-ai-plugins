@@ -10,3 +10,4 @@ Explore: `guides/stream-kinds/wel-defender.md`.
 Security-channel audit is `themes/windows-security-and-audit.md`. Do not mix them.
 
 **Pivots.** Protection disabled or threat detections: filter `subsource = "win.defender.eventlog"`, group by `sparklogs.reason` (LQL). Device health is supporting (was the agent observing), not the Defender verdict.
+Protection turned off by a script: who ran it is in `playbooks/powershell-script-blocks.md`.

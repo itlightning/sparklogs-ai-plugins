@@ -3,7 +3,7 @@
   "source": {
     "repository": "sparklogs-source-library",
     "branch": "main",
-    "commit": "d6a7c8dd437ebf3459d41ff1ea70e54757f60713",
+    "commit": "ac6743506b657f9bad298ced51afe85b2fdc4891",
     "generatedSubpath": "docs/generated-public"
   },
   "consumption": {
@@ -280,6 +280,27 @@
     },
     {
       "module": "win.eventlog.apps",
+      "artifacts": [
+        {
+          "file": "README.md",
+          "summary": "feed index: what each artifact answers and the order to read them in"
+        },
+        {
+          "file": "fields.md",
+          "summary": "what exists at rest, what curates it, and the raw fallback when nothing does"
+        },
+        {
+          "file": "enums.md",
+          "summary": "the closed token vocabularies that are safe to group by"
+        },
+        {
+          "file": "reasons.md",
+          "summary": "what each reason means (public summary, severity, impact)"
+        }
+      ]
+    },
+    {
+      "module": "win.powershell.eventlog",
       "artifacts": [
         {
           "file": "README.md",

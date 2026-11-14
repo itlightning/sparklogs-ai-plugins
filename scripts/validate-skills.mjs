@@ -29,44 +29,9 @@ const SHARED_REFERENCES = [
 ];
 const SKILL_LOCAL_REFERENCES = new Set(['output-template.md', 'hypothesis-generation.md']);
 
-// Pinned snapshot of `service_vocabulary` from the SparkLogs source-library registry
-// (registry.yaml). The registry is the authority and is additive-only; this list is the
-// sync point for a standalone checkout of this repo. Adding a registry value requires
-// adding it here AND as a row in src/guides/service-taxonomy.md in the same change;
-// validateServiceTaxonomy() fails until both agree.
-const REGISTRY_SERVICE_VALUES = [
-  'storage',
-  'patching',
-  'auth',
-  'security_audit',
-  'networking',
-  'vpn',
-  'file_sharing',
-  'file_sync',
-  'printing',
-  'backup',
-  'os_stability',
-  'app_stability',
-  'hardware',
-  'performance',
-  'user_profiles',
-  'remote_access',
-  'rmm',
-  'endpoint_protection',
-  'device_management',
-  'directory_services',
-  'certificates',
-  'virtualization',
-  'clustering',
-  'database',
-  'web',
-  'email',
-  'time_sync',
-  'licensing',
-  'telephony',
-  'scheduled_tasks',
-  'inventory',
-];
+// `service_vocabulary` keys from the source-library registry, written by `yarn sync-generated`
+// and drift-checked by its --check. src/guides/service-taxonomy.md must carry exactly these rows.
+const SERVICE_VOCABULARY_FILE = path.join(ROOT, 'scripts', 'generated-service-vocabulary.json');
 
 async function exists(file) {
   try {
@@ -148,11 +113,9 @@ async function validateServiceTaxonomy() {
     const match = line.match(/^\| `([a-z0-9_]+)`(?: \(value\))? \|/);
     if (match) rows.add(match[1]);
   }
-  const expected = new Set(REGISTRY_SERVICE_VALUES);
-  if (expected.size !== REGISTRY_SERVICE_VALUES.length) {
-    throw new Error('REGISTRY_SERVICE_VALUES contains duplicates');
-  }
-  const missing = REGISTRY_SERVICE_VALUES.filter((value) => !rows.has(value));
+  const registryValues = JSON.parse(await fs.readFile(SERVICE_VOCABULARY_FILE, 'utf8'));
+  const expected = new Set(registryValues);
+  const missing = registryValues.filter((value) => !rows.has(value));
   if (missing.length) {
     throw new Error(`service-taxonomy.md lacks rows for registry values: ${missing.join(', ')}`);
   }

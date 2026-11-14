@@ -16,6 +16,7 @@ Search for the heading "## `<code>`" or a word from the reason's label. Do not r
 | `filesystem_corruption` | filesystem corruption | event | Error | `storage` |  |
 | `storage_controller_reset` | storage controller reset | event | Warning to Error | `storage` |  |
 | `storage_device_command_failed` | storage device command failed | event | Debug to Notice | `storage` |  |
+| `storage_request_slow` | Storage request slow | event | Display | `storage` |  |
 | `volume_mount_failed` | volume mount failed | event | Info to Warning | `storage` | benign possible |
 
 ## `disk_bad_block`: disk bad block
@@ -241,6 +242,32 @@ A storage device did not complete a command, and reported sense data saying why.
 **Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/feeds/eventlog-storage#storage_device_command_failed, https://sparklogs.com/reference/reasons/storage_device_command_failed.json
 
 Sense data is the device's own account of a failure, so it is the one place a drive's answer is recorded rather than inferred. Empty removable slots and unsupported-command probes are not kept.
+
+## `storage_request_slow`: Storage request slow
+
+One request to a disk took longer than the storage driver's threshold.
+
+**Severity:** Display
+
+**Why it matters:** Programs reading or writing that disk paused while the request was outstanding.
+
+**In practice:** Storport logs event 557 in Microsoft-Windows-Storage-Storport/Operational when an I/O took longer than its threshold, with the disk address, the disk's model and serial, the threshold and how long the request took. SparkLogs keeps one row per disk path and command every five minutes, with a count of the repeats. A busy or failing disk, a saturated storage controller, a slow SAN or virtual disk, or power management on the disk is the usual cause.
+
+**When to ignore:** An occasional slow request during backups or heavy maintenance on a healthy disk.
+
+**What to check:**
+
+- Read the disk model, serial and duration, and check whether the same disk repeats.
+- Check the disk's health with the vendor tool or `Get-PhysicalDisk | Get-StorageReliabilityCounter`.
+- On a virtual machine, check the latency of the datastore or SAN behind the disk.
+
+**Related:**
+
+- `storage_controller_reset`: the driver reset the path after a request did not complete
+
+**Example:** A file server's data disk takes more than 30 seconds to answer one request during a backup.
+
+**Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/feeds/eventlog-storage#storage_request_slow, https://sparklogs.com/reference/reasons/storage_request_slow.json
 
 ## `volume_mount_failed`: volume mount failed
 

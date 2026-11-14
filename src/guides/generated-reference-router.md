@@ -12,21 +12,23 @@ the wrong one.
 
 ## Route by question shape
 
-| The question you are holding | Artifact | Read mode | What you get |
-|---|---|---|---|
-| "Which event family carries X?" | `fields/INDEX.md`, then one `fields/family-*.md` | Index, then one table | the stable path, type, unit, and meaning for each envelope field |
-| "Which state topic carries X?" | `fields/INDEX.md`, then one `fields/topic-*.md` | Index, then one table | the stable path, type, unit, and meaning for each topic reading |
-| "Which field carries X on this source, and what happens when it is missing?" | `fields.md` | Search field name | every promoted field, what curates it, and the raw provider fallback when nothing does |
-| "What values can this token take, and is it safe to group by?" | `enums.md` | **Grep only** (code or `##`) | the closed vocabularies, with what each token means |
-| "What does this status/HRESULT/MSI/constant mean?" | `enums.md` | **Grep only** | same as above; pick the feed from the event `subsource` (LQL) |
-| "What does this `sparklogs.reason` (LQL) value mean?" | `reasons.md` | Summary table, then one `##` | public summary, severity, impact for that reason |
-| "How do I actually answer this investigation question here?" | `recipes.md` | One section | worked pivots for that source, written against real field names |
-| "Is this pattern string something the pack meant to produce?" | `patterns.md` | Search one heading | a decision procedure: expected, unexpected, or uncurated |
-| "I know this data as ECS or OCSF, what is it called here?" | `mapping-ecs.md` / `mapping-ocsf.md` | One section | anchors from the external taxonomy onto these fields |
-| "What is on this box right now?" | none of the above | n/a | inventory rows from the MCP tools, not reference content |
-| "How do I explore this kind of stream?" | `guides/stream-kinds.md` | One guide | feed → kind → explore ladder. Not `fields.md` |
-| "What does this `app` (LQL) token mean?" | `guides/app-vocabulary.md` | Search token | pack-minted product identity; empty is normal |
-| "Unfamiliar `pattern_hash` (LQL), what is this shape?" | MCP `describe_pattern` (tool) first | Tool, then grep | pattern text, examples, fleet spread; then `reasons.md` / `recipes.md` if needed |
+| The question you are holding | Artifact | What you get |
+|---|---|---|
+| "Which event family carries X?" | `fields/INDEX.md`, then one `fields/family-*.md` | the stable path, type, unit, and meaning for each envelope field |
+| "Which state topic carries X?" | `fields/INDEX.md`, then one `fields/topic-*.md` | the stable path, type, unit, and meaning for each topic reading |
+| "Which field carries X on this source, and what happens when it is missing?" | `fields.md` | every promoted field, what curates it, and the raw provider fallback when nothing does |
+| "What values can this token take, and is it safe to group by?" | `enums.md` | the closed vocabularies, with what each token means |
+| "What does this status/HRESULT/MSI/constant mean?" | `enums.md` | same as above; pick the feed from the event `subsource` (LQL) |
+| "What does this `sparklogs.reason` (LQL) value mean?" | `reasons.md` | public summary, severity, impact for that reason |
+| "How do I actually answer this investigation question here?" | `recipes.md` | worked pivots for that source, written against real field names |
+| "Is this pattern string something the pack meant to produce?" | `patterns.md` | a decision procedure: expected, unexpected, or uncurated |
+| "I know this data as ECS or OCSF, what is it called here?" | `mapping-ecs.md` / `mapping-ocsf.md` | anchors from the external taxonomy onto these fields |
+| "What is on this box right now?" | none of the above | inventory rows from the MCP tools, not reference content |
+| "How do I explore this kind of stream?" | `guides/stream-kinds.md` | feed → kind → explore ladder. Not `fields.md` |
+| "What does this `app` (LQL) token mean?" | `guides/app-vocabulary.md` | pack-minted product identity; empty is normal |
+| "Unfamiliar `pattern_hash` (LQL), what is this shape?" | MCP `describe_pattern` (tool) first | pattern text, examples, fleet spread; then `reasons.md` / `recipes.md` if needed |
+
+How much of each artifact to read (grep, one section, summary table first): the read-mode table in the skill's corpus block.
 
 Two shapes deserve their own line because they are the ones people get wrong:
 
@@ -42,10 +44,10 @@ Two shapes deserve their own line because they are the ones people get wrong:
 
 1. Resolve the source. A ticket names a machine and a symptom; a query result names a `subsource` (LQL).
    The `subsource` (LQL) IS the module id, and it works in both directions. Given an event carrying
-   `subsource = win.eventlog.security`, the module is `feeds/win.eventlog.security/`. Given a
+   `subsource = win.eventlog.security` (LQL), the module is `feeds/win.eventlog.security/`. Given a
    module you want to query, the module id IS the LQL scoping predicate:
 
-   ```
+   ```lql
    subsource = "win.eventlog.security"
    ```
 
@@ -54,14 +56,16 @@ Two shapes deserve their own line because they are the ones people get wrong:
 2. Open that module's `README.md`. It is the module index and it is short.
 3. Open the one artifact the table above points at.
 
-If no module directory exists for a subsource, the source is uncurated or its reference set has not
-been generated yet. Fall back to `message` (LQL), `pattern` (LQL), `severity` (LQL) and the raw provider payload, and
-say in your findings that you were reading uncurated text.
+If no module directory exists for a subsource, it is ingest-key data or an agent feed whose reference
+is not in this plugin: `sent_via` (col) on `list_sources` (tool) says which. An agent feed can still carry
+`sparklogs.reason` (LQL); group by it before falling back to `message` (LQL), `pattern` (LQL), `severity` (LQL) and the raw
+provider payload, and say in your findings when you were reading uncurated text.
 
 ## What this content is not
 
 - **Not separate device-health column names.** The generated field reference uses the same paths as
-  `query_device_health` (tool) columns and `query_logs` (tool) filters.
+  `query_device_health` (tool) condition, timeline and latest_state columns and `query_logs` (tool) filters.
+  The device-view result sets use short names instead (`guides/device-state-fields.md`, **Result sets**).
 - **Not a severity table.** Severity is a shared ladder across every source and is documented once,
   in `category-classes.md`. A module never defines its own bands.
 - **Not exhaustive about what exists at rest.** A field is listed once curation promotes
@@ -154,6 +158,13 @@ say in your findings that you were reading uncurated text.
 - `feeds/win.eventlog.apps/fields.md`: what exists at rest, what curates it, and the raw fallback when nothing does
 - `feeds/win.eventlog.apps/enums.md`: the closed token vocabularies that are safe to group by
 - `feeds/win.eventlog.apps/reasons.md`: what each reason means (public summary, severity, impact)
+
+### `win.powershell.eventlog`
+
+- `feeds/win.powershell.eventlog/README.md`: feed index: what each artifact answers and the order to read them in
+- `feeds/win.powershell.eventlog/fields.md`: what exists at rest, what curates it, and the raw fallback when nothing does
+- `feeds/win.powershell.eventlog/enums.md`: the closed token vocabularies that are safe to group by
+- `feeds/win.powershell.eventlog/reasons.md`: what each reason means (public summary, severity, impact)
 
 ### `win.servicing.cbs`
 

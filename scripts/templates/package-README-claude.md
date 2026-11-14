@@ -6,7 +6,7 @@ Investigation skills for SparkLogs MCP.
 
 - `skills/`: `sparklogs-ask`, `sparklogs-investigate`, `sparklogs-analyze-cause`, `sparklogs-feedback`. Each skill carries the reference corpus it cites under its own references directory, so a skill resolves its citations without reaching outside its folder (including Claude Desktop, which mounts only `skills/`).
 - `commands/`: `/sparklogs:sparklogs-summary`, `/sparklogs:sparklogs-explain`. Ask, investigate, analyze-cause, and feedback are skills (plain language). Claude Code namespaces the filename, so these look doubled; Desktop's picker shows `sparklogs-summary` / `sparklogs-explain`.
-- `agents/`: subagents for pattern enumeration, clustering, and log summarization.
+- `agents/`: subagents for pattern enumeration and log summarization.
 - `.mcp.json`: the SparkLogs MCP server, transport `http`. Claude discovers it at the plugin root.
 
 ## Install

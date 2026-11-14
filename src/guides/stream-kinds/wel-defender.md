@@ -1,7 +1,7 @@
 # Kind: WEL Defender
 
-Scope **`subsource = "win.defender.eventlog"`**.
-Group **`winlog.event_id` (LQL) / `sparklogs.reason` (LQL) / `pattern` (LQL)**.
+Scope **`subsource = "win.defender.eventlog"` (LQL)**.
+Group **`event_id` (LQL) / `sparklogs.reason` (LQL) / `pattern` (LQL)**.
 **`event_data.*` is expected** on this channel.
 
 One publisher is typical, so `provider_name` (LQL) is not the split.
@@ -10,7 +10,7 @@ One publisher is typical, so `provider_name` (LQL) is not the split.
 ## Explore
 
 1. Scope this `subsource` (LQL).
-2. Group `winlog.event_id` (LQL) / `sparklogs.reason` (LQL) / `pattern` (LQL).
+2. Group `event_id` (LQL) / `sparklogs.reason` (LQL) / `pattern` (LQL).
 3. Read **`event_data.*`**.
 4. Theme: `themes/endpoint-protection.md`.
 

@@ -34,8 +34,6 @@ args:
   - aggregate
   - bucket
   - comment
-  - device_classes
-  - device_roles
   - end
   - external_investigation_id
   - field_match
@@ -45,6 +43,10 @@ args:
   - full_length_values
   - group_by
   - group_by_reason
+  - having
+  - host_classes
+  - host_roles
+  - image
   - having_lql
   - include_agents
   - include_examples
@@ -53,6 +55,7 @@ args:
   - kinds
   - limit
   - lql
+  - metric
   - min_severity
   - offset
   - order_by
@@ -60,6 +63,7 @@ args:
   - path_match
   - path_prefix
   - pattern_hashes
+  - query_scope
   - psa_client_id
   - query
   - query_id
@@ -67,18 +71,46 @@ args:
   - rmm_client_id
   - sample
   - select
+  - source
+  - sources
   - session_detail
   - start
   - subject
   - tier
   - type
+  - unhealthy_collection_only
 
 # Union of MCP response headers (health fieldsets, list_sources, resolve_scope,
 # counts, describe_pattern, envelope). A wire path (sparklogs.*) is a col too
 # whenever a tool renders it under that dotted name (device-health does, for
 # every wire field it lifts); resolve_scope's own flat "kind" is unrelated.
 cols:
+  - psa_client_id
+  - rmm_client_id
+  - busy_pct_avg
+  - class
+  - collector_source_kind
+  - cpu_pct_avg
+  - entry
+  - changes_capped
+  - occurrence_count
+  - instance
+  - is_busiest_disk
+  - is_open
+  - label
+  - media
+  - queue_depth_avg
+  - reason
+  - resident_bytes_avg
+  - summary.query_scope
+  - topic
   - advisories
+  - clearing_since
+  - closes_in_about
+  - bytes_ingested
+  - summary.feed_health
+  - update_failure_reason
+  - update_status
   - affected_agents
   - affected_senders
   - affected_sources
@@ -153,6 +185,8 @@ cols:
   - sparklogs.config_change.target_name
   - sparklogs.config_change.type
   - sparklogs.data.network_adapters.adapter_class
+  - sparklogs.data.system_info.tpm_present
+  - sparklogs.data.system_info.tpm_version
   - sparklogs.delta.id
   - sparklogs.delta.prev_id
   - sparklogs.display_name
@@ -205,6 +239,12 @@ cols:
   - filter_lql
   - summary.refinable_results
   - refine_example
+  - holds
+  - narrow_by
+  - pid
+  - untrusted_data_block_tag
+  - untrusted_data_json_paths
+  - connections
   - unavailable
   - truncated
   - header
@@ -254,7 +294,11 @@ cols:
 
 # Resident LQL: query-engine / wire fields the pack field tables do not own.
 # Module paths (win.eventlog.*) come from the library harvest.
+# Each entry must be in scripts/fixtures/lql-live-fields.txt or the pack harvest, and each
+# lql_families prefix must prefix a field in one of them (lint-identifier-tags.mjs checks).
 lql_resident:
+  - command_line
+  - service_detail
   - agent_id
   - app
   - app_hash
@@ -281,6 +325,7 @@ lql_resident:
   - sparklogs.instance
   - sparklogs.kind
   - sparklogs.reason
+  - sparklogs.reason_variant
   - sparklogs.result.code
   - sparklogs.result.code_name
   - sparklogs.topic
@@ -288,11 +333,21 @@ lql_resident:
   - subsource_hash
   - t
   - trace_id
-  - winlog.event_id
-  # Pedagogical custom paths in lql-reference.md
-  - correlation_id
-  - x.foo
-  - x.tags
+  - event_id
+  - level
+  - process_id
+  - sparklogs.throttle.suppressed_prev
+  - user_id
+  - user_name
+
+# Made-up names the guides use to teach syntax, each marked illustrative where it is used.
+# Entry is an exact name or prefix.* (the prefix and every path under it).
+# Never put a name here that a real event might carry; add real names to lql_resident.
+lql_pedagogical:
+  - x.*
+  - path.*
+  - field
+  - processes
 
 lql_families:
   - event_data
@@ -309,7 +364,6 @@ lql_families:
   - sparklogs.result
   - sparklogs.running_as
   - sparklogs.target
-  - sparklogs.error
   - sparklogs.destination
 
 # Small closed vocabs. Feed ids come from MODULES. Apps from registry.yaml.
@@ -318,6 +372,7 @@ values:
   kinds:
     - inventory
     - monitor
+    - occurrence
     - delta
     - agent_op
     - config_change
@@ -397,6 +452,8 @@ values:
     - top_processes_over_time
     - device_overview
     - device_network
+    - fleet_processes
+    - fleet_performance
   # Device view vocabularies: result-set names, evidence kinds, heat bands and domains,
   # typical-range placement, outage state, process grouping and ranking.
   device_view_result_sets:
@@ -445,17 +502,146 @@ values:
     - pending
   process_grouping:
     - process_instance
+  # sparklogs.reason_variant arm ids the playbooks name (surface rows in feeds/<id>/fields.md).
+  reason_arms:
+    - active
+    - below_tpm
+    - boot_corrected
+    - boot_recoverable
+    - boot_unrecoverable
+    - disengaged
+    - error_source_record
+    - event_log
+    - kernel_power
+    - enhanced_pin_refused
+    - expected_check_failed
+    - failure_mode
+    - init_failed
+    - passive
+    - name_not_resolved
+    - no_mismatch
+    - no_usable_tpm
+    - other_error
+    - pcr_mismatch
+    - pcr_values_unreadable
+    - dbx
+    - db
+    - pca_2011_revoked
+    - pcrs_mismatched
+    - protector_unusable
+    - required_check_failed
+    - secure_boot_changed
+    - tpm_pin_refused
+    - tpm_refused
+    - unrecognized
+    - access_denied
+    - connection_failed
+    - credential_refused
+    - filesystem
+    - guest_auth
+    - logon_denied
+    - network
+    - no_authority
+    - other
+    - recovered
+    - session_setup
+    - timeout
+    - wrong_principal
+    - wudf_reflector_entry
+    - autoenroll_cycle_failed
+    - failed
+    - retired_aik
+    - correction_required
+    - corruption_discovered
+    - device_gone
+    - device_offline
+    - mount_failed
+    - offline_repair_required
+    - removable_verify
+    - repair_activity
+    - repair_posting_throttled
+    - state_error
+    - state_warning
+    - torn_write_detected
+    - interrupted
+    - scan_found
+    - unrepaired
+    - detection_only
+    - operation_failed
+    - package_blocked
+    - offline_too_long
+    - folder_stopped
+    - config_unreachable
+    - down
+    - wsaeacces
+    - credential_failed
+    - entra_daily_certificate
+    - store_certificate
+    - enrollment_failed
+    - dirty_shutdown_stopped
+    - recovery_started
+    - memory_corrected
+    - adapter_start_failed
+    - driver_start_failed
+    - spot_fix_required
+    - online_scan_required
+    - shadow_copy_volume
+    - reconnected
+    - taking_long
+    - took_long
+    - load_failed
+    - backup_profile_used
+    - folder_delete_failed
+    - hive_load_failed
+    - shutdown_in_progress
+    - http_401
+    - http_404
+    - transfer_error
+    - directory_read_failed
+    - sysvol_unreachable
+    - sysvol_no_code
+    - script_failed
+    - mdm_already_enrolled
+    - connectivity_notification_unsupported
+    - domain_unresolved
+    - share_unreachable
+    - no_network
+    - deferred
+  # sparklogs.data.storage_devices[].presentation values (fields/topic-storage-devices.md).
+  storage_presentation:
+    - local_physical
+    - san_lun
+    - guest_virtual
+    - software_virtual
+    - removable
+    - component
+    - diagnosed
+    - dialog
+    - measured
+    - whole_boot
+    - whole_shutdown
+  # sparklogs.data.performance.pagefile_growth_limit values (fields/topic-performance.md)
+  pagefile_growth_limit:
+    - at_max
+    - disk_space
+    - no_pagefile
   # sparklogs.topic values observed on sparklogs.device.state in a live workspace.
   topics:
     - agent_overhead
     - agent_pipeline
+    - app_crashes
     - collector_health
     - crash_dump_config
+    - crashes
+    - devices
     - disk_volumes
     - drivers
     - feed_health
     - installed_products
     - installed_products_summary
+    - kernel_crashes
+    - lifecycle
+    - network_shares
     - performance
     - processes
     - services
@@ -463,40 +649,61 @@ values:
     - storage_devices
     - storage_io
     - system_info
+    - top_processes
     - volume_map
     - vss_shadowstorage
     - vss_writers
     - windows_update_agent_state
-  services:
-    - app_stability
-    - auth
-    - backup
-    - certificates
-    - clustering
-    - database
-    - device_management
-    - directory_services
-    - email
-    - endpoint_protection
-    - file_sharing
-    - file_sync
-    - hardware
-    - licensing
-    - networking
-    - os_stability
-    - patching
-    - printing
-    - remote_access
-    - rmm
-    - scheduled_tasks
-    - security_audit
-    - storage
-    - telephony
-    - time_sync
-    - user_profiles
-    - virtualization
-    - vpn
-    - web
+  # rank_by, fleet metric and fleet group_by values on query_device_health
+  # entry column of the device-view events result set
+  device_view_event_entries:
+    - episode
+    - episode_step
+    - change
+  # sparklogs.config_change.type values the guides name
+  config_change_types:
+    - bios
+    - operating_system
+    - firewall_rule
+    - kernel_driver
+    - device_driver
+    - windows_service
+    - installed_product
+    - network_adapter
+  # sparklogs.config_change.basis and .category values
+  config_change_basis:
+    - recorded
+    - observed
+  config_change_category:
+    - maintenance
+  # crash analysis, timing and dump vocabularies (fields/topic-crashes.md, topic-crash-dump-config.md)
+  crash_analysis:
+    - complete
+    - dump_unavailable
+    - budget_skipped
+    - resource_limited
+  crash_time_basis:
+    - dump_header
+    - estimated_bounds
+  crash_dump_format:
+    - kernel_triage
+    - kernel_bitmap
+    - kernel_full
+  crash_dump_type:
+    - mini
+  crash_stack_stop:
+    - no_image
+    - image_unavailable
+  crash_stack_stop_image:
+    - identity_mismatch
+    - not_found
+  device_health_metrics:
+    - net_rx
+    - net_tx
+    - io_read
+    - io_write
+    - cpu_busy_pct_avg
+    - device
   aggregate_fn:
     - count
     - count_distinct

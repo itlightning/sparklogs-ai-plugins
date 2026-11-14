@@ -33,7 +33,7 @@ const DIST = path.resolve(ROOT, process.argv[2] ?? 'build/dist');
 const LICENSE = await fs.readFile(path.join(ROOT, 'LICENSE'));
 const ALLOWED_EXTS = new Set(['.md', '.json', '.svg', '.png']);
 const ALLOWED_NAMES = new Set(['README.md', 'LICENSE', '.mcp.json', 'mcp.json']);
-const MAINTAINER_ONLY = ['SYNC-MANIFEST.json'];
+const MAINTAINER_ONLY = ['SYNC-MANIFEST.json', 'reference-navigation.md'];
 const ALLOWED_MCP_HOSTS = new Set(['mcp.sparklogs.app', 'us.mcp.sparklogs.app', 'eu.mcp.sparklogs.app']);
 const SEMVER = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/;
 
@@ -217,7 +217,7 @@ async function validateShippedMarkdown(host, base) {
       leftoverHits.push(`${relative}: ${hit}`);
     }
     for (const kind of keepTagKindsFound(text)) keepKinds.add(kind);
-    if (/BEGIN GENERATED|END GENERATED|HOSTVARIANT/.test(text)) markerHits.push(relative);
+    if (/BEGIN GENERATED|END GENERATED|HOSTVARIANT|confirmed with data|core-block:/.test(text)) markerHits.push(relative);
     const { data } = parseFrontmatter(text, `${host}:${relative}`);
     for (const key of Object.keys(data)) {
       if (AUTHORING_FRONTMATTER_KEYS.has(key)) authoringHits.push(`${relative} key ${key}`);
@@ -240,7 +240,7 @@ async function validateShippedMarkdown(host, base) {
     }
   });
   if (markerHits.length) {
-    throw new Error(`${host} shipped GENERATED markers:\n  ${markerHits.join('\n  ')}`);
+    throw new Error(`${host} shipped authoring markers (GENERATED, HOSTVARIANT or data-confirmed):\n  ${markerHits.join('\n  ')}`);
   }
   if (authoringHits.length) {
     throw new Error(`${host} shipped authoring frontmatter:\n  ${authoringHits.join('\n  ')}`);
@@ -258,16 +258,17 @@ async function validateShippedMarkdown(host, base) {
   }
   for (const skill of ['sparklogs-ask', 'sparklogs-investigate', 'sparklogs-analyze-cause']) {
     const text = await fs.readFile(path.join(base, 'skills', skill, 'SKILL.md'), 'utf8');
-    for (const id of MODULES) {
+    // analyze-cause reasons from a prior summary and reaches feeds through the router guide.
+    for (const id of skill === 'sparklogs-analyze-cause' ? [] : MODULES) {
       if (!text.includes(`feeds/${id}/`)) {
         throw new Error(`${host} ${skill} missing generated feed ${id}`);
       }
     }
     if (skill === 'sparklogs-analyze-cause') {
-      if (text.includes('playbooks/backup-failure.md')) {
+      if (text.includes('playbooks/windows-vss.md')) {
         throw new Error(`${host} ${skill} should not carry the playbook table`);
       }
-    } else if (!text.includes('playbooks/backup-failure.md')) {
+    } else if (!text.includes('playbooks/windows-vss.md')) {
       throw new Error(`${host} ${skill} missing generated playbook table`);
     }
   }

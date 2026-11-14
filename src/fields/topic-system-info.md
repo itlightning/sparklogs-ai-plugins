@@ -18,6 +18,9 @@ Full inventory every hour. Supported changes are reported when the agent observe
 | `sparklogs.data.system_info.secure_boot` | bool |  | Whether Secure Boot is turned on. |
 | `sparklogs.data.system_info.tpm_present` | bool |  | Whether the machine has a TPM that Windows can use. |
 | `sparklogs.data.system_info.tpm_version` | string |  | The TPM specification version the chip supports, such as 2.0. Stored as text, not a number. |
+| `sparklogs.data.system_info.tpm_manufacturer` | string |  | The TPM maker's vendor ID as the chip reports it, such as `IFX` (Infineon), `INTC` (Intel), `AMD`, `NTC` (Nuvoton), `STM` (STMicroelectronics) or `MSFT` (Microsoft); `tpm.msc` shows it as the manufacturer name. Absent for a TPM 1.2 and when the TPM did not answer. |
+| `sparklogs.data.system_info.tpm_firmware_version` | string |  | The TPM's firmware version as the chip reports it, four dotted numbers such as `7.85.4555.0`; `tpm.msc` shows it as the manufacturer version. Absent for a TPM 1.2 and when the TPM did not answer. |
+| `sparklogs.data.system_info.tpm_spec_revision` | string |  | The revision of the TPM 2.0 specification the chip implements, such as `1.59`. Stored as text, not a number. Absent for a TPM 1.2 and when the TPM did not answer. |
 | `sparklogs.data.system_info.memory_integrity_enabled` | bool |  | Whether Windows memory integrity (hypervisor-protected code integrity) is enforcing on kernel code. False when it is off or only auditing. Absent when it could not be read. |
 | `sparklogs.data.system_info.os_edition` | string |  | The installed Windows edition, such as Windows 11 Pro. |
 | `sparklogs.data.system_info.os_display_version` | string |  | The Windows feature-update version, such as 23H2, as Settings shows it. |

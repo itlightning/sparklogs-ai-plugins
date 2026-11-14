@@ -6,7 +6,7 @@ This file gives detailed guidance on the analytic step: converting the prior inv
 
 ## The core analytic approach
 
-1. **Re-read the prior summary's Findings.** Treat each Finding as a fact. Note temporal patterns (when did things start? did multiple events cluster in time?), source distribution (one source or fleet-wide?), anomaly signals used, and not-checked flags.
+1. **Re-read the prior summary's Findings.** Treat each Finding as a fact. Note temporal patterns (when did things start? did multiple events cluster in time?), source distribution (one source or fleet-wide?), and not-checked flags.
 
 2. **For each Finding, ask: "what could explain this?"** Generate 2-5 candidate causes per Finding without filtering yet. Be generous in this brainstorming step - the filtering happens in step 4.
 
@@ -26,8 +26,8 @@ This file gives detailed guidance on the analytic step: converting the prior inv
 
 When the prior investigation surfaced "X happened concurrent with Y" Findings:
 
-- **Recent change + new symptom** -> hypothesis "the recent change caused the symptom." Discriminator: rollback test, or finding sources without the change but with the symptom.
-- **Cyclical timing (same time every day/week)** -> hypothesis "scheduled job or external recurrence is the cause." Discriminator: identify the schedule; correlate with scheduled_tasks subsource.
+- **Recent change + new symptom** -> hypothesis "the recent change caused the symptom." Discriminator: rollback test, or finding sources without the change but with the symptom. Bounding the window and ranking the device's changes: `playbooks/what-changed.md`.
+- **Cyclical timing (same time every day/week)** -> hypothesis "scheduled job or external recurrence is the cause." Discriminator: identify the schedule; correlate with Task Scheduler events (`subsource = "win.eventlog.management"` (LQL), `service = scheduled_tasks` (LQL)) at the same times. A task that failed or did not run: `playbooks/scheduled-task-failures.md`.
 - **Sudden onset without obvious change** -> hypothesis "external trigger (network event, cloud service issue, time-of-day boundary)." Discriminator: cross-source pivot ("did it happen on other sources at the same time?").
 
 ### Fleet pattern patterns
@@ -35,7 +35,7 @@ When the prior investigation surfaced "X happened concurrent with Y" Findings:
 When the prior investigation surfaced "this affects N sources" Findings:
 
 - **N = 1 (single source)** -> hypothesis space includes source-specific configuration, hardware, software state.
-- **N = small subset** -> hypothesis "shared factor among the subset." Discriminator: contrast `query_event_counts_by_severity` (tool) runs over the affected vs unaffected populations (in v1; `compare_populations` (other) is a fast-follow tool). Group by a scope-ladder field (`service` (LQL), `app` (LQL), `subsource` (LQL), `category` (LQL)) to test whether the subset shares a component.
+- **N = small subset** -> hypothesis "shared factor among the subset." Discriminator: contrast `query_event_counts_by_severity` (tool) runs over the affected and unaffected populations. Group by a field from `guides/scope-ladder.md` (`sparklogs.reason` (LQL), `service` (LQL), `app` (LQL), `subsource` (LQL)) to test whether the subset shares a component.
 - **N = fleet-wide** -> hypothesis "environment-wide cause" - recent fleet-wide change (patch, GPO push, DNS change), or upstream service issue.
 
 ### Device health patterns
@@ -43,7 +43,7 @@ When the prior investigation surfaced "this affects N sources" Findings:
 When the prior investigation cited a device view:
 
 - **Heat span with contributors** -> hypothesis "a contributor's load caused the pressure." Discriminator: does the span recur without that executable, and does the executable's own trajectory (the `processes` (value) result set) rise with the span?
-- **Confirmed outage beyond the gateway** -> hypotheses "the site's internet connection" and "something on this device's path past the router." Discriminator: the org comparison over the outage's `compare_start` (col) to `compare_end` (col), kept to devices at the same site (an org can span sites). Other devices down in the same buckets points at the shared connection or the probe target. This device alone points at its own path. Placement limits: `guides/device-state-fields.md` (**Network outages**).
+- **Confirmed outage beyond the gateway** -> hypotheses "the site's internet connection" and "something on this device's path past the router." Discriminator: the org comparison over the outage's `compare_start` (col) to `compare_end` (col), kept to devices with the same network key (an org can span sites; `guides/device-state-fields.md`, **Network outages**). Other devices down in the same buckets points at the shared connection or the probe target. This device alone points at its own path. Placement limits: `guides/device-state-fields.md` (**Network outages**).
 - **Recent change overlapping a span or outage** -> hypothesis "the change caused it." Discriminator: did the span or outage start after the change, and does it appear on devices without the change?
 
 ### Off-endpoint visibility patterns
@@ -52,15 +52,6 @@ When the prior investigation flagged off-endpoint causes in WHAT WAS NOT CHECKED
 
 - **Off-endpoint cause is plausible** -> include it as a hypothesis with `Off-endpoint check needed: yes` and explicit pointer to what to check.
 - **Off-endpoint cause is implausible given on-endpoint evidence** -> either omit or include at `low` (value) confidence with explicit reasoning.
-
-### Anomaly-signal patterns
-
-When the prior investigation cited anomaly signals (with detector + baseline information):
-
-- **`rule_state_expectation` (other) violation** -> hypothesis "the entity is in a state the rule says it shouldn't be." Strong signal even at low detector confidence.
-- **`value_distribution` (other) outlier** -> hypothesis "the entity's value is unusual relative to its history." Less strong; could be a legitimate workload spike.
-- **`expected_change_missing` (other)** -> hypothesis "something that should have happened didn't." e.g., "cert auto-renewal didn't fire at the expected time."
-- **Multiple anomalies on same snapshot with shared category** -> hypothesis "system-level event affecting multiple components simultaneously."
 
 ---
 
@@ -148,19 +139,5 @@ Write the hypothesis statement as a direct, specific claim, not a hedge. "Disk s
 
 ## When to make additional MCP calls during analysis
 
-Sometimes the prior investigation's findings are sufficient for analysis without further data gathering. Other times, a quick additional check substantially strengthens or weakens a hypothesis.
+When and when not to: `SKILL.md` Section 5. A population contrast runs `query_event_counts_by_severity` (tool) over each population separately, defined from the prior Findings, and compares the two.
 
-**Make additional MCP calls when:**
-- A fleet pivot would discriminate between "single-source hypothesis" and "fleet-wide hypothesis." `query_event_counts_by_severity` (tool) with `group_by=["source"]` on the relevant pattern.
-- A population contrast would discriminate between "affected sources have factor X" and "factor X is irrelevant." In v1, run `query_event_counts_by_severity` (tool) over each population separately and compare; use prior Findings to define the populations. (`compare_populations` (other) is a fast-follow tool.)
-- A specific time-window check the prior investigation didn't cover would confirm/refute a hypothesis with a single targeted call.
-
-**Skip additional MCP calls when:**
-- Prior findings already provide sufficient evidence.
-- The check is off-endpoint (surface as "off-endpoint check needed" instead).
-- The check would significantly expand the investigation without proportional analytic benefit.
-
-When you do make additional calls:
-- Reuse the prior investigation's `external_investigation_id` (arg).
-- Prefer cached refinements (`refine_query_result` (tool)) over fresh backing queries - they run against the cache, not the source.
-- Cite the resulting `query_url` (col)s in the hypothesis's Evidence support if they support a specific hypothesis.

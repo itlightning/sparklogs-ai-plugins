@@ -43,7 +43,8 @@ const HOST_LABELS = {
 };
 // Build inputs that must never ride into a shipped package. validate-rendered.mjs asserts the same
 // list, so an addition here without one there fails the build rather than shipping quietly.
-const MAINTAINER_ONLY = new Set(['SYNC-MANIFEST.json']);
+// reference-navigation.md is the stitch source for every SKILL.md corpus block, not a guide.
+const MAINTAINER_ONLY = new Set(['SYNC-MANIFEST.json', 'reference-navigation.md']);
 const SEMVER = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/;
 const DIST_README_TEMPLATE_REL = 'scripts/templates/dist-README.md';
 const DIST_README_TEMPLATE = path.join(ROOT, DIST_README_TEMPLATE_REL);
@@ -424,7 +425,12 @@ async function renderSkills(base, host) {
     .filter((entry) => entry.isDirectory())
     .map((entry) => entry.name)
     .sort();
+  // A skill whose SKILL.md cites no corpus path (feedback) gets no copy: each copy is the whole
+  // corpus, and the package size cap counts every one.
+  const citesCorpus = new RegExp(`(?:^|[\\s(\`/])(?:${CORPUS_TOPS.join('|')})/`, 'm');
   for (const skill of skills) {
+    const skillMd = await fs.readFile(path.join(skillsDir, skill, 'SKILL.md'), 'utf8');
+    if (!citesCorpus.test(skillMd)) continue;
     for (const top of CORPUS_TOPS) {
       await renderTree(
         path.join(ROOT, 'src', top),

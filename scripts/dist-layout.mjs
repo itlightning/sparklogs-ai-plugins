@@ -33,7 +33,7 @@ export const AGENT_PLUGINS_PLUGIN_SCHEMA = 'https://agent-plugins.org/schemas/1.
 export const AGENT_PLUGINS_MCP_SCHEMA = 'https://agent-plugins.org/schemas/1.0.0/mcp.schema.json';
 
 // What each host package actually contains, and where its two config files go.
-// `trees` excludes skills/ (always rendered). Every host also materializes the corpus under each
+// `trees` excludes skills/ (always rendered). Every host also materializes the corpus under each citing
 // skill's references/ subtree. Claude additionally ships guides/playbooks/themes/feeds at the
 // package root for commands and agents.
 // Codex documents skills, MCP servers and hooks as the bundled component kinds: no commands, no
@@ -86,8 +86,8 @@ export const FEED_ID = /^[a-z][a-z0-9_]*(?:\.[a-z][a-z0-9_]*)*$/;
 
 // SKILL.md is ~59 KiB today. A dump that is not an index should fail before it ships.
 export const MAX_SRC_FILE_BYTES = 128 * 1024;
-// Every host materializes the corpus inside each skill. Claude additionally ships agents/ at the
-// package root. Cap is sized for corpus times skill count plus commands and assets.
+// Every host materializes the corpus inside each skill that cites it. Claude additionally ships agents/ at the
+// package root. Cap is sized for corpus times citing-skill count plus commands and assets.
 export const MAX_PACKAGE_BYTES = 8 * 1024 * 1024;
 // Decimal megabytes: 35 MB.
 export const MAX_DIST_BYTES = 35 * 1000 * 1000;

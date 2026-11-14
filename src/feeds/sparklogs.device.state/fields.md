@@ -12,7 +12,6 @@ Read every row below as a query contract, the same way a reason code is read.
 
 - **Additive only.** Fields and vocabulary tokens are added, never renamed or repurposed, without a documented migration.
 - **Misses are honest.** An unlisted code leaves its decoded field unset and the raw value promoted; a meaning is never invented.
-- **Correlate with `pack_version`.** A field exists at rest only from the pack version that shipped it, so check the pack version on the events in scope before concluding a condition is absent.
 
 ## Raw fallback
 
@@ -201,6 +200,8 @@ The last column is different in kind: it is the author's account of the row or e
 | `sparklogs_agent_memory_over_budget` / `recovered` | n/a | **fields: none** |  |
 | `sparklogs_agent_started` / `default` | n/a | **fields: none** |  |
 | `sparklogs_agent_stopped` / `default` | n/a | **fields: none** |  |
+| `tpm_chip_changed` / `default` | n/a | **fields: none** |  |
+| `tpm_firmware_changed` / `default` | n/a | **fields: none** |  |
 | `tpm_presence_changed` / `default` | n/a | **fields: none** |  |
 | `tpm_version_changed` / `default` | n/a | **fields: none** |  |
 | `virtualization_changed` / `default` | n/a | **fields: none** |  |
@@ -386,6 +387,8 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `sparklogs_agent_memory_over_budget` / `recovered`
 - `sparklogs_agent_started` / `default`
 - `sparklogs_agent_stopped` / `default`
+- `tpm_chip_changed` / `default`
+- `tpm_firmware_changed` / `default`
 - `tpm_presence_changed` / `default`
 - `tpm_version_changed` / `default`
 - `virtualization_changed` / `default`

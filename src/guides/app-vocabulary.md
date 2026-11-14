@@ -7,6 +7,7 @@ Empty `app` (LQL) is a curated answer on OS-generic and multi-product channels (
 Stream identity is **`subsource` (LQL)**. Explore: `guides/stream-kinds.md`.
 
 The table is pack-minted keys that have a public stream. Additive-only.
+For third-party products the token marks events about the product's Windows services (a service that crashed, stopped or failed to start), not the product's own job or detection results.
 Reserved app tokens with no curated stream yet are held back for lint and are omitted here.
 Other `app` (LQL) values can still arrive from non-pack senders; those are real events, not a schema error.
 

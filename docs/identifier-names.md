@@ -11,7 +11,11 @@ In authored `src/` prose, tag every identifier-shaped backtick (`[a-z][a-z0-9_.]
 | `(value)` | Closed vocabulary | stripped on render | feeds, kinds, apps, statuses, topics, reason values, enums |
 | `(other)` | Syntax / pedagogy (`in` (other), `null` (other), `asc` (other)) | stripped on render | not in any product set; not dotted |
 
-Fenced LQL and JSON tool-call blocks are not tagged.
+Names inside fenced LQL and JSON tool-call blocks are not tagged.
+Give every LQL block the info string ```` ```lql ````; `<-` starts an end-of-line note inside one.
+Tag an inline LQL expression with `(LQL)` too, e.g. `service = backup` (LQL).
+Every field named in an LQL block or an `(LQL)` span must be vetted: in `scripts/fixtures/lql-live-fields.txt` (a `list_fields` (tool) snapshot), declared by the pack (`src/feeds/`, `src/fields/`), or on `lql_pedagogical` (other) in `scripts/identifier-sot.yaml` for made-up example names, which the guide marks as illustrative.
+`lint-identifier-tags.mjs` fails on an unvetted field in authored `src/`, only warns for generated `src/feeds/`, and lists pack-declared fields the snapshot has not seen.
 Do not use a file-wide default.
 A body in two sets (`subsource` (LQL) or `subsource` (col)) may wear either tag.
 `(other)` cannot launder a real identifier.

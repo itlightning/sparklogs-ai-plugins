@@ -3,6 +3,8 @@
 
 // Pack-minted `app` tokens are closed vocabulary. Emit `(value)` so src/ matches
 // identifier-tag authoring; render strips that tag. The GENERATED block is not linted.
+// The same registry read also writes SERVICE_VOCABULARY_FILE, the `service` key list that
+// validate-skills.mjs holds src/guides/service-taxonomy.md to on a standalone checkout.
 
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -20,6 +22,7 @@ const ROOT = process.cwd();
 const TARGET = 'src/guides/app-vocabulary.md';
 const BEGIN = '<!-- BEGIN GENERATED APP_VOCABULARY -->';
 const END = '<!-- END GENERATED APP_VOCABULARY -->';
+export const SERVICE_VOCABULARY_FILE = 'scripts/generated-service-vocabulary.json';
 
 async function exists(file) {
   try {
@@ -95,6 +98,24 @@ function splice(text, table) {
   return `${head}\n\n${table}\n\n${tail}`;
 }
 
+function serviceVocabularyJson(parsed, registryPath) {
+  const services = parsed?.service_vocabulary;
+  if (!services || typeof services !== 'object' || Array.isArray(services)) {
+    throw new Error(`${registryPath} has no service_vocabulary map`);
+  }
+  return `${JSON.stringify(Object.keys(services).sort(), null, 2)}
+`;
+}
+
+async function readOrEmpty(file) {
+  try {
+    return await fs.readFile(file, 'utf8');
+  } catch (error) {
+    if (error.code === 'ENOENT') return '';
+    throw error;
+  }
+}
+
 export async function syncAppVocabulary({ check = false } = {}) {
   const { dir, explicit } = libraryDir();
   const registryPath = path.join(dir, 'registry.yaml');
@@ -117,12 +138,23 @@ export async function syncAppVocabulary({ check = false } = {}) {
   const file = path.join(ROOT, TARGET);
   const current = await fs.readFile(file, 'utf8');
   const next = splice(current, table);
+  const servicesFile = path.join(ROOT, SERVICE_VOCABULARY_FILE);
+  const servicesCurrent = await readOrEmpty(servicesFile);
+  const servicesNext = serviceVocabularyJson(parsed, registryPath);
   if (check) {
-    if (current !== next) {
-      throw new Error(`${TARGET} is out of date with source-library app_vocabulary. Run: yarn sync-generated`);
+    const drifted = [
+      ...(current !== next ? [`${TARGET} (app_vocabulary)`] : []),
+      ...(servicesCurrent !== servicesNext ? [`${SERVICE_VOCABULARY_FILE} (service_vocabulary)`] : []),
+    ];
+    if (drifted.length) {
+      throw new Error(`Out of date with source-library registry.yaml: ${drifted.join(', ')}. Run: yarn sync-generated`);
     }
-    console.log('app-vocabulary table matches registry.yaml');
+    console.log('app-vocabulary table and service vocabulary match registry.yaml');
     return;
+  }
+  if (servicesCurrent !== servicesNext) {
+    await fs.writeFile(servicesFile, servicesNext);
+    console.log(`wrote ${SERVICE_VOCABULARY_FILE}`);
   }
   if (current === next) {
     console.log(`${TARGET}: already current`);

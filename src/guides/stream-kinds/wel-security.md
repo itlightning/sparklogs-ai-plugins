@@ -1,14 +1,14 @@
 # Kind: WEL Security
 
-Scope **`subsource = "win.eventlog.security"`**.
-Then **`sparklogs.actor.*`**, **`sparklogs.reason` (LQL)**, **`winlog.event_id` (LQL)**, then `pattern` (LQL).
+Scope **`subsource = "win.eventlog.security"` (LQL)**.
+Then **`sparklogs.actor.*`**, **`sparklogs.reason` (LQL)**, **`event_id` (LQL)**, then `pattern` (LQL).
 
 `provider_name` (LQL) exists but this channel has few publishers. Grouping by it is a weak split.
 
 ## Explore
 
 1. Scope the host to this `subsource` (LQL).
-2. Prefer **`sparklogs.actor.*`**, **`sparklogs.reason` (LQL)**, **`winlog.event_id` (LQL)**, then `pattern` (LQL).
+2. Prefer **`sparklogs.actor.*`**, **`sparklogs.reason` (LQL)**, **`event_id` (LQL)**, then `pattern` (LQL).
 3. Worked pivots: `feeds/win.eventlog.security/recipes.md` (one recipe, then confirm `fields.md`).
 4. Theme: `themes/windows-security-and-audit.md`.
 
@@ -19,4 +19,4 @@ Raw Security payload remains under provider paths in `fields.md`.
 
 ## Accuracy
 
-Empty curated `sparklogs.reason` (LQL) is not "no audit activity". Drop `sparklogs.reason` (LQL) and group `winlog.event_id` (LQL) / `pattern` (LQL) before you stop.
+Empty curated `sparklogs.reason` (LQL) is not "no audit activity". Drop `sparklogs.reason` (LQL) and group `event_id` (LQL) / `pattern` (LQL) before you stop.

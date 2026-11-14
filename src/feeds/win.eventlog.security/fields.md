@@ -12,7 +12,6 @@ Read every row below as a query contract, the same way a reason code is read.
 
 - **Additive only.** Fields and vocabulary tokens are added, never renamed or repurposed, without a documented migration.
 - **Misses are honest.** An unlisted code leaves its decoded field unset and the raw value promoted; a meaning is never invented.
-- **Correlate with `pack_version`.** A field exists at rest only from the pack version that shipped it, so check the pack version on the events in scope before concluding a condition is absent.
 
 ## Raw fallback
 
@@ -44,7 +43,7 @@ Stored flat under the `win.eventlog.security.` prefix.
 | `win.eventlog.security.token_elevated` | bool | Whether the sign-in on 4624 received a full administrator token (an elevated token). Absent when the event does not say. |
 | `win.eventlog.security.privileges` | array | Sensitive privileges given to the new session on 4672, as the Se* privilege names Windows lists, such as SeDebugPrivilege. The names are the same on every Windows language. |
 | `win.eventlog.security.workstation` | string | Name of the machine the sign-in came from, as Windows wrote it (usually the NetBIOS name), from `WorkstationName` on 4624 and 4625 or `Workstation` on 4776, 4777 and 4794. |
-| `win.eventlog.security.caller_computer` | string | Name of the machine the failed sign-ins came from, as Windows wrote it, from `CallerComputerName` on account lockout event 4740. The first place to look for what locked the account. |
+| `win.eventlog.security.caller_computer` | string | Name of the machine the failed sign-ins came from, as Windows wrote it, from `TargetDomainName` on account lockout event 4740, which Windows shows as Caller Computer Name. The first place to look for what locked the account. |
 | `win.eventlog.security.status` | string | Failure code as Windows logged it, in lowercase hex: an NTSTATUS code on 4625, 4776 and 4777, or a Kerberos result code on 4768, 4769, 4770 and 4771. |
 | `win.eventlog.security.substatus` | string | Detailed NTSTATUS code on 4625, usually the real cause of the failed sign-in. 0x0 means the status code carries the cause. |
 | `win.eventlog.security.status_meaning` | string | Meaning of the failure code in a few words, such as wrong password or account locked, for NTSTATUS codes on 4625, 4776 and 4777 and Kerberos result codes on 4768 to 4771. Absent when SparkLogs has no meaning for the code. |

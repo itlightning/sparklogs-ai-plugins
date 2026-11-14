@@ -1,6 +1,6 @@
 # Writing Voice
 
-Style rules for every user-visible SparkLogs answer: chat (`sparklogs-ask`), system condition summaries (`sparklogs-investigate`), and cause analyses (`sparklogs-analyze-cause`). Consistency here is what makes SparkLogs output read as engineered, not generated.
+Style rules for every user-visible SparkLogs answer: chat (`sparklogs-ask`), system condition summaries (`sparklogs-investigate`), and cause analyses (`sparklogs-analyze-cause`). The same rules apply in every skill.
 
 ---
 
@@ -9,19 +9,35 @@ Style rules for every user-visible SparkLogs answer: chat (`sparklogs-ask`), sys
 - **Active voice.** "srv-fileshare01 emitted 351 disk-controller errors from Jun 1 to Jun 8," not "351 disk-controller errors were observed." "VSS writer SqlServerWriter was in FAILED state," not "it was observed that the writer entered a failed state."
 - **Lead with the fact, not the process.** Avoid "I queried," "I found," "I looked at," or "I checked" in the report body. The Finding and Evidence fields already show the work; narrating the process again is noise.
 - **Concise, complete sentences.** Short paragraphs and bullets. One idea per sentence. Don't sacrifice clarity for brevity: a Finding still needs its subject, state, and time even if that makes the sentence longer.
-- **No em dash (U+2014).** Use a colon, comma, semicolon, parentheses, or a new sentence instead.
 - **State findings and hypotheses directly.** "Disk signature collision on Harddisk2," not "it is possible there may be a disk issue." Hedge the Confidence field, not the sentence.
 - **Precise hedges.** Use "not proven," "not checked," "low confidence," or "insufficient evidence" - not vague filler like "may be," "could potentially," or "it's possible that."
-- **No stock assistant openers, filler transitions, or buzzwords.** Skip "I'd be happy to," "Let's dive in," "Additionally," "It's worth noting," "leverage," "robust," "seamless."
 - **Ask skill: answer first, then stop.** No template. No session recap. No "three things to remember."
 - **Investigate / analyze-cause: the template is the deliverable.** Any chat before or after the rendered template should be at most one sentence.
+
+---
+
+## Core rules shared with all SparkLogs public writing
+
+These apply to every answer as well.
+
+<!-- core-block:start (synced 2026-11-11) -->
+- Every sentence earns its place: if it would not change what the reader does, cut it.
+- No em dash (U+2014) and no semicolon as glue. Use a period, a comma or a colon.
+- No "X, not Y" or "it is not X, it is Y" unless the reader had Y in mind.
+- No slogan fragments in pairs or triads ("Less noise. Better tickets.").
+- No sentence that restates the heading, or the example, table or output just above it.
+- No closing sentence that sums up or inspires. End on the last fact.
+- No stock openers, filler transitions or buzzwords: "I'd be happy to", "Additionally", "It's worth noting", "leverage", "robust", "seamless", "comprehensive", "powerful".
+- Name the actor and use an active verb.
+- Explain a term before using it; write for a reader who has not seen the product.
+<!-- core-block:end -->
 
 ---
 
 ## Good style
 
 - `srv-fileshare01 emitted 351 disk-controller errors from 2026-06-01 to 2026-06-08.`
-- `Confidence: high that VSS writer SqlServerWriter failed at 03:14:32 UTC; its relationship to the KB install is not proven.`
+- `Confidence: high that VSS writer SqlServerWriter failed at 03:14:32 UTC. Its relationship to the KB install is not proven.`
 - `No evidence of ingest drops on srv-fileshare02 in the checked window. Confidence: insufficient_evidence, see Note.`
 - `Disk signature collision on Harddisk2.` (a hypothesis statement, not "there could be a disk signature issue")
 
