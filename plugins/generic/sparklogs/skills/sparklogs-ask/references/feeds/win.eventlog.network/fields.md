@@ -12,7 +12,6 @@ Read every row below as a query contract, the same way a reason code is read.
 
 - **Additive only.** Fields and vocabulary tokens are added, never renamed or repurposed, without a documented migration.
 - **Misses are honest.** An unlisted code leaves its decoded field unset and the raw value promoted; a meaning is never invented.
-- **Correlate with `pack_version`.** A field exists at rest only from the pack version that shipped it, so check the pack version on the events in scope before concluding a condition is absent.
 
 ## Raw fallback
 
@@ -31,14 +30,14 @@ Stored flat under the `win.eventlog.network.` prefix.
 | `win.eventlog.network.dns_query_name` | string | DNS name the client was looking up when the lookup timed out, from `QueryName` on DNS-Client event 1013. |
 | `win.eventlog.network.firewall_rule_action` | int | Action of the firewall rule (allow or block), as the number the Windows Firewall event writes in `Action`, on rule added, changed and deleted events. |
 | `win.eventlog.network.firewall_rule_active` | int | Whether the firewall rule is turned on: 1 on, 0 off, from `Active` on Windows Firewall rule events. |
-| `win.eventlog.network.firewall_rule_application_path` | string | Program path the firewall rule applies to, from `ApplicationPath` on Windows Firewall rule events. |
+| `win.eventlog.network.firewall_rule_application_path` | string | Program path the firewall rule applies to, from `ApplicationPath` on Windows Firewall rule events 2004, 2005, 2097 and 2099. Absent when the rule applies to every program and on the delete events 2006 and 2052. |
 | `win.eventlog.network.firewall_rule_direction` | int | Direction of the firewall rule (inbound or outbound), as the number the Windows Firewall event writes in `Direction`. |
-| `win.eventlog.network.firewall_rule_local_ports` | string | Local ports the firewall rule matches, as the rule states them (a port, a list or a range), from `LocalPorts` on Windows Firewall rule events. |
+| `win.eventlog.network.firewall_rule_local_ports` | string | Local ports the firewall rule matches, as the rule states them (a port, a list or a range), from `LocalPorts` on Windows Firewall rule events 2004, 2005, 2097 and 2099. Absent when the rule matches any port and on the delete events 2006 and 2052. |
 | `win.eventlog.network.firewall_rule_origin` | int | Where the firewall rule came from (for example local settings or Group Policy), as the number the Windows Firewall event writes in `Origin`. |
 | `win.eventlog.network.firewall_rule_profiles` | int | Network profiles the firewall rule applies to, as the number in `Profiles`: add 1 for Domain, 2 for Private and 4 for Public. |
 | `win.eventlog.network.firewall_rule_protocol` | int | IP protocol number the firewall rule matches, from `Protocol`: 6 TCP, 17 UDP, 256 any. |
-| `win.eventlog.network.firewall_rule_remote_ports` | string | Remote ports the firewall rule matches, as the rule states them, from `RemotePorts` on Windows Firewall rule events. |
-| `win.eventlog.network.firewall_rule_service_name` | string | Windows service the firewall rule applies to, from `ServiceName` on Windows Firewall rule events. |
+| `win.eventlog.network.firewall_rule_remote_ports` | string | Remote ports the firewall rule matches, as the rule states them, from `RemotePorts` on Windows Firewall rule events 2004, 2005, 2097 and 2099. Absent when the rule matches any port and on the delete events 2006 and 2052. |
+| `win.eventlog.network.firewall_rule_service_name` | string | Windows service the firewall rule applies to, from `ServiceName` on Windows Firewall rule events 2004, 2005, 2097 and 2099. Absent when the rule names no service, which most do, and on the delete events 2006 and 2052. |
 | `win.eventlog.network.ncsi_capability` | int | Connectivity Windows reports after losing internet access, from `Capability` on NCSI event 4042: 0 no connectivity, 1 local network only. Present only when the previous state was internet access. |
 | `win.eventlog.network.ncsi_change_reason` | int | Reason code NCSI gives for the loss of internet access, from `CapabilityChangeReason` on event 4042, as a number. The message names the reason in words. |
 | `win.eventlog.network.ncsi_family` | int | Address family that lost internet access, from `Family` on NCSI event 4042, as a number (0 is IPv4). The message names it in words. |
@@ -55,7 +54,7 @@ Stored flat under the `win.eventlog.network.` prefix.
 | `win.eventlog.network.smb_command` | int | SMB2 command number of the request that failed signing or encryption checks, from `Smb2Command` on SMBClient events 31013 and 31014. |
 | `win.eventlog.network.smb_connection_type` | int | Type of SMB connection, as the number Windows writes in `ConnectionType`, from SMBClient connectivity events and SMBServer event 4000. |
 | `win.eventlog.network.smb_durable_handle` | bool | Whether the file handle the SMB server could not reopen was durable, from `DurableHandle` on SMBServer event 1016. |
-| `win.eventlog.network.smb_elapsed_ms` | int | Milliseconds the SMB client spent on the connection attempt, from `ElapsedTimeInMs` on SMBClient connectivity events. |
+| `win.eventlog.network.smb_elapsed_ms` | int | Milliseconds the SMB client waited on a request that timed out, from `ElapsedTimeInMs` on SMBClient request timeout event 30809. The connection failure events do not carry it. |
 | `win.eventlog.network.smb_encryption_used` | bool | Whether the SMB connection or share was encrypted, from `EncryptionUsed` on SMBClient event 30808 or SMBServer event 4000. |
 | `win.eventlog.network.smb_granted_access` | string | Access mask the SMB server granted on the share, from `GrantedAccess` on SMBServer event 1006, as Windows wrote it. |
 | `win.eventlog.network.smb_logon_id` | string | Logon session ID of the user whose SMB sign-in failed, from `LogonId` on SMBClient security events. |
@@ -68,7 +67,7 @@ Stored flat under the `win.eventlog.network.` prefix.
 | `win.eventlog.network.smb_persistent_handle` | bool | Whether the file handle the SMB server could not reopen was persistent (continuously available), from `PersistentHandle` on SMBServer event 1016. |
 | `win.eventlog.network.smb_reason_code` | int | Reason code the SMB client or server gave for the failure, from `Reason` or `ReasonCode`, as a number. |
 | `win.eventlog.network.smb_resilient_handle` | bool | Whether the file handle the SMB server could not reopen was resilient, from `ResilientHandle` on SMBServer event 1016. |
-| `win.eventlog.network.smb_retry_count` | int | Number of times the SMB client retried the connection, from `RetryCount` on SMBClient connectivity events. |
+| `win.eventlog.network.smb_retry_count` | int | Number of times the SMB client retried a request that timed out, from `RetryCount` on SMBClient request timeout event 30809. The connection failure events do not carry it. |
 | `win.eventlog.network.smb_session_id` | string | SMB session ID, from `SessionId` on SMBClient and SMBServer events. Filter on it to follow one session. |
 | `win.eventlog.network.smb_setting_default` | int | Default value of the SMB security setting, from `DefaultLmCompatibilityLevel` on SMBServer event 1021. |
 | `win.eventlog.network.smb_setting_name` | string | Name of the SMB or LAN Manager security setting the event reports, from `RegName` on SMBClient events 31003, 31016 and 31018, or LmCompatibilityLevel on SMBServer event 1021. |
@@ -107,11 +106,11 @@ Prefer these over the per-feed fields for anything that spans feeds.
 ## Tail keys and where the value is queryable
 
 The curated first line renders a `key=value` tail in one canonical order for the whole module, so an omitted key never moves the rest.
-Each key names one field; that field is where the value is queried.
+A key is listed with the module field of the same name; a key without one may still be queryable under another field in the table above.
 
 | Tail key | Queryable as |
 |---|---|
-| `component` | not queryable as a field |
+| `component` | no field of the same name |
 
 ## What sets each field
 

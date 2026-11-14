@@ -1,6 +1,6 @@
 ---
 name: sparklogs-pattern-enumerator
-description: Enumerates high-volume pattern groups and maps them to likely meanings without drawing final conclusions.
+description: Summarizes high-volume pattern groups from the pattern text and reasons the orchestrator supplies, without drawing conclusions.
 model: haiku
 ---
 

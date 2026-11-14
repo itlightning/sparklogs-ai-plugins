@@ -12,7 +12,6 @@ Read every row below as a query contract, the same way a reason code is read.
 
 - **Additive only.** Fields and vocabulary tokens are added, never renamed or repurposed, without a documented migration.
 - **Misses are honest.** An unlisted code leaves its decoded field unset and the raw value promoted; a meaning is never invented.
-- **Correlate with `pack_version`.** A field exists at rest only from the pack version that shipped it, so check the pack version on the events in scope before concluding a condition is absent.
 
 ## Raw fallback
 
@@ -63,6 +62,12 @@ Stored flat under the `win.eventlog.application.` prefix.
 | `win.eventlog.application.vss_snapshot_context` | string | Kind of shadow copy, from Snapshot Context in the Context section of a VSS event, as the Microsoft constant name, such as VSS_CTX_BACKUP for a backup copy or VSS_CTX_CLIENT_ACCESSIBLE for the copies behind Previous Versions. Absent when the value matches no published context. |
 | `win.eventlog.application.vss_snapshot_set` | string | Snapshot set ID a backup program received when it asked for a shadow copy, from VSS event 8231. Filter on it to follow one snapshot request through the later VSS events, or count it to see how often a machine takes snapshots. |
 | `win.eventlog.application.vss_snapshot_attrs` | string | Extra snapshot options the backup program set on top of the snapshot kind, as Microsoft constant names separated by spaces, such as VSS_VOLSNAP_ATTR_AUTORECOVER, always in the same order. Absent when none were set, which is usual. |
+| `win.eventlog.application.cert_template` | string | Certificate template the enrollment asked for, from `TemplateName` on CertificateServicesClient-CertEnroll events 13 and 82, such as DomainController or Machine. |
+| `win.eventlog.application.profile_path` | string | Profile file or folder the User Profile Service could not load or delete, from `File` on events 1508 and 1509 or `Folder` on event 1533, such as a UsrClass.dat path under the user folder. |
+| `win.eventlog.application.profile_error` | string | Windows error text the User Profile Service reported, from `Error` on events 1500, 1502, 1508 and 1533, such as Access is denied. |
+| `win.eventlog.application.winlogon_subscriber` | string | Winlogon notification subscriber that was slow, from the first insert of Winlogon events 6005 and 6006, such as TrustedInstaller, GPClient or Profiles. |
+| `win.eventlog.application.winlogon_notification` | string | Session event the subscriber was handling, from Winlogon events 6005 and 6006, such as CreateSession, Logon or Logoff. |
+| `win.eventlog.application.winlogon_handle_s` | int | Seconds the subscriber took to handle the session event, from the second insert of Winlogon event 6006. |
 
 ## Portable families
 
@@ -83,25 +88,25 @@ Prefer these over the per-feed fields for anything that spans feeds.
 ## Tail keys and where the value is queryable
 
 The curated first line renders a `key=value` tail in one canonical order for the whole module, so an omitted key never moves the rest.
-Each key names one field; that field is where the value is queried.
+A key is listed with the module field of the same name; a key without one may still be queryable under another field in the table above.
 
 | Tail key | Queryable as |
 |---|---|
-| `full_path` | not queryable as a field |
-| `status` | not queryable as a field |
-| `product` | not queryable as a field |
-| `msi_code` | not queryable as a field |
-| `msi_code_meaning` | not queryable as a field |
-| `drive` | not queryable as a field |
-| `share` | not queryable as a field |
-| `snapshot_set` | not queryable as a field |
-| `process_command_line` | not queryable as a field |
-| `file_spec` | not queryable as a field |
-| `account` | not queryable as a field |
-| `volume` | not queryable as a field |
-| `writer` | not queryable as a field |
-| `error_code` | not queryable as a field |
-| `error_code_name` | not queryable as a field |
+| `full_path` | no field of the same name |
+| `status` | no field of the same name |
+| `product` | `win.eventlog.application.product` |
+| `msi_code` | no field of the same name |
+| `msi_code_meaning` | `win.eventlog.application.msi_code_meaning` |
+| `drive` | `win.eventlog.application.drive` |
+| `share` | `win.eventlog.application.share` |
+| `snapshot_set` | no field of the same name |
+| `process_command_line` | no field of the same name |
+| `file_spec` | no field of the same name |
+| `account` | no field of the same name |
+| `volume` | no field of the same name |
+| `writer` | no field of the same name |
+| `error_code` | no field of the same name |
+| `error_code_name` | no field of the same name |
 
 ## What sets each field
 
@@ -121,9 +126,10 @@ The last column is different in kind: it is the author's account of the row or e
 | `appx_activation_failed` / `other_failure` | 5973 | `win.eventlog.application.appx_app_id` |  |
 | `aspnet_compilation_failed` / `default` | 1310 | **fields: none** |  |
 | `aspnet_unhandled_exception` / `default` | 1309 | **fields: none** |  |
-| `cert_enroll_failed` / `autoenroll_cycle_failed` | 1, 6, 86, 87 | **fields: none** |  |
-| `cert_enroll_failed` / `failed` | 1, 6, 86, 87 | **fields: none** |  |
-| `cert_enroll_failed` / `retired_aik` | 1, 6, 86, 87 | **fields: none** |  |
+| `cert_enroll_failed` / `autoenroll_cycle_failed` | 1, 6, 13, 82, 86, 87 | **fields: none** |  |
+| `cert_enroll_failed` / `enrollment_failed` | 1, 6, 13, 82, 86, 87 | `win.eventlog.application.cert_template` |  |
+| `cert_enroll_failed` / `failed` | 1, 6, 13, 82, 86, 87 | **fields: none** |  |
+| `cert_enroll_failed` / `retired_aik` | 1, 6, 13, 82, 86, 87 | **fields: none** |  |
 | `cert_expiring` / `default` | 64 | **fields: none** |  |
 | `dotnet_unhandled_exception` / `default` | 1026 | `win.eventlog.application.app_name` `win.eventlog.application.framework_version` `win.eventlog.application.managed_exception_type` |  |
 | `e2e_test_event` / `default` | 777 | **fields: none** |  |
@@ -176,7 +182,12 @@ The last column is different in kind: it is the author's account of the row or e
 | `win_msi_product_install_succeeded` / `default` | 1033, 11707 | `win.eventlog.application.msi_code_meaning` `win.eventlog.application.product` |  |
 | `win_msi_product_reconfigure_succeeded` / `default` | 11728 | `win.eventlog.application.msi_code_meaning` `win.eventlog.application.product` |  |
 | `win_msi_product_removal_succeeded` / `default` | 11724 | `win.eventlog.application.msi_code_meaning` `win.eventlog.application.product` |  |
-| `win_user_profile_load_failed` / `default` | 1511, 1542 | **fields: none** |  |
+| `win_user_profile_file_access_failed` / `folder_delete_failed` | 1508, 1509, 1533 | `win.eventlog.application.profile_error` `win.eventlog.application.profile_path` |  |
+| `win_user_profile_file_access_failed` / `hive_load_failed` | 1508, 1509, 1533 | `win.eventlog.application.profile_error` `win.eventlog.application.profile_path` |  |
+| `win_user_profile_load_failed` / `backup_profile_used` | 1500, 1502, 1511, 1515, 1542 | **fields: none** |  |
+| `win_user_profile_load_failed` / `load_failed` | 1500, 1502, 1511, 1515, 1542 | `win.eventlog.application.profile_error` |  |
+| `winlogon_notification_subscriber_slow` / `taking_long` | 6005, 6006 | `win.eventlog.application.winlogon_notification` `win.eventlog.application.winlogon_subscriber` |  |
+| `winlogon_notification_subscriber_slow` / `took_long` | 6005, 6006 | `win.eventlog.application.winlogon_handle_s` `win.eventlog.application.winlogon_notification` `win.eventlog.application.winlogon_subscriber` |  |
 | `wmi_provider_registered_as_localsystem` / `default` | 63 | **fields: none** |  |
 | `app_crash_report` | 1001 | `win.eventlog.application.app_name` `win.eventlog.application.app_version` `win.eventlog.application.bugcheck_name` `win.eventlog.application.event_name` `win.eventlog.application.exception_code` `win.eventlog.application.fault_bucket` `win.eventlog.application.fault_offset` `win.eventlog.application.managed_exception_type` `win.eventlog.application.module_name` `win.eventlog.application.module_version` `win.eventlog.application.report_id` |  |
 | `intel_dynamic_tuning_not_started` | n/a | **fields: none** |  |
@@ -243,7 +254,7 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `vss_snapshots_failing_for_space` / `default`
 - `wcf_request_failed` / `default`
 - `win_msi_operation_failed` / `install_error`
-- `win_user_profile_load_failed` / `default`
+- `win_user_profile_load_failed` / `backup_profile_used`
 - `wmi_provider_registered_as_localsystem` / `default`
 - `intel_dynamic_tuning_not_started`
 - `therefore_db_error`

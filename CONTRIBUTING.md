@@ -20,7 +20,7 @@ yarn run smoke
 
 Use `yarn run <script>` consistently. This project is Yarn-only.
 
-Identifier-tag lint (`lint-identifier-tags.mjs`) checks `(value)` / `(LQL)` tokens against **committed** `src/feeds/` (same as CI). To lint against a sibling `sparklogs-source-library` checkout while authoring ahead of sync, set `SPARKLOGS_IDENTIFIER_SOT_INCLUDE_LIBRARY=1`.
+Identifier-tag lint (`lint-identifier-tags.mjs`) checks `(value)` / `(LQL)` tokens against **committed** `src/feeds/` (same as CI). To lint against a sibling `sparklogs-source-library` checkout while authoring ahead of sync, set `SPARKLOGS_IDENTIFIER_SOT_INCLUDE_LIBRARY=1`. The same script vets every LQL field name in ```` ```lql ```` blocks and `(LQL)` spans (see `docs/maintainer-guide.md`).
 
 ## Layout
 

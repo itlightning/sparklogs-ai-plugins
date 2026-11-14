@@ -1,0 +1,71 @@
+# TPM errors or attestation failure
+
+**Trigger.** "The TPM keeps logging errors", "Windows Hello or BitLocker says the TPM is not working", or a device fails Intune device health attestation.
+
+**Accuracy.** The TPM logs event 17 in the System log for every command it does not complete, and most of those are Windows asking what the TPM supports.
+A large event 17 count is not a TPM fault. Count the failing populations only.
+The TPM events say a command or check failed on the device. They do not say whether Intune or conditional access marked the device noncompliant: that verdict is off-endpoint.
+Attestation checks run on a schedule and at boot, so one failed check is one reading, not a standing state.
+
+**Feeds.** `subsource` (LQL) `win.eventlog.system` carries TPM event 17, TPM hardware errors and TPM-WMI attestation: `../feeds/win.eventlog.system/reasons.md` and `fields.md`.
+`win.eventlog.platform` carries the boot environment's TPM initialization.
+Each reason's arm is on `sparklogs.reason_variant` (LQL).
+
+**Device health first.** `latest_state` on the `system_info` topic: `sparklogs.data.system_info.tpm_present` (col) and `sparklogs.data.system_info.tpm_version` (col) say whether Windows sees a TPM now and which specification it reports.
+On a TPM 2.0 the same row names the chip: `sparklogs.data.system_info.tpm_manufacturer` (LQL) is the maker's vendor ID (`IFX` (other) Infineon, `INTC` (other) Intel firmware TPM, `AMD` (other) AMD firmware TPM, `NTC` (other) Nuvoton, `STM` (other) STMicroelectronics, `MSFT` (other) a virtual machine's TPM or a Pluton security processor), `sparklogs.data.system_info.tpm_firmware_version` (LQL) the firmware the chip runs, and `sparklogs.data.system_info.tpm_spec_revision` (LQL) the specification revision it implements.
+Check the maker and firmware version against the maker's security advisories.
+These three are absent on a TPM 1.2 and when the TPM did not answer the agent: their absence does not mean there is no TPM, which `sparklogs.data.system_info.tpm_present` (col) answers.
+`device_overview` over the window: its `events` (col) carry `tpm_presence_changed` (a TPM appeared or disappeared, usually a firmware setting, firmware update or board replacement), `tpm_version_changed`, `tpm_chip_changed` (the TPM now comes from another maker, usually a firmware setting switching between the processor's firmware TPM and a discrete chip), `tpm_firmware_changed` (the same TPM runs another firmware version) and `bios_version_changed`.
+Each takes effect at a restart, so it follows the restart that applied it.
+A TPM that disappeared, changed version or changed maker explains every TPM error after it. A firmware change can start or end a firmware defect. Look for that change before reading event 17; other changes before the first error: `what-changed.md`.
+
+**Event 17: routine or failing.**
+
+- Routine, never counted on its own: `tpm_capability_probe_declined` (the TPM answered "not supported" or "not there"), `tpm_command_retry_requested` (busy or self-testing, Windows retries), `tpm_counter_reset_on_resume` (TPM event 30, firmware reset the TPM during sleep). A healthy device can log hundreds of probe refusals.
+- `tpm_command_failed`: arm `below_tpm` is a Windows driver status in `win.eventlog.system.tpm_response_code` (LQL), so the command got no answer from the TPM. Arm `failure_mode` is TPM2_RC_FAILURE: the TPM has stopped until restart. Arm `unrecognized` is a response outside the routine groups.
+- `tpm_authorization_refused`: a wrong authorization value, often a mistyped PIN, which counts toward the TPM's lockout, or a policy that no longer matches the boot measurements. Warning when the TPM is in lockout and refuses every authorization.
+- `tpm_hardware_failed`: TPM event 15, the driver found a non-recoverable TPM error and stopped TPM services. `win.eventlog.system.tpm_error_data` (LQL) holds the status.
+
+```lql
+source = "<host>" AND subsource = "win.eventlog.system" AND sparklogs.reason in (tpm_command_failed, tpm_authorization_refused, tpm_hardware_failed)
+```
+
+Group by `sparklogs.reason` (LQL), `sparklogs.reason_variant` (LQL).
+Breadth across commands: group the same query by `win.eventlog.system.tpm_command` (LQL), `win.eventlog.system.tpm_response` (LQL).
+Many `tpm_command_failed` rows across many different commands, over and over, plus `tpm_hardware_failed`, is a TPM, firmware or driver problem.
+A few refusals on one or two commands mean nothing on their own.
+For `tpm_authorization_refused`, read `win.eventlog.system.tpm_response_position` (LQL) for which authorization the TPM refused, and check whether the user reports a PIN or BitLocker unlock problem at the same time.
+
+**Attestation.**
+
+- `tpm_attestation_check_failed`: TPM-WMI event 1041. Arm `required_check_failed` means the device cannot pass attestation. The failed checks are in `win.eventlog.system.tpm_attestation_required_failed` (LQL), most often EkCertIsAvailable (no endorsement key certificate, common on virtual machines and some older TPMs).
+  Arm `expected_check_failed` lists its checks in `win.eventlog.system.tpm_attestation_expected_failed` (LQL), usually PcrsMatchTcgLog: attestation may fail for this boot only. A restart and a passing 1041 clear it.
+  `win.eventlog.system.tpm_attestation_health_status` (LQL) is the overall result Windows wrote (Attestable, Possibly attestable, Cannot be attested). `win.eventlog.system.tpm_attestation_pcrs_match_tcg_log` (LQL) and `win.eventlog.system.tpm_attestation_tpm_responsive` (LQL) are the two checks that point at the TPM itself.
+- `tpm_attestation_failed`: TPM-WMI event 1040, a critical component failed the pre-attestation checks. The event names a detail file on the device and carries no check results, so read the 1041 beside it.
+- `device_health_cert_service_unreachable`: TPM-WMI event 1538, the health certificate request could not reach Microsoft's service. Arm `name_not_resolved` is the request running before the network is up and is routine. Arm `other_error` points at a firewall, proxy or filtering rule.
+
+```lql
+source = "<host>" AND subsource = "win.eventlog.system" AND sparklogs.reason in (tpm_attestation_check_failed, tpm_attestation_failed, device_health_cert_service_unreachable)
+```
+
+Group by `sparklogs.reason` (LQL), `win.eventlog.system.tpm_attestation_health_status` (LQL).
+
+**No usable TPM at boot.** `tpm_initialization_failed` on `win.eventlog.platform` is Kernel-Boot event 235. Arm `no_usable_tpm` means the boot environment found no TPM it could use: a virtual machine without a virtual TPM logs it at every boot.
+Arm `init_failed` is any other initialization failure, with the boot position in `win.eventlog.platform.tpm_init_position` (LQL). It says the boot could not initialize the TPM, not that the TPM is absent.
+
+**Well-known causes.**
+
+- TPM firmware with a known defect, fixed by the device maker's TPM or BIOS update. A failure that starts or stops at `tpm_firmware_changed` or `bios_version_changed` points at the firmware; `sparklogs.data.system_info.tpm_firmware_version` (LQL) is the version to look up.
+- The TPM was cleared, reset or switched between discrete and firmware TPM in the BIOS: `tpm_presence_changed`, `tpm_version_changed` or `tpm_chip_changed`. Windows Hello and BitLocker keys sealed to the old TPM stop working, and a BitLocker drive asks for its recovery password: `bitlocker-recovery.md`.
+- Dictionary-attack lockout after repeated wrong PINs: `tpm_authorization_refused` at Warning, every authorization refused. It clears after the lockout period, or when the TPM owner resets it.
+- A failing TPM chip or system board: `tpm_hardware_failed`, or `failure_mode` that returns after each restart. Other hardware errors on the same device: `hardware-faults.md`.
+
+**One device or many.** Before calling a TPM event significant, count `tpm_command_failed` or `tpm_attestation_check_failed` across the organization by `source` (LQL), with the arm beside it.
+The same reason and arm on many devices that work is a model or firmware trait: compare the devices' `sparklogs.data.system_info.tpm_manufacturer` (LQL) and `sparklogs.data.system_info.tpm_firmware_version` (LQL) to see whether one maker or firmware carries it. One device with a high count among peers that log none is that device.
+A failed Required check on every virtual machine in the organization is the hypervisor's TPM, not a fault. A maker of `MSFT` (other) alone does not mark a virtual machine: a Pluton security processor reports it too.
+
+**Findings.** Lead with the failing population and its count on the device, then the peer comparison.
+Name probe and retry counts only to say they were excluded.
+A TPM fault and a BitLocker recovery prompt on the same device: `bitlocker-recovery.md`.
+
+**Off-endpoint** (HM14): the Intune compliance or conditional access verdict, Microsoft's attestation service, TPM firmware advisories from the device maker, a virtual machine host's virtual TPM.

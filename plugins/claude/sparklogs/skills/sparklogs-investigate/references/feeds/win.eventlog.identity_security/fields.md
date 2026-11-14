@@ -12,7 +12,6 @@ Read every row below as a query contract, the same way a reason code is read.
 
 - **Additive only.** Fields and vocabulary tokens are added, never renamed or repurposed, without a documented migration.
 - **Misses are honest.** An unlisted code leaves its decoded field unset and the raw value promoted; a meaning is never invented.
-- **Correlate with `pack_version`.** A field exists at rest only from the pack version that shipped it, so check the pack version on the events in scope before concluding a condition is absent.
 
 ## Raw fallback
 
@@ -42,11 +41,11 @@ Stored flat under the `win.eventlog.identity_security.` prefix.
 | `win.eventlog.identity_security.shadow_stack_nonenforcement_reason` | int | Reason code Windows gave for letting a process keep running after a shadow stack (hardware-enforced stack protection) mismatch, from `NonenforcementReason` on Security-Mitigations event 25, as a number. SparkLogs does not decode it. |
 | `win.eventlog.identity_security.shadow_stack_control_pc_image` | string | File name (without folder) of the module the mismatched return address points into, from `ControlPcImageName` on Security-Mitigations events 25 and 28. Usually names the module that caused the mismatch. |
 | `win.eventlog.identity_security.entra_error_message` | string | Error text the Microsoft Entra sign-in library wrote for a failed token request, from `ErrorMessage` on AAD Operational events. Tells a network failure from a tenant configuration problem. |
-| `win.eventlog.identity_security.correlation_id` | string | Correlation ID Microsoft Entra stamped on one sign-in or token attempt, from `CorrelationID` on AAD Operational events. Each attempt gets a new one. Use it to find the same attempt in the Entra sign-in logs. |
-| `win.eventlog.identity_security.http_status` | int | HTTP status code the registration service returned, from `HttpStatus` on User Device Registration failure events. Tells a refusal by the service from a network failure. |
+| `win.eventlog.identity_security.correlation_id` | string | Correlation ID Microsoft Entra stamped on one sign-in or token attempt, from `CorrelationID` on AAD Operational events 1085, 1086, 1094, 1131, 1155, 1160 to 1162 and 1202, and from `Target` on 1084 and 1256. The token errors 1097, 1098 and 1112 carry none. Each attempt gets a new one. Use it to find the same attempt in the Entra sign-in logs. |
+| `win.eventlog.identity_security.http_status` | int | HTTP status code the registration service returned, from `HttpStatus` on User Device Registration failure events 204 and 252. Tells a refusal by the service from a network failure. |
 | `win.eventlog.identity_security.directory_error_code` | int | Detail error code under a device registration failure, from `ErrorCode` on User Device Registration failure events that also carry an exit code. Events 220 and 221 carry only this code, and SparkLogs reports it as the result code of those events instead. |
-| `win.eventlog.identity_security.directory_error_subcode` | string | Sub-code the registration service gave with a failure, from `ErrorSubcode`, such as one for two devices claiming the same name. The only field that picks out the duplicate device case. |
-| `win.eventlog.identity_security.registration_attribute` | string | Device object attribute a registration update was trying to write, from `Attribute` on User Device Registration failure events. |
+| `win.eventlog.identity_security.directory_error_subcode` | string | Sub-code the registration service gave with a failure, from `ErrorSubcode` on User Device Registration event 252, such as one for two devices claiming the same name. The only field that picks out the duplicate device case. |
+| `win.eventlog.identity_security.registration_attribute` | string | Device object attribute a registration update was trying to write, from `Attribute` on User Device Registration event 252. |
 | `win.eventlog.identity_security.whfb_policy_enabled` | string | Whether a policy turns on Windows Hello for Business for this device, from `NgcPolicyEnabled` on the Windows Hello provisioning checks (User Device Registration 359 and 360, HelloForBusiness events). No means Windows Hello is not configured here, as opposed to a failed rollout. |
 | `win.eventlog.identity_security.whfb_user_remote` | string | Whether the user is connected through Remote Desktop, from `UserIsRemote` on the Windows Hello provisioning checks. Windows Hello does not set up over a remote session. |
 | `win.eventlog.identity_security.whfb_device_joined` | string | Whether the device is joined to the directory, from `DeviceIsJoined` on the Windows Hello provisioning checks. |
@@ -54,19 +53,19 @@ Stored flat under the `win.eventlog.identity_security.` prefix.
 | `win.eventlog.identity_security.whfb_primary_refresh_token` | string | Whether the user signed in with Microsoft Entra credentials and holds a sign-in token, from `AADPrt` on the Windows Hello provisioning checks. Says only whether the token exists. |
 | `win.eventlog.identity_security.whfb_key_status` | string | Status of the Windows Hello key as Windows names it, from `KeyStatusSymbolicName` on Windows Hello key registration events, such as a TPM with no attestation support. |
 | `win.eventlog.identity_security.dpapi_failure_reason` | int | Reason code Windows data protection (DPAPI) gave for failing to decrypt protected data, from `ReasonForFailure` on Crypto-DPAPI events, as a number. SparkLogs does not decode it. |
-| `win.eventlog.identity_security.dpapi_master_key_guid` | string | GUID of the DPAPI master key the decryption tried to use, from `MasterKeyGUID` on Crypto-DPAPI events. Identifies the key only. |
+| `win.eventlog.identity_security.dpapi_master_key_guid` | string | GUID of the DPAPI master key the decryption tried to use, from `MasterKeyGUID` on Crypto-DPAPI events 8202, 8204 and 8205. Identifies the key only. |
 | `win.eventlog.identity_security.crypto_provider` | string | Key storage provider the key operation used, from `ProviderName` on Crypto-NCrypt operational events, such as the software provider or the TPM (platform) provider. The same status code means different things on the two. |
 | `win.eventlog.identity_security.crypto_operation_type` | int | Type of key storage operation, from `OperationType` on Crypto-NCrypt operational events, as a number. SparkLogs does not decode it. |
-| `win.eventlog.identity_security.crypto_function` | string | Key isolation function that failed, from `Function` on Crypto-NCrypt events 13 and 26. |
-| `win.eventlog.identity_security.vbs_can_be_enabled` | int | Whether the platform says virtualization-based key protection can be turned on at all, from `CanBeEnabled` on Crypto-NCrypt events 13 and 26. Zero means the hardware or firmware cannot support it, so retrying will not help. |
-| `win.eventlog.identity_security.vbs_restart_attempts` | int | Number of times Windows has tried to restart virtualization-based key protection, from `TotalAttemptedRestarts` on Crypto-NCrypt events 13 and 26. A running total. |
-| `win.eventlog.identity_security.vbs_restart_successes` | int | Number of restarts of virtualization-based key protection that succeeded, from `TotalSuccessfulRestarts` on Crypto-NCrypt events 13 and 26. A running total. |
+| `win.eventlog.identity_security.crypto_function` | string | Key isolation function that failed, from `Function` on Crypto-NCrypt event 13 (event 26 does not carry it). |
+| `win.eventlog.identity_security.vbs_can_be_enabled` | int | Whether the platform says virtualization-based key protection can be turned on at all, from `CanBeEnabled` on Crypto-NCrypt event 26 (event 13 does not carry it). Zero means the hardware or firmware cannot support it, so retrying will not help. |
+| `win.eventlog.identity_security.vbs_restart_attempts` | int | Number of times Windows has tried to restart virtualization-based key protection, from `TotalAttemptedRestarts` on Crypto-NCrypt event 26 (event 13 does not carry it). A running total. |
+| `win.eventlog.identity_security.vbs_restart_successes` | int | Number of restarts of virtualization-based key protection that succeeded, from `TotalSuccessfulRestarts` on Crypto-NCrypt event 26 (event 13 does not carry it). A running total. |
 | `win.eventlog.identity_security.gp_connectivity_failure` | bool | Whether Group Policy blamed the network for a failed policy refresh, from `IsConnectivityFailure` on GroupPolicy events 7000 and 7001. Tells a machine off the corporate network from one that cannot reach its own domain. |
 | `win.eventlog.identity_security.gp_is_machine` | int | Whether the policy refresh was for the computer (1) or for a user at logon (0), from `IsMachine` on GroupPolicy events 7000 and 7001. |
 | `win.eventlog.identity_security.gp_elapsed_seconds` | int | Seconds the failed policy refresh took, from `PolicyElaspedTimeInSeconds` (the field name is misspelled by Windows) on GroupPolicy events 7000 and 7001. |
 | `win.eventlog.identity_security.gp_extension_name` | string | Group Policy client-side extension that reported a failure, from `CSEExtensionName` on GroupPolicy events 6016 and 7016, such as Security or Drive Maps. Each extension fails for its own reasons. |
 | `win.eventlog.identity_security.gp_extension_id` | string | GUID of that client-side extension, from `CSEExtensionId` on GroupPolicy events 6016 and 7016. The same on every Windows language. |
-| `win.eventlog.identity_security.gp_dc_discovery_ms` | int | Milliseconds Group Policy spent looking for a domain controller before it gave up, from `DCDiscoveryTimeInMilliSeconds` on GroupPolicy events 7017, 7320 and 7326. |
+| `win.eventlog.identity_security.gp_dc_discovery_ms` | int | Milliseconds Group Policy spent looking for a domain controller before it gave up, from `DCDiscoveryTimeInMilliSeconds` on GroupPolicy event 7326. Events 7017 and 7320 do not carry it. |
 | `win.eventlog.identity_security.gp_mutual_auth_enforced` | bool | Whether the machine requires mutual authentication when it reads policy from a file share, from `MutualAuthenticationEnforced` on GroupPolicy event 9001. |
 | `win.eventlog.identity_security.gp_integrity_enforced` | bool | Whether the machine requires integrity protection when it reads policy from a file share, from `IntegrityEnforced` on GroupPolicy event 9001. |
 | `win.eventlog.identity_security.ntlm_version` | string | NTLM version used, from `NtlmVersion` on NTLM Operational events 4020 to 4023. NTLMv1 is the insecure version to find and remove. |
@@ -74,10 +73,16 @@ Stored flat under the `win.eventlog.identity_security.` prefix.
 | `win.eventlog.identity_security.ntlm_channel_binding` | string | Channel binding status of the NTLM exchange, from `ChannelBindingStatus` on NTLM Operational events. |
 | `win.eventlog.identity_security.ntlm_mic_status` | string | Message integrity check status of the NTLM exchange, from `Mic Status` on NTLM Operational events. |
 | `win.eventlog.identity_security.bitlocker_backup_target` | string | Where a BitLocker recovery key backup was sent: a Microsoft account (events 829 and 898), Microsoft Entra ID (event 846), or a directory the event does not name (event 872). Set from the event ID. |
-| `win.eventlog.identity_security.bitlocker_volume_mount_point` | string | Drive the BitLocker recovery key backup event is about, from `VolumeMountPoint`, as Windows wrote it. Absent when the event does not carry it. |
+| `win.eventlog.identity_security.bitlocker_volume_mount_point` | string | Drive a BitLocker recovery key backup (events 829, 845, 846, 897 and 898) or a reseal of the boot settings to the TPM (event 793) is about, from `VolumeMountPoint`, as Windows wrote it. Absent when the event does not carry it. |
+| `win.eventlog.identity_security.bitlocker_sealed_pcrs` | array | PCR indices BitLocker sealed a key to on event 892, in ascending order, decoded from `PCRBitmap`. A change in a PCR outside this list does not by itself make the TPM refuse the key at the next boot. Typically 7 and 11 on a UEFI device with Secure Boot. |
+| `win.eventlog.identity_security.bitlocker_seal_pcr_bitmap` | string | The PCRs from `PCRBitmap` on event 892, written as a hex bitmap with one bit per PCR (0x880 is PCRs 7 and 11). |
+| `win.eventlog.identity_security.bitlocker_seal_excluded_pcrs` | array | PCR indices left out of the seal on event 892, in ascending order, decoded from `ExcludedPcrsBitmap`. Absent when none were left out. |
+| `win.eventlog.identity_security.bitlocker_seal_pcr_source` | int | Where the PCR list on event 892 came from, as the `PCRBitmapSource` number Windows wrote. 3 is Secure Boot, which the event text names. In practice 3 comes with PCRs 7 and 11, and 5 with PCRs 0, 2, 4 and 11; the event text gives no name for 5. |
+| `win.eventlog.identity_security.bitlocker_sealed_pcr_values` | array | The value each PCR on event 892 is sealed to, from `PCRValues`: one entry per PCR in ascending order, with the PCR index (`pcr`) and its digest as lowercase hex (`value`), the same form as the boot PCR record of BitLocker-Driver event 24709. Absent when the value does not split into one digest per sealed PCR. |
+| `win.eventlog.identity_security.bitlocker_seal_pcr_source_name` | string | Name of the PCR source on event 892: secure_boot when `PCRBitmapSource` is 3. Absent for any other number, which the event does not name. |
 | `win.eventlog.identity_security.bitlocker_secure_boot_reason` | string | Why BitLocker could not use Secure Boot to protect the drive: Secure Boot is turned off (event 810), the boot measurement log is invalid, or the measurements could not be read. Set from the event ID. |
-| `win.eventlog.identity_security.cert_subject` | string | Subject of the certificate that has expired or is about to, from `SubjectName` on CertificateServicesClient Lifecycle events 1002 and 1003. Tells a domain controller or server certificate from an application certificate. |
-| `win.eventlog.identity_security.cert_not_valid_after` | string | Expiry time of the certificate, from `NotValidAfter` on CertificateServicesClient Lifecycle events 1002 and 1003, as Windows records it: a UTC date and time such as 2026-03-02T13:01:19Z. A renewed certificate has a new value, so it does not look like a repeat of the old one. |
+| `win.eventlog.identity_security.cert_subject` | string | Subject of the certificate that has expired or is about to, from `SubjectName` on CertificateServicesClient Lifecycle events 1002 and 1003. Tells a domain controller or server certificate from an application certificate. Absent on user-store rows, which Windows writes without a subject. |
+| `win.eventlog.identity_security.cert_not_valid_after` | string | Expiry time of the certificate, from `NotValidAfter` on CertificateServicesClient Lifecycle events 1002 and 1003, as microseconds since 1970-01-01 UTC (for example 1794397577000000). A renewed certificate has a new value, so it does not look like a repeat of the old one. |
 | `win.eventlog.identity_security.cert_store` | string | Certificate store the certificate is in: machine (the computer store, usually server and infrastructure certificates) or user (the user store), from which Lifecycle channel logged it. |
 | `win.eventlog.identity_security.applocker_policy_name` | string | AppLocker rule collection the audit finding came from, from `PolicyName` on AppLocker event 8003, such as the executable or the DLL collection. |
 | `win.eventlog.identity_security.applocker_rule_name` | string | AppLocker rule that would have blocked the file, from `RuleName` on AppLocker event 8003. A placeholder name means no rule matched. |
@@ -100,12 +105,12 @@ Prefer these over the per-feed fields for anything that spans feeds.
 ## Tail keys and where the value is queryable
 
 The curated first line renders a `key=value` tail in one canonical order for the whole module, so an omitted key never moves the rest.
-Each key names one field; that field is where the value is queried.
+A key is listed with the module field of the same name; a key without one may still be queryable under another field in the table above.
 
 | Tail key | Queryable as |
 |---|---|
-| `extension` | not queryable as a field |
-| `error_code` | not queryable as a field |
+| `extension` | no field of the same name |
+| `error_code` | no field of the same name |
 
 ## What sets each field
 
@@ -119,6 +124,8 @@ The last column is different in kind: it is the author's account of the row or e
 | `applocker_audit_would_block` / `no_matching_rule` | 8003 | `win.eventlog.identity_security.applocker_file_path` `win.eventlog.identity_security.applocker_policy_name` `win.eventlog.identity_security.applocker_rule_id` `win.eventlog.identity_security.applocker_rule_name` |  |
 | `applocker_audit_would_block` / `rule_matched` | 8003 | `win.eventlog.identity_security.applocker_file_path` `win.eventlog.identity_security.applocker_policy_name` `win.eventlog.identity_security.applocker_rule_id` `win.eventlog.identity_security.applocker_rule_name` |  |
 | `applocker_unsupported_windows_edition` / `default` | 8009 | **fields: none** |  |
+| `bitlocker_boot_settings_resealed` / `default` | 793 | `win.eventlog.identity_security.bitlocker_volume_mount_point` |  |
+| `bitlocker_key_sealed_to_tpm` / `default` | 892 | `win.eventlog.identity_security.bitlocker_seal_excluded_pcrs` `win.eventlog.identity_security.bitlocker_seal_pcr_bitmap` `win.eventlog.identity_security.bitlocker_seal_pcr_source` `win.eventlog.identity_security.bitlocker_seal_pcr_source_name` `win.eventlog.identity_security.bitlocker_sealed_pcr_values` `win.eventlog.identity_security.bitlocker_sealed_pcrs` |  |
 | `bitlocker_protection_resume_failed` / `default` | 822 | **fields: none** |  |
 | `bitlocker_recovery_info_read_failed` / `fetch_failed` | 868, 875 | **fields: none** |  |
 | `bitlocker_recovery_info_read_failed` / `service_refused` | 868, 875 | **fields: none** |  |
@@ -127,8 +134,10 @@ The last column is different in kind: it is the author's account of the row or e
 | `bitlocker_secure_boot_unavailable` / `measurement_invalid` | 810, 811, 812, 813, 815, 834, 835, 878, 881, 893 | `win.eventlog.identity_security.bitlocker_secure_boot_reason` |  |
 | `bitlocker_secure_boot_unavailable` / `measurement_unreadable` | 810, 811, 812, 813, 815, 834, 835, 878, 881, 893 | `win.eventlog.identity_security.bitlocker_secure_boot_reason` |  |
 | `bitlocker_secure_boot_unavailable` / `secure_boot_disabled` | 810, 811, 812, 813, 815, 834, 835, 878, 881, 893 | `win.eventlog.identity_security.bitlocker_secure_boot_reason` |  |
-| `cert_expired` / `default` | 1002, 1003 | `win.eventlog.identity_security.cert_not_valid_after` `win.eventlog.identity_security.cert_store` `win.eventlog.identity_security.cert_subject` |  |
-| `cert_expiring` / `default` | 1002, 1003 | `win.eventlog.identity_security.cert_not_valid_after` `win.eventlog.identity_security.cert_store` `win.eventlog.identity_security.cert_subject` |  |
+| `cert_expired` / `entra_daily_certificate` | 1002, 1003 | `win.eventlog.identity_security.cert_not_valid_after` `win.eventlog.identity_security.cert_store` `win.eventlog.identity_security.cert_subject` |  |
+| `cert_expired` / `store_certificate` | 1002, 1003 | `win.eventlog.identity_security.cert_not_valid_after` `win.eventlog.identity_security.cert_store` `win.eventlog.identity_security.cert_subject` |  |
+| `cert_expiring` / `entra_daily_certificate` | 1002, 1003 | `win.eventlog.identity_security.cert_not_valid_after` `win.eventlog.identity_security.cert_store` `win.eventlog.identity_security.cert_subject` |  |
+| `cert_expiring` / `store_certificate` | 1002, 1003 | `win.eventlog.identity_security.cert_not_valid_after` `win.eventlog.identity_security.cert_store` `win.eventlog.identity_security.cert_subject` |  |
 | `code_integrity_catalog_load_failed` / `resource_pressure` | 3010, 3024 | `win.eventlog.identity_security.code_integrity_catalog` |  |
 | `code_integrity_catalog_load_failed` / `unreadable` | 3010, 3024 | `win.eventlog.identity_security.code_integrity_catalog` |  |
 | `code_integrity_driver_revoked` / `default` | 3023 | `win.eventlog.identity_security.code_integrity_file` `win.eventlog.identity_security.code_integrity_secure_required` |  |
@@ -177,15 +186,18 @@ The last column is different in kind: it is the author's account of the row or e
 | `exploit_mitigation_shadow_stack_mismatch` / `blocked` | 28 | `win.eventlog.identity_security.mitigation_process` `win.eventlog.identity_security.shadow_stack_control_pc_image` |  |
 | `exploit_mitigation_shadow_stack_mismatch` / `not_enforced` | 25 | `win.eventlog.identity_security.mitigation_process` `win.eventlog.identity_security.shadow_stack_control_pc_image` `win.eventlog.identity_security.shadow_stack_nonenforcement_reason` |  |
 | `group_policy_domain_controller_unresolved` / `access_denied` | 7017, 7320, 7326 | `win.eventlog.identity_security.gp_dc_discovery_ms` |  |
+| `group_policy_domain_controller_unresolved` / `connectivity_notification_unsupported` | 7017, 7320, 7326 | `win.eventlog.identity_security.gp_dc_discovery_ms` |  |
 | `group_policy_domain_controller_unresolved` / `discovery_failed` | 7017, 7320, 7326 | `win.eventlog.identity_security.gp_dc_discovery_ms` |  |
 | `group_policy_domain_controller_unresolved` / `domain_unresolved` | 7017, 7320, 7326 | `win.eventlog.identity_security.gp_dc_discovery_ms` |  |
 | `group_policy_extension_apply_failed` / `deferred` | 6016, 7016 | `win.eventlog.identity_security.gp_extension_id` `win.eventlog.identity_security.gp_extension_name` |  |
 | `group_policy_extension_apply_failed` / `extension_failed` | 6016, 7016 | `win.eventlog.identity_security.gp_extension_id` `win.eventlog.identity_security.gp_extension_name` |  |
+| `group_policy_extension_apply_failed` / `mdm_already_enrolled` | 6016, 7016 | `win.eventlog.identity_security.gp_extension_id` `win.eventlog.identity_security.gp_extension_name` |  |
 | `group_policy_extension_apply_failed` / `no_changes` | 6016, 7016 | `win.eventlog.identity_security.gp_extension_id` `win.eventlog.identity_security.gp_extension_name` |  |
 | `group_policy_extension_apply_failed` / `share_unreachable` | 6016, 7016 | `win.eventlog.identity_security.gp_extension_id` `win.eventlog.identity_security.gp_extension_name` |  |
 | `group_policy_file_share_unhardened` / `default` | 9001 | `win.eventlog.identity_security.gp_integrity_enforced` `win.eventlog.identity_security.gp_mutual_auth_enforced` |  |
-| `group_policy_processing_failed` / `no_network` | 7000, 7001 | `win.eventlog.identity_security.gp_connectivity_failure` `win.eventlog.identity_security.gp_elapsed_seconds` `win.eventlog.identity_security.gp_is_machine` |  |
-| `group_policy_processing_failed` / `other_failure` | 7000, 7001 | `win.eventlog.identity_security.gp_connectivity_failure` `win.eventlog.identity_security.gp_elapsed_seconds` `win.eventlog.identity_security.gp_is_machine` |  |
+| `group_policy_processing_failed` / `no_network` | 7000, 7001, 7017 | `win.eventlog.identity_security.gp_connectivity_failure` `win.eventlog.identity_security.gp_elapsed_seconds` `win.eventlog.identity_security.gp_is_machine` |  |
+| `group_policy_processing_failed` / `other_failure` | 7000, 7001, 7017 | `win.eventlog.identity_security.gp_connectivity_failure` `win.eventlog.identity_security.gp_elapsed_seconds` `win.eventlog.identity_security.gp_is_machine` |  |
+| `group_policy_processing_failed` / `sysvol_unreachable` | 7000, 7001, 7017 | **fields: none** |  |
 | `laps_password_backup_failed` / `authentication` | 10005, 10026, 10028, 10032, 10059 | **fields: none** |  |
 | `laps_password_backup_failed` / `backup_failed` | 10005, 10026, 10028, 10032, 10059 | **fields: none** |  |
 | `laps_password_backup_failed` / `tenant_not_enabled` | 10005, 10026, 10028, 10032, 10059 | **fields: none** |  |
@@ -220,6 +232,7 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `entra_sign_in_failed` / `credential`
 - `entra_sign_in_failed` / `unexplained`
 - `entra_sign_in_failed` / `unreachable`
+- `group_policy_processing_failed` / `sysvol_unreachable`
 - `laps_password_backup_failed` / `authentication`
 - `laps_password_backup_failed` / `backup_failed`
 - `laps_password_backup_failed` / `tenant_not_enabled`

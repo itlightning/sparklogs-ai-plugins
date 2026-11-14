@@ -5,7 +5,7 @@ Full inventory every 6 hours. Supported changes are reported when the agent obse
 
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
-| `sparklogs.data.vss_shadowstorage.display_name` | string |  | The volume's drive letter or mount path. |
+| `sparklogs.data.vss_shadowstorage.display_name` | string |  | The volume's drive letter. Absent when the volume has no drive letter. |
 | `sparklogs.data.vss_shadowstorage.volume` | string |  | The volume's identity, the same key `disk_volumes` and `volume_map` use. When the agent cannot match the volume, the lowercased name `vssadmin` gave it instead. |
 | `sparklogs.data.vss_shadowstorage.volume_resolution` | string |  | `unresolved` when the agent could not match the volume, so its key is the name `vssadmin` gave and does not join with other volume topics. Absent otherwise. |
 | `sparklogs.data.vss_shadowstorage.shadowstorage_used_pct` | float | percent | How much of the volume's shadow copy storage limit is in use. Can exceed 100 when the limit is lowered below the space already used. |

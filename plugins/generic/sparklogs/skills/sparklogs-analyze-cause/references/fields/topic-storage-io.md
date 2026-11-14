@@ -6,7 +6,7 @@ Reported every 5 minutes on clock boundaries for the window ending at `t`. `spar
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
 | `sparklogs.data.storage_io.volume` | string |  | The volume's GUID, the same key `disk_volumes` uses. |
-| `sparklogs.data.storage_io.display_name` | string |  | The volume's drive letter or mount path. |
+| `sparklogs.data.storage_io.display_name` | string |  | The volume's drive letter. Absent when the volume has no drive letter. |
 | `sparklogs.data.storage_io.volume_role` | string |  | What the volume is used for: `os` (the Windows volume), `fixed_data` (another fixed volume) or `removable`. Absent when the role is unknown. |
 | `sparklogs.data.storage_io.volume_role_code` | integer |  | A numeric code for the volume's role. |
 | `sparklogs.data.storage_io.busy_pct_avg` | float | percent | The average share of the 5-minute window the volume's storage was busy. |

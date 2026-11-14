@@ -12,7 +12,6 @@ Read every row below as a query contract, the same way a reason code is read.
 
 - **Additive only.** Fields and vocabulary tokens are added, never renamed or repurposed, without a documented migration.
 - **Misses are honest.** An unlisted code leaves its decoded field unset and the raw value promoted; a meaning is never invented.
-- **Correlate with `pack_version`.** A field exists at rest only from the pack version that shipped it, so check the pack version on the events in scope before concluding a condition is absent.
 
 ## Raw fallback
 
@@ -23,7 +22,7 @@ A promoted field being absent does not mean the raw one is: promotion is per cur
 
 ## Reconstruction guarantee
 
-7 curated surface(s) drop the vendor body text below the synthesized first line.
+9 curated surface(s) drop the vendor body text below the synthesized first line.
 That is never data loss: the provider payload is retained at rest, so a dropped body can be reconstructed from it.
 What the body said is derivable; what it cost to ship it repeatedly is not.
 
@@ -82,6 +81,45 @@ Stored flat under the `win.eventlog.system.` prefix.
 | `win.eventlog.system.mem_physical_bytes` | int | Installed physical memory in bytes, from `PhysicalMemorySize` on Resource-Exhaustion-Detector event 2004. |
 | `win.eventlog.system.mem_physical_used_bytes` | int | Physical memory in use in bytes, from `PhysicalMemoryUsage` on Resource-Exhaustion-Detector event 2004. |
 | `win.eventlog.system.mem_top_consumer_image` | string | Program that held the most committed memory when Windows found virtual memory running low, read from the message of Resource-Exhaustion-Detector event 2004. Absent when the message does not name one or is not in English. |
+| `win.eventlog.system.tpm_command_ordinal` | int | TPM 2.0 command code Windows sent, from `TpmCommandOrdinal` on TPM event 17, as the number Windows wrote. `tpm_command` gives its name. |
+| `win.eventlog.system.tpm_command` | string | Name of the TPM 2.0 command on TPM event 17, such as TPM2_CC_TestParms or TPM2_CC_Unseal. Absent for a code that is not a TPM 2.0 command, as on a TPM 1.2 device. |
+| `win.eventlog.system.tpm_response_code` | int | Response the TPM or its driver returned, from `TpmResponseCode` on TPM event 17, as the number Windows wrote. A value of 3221225472 (0xC0000000) or more is a Windows driver status, not a TPM response. |
+| `win.eventlog.system.tpm_response` | string | Name of the TPM 2.0 response code on TPM event 17, such as TPM2_RC_VALUE or TPM2_RC_AUTH_FAIL, without the bits that say which parameter, handle or session it refers to. Absent for a driver status or an unrecognized code. |
+| `win.eventlog.system.tpm_response_position` | string | Which part of the command the TPM response refers to on TPM event 17: a parameter, a handle or a session, with its number in the order the command lists them. Absent when the response names none. |
+| `win.eventlog.system.boot_pcrs` | array | Boot-time final PCR values from BitLocker-Driver event 24709, one entry per PCR in PCR order: `pcr` (the index), `value` (the digest in lowercase hex) and, on a UEFI boot, `role` (what that PCR measures, such as the core firmware code for PCR 0, the boot manager for PCR 4, the Secure Boot state for PCR 7, BitLocker access control for PCR 11). Absent when the values do not match the PCR list and digest size the event states. |
+| `win.eventlog.system.boot_pcr_indices` | array | PCR indices BitLocker-Driver event 24709 recorded values for, in ascending order, from `AllFinalPcrValuesPcrBitmap`. Typically 0, 2, 4, 5, 7 and 11. |
+| `win.eventlog.system.boot_pcr_fingerprint` | string | SHA-256 over the PCR list and all boot-time PCR values on event 24709. Equal on two boots of one device means the measured boot did not change. Different means at least one PCR value changed. |
+| `win.eventlog.system.boot_pcr_hash_algorithm` | string | Hash bank the PCR values on event 24709 come from: sha1, sha256, sha384, sha512 or sm3_256, from `TcgLogHashAlgorithm`. |
+| `win.eventlog.system.bitlocker_mismatched_pcr` | int | PCR whose value at boot differed from the value a BitLocker TPM protector was sealed to, from `MismatchedPcr` on BitLocker-Driver event 24706. 7 is the Secure Boot state, 4 the boot manager, 0 and 2 the firmware code. |
+| `win.eventlog.system.bitlocker_binding_pcr_bitmap` | string | PCRs the BitLocker TPM protector is bound to, as the hex bitmap Windows wrote in `PcrBitmap` on BitLocker-Driver event 24706, one bit per PCR (0x880 is PCRs 7 and 11). |
+| `win.eventlog.system.bitlocker_reported_pcrs` | array | PCR indices read from the low 24 bits of `ErrorCode` on BitLocker-Driver event 24641, in ascending order, when the code is 0x02 followed by a nonzero PCR bitmap (0x2000880 is PCRs 7 and 11). On devices that also logged BitLocker-API event 892, these PCRs matched the PCRs the drive key was sealed to. Absent for any other code. |
+| `win.eventlog.system.bitlocker_reported_pcr_bitmap` | string | The low 24 bits of `ErrorCode` on BitLocker-Driver event 24641, as a hex bitmap with one bit per PCR (0x880 is PCRs 7 and 11), under the same condition as the PCR list. Absent for any other code. |
+| `win.eventlog.system.bitlocker_binding_id` | string | Binding ID of the TPM protector that started Windows (BitLocker-Driver event 24711) or could not be used to start it (event 24721), from `OptionalGUID`, a GUID in braces in lowercase. The same ID appears as "Binding ID" in the event text. |
+| `win.eventlog.system.tpm_error_data` | int | Value the TPM driver wrote in `Data` on TPM event 15 (non-recoverable TPM hardware error), as the number Windows wrote. A value from 3221225472 (0xC0000000) up to 4294967294 is a Windows status word and is also named in the result fields. |
+| `win.eventlog.system.tpm_reset_count_before` | int | TPM reset counter the driver expected after hibernate or resume, from `resetCountBefore` on TPM event 30. |
+| `win.eventlog.system.tpm_reset_count_after` | int | TPM reset counter the driver read after hibernate or resume, from `resetCountAfter` on TPM event 30. One more than the value before means the TPM was reset once across the sleep. |
+| `win.eventlog.system.tpm_restart_count_before` | int | TPM restart counter the driver expected after hibernate or resume, from `restartCountBefore` on TPM event 30. |
+| `win.eventlog.system.tpm_restart_count_after` | int | TPM restart counter the driver read after hibernate or resume, from `restartCountAfter` on TPM event 30. |
+| `win.eventlog.system.tpm_attestation_health_status` | string | Overall pre-attestation result Windows wrote in `HealthStatus` on TPM-WMI event 1041, such as Attestable, Possibly attestable or Cannot be attested. |
+| `win.eventlog.system.tpm_attestation_pcrs_match_tcg_log` | bool | Whether the PCR values in the TPM match the boot log Windows recorded, from the PcrsMatchTcgLog check on TPM-WMI event 1041. False means the boot log cannot prove what the TPM measured. |
+| `win.eventlog.system.tpm_attestation_tpm_responsive` | bool | Whether the TPM answered the pre-attestation checks, from the TpmIsResponsive check on TPM-WMI event 1041. |
+| `win.eventlog.system.tpm_attestation_required_failed` | array | Required pre-attestation checks on TPM-WMI event 1041 whose value missed the desired value, by the check names Windows writes, such as EkCertIsAvailable. Any entry means the device cannot pass attestation. Present only when a Required or Expected check failed. |
+| `win.eventlog.system.tpm_attestation_expected_failed` | array | Expected pre-attestation checks on TPM-WMI event 1041 whose value missed the desired value, such as PcrsMatchTcgLog. Present only when a Required or Expected check failed. |
+| `win.eventlog.system.secure_boot_update_type` | string | Which Secure Boot update the TPM-WMI event is about, from `UpdateType` on events 1795, 1796, 1802 and 1808, such as KEK 2023, Windows UEFI CA 2023 (DB), DBX or SBAT. Older Windows builds write a number here instead of a name. |
+| `win.eventlog.system.secure_boot_skip_reason` | string | Known-issue identifier that blocked a Secure Boot update, from `SkipReason` on TPM-WMI event 1802, such as KI_7. Microsoft does not publish what each identifier means. |
+| `win.eventlog.system.secure_boot_bucket_confidence` | string | Microsoft rating of the 2023 Secure Boot certificate rollout for this hardware model, from `BucketConfidenceLevel` on TPM-WMI events 1795, 1802, 1803 and 1808, as the label Windows wrote. On 1808 the update is already applied and the label asks nothing of the device, even when it reads No Data Observed - Action Required. |
+| `win.eventlog.system.gp_file_path` | string | Policy file Group Policy could not read, from `FilePath` on GroupPolicy event 1058: the UNC path of a gpt.ini on the domain SYSVOL share, which names the policy object by its GUID. |
+| `win.eventlog.system.gp_extension_name` | string | Group Policy client-side extension that failed to apply, from `ExtensionName` on GroupPolicy event 1085, such as MDM Policy or Deployed Printer Connections. |
+| `win.eventlog.system.gp_extension_id` | string | GUID of that client-side extension, from `ExtensionId` on GroupPolicy event 1085. The same on every Windows language. |
+| `win.eventlog.system.gpo_name` | string | Display name of the policy object whose script failed, from `GPODisplayName` on GroupPolicy event 1130. |
+| `win.eventlog.system.thermal_zone` | string | ACPI thermal zone that reached its critical temperature, from `ThermalZoneDeviceInstance` on Kernel-Power event 88, such as \_TZ.THRM. |
+| `win.eventlog.system.thermal_hot_k` | int | Temperature the firmware sets as the hibernate point for that thermal zone, in kelvin, from `_HOT` on Kernel-Power event 88. Subtract 273 for degrees Celsius. |
+| `win.eventlog.system.battery_remaining_pct` | int | Battery charge left when a battery trigger fired, in percent, from `RemainingPercentage` on Kernel-Power event 524. |
+| `win.eventlog.system.ac_online` | bool | Whether the machine was on mains power when a battery trigger fired, from `IsAcOnline` on Kernel-Power event 524. |
+| `win.eventlog.system.power_policy_action` | int | Action the power plan takes for a battery trigger, from `PowerPolicyAction` on Kernel-Power event 524, as the Windows POWER_ACTION number: 0 none, 2 sleep, 3 hibernate, 4 shut down. |
+| `win.eventlog.system.reduced_state_s` | int | Seconds the processor has been held below its rated speed by firmware since the last report, from `CapDurationInSeconds` on Kernel-Processor-Power event 37. |
+| `win.eventlog.system.tls_error_state` | int | Internal error state Schannel reports for a client credential it could not create, from `ErrorState` on Schannel event 36871. 10013 is the Winsock access-denied number and is the common state. |
+| `win.eventlog.system.tls_caller_process` | string | Program that asked Schannel for the client credential, from `CallerProcessImageName` on Schannel event 36871, as Windows wrote it (an image name such as svchost or a full path). |
 
 ## Portable families
 
@@ -104,26 +142,68 @@ Prefer these over the per-feed fields for anything that spans feeds.
 ## Tail keys and where the value is queryable
 
 The curated first line renders a `key=value` tail in one canonical order for the whole module, so an omitted key never moves the rest.
-Each key names one field; that field is where the value is queried.
+A key is listed with the module field of the same name; a key without one may still be queryable under another field in the table above.
 
 | Tail key | Queryable as |
 |---|---|
-| `volume` | not queryable as a field |
-| `process_path` | not queryable as a field |
-| `actor` | not queryable as a field |
-| `actor_domain` | not queryable as a field |
-| `reason` | not queryable as a field |
-| `reason_code` | not queryable as a field |
-| `shutdown_type` | not queryable as a field |
-| `comment` | not queryable as a field |
-| `bugcheck_code` | not queryable as a field |
-| `bugcheck_name` | not queryable as a field |
-| `power_button_timestamp` | not queryable as a field |
-| `error_ts` | not queryable as a field |
-| `cper_decode` | not queryable as a field |
-| `update_title` | not queryable as a field |
-| `error_code` | not queryable as a field |
-| `error_code_name` | not queryable as a field |
+| `volume` | `win.eventlog.system.volume` |
+| `process_path` | `sparklogs.process.path` |
+| `actor` | `sparklogs.actor.name` |
+| `actor_domain` | `sparklogs.actor.domain` |
+| `reason` | no field of the same name |
+| `reason_code` | no field of the same name |
+| `shutdown_type` | `win.eventlog.system.shutdown_type` |
+| `comment` | no field of the same name |
+| `bugcheck_code` | `win.eventlog.system.bugcheck_code` |
+| `bugcheck_name` | `win.eventlog.system.bugcheck_name` |
+| `power_button_timestamp` | no field of the same name |
+| `error_ts` | no field of the same name |
+| `cper_decode` | `win.eventlog.system.cper_decode` |
+| `update_title` | `win.eventlog.system.update_title` |
+| `command` | no field of the same name |
+| `response` | no field of the same name |
+| `position` | no field of the same name |
+| `response_code` | no field of the same name |
+| `pcrs` | no field of the same name |
+| `fingerprint` | no field of the same name |
+| `pcr0` | no field of the same name |
+| `pcr1` | no field of the same name |
+| `pcr2` | no field of the same name |
+| `pcr3` | no field of the same name |
+| `pcr4` | no field of the same name |
+| `pcr5` | no field of the same name |
+| `pcr6` | no field of the same name |
+| `pcr7` | no field of the same name |
+| `pcr8` | no field of the same name |
+| `pcr9` | no field of the same name |
+| `pcr10` | no field of the same name |
+| `pcr11` | no field of the same name |
+| `pcr12` | no field of the same name |
+| `pcr13` | no field of the same name |
+| `pcr14` | no field of the same name |
+| `pcr15` | no field of the same name |
+| `pcr16` | no field of the same name |
+| `pcr17` | no field of the same name |
+| `pcr18` | no field of the same name |
+| `pcr19` | no field of the same name |
+| `pcr20` | no field of the same name |
+| `pcr21` | no field of the same name |
+| `pcr22` | no field of the same name |
+| `pcr23` | no field of the same name |
+| `secure_boot` | no field of the same name |
+| `mismatched_pcr` | no field of the same name |
+| `pcr_bitmap` | no field of the same name |
+| `driver_data` | no field of the same name |
+| `reset_before` | no field of the same name |
+| `reset_after` | no field of the same name |
+| `restart_before` | no field of the same name |
+| `restart_after` | no field of the same name |
+| `health_status` | no field of the same name |
+| `failed_checks` | no field of the same name |
+| `update_type` | no field of the same name |
+| `skip_reason` | no field of the same name |
+| `error_code` | no field of the same name |
+| `error_code_name` | no field of the same name |
 
 ## What sets each field
 
@@ -135,10 +215,22 @@ The last column is different in kind: it is the author's account of the row or e
 | Surface | Event ids | Fields set | Row fields |
 |---|---|---|---|
 | `av_unsigned_code_blocked` / `default` | 514 | **fields: none** |  |
-| `bitlocker_key_retrieval_code_reported` / `default` | 24641 | **fields: none** |  |
+| `bitlocker_key_retrieval_code_reported` / `default` | 24641 | `win.eventlog.system.bitlocker_reported_pcr_bitmap` `win.eventlog.system.bitlocker_reported_pcrs` |  |
+| `bitlocker_recovery_password_used` / `default` | 24652 | **fields: none** |  |
+| `bitlocker_tpm_binding_mismatch` / `default` | 24706 | `win.eventlog.system.bitlocker_binding_pcr_bitmap` `win.eventlog.system.bitlocker_mismatched_pcr` |  |
+| `bitlocker_tpm_unlock_failed` / `enhanced_pin_refused` | 24635, 24636, 24638, 24643, 24657, 24658, 24721 | **fields: none** |  |
+| `bitlocker_tpm_unlock_failed` / `pcrs_mismatched` | 24635, 24636, 24638, 24643, 24657, 24658, 24721 | **fields: none** |  |
+| `bitlocker_tpm_unlock_failed` / `protector_unusable` | 24635, 24636, 24638, 24643, 24657, 24658, 24721 | `win.eventlog.system.bitlocker_binding_id` |  |
+| `bitlocker_tpm_unlock_failed` / `secure_boot_changed` | 24635, 24636, 24638, 24643, 24657, 24658, 24721 | **fields: none** |  |
+| `bitlocker_tpm_unlock_failed` / `secure_boot_disabled` | 24635, 24636, 24638, 24643, 24657, 24658, 24721 | **fields: none** |  |
+| `bitlocker_tpm_unlock_failed` / `tpm_pin_refused` | 24635, 24636, 24638, 24643, 24657, 24658, 24721 | **fields: none** |  |
+| `bitlocker_tpm_unlock_failed` / `tpm_refused` | 24635, 24636, 24638, 24643, 24657, 24658, 24721 | **fields: none** |  |
+| `bitlocker_tpm_unlock_succeeded` / `default` | 24711 | `win.eventlog.system.bitlocker_binding_id` |  |
 | `dcom_activation_timeout` / `default` | 10029 | **fields: none** |  |
 | `dcom_register_timeout` / `default` | 10010 | `win.eventlog.system.clsid` |  |
 | `dcom_start_failed` / `default` | 10005 | **fields: none** |  |
+| `device_health_cert_service_unreachable` / `name_not_resolved` | 1538 | **fields: none** |  |
+| `device_health_cert_service_unreachable` / `other_error` | 1538 | **fields: none** |  |
 | `disk_bad_block` / `default` | 7 | **fields: none** |  |
 | `disk_controller_error` / `default` | 11 | **fields: none** |  |
 | `disk_failure_predicted` / `default` | 52 | **fields: none** |  |
@@ -165,20 +257,34 @@ The last column is different in kind: it is the author's account of the row or e
 | `filesystem_corruption` / `corruption_discovered` | 7, 55, 98, 130, 131, 132, 133 | `win.eventlog.system.filesystem` `win.eventlog.system.volume` |  |
 | `filesystem_corruption` / `disk` | 7, 55, 98, 130, 131, 132, 133 | **fields: none** |  |
 | `filesystem_corruption` / `offline_repair_required` | 7, 55, 98, 130, 131, 132, 133 | `win.eventlog.system.filesystem` `win.eventlog.system.volume` |  |
+| `filesystem_corruption` / `online_scan_required` | 7, 55, 98, 130, 131, 132, 133 | `win.eventlog.system.filesystem` `win.eventlog.system.volume` |  |
 | `filesystem_corruption` / `repair_activity` | 7, 55, 98, 130, 131, 132, 133 | `win.eventlog.system.filesystem` `win.eventlog.system.volume` |  |
 | `filesystem_corruption` / `repair_posting_throttled` | 7, 55, 98, 130, 131, 132, 133 | `win.eventlog.system.filesystem` `win.eventlog.system.volume` |  |
+| `filesystem_corruption` / `shadow_copy_volume` | 7, 55, 98, 130, 131, 132, 133 | `win.eventlog.system.filesystem` `win.eventlog.system.volume` |  |
+| `filesystem_corruption` / `spot_fix_required` | 7, 55, 98, 130, 131, 132, 133 | `win.eventlog.system.filesystem` `win.eventlog.system.volume` |  |
 | `filesystem_corruption` / `torn_write_detected` | 7, 55, 98, 130, 131, 132, 133 | `win.eventlog.system.filesystem` `win.eventlog.system.volume` |  |
 | `filesystem_delayed_write_lost` / `default` | 50 | `win.eventlog.system.filesystem` `win.eventlog.system.volume` |  |
 | `filesystem_transaction_log_operation_failed` / `flush_failed` | 134, 136, 137, 140 | `win.eventlog.system.filesystem` `win.eventlog.system.volume` |  |
 | `filesystem_transaction_log_operation_failed` / `metadata_reset` | 134, 136, 137, 140 | `win.eventlog.system.filesystem` `win.eventlog.system.volume` |  |
 | `filesystem_transaction_log_operation_failed` / `recovery_error` | 134, 136, 137, 140 | `win.eventlog.system.filesystem` `win.eventlog.system.volume` |  |
 | `filesystem_transaction_log_operation_failed` / `start_failed` | 134, 136, 137, 140 | `win.eventlog.system.filesystem` `win.eventlog.system.volume` |  |
-| `gpu_driver_reset` / `default` | 153 | **fields: none** |  |
-| `group_policy_processing_failed` / `default` | 1129 | **fields: none** |  |
+| `gpu_driver_error` / `default` | 14 | **fields: none** |  |
+| `gpu_driver_reset` / `default` | 153, 4101 | **fields: none** |  |
+| `group_policy_domain_controller_unresolved` / `discovery_failed` | 1054 | **fields: none** |  |
+| `group_policy_domain_controller_unresolved` / `domain_unresolved` | 1054 | **fields: none** |  |
+| `group_policy_extension_apply_failed` / `extension_failed` | 1085, 1130 | `win.eventlog.system.gp_extension_id` `win.eventlog.system.gp_extension_name` |  |
+| `group_policy_extension_apply_failed` / `mdm_already_enrolled` | 1085, 1130 | `win.eventlog.system.gp_extension_id` `win.eventlog.system.gp_extension_name` |  |
+| `group_policy_extension_apply_failed` / `script_failed` | 1085, 1130 | `command_line` `win.eventlog.system.gpo_name` |  |
+| `group_policy_extension_apply_failed` / `share_unreachable` | 1085, 1130 | `win.eventlog.system.gp_extension_id` `win.eventlog.system.gp_extension_name` |  |
+| `group_policy_processing_failed` / `directory_read_failed` | 1006, 1030, 1058, 1129 | **fields: none** |  |
+| `group_policy_processing_failed` / `no_network` | 1006, 1030, 1058, 1129 | **fields: none** |  |
+| `group_policy_processing_failed` / `sysvol_no_code` | 1006, 1030, 1058, 1129 | `win.eventlog.system.gp_file_path` |  |
+| `group_policy_processing_failed` / `sysvol_unreachable` | 1006, 1030, 1058, 1129 | `win.eventlog.system.gp_file_path` |  |
 | `group_policy_software_install_failed` / `deferred` | 101, 102, 103, 108, 1112 | **fields: none** |  |
 | `group_policy_software_install_failed` / `install_failed` | 101, 102, 103, 108, 1112 | **fields: none** |  |
 | `hardware_error_corrected` / `boot_corrected` | 1 | `win.eventlog.system.cper_creator` `win.eventlog.system.cper_decode` `win.eventlog.system.cper_error_ts` `win.eventlog.system.cper_firmware_record_types` `win.eventlog.system.cper_flags` `win.eventlog.system.cper_flags_raw` `win.eventlog.system.cper_notification` `win.eventlog.system.cper_revision` `win.eventlog.system.cper_section_count` `win.eventlog.system.cper_section_severities` `win.eventlog.system.cper_section_types` `win.eventlog.system.cper_severity` |  |
 | `hardware_error_corrected` / `error_source_record` | 17, 19 | `win.eventlog.system.device_instance` `win.eventlog.system.error_source` |  |
+| `hardware_error_corrected` / `memory_corrected` | 47 | `win.eventlog.system.error_source` |  |
 | `hardware_error_uncorrected` / `boot_recoverable` | 1 | `win.eventlog.system.cper_creator` `win.eventlog.system.cper_decode` `win.eventlog.system.cper_error_ts` `win.eventlog.system.cper_firmware_record_types` `win.eventlog.system.cper_flags` `win.eventlog.system.cper_flags_raw` `win.eventlog.system.cper_notification` `win.eventlog.system.cper_revision` `win.eventlog.system.cper_section_count` `win.eventlog.system.cper_section_severities` `win.eventlog.system.cper_section_types` `win.eventlog.system.cper_severity` |  |
 | `hardware_error_uncorrected` / `boot_unrecoverable` | 1 | `win.eventlog.system.cper_creator` `win.eventlog.system.cper_decode` `win.eventlog.system.cper_error_ts` `win.eventlog.system.cper_firmware_record_types` `win.eventlog.system.cper_flags` `win.eventlog.system.cper_flags_raw` `win.eventlog.system.cper_notification` `win.eventlog.system.cper_revision` `win.eventlog.system.cper_section_count` `win.eventlog.system.cper_section_severities` `win.eventlog.system.cper_section_types` `win.eventlog.system.cper_severity` |  |
 | `hardware_error_uncorrected` / `error_source_record` | 18, 20 | `win.eventlog.system.device_instance` `win.eventlog.system.error_source` |  |
@@ -191,6 +297,8 @@ The last column is different in kind: it is the author's account of the row or e
 | `iis_apppool_worker_start_failed` / `default` | 5059 | **fields: none** |  |
 | `iis_worker_crash` / `default` | 5009, 5011 | **fields: none** |  |
 | `ip_address_conflict_detected` / `default` | 4199 | `win.eventlog.system.conflict_hardware_address` `win.eventlog.system.conflict_ip_address` |  |
+| `iscsi_target_connection_lost` / `connection_failed` | 1, 7, 20, 34, 49 | **fields: none** |  |
+| `iscsi_target_connection_lost` / `reconnected` | 1, 7, 20, 34, 49 | **fields: none** |  |
 | `kerberos_cert_domain_unresolved` / `default` | 11 | **fields: none** |  |
 | `kerberos_etype_unsupported` / `default` | 16, 203 | **fields: none** |  |
 | `kerberos_pac_verify_failed` / `default` | 18 | **fields: none** |  |
@@ -205,6 +313,7 @@ The last column is different in kind: it is the author's account of the row or e
 | `os_restart_requested` / `default` | 1074 | `win.eventlog.system.shutdown_comment` `win.eventlog.system.shutdown_reason` `win.eventlog.system.shutdown_reason_code` `win.eventlog.system.shutdown_type` `win.eventlog.system.shutdown_type_text` |  |
 | `os_shutdown` / `default` | 13 | **fields: none** |  |
 | `os_sleep` / `default` | 42, 506 | **fields: none** |  |
+| `os_thermal_hibernated` / `default` | 88 | `win.eventlog.system.thermal_hot_k` `win.eventlog.system.thermal_zone` |  |
 | `os_wake` / `default` | 1, 507 | **fields: none** |  |
 | `pagefile_extended` / `default` | 26 | **fields: none** |  |
 | `patch_install_deferred` / `packages_in_use` | 20 | `win.eventlog.system.update_title` |  |
@@ -222,6 +331,15 @@ The last column is different in kind: it is the author's account of the row or e
 | `rds_licensing_service_failed` / `database_error` | 37, 44, 4097 | **fields: none** |  |
 | `rds_licensing_service_failed` / `start_failed` | 37, 44, 4097 | **fields: none** |  |
 | `secure_boot_cert_update_pending` / `default` | 1801 | **fields: none** |  |
+| `secure_boot_certs_current` / `default` | 1808 | `win.eventlog.system.secure_boot_bucket_confidence` `win.eventlog.system.secure_boot_update_type` |  |
+| `secure_boot_database_update_applied` / `db` | 1036 | **fields: none** |  |
+| `secure_boot_database_update_applied` / `dbx` | 1034, 1035 | **fields: none** |  |
+| `secure_boot_database_update_applied` / `pca_2011_revoked` | 1037 | **fields: none** |  |
+| `secure_boot_update_failed` / `firmware_error` | 1795, 1796, 1797, 1802, 1803 | `win.eventlog.system.secure_boot_bucket_confidence` `win.eventlog.system.secure_boot_skip_reason` `win.eventlog.system.secure_boot_update_type` |  |
+| `secure_boot_update_failed` / `kek_not_provisioned` | 1795, 1796, 1797, 1802, 1803 | `win.eventlog.system.secure_boot_bucket_confidence` `win.eventlog.system.secure_boot_skip_reason` `win.eventlog.system.secure_boot_update_type` |  |
+| `secure_boot_update_failed` / `known_firmware_issue` | 1795, 1796, 1797, 1802, 1803 | `win.eventlog.system.secure_boot_bucket_confidence` `win.eventlog.system.secure_boot_skip_reason` `win.eventlog.system.secure_boot_update_type` |  |
+| `secure_boot_update_failed` / `prerequisite_missing` | 1795, 1796, 1797, 1802, 1803 | `win.eventlog.system.secure_boot_bucket_confidence` `win.eventlog.system.secure_boot_skip_reason` `win.eventlog.system.secure_boot_update_type` |  |
+| `secure_boot_update_failed` / `unexpected_error` | 1795, 1796, 1797, 1802, 1803 | `win.eventlog.system.secure_boot_bucket_confidence` `win.eventlog.system.secure_boot_skip_reason` `win.eventlog.system.secure_boot_update_type` |  |
 | `security_agent_service_start_failed` / `default` | 6 | **fields: none** |  |
 | `security_agent_service_terminated` / `default` | 5 | **fields: none** |  |
 | `service_crashed` / `default` | 7031, 7034 | `win.eventlog.system.crash_count` `win.eventlog.system.service_name` |  |
@@ -245,9 +363,22 @@ The last column is different in kind: it is the author's account of the row or e
 | `tls_cert_name_mismatch` / `default` | 36884 | **fields: none** |  |
 | `tls_cert_untrusted_ca` / `default` | 36882 | **fields: none** |  |
 | `tls_cipher_mismatch` / `default` | 36874 | **fields: none** |  |
-| `tls_client_credential_failed` / `default` | 36871 | **fields: none** |  |
+| `tls_client_credential_failed` / `credential_failed` | 36871 | `win.eventlog.system.tls_caller_process` `win.eventlog.system.tls_error_state` |  |
+| `tls_client_credential_failed` / `wsaeacces` | 36871 | `win.eventlog.system.tls_caller_process` `win.eventlog.system.tls_error_state` |  |
 | `tls_server_credential_failed` / `default` | 36870 | **fields: none** |  |
+| `tpm_attestation_check_failed` / `expected_check_failed` | 1041 | `win.eventlog.system.tpm_attestation_expected_failed` `win.eventlog.system.tpm_attestation_health_status` `win.eventlog.system.tpm_attestation_pcrs_match_tcg_log` `win.eventlog.system.tpm_attestation_required_failed` `win.eventlog.system.tpm_attestation_tpm_responsive` |  |
+| `tpm_attestation_check_failed` / `required_check_failed` | 1041 | `win.eventlog.system.tpm_attestation_expected_failed` `win.eventlog.system.tpm_attestation_health_status` `win.eventlog.system.tpm_attestation_pcrs_match_tcg_log` `win.eventlog.system.tpm_attestation_required_failed` `win.eventlog.system.tpm_attestation_tpm_responsive` |  |
 | `tpm_attestation_failed` / `default` | 1040 | **fields: none** |  |
+| `tpm_authorization_refused` / `default` | 17 | `win.eventlog.system.tpm_command` `win.eventlog.system.tpm_command_ordinal` `win.eventlog.system.tpm_response` `win.eventlog.system.tpm_response_code` `win.eventlog.system.tpm_response_position` |  |
+| `tpm_boot_pcr_values_recorded` / `pcr_values_unreadable` | 24709 | `win.eventlog.system.boot_pcr_hash_algorithm` `win.eventlog.system.boot_pcr_indices` |  |
+| `tpm_boot_pcr_values_recorded` / `values_split` | 24709 | `win.eventlog.system.boot_pcr_fingerprint` `win.eventlog.system.boot_pcr_hash_algorithm` `win.eventlog.system.boot_pcr_indices` `win.eventlog.system.boot_pcrs` |  |
+| `tpm_capability_probe_declined` / `default` | 17 | `win.eventlog.system.tpm_command` `win.eventlog.system.tpm_command_ordinal` `win.eventlog.system.tpm_response` `win.eventlog.system.tpm_response_code` `win.eventlog.system.tpm_response_position` |  |
+| `tpm_command_failed` / `below_tpm` | 17 | `win.eventlog.system.tpm_command` `win.eventlog.system.tpm_command_ordinal` `win.eventlog.system.tpm_response_code` |  |
+| `tpm_command_failed` / `failure_mode` | 17 | `win.eventlog.system.tpm_command` `win.eventlog.system.tpm_command_ordinal` `win.eventlog.system.tpm_response` `win.eventlog.system.tpm_response_code` |  |
+| `tpm_command_failed` / `unrecognized` | 17 | `win.eventlog.system.tpm_command` `win.eventlog.system.tpm_command_ordinal` `win.eventlog.system.tpm_response` `win.eventlog.system.tpm_response_code` `win.eventlog.system.tpm_response_position` |  |
+| `tpm_command_retry_requested` / `default` | 17 | `win.eventlog.system.tpm_command` `win.eventlog.system.tpm_command_ordinal` `win.eventlog.system.tpm_response` `win.eventlog.system.tpm_response_code` |  |
+| `tpm_counter_reset_on_resume` / `default` | 30 | `win.eventlog.system.tpm_reset_count_after` `win.eventlog.system.tpm_reset_count_before` `win.eventlog.system.tpm_restart_count_after` `win.eventlog.system.tpm_restart_count_before` |  |
+| `tpm_hardware_failed` / `default` | 15 | `win.eventlog.system.tpm_error_data` |  |
 | `unexpected_shutdown` / `event_log` | 41, 6008 | `win.eventlog.system.recorded_at` |  |
 | `unexpected_shutdown` / `kernel_power` | 41 | `win.eventlog.system.bugcheck_code` `win.eventlog.system.bugcheck_name` `win.eventlog.system.connected_standby_in_progress` `win.eventlog.system.sleep_in_progress` |  |
 | `vpn_connected` / `default` | 20267 | **fields: none** |  |
@@ -256,10 +387,12 @@ The last column is different in kind: it is the author's account of the row or e
 | `vss_shadow_aborted` / `storage_limit_reached` | 1, 5, 13, 14, 15, 16, 20, 23, 24, 27, 28, 29, 32, 35, 36, 67 | `win.eventlog.system.volume` |  |
 | `vss_snapshots_failing_for_space` / `default` | 25 | `win.eventlog.system.volume` |  |
 | `win_app_error_dialog_shown` / `default` | 26 | **fields: none** |  |
+| `win_battery_critical_action_triggered` / `default` | 524 | `win.eventlog.system.ac_online` `win.eventlog.system.battery_remaining_pct` `win.eventlog.system.power_policy_action` |  |
 | `winre_servicing_failed` / `default` | 4502 | **fields: none** |  |
 | `wlan_limited_connectivity` / `default` | 4003 | **fields: none** |  |
 | `bitlocker_key_retrieval_success_code` | 24641 | **fields: none** |  |
-| `iscsi_path_repeat` | 1, 7, 9, 20, 39, 49, 129 | **fields: none** |  |
+| `cpu_speed_limited_by_firmware` | 37 | `win.eventlog.system.reduced_state_s` |  |
+| `iscsi_path_repeat` | 9, 39, 129 | **fields: none** |  |
 | `vss_shadow_copy_reclaimed` | 33, 58, 95 | `win.eventlog.system.volume` |  |
 | `whea_boot_error_record` | 1 | `win.eventlog.system.cper_creator` `win.eventlog.system.cper_decode` `win.eventlog.system.cper_error_ts` `win.eventlog.system.cper_firmware_record_types` `win.eventlog.system.cper_flags` `win.eventlog.system.cper_flags_raw` `win.eventlog.system.cper_notification` `win.eventlog.system.cper_revision` `win.eventlog.system.cper_section_count` `win.eventlog.system.cper_section_severities` `win.eventlog.system.cper_section_types` `win.eventlog.system.cper_severity` |  |
 | `wifi_direct_adapter_fault` | 10317 | **fields: none** |  |
@@ -270,9 +403,17 @@ These carry class, reason and message text only.
 A predicate over them uses the reason, the class, or the retained payload; there is no promoted field to filter on.
 
 - `av_unsigned_code_blocked` / `default`
-- `bitlocker_key_retrieval_code_reported` / `default`
+- `bitlocker_recovery_password_used` / `default`
+- `bitlocker_tpm_unlock_failed` / `enhanced_pin_refused`
+- `bitlocker_tpm_unlock_failed` / `pcrs_mismatched`
+- `bitlocker_tpm_unlock_failed` / `secure_boot_changed`
+- `bitlocker_tpm_unlock_failed` / `secure_boot_disabled`
+- `bitlocker_tpm_unlock_failed` / `tpm_pin_refused`
+- `bitlocker_tpm_unlock_failed` / `tpm_refused`
 - `dcom_activation_timeout` / `default`
 - `dcom_start_failed` / `default`
+- `device_health_cert_service_unreachable` / `name_not_resolved`
+- `device_health_cert_service_unreachable` / `other_error`
 - `disk_bad_block` / `default`
 - `disk_controller_error` / `default`
 - `disk_failure_predicted` / `default`
@@ -293,8 +434,12 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `failover_cluster_resource_host_crash` / `default`
 - `failover_cluster_service_down` / `default`
 - `filesystem_corruption` / `disk`
+- `gpu_driver_error` / `default`
 - `gpu_driver_reset` / `default`
-- `group_policy_processing_failed` / `default`
+- `group_policy_domain_controller_unresolved` / `discovery_failed`
+- `group_policy_domain_controller_unresolved` / `domain_unresolved`
+- `group_policy_processing_failed` / `directory_read_failed`
+- `group_policy_processing_failed` / `no_network`
 - `group_policy_software_install_failed` / `deferred`
 - `group_policy_software_install_failed` / `install_failed`
 - `http_ssl_binding_created` / `default`
@@ -305,6 +450,8 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `iis_apppool_identity_invalid` / `default`
 - `iis_apppool_worker_start_failed` / `default`
 - `iis_worker_crash` / `default`
+- `iscsi_target_connection_lost` / `connection_failed`
+- `iscsi_target_connection_lost` / `reconnected`
 - `kerberos_cert_domain_unresolved` / `default`
 - `kerberos_etype_unsupported` / `default`
 - `kerberos_pac_verify_failed` / `default`
@@ -329,6 +476,9 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `rds_licensing_service_failed` / `database_error`
 - `rds_licensing_service_failed` / `start_failed`
 - `secure_boot_cert_update_pending` / `default`
+- `secure_boot_database_update_applied` / `db`
+- `secure_boot_database_update_applied` / `dbx`
+- `secure_boot_database_update_applied` / `pca_2011_revoked`
 - `security_agent_service_start_failed` / `default`
 - `security_agent_service_terminated` / `default`
 - `smb_delayed_write_lost` / `default`
@@ -341,7 +491,6 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `tls_cert_name_mismatch` / `default`
 - `tls_cert_untrusted_ca` / `default`
 - `tls_cipher_mismatch` / `default`
-- `tls_client_credential_failed` / `default`
 - `tls_server_credential_failed` / `default`
 - `tpm_attestation_failed` / `default`
 - `vpn_connected` / `default`

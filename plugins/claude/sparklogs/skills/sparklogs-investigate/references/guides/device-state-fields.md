@@ -17,6 +17,13 @@ Agent-debug feeds describe collection problems, not the device's workload health
 | Raw topic samples | `series`, with `topics` (arg). Each inventory part is a result row. |
 | Available topics and sampled fields | `topics`. |
 | Episode history or repeating changes | `event_timeline`. Includes all in-window events of episodes whose in-window peak meets the severity floor. Events without an episode filter individually. |
+| Crash or application problem on a device | Process crashes, service crashes and other occurrences: `event_timeline` with `kinds` (arg) `["occurrence"]` (value), oldest first. App hangs, and the Windows Error Reporting detail of crashes, are on `win.eventlog.application` only (`app_hang`, `app_crash`, no `sparklogs.kind` (LQL)), so the device-health views never return them: count them with `query_event_counts_by_severity` on `sparklogs.reason in (app_crash, app_hang)` (LQL). Reading the crashes: `../playbooks/crashes-and-restarts.md`. |
+| Open problems across a client or the fleet | Omit `view` (arg) over a window of days. A row is open unless its `sparklogs.class` (col) is `RECOVERED` (value) or `ENDED` (value); a clearing one carries `clearing_since` (col) and `closes_in_about` (col): say since when and about how long until it closes. Narrow with `reasons` (arg) or `topics` (arg). |
+| How many devices have a condition | `group_by_reason` (arg) set: one row per kind and reason with `affected_agents` (col), `episode_count` (col), `occurrence_count` (col) and `event_count` (col). For changes, `occurrence_count` (col) counts the changes and `event_count` (col) every witness of them. A device can sit in several groups: do not sum `affected_agents` (col) across rows. |
+| Which processes use the most CPU, RAM or I/O across devices | `fleet_processes`, `metric` (arg) `cpu`, `ram`, `io_read` or `io_write`. `image` (arg) narrows to one executable; `group_by` (arg) `device` ranks the devices instead. |
+| How one reading spreads across devices (outliers) | `fleet_performance`, `metric` (arg) naming the reading (default `cpu_busy_pct_avg`); `group_by` (arg) `device` lists the outlying devices. |
+
+Collection problems are not device health: call `resolve_scope` with `unhealthy_collection_only` (arg) (`scope-resolution.md`). The symptom walk ("no data from this device") is `../playbooks/sparklogs-collection.md`.
 
 For current conditions, use a window of days: an open episode with no event in a narrow window will be absent.
 Latest state is an observation, not a live inspection of the endpoint.
@@ -57,7 +64,7 @@ Use that light form to choose the devices and intervals worth a full reading, th
 
 ### The reading, part by part
 
-1. `header` (col): window, `bucket_s` (col), coverage, `measured` (col) and `not_measured` (col).
+1. `header` (col): window, `bucket_s` (col), `measured` (col) and `not_measured` (col), and coverage when part of the window was asleep, powered off or unreported.
    Coverage splits the window into observed, asleep, powered-off and unreported seconds.
    Do not qualify an answer on observed share at 89 percent or above; a few seconds or one missing sample change nothing for the reader.
    Asleep and powered-off time are device state, not coverage: state them when they bear on the question.
@@ -74,7 +81,7 @@ Use that light form to choose the devices and intervals worth a full reading, th
 4. `domains` (col): the window in coarse buckets with each domain's reading and band.
    `heat_spans` (col): stretches where a domain's heat was above `ok`, found at `bucket_s` (col).
    Bands are `ok`, `warm`, `hot` and `very_hot`.
-   Each span carries its peak band and time, the `driver` (col) reading that set the peak and its value, where the peak sat against the device's typical range from before the window (`below`, `within`, `above`), up to 3 contributors with their share, and the episodes and changes that overlapped it.
+   Each span carries its peak band and time, the `driver` (col) reading that set the peak and its value, on `device_overview` where the peak sat against the device's typical range from before the window (`device_network` spans carry `medium` (col) instead) (`below`, `within`, `above`), up to 3 contributors with their share, the episodes that opened or took a step in the span or the bucket before it, and the changes observed there. An episode open since before the span with no step in it is not linked.
    A span says when a measure ran high, not why. Contributors ran at the same time and are not proven causes.
    Disk heat is the busiest disk's busy time, pushed up by its queue depth. Latency is not an input, so slow I/O at moderate busy time can leave no disk span.
    Read `disk_latency_ms` (col) in `domains` (col) and `latency_ms_p90_10s` (col) in the `storage` result set for latency. A span names no disk: `busiest_disk` (col) in the `buckets` result set does.
@@ -82,11 +89,13 @@ Use that light form to choose the devices and intervals worth a full reading, th
 5. `top_processes` (col) (`device_overview`) or `top_connections` (col) (`device_network`): window figures over the observations the agent retained.
    The agent reports its top processes and connections per window, so these figures are lower bounds and a short burst can be missing.
    `window_rank_by` (col) names the rankings a row led. It is empty for a row kept further down a ranking.
-   A `top_processes` (col) row combines every instance of one executable. A `top_connections` (col) row is one connection, with its PID.
+   A `top_processes` (col) row combines every instance of one executable. A `top_connections` (col) row folds one process's connections to one remote end and port, counted in `connections` (col); `pid` (col) is set only when they all came from one process instance.
+   To read a row's connections per bucket, filter the `connections` result set on the columns the header's `top_connections` (col) pivot names in `narrow_by` (col), with the row's values; leave out a term whose cell is empty.
 6. `events` (col): the most relevant episodes and changes, open episodes first.
    An episode appears only when it had an event inside the window. One open since before the start with no event in the window is absent, so use a window of days for what is open now.
-   Changes also cover the 48 hours before the window.
-   Occurrences are not in this part. They are rows of the `events` result set, which also carries the boot, sleep and shutdown marks. On `device_network` that set holds only networking rows and those marks.
+   Changes also cover the 48 hours before the window. Each device keeps its newest 200 changes (on `device_network`, network changes only); when older ones were dropped the `events` entry's `truncated` (col) says so, `changes_capped` (col) is true on that device's `device_summary` row, and the listed changes are complete only from the oldest one listed. The bound counts changes of every severity, so Debug and Verbose firewall rule churn can fill it. For an onset before that, read the changes grouped by reason and the change timeline (`../playbooks/what-changed.md`, **Busy devices**).
+   In the `events` set, `entry` (col) says what a row is (`episode`, `episode_step`, `change`, `occurrence`). `class` (col) is empty on firewall rule changes, episode steps and occurrences: find changes by `entry` (col) and severity, not by `class` (col).
+   On `device_overview`, crashes and other occurrences are in neither this part nor the `events` result set, whose only occurrences are the boot, sleep, shutdown, restart request and agent start and stop marks: read them with the `next_reads` (col) `event_timeline` call (`kinds` (arg) `["occurrence"]` (value)). On `device_network` the `events` set holds networking occurrences and those marks.
 7. `next_reads` (col): calls with their arguments ready to paste beside your `external_investigation_id` (arg).
 
 A list that left rows out counts them in `omitted` (col).
@@ -95,7 +104,7 @@ Timestamps are RFC3339 UTC.
 ### Result sets
 
 The reading itself is not refinable.
-`summary.refinable_results` (col) lists the result sets behind it, each with its own `query_id` (col), row and column counts, and a `refine_example` (col).
+`summary.refinable_results` (col) lists the result sets behind it, each with its own `query_id` (col), its row count, `holds` (col) (what the set is for) and, on every set but `device_summary` and `buckets`, a `refine_example` (col): one ready filter for the set's main question.
 An entry marked `unavailable` (col) failed to build and is not an empty set; say so instead of reading it as zero rows.
 `truncated` (col) appears only when a set was cut, and names which rows are missing.
 A result set read after its stored rows expired is rebuilt by re-running the original call on current data. Refine it as usual, but late-arriving data can change its rows.
@@ -108,6 +117,18 @@ A result set read after its stored rows expired is rebuilt by re-running the ori
 Every set leads with `agent_id` (col) and `org_id` (col), and bucketed sets with `bucket_start` (col).
 Paste a reading's `filter_lql` (col) into `refine_query_result` with that set's `query_id` (arg).
 For follow-ups on one device's inventory (is a service running, is a product installed, which drivers are loaded), refine the overview's `state` set instead of new calls.
+
+Result-set columns use short names, not the `sparklogs.*` paths of events: a `sparklogs.topic` (LQL) filter on a result set matches nothing, with no warning.
+Key columns per set:
+
+| Set | Key columns |
+|---|---|
+| `state` | `topic` (col), `instance` (col), `row_kind` (col), `kind` (col), `observed_at` (col), and the payload as `sparklogs.data.<topic>[]`. Filter `topic = installed_products AND sparklogs.data.installed_products[](name: "Edge")` |
+| `events` | `entry` (col) (`episode`, `episode_step`, `change` or `occurrence`), `reason` (col), `topic` (col), `instance` (col), `class` (col), `severity` (col), `is_open` (col), `clearing_since` (col), `observed_at` (col) |
+| `processes` | `bucket_start` (col), `image_name` (col), `cpu_pct_avg` (col), `resident_bytes_avg` (col), `private_commit_bytes_avg` (col), per-process read, write and TCP rates |
+| `storage` | `bucket_start` (col), `kind` (col) (disk or volume), `instance` (col), `label` (col), `media` (col), `is_busiest_disk` (col), `latency_ms_p90_10s` (col), `queue_depth_avg` (col), `busy_pct_avg` (col) |
+
+A TSV refine response lists the set's columns in `schema.columns` (col); a JSONL one (the `state` set) carries them as row keys, with the payload under `sparklogs.data.<topic>`. Read them before writing a filter.
 A ratio or percent column sits beside its numerator and denominator: to combine buckets, sum both and divide.
 An average of a ratio column weights a near-idle bucket the same as a busy one.
 
@@ -138,7 +159,7 @@ On `device_network`, a gateway that ignores ping still lists its attempts, so it
 `ownership` (col) says where an outage sits, from the device's own evidence: its own link, between it and its gateway, beyond the gateway, or at the DNS resolver. It reads not placed when no gateway probe was counted during the outage.
 Beyond the gateway covers both the router's internet connection and the ISP. Endpoint data cannot tell those apart, so do not name the ISP as the cause.
 `compare_start` (col) and `compare_end` (col) bound a comparison: the matching `next_reads` (col) entry reads every device in the org over those buckets.
-The org can span several sites: compare only the devices at the same site. Several devices down together can also mean the probe target itself was down.
+The org can span several sites. Devices on the same network share `sparklogs.data.performance.network_context_key` (LQL), carried on `fleet_performance` rows and the performance topic: compare devices with the outage device's key. A `vpn_` key is a device whose main connection runs over a VPN. The key is kept while a device is offline, so it is not proof of the current network. Several devices down together can also mean the probe target itself was down.
 
 ## Report installed software
 
@@ -202,6 +223,7 @@ For repeating configuration changes, use the timeline view and the relevant chan
 The episode occurrence counter is not a list of change events.
 Correlate a condition with underlying logs using its subject, reason and time window.
 A reported change alone does not establish causation.
+Which changes before an onset to rank, and how: `../playbooks/what-changed.md`.
 
 Name a changed item with `sparklogs.config_change.target_name` (col) when present; group and join on `sparklogs.config_change.type` (col) with `sparklogs.config_change.target` (col), since a target is unique only within its type and the name is display only.
 On an inventory, `sparklogs.observes_config_changes` (col) false means the agent cannot report observed changes on that topic.
@@ -209,8 +231,8 @@ No change rows then says nothing about whether anything changed.
 
 ## Network adapters
 
-`sparklogs.data.network_adapters.adapter_class` (col) separates `physical` adapters from virtual switches, other virtual adapters (VPN, TAP, Wi-Fi Direct), tunnels, WAN miniports, loopback and `not_present` ones.
-Filter to physical adapters before judging a device's wired or wireless connectivity.
+`sparklogs.data.network_adapters[].adapter_class` (LQL) separates `physical` adapters from virtual switches, other virtual adapters (VPN, TAP, Wi-Fi Direct), tunnels, WAN miniports, loopback and `not_present` ones.
+Filter to physical adapters (`sparklogs.data.network_adapters[](adapter_class="physical")` (LQL)) before judging a device's wired or wireless connectivity.
 `network_adapter_dhcp_failed` is open while an adapter holds only a self-assigned 169.254 address; it rates higher on a server and when no other default route keeps the device online.
 `network_adapter_link_downshifted` is open while a wired link runs at half or less of its seven-day peak speed; cables, ports, docks and power policy are the usual causes.
 Both end as `no_longer_applicable` when the adapter disconnects, which is not a recovery.
@@ -223,10 +245,8 @@ Missing data does not establish that the device is healthy, offline or affected 
 Topic absence can reflect availability, collection state or the selected window.
 Check device and feed status when the distinction matters.
 
-`agent_complete_through` (col) on the `resolve_scope` agent row bounds the device's reported data completeness.
-Read its advisories for the affected feeds.
-Event counts and first/last timestamps cannot establish continuous coverage inside the window.
 A device missing from a report remains unknown until its scope and data coverage are established.
+Completeness comes from `agent_complete_through` (col) on the agent row, never from event counts: `scope-resolution.md` (Completeness).
 
 ## Other event families
 

@@ -82,7 +82,7 @@ Privilege assignment is dominated by platform identities. One predicate collapse
 1. The account and platform arms of privilege assignment are separate curated shapes, so the principal kind selects between them.
 
    ```
-   winlog.event_id = 4672 AND sparklogs.actor.kind = "account"
+   event_id = 4672 AND sparklogs.actor.kind = "account"
    ```
 
 2. Group by sparklogs.actor.name for who ran elevated and how often; win.eventlog.security.privileges lists what was actually held.

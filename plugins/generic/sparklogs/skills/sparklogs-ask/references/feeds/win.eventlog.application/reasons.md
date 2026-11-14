@@ -53,7 +53,9 @@ Search for the heading "## `<code>`" or a word from the reason's label. Do not r
 | `win_msi_product_install_succeeded` | win msi product install succeeded | event | Notice | `patching` |  |
 | `win_msi_product_reconfigure_succeeded` | win msi product reconfigure succeeded | event | Notice | `patching` |  |
 | `win_msi_product_removal_succeeded` | win msi product removal succeeded | event | Notice | `patching` |  |
-| `win_user_profile_load_failed` | win user profile load failed | event | Serious | `user_profiles` |  |
+| `win_user_profile_file_access_failed` | User profile file access failed | event | Notice | `user_profiles` |  |
+| `win_user_profile_load_failed` | win user profile load failed | event | Warning to Serious | `user_profiles` |  |
+| `winlogon_notification_subscriber_slow` | Winlogon subscriber slow | event | Info to Notice | `os_stability` |  |
 | `wmi_provider_registered_as_localsystem` | wmi provider registered as localsystem | event | Info | `inventory` | benign |
 
 ## `adcs_ca_chain_failed`: adcs ca chain failed
@@ -244,13 +246,14 @@ A certificate enrollment or an autoenrollment cycle on this machine did not comp
 
 **Why it matters:** The machine may not get or renew a certificate it needs, so Wi-Fi, VPN or other sign-ins that rely on it can fail later.
 
-**In practice:** The enrollment client writes events 86 and 87 to the Application log (source CertificateServicesClient-CertEnroll) when an enrollment such as a SCEP device request fails. The autoenrollment client writes events 1 and 6 (source CertificateServicesClient-AutoEnrollment) when it cannot finish a cycle against the directory or the CA, often because it could not reach them. Both show as Warning. A laptop that was off the corporate network when autoenrollment ran is a routine cause, and the next cycle tries again. Enrollment against Microsoft's retired attestation endpoint (a URL containing microsoftaik) can never succeed and needs no action. It shows as Verbose.
+**In practice:** The enrollment client writes events 86 and 87 to the Application log (source CertificateServicesClient-CertEnroll) when an enrollment such as a SCEP device request fails. The same source writes events 13 and 82 when enrollment for a named certificate template fails against the CA or against every enrollment server URL, with the template and the error. The autoenrollment client writes events 1 and 6 (source CertificateServicesClient-AutoEnrollment) when it cannot finish a cycle against the directory or the CA, often because it could not reach them. Both show as Warning. A laptop that was off the corporate network when autoenrollment ran is a routine cause, and the next cycle tries again. Enrollment against Microsoft's retired attestation endpoint (a URL containing microsoftaik) can never succeed and needs no action. It shows as Verbose.
 
 **When to ignore:** Enrollment against the retired microsoftaik endpoint, and a single autoenrollment failure on a laptop that was off the corporate network.
 
 **What to check:**
 
 - Read the URL, status and error in the message.
+- For 13 and 82, check the template name and that the machine can reach the CA over RPC (`certutil -ping`).
 - Check whether the machine later received the certificate (certlm.msc, Personal store).
 - For autoenrollment cycles, confirm the machine can reach a domain controller and the CA, then run certutil -pulse to retry.
 
@@ -426,6 +429,8 @@ The Windows database engine (ESENT) found corruption in a database file.
 
 The NVIDIA display driver reported a warning or error.
 
+**Also reported by:** `win.eventlog.system`
+
 **Severity:** Notice at most; native level decides below
 
 **Why it matters:** Users may see display resets, graphics hangs, application crashes, or GPU-accelerated workload interruption. A single event is commonly benign: driver upgrades reset the display stack.
@@ -478,7 +483,7 @@ A Group Policy drive mapping did not complete on this host.
 
 A Group Policy preference extension could not apply the settings from a policy object.
 
-**Also reported by:** `win.eventlog.identity_security`
+**Also reported by:** `win.eventlog.identity_security`, `win.eventlog.system`
 
 **Severity:** Minor
 
@@ -1221,26 +1226,83 @@ A Windows Installer product removal completed successfully.
 
 The outcome is read from the installer error code the event id carries rather than from the message text, so it behaves the same on a non-English system.
 
-## `win_user_profile_load_failed`: win user profile load failed
+## `win_user_profile_file_access_failed`: User profile file access failed
 
-Windows could not load a user profile, or loaded a temporary profile.
+Windows could not load a registry file of a user profile, or could not delete a profile folder.
 
-**Severity:** Serious
+**Severity:** Notice
 
-**Why it matters:** The user cannot work normally on that machine: they log on with missing settings, missing data paths, or a temporary profile until the profile issue is fixed.
+**Why it matters:** Part of the user's settings may be missing for that logon, or old profile folders stay on disk.
 
-**In practice:** The User Profile Service writes these to the Application log (source Microsoft-Windows-User Profiles Service). Event 1511 says Windows cannot find the local profile and signed the user in with a temporary profile. Event 1542 says Windows cannot load the user's classes registry file, with the detail in the message. With a temporary profile, the user sees an empty desktop or "You've been signed in with a temporary profile", and changes made in that session are lost at sign-out. A damaged profile or registry hive, a full disk, wrong permissions on the profile folder, or a roaming or FSLogix profile that did not attach are common causes. It shows as Serious.
+**In practice:** The User Profile Service writes these to the Application log. Event 1508 says Windows was unable to load the registry for a profile file, such as UsrClass.dat, with the Windows error text, often that another process is using the file. Event 1509 says Windows was unable to load that file and carries only a numeric status, in the event's `Status` field. Event 1533 says Windows cannot delete a profile folder, such as a TEMP profile left after a failed logon, because files in it are in use or access is denied, with the Windows error text. Each event names the file or folder.
+
+**When to ignore:** An occasional 1508 and 1509 pair that does not repeat for the same user.
 
 **What to check:**
 
-- Identify the affected user in the message.
+- Read the file or folder and the error text, or on 1509 the status.
+- For a file in use, look for software that holds user registry files at logoff, such as backup, antivirus or profile tools.
+- For a folder that cannot be deleted, remove it after the user signs out and check the ProfileList registry key has no entry left for it.
+
+**Related:**
+
+- `win_user_profile_load_failed`: the whole profile could not be loaded
+
+**Example:** At every logon on a shared desktop, Windows cannot load UsrClass.dat because another process still holds it.
+
+**Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/feeds/eventlog-application#win_user_profile_file_access_failed, https://sparklogs.com/reference/reasons/win_user_profile_file_access_failed.json
+
+## `win_user_profile_load_failed`: win user profile load failed
+
+Windows could not load a user profile, loaded a temporary profile, or fell back to a backup copy.
+
+**Severity:** Serious or Warning
+
+**Why it matters:** The user cannot work normally on that machine: they cannot log on, or they log on with missing settings, missing data paths, or a temporary profile until the profile issue is fixed.
+
+**In practice:** The User Profile Service writes these to the Application log (source Microsoft-Windows-User Profiles Service). Event 1500 says the user cannot log on because the profile cannot be loaded, and 1502 that the locally stored profile cannot be loaded; both end with the Windows error, such as Access is denied. Event 1511 says Windows cannot find the local profile and signed the user in with a temporary profile. Event 1542 says Windows cannot load the user's classes registry file. With a temporary profile, the user sees an empty desktop or "You've been signed in with a temporary profile", and changes made in that session are lost at sign-out. Event 1515 says Windows backed up the profile and will use the backup at the next logon, which is recorded at Warning. A damaged profile or registry hive, a full disk, wrong permissions on the profile folder, or a roaming or FSLogix profile that did not attach are common causes.
+
+**What to check:**
+
+- Identify the affected user in the message, and read the error text.
 - Check HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList for that user's SID, including a duplicate key ending in .bak.
 - Check free disk space, permissions on the profile folder, and the FSLogix or roaming profile logs.
 - Have the user sign out before repairing. Changes made in a temporary profile are lost.
 
+**Related:**
+
+- `win_user_profile_file_access_failed`: one profile file or folder the service could not load or delete
+
 **Example:** An FSLogix profile disk fails to attach, and a terminal server user signs in to a temporary profile.
 
 **Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/feeds/eventlog-application#win_user_profile_load_failed, https://sparklogs.com/reference/reasons/win_user_profile_load_failed.json
+
+## `winlogon_notification_subscriber_slow`: Winlogon subscriber slow
+
+A component that Winlogon waits on, from Windows or another vendor, was slow to handle sign-in, sign-out or session start.
+
+**Severity:** Notice when a subscriber took a minute or more, Info otherwise.
+
+**Why it matters:** The user waited at the welcome screen, "Please wait" or sign-out screen while the subscriber finished; event 6006 gives the seconds.
+
+**In practice:** Winlogon logs event 6005 in the Application log when a notification subscriber is taking long to handle a session event, and event 6006 when it finishes, with the seconds it took. The subscriber names the component: TrustedInstaller is Windows servicing finishing an update, GPClient is Group Policy, Profiles is the User Profile Service, and frxsvc is FSLogix. The session event says when: CreateSession, Logon, Logoff or EndShell. A pending update, slow Group Policy processing, a large or remote profile, or an unreachable network share at sign-in is the usual cause.
+
+**When to ignore:** TrustedInstaller once right after an update installs.
+
+**What to check:**
+
+- Read the subscriber and the seconds on event 6006.
+- For GPClient, check Group Policy processing time with `gpresult` and the GroupPolicy Operational log.
+- For Profiles or frxsvc, check the profile size and the profile or FSLogix storage.
+- For TrustedInstaller, check for an update that was installing at the time.
+
+**Related:**
+
+- `group_policy_processing_failed`: a Group Policy pass that failed rather than ran slowly
+
+**Example:** After a cumulative update, TrustedInstaller takes 70 seconds to handle session creation on the next start.
+
+**Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/feeds/eventlog-application#winlogon_notification_subscriber_slow, https://sparklogs.com/reference/reasons/winlogon_notification_subscriber_slow.json
 
 ## `wmi_provider_registered_as_localsystem`: wmi provider registered as localsystem
 

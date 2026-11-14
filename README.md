@@ -12,7 +12,7 @@ Data comes from Windows systems across your fleet through the [SparkLogs Agent](
 
 - Investigate one device end to end: what changed, what failed, and what it means, with every claim tied to the events behind it. See [skills/sparklogs-investigate](plugins/claude/sparklogs/skills/sparklogs-investigate/SKILL.md).
 - Triage the whole fleet: what needs attention today, what is new this week, and who else is affected.
-- Follow guided steps for common MSP situations such as backup failures, patch failures, slow logon, and degraded storage. See [playbooks](plugins/claude/sparklogs/skills/sparklogs-investigate/references/playbooks/playbooks.md).
+- Follow guided steps for common MSP situations such as patch failures, slow logon, degraded storage, and VSS writer and shadow-copy problems. See [playbooks](plugins/claude/sparklogs/skills/sparklogs-investigate/references/playbooks/playbooks.md).
 - Read per-feed reference knowledge for Windows Event Log, servicing, and Defender data, so answers cite what an event actually means instead of guessing from an event ID. See [feeds](plugins/claude/sparklogs/skills/sparklogs-investigate/references/feeds).
 - Write ticket-ready summaries, and explain any single finding back to the evidence it came from. See [commands](plugins/claude/sparklogs/commands).
 
@@ -21,7 +21,6 @@ Data comes from Windows systems across your fleet through the [SparkLogs Agent](
 ```
 What needs attention in my fleet today?
 Investigate why <server> has been unhealthy this week.
-Backups failed on <server> three nights running. Why?
 What new failures are happening this week that we have not seen before?
 ```
 
@@ -63,7 +62,7 @@ The plugin is mostly readable markdown. Browse it here before you install:
 - [Guides](plugins/claude/sparklogs/skills/sparklogs-investigate/references/guides): query language, tool selection, scope resolution, feed reference routing.
 - [Feed references](plugins/claude/sparklogs/skills/sparklogs-investigate/references/feeds): fields, enums, and reason codes per data feed.
 - [Themes](plugins/claude/sparklogs/skills/sparklogs-investigate/references/themes): patching, security and audit, endpoint protection, operational events, device health.
-- [Subagents](plugins/claude/sparklogs/agents): pattern enumeration, clustering, and log summarization helpers.
+- [Subagents](plugins/claude/sparklogs/agents): pattern enumeration and log summarization helpers.
 
 Those links point at the Claude package. Every host package under `plugins/<host>/sparklogs/` carries the same skills and the same reference corpus inside each skill's references tree; commands, subagents, and rules ship only where the host documents them.
 
@@ -75,7 +74,7 @@ This branch is generated from the `source` branch, so pull requests land on `sou
 
 ---
 
-Version: 1.12.8
+Version: 1.12.12
 
 License: Apache-2.0, see [LICENSE](LICENSE).
 

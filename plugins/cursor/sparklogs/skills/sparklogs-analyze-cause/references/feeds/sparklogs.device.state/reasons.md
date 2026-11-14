@@ -102,6 +102,8 @@ Search for the heading "## `<code>`" or a word from the reason's label. Do not r
 | `sparklogs_agent_memory_over_budget` | SparkLogs agent memory over budget | condition | Notice | `rmm` |  |
 | `sparklogs_agent_started` | SparkLogs agent started | occurrence |  | `rmm` |  |
 | `sparklogs_agent_stopped` | SparkLogs agent stopped | occurrence |  | `rmm` |  |
+| `tpm_chip_changed` | TPM chip changed | change |  | `platform` |  |
+| `tpm_firmware_changed` | TPM firmware changed | change |  | `platform` |  |
 | `tpm_presence_changed` | TPM presence changed | change |  | `platform` |  |
 | `tpm_version_changed` | TPM specification changed | change |  | `platform` |  |
 | `virtualization_changed` | Virtualization changed | change |  | `platform` |  |
@@ -1644,7 +1646,7 @@ Windows Update has not checked for updates in a long time, or never has.
 
 **Why it matters:** The machine finds no new updates, so it falls behind on security fixes while patch reports can still show it as current.
 
-**In practice:** Windows Update's last successful search for updates is 14 days old or more, or Windows Update reports it has never searched. It is raised once that has held for 1 day while the agent is running, so a machine that was switched off for weeks has time to catch up. A disabled or broken Windows Update service, a proxy or firewall blocking the update servers, or a WSUS server named in policy that no longer exists is the usual cause.
+**In practice:** Windows Update's last successful search for updates is 14 days old or more, or Windows Update reports it has never searched. It is raised once that has held for 12 hours while the agent is running, so a machine that was switched off for weeks has time to catch up. A disabled or broken Windows Update service, a proxy or firewall blocking the update servers, or a WSUS server named in policy that no longer exists is the usual cause. Where an RMM tool or another program runs the update scans through the Windows Update API, those scans may not update the search time the agent reads, so on such a machine this can appear while updates still arrive and may be a false lead.
 
 **What to check:**
 
@@ -1653,6 +1655,7 @@ Windows Update has not checked for updates in a long time, or never has.
 - The WSUS server in policy (`WUServer` under `HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate`) still exists and answers.
 - The machine's WinHTTP proxy (`netsh winhttp show proxy`).
 - `Get-WindowsUpdateLog` writes the Windows Update log to the desktop, for the error behind a failing search.
+- On a machine whose updates an RMM tool manages, the RMM's own patch report, for when it last scanned.
 
 **How it ends:** Ends when the last completed Windows Update scan is less than 14 days old.
 
@@ -2203,14 +2206,14 @@ The SparkLogs agent stopped.
 
 **Severity:** Notice when the agent stopped on an error, Display for an update, a shutdown, or someone stopping the service.
 
-**Why it matters:** The machine is not collecting until the agent starts again.
+**Why it matters:** The agent takes no device or performance readings until it starts again. After a crash, logs keep arriving. After an update, a shutdown or someone stopping the service, logs written in the gap arrive once collection starts again. They are lost if the agent is uninstalled or never started again. Event log records can also be lost if Windows overwrites them before the agent starts again; the agent then reports them as skipped events.
 
-**In practice:** The event names the cause: an agent update, Windows shutting down, someone stopping the service (an administrator, an RMM tool or an uninstall), or an error inside the agent. A machine whose last event is this one is not collecting, which explains missing logs and readings until the next start. When the agent dies without stopping, the Service Control Manager records it in the System log, and SparkLogs reports that record under this reason at Error.
+**In practice:** The event names the cause: an agent update, Windows shutting down, someone stopping the service (an administrator, an RMM tool or an uninstall), or an error inside the agent. When the agent dies without stopping, the Service Control Manager records it in the System log, and SparkLogs reports that record under this reason at Error.
 
 **What to check:**
 
 - The cause in the event, and for a stop by someone, which administrator or RMM policy stopped it.
-- The time to the next SparkLogs agent started: how long the machine was not collecting.
+- The time to the next SparkLogs agent started: how long the machine had no readings.
 - Repeated error stops: report them to SparkLogs support with the device name.
 
 **Related:**
@@ -2220,6 +2223,41 @@ The SparkLogs agent stopped.
 **Example:** Windows stops the agent as an office desktop shuts down to install its monthly updates.
 
 **Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/topics/lifecycle#sparklogs_agent_stopped, https://sparklogs.com/reference/reasons/sparklogs_agent_stopped.json
+
+## `tpm_chip_changed`: TPM chip changed
+
+The machine's TPM now comes from a different maker.
+
+**Why it matters:** Keys sealed in the old TPM do not move to the new one, so BitLocker asks for its recovery key at start, and Windows Hello PINs and other keys held in the TPM have to be set up again.
+
+**In practice:** The TPM stayed present, but its maker changed, such as Intel's firmware TPM (`INTC`) to a discrete Infineon chip (`IFX`). The usual cause is a firmware setting that switches between the processor's firmware TPM and a discrete chip; a motherboard or chip swap shows here only when the new TPM comes from another maker. The new TPM's firmware and specification come with it and are not reported separately. Firmware changes take effect at a restart, so the event follows the restart that applied it.
+
+**What to check:**
+
+- The old and new vendor IDs in the event, and whether someone changed the TPM setting in the firmware setup.
+- With BitLocker on, the machine's recovery key, and `manage-bde -protectors -get C:` once it starts.
+- Windows Hello sign-in and any device certificates kept in the TPM.
+
+**Example:** A technician switches a desktop from its firmware TPM to the discrete TPM on its motherboard.
+
+**Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/topics/system-info#tpm_chip_changed, https://sparklogs.com/reference/reasons/tpm_chip_changed.json
+
+## `tpm_firmware_changed`: TPM firmware changed
+
+The TPM's firmware version changed.
+
+**Why it matters:** A TPM firmware update can clear the TPM or change what it measures, so BitLocker can ask for its recovery key at the next start, and TPM-backed keys such as Windows Hello's may need to be set up again.
+
+**In practice:** The same TPM now runs another firmware version, usually from a BIOS update, a vendor TPM update tool or Windows Update. Vendors ship TPM firmware updates to fix security flaws, so the event confirms that a fix reached the machine. Firmware changes take effect at a restart, so the event follows the restart that applied it.
+
+**What to check:**
+
+- The old and new versions in the event, against the vendor's security advisories for that TPM.
+- BitLocker recovery prompts and Windows Hello sign-in around the same restart.
+
+**Example:** A vendor update moves a desktop's Infineon TPM from firmware 7.63.3353.0 to 7.85.4555.0.
+
+**Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/topics/system-info#tpm_firmware_changed, https://sparklogs.com/reference/reasons/tpm_firmware_changed.json
 
 ## `tpm_presence_changed`: TPM presence changed
 

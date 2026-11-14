@@ -1,7 +1,7 @@
 # Playbook authoring
 
-Unpublished authoring doc on the `source` branch.
-Installed packages do not include this file.
+Authoring doc for contributors.
+Plugin packages do not include this file.
 Read it before adding or rewriting `src/playbooks/*.md`.
 Runtime investigation style is `src/guides/writing-voice.md`.
 Tool mechanics stay in `src/guides/mcp-tool-decision-tree.md` and the MCP server instructions.
@@ -18,7 +18,7 @@ One symptom, one file.
 It teaches *how to reason about this failure class* and *which predicates and fields to use*.
 It is not a numbered MCP session.
 It is not complete and not authoritative: example LQL is a start, not the event universe.
-Do not put a copied disclaimer in every leaf. Completeness lives once in `playbooks/playbooks.md`, the skills, and `guides/common-mistakes.md`.
+Do not put a copied disclaimer in every leaf. The completeness rule lives once, in `guides/common-mistakes.md` (**Treating a playbook as the event catalog**). `playbooks/playbooks.md` and the skills point at it.
 Leaf Accuracy covers *this symptom's* claim limits (job vs plumbing, state vs logs), not a second copy of the index rule.
 
 ## Structure
@@ -37,22 +37,27 @@ Keep this order. Drop a heading if it would be empty.
 ## Queries
 
 Write LQL the agent can paste into `query_event_counts_by_severity` or `query_logs`.
+Put each query in a ```` ```lql ```` block: every field it names must be a real field (see `docs/identifier-names.md`).
+A query that names a raw `event_id` (`event_id = 892`, `event_id in (33, 58)`) claims Windows logs that id on these feeds.
+Confirm every id in real SparkLogs data, then put `<!-- confirmed with data on YYYY-MM-DD -->` on the line right after the block's closing fence.
+`yarn precommit` fails on a playbook query with a raw `event_id` and no marker; render strips the marker from every package.
 Group-by is part of the question: one noun, one field; two nouns, a cross-tab.
 Name the field that carries the discriminator (`reason`, `vss_writer`, `instance`, `status_meaning`).
 Do not teach `describe_pattern` or `refine_query_result` here; the skill already knows those.
 
 Device-health sections name the view, the reading parts and the result-set columns (`heat_spans`, `outages`, `private_commit_bytes_last`), reasons and the claim each encodes.
 Do not paste a full `query_device_health(...)` call; the worked calls live in `guides/device-state-fields.md`.
-Every name must match the live tool: check it against the tool's input schema and a real response before committing.
+Text targets the newest SparkLogs MCP server build, released or not: the plugin and the server ship together, so keep no wording or fallback for an older response shape. Check every name against that build's tool input schema and a real response before committing.
 
 ## Do not
 
 - Walk through `resolve_scope` / `list_sources` / "then confirm data in the window".
-- Repeat MCP parameter grammar.
+- Repeat MCP parameter grammar: no parameter names, argument values, flags or call plumbing. Tool names, view names, result-set columns and field names are fine. `yarn precommit` fails on an `(arg)` tag under `src/playbooks/`.
 - Infer job or product outcome from plumbing that does not carry it.
 - Dump a feed directory; one artifact per question (`guides/generated-reference-router.md`).
 - Copy a stream-kind ladder into every playbook; point at `guides/stream-kinds.md`.
 - Copy private design-doc maps, Layer labels, or unreleased pack internals. Field names and public Microsoft vocabulary are fine.
+- Name internal processes, environments, hosts or customers. Describe the product and its data only.
 
 ## Length
 

@@ -1,7 +1,7 @@
 # Kind: WEL Setup
 
-Scope **`subsource = "win.eventlog.setup"`**.
-Group **`winlog.event_id` (LQL) / `pattern` (LQL) / `sparklogs.reason` (LQL)**.
+Scope **`subsource = "win.eventlog.setup"` (LQL)**.
+Group **`event_id` (LQL) / `pattern` (LQL) / `sparklogs.reason` (LQL)**.
 Payload is often **`user_data.*`**.
 
 Few publishers. `provider_name` (LQL) is optional confirmation, not the first split.
@@ -9,7 +9,7 @@ Few publishers. `provider_name` (LQL) is optional confirmation, not the first sp
 ## Explore
 
 1. Scope this `subsource` (LQL).
-2. Group `winlog.event_id` (LQL) / `pattern` (LQL) / `sparklogs.reason` (LQL).
+2. Group `event_id` (LQL) / `pattern` (LQL) / `sparklogs.reason` (LQL).
 3. Read **`user_data.*`** (not Application-style `event_data` (LQL)).
 4. Join with CBS/DISM via `../../themes/windows-updates-and-patching.md`.
 

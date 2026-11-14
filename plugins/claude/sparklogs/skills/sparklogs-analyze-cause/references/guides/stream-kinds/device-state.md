@@ -1,8 +1,8 @@
 # Kind: device state
 
 **One device or a few, over a window:** `query_device_health` `view` (arg) `device_overview` or `device_network`. How to read the answer: `../device-state-fields.md` (**Read a device view**).
-**Standing / latest of each episode:** `query_device_health`, omit `view` (arg) (`fieldset` (arg) = `rca` for one host).
-Columns: the response `schema.columns` (col) or the tool description. Episode and observation limits: `../device-state-fields.md`.
+**Standing / latest of each episode:** `query_device_health`, omit `view` (arg).
+Columns: the response `schema.columns` (col) on TSV, the row keys on JSONL, or the tool description. Episode and observation limits: `../device-state-fields.md`.
 A default-view row is the latest event of each episode that emitted inside the requested window, not the latest event of each subject.
 What is on the box is `view` (arg) `latest_state`.
 Process charts: `view` (arg) `top_processes_over_time`. Raw measurements: `series` with `topics` (arg). RCA: `view` (arg) `event_timeline` on the same tool.
@@ -17,15 +17,8 @@ Start at `../../fields/INDEX.md`, then open the topic table for its exact names,
 
 ## Which reading
 
-| Question | Tool |
-|---|---|
-| What happened on this device over a window (performance, storage, processes, network, episodes and changes) | `query_device_health`, `view` (arg) `device_overview` or `device_network`, then refine its result sets |
-| Standing conditions / latest event of each episode in this window | `query_device_health`, omit `view` (arg) (`fieldset` (arg) = `rca` for one host). Episode and observation limits: `../device-state-fields.md` |
-| What is on the box / how it last read | `query_device_health`, `view` (arg) `latest_state` |
-| Process CPU, memory or I/O trends | `query_device_health`, `view` (arg) `top_processes_over_time`. See the chart recipe below. |
-| Raw device measurements over time | `query_device_health`, `view` (arg) `series` with `topics` (arg). Use `topics` to discover topics and sampled fields. |
-| Series of those episodes, or repeating change points | `query_device_health` `view` (arg) `event_timeline`. `min_severity` (arg) filters by the episode peak, then returns every in-window event of those episodes. Fieldset `fleet` when duration / `sparklogs.episode.cleared_ts` (col) / `sparklogs.class` (col) matter |
-| Underlying log events and fields outside the health projection | `query_logs` on this `subsource` (LQL). |
+Which `query_device_health` view answers which question: `../device-state-fields.md` (**Choose the view**).
+Underlying log events and fields outside the health projection: `query_logs` on this `subsource` (LQL), as below.
 
 MCP column names paste straight into LQL now: `sparklogs.kind` (col) on a device-health row is `sparklogs.kind` (LQL) in logs, same spelling.
 `subsource` (col) on health rows is the feed id `sparklogs.device.state`, the same stamp as logs.
@@ -81,7 +74,7 @@ field                                          type  event_count
 sparklogs.data.processes[].image_name          s     673
 sparklogs.data.processes[].image_path          s     673
 sparklogs.data.processes[].pid                 n     673
-sparklogs.data.processes[].resident_bytes   n     346
+sparklogs.data.processes[].resident_bytes      n     346
 sparklogs.data.processes[].delta_old.pid       n     336
 ```
 
@@ -103,7 +96,7 @@ disk_volumes:        {"volume":"volume:<guid>","display_name":"C:","volume_role"
 processes (delta):   {"image_name":"svchost.exe","pid":4816,"image_path":"<os>/system32/svchost.exe",
                       "instance":"process:4816|2026-09-06T04:41:50Z","services":["wuauserv"],
                       "age_s":81,"handle_count":329,"ram_growth_peak_mb":17.21,
-                      "create_time_raw":134331433103133250,"delta_kind":"added"}
+                      "create_time_ts":"2026-09-06T04:41:50Z","delta_kind":"added"}
 drivers:             {"class":"Net","provider":"Microsoft","inf":"wnetvsc.inf","device_count":1,
                       "description":"Microsoft Hyper-V Network Adapter","version":"10.0.14393.2273",
                       "driver_date":"2006-06-21T07:00:00.000000Z"}
@@ -111,17 +104,17 @@ installed_products:  {"name":"Microsoft Edge","publisher":"Microsoft Corporation
                       "install_context":"machine","instance":"product:microsoft edge"}
 ```
 
-Values are stored as lowercase tokens: current_state is running or stopped, start_type is manual, auto_delayed or disabled, volume_role is os, drive_type is fixed, mount_state is mounted. String equality ignores case, so a literal typed STOPPED matches the same events as stopped.
+Values are stored as lowercase tokens: current_state is running or stopped, start_type is auto, auto_delayed, manual or disabled, volume_role is os, drive_type is fixed, mount_state is mounted. Equality on payload leaves ignores case, so a literal typed STOPPED matches the same events as stopped. `source` (LQL) equality does not: see `../mcp-tool-decision-tree.md` (paste-back rules).
 
 A stopped_exit_code of 1077 means the service has not been started since boot. It is not a failure code.
 
-The process instance key is pid plus create time, so it changes on every restart. Group process questions on image_name, not on the instance. create_time_raw is a 64-bit count that loses digits under the default number reading; force it with `#i` when you compare it.
+The process instance key is pid plus `sparklogs.data.processes[].create_time_ts` (LQL), so it changes on every restart. Group process questions on image_name, not on the instance.
 
 ## Step 2: find the devices
 
-`path[](pred)` matches an event when at least ONE element satisfies the whole predicate. `path[].leaf=v` is sugar for the single-term form.
+`path[](pred)` matches an event when at least ONE element satisfies the whole predicate. `path[].leaf=v` (LQL) is sugar for the single-term form.
 
-```
+```lql
 sparklogs.data.processes[](image_name="svchost.exe")
 sparklogs.data.services[](current_state="stopped" AND start_type="auto_delayed")
 sparklogs.data.disk_volumes[](volume_role="os" AND free_pct<25)
@@ -138,24 +131,22 @@ Two terms inside one `[]()` bind to the SAME element. The same two terms written
 
 | Query | Means |
 |---|---|
-| `sparklogs.data.processes[](image_name="svchost.exe" AND resident_bytes>200000000)` | one svchost process is over 200 MB |
-| `sparklogs.data.processes[].image_name="svchost.exe" AND sparklogs.data.processes[].resident_bytes>200000000` | the box runs svchost, and something on the box is over 200 MB |
+| `sparklogs.data.processes[](image_name="svchost.exe" AND resident_bytes>200000000)` (LQL) | one svchost process is over 200 MB |
+| `sparklogs.data.processes[].image_name="svchost.exe" AND sparklogs.data.processes[].resident_bytes>200000000` (LQL) | the box runs svchost, and something on the box is over 200 MB |
 
-On a two-device dev fleet over 30 hours the bound form matched 0 events and the uncorrelated form matched 56. The same pair on services (stopped with auto_delayed) gave 76 bound against 94 uncorrelated. Reporting the uncorrelated count as the bound one overstates by whatever that gap happens to be.
+The uncorrelated count is usually larger, and reporting it as the bound one overstates by that gap.
 
 Write the bound form whenever the two facts have to be true of one process, one service, or one volume. Reach for the uncorrelated form only to ask whether both things exist somewhere on the host.
 
 Presence and negation follow the same scope:
 
-```
+```lql
 sparklogs.data.processes[]!                        the array is present, empty array included
 NOT sparklogs.data.processes[](image_name="x")     no element matches, and absent arrays match too
 sparklogs.data.processes[]! AND NOT sparklogs.data.processes[](image_name="x")
 ```
 
 ## Step 3: see only the matching elements
-
-**This section arrives with the next server build.** Until then, `[]` in `select` (arg) is refused with a message pointing at the filter grammar, and the workaround below is the whole answer.
 
 Filtered element projection reuses the filter grammar in a name slot:
 
@@ -167,7 +158,7 @@ select: ["sparklogs.data.processes[].image_name"]                        every e
 
 The row filter and the projection are independent: the filter picks the events, the projection picks the elements shown. An empty match renders `[]`, an absent array is omitted from the JSONL row. One `[]` level per name; a nested second level is refused.
 
-**Today, name the array itself.** `select: ["sparklogs.data.processes"]` returns the whole array, and a full inventory array (hundreds of services, dozens of driver packages) is cut at the response cap with a `…[truncated:N more items]` marker on the tail. Prefer a narrow window and one device, then read `message` (col): it carries the topic's own summary line and the low-signal cut never touches it.
+Naming the array itself (`select: ["sparklogs.data.processes"]`) returns every element, and a full inventory array (hundreds of services, dozens of driver packages) is cut at the response cap with a `…[truncated:N more items]` marker on the tail. Project the matching elements instead.
 
 ## Aggregate across devices
 
@@ -186,8 +177,8 @@ Item leaves group and aggregate: `group_by` (arg) on `sparklogs.data.services[].
 
 ```
 source              samples  cpu_avg   commit_max
-lakeside-srv01-s01  12       0.256666  57.55
-summit-app01-s01    12       0.129166  48.65
+srv-app01           12       0.256666  57.55
+ws-022              12       0.129166  48.65
 ```
 
 `select` (arg) on step 1 shrinks the response only. The cache keeps every column, so step 2 can aggregate the commit_pct path even though step 1 never returned it.
@@ -210,7 +201,7 @@ After resolving scope, add the returned scope, device IDs and the requested star
 }
 ```
 
-Choose CPU, resident RAM, read bytes or write bytes as the ranking metric.
+Choose CPU, resident RAM, read bytes, write bytes, or TCP bytes received or sent (`net_rx`, `net_tx`) as the ranking metric.
 The process count defaults to 10 and can reach 500 per device.
 Executable grouping combines same-named processes within each sample.
 Instance grouping separates PID and creation time on each device; paths are optional metadata.

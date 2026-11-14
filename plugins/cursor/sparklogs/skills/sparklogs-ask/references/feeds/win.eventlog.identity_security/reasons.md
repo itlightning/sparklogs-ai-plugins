@@ -10,12 +10,14 @@ Search for the heading "## `<code>`" or a word from the reason's label. Do not r
 |---|---|---|---|---|---|
 | `applocker_audit_would_block` | applocker audit would block | event | Info to Notice | `security_audit` |  |
 | `applocker_unsupported_windows_edition` | applocker unsupported windows edition | event | Notice | `security_audit` |  |
+| `bitlocker_boot_settings_resealed` | bitlocker boot settings resealed | event | Verbose | `encryption` |  |
+| `bitlocker_key_sealed_to_tpm` | bitlocker key sealed to tpm | event | Verbose | `encryption` |  |
 | `bitlocker_protection_resume_failed` | bitlocker protection resume failed | event | Warning | `encryption` |  |
 | `bitlocker_recovery_info_read_failed` | bitlocker recovery info read failed | event | Info to Notice | `encryption` |  |
 | `bitlocker_recovery_key_backup_failed` | bitlocker recovery key backup failed | event | Info to Error | `encryption` | benign possible |
 | `bitlocker_secure_boot_unavailable` | bitlocker secure boot unavailable | event | Notice | `encryption` |  |
-| `cert_expired` | cert expired | event | Warning | `certificates` |  |
-| `cert_expiring` | cert expiring | event | Warning | `certificates` |  |
+| `cert_expired` | cert expired | event | Info to Warning | `certificates` | benign possible |
+| `cert_expiring` | cert expiring | event | Info to Warning | `certificates` | benign possible |
 | `code_integrity_catalog_load_failed` | code integrity catalog load failed | event | Info to Notice | `security_audit` | benign possible |
 | `code_integrity_driver_revoked` | code integrity driver revoked | event | Warning | `security_audit` |  |
 | `code_integrity_image_hash_missing` | code integrity image hash missing | event | Notice to Warning | `security_audit` |  |
@@ -33,7 +35,7 @@ Search for the heading "## `<code>`" or a word from the reason's label. Do not r
 | `exploit_mitigation_audit_would_block` | exploit mitigation audit would block | event | Info | `security_audit` | benign |
 | `exploit_mitigation_blocked` | exploit mitigation blocked | event | Verbose to Notice | `security_audit` | benign possible |
 | `exploit_mitigation_shadow_stack_mismatch` | exploit mitigation shadow stack mismatch | event | Notice to Warning | `security_audit` |  |
-| `group_policy_domain_controller_unresolved` | group policy domain controller unresolved | event | Notice to Warning | `device_management` |  |
+| `group_policy_domain_controller_unresolved` | group policy domain controller unresolved | event | Display to Warning | `device_management` |  |
 | `group_policy_extension_apply_failed` | group policy extension apply failed | event | Info to Minor | `device_management` | benign possible |
 | `group_policy_file_share_unhardened` | group policy file share unhardened | event | Notice | `device_management` |  |
 | `group_policy_processing_failed` | group policy processing failed | event | Notice to Warning | `device_management` |  |
@@ -92,6 +94,58 @@ An application-control policy reached a device whose Windows edition cannot enfo
 **Example:** A device on an edition without application-control support receives a domain-wide AppLocker policy.
 
 **Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/feeds/eventlog-identity-security#applocker_unsupported_windows_edition, https://sparklogs.com/reference/reasons/applocker_unsupported_windows_edition.json
+
+## `bitlocker_boot_settings_resealed`: bitlocker boot settings resealed
+
+BitLocker resealed a drive's boot settings to the TPM.
+
+**Severity:** Verbose
+
+**Why it matters:** None by itself. It shows BitLocker prepared the drive to open with the TPM at the next boot.
+
+**In practice:** BitLocker writes event 793 to the Microsoft-Windows-BitLocker/BitLocker Management log when it seals a volume's boot settings to the TPM again, for example after an update replaces the boot manager. Event Viewer shows it as a Warning, but it reports a completed reseal. BitLocker-API event 892 in the same log, written around the same time, lists the PCRs the key is now sealed to.
+
+**When to ignore:** Safe to pass over unless you are explaining a BitLocker recovery prompt on this device.
+
+**What to check:**
+
+- To explain a recovery prompt, check whether a reseal was logged after the last change to the boot path and before the restart that asked for the key.
+
+**Related:**
+
+- `bitlocker_key_sealed_to_tpm`: the PCRs the key is sealed to after the reseal
+- `bitlocker_protection_resume_failed`: protection that did not come back after a suspend
+
+**Example:** After a cumulative update replaces the boot manager, a laptop reseals the boot settings for C:.
+
+**Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/feeds/eventlog-identity-security#bitlocker_boot_settings_resealed, https://sparklogs.com/reference/reasons/bitlocker_boot_settings_resealed.json
+
+## `bitlocker_key_sealed_to_tpm`: bitlocker key sealed to tpm
+
+BitLocker sealed the drive key to the TPM, and the event lists the PCRs that key now depends on.
+
+**Severity:** Verbose
+
+**Why it matters:** None by itself. The PCR list says which boot measurements must stay the same for the drive to open without its recovery key.
+
+**In practice:** BitLocker writes event 892 to the Microsoft-Windows-BitLocker/BitLocker Management log each time it seals the drive key to the TPM, for example after an update that changes the boot path. The text names the PCRs, for example [7,11], and their source, for example Secure Boot. The TPM releases the key at boot only while those PCRs hold the values the key was sealed to. A change in a PCR outside this list does not by itself make the TPM refuse the key. A TPM clear or lockout can also make it refuse. On a UEFI device with Secure Boot, PCR 7 is the Secure Boot state and keys, and PCR 11 is BitLocker's own access control. SparkLogs also lists the value each of those PCRs is sealed to, in the same form as the boot PCR record, so the two compare entry by entry.
+
+**When to ignore:** Safe to pass over unless you are explaining a BitLocker recovery prompt on this device.
+
+**What to check:**
+
+- To explain a recovery prompt, compare bitlocker_sealed_pcr_values from the last seal before the prompt with boot_pcrs from the first boot after it (BitLocker-Driver event 24709 in the System log): a sealed PCR whose value differs is the one that changed.
+- If the list is not 7 and 11 on a UEFI device, check whether Secure Boot is on with `Confirm-SecureBootUEFI` in an elevated PowerShell.
+
+**Related:**
+
+- `bitlocker_boot_settings_resealed`: the reseal of the boot settings logged around the same restart
+- `bitlocker_secure_boot_unavailable`: BitLocker could not use Secure Boot for integrity on this volume
+- `tpm_boot_pcr_values_recorded`: the PCR values recorded at each boot, to compare against this list
+
+**Example:** After a boot manager update, a laptop reseals its key to PCRs 7 and 11 with Secure Boot as the source.
+
+**Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/feeds/eventlog-identity-security#bitlocker_key_sealed_to_tpm, https://sparklogs.com/reference/reasons/bitlocker_key_sealed_to_tpm.json
 
 ## `bitlocker_protection_resume_failed`: bitlocker protection resume failed
 
@@ -200,11 +254,11 @@ BitLocker reported that Secure Boot integrity data could not be used for a volum
 
 A certificate in the machine or the user store has expired.
 
-**Severity:** Warning
+**Severity:** Warning or Info
 
 **Why it matters:** Anything that uses that certificate, such as VPN or Wi-Fi sign-in or code signing, fails from now on. The event does not say what uses it.
 
-**In practice:** Windows writes event 1002 when a certificate has expired: to the Microsoft-Windows-CertificateServicesClient-Lifecycle-System/Operational log for the machine store, and to the Lifecycle-User log for the user store. The record names the certificate subject and its expiry date. The subject is what tells a domain or Wi-Fi authentication certificate from a vendor application's certificate.
+**In practice:** Windows writes event 1002 when a certificate has expired: to the Microsoft-Windows-CertificateServicesClient-Lifecycle-System/Operational log for the machine store, and to the Lifecycle-User log for the user store. The record names the certificate subject and its expiry date. The subject is what tells a domain or Wi-Fi authentication certificate from a vendor application's certificate. A machine certificate whose subject is two GUIDs reports expired about once a day; it typically matches the one-day remote desktop certificate Microsoft Entra ID issues to joined devices and replaces daily. That row ships at Info and needs no action. User-store records carry no subject, only the expiry time, which is in microseconds since 1970.
 
 **When to ignore:** When a renewed copy of the same certificate is already in the store, or nothing on the device uses it.
 
@@ -229,11 +283,11 @@ A certificate in the machine or the user store is about to expire.
 
 **Also reported by:** `win.eventlog.application`
 
-**Severity:** Warning
+**Severity:** Warning or Info
 
 **Why it matters:** Anything that uses that certificate fails on the expiry date unless it is renewed first.
 
-**In practice:** Windows writes event 1003 when a certificate is close to its expiry date: to the Microsoft-Windows-CertificateServicesClient-Lifecycle-System/Operational log for the machine store, and to the Lifecycle-User log for the user store. The record names the certificate subject and its expiry date. Auto-enrollment renews certificates from an enterprise template before they expire, so a warning for one of those points at enrollment not working.
+**In practice:** Windows writes event 1003 when a certificate is close to its expiry date: to the Microsoft-Windows-CertificateServicesClient-Lifecycle-System/Operational log for the machine store, and to the Lifecycle-User log for the user store. The record names the certificate subject and its expiry date. Auto-enrollment renews certificates from an enterprise template before they expire, so a warning for one of those points at enrollment not working. A machine certificate whose subject is two GUIDs reports expiring about once a day; it typically matches the one-day remote desktop certificate Microsoft Entra ID issues to joined devices and replaces daily. That row ships at Info and needs no action. User-store records carry no subject, only the expiry time, which is in microseconds since 1970.
 
 **When to ignore:** When a renewed copy is already in the store, or nothing on the device uses the certificate.
 
@@ -707,11 +761,13 @@ A process returned to a different address from the one the hardware shadow stack
 
 The machine could not find or could not reach a domain controller.
 
-**Severity:** Warning or Notice
+**Also reported by:** `win.eventlog.system`
+
+**Severity:** Warning, Notice or Display
 
 **Why it matters:** No Group Policy refresh happens, so the machine keeps the settings it last applied and gets no new ones.
 
-**In practice:** Group Policy writes events 7017, 7320 and 7326 to the Microsoft-Windows-GroupPolicy/Operational log when it cannot find or reach a domain controller, so no policy pass starts. The error code is the cause. ERROR_NO_SUCH_DOMAIN (1355) means the domain name did not resolve, the normal state of a laptop off the corporate network. Access denied (5) means a controller answered and refused, which usually points at a broken machine account. Not part of this reason: event 7320 with access denied on a workgroup or Entra-only device, which Windows writes on every refresh as a routine access check and which ships unlabeled at Info.
+**In practice:** Group Policy writes events 7017, 7320 and 7326 to the Microsoft-Windows-GroupPolicy/Operational log when it cannot find or reach a domain controller, so no policy pass starts. The error code is the cause. ERROR_NO_SUCH_DOMAIN (1355) means the domain name did not resolve, the normal state of a laptop off the corporate network. Access denied (5) means a controller answered and refused, which usually points at a broken machine account. Not part of this reason: event 7320 with access denied on a workgroup or Entra-only device, which Windows writes on every refresh as a routine access check and which ships unlabeled at Info. On a domain controller, event 7320 with code 50 is the service failing to register for connectivity notification on itself at every refresh, and ships at Display. The System log reports the same failure as event 1054.
 
 **When to ignore:** No-such-domain or other discovery codes on a laptop off the corporate network, when policy refreshes once it is back.
 
@@ -734,15 +790,15 @@ The machine could not find or could not reach a domain controller.
 
 A Group Policy client-side extension could not apply the settings from a policy object.
 
-**Also reported by:** `win.eventlog.application`
+**Also reported by:** `win.eventlog.application`, `win.eventlog.system`
 
 **Severity:** Minor or Info
 
 **Why it matters:** None of that policy object's items were delivered to the affected user or machine on this refresh.
 
-**In practice:** Group Policy writes event 6016 or 7016 to the Microsoft-Windows-GroupPolicy/Operational log when a client-side extension, such as Drive Maps, Folder Redirection, Security or Software Installation, finishes with an error code. Windows' own text begins "Completed ... Extension Processing", which reads as success, so SparkLogs puts a first line in front naming the failure, the extension and the code. Network-path codes (53, 58 and 1222) mean the extension could not reach the share it reads from. Code 1274 means the extension was put off to the next foreground refresh, and 1252 means nothing changed since its last run. Both are routine and ship at Info.
+**In practice:** Group Policy writes event 6016 or 7016 to the Microsoft-Windows-GroupPolicy/Operational log when a client-side extension, such as Drive Maps, Folder Redirection, Security or Software Installation, finishes with an error code. Windows' own text begins "Completed ... Extension Processing", which reads as success, so SparkLogs puts a first line in front naming the failure, the extension and the code. Network-path codes (53, 58 and 1222) mean the extension could not reach the share it reads from. Code 1274 means the extension was put off to the next foreground refresh, and 1252 means nothing changed since its last run. Both are routine and ship at Info. On the MDM Policy extension, 0x8018000A (MENROLL_E_DEVICE_ALREADY_ENROLLED) means the device is already enrolled in device management; it is routine and ships at Info. The System log carries the same failure as event 1085.
 
-**When to ignore:** Code 1274 (put off to the next foreground refresh) and code 1252 (nothing changed), which ship at Info.
+**When to ignore:** Code 1274 (put off to the next foreground refresh), code 1252 (nothing changed) and 0x8018000A on the MDM Policy extension (already enrolled), which ship at Info.
 
 **What to check:**
 
@@ -792,7 +848,7 @@ Group Policy failed to apply for that boot or that logon.
 
 **Why it matters:** No policy change reaches the machine for that session. It keeps the settings it last applied, so new or changed policy, security settings included, is missing.
 
-**In practice:** Group Policy writes event 7000 (computer policy at boot) or 7001 (user policy at sign-in) to the Microsoft-Windows-GroupPolicy/Operational log when the whole policy pass fails. The event carries the error code and a flag saying whether Windows put the failure down to connectivity. A connectivity failure on a laptop that started away from the corporate network is expected. On a server, or for any other cause, it points at domain controller reach, the machine account or the policy objects themselves.
+**In practice:** Group Policy writes event 7000 (computer policy at boot) or 7001 (user policy at sign-in) to the Microsoft-Windows-GroupPolicy/Operational log when the whole policy pass fails. The event carries the error code and a flag saying whether Windows put the failure down to connectivity. A connectivity failure on a laptop that started away from the corporate network is expected. On a server, or for any other cause, it points at domain controller reach, the machine account or the policy objects themselves. Event 7017 on the file-access operation means a policy file on the domain controller's SYSVOL share could not be read; the parameter names the file and the code says why.
 
 **When to ignore:** Connectivity failures on a workstation that started away from the corporate network, when the next refresh on the network succeeds.
 
@@ -801,6 +857,7 @@ Group Policy failed to apply for that boot or that logon.
 - Read the connectivity flag and the error code.
 - Once the device is on the network, run `gpupdate /force`, then `gpresult /r` to confirm policy applied.
 - On a server, or with a cause other than connectivity, check domain controller reach, the machine account and the permissions on the policy objects.
+- For a SYSVOL read failure, open the named path from the device (`dir \\<domain>\SYSVOL`) and check DFS Replication health on the domain controllers.
 
 **Related:**
 

@@ -25,8 +25,6 @@ returns zero rows on a fleet full of context rows. To select them, test for the 
 `NOT sparklogs.class!`. To select context rows of a given morphology, filter on the kind instead,
 which IS written: `sparklogs.kind = inventory`.
 
-`NOISE` never reaches you: it is the one class that drops an event, so no query can return one.
-
 **BENIGN is about TEXT, not outcome.** A routine success is `CONTEXT`, not `BENIGN`. `BENIGN` means a
 naive reader would think the line is bad and it is not.
 
@@ -57,10 +55,11 @@ must act on.
 is independently stamped as its own field on the same event.
 
 ```
-disk_volumes.os_volume_space_low.ELEVATED
-disk_volumes.NOTABLE
-disk_volumes.INVENTORY
-hash_mismatch.NOTABLE
+disk_volumes.volume_fill_rate_high.ELEVATED     <- topic.reason.CLASS
+disk_volumes.INVENTORY                          <- topic.KIND on inventory rows
+crashes.process_crash.NOTABLE                   <- topic.reason.CLASS on an occurrence
+app_crash.NOTABLE                               <- reason.CLASS on a curated Windows Event Log row
+disk_volumes                                    <- bare topic
 ```
 
 The class segment, when present, is LAST. `ELEVATED.os_volume_space_low` is not a shape this
@@ -113,9 +112,9 @@ bridge; everything else about severity in this doc set points here.
 
 | Where you see it | Form | Example |
 |---|---|---|
-| Prose you write, and LQL filters | lowercase rung name | `severity in (error, critical)` |
+| Prose you write, LQL filters and `min_severity` (arg) | lowercase rung name | `severity >= warning` (LQL), `min_severity: "error"` |
 | The `severity` (LQL) cell on a returned row | UPPERCASE rung name | `ERROR`, `CRITICAL`, and `WARN2` / `WARN3` for rungs between the named ones |
-| Numeric filters and `severity_level` (col) | integer 1-24 | `min_severity: 17` |
+| `severity_level` (col) | integer 1-24 | `17`. Filter by the name, not the number |
 | Anything that COUNTS events: the `cnt_<band>` columns and `summary.severity_histogram` (col) | lowercase band name, one of nine | `critical_plus`, `info_or_notice` |
 
 **A cell and a digest speak different vocabularies on purpose.** A row's `severity` (LQL) reports ONE
@@ -128,8 +127,8 @@ spelling to trust:
 
 Severity bands, same on every tool: cnt_debug_or_below (severity 6 and below), cnt_verbose (7-8), cnt_info_or_notice (9-12), cnt_warning (13-15), cnt_minor (16), cnt_error (17), cnt_serious (18), cnt_severe (19), cnt_critical_plus (20 and above). Listings of problems carry the failure side only (cnt_warning and above). Tools that count all traffic carry every band.
 
-`summary.severity_histogram` (col) is an ORDERED list of `{band, count}` over those bands, worst-last,
-carrying only the bands that occurred: a band missing from it is a band that response never saw.
+`summary.severity_histogram` (col) is an ORDERED list of `{band, count}` over those bands, worst-last.
+`query_event_counts_by_severity` lists every band, with zeros; `list_sources` and `query_scope_activity` list only the bands present. A missing band is a zero.
 The failure-side subset is the five columns `cnt_warning` (col) through `cnt_critical_plus` (col), and a listing
 that carries them is not hiding the quiet traffic: it never counted it.
 
@@ -137,23 +136,24 @@ that carries them is not hiding the quiet traffic: it never counted it.
 datum: paraphrasing `WARN3` as "warning" breaks the link between your finding and the row. Both fit
 in one sentence: `severity WARN3 (minor)`.
 
-**Use the rung names.** Write `serious`, `minor`, `severe`. Do not write `error2`, `error4`,
-`warn4` or the other OTel short forms in prose, filters or findings; they exist only as ingest
-aliases that normalize third-party logs onto this ladder, and they are worth naming only when you are
-explaining that normalization to someone.
+**Use the rung names.** Write `serious`, `minor`, `severe` in prose, filters and findings.
 
-**Critical+ is a fetch-first contract.** Any non-zero critical+ count in scope means: fetch those
-events before proceeding, whatever the ticket was about. Producers admit `Critical` only for facts an
-engineer working an unrelated issue must always be told, so the count is small and always material.
-The Info through Error bands carry no such mandate: read and weigh them on their evidence.
+**Critical+ is a fetch-first contract on curated rows.** Any non-zero critical+ count in scope on agent
+feeds (or rows with `sparklogs.reason!` (LQL)) means: fetch those events before proceeding, whatever the
+ticket was about. Source packs admit `Critical` only for facts an engineer working an unrelated issue must
+always be told, so the count is small and always material. On ingest-key data critical is the sender's own
+level: read it and weigh it like any other row. The Info through Error bands carry no such mandate: read
+and weigh them on their evidence.
 
 **Severity is not the provider's opinion.** Windows logging a routine auth denial at Error is that
 vendor's taxonomy. A curated pack re-grades by consequence.
 
 ## Kind, and why counts double
 
-`sparklogs.kind` (LQL) says what MORPHOLOGY a row is: `inventory`, `monitor`, `delta`, `agent_op`,
-`config_change`, `malformed`. It is a different question from class and from severity.
+`sparklogs.kind` (LQL) says what MORPHOLOGY a row is: `inventory`, `monitor`, `occurrence`, `delta`, `agent_op`,
+`config_change`, `malformed`. An `occurrence` is a one-off event the agent observed, such as a process crash. It is a different question from class and from severity.
+
+**Where kind is set.** Device-state rows always carry a kind. On Windows Event Log feeds only two shapes do: `config_change` (firewall rules, service installs, scheduled tasks, accounts, group membership, logon rights, audit policy, audited registry values, directory objects, Defender settings; reading them before an onset: `../playbooks/what-changed.md`) and `occurrence` on System (boot, shutdown, sleep, wake and restart marks, SCM 7036 agent start and stop, SCM 7031 and 7034 `service_crashed`), plus `agent_op` rows. Most other Windows Event Log reasons, `app_crash` and `app_hang` among them, carry no kind: group them by `sparklogs.reason` (LQL), and read an empty kind group as normal.
 
 `malformed` marks a row that did not parse cleanly, and it does not stand alone: a row can keep a
 valid `sparklogs.kind` (LQL) and still carry `sparklogs.malformed_event=true`, so a `sparklogs.kind=malformed` filter by itself misses
@@ -170,4 +170,4 @@ is one fact with two witnesses, not two problems. Say which kind you counted.
   severity >= Warning.
 - **`NOTABLE` counts include closures.** A flapping condition contributes an onset and a closure. For
   onsets only, filter on the reason and the transition, not on the class.
-- **Fleet "currently degraded"** = the latest `ELEVATED` with severity >= Warning per host.
+- **Fleet "currently degraded"**: open conditions with `query_device_health`, view omitted; a row is open unless its class is `RECOVERED` or `ENDED` (`device-state-fields.md`, **Choose the view**).

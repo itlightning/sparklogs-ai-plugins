@@ -6,7 +6,7 @@ Full inventory every hour. Supported changes are reported when the agent observe
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
 | `sparklogs.data.volume_map.volume` | string |  | The volume's stable identity, the same identity `disk_volumes` uses. |
-| `sparklogs.data.volume_map.display_name` | string |  | The volume's drive letter or mount path, for display. |
+| `sparklogs.data.volume_map.display_name` | string |  | The volume's drive letter, for display. Absent when the volume has no drive letter. |
 | `sparklogs.data.volume_map.aliases` | string_array |  | Other names this volume is known by. |
 | `sparklogs.data.volume_map.primary_mount` | string |  | The drive letter if the volume has one, else its first mount path. Absent when the volume is unmounted. |
 | `sparklogs.data.volume_map.mounts` | string_array |  | Every path this volume is mounted at. Empty is a valid state: zero mounts is not an error. |

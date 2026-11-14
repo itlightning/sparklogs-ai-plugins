@@ -6,7 +6,7 @@ Full inventory every 15 minutes. Supported changes are reported when the agent o
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
 | `sparklogs.data.disk_volumes.volume` | string |  | The volume's GUID, lowercased. It stays the same when the drive letter changes, so it is the key to follow a volume by. |
-| `sparklogs.data.disk_volumes.display_name` | string |  | The volume's drive letter, or its mount path when it has no letter. |
+| `sparklogs.data.disk_volumes.display_name` | string |  | The volume's drive letter. Absent when the volume has no drive letter. |
 | `sparklogs.data.disk_volumes.volume_label` | string |  | The volume's label, as File Explorer shows it. |
 | `sparklogs.data.disk_volumes.aliases` | string_array |  | Other names the volume is known by, such as its label, besides its drive letter or mount path and its GUID. |
 | `sparklogs.data.disk_volumes.drive_type` | string |  | The kind of drive Windows reports for the volume, such as `fixed` or `removable`. |
@@ -21,6 +21,7 @@ Full inventory every 15 minutes. Supported changes are reported when the agent o
 | `sparklogs.data.disk_volumes.mount_state_code` | integer |  | A numeric code for the volume's mount state. |
 | `sparklogs.data.disk_volumes.filesystem` | string |  | The volume's file system, lowercased, such as `ntfs`. Absent when the file system did not answer this reading. |
 | `sparklogs.data.disk_volumes.bitlocker_protection` | string |  | The volume's BitLocker protection: `on`, `off`, `suspended`, or `n_a` when BitLocker does not apply to the volume. Absent when BitLocker status could not be read. |
+| `sparklogs.data.disk_volumes.bitlocker_encryption_method` | string |  | The algorithm BitLocker encrypts the volume with: `xts_aes_128` (the Windows default), `xts_aes_256`, `aes_128`, `aes_256`, `aes_128_diffuser`, `aes_256_diffuser`, `hardware` (the drive's own encryption), or `none` when the volume is not encrypted; a code Windows adds later is reported as its number. Absent when BitLocker status could not be read or the volume is not encryptable. |
 | `sparklogs.data.disk_volumes.bitlocker_dropped` | bool |  | Whether BitLocker protection is off or suspended. Absent when BitLocker status could not be read. |
 | `sparklogs.data.disk_volumes.bitlocker_off_age_min` | float | minutes | How long BitLocker protection has been off or suspended. Time asleep counts, since a sleeping device without protection is exposed all the same. |
 | `sparklogs.data.disk_volumes.bitlocker_was_protected` | bool |  | Whether the agent has seen BitLocker protection on for this volume since it began watching it. A volume never seen protected raises no dropped-protection condition. |

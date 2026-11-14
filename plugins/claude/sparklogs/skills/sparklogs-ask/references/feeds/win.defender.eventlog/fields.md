@@ -12,7 +12,6 @@ Read every row below as a query contract, the same way a reason code is read.
 
 - **Additive only.** Fields and vocabulary tokens are added, never renamed or repurposed, without a documented migration.
 - **Misses are honest.** An unlisted code leaves its decoded field unset and the raw value promoted; a meaning is never invented.
-- **Correlate with `pack_version`.** A field exists at rest only from the pack version that shipped it, so check the pack version on the events in scope before concluding a condition is absent.
 
 ## Raw fallback
 
@@ -32,11 +31,11 @@ Stored flat under the `win.defender.eventlog.` prefix.
 | `win.defender.eventlog.severity_name` | string | Defender's rating of the threat as text, from `Severity Name` on events 1116 and 1006, in lowercase. The text follows the Windows display language. |
 | `win.defender.eventlog.category_id` | int | Number of the threat category Defender assigned, from `Category ID` on events 1116 and 1006. |
 | `win.defender.eventlog.category_name` | string | Threat category Defender assigned, as text, from `Category Name` on events 1116 and 1006. |
-| `win.defender.eventlog.threat_path` | string | Path of the file or other object Defender acted on, from `Path` on the detection and remediation events (1116 to 1119, 1015, and the older 1006 to 1008) and on attack surface reduction block event 1121. |
-| `win.defender.eventlog.detection_origin` | string | Where the threat was found, such as a local machine or a network share, from `Detection Origin` on events 1116 and 1006. |
-| `win.defender.eventlog.detection_type` | string | Kind of detection Defender made, from `Detection Type` on events 1116 and 1006. |
-| `win.defender.eventlog.detection_source` | string | Defender component that made the detection, such as real-time protection or a user scan, from `Detection Source` on events 1116 and 1006. |
-| `win.defender.eventlog.user` | string | User account Defender ties to the event, from `User`: the account on a detection or remediation (1116, 1117 and the older 1006, 1007), or the account that started or ran a scan (1000, 1001). |
+| `win.defender.eventlog.threat_path` | string | Path of the file or other object Defender acted on, from `Path` on the detection and remediation events 1116 to 1119, the older 1007 and 1008, and attack surface reduction block event 1121, and from `Path Found` on the older detection event 1006 and behavior event 1015. |
+| `win.defender.eventlog.detection_origin` | string | Where the threat was found, such as a local machine or a network share, from `Origin Name` on event 1116 and `Detection Origin` on the older 1006. |
+| `win.defender.eventlog.detection_type` | string | Kind of detection Defender made, from `Type Name` on event 1116 and `Detection Type` on the older 1006. |
+| `win.defender.eventlog.detection_source` | string | Defender component that made the detection, such as real-time protection or a user scan, from `Source Name` on event 1116 and `Detection Source` on the older 1006. |
+| `win.defender.eventlog.user` | string | User account Defender ties to the event: the account on a detection or remediation, from `Detection User` on 1116 and 1117 and `User` on the older 1006 and 1007, or the account that started or ran a scan (1000, 1001). |
 | `win.defender.eventlog.action_id` | int | Number of the remediation action Defender took, from `Action ID` on events 1117 and 1007. |
 | `win.defender.eventlog.action_name` | string | Remediation action Defender took, as text, from `Action Name` on events 1117 and 1007, in lowercase. The text follows the Windows display language, so an allow on a non-English system is not the word allow. |
 | `win.defender.eventlog.status` | string | Result code Defender logged, from `Error Code`. On remediation events 1117 and 1007 it is the outcome, and a completed action reads as zero. On remediation failures (1118, 1119, 1008), scan failure 1005, security intelligence update failures (2001, 2003, 2004) and engine failures (3002, 5008) it is the failure code. |
