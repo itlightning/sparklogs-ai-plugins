@@ -45,6 +45,10 @@ Workstation discipline: CI will not catch a stale table by itself (see the drift
 
 `yarn stitch-indexes` is a different command: it rebuilds SKILL / playbook index tables from **this** repo's leaf YAML, not from the library.
 
+`yarn guide-corpus` writes the guide corpus to `build/guide-corpus/`: `docs/<path>` holds each rendered document under `feeds/`, `fields/`, `guides/`, `playbooks/` and `themes/` (maintainer-only inputs excluded), and `manifest.json` lists each one with its sha256, line count and H2/H3 sections.
+It needs node only (no package install) and reads no library checkout: the library commit comes from `scripts/generated-SYNC-MANIFEST.json`.
+Every run verifies what it wrote; `yarn validate` emits it twice and diffs the two.
+
 Identifier tags (`docs/identifier-names.md`): authored `src/` prose backticks that match `[a-z][a-z0-9_.]*` must carry `(arg)`, `(col)`, `(LQL)`, `(tool)`, `(value)`, or `(other)`. Render strips `(tool)`, `(value)`, and `(other)`. Membership is `scripts/identifier-sot.yaml` plus a sibling library harvest. Fenced LQL/JSON is exempt. `src/feeds/`, `src/fields/`, and GENERATED blocks are skipped.
 
 LQL field vet (same script): every field named in a ```` ```lql ```` block or an `(LQL)` span in authored `src/` must be in `scripts/fixtures/lql-live-fields.txt`, declared by the pack (`src/feeds/` field tables and `src/fields/`), or on `lql_pedagogical` in `scripts/identifier-sot.yaml`. `lql_resident` and `lql_families` are themselves vetted against the snapshot and the pack. Generated `src/feeds/` blocks only warn: fix those in the source library. The snapshot was captured with the SparkLogs MCP `list_fields` tool; its header says how to refresh it. `validate-rendered.mjs` scans shipped `.md`: leftover strip-tags fail; each host pack must still contain `(arg)`, `(col)`, and `(LQL)` (empty match is not a pass).

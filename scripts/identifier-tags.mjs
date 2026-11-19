@@ -33,21 +33,17 @@ import {
   stripAnnotation,
   vetSotLists,
 } from './lql-field-refs.mjs';
+import {
+  ALL_TAGS,
+  IDENTIFIER_BODY,
+  KEEP_TAGS,
+  STRIP_TAGS,
+  isFenceLine,
+  stripAuthoringTags,
+} from './host-transforms.mjs';
 
-export const KEEP_TAGS = new Set(['arg', 'col', 'LQL']);
-export const STRIP_TAGS = new Set(['tool', 'value', 'other']);
-export const ALL_TAGS = new Set([...KEEP_TAGS, ...STRIP_TAGS]);
-
-export const IDENTIFIER_BODY = '[a-z][a-z0-9_.]*';
 const TAG_ALT = [...ALL_TAGS].join('|');
-const TAGGED_RE = new RegExp('`(' + IDENTIFIER_BODY + ')` \\((' + TAG_ALT + ')\\)', 'g');
 const BACKTICK_RE = new RegExp('`(' + IDENTIFIER_BODY + ')`(?: \\((' + TAG_ALT + ')\\))?', 'g');
-
-const FENCE_LINE = /^(```|~~~)/;
-
-function isFenceOpen(line) {
-  return FENCE_LINE.test(line.trim());
-}
 
 // Split markdown into lintable prose vs skipped regions (fences, GENERATED).
 // fences: each fenced block's info string and body as [start, end) offsets into text.
@@ -63,7 +59,7 @@ export function proseRanges(text) {
   for (let i = 0; i < lines.length; i += 1) {
     const line = lines[i];
     const lineLen = line.length + (i < lines.length - 1 ? 1 : 0);
-    if (isFenceOpen(line)) {
+    if (isFenceLine(line)) {
       if (!fence) {
         if (offset > start) ranges.push([start, offset]);
         fence = { info: line.trim().slice(3).trim(), body: [offset + lineLen, offset + lineLen] };
@@ -85,13 +81,6 @@ export function inRanges(index, ranges) {
     if (index >= a && index < b) return true;
   }
   return false;
-}
-
-export function stripAuthoringTags(text) {
-  return text.replace(TAGGED_RE, (full, body, tag) => {
-    if (STRIP_TAGS.has(tag)) return '`' + body + '`';
-    return full;
-  });
 }
 
 function skipRel(rel) {

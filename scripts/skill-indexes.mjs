@@ -6,7 +6,6 @@
 
 import fs from 'node:fs/promises';
 import path from 'node:path';
-import yaml from 'js-yaml';
 import { THEME_FILES } from './dist-layout.mjs';
 import { FEED_WHAT, MODULES } from './generated-references.config.mjs';
 
@@ -371,7 +370,10 @@ export async function checkIndexFiles(root) {
   }
 }
 
-export function proveShipMarkdown() {
+// Async so the YAML parser loads only for this round-trip check: the render core stays on node
+// built-ins.
+export async function proveShipMarkdown() {
+  const { default: yaml } = await import('js-yaml');
   const skill = `---
 name: sparklogs-ask
 description: Query logs.

@@ -17,6 +17,39 @@
 // Source stays single-source: no host dialect is hand-written into src/.
 
 import path from 'node:path';
+import { shipMarkdown } from './skill-indexes.mjs';
+
+// Identifier tags on prose backticks (lint rules in identifier-tags.mjs). Render keeps the KEEP_TAGS
+// annotation and drops the STRIP_TAGS one, leaving the plain backticked identifier.
+export const KEEP_TAGS = new Set(['arg', 'col', 'LQL']);
+export const STRIP_TAGS = new Set(['tool', 'value', 'other']);
+export const ALL_TAGS = new Set([...KEEP_TAGS, ...STRIP_TAGS]);
+export const IDENTIFIER_BODY = '[a-z][a-z0-9_.]*';
+const TAGGED_RE = new RegExp('`(' + IDENTIFIER_BODY + ')` \\((' + [...ALL_TAGS].join('|') + ')\\)', 'g');
+
+export function stripAuthoringTags(text) {
+  return text.replace(TAGGED_RE, (full, body, tag) => {
+    if (STRIP_TAGS.has(tag)) return '`' + body + '`';
+    return full;
+  });
+}
+
+// A line that opens or closes a fenced code block. Every markdown scan here toggles on it, so
+// lint, render and the guide corpus agree on what is code.
+const FENCE_LINE = /^(```|~~~)/;
+
+export function isFenceLine(line) {
+  return FENCE_LINE.test(line.trim());
+}
+
+/**
+ * The host-independent part of rendering one shipped markdown file: authoring frontmatter and
+ * markers out, authoring tags stripped, the host-variant arm kept. Per-host corpus-path and command
+ * rewrites apply on top of this.
+ */
+export function renderSharedMarkdown(text, file, { commands }) {
+  return applyHostVariants(stripAuthoringTags(shipMarkdown(text, file)), { commands }, file);
+}
 
 export const CORPUS_TOPS = ['guides', 'playbooks', 'themes', 'feeds', 'fields'];
 
