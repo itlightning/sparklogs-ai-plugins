@@ -6,14 +6,18 @@
 Each section below is complete for its reason: every public field, in the words the reference page shows.
 Search for the heading "## `<code>`" or a word from the reason's label. Do not read the whole file.
 
-| reason | label | kind | severity | service | benign |
-|---|---|---|---|---|---|
-| `patch_install_failed` | patch install failed | event | Error | `patching` |  |
-| `win_component_store_corruption` | win component store corruption | event | Notice to Warning | `patching` |  |
+| reason | label | kind | severity | service | benign | use when |
+|---|---|---|---|---|---|---|
+| `patch_install_failed` | patch install failed | event | Error | `patching` |  | an update or Windows feature fails to install or uninstall, whether from Windows Update, an RMM patch job, DISM or a manual .msu, and a technician needs the package name and status code the Setup log recorded. |
+| `win_component_store_corruption` | win component store corruption | event | Notice to Warning | `patching` |  | a component-store scan or repair finished with damage left over, often found while chasing failed updates, and a technician needs the Setup log's count of items found and repaired. |
 
 ## `patch_install_failed`: patch install failed
 
 An update or Windows package failed to install or uninstall.
+
+**Use when:** an update or Windows feature fails to install or uninstall, whether from Windows Update, an RMM patch job, DISM or a manual .msu, and a technician needs the package name and status code the Setup log recorded.
+
+**Keywords:** update failed to install, KB failed to install, patch install failed, update uninstall failed, cannot remove update, msu install failed, wusa install failed, Windows feature package failed to change state, package failed to change state, 0x800f0922
 
 **Also reported by:** `win.eventlog.system`
 
@@ -41,6 +45,10 @@ An update or Windows package failed to install or uninstall.
 ## `win_component_store_corruption`: win component store corruption
 
 A Windows component-store scan found damage that it did not repair.
+
+**Use when:** a component-store scan or repair finished with damage left over, often found while chasing failed updates, and a technician needs the Setup log's count of items found and repaired.
+
+**Keywords:** WinSxS corruption, corruption not repaired, component store repair incomplete, DISM ScanHealth found corruption, Setup log component store scan count
 
 **Also reported by:** `win.servicing.cbs`
 

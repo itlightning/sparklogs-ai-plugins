@@ -6,113 +6,113 @@
 Each section below is complete for its reason: every public field, in the words the reference page shows.
 Search for the heading "## `<code>`" or a word from the reason's label. Do not read the whole file.
 
-| reason | label | kind | severity | service | benign |
-|---|---|---|---|---|---|
-| `app_crash_recurring` | Application crashing repeatedly | condition | Display to Serious | `app_stability` |  |
-| `audit_policy_changed` | Audit policy changed | change |  | `security_audit` |  |
-| `audit_policy_coverage_reduced` | Audit coverage reduced | change |  | `security_audit` |  |
-| `bios_version_changed` | BIOS version changed | change |  | `patching` |  |
-| `boot_mode_changed` | Boot mode changed | change |  | `platform` |  |
-| `cpu_busy` | CPU busy | condition | Display to Notice | `performance` |  |
-| `cpu_configuration_changed` | CPU configuration changed | change |  | `platform` |  |
-| `cpu_interrupt_storm` | CPU interrupt storm | condition | Warning to Error | `performance` |  |
-| `cpu_kernel_dominated` | CPU time mostly kernel work | condition | Notice | `performance` |  |
-| `cpu_throttled_under_load` | CPU throttled under load | condition | Warning to Error | `performance` |  |
-| `crash_dump_page_file_too_small` | Page file too small for crash dumps | condition | Notice | `os_stability` |  |
-| `crash_dump_type_changed` | Crash dump type changed | change |  | `os_stability` |  |
-| `data_volume_space_low` | Data volume low on space | condition | Display to Warning | `storage` |  |
-| `disk_brought_online` | Disk brought online | change |  | `storage` |  |
-| `disk_latency_degraded` | Disk latency degraded | condition | Display to Error | `storage` |  |
-| `disk_partition_layout_changed` | Disk partition layout changed | change |  | `storage` |  |
-| `disk_read_only_changed` | Disk read-only setting changed | change |  | `storage` |  |
-| `disk_saturated` | Disk saturated | condition | Display to Minor | `storage` |  |
-| `disk_taken_offline` | Disk taken offline | change |  | `storage` |  |
-| `disk_unresponsive` | Disk unresponsive | condition | Minor to Critical | `storage` |  |
-| `dns_lookup_redirected` | DNS lookup redirected | condition | Display to Notice | `networking` |  |
-| `domain_membership_changed` | Domain membership changed | change |  | `platform` |  |
-| `driver_installed` | Driver installed | change |  | `platform` |  |
-| `driver_removed` | Driver removed | change |  | `platform` |  |
-| `driver_updated` | Driver updated | change |  | `platform` |  |
-| `hardware_identity_changed` | Hardware identity changed | change |  | `platform` |  |
-| `host_booted` | Host booted | occurrence |  | `os_stability` |  |
-| `host_clock_stepped` | Host clock stepped | occurrence |  | `os_stability` |  |
-| `host_resume_settled` | Host resume settled | occurrence |  | `os_stability` |  |
-| `host_role_added` | Role detected | change |  | `platform` |  |
-| `host_role_removed` | Role no longer detected | change |  | `platform` |  |
-| `host_shutdown` | Host shutting down | occurrence |  | `os_stability` |  |
-| `host_sleep_entered` | Host entered sleep | occurrence |  | `os_stability` |  |
-| `host_sleep_exited` | Host resumed | occurrence |  | `os_stability` |  |
-| `host_unexpected_shutdown` | Unexpected host shutdown | occurrence |  | `os_stability` |  |
-| `installed_memory_changed` | Installed memory changed | change |  | `platform` |  |
-| `installed_product_changed` | Installed product changed | change |  | `patching` |  |
-| `installed_product_installed` | Installed product appeared | change |  | `patching` |  |
-| `installed_product_removed` | Installed product removed | change |  | `patching` |  |
-| `kernel_crash` | Windows crashed (blue screen) | occurrence |  | `os_stability` |  |
-| `kernel_crash_recurring` | Repeated Windows crashes | condition | Display to Critical | `os_stability` |  |
-| `kernel_driver_flapping` | Kernel driver loading repeatedly | condition | Notice | `platform` |  |
-| `kernel_driver_installed` | Kernel driver installed | change |  | `platform` |  |
-| `kernel_driver_installed_repeatedly` | Kernel driver installed repeatedly | condition | Display | `platform` |  |
-| `kernel_driver_loaded` | Kernel driver loaded | change |  | `platform` |  |
-| `kernel_driver_unloaded` | Kernel driver unloaded | change |  | `platform` |  |
-| `kernel_driver_updated` | Kernel driver updated | change |  | `platform` |  |
-| `network_adapter_dhcp_failed` | Network adapter DHCP failed | condition | Notice to Error | `networking` |  |
-| `network_adapter_disabled` | Network adapter disabled | change |  | `networking` |  |
-| `network_adapter_emulated` | Emulated network adapter | condition | Display to Notice | `networking` |  |
-| `network_adapter_enabled` | Network adapter enabled | change |  | `networking` |  |
-| `network_adapter_filters_changed` | Network adapter filters changed | change |  | `networking` |  |
-| `network_adapter_ipv4_dhcp_changed` | Network adapter DHCP setting changed | change |  | `networking` |  |
-| `network_adapter_link_downshifted` | Network link speed downshifted | condition | Notice to Warning | `networking` |  |
-| `network_adapter_metric_changed` | Network adapter metric changed | change |  | `networking` |  |
-| `network_adapter_mtu_changed` | Network adapter MTU changed | change |  | `networking` |  |
-| `network_adapter_saturated` | Network link saturated | condition | Display to Notice | `networking` |  |
-| `network_adapter_static_address_changed` | Network adapter static address changed | change |  | `networking` |  |
-| `network_adapter_static_dns_changed` | Network adapter static DNS changed | change |  | `networking` |  |
-| `network_adapter_static_gateway_changed` | Network adapter static gateway changed | change |  | `networking` |  |
-| `network_context_changed` | Primary network changed | occurrence |  | `networking` |  |
-| `network_ipv6_broken` | IPv6 broken while advertised | condition | Display to Notice | `networking` |  |
-| `network_share_added` | Network share added | change |  | `file_sharing` |  |
-| `network_share_path_changed` | Network share path changed | change |  | `file_sharing` |  |
-| `network_share_permissions_changed` | Network share permissions changed | change |  | `file_sharing` |  |
-| `network_share_removed` | Network share removed | change |  | `file_sharing` |  |
-| `operating_system_changed` | Operating system changed | change |  | `patching` |  |
-| `os_clock_drift` | Clock drifting | condition |  | `performance` |  |
-| `os_volume_space_low` | OS volume low on space | condition | Notice to Severe | `storage` |  |
-| `page_file_configuration_changed` | Page file configuration changed | change |  | `performance` |  |
-| `patch_scan_stale` | Windows Update scan out of date | condition | Warning | `patching` |  |
-| `patch_updates_paused` | Windows Updates paused | condition | Notice to Error | `patching` |  |
-| `power_wake_loop` | Power wake loop | condition | Display | `platform` |  |
-| `primary_dns_suffix_changed` | Primary DNS suffix changed | change |  | `networking` |  |
-| `process_cpu_high` | Process using high CPU | condition |  | `performance` |  |
-| `process_crash` | Application crashed | occurrence |  | `app_stability` |  |
-| `process_handle_count_high` | Process handle count high | condition | Display | `performance` |  |
-| `ram_commit_near_limit` | Memory commit near its limit | condition | Notice to Critical | `performance` |  |
-| `ram_pressure` | Memory pressure slowing the host | condition | Notice to Severe | `performance` |  |
-| `secure_boot_disabled` | Secure Boot disabled | change |  | `security_audit` |  |
-| `secure_boot_enabled` | Secure Boot enabled | change |  | `security_audit` |  |
-| `service_auto_not_running` | Automatic service not running | condition | Display to Severe | `app_stability` |  |
-| `service_command_line_changed` | Service command changed | change |  | `security_audit` |  |
-| `service_flapping` | Service crashing and restarting | condition | Display to Serious | `app_stability` |  |
-| `service_installed` | Service installed | change |  | `security_audit` |  |
-| `service_logon_account_changed` | Service account changed | change |  | `security_audit` |  |
-| `service_removed` | Service removed | change |  | `security_audit` |  |
-| `service_start_type_changed` | Service start type changed | change |  | `security_audit` |  |
-| `service_stuck_pending` | Service stuck starting or stopping | condition | Display to Severe | `app_stability` |  |
-| `sparklogs_agent_cpu_over_budget` | SparkLogs agent CPU over budget | condition | Notice | `rmm` |  |
-| `sparklogs_agent_handle_over_budget` | SparkLogs agent handles over budget | condition | Notice | `rmm` |  |
-| `sparklogs_agent_memory_over_budget` | SparkLogs agent memory over budget | condition | Notice | `rmm` |  |
-| `sparklogs_agent_started` | SparkLogs agent started | occurrence |  | `rmm` |  |
-| `sparklogs_agent_stopped` | SparkLogs agent stopped | occurrence |  | `rmm` |  |
-| `tpm_chip_changed` | TPM chip changed | change |  | `platform` |  |
-| `tpm_firmware_changed` | TPM firmware changed | change |  | `platform` |  |
-| `tpm_presence_changed` | TPM presence changed | change |  | `platform` |  |
-| `tpm_version_changed` | TPM specification changed | change |  | `platform` |  |
-| `virtualization_changed` | Virtualization changed | change |  | `platform` |  |
-| `volume_bitlocker_protection_dropped` | BitLocker protection dropped | condition | Notice | `storage` |  |
-| `volume_fill_rate_high` | Volume filling quickly | condition | Display | `storage` |  |
-| `volume_unreadable` | Volume unreadable | condition | Serious to Severe | `storage` |  |
-| `vss_snapshots_failing_for_space` | Shadow copies failing for space | condition | Notice to Error | `backup` |  |
-| `vss_writer_failed` | VSS writer failed | condition | Display to Warning | `backup` |  |
-| `winhttp_proxy_changed` | WinHTTP proxy changed | change |  | `networking` |  |
+| reason | label | kind | severity | service | benign | use when |
+|---|---|---|---|---|---|---|
+| `app_crash_recurring` | Application crashing repeatedly | condition | Display to Serious | `app_stability` |  |  |
+| `audit_policy_changed` | Audit policy changed | change |  | `security_audit` |  |  |
+| `audit_policy_coverage_reduced` | Audit coverage reduced | change |  | `security_audit` |  |  |
+| `bios_version_changed` | BIOS version changed | change |  | `patching` |  |  |
+| `boot_mode_changed` | Boot mode changed | change |  | `platform` |  |  |
+| `cpu_busy` | CPU busy | condition | Display to Notice | `performance` |  |  |
+| `cpu_configuration_changed` | CPU configuration changed | change |  | `platform` |  |  |
+| `cpu_interrupt_storm` | CPU interrupt storm | condition | Warning to Error | `performance` |  |  |
+| `cpu_kernel_dominated` | CPU time mostly kernel work | condition | Notice | `performance` |  |  |
+| `cpu_throttled_under_load` | CPU throttled under load | condition | Warning to Error | `performance` |  |  |
+| `crash_dump_page_file_too_small` | Page file too small for crash dumps | condition | Notice | `os_stability` |  |  |
+| `crash_dump_type_changed` | Crash dump type changed | change |  | `os_stability` |  |  |
+| `data_volume_space_low` | Data volume low on space | condition | Display to Warning | `storage` |  |  |
+| `disk_brought_online` | Disk brought online | change |  | `storage` |  |  |
+| `disk_latency_degraded` | Disk latency degraded | condition | Display to Error | `storage` |  |  |
+| `disk_partition_layout_changed` | Disk partition layout changed | change |  | `storage` |  |  |
+| `disk_read_only_changed` | Disk read-only setting changed | change |  | `storage` |  |  |
+| `disk_saturated` | Disk saturated | condition | Display to Minor | `storage` |  |  |
+| `disk_taken_offline` | Disk taken offline | change |  | `storage` |  |  |
+| `disk_unresponsive` | Disk unresponsive | condition | Minor to Critical | `storage` |  |  |
+| `dns_lookup_redirected` | DNS lookup redirected | condition | Display to Notice | `networking` |  |  |
+| `domain_membership_changed` | Domain membership changed | change |  | `platform` |  |  |
+| `driver_installed` | Driver installed | change |  | `platform` |  |  |
+| `driver_removed` | Driver removed | change |  | `platform` |  |  |
+| `driver_updated` | Driver updated | change |  | `platform` |  |  |
+| `hardware_identity_changed` | Hardware identity changed | change |  | `platform` |  |  |
+| `host_booted` | Host booted | occurrence |  | `os_stability` |  |  |
+| `host_clock_stepped` | Host clock stepped | occurrence |  | `os_stability` |  |  |
+| `host_resume_settled` | Host resume settled | occurrence |  | `os_stability` |  |  |
+| `host_role_added` | Role detected | change |  | `platform` |  |  |
+| `host_role_removed` | Role no longer detected | change |  | `platform` |  |  |
+| `host_shutdown` | Host shutting down | occurrence |  | `os_stability` |  |  |
+| `host_sleep_entered` | Host entered sleep | occurrence |  | `os_stability` |  |  |
+| `host_sleep_exited` | Host resumed | occurrence |  | `os_stability` |  |  |
+| `host_unexpected_shutdown` | Unexpected host shutdown | occurrence |  | `os_stability` |  |  |
+| `installed_memory_changed` | Installed memory changed | change |  | `platform` |  |  |
+| `installed_product_changed` | Installed product changed | change |  | `patching` |  |  |
+| `installed_product_installed` | Installed product appeared | change |  | `patching` |  |  |
+| `installed_product_removed` | Installed product removed | change |  | `patching` |  |  |
+| `kernel_crash` | Windows crashed (blue screen) | occurrence |  | `os_stability` |  |  |
+| `kernel_crash_recurring` | Repeated Windows crashes | condition | Display to Critical | `os_stability` |  |  |
+| `kernel_driver_flapping` | Kernel driver loading repeatedly | condition | Notice | `platform` |  |  |
+| `kernel_driver_installed` | Kernel driver installed | change |  | `platform` |  |  |
+| `kernel_driver_installed_repeatedly` | Kernel driver installed repeatedly | condition | Display | `platform` |  |  |
+| `kernel_driver_loaded` | Kernel driver loaded | change |  | `platform` |  |  |
+| `kernel_driver_unloaded` | Kernel driver unloaded | change |  | `platform` |  |  |
+| `kernel_driver_updated` | Kernel driver updated | change |  | `platform` |  |  |
+| `network_adapter_dhcp_failed` | Network adapter DHCP failed | condition | Notice to Error | `networking` |  |  |
+| `network_adapter_disabled` | Network adapter disabled | change |  | `networking` |  |  |
+| `network_adapter_emulated` | Emulated network adapter | condition | Display to Notice | `networking` |  |  |
+| `network_adapter_enabled` | Network adapter enabled | change |  | `networking` |  |  |
+| `network_adapter_filters_changed` | Network adapter filters changed | change |  | `networking` |  |  |
+| `network_adapter_ipv4_dhcp_changed` | Network adapter DHCP setting changed | change |  | `networking` |  |  |
+| `network_adapter_link_downshifted` | Network link speed downshifted | condition | Notice to Warning | `networking` |  |  |
+| `network_adapter_metric_changed` | Network adapter metric changed | change |  | `networking` |  |  |
+| `network_adapter_mtu_changed` | Network adapter MTU changed | change |  | `networking` |  |  |
+| `network_adapter_saturated` | Network link saturated | condition | Display to Notice | `networking` |  |  |
+| `network_adapter_static_address_changed` | Network adapter static address changed | change |  | `networking` |  |  |
+| `network_adapter_static_dns_changed` | Network adapter static DNS changed | change |  | `networking` |  |  |
+| `network_adapter_static_gateway_changed` | Network adapter static gateway changed | change |  | `networking` |  |  |
+| `network_context_changed` | Primary network changed | occurrence |  | `networking` |  |  |
+| `network_ipv6_broken` | IPv6 broken while advertised | condition | Display to Notice | `networking` |  |  |
+| `network_share_added` | Network share added | change |  | `file_sharing` |  |  |
+| `network_share_path_changed` | Network share path changed | change |  | `file_sharing` |  |  |
+| `network_share_permissions_changed` | Network share permissions changed | change |  | `file_sharing` |  |  |
+| `network_share_removed` | Network share removed | change |  | `file_sharing` |  |  |
+| `operating_system_changed` | Operating system changed | change |  | `patching` |  |  |
+| `os_clock_drift` | Clock drifting | condition |  | `performance` |  |  |
+| `os_volume_space_low` | OS volume low on space | condition | Notice to Severe | `storage` |  |  |
+| `page_file_configuration_changed` | Page file configuration changed | change |  | `performance` |  |  |
+| `patch_scan_stale` | Windows Update scan out of date | condition | Warning | `patching` |  |  |
+| `patch_updates_paused` | Windows Updates paused | condition | Notice to Error | `patching` |  |  |
+| `power_wake_loop` | Power wake loop | condition | Display | `platform` |  |  |
+| `primary_dns_suffix_changed` | Primary DNS suffix changed | change |  | `networking` |  |  |
+| `process_cpu_high` | Process using high CPU | condition |  | `performance` |  |  |
+| `process_crash` | Application crashed | occurrence |  | `app_stability` |  |  |
+| `process_handle_count_high` | Process handle count high | condition | Display | `performance` |  |  |
+| `ram_commit_near_limit` | Memory commit near its limit | condition | Notice to Critical | `performance` |  |  |
+| `ram_pressure` | Memory pressure slowing the host | condition | Notice to Severe | `performance` |  |  |
+| `secure_boot_disabled` | Secure Boot disabled | change |  | `security_audit` |  |  |
+| `secure_boot_enabled` | Secure Boot enabled | change |  | `security_audit` |  |  |
+| `service_auto_not_running` | Automatic service not running | condition | Display to Severe | `app_stability` |  |  |
+| `service_command_line_changed` | Service command changed | change |  | `security_audit` |  |  |
+| `service_flapping` | Service crashing and restarting | condition | Display to Serious | `app_stability` |  |  |
+| `service_installed` | Service installed | change |  | `security_audit` |  |  |
+| `service_logon_account_changed` | Service account changed | change |  | `security_audit` |  |  |
+| `service_removed` | Service removed | change |  | `security_audit` |  |  |
+| `service_start_type_changed` | Service start type changed | change |  | `security_audit` |  |  |
+| `service_stuck_pending` | Service stuck starting or stopping | condition | Display to Severe | `app_stability` |  |  |
+| `sparklogs_agent_cpu_over_budget` | SparkLogs agent CPU over budget | condition | Notice | `rmm` |  |  |
+| `sparklogs_agent_handle_over_budget` | SparkLogs agent handles over budget | condition | Notice | `rmm` |  |  |
+| `sparklogs_agent_memory_over_budget` | SparkLogs agent memory over budget | condition | Notice | `rmm` |  |  |
+| `sparklogs_agent_started` | SparkLogs agent started | occurrence |  | `rmm` |  |  |
+| `sparklogs_agent_stopped` | SparkLogs agent stopped | occurrence |  | `rmm` |  |  |
+| `tpm_chip_changed` | TPM chip changed | change |  | `platform` |  |  |
+| `tpm_firmware_changed` | TPM firmware changed | change |  | `platform` |  |  |
+| `tpm_presence_changed` | TPM presence changed | change |  | `platform` |  |  |
+| `tpm_version_changed` | TPM specification changed | change |  | `platform` |  |  |
+| `virtualization_changed` | Virtualization changed | change |  | `platform` |  |  |
+| `volume_bitlocker_protection_dropped` | BitLocker protection dropped | condition | Notice | `storage` |  |  |
+| `volume_fill_rate_high` | Volume filling quickly | condition | Display | `storage` |  |  |
+| `volume_unreadable` | Volume unreadable | condition | Serious to Severe | `storage` |  |  |
+| `vss_snapshots_failing_for_space` | Shadow copies failing for space | condition | Notice to Error | `backup` |  |  |
+| `vss_writer_failed` | VSS writer failed | condition | Display to Warning | `backup` |  |  |
+| `winhttp_proxy_changed` | WinHTTP proxy changed | change |  | `networking` |  |  |
 
 ## `app_crash_recurring`: Application crashing repeatedly
 

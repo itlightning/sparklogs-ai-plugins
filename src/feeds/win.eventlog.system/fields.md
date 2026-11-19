@@ -306,8 +306,8 @@ The last column is different in kind: it is the author's account of the row or e
 | `kerberos_weak_krbtgt_key` / `default` | 42 | **fields: none** |  |
 | `nic_driver_fault_reported` / `default` | 5002, 5005 | **fields: none** |  |
 | `nic_driver_load_failed` / `default` | 5000 | **fields: none** |  |
-| `nic_link_down` / `down` | 1, 2, 27, 32, 33, 34 | **fields: none** |  |
-| `nic_link_down` / `recovered` | 1, 2, 27, 32, 33, 34 | **fields: none** |  |
+| `nic_link_down` / `down` | 1, 2, 9, 14, 27, 32, 33, 34 | **fields: none** |  |
+| `nic_link_down` / `recovered` | 1, 2, 9, 14, 27, 32, 33, 34 | **fields: none** |  |
 | `os_boot` / `default` | 12 | **fields: none** |  |
 | `os_bsod` / `default` | 1001 | `win.eventlog.system.bugcheck_name` `win.eventlog.system.bugcheck_text` `win.eventlog.system.dump_file` `win.eventlog.system.report_id` |  |
 | `os_restart_requested` / `default` | 1074 | `win.eventlog.system.shutdown_comment` `win.eventlog.system.shutdown_reason` `win.eventlog.system.shutdown_reason_code` `win.eventlog.system.shutdown_type` `win.eventlog.system.shutdown_type_text` |  |

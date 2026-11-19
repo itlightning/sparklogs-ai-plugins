@@ -6,61 +6,65 @@
 Each section below is complete for its reason: every public field, in the words the reference page shows.
 Search for the heading "## `<code>`" or a word from the reason's label. Do not read the whole file.
 
-| reason | label | kind | severity | service | benign |
-|---|---|---|---|---|---|
-| `adcs_ca_chain_failed` | adcs ca chain failed | event | Error | `certificates` |  |
-| `adcs_crl_publish_failed` | adcs crl publish failed | event | Error | `certificates` |  |
-| `app_crash` | app crash | event | Minor | `app_stability` |  |
-| `app_hang` | app hang | event | Minor | `app_stability` |  |
-| `appx_activation_failed` | appx activation failed | event | Info to Notice | `app_stability` | benign possible |
-| `aspnet_compilation_failed` | aspnet compilation failed | event | Error | `web` |  |
-| `aspnet_unhandled_exception` | aspnet unhandled exception | event | Minor | `web` |  |
-| `cert_enroll_failed` | cert enroll failed | event | Verbose to Warning | `certificates` | benign possible |
-| `cert_expiring` | cert expiring | event | Warning | `certificates` |  |
-| `dotnet_unhandled_exception` | dotnet unhandled exception | event | Minor | `app_stability` |  |
-| `entra_password_hash_sync_failed` | entra password hash sync failed | event | Error | `directory_services` |  |
-| `entra_sync_run_failed` | entra sync run failed | event | Error | `directory_services` |  |
-| `entra_sync_scheduler_aborted` | entra sync scheduler aborted | event | Error | `directory_services` |  |
-| `esent_db_corruption` | esent db corruption | event | Warning to Serious | `database` |  |
-| `gpu_driver_error` | gpu driver error | event | Notice | `hardware` |  |
-| `group_policy_drive_map_failed` | group policy drive map failed | event | Notice to Minor | `device_management` |  |
-| `group_policy_extension_apply_failed` | group policy extension apply failed | event | Minor | `device_management` |  |
-| `group_policy_preference_item_failed` | group policy preference item failed | event | Warning to Minor | `device_management` |  |
-| `mfa_not_configured` | mfa not configured | event | Warning | `auth` |  |
-| `mfa_sign_in_succeeded` | mfa sign in succeeded | event | Info | `auth` |  |
-| `mfa_unavailable_access_granted` | mfa unavailable access granted | event | Error | `auth` |  |
-| `mfa_user_not_enrolled` | mfa user not enrolled | event | Notice | `auth` |  |
-| `mssql_agent_job_failed` | mssql agent job failed | event | Error | `database` |  |
-| `mssql_db_io_failed` | mssql db io failed | event | Error | `database` |  |
-| `mssql_db_page_corruption` | mssql db page corruption | event | Critical | `database` |  |
-| `mssql_db_read_retried` | mssql db read retried | event | Warning | `database` |  |
-| `mssql_login_failed` | mssql login failed | event | Notice | `database` |  |
-| `office_subscription_licensing_failed` | office subscription licensing failed | event | Warning | `licensing` |  |
-| `quickbooks_verify_database_advised` | quickbooks verify database advised | event | Error | `app_stability` |  |
-| `remote_assist_session_started` | remote assist session started | event | Notice | `remote_access` |  |
-| `restart_manager_app_pending` | restart manager app pending | event | Info | `patching` | benign |
-| `security_agent_config_fetch_failed` | security agent config fetch failed | event | Error | `endpoint_protection` |  |
-| `security_agent_host_isolated` | security agent host isolated | event | Notice to Serious | `endpoint_protection` |  |
-| `vpn_dial_failed` | vpn dial failed | event | Minor | `vpn` |  |
-| `vss_optimization_time_budget_reached` | vss optimization time budget reached | event | Debug | `backup` | benign |
-| `vss_provider_class_not_registered` | vss provider class not registered | event | Error | `backup` |  |
-| `vss_snapshot_call_failed` | vss snapshot call failed | event | Warning | `backup` |  |
-| `vss_snapshots_failing_for_space` | vss snapshots failing for space | event | Error | `backup` |  |
-| `vss_writer_callback_query` | vss writer callback query | event | Info | `backup` | benign |
-| `vss_writer_failed` | vss writer failed | event | Error | `backup` |  |
-| `wcf_request_failed` | wcf request failed | event | Minor | `web` |  |
-| `win_msi_operation_failed` | win msi operation failed | event | Info to Minor | `patching` | benign possible |
-| `win_msi_product_install_succeeded` | win msi product install succeeded | event | Notice | `patching` |  |
-| `win_msi_product_reconfigure_succeeded` | win msi product reconfigure succeeded | event | Notice | `patching` |  |
-| `win_msi_product_removal_succeeded` | win msi product removal succeeded | event | Notice | `patching` |  |
-| `win_user_profile_file_access_failed` | User profile file access failed | event | Notice | `user_profiles` |  |
-| `win_user_profile_load_failed` | win user profile load failed | event | Warning to Serious | `user_profiles` |  |
-| `winlogon_notification_subscriber_slow` | Winlogon subscriber slow | event | Info to Notice | `os_stability` |  |
-| `wmi_provider_registered_as_localsystem` | wmi provider registered as localsystem | event | Info | `inventory` | benign |
+| reason | label | kind | severity | service | benign | use when |
+|---|---|---|---|---|---|---|
+| `adcs_ca_chain_failed` | adcs ca chain failed | event | Error | `certificates` |  | certificates from the internal CA stop being trusted, or the CA stops issuing, because a certificate in its own chain expired. |
+| `adcs_crl_publish_failed` | adcs crl publish failed | event | Error | `certificates` |  | a certificate server could not publish its certificate revocation list (CRL) to a distribution point, so clients start rejecting its certificates once the last published CRL expires. |
+| `app_crash` | app crash | event | Minor | `app_stability` |  | a program suddenly closed or vanished without warning, or a technician needs the faulting module and exception code from the Application Error crash record. |
+| `app_hang` | app hang | event | Minor | `app_stability` |  | a program froze with Not Responding in its title and was closed by the user or by Windows, rather than crashing on a fault. |
+| `appx_activation_failed` | appx activation failed | event | Info to Notice | `app_stability` | benign possible | a Microsoft Store or built-in packaged app does not open when clicked, including Windows refusing to run such apps under the built-in Administrator account. |
+| `aspnet_compilation_failed` | aspnet compilation failed | event | Error | `web` |  | an ASP.NET site on IIS shows a compilation error page or fails on every request, often right after a deployment. |
+| `aspnet_unhandled_exception` | aspnet unhandled exception | event | Minor | `web` |  | users of an ASP.NET web application on IIS get an error page for some requests while the rest of the site keeps working, and you need the exception and stack trace. |
+| `cert_enroll_failed` | cert enroll failed | event | Verbose to Warning | `certificates` | benign possible | a machine does not get or renew a certificate it should receive automatically, such as a device certificate for Wi-Fi or VPN, because enrollment or autoenrollment failed. |
+| `cert_expiring` | cert expiring | event | Warning | `certificates` |  | the autoenrollment client keeps reporting that a machine certificate is about to expire or has expired, and you need to know why it is not being renewed. |
+| `dotnet_unhandled_exception` | dotnet unhandled exception | event | Minor | `app_stability` |  | a .NET program closes on its own, often at start-up, and a technician needs the exception type and stack trace behind the crash. |
+| `entra_password_hash_sync_failed` | entra password hash sync failed | event | Error | `directory_services` |  | users sign in to Microsoft 365 or other cloud services with their old password after changing it on the domain, because Entra Connect password hash sync failed. |
+| `entra_sync_run_failed` | entra sync run failed | event | Error | `directory_services` |  | new users, group changes or disabled accounts from Active Directory do not reach Microsoft 365 or Entra ID because one Entra Connect sync step, an import or export run profile, failed. |
+| `entra_sync_scheduler_aborted` | entra sync scheduler aborted | event | Error | `directory_services` |  | no on-premises changes reach Microsoft 365 or Entra ID at all anymore, because the Entra Connect sync scheduler on the server stopped and no cycles run until the service restarts. |
+| `esent_db_corruption` | esent db corruption | event | Warning to Serious | `database` |  | a Windows feature or server role that stores its data with the ESENT database engine, such as Windows Search, Active Directory or DHCP, reports a damaged database file. |
+| `gpu_driver_error` | gpu driver error | event | Notice | `hardware` |  | a technician finds NVIDIA display or OpenGL driver warnings in the Application log, or a CAD or 3D program stops with an NVIDIA OpenGL driver message, and needs to know whether they matter. |
+| `group_policy_drive_map_failed` | group policy drive map failed | event | Notice to Minor | `device_management` |  | a network drive mapped by Group Policy is missing for a user after sign-in, and you need the drive letter, share and Windows error the Drive Maps preference recorded. |
+| `group_policy_extension_apply_failed` | group policy extension apply failed | event | Minor | `device_management` |  | none of the shortcuts, files or other preference items from one Group Policy object reached a user or machine on a refresh, often because the policy share was out of reach. |
+| `group_policy_preference_item_failed` | group policy preference item failed | event | Warning to Minor | `device_management` |  | one shortcut, file copy or other Group Policy preference item does not apply while the rest of the policy object does, and you need which item failed and why. |
+| `mfa_not_configured` | mfa not configured | event | Warning | `auth` |  | Duo Windows Logon is installed on a host but was never given its settings, so sign-ins there never ask for Duo, or someone asks whether the host really enforces MFA. |
+| `mfa_sign_in_succeeded` | mfa sign in succeeded | event | Info | `auth` |  | someone asks whether a sign-in on a host really passed Duo, or a technician needs the normal Duo sign-ins to compare against a fail-open or refused one. |
+| `mfa_unavailable_access_granted` | mfa unavailable access granted | event | Error | `auth` |  | staff signed in with a password alone because Duo could not reach its service, or a technician sees a Duo fail open or failsafe sign-in. |
+| `mfa_user_not_enrolled` | mfa user not enrolled | event | Notice | `auth` |  | a user cannot sign in to a PC or server protected by Duo because their account has no second factor enrolled. |
+| `mssql_agent_job_failed` | mssql agent job failed | event | Error | `database` |  | a scheduled SQL Server job, such as a nightly backup, import, index rebuild or maintenance plan, ran and failed. |
+| `mssql_db_io_failed` | mssql db io failed | event | Error | `database` |  | SQL Server queries fail because Windows returned a read or write error on a database file, pointing at the disk, controller or storage path underneath. |
+| `mssql_db_page_corruption` | mssql db page corruption | event | Critical | `database` |  | SQL Server reports a damaged database page, such as an incorrect checksum or torn page, and queries that touch it fail. |
+| `mssql_db_read_retried` | mssql db read retried | event | Warning | `database` |  | SQL Server reports that a read of a database file failed and then succeeded on a retry (error 825), and someone asks whether the disk or storage under the database is going bad. |
+| `mssql_login_failed` | mssql login failed | event | Notice | `database` |  | an application or person cannot sign in to a SQL Server database because the login is rejected, such as a wrong or old password or a database the login cannot open. |
+| `office_subscription_licensing_failed` | office subscription licensing failed | event | Warning | `licensing` |  | Office or Microsoft 365 apps say the subscription could not be verified, or warn that they will drop to reduced functionality or read-only if the licence is not confirmed. |
+| `quickbooks_verify_database_advised` | quickbooks verify database advised | event | Error | `app_stability` |  | QuickBooks tells the user to run Verify Data or Rebuild Data on the company file, for example after an error in a memorized report. |
+| `remote_assist_session_started` | remote assist session started | event | Notice | `remote_access` |  | someone asks whether a person was viewing this desktop through Quick Assist, or a user reports a caller who had them start a Quick Assist session. |
+| `restart_manager_app_pending` | restart manager app pending | event | Info | `patching` | benign | an installer or updater could not close or restart a program the user still had open, so the update needs the program closed or the machine restarted to finish. |
+| `security_agent_config_fetch_failed` | security agent config fetch failed | event | Error | `endpoint_protection` |  | a Huntress agent still shows as installed but stops taking new policy, or its log says it is unable to retrieve agent config because its keys were refused. |
+| `security_agent_host_isolated` | security agent host isolated | event | Notice to Serious | `endpoint_protection` |  | a PC loses all network access because Huntress isolated it, or someone asks when Huntress isolated or released this host. |
+| `vpn_dial_failed` | vpn dial failed | event | Minor | `vpn` |  | a user's built-in Windows VPN or dial-up connection will not connect, with a remote access error such as 691 (user name or password not recognized). |
+| `vss_optimization_time_budget_reached` | vss optimization time budget reached | event | Debug | `backup` | benign | a technician sees VSS warnings that the shadow copy optimization writer ran out of time excluding temporary files, often the Windows Update cache, and asks whether backups are affected. |
+| `vss_provider_class_not_registered` | vss provider class not registered | event | Error | `backup` |  | every backup or restore point on a machine fails to create a shadow copy with 0x80040154 (class not registered), often after an old backup product was removed. |
+| `vss_snapshot_call_failed` | vss snapshot call failed | event | Warning | `backup` |  | a backup agent or administrator cannot change a volume's shadow storage size because VSS is refused with access denied, or a snapshot prepare or commit call is rejected as an invalid parameter. |
+| `vss_snapshots_failing_for_space` | vss snapshots failing for space | event | Error | `backup` |  | System Restore points or Previous Versions keep disappearing, or new shadow copies stop being made, because shadow copy storage on the volume is full. |
+| `vss_writer_callback_query` | vss writer callback query | event | Info | `backup` | benign | a technician finds a VSS error that it could not query a writer's callback interface (access denied) on a host whose backups still finish, and asks whether it matters. |
+| `vss_writer_failed` | vss writer failed | event | Error | `backup` |  | a backup of SQL Server, Exchange, Hyper-V, Active Directory or another database-backed store failed or warned that a VSS writer failed, even when the job reported success. |
+| `wcf_request_failed` | wcf request failed | event | Minor | `web` |  | a line-of-business service built on WCF returns a fault to its callers, often because a client asked for an endpoint or .svc address the host does not have. |
+| `win_msi_operation_failed` | win msi operation failed | event | Info to Minor | `patching` | benign possible | a software install, update or uninstall fails or rolls back, and Windows Installer reports a code such as 1603 (fatal error), 1618 (another installation in progress) or 1730 (needs an administrator). |
+| `win_msi_product_install_succeeded` | win msi product install succeeded | event | Notice | `patching` |  | someone asks when a Windows Installer (MSI) program was installed on this machine, or whether a deployment's MSI install actually completed. |
+| `win_msi_product_reconfigure_succeeded` | win msi product reconfigure succeeded | event | Notice | `patching` |  | someone asks who or what repaired, modified or changed the features of an installed program, or why a product keeps reconfiguring itself. |
+| `win_msi_product_removal_succeeded` | win msi product removal succeeded | event | Notice | `patching` |  | someone asks when or whether a program was uninstalled from this machine, or who removed an application that is now missing. |
+| `win_user_profile_file_access_failed` | User profile file access failed | event | Notice | `user_profiles` |  | some of a user's settings are missing at sign-in because Windows could not load one of the profile's registry files, or an old or TEMP profile folder cannot be deleted. |
+| `win_user_profile_load_failed` | win user profile load failed | event | Warning to Serious | `user_profiles` |  | a user signs in to an empty desktop or the message "You've been signed in with a temporary profile", or cannot sign in because the User Profile Service failed the sign-in. |
+| `winlogon_notification_subscriber_slow` | Winlogon subscriber slow | event | Info to Notice | `os_stability` |  | sign-in, sign-out or the first logon after a restart sits on the Welcome or Please wait screen for a long time, and someone asks what held it up. |
+| `wmi_provider_registered_as_localsystem` | wmi provider registered as localsystem | event | Info | `inventory` | benign | a technician or security scan flags a WMI warning that a provider is registered to use the LocalSystem account and may cause a security violation, and asks whether it is a threat. |
 
 ## `adcs_ca_chain_failed`: adcs ca chain failed
 
 Active Directory Certificate Services reported a problem with the certification authority's certificate chain.
+
+**Use when:** certificates from the internal CA stop being trusted, or the CA stops issuing, because a certificate in its own chain expired.
+
+**Keywords:** AD CS, ADCS, CA certificate expired, root CA certificate expired, intermediate CA certificate expired, subordinate CA certificate expired, issuing CA expired, CA chain expired, certificate server trust chain, renew CA certificate
 
 **Severity:** Error
 
@@ -87,6 +91,10 @@ Active Directory Certificate Services reported a problem with the certification 
 
 The certification authority could not publish a certificate revocation list (CRL).
 
+**Use when:** a certificate server could not publish its certificate revocation list (CRL) to a distribution point, so clients start rejecting its certificates once the last published CRL expires.
+
+**Keywords:** CRL publish failed, cannot publish CRL, CRL not updated, stale CRL, CRL expired, base CRL, delta CRL, CRL distribution point, AD CS, ADCS
+
 **Severity:** Error
 
 **Why it matters:** Nothing fails until the last published CRL expires. Then anything that checks revocation, such as VPN, 802.1X Wi-Fi, smart card sign-in and some web servers, rejects otherwise valid certificates.
@@ -111,6 +119,10 @@ The certification authority could not publish a certificate revocation list (CRL
 ## `app_crash`: app crash
 
 A Windows application process crashed.
+
+**Use when:** a program suddenly closed or vanished without warning, or a technician needs the faulting module and exception code from the Application Error crash record.
+
+**Keywords:** program closed by itself, program crashed, program disappeared, has stopped working, program closed and lost my work, APPCRASH, faulting application name, faulting module, exception code, access violation, 0xc0000409, 0xc0000374, QuickBooks crashed
 
 **Severity:** Minor
 
@@ -139,6 +151,10 @@ A Windows application process crashed.
 
 A Windows application stopped responding and was closed.
 
+**Use when:** a program froze with Not Responding in its title and was closed by the user or by Windows, rather than crashing on a fault.
+
+**Keywords:** Not Responding, program not responding, program froze, app frozen, program hangs, hung application, end task, force closed program, stopped interacting with Windows, AppHangB1, hang type
+
 **Severity:** Minor
 
 **Why it matters:** The program froze and was closed, usually by the user, and unsaved work was lost.
@@ -162,6 +178,10 @@ A Windows application stopped responding and was closed.
 ## `appx_activation_failed`: appx activation failed
 
 A Store or packaged application did not start.
+
+**Use when:** a Microsoft Store or built-in packaged app does not open when clicked, including Windows refusing to run such apps under the built-in Administrator account.
+
+**Keywords:** Store app won't open, Microsoft Store app not opening, packaged app, UWP app, MSIX app, AppX, Calculator won't open, Photos app won't open, can't be opened using the Built-in Administrator account, built-in Administrator app, can't be activated by the Built-in Administrator
 
 **Also reported by:** `win.eventlog.apps`
 
@@ -191,6 +211,10 @@ A Store or packaged application did not start.
 
 A web application on this host could not be compiled and is not serving requests.
 
+**Use when:** an ASP.NET site on IIS shows a compilation error page or fails on every request, often right after a deployment.
+
+**Keywords:** ASP.NET compilation error, Compilation Error, Compiler Error Message, CS0246, Temporary ASP.NET Files, compilation error after deployment, partial deployment
+
 **Severity:** Error
 
 **Why it matters:** Every request to that application fails until the source or the deployment is corrected. Other applications on the host are unaffected.
@@ -215,6 +239,10 @@ A web application on this host could not be compiled and is not serving requests
 ## `aspnet_unhandled_exception`: aspnet unhandled exception
 
 A web application on this host raised an unhandled exception while serving a request.
+
+**Use when:** users of an ASP.NET web application on IIS get an error page for some requests while the rest of the site keeps working, and you need the exception and stack trace.
+
+**Keywords:** ASP.NET unhandled exception, ASP.NET error page, ASP.NET exception, yellow screen of death, YSOD, intermittent website errors, intranet page error, web application exception
 
 **Severity:** Minor
 
@@ -241,6 +269,10 @@ A web application on this host raised an unhandled exception while serving a req
 ## `cert_enroll_failed`: cert enroll failed
 
 A certificate enrollment or an autoenrollment cycle on this machine did not complete.
+
+**Use when:** a machine does not get or renew a certificate it should receive automatically, such as a device certificate for Wi-Fi or VPN, because enrollment or autoenrollment failed.
+
+**Keywords:** autoenrollment failed, auto-enrollment, certificate autoenrollment, certificate enrollment failed, certificate not issued automatically, certificate renewal failed, machine certificate missing, SCEP, certificate template, enrollment server, AIK certificate
 
 **Severity:** Warning or Verbose
 
@@ -273,6 +305,10 @@ Enrollment against the retired endpoint needs no action: the endpoint no longer 
 
 A certificate held by this machine is about to expire or has already expired, and has not been replaced.
 
+**Use when:** the autoenrollment client keeps reporting that a machine certificate is about to expire or has expired, and you need to know why it is not being renewed.
+
+**Keywords:** machine certificate expiring, certificate renewal not happening, same certificate expiring warning every day, autoenrollment renewal, is about to expire or already expired
+
 **Also reported by:** `win.eventlog.identity_security`
 
 **Severity:** Warning
@@ -302,6 +338,10 @@ A certificate held by this machine is about to expire or has already expired, an
 
 A .NET application terminated because of an unhandled managed exception.
 
+**Use when:** a .NET program closes on its own, often at start-up, and a technician needs the exception type and stack trace behind the crash.
+
+**Keywords:** .NET Runtime error, .NET crash, .NET application crashed, .NET unhandled exception, process was terminated due to an unhandled exception, CLR20r3, CLR crash, Framework Version, Could not load file or assembly crash, FileNotFoundException, managed exception
+
 **Severity:** Minor
 
 **Why it matters:** The .NET program closed without warning. Unsaved work or background processing stopped.
@@ -326,6 +366,10 @@ A .NET application terminated because of an unhandled managed exception.
 ## `entra_password_hash_sync_failed`: entra password hash sync failed
 
 Password hash synchronization failed for an on-premises domain.
+
+**Use when:** users sign in to Microsoft 365 or other cloud services with their old password after changing it on the domain, because Entra Connect password hash sync failed.
+
+**Keywords:** password hash sync, password hash synchronization, PHS, password sync failed, new password not working in Microsoft 365, old password still works in Office 365, password not syncing to cloud
 
 **Severity:** Error
 
@@ -354,6 +398,10 @@ Password hash synchronization failed for an on-premises domain.
 
 A directory synchronization run profile failed to complete.
 
+**Use when:** new users, group changes or disabled accounts from Active Directory do not reach Microsoft 365 or Entra ID because one Entra Connect sync step, an import or export run profile, failed.
+
+**Keywords:** new users not syncing to Office 365, new accounts not showing in Microsoft 365, AD changes not syncing, directory sync failed, dirsync, Azure AD Connect sync error, delta import failed, full import failed, connector failed, management agent failed on run profile
+
 **Severity:** Error
 
 **Why it matters:** The changes that run profile carries did not move on this cycle. Repeated failures leave the cloud directory progressively out of date.
@@ -378,6 +426,10 @@ A directory synchronization run profile failed to complete.
 ## `entra_sync_scheduler_aborted`: entra sync scheduler aborted
 
 The directory synchronization scheduler stopped, so no further synchronization cycles run on this server.
+
+**Use when:** no on-premises changes reach Microsoft 365 or Entra ID at all anymore, because the Entra Connect sync scheduler on the server stopped and no cycles run until the service restarts.
+
+**Keywords:** sync scheduler stopped, sync cycle not running, directory sync stopped, Azure AD Connect stopped syncing, Entra Connect not syncing, ADSync scheduler, scheduler thread aborted, nothing syncing to Office 365, last sync hours ago
 
 **Severity:** Error
 
@@ -404,6 +456,10 @@ The directory synchronization scheduler stopped, so no further synchronization c
 
 The Windows database engine (ESENT) found corruption in a database file.
 
+**Use when:** a Windows feature or server role that stores its data with the ESENT database engine, such as Windows Search, Active Directory or DHCP, reports a damaged database file.
+
+**Keywords:** ESE database, Extensible Storage Engine, ESENT database corrupt, ESENT -1018, JET_errReadVerifyFailure, search index corrupt, Active Directory database corrupt, DHCP database corrupt, WINS database corrupt, CA database corrupt, DFSR database corrupt
+
 **Severity:** Serious, Error or Warning
 
 **Why it matters:** The consequence depends on the database. A Windows cache such as the Search index, the usage history or a browser cache rebuilds once reset. A server role database such as Active Directory, DHCP or a certification authority is the store the role serves from and needs a repair or a restore.
@@ -428,6 +484,10 @@ The Windows database engine (ESENT) found corruption in a database file.
 ## `gpu_driver_error`: gpu driver error
 
 The NVIDIA display driver reported a warning or error.
+
+**Use when:** a technician finds NVIDIA display or OpenGL driver warnings in the Application log, or a CAD or 3D program stops with an NVIDIA OpenGL driver message, and needs to know whether they matter.
+
+**Keywords:** NVIDIA driver warning, NVIDIA driver error, NVIDIA graphics driver error, OpenGL driver error, OpenGL context lost, CAD program crashes NVIDIA
 
 **Also reported by:** `win.eventlog.system`
 
@@ -456,6 +516,10 @@ This reason names a provider-level driver-error family, not a specific mechanism
 
 A Group Policy drive mapping did not complete on this host.
 
+**Use when:** a network drive mapped by Group Policy is missing for a user after sign-in, and you need the drive letter, share and Windows error the Drive Maps preference recorded.
+
+**Keywords:** mapped drive missing, network drive not mapping, drive letter missing at login, shared drive missing after login, mapped drive not showing, drive mapping failed, GPP drive map, Group Policy Preferences drive map, Drive Maps preference, account locked out by mapped drive password
+
 **Severity:** Warning; Minor when the share refused the stored password; Notice when a local device already holds the letter.
 
 **Why it matters:** The affected user does not have the mapped drive for that session. Nothing else on the machine is affected, and the mapping is attempted again at every policy refresh.
@@ -482,6 +546,10 @@ A Group Policy drive mapping did not complete on this host.
 ## `group_policy_extension_apply_failed`: group policy extension apply failed
 
 A Group Policy preference extension could not apply the settings from a policy object.
+
+**Use when:** none of the shortcuts, files or other preference items from one Group Policy object reached a user or machine on a refresh, often because the policy share was out of reach.
+
+**Keywords:** Group Policy Preferences failed, GPP extension failed, preference extension failed, Group Policy Shortcuts, Group Policy Files, Group Policy Registry, Group Policy Printers extension failed, Group Policy Scheduled Tasks, policy share unreachable
 
 **Also reported by:** `win.eventlog.identity_security`, `win.eventlog.system`
 
@@ -512,6 +580,10 @@ A Group Policy preference extension could not apply the settings from a policy o
 
 A Group Policy preference item did not apply on this host.
 
+**Use when:** one shortcut, file copy or other Group Policy preference item does not apply while the rest of the policy object does, and you need which item failed and why.
+
+**Keywords:** GPP item failed, preference item did not apply, Group Policy Preferences item not applied, shortcut not created by Group Policy, file not copied by Group Policy, Group Policy Preferences item, preference item access denied, preference item file not found, stored password in preference item
+
 **Severity:** Minor or Warning
 
 **Why it matters:** The configured item is missing for the affected user or machine. The rest of the policy object applied normally.
@@ -536,6 +608,10 @@ A Group Policy preference item did not apply on this host.
 ## `mfa_not_configured`: mfa not configured
 
 A multi-factor logon agent is installed on this host but holds no configuration, so it enforces no second factor.
+
+**Use when:** Duo Windows Logon is installed on a host but was never given its settings, so sign-ins there never ask for Duo, or someone asks whether the host really enforces MFA.
+
+**Keywords:** Duo not configured, Duo for Windows Logon, Duo integration key, MFA installed but not enforced, is MFA enforced, does this PC require 2FA
 
 **Severity:** Warning
 
@@ -563,6 +639,10 @@ A multi-factor logon agent is installed on this host but holds no configuration,
 
 A sign-in completed with its second factor verified.
 
+**Use when:** someone asks whether a sign-in on a host really passed Duo, or a technician needs the normal Duo sign-ins to compare against a fail-open or refused one.
+
+**Keywords:** Duo push approved, Duo sign-in success, Duo login log, did Duo work, MFA verified, second factor approved, Duo RDP login succeeded, Duo success logged as error
+
 **Severity:** Info
 
 **Why it matters:** None. It records a sign-in that its second factor protected.
@@ -589,6 +669,10 @@ A sign-in completed with its second factor verified.
 
 A sign-in was allowed without its second factor because the multi-factor service could not be reached.
 
+**Use when:** staff signed in with a password alone because Duo could not reach its service, or a technician sees a Duo fail open or failsafe sign-in.
+
+**Keywords:** Duo fail open, failopen, failsafe, Duo offline, Duo service unreachable, Duo cannot reach service, signed in without Duo prompt, not asked for phone code, MFA bypassed, 2FA skipped
+
 **Severity:** Error
 
 **Why it matters:** Multi-factor authentication was not applied to that sign-in. While the service stays unreachable, sign-ins on this host continue to complete with a single factor.
@@ -614,6 +698,10 @@ A sign-in was allowed without its second factor because the multi-factor service
 
 A sign-in was refused because the account is not enrolled with the multi-factor service.
 
+**Use when:** a user cannot sign in to a PC or server protected by Duo because their account has no second factor enrolled.
+
+**Keywords:** Duo not enrolled, user not enrolled, Duo enrollment, enroll user in Duo, must enroll in Duo, new hire cannot log in Duo, Duo service account
+
 **Severity:** Notice
 
 **Why it matters:** The user cannot sign in on this host until the account is enrolled or excluded from the policy.
@@ -638,6 +726,10 @@ A sign-in was refused because the account is not enrolled with the multi-factor 
 
 A scheduled SQL Server Agent job failed.
 
+**Use when:** a scheduled SQL Server job, such as a nightly backup, import, index rebuild or maintenance plan, ran and failed.
+
+**Keywords:** SQL Agent job failed, job step failed, maintenance plan failed, SQL backup job failed, nightly database job failed, index rebuild job failed, CHECKDB job failed, Ola Hallengren job failed
+
 **Severity:** Error
 
 **Why it matters:** The work that job does, such as a backup, an import or a maintenance task, did not happen on this run.
@@ -661,6 +753,10 @@ A scheduled SQL Server Agent job failed.
 ## `mssql_db_io_failed`: mssql db io failed
 
 SQL Server reported an I/O error on a database file.
+
+**Use when:** SQL Server queries fail because Windows returned a read or write error on a database file, pointing at the disk, controller or storage path underneath.
+
+**Keywords:** SQL Server I/O error, SQL Server disk error, operating system error 1117, operating system error 23, SQL Server read failed, SQL Server write failed, data file read failed
 
 **Severity:** Error
 
@@ -688,6 +784,10 @@ SQL Server reported an I/O error on a database file.
 
 SQL Server confirmed logical page corruption in a database.
 
+**Use when:** SQL Server reports a damaged database page, such as an incorrect checksum or torn page, and queries that touch it fail.
+
+**Keywords:** SQL database corruption, corrupt SQL database, logical consistency-based I/O error, incorrect checksum, torn page, CHECKDB consistency errors, page restore, damaged database page
+
 **Severity:** Critical
 
 **Why it matters:** Queries that touch the damaged pages fail, and the corruption does not repair itself.
@@ -713,6 +813,10 @@ SQL Server confirmed logical page corruption in a database.
 ## `mssql_db_read_retried`: mssql db read retried
 
 SQL Server retried a database read after it failed, and the retry succeeded.
+
+**Use when:** SQL Server reports that a read of a database file failed and then succeeded on a retry (error 825), and someone asks whether the disk or storage under the database is going bad.
+
+**Keywords:** read-retry, read retry required, SQL read retry, succeeded after failing, intermittent database read failure, SQL Server storage warning, SQL Server I/O warning
 
 **Severity:** Warning
 
@@ -740,6 +844,10 @@ SQL Server retried a database read after it failed, and the retry succeeded.
 
 A login to a SQL Server instance failed.
 
+**Use when:** an application or person cannot sign in to a SQL Server database because the login is rejected, such as a wrong or old password or a database the login cannot open.
+
+**Keywords:** Login failed for user, SQL login failed, SQL password rejected, sa login failed, SQL Server authentication failed, Password did not match that for the login, Failed to open the explicitly specified database, SSMS login failed, SQL login brute force, MSSQL login
+
 **Severity:** Notice
 
 **Why it matters:** The client could not connect as that login. An application that keeps failing cannot reach its database until the credential or the database name is fixed.
@@ -766,6 +874,10 @@ Repeats of the same login, database and client are kept once a minute with a cou
 
 The subscription licensing check for the installed office suite failed.
 
+**Use when:** Office or Microsoft 365 apps say the subscription could not be verified, or warn that they will drop to reduced functionality or read-only if the licence is not confirmed.
+
+**Keywords:** Office subscription, Microsoft 365 licence, Microsoft 365 license, Office 365 activation, Microsoft 365 activation failed, Office licensing check failed, subscription could not be verified, Office reduced functionality mode, Office read-only mode, Office subscription licence check failed
+
 **Severity:** Warning
 
 **Why it matters:** The suite keeps working on the licence it already holds. If the check keeps failing, the applications eventually drop to reduced functionality and documents become read-only.
@@ -788,6 +900,10 @@ The subscription licensing check for the installed office suite failed.
 
 QuickBooks advised verifying the company database.
 
+**Use when:** QuickBooks tells the user to run Verify Data or Rebuild Data on the company file, for example after an error in a memorized report.
+
+**Keywords:** Verify Data, Rebuild Data, Verify/Rebuild, QuickBooks data damage, QuickBooks file may be damaged, memorized report error
+
 **Severity:** Error
 
 **Why it matters:** QuickBooks reported a company-file error and requested verification. This advice alone does not confirm damage or require rebuilding the file.
@@ -806,6 +922,10 @@ QuickBooks advised verifying the company database.
 ## `remote_assist_session_started`: remote assist session started
 
 A remote assistance session started on this host and a remote party could see the desktop.
+
+**Use when:** someone asks whether a person was viewing this desktop through Quick Assist, or a user reports a caller who had them start a Quick Assist session.
+
+**Keywords:** Quick Assist, Quick Assist session, Quick Assist screen sharing, Quick Assist scam, Quick Assist security code, Quick Assist screen viewed
 
 **Severity:** Notice
 
@@ -832,6 +952,10 @@ A remote assistance session started on this host and a remote party could see th
 
 Restart Manager could not shut down or restart an app during an update session.
 
+**Use when:** an installer or updater could not close or restart a program the user still had open, so the update needs the program closed or the machine restarted to finish.
+
+**Keywords:** Restart Manager, application could not be shut down, application could not be restarted, app would not close during update, program blocking an update, app left open during update, close the program to finish the update
+
 **Severity:** Info cap
 
 **Why it matters:** The update may need a retry, reboot, or user action to close the blocking app.
@@ -857,6 +981,10 @@ Restart Manager could not shut down or restart an app during an update session.
 
 A security agent could not retrieve its configuration because its credentials were refused.
 
+**Use when:** a Huntress agent still shows as installed but stops taking new policy, or its log says it is unable to retrieve agent config because its keys were refused.
+
+**Keywords:** Huntress agent, unable to retrieve agent config, Huntress account key, Huntress organization key, re-register Huntress agent, Huntress agent not getting policy, Huntress credentials refused
+
 **Severity:** Error
 
 **Why it matters:** The agent takes no new configuration or detection content and drifts from the policy it is meant to enforce, while continuing to appear installed.
@@ -879,6 +1007,10 @@ A security agent could not retrieve its configuration because its credentials we
 ## `security_agent_host_isolated`: security agent host isolated
 
 An endpoint detection agent isolated this host from the network, or later released it.
+
+**Use when:** a PC loses all network access because Huntress isolated it, or someone asks when Huntress isolated or released this host.
+
+**Keywords:** Huntress isolation, Huntress host isolation, Huntress network isolation, Huntress isolated workstation, Huntress released host, released from isolation, isolated from the network by Huntress
 
 **Severity:** Serious or Notice
 
@@ -904,11 +1036,15 @@ An endpoint detection agent isolated this host from the network, or later releas
 
 A remote-access dial attempt failed.
 
+**Use when:** a user's built-in Windows VPN or dial-up connection will not connect, with a remote access error such as 691 (user name or password not recognized).
+
+**Keywords:** Windows VPN won't connect, built-in VPN failed, Windows VPN connection failed, Always On VPN failed, rasdial failed, dial-up connection failed, remote access connection failed, error 691, error 809, error 789, error 812, error 868, L2TP VPN failed, IKEv2 VPN failed, SSTP VPN failed
+
 **Severity:** Minor
 
 **Why it matters:** The user did not reach the network through that profile on that attempt. One failure is usually retried successfully. Repeated failures on one profile point at the VPN server or its configuration.
 
-**In practice:** The Windows remote access client writes event 20227 to the Application log (source RasClient) when a VPN or dial-up connection attempt fails. The message names the connection profile and the error code, a Windows remote access error number: an authentication error points at the credential. One failure is usually a mistyped password, a certificate not yet chosen or a hotel captive portal. The same profile failing on many hosts points at the VPN server. It shows as Minor.
+**In practice:** The Windows remote access client writes event 20227 to the Application log (source RasClient) when a VPN or dial-up connection attempt fails. The message names the connection profile and the error code, an error number of the Windows built-in VPN client (remote access, RAS): an authentication error points at the credential. One failure is usually a mistyped password, a certificate not yet chosen or a hotel captive portal. The same profile failing on many hosts points at the VPN server. It shows as Minor.
 
 **When to ignore:** A single failure followed by a successful connection on the same profile.
 
@@ -929,6 +1065,10 @@ A remote-access dial attempt failed.
 ## `vss_optimization_time_budget_reached`: vss optimization time budget reached
 
 Shadow copy optimization did not finish excluding temporary files within its time budget.
+
+**Use when:** a technician sees VSS warnings that the shadow copy optimization writer ran out of time excluding temporary files, often the Windows Update cache, and asks whether backups are affected.
+
+**Keywords:** Shadow Copy Optimization Writer, optimization writer timeout, FilesNotToSnapshot, VSS time limit excluding files, shadow copy larger than expected, Windows Update cache in shadow copy
 
 **Severity:** Debug
 
@@ -954,6 +1094,10 @@ Shadow copy optimization did not finish excluding temporary files within its tim
 
 A component the Volume Shadow Copy Service needs is not registered, so shadow copies cannot be created on this machine.
 
+**Use when:** every backup or restore point on a machine fails to create a shadow copy with 0x80040154 (class not registered), often after an old backup product was removed.
+
+**Keywords:** REGDB_E_CLASSNOTREG, VSS provider missing, shadow copy provider not registered, Microsoft Software Shadow Copy provider missing, swprv, swprv.dll, vss_ps.dll, re-register VSS components, every snapshot fails, snapshots fail after uninstalling backup software, vssadmin list providers
+
 **Severity:** Error
 
 **Why it matters:** Snapshot-based backups, System Restore and anything else that needs a shadow copy fail on this host until the registration is repaired. A backup product may still complete a job by other means, so a green backup report does not clear this.
@@ -978,6 +1122,10 @@ A component the Volume Shadow Copy Service needs is not registered, so shadow co
 ## `vss_snapshot_call_failed`: vss snapshot call failed
 
 A call the Volume Shadow Copy Service makes while working with shadow copies was refused or rejected.
+
+**Use when:** a backup agent or administrator cannot change a volume's shadow storage size because VSS is refused with access denied, or a snapshot prepare or commit call is rejected as an invalid parameter.
+
+**Keywords:** cannot resize shadow storage, resize shadowstorage access denied, shadow storage maximum size refused, VSS E_ACCESSDENIED, VSS E_INVALIDARG, VSS invalid parameter, third-party shadow copy provider, VSS device control call failed
 
 **Severity:** Warning
 
@@ -1007,6 +1155,10 @@ A call the Volume Shadow Copy Service makes while working with shadow copies was
 
 Shadow copy storage is full, so restore points are being deleted or no longer created.
 
+**Use when:** System Restore points or Previous Versions keep disappearing, or new shadow copies stop being made, because shadow copy storage on the volume is full.
+
+**Keywords:** restore points deleted, Previous Versions missing, shadow storage full, shadow copy storage full, shadow copies deleted, no remaining diff area candidates, insufficient storage to create a shadow copy, raise shadow storage limit
+
 **Also reported by:** `win.eventlog.system`, `vss-shadowstorage`
 
 **Severity:** Error
@@ -1035,6 +1187,10 @@ Shadow copy storage is full, so restore points are being deleted or no longer cr
 
 The Volume Shadow Copy Service could not read a writer's callback interface because of process permissions, and continued.
 
+**Use when:** a technician finds a VSS error that it could not query a writer's callback interface (access denied) on a host whose backups still finish, and asks whether it matters.
+
+**Keywords:** Unexpected error querying for the IVssWriterCallback interface, VSS access denied error, VSS error but backup succeeded
+
 **Severity:** Info
 
 **Why it matters:** None on its own. Shadow copy creation is not blocked by this check.
@@ -1060,13 +1216,17 @@ The Volume Shadow Copy Service could not read a writer's callback interface beca
 
 A backup writer for a database, mail store, virtual machine host, or directory service reported a failure during shadow copy creation.
 
+**Use when:** a backup of SQL Server, Exchange, Hyper-V, Active Directory or another database-backed store failed or warned that a VSS writer failed, even when the job reported success.
+
+**Keywords:** VSS writer failed, writer failed during snapshot, SqlServerWriter, Microsoft Exchange Writer, Microsoft Hyper-V VSS Writer, NTDS writer, WIDWriter, SharePoint writer, DFS Replication writer, Oracle VSS writer, SqlServerWriter Last error, application-consistent backup failed, Exchange backup failed
+
 **Also reported by:** `vss-writers`
 
 **Severity:** Error
 
 **Why it matters:** The backup of that data store may be incomplete or inconsistent, even if the backup job itself reported success.
 
-**In practice:** VSS (source VSS, at Warning or Error) or the SQL Server VSS writer service (source SQLWRITER, events 8193, 24581, 24582 and 24583) writes to the Application log that a writer failed. The writer is one that fronts a data store, such as SQL Server, Exchange, Hyper-V, Active Directory, a failover cluster or a certification authority, and the line names it and the snapshot phase. That writer could not do its part, so the backup of its store may not restore cleanly even when the job reported success. VSS writes no recovery record for a writer, so the risk shows at restore time. It shows as Error. A SQLWRITER registry probe that prints an error beside hr = 0x00000000 is a success and is not part of this reason.
+**In practice:** VSS (source VSS, at Warning or Error) or the SQL Server VSS writer service (source SQLWRITER, events 8193, 24581, 24582 and 24583) writes to the Application log that a writer failed. The writer is one that fronts a data store: SQL Server, Exchange, Hyper-V, Active Directory, a failover cluster, a certification authority, Windows Internal Database, SharePoint, DFS Replication or Oracle. The line names the writer and the snapshot phase. That writer could not do its part, so the backup of its store may not restore cleanly even when the job reported success. VSS writes no recovery record for a writer, so the risk shows at restore time. It shows as Error. A SQLWRITER registry probe that prints an error beside hr = 0x00000000 is a success and is not part of this reason.
 
 **What to check:**
 
@@ -1089,6 +1249,10 @@ A backup writer for a database, mail store, virtual machine host, or directory s
 ## `wcf_request_failed`: wcf request failed
 
 A WCF service on this machine could not process a request.
+
+**Use when:** a line-of-business service built on WCF returns a fault to its callers, often because a client asked for an endpoint or .svc address the host does not have.
+
+**Keywords:** WCF, Windows Communication Foundation, WCF service error, svc endpoint not found, EndpointNotFoundException, ServiceActivationException, WebHost failed to process a request, requested service could not be activated
 
 **Also reported by:** `win.eventlog.apps`
 
@@ -1115,6 +1279,10 @@ A WCF service on this machine could not process a request.
 ## `win_msi_operation_failed`: win msi operation failed
 
 A Windows Installer (MSI) install, update or removal did not complete.
+
+**Use when:** a software install, update or uninstall fails or rolls back, and Windows Installer reports a code such as 1603 (fatal error), 1618 (another installation in progress) or 1730 (needs an administrator).
+
+**Keywords:** MSI install failed, install failed halfway, MSI uninstall failed, installation rolled back, msiexec failed, Windows Installer error, error 1603, fatal error during installation, error 1618, another installation is already in progress, error 1708, Installation operation failed, error 1730, must be an Administrator to remove, error 1306, error 1321, error 1500
 
 **Severity:** Minor for a failed operation; Warning for installer events 1013, 10005 and 1032; Notice when the operation lacked administrator rights or a file was open; Info when another install was running.
 
@@ -1146,6 +1314,10 @@ Retry-later detection reads the installer status value rather than the message t
 
 A Windows Installer product install completed successfully.
 
+**Use when:** someone asks when a Windows Installer (MSI) program was installed on this machine, or whether a deployment's MSI install actually completed.
+
+**Keywords:** Installation completed successfully, Windows Installer installed the product, Installation success or error status: 0, when was this program installed, MSI install succeeded, software install history, new MSI software installed
+
 **Severity:** Notice
 
 **Why it matters:** The product is installed. The record is the change-history anchor for what arrived on the machine and when.
@@ -1173,6 +1345,10 @@ The outcome is read from the installer result field rather than from the message
 ## `win_msi_product_reconfigure_succeeded`: win msi product reconfigure succeeded
 
 A Windows Installer product configuration operation completed successfully.
+
+**Use when:** someone asks who or what repaired, modified or changed the features of an installed program, or why a product keeps reconfiguring itself.
+
+**Keywords:** Configuration completed successfully, program repaired, MSI repair install, modify installed program, feature change, Apps and Features repair, msiexec /f, product keeps reconfiguring, MSI repair
 
 **Severity:** Notice
 
@@ -1202,6 +1378,10 @@ The outcome is read from the installer error code the event id carries rather th
 
 A Windows Installer product removal completed successfully.
 
+**Use when:** someone asks when or whether a program was uninstalled from this machine, or who removed an application that is now missing.
+
+**Keywords:** Removal completed successfully, program uninstalled, software removed, who uninstalled, when was this program uninstalled, uninstall history, MSI uninstall succeeded, msiexec /x
+
 **Severity:** Notice
 
 **Why it matters:** The product is no longer installed. The record is the change-history anchor for what left the machine and when.
@@ -1230,6 +1410,10 @@ The outcome is read from the installer error code the event id carries rather th
 
 Windows could not load a registry file of a user profile, or could not delete a profile folder.
 
+**Use when:** some of a user's settings are missing at sign-in because Windows could not load one of the profile's registry files, or an old or TEMP profile folder cannot be deleted.
+
+**Keywords:** Windows was unable to load the registry, Windows cannot delete the profile directory, cannot delete user profile folder, profile folder in use, TEMP profile folder left behind, user registry file locked, UsrClass.dat in use
+
 **Severity:** Notice
 
 **Why it matters:** Part of the user's settings may be missing for that logon, or old profile folders stay on disk.
@@ -1256,6 +1440,10 @@ Windows could not load a registry file of a user profile, or could not delete a 
 
 Windows could not load a user profile, loaded a temporary profile, or fell back to a backup copy.
 
+**Use when:** a user signs in to an empty desktop or the message "You've been signed in with a temporary profile", or cannot sign in because the User Profile Service failed the sign-in.
+
+**Keywords:** temporary profile, temp profile, signed in with a temporary profile, User Profile Service failed the sign-in, User profile cannot be loaded, empty desktop after sign-in, files and settings missing after sign-in, corrupt user profile, profile corrupted, ProfileList .bak, NTUSER.DAT, roaming profile not loading, FSLogix temporary profile
+
 **Severity:** Serious or Warning
 
 **Why it matters:** The user cannot work normally on that machine: they cannot log on, or they log on with missing settings, missing data paths, or a temporary profile until the profile issue is fixed.
@@ -1280,6 +1468,10 @@ Windows could not load a user profile, loaded a temporary profile, or fell back 
 ## `winlogon_notification_subscriber_slow`: Winlogon subscriber slow
 
 A component that Winlogon waits on, from Windows or another vendor, was slow to handle sign-in, sign-out or session start.
+
+**Use when:** sign-in, sign-out or the first logon after a restart sits on the Welcome or Please wait screen for a long time, and someone asks what held it up.
+
+**Keywords:** slow login, slow logon, slow sign-in, stuck on Welcome screen, Please wait screen, slow logoff, stuck signing out, logon delay, notification subscriber, TrustedInstaller logon delay, FSLogix slow logon, Group Policy slow logon
 
 **Severity:** Notice when a subscriber took a minute or more, Info otherwise.
 
@@ -1307,6 +1499,10 @@ A component that Winlogon waits on, from Windows or another vendor, was slow to 
 ## `wmi_provider_registered_as_localsystem`: wmi provider registered as localsystem
 
 A WMI provider registered to run under the LocalSystem account.
+
+**Use when:** a technician or security scan flags a WMI warning that a provider is registered to use the LocalSystem account and may cause a security violation, and asks whether it is a threat.
+
+**Keywords:** may cause a security violation, does not correctly impersonate user requests, registered in the Windows Management Instrumentation namespace, WMI provider LocalSystem, WMI security warning, WMI provider privileged account
 
 **Severity:** Info cap
 

@@ -6,128 +6,132 @@
 Each section below is complete for its reason: every public field, in the words the reference page shows.
 Search for the heading "## `<code>`" or a word from the reason's label. Do not read the whole file.
 
-| reason | label | kind | severity | service | benign |
-|---|---|---|---|---|---|
-| `av_unsigned_code_blocked` | av unsigned code blocked | event | Serious | `endpoint_protection` |  |
-| `bitlocker_key_retrieval_code_reported` | bitlocker key retrieval code reported | event | Verbose | `encryption` | benign |
-| `bitlocker_recovery_password_used` | bitlocker recovery password used | event | Warning | `encryption` |  |
-| `bitlocker_tpm_binding_mismatch` | bitlocker tpm binding mismatch | event | Warning | `encryption` |  |
-| `bitlocker_tpm_unlock_failed` | bitlocker tpm unlock failed | event | Warning | `encryption` |  |
-| `bitlocker_tpm_unlock_succeeded` | bitlocker tpm unlock succeeded | event | Verbose | `encryption` |  |
-| `dcom_activation_timeout` | dcom activation timeout | event | Minor | `app_stability` |  |
-| `dcom_register_timeout` | dcom register timeout | event | Notice | `app_stability` |  |
-| `dcom_start_failed` | dcom start failed | event | Minor | `app_stability` |  |
-| `device_health_cert_service_unreachable` | device health cert service unreachable | event | Verbose to Notice | `networking` | benign possible |
-| `disk_bad_block` | disk bad block | event | Warning to Serious | `storage` |  |
-| `disk_controller_error` | disk controller error | event | Notice to Error | `storage` |  |
-| `disk_failure_predicted` | disk failure predicted | event | Error to Serious | `storage` |  |
-| `disk_io_failed` | disk io failed | event | Notice to Error | `storage` |  |
-| `disk_io_retried` | disk io retried | event | Notice to Warning | `storage` |  |
-| `disk_paging_error` | disk paging error | event | Notice to Error | `storage` |  |
-| `disk_surprise_removal` | disk surprise removal | event | Warning | `storage` |  |
-| `dns_client_resolution_timed_out` | dns client resolution timed out | event | Display | `networking` |  |
-| `dns_registration_failed` | dns registration failed | event | Info to Warning | `networking` |  |
-| `domain_secure_channel_failed` | domain secure channel failed | event | Display to Warning | `auth` |  |
-| `driver_load_failed` | driver load failed | event | Info to Warning | `hardware` | benign possible |
-| `ephemeral_port_alloc_failed` | ephemeral port alloc failed | event | Notice | `networking` |  |
-| `failover_cluster_csv_unavailable` | failover cluster csv unavailable | event | Severe | `clustering` |  |
-| `failover_cluster_node_config_stale` | failover cluster node config stale | event | Error | `clustering` |  |
-| `failover_cluster_node_removed` | failover cluster node removed | event | Serious | `clustering` |  |
-| `failover_cluster_resource_failed` | failover cluster resource failed | event | Serious | `clustering` |  |
-| `failover_cluster_resource_hang` | failover cluster resource hang | event | Serious | `clustering` |  |
-| `failover_cluster_resource_host_crash` | failover cluster resource host crash | event | Serious | `clustering` |  |
-| `failover_cluster_service_down` | failover cluster service down | event | Severe | `clustering` |  |
-| `filesystem_corruption` | filesystem corruption | event | Verbose to Critical | `storage` |  |
-| `filesystem_delayed_write_lost` | filesystem delayed write lost | event | Error to Serious | `storage` |  |
-| `filesystem_transaction_log_operation_failed` | filesystem transaction log operation failed | event | Notice to Error | `storage` |  |
-| `gpu_driver_error` | GPU driver error | event | Notice | `hardware` |  |
-| `gpu_driver_reset` | gpu driver reset | event | Notice | `hardware` |  |
-| `group_policy_domain_controller_unresolved` | group policy domain controller unresolved | event | Notice | `device_management` |  |
-| `group_policy_extension_apply_failed` | group policy extension apply failed | event | Info to Minor | `device_management` | benign possible |
-| `group_policy_processing_failed` | group policy processing failed | event | Notice to Warning | `device_management` |  |
-| `group_policy_software_install_failed` | group policy software install failed | event | Info to Warning | `device_management` | benign possible |
-| `hardware_error_corrected` | hardware error corrected | event | Notice | `hardware` |  |
-| `hardware_error_uncorrected` | hardware error uncorrected | event | Minor to Error | `hardware` |  |
-| `http_ssl_binding_created` | http ssl binding created | event | Notice | `certificates` |  |
-| `http_ssl_binding_deleted` | http ssl binding deleted | event | Notice | `certificates` |  |
-| `http_ssl_config_failed` | http ssl config failed | event | Error | `certificates` |  |
-| `hyperv_vswitch_config_restore_failed` | hyperv vswitch config restore failed | event | Info to Error | `virtualization` |  |
-| `iis_apppool_disabled` | iis apppool disabled | event | Warning to Serious | `web` |  |
-| `iis_apppool_identity_invalid` | iis apppool identity invalid | event | Warning to Error | `web` |  |
-| `iis_apppool_worker_start_failed` | iis apppool worker start failed | event | Warning to Error | `web` |  |
-| `iis_worker_crash` | iis worker crash | event | Warning | `web` |  |
-| `ip_address_conflict_detected` | IP address conflict | event | Warning | `networking` |  |
-| `iscsi_target_connection_lost` | iSCSI target connection lost | event | Info to Warning | `storage` |  |
-| `kerberos_cert_domain_unresolved` | kerberos cert domain unresolved | event | Info | `auth` |  |
-| `kerberos_etype_unsupported` | kerberos etype unsupported | event | Warning | `auth` |  |
-| `kerberos_pac_verify_failed` | kerberos pac verify failed | event | Warning | `auth` |  |
-| `kerberos_smartcard_cert_missing` | kerberos smartcard cert missing | event | Warning | `auth` |  |
-| `kerberos_weak_krbtgt_key` | kerberos weak krbtgt key | event | Warning | `auth` |  |
-| `nic_driver_fault_reported` | nic driver fault reported | event | Warning | `networking` |  |
-| `nic_driver_load_failed` | nic driver load failed | event | Error | `networking` |  |
-| `nic_link_down` | nic link down | event | Info to Warning | `networking` |  |
-| `os_boot` | os boot | event | Info | `os_stability` |  |
-| `os_bsod` | os bsod | event | Error to Serious | `os_stability` |  |
-| `os_restart_requested` | os restart requested | event | Notice | `os_stability` |  |
-| `os_shutdown` | os shutdown | event | Info | `os_stability` |  |
-| `os_sleep` | os sleep | event | Info | `hardware` |  |
-| `os_thermal_hibernated` | Critical thermal hibernate | event | Warning to Error | `hardware` |  |
-| `os_wake` | os wake | event | Info | `hardware` |  |
-| `pagefile_extended` | pagefile extended | event | Notice | `performance` |  |
-| `patch_install_deferred` | patch install deferred | event | Verbose to Info | `patching` | benign |
-| `patch_install_failed` | patch install failed | event | Info to Minor | `patching` | benign possible |
-| `platform_tamper_indicator_reported` | platform tamper indicator reported | event | Warning to Error | `endpoint_protection` |  |
-| `ram_commit_exhausted` | ram commit exhausted | event | Error to Serious | `performance` |  |
-| `rds_license_server_unactivated` | rds license server unactivated | event | Warning | `licensing` |  |
-| `rds_license_tracking_failed` | rds license tracking failed | event | Warning | `licensing` |  |
-| `rds_licensing_service_failed` | rds licensing service failed | event | Error | `licensing` |  |
-| `secure_boot_cert_update_pending` | secure boot cert update pending | event | Warning | `hardware` |  |
-| `secure_boot_certs_current` | secure boot certs current | event | Info | `hardware` | benign |
-| `secure_boot_database_update_applied` | secure boot database update applied | event | Verbose | `hardware` |  |
-| `secure_boot_update_failed` | secure boot update failed | event | Notice | `hardware` |  |
-| `security_agent_service_start_failed` | security agent service start failed | event | Warning | `endpoint_protection` |  |
-| `security_agent_service_terminated` | security agent service terminated | event | Minor | `endpoint_protection` |  |
-| `service_crashed` | service crashed | event | Error | `app_stability` |  |
-| `service_exited_with_error` | service exited with error | event | Error | `app_stability` |  |
-| `service_hang` | service hang | event | Notice | `app_stability` |  |
-| `service_hung_starting` | service hung starting | event | Notice | `app_stability` |  |
-| `service_installed` | service installed | event | Verbose to Notice | `security_audit` | benign possible |
-| `service_start_failed` | service start failed | event | Error | `app_stability` |  |
-| `service_start_timeout` | service start timeout | event | Notice | `app_stability` |  |
-| `smb_delayed_write_lost` | smb delayed write lost | event | Error | `storage` |  |
-| `smb_server_transport_bind_failed` | smb server transport bind failed | event | Info to Warning | `networking` |  |
-| `smb_share_recreate_failed` | smb share recreate failed | event | Warning | `storage` |  |
-| `sparklogs_agent_started` | sparklogs agent started | event | Display | `rmm` |  |
-| `sparklogs_agent_stopped` | SparkLogs agent stopped | event | Display to Error | `rmm` |  |
-| `storage_controller_reset` | storage controller reset | event | Notice to Warning | `storage` |  |
-| `time_sync_failed` | time sync failed | event | Info to Warning | `time_sync` |  |
-| `tls_cert_expired` | tls cert expired | event | Error | `certificates` |  |
-| `tls_cert_name_mismatch` | tls cert name mismatch | event | Error | `certificates` |  |
-| `tls_cert_untrusted_ca` | tls cert untrusted ca | event | Error | `certificates` |  |
-| `tls_cipher_mismatch` | tls cipher mismatch | event | Warning | `certificates` |  |
-| `tls_client_credential_failed` | tls client credential failed | event | Notice to Error | `certificates` |  |
-| `tls_server_credential_failed` | tls server credential failed | event | Error | `certificates` |  |
-| `tpm_attestation_check_failed` | tpm attestation check failed | event | Notice | `hardware` |  |
-| `tpm_attestation_failed` | tpm attestation failed | event | Error | `hardware` |  |
-| `tpm_authorization_refused` | tpm authorization refused | event | Notice to Warning | `hardware` |  |
-| `tpm_boot_pcr_values_recorded` | tpm boot pcr values recorded | event | Info | `encryption` |  |
-| `tpm_capability_probe_declined` | tpm capability probe declined | event | Debug | `hardware` | benign |
-| `tpm_command_failed` | tpm command failed | event | Notice to Warning | `hardware` |  |
-| `tpm_command_retry_requested` | tpm command retry requested | event | Verbose | `hardware` | benign |
-| `tpm_counter_reset_on_resume` | tpm counter reset on resume | event | Verbose | `hardware` | benign |
-| `tpm_hardware_failed` | tpm hardware failed | event | Error | `hardware` |  |
-| `unexpected_shutdown` | unexpected shutdown | event | Warning to Serious | `os_stability` |  |
-| `vpn_connected` | vpn connected | event | Notice | `vpn` |  |
-| `vss_shadow_aborted` | vss shadow aborted | event | Warning to Error | `backup` |  |
-| `vss_snapshots_failing_for_space` | vss snapshots failing for space | event | Error | `backup` |  |
-| `win_app_error_dialog_shown` | win app error dialog shown | event | Minor | `app_stability` |  |
-| `win_battery_critical_action_triggered` | Battery trigger action | event | Notice | `hardware` |  |
-| `winre_servicing_failed` | winre servicing failed | event | Error | `patching` |  |
-| `wlan_limited_connectivity` | wlan limited connectivity | event | Warning | `networking` |  |
+| reason | label | kind | severity | service | benign | use when |
+|---|---|---|---|---|---|---|
+| `av_unsigned_code_blocked` | av unsigned code blocked | event | Serious | `endpoint_protection` |  | McAfee or Trellix blocks a program because its file is unsigned or its code does not match its signature, and that program then fails at something it needs to do. |
+| `bitlocker_key_retrieval_code_reported` | bitlocker key retrieval code reported | event | Verbose | `encryption` | benign | a technician finds a BitLocker error about retrieving the volume master key during restart and needs to know whether it caused a recovery prompt or can be passed over. |
+| `bitlocker_recovery_password_used` | bitlocker recovery password used | event | Warning | `encryption` |  | a user had to type the long BitLocker recovery key to start a laptop or PC, or someone asks when a device needed its recovery key. |
+| `bitlocker_tpm_binding_mismatch` | bitlocker tpm binding mismatch | event | Warning | `encryption` |  | a laptop or PC asked for its BitLocker recovery key after a BIOS or firmware update, a Secure Boot change or a boot manager change, and you need the PCR number that names which part of the boot changed. |
+| `bitlocker_tpm_unlock_failed` | bitlocker tpm unlock failed | event | Warning | `encryption` |  | a laptop or PC would not start normally and stopped at the BitLocker recovery screen, or its BitLocker PIN was refused at boot, and you need the refusal the TPM stated: Secure Boot off or changed, PIN refused, or protector unusable. |
+| `bitlocker_tpm_unlock_succeeded` | bitlocker tpm unlock succeeded | event | Verbose | `encryption` |  | a technician needs to know whether an encrypted device started on its TPM alone, without a recovery key, on a given boot. |
+| `dcom_activation_timeout` | dcom activation timeout | event | Minor | `app_stability` |  | a COM activation waits on something else, such as the service hosting the class finishing a stop, and gives up, so the program or Windows feature that asked for the component fails or hangs. |
+| `dcom_register_timeout` | dcom register timeout | event | Notice | `app_stability` |  | a program reports Server execution failed because the COM server it started did not register with DCOM in time, or a technician asks about DCOM records saying a server did not register within the required timeout. |
+| `dcom_start_failed` | dcom start failed | event | Minor | `app_stability` |  | a program reports that a component or service cannot start when a feature is used, and the System log shows DCOM got an error starting a service. |
+| `device_health_cert_service_unreachable` | device health cert service unreachable | event | Verbose to Notice | `networking` | benign possible | Intune marks a device not compliant for device health attestation because Windows could not reach the Microsoft attestation service through the network, proxy or firewall, or a technician asks why Windows could not get its health certificate from Microsoft. |
+| `disk_bad_block` | disk bad block | event | Warning to Serious | `storage` |  | files on a drive will not open or copy, a backup fails on the same files, or the System log reports a bad block on a hard drive. |
+| `disk_controller_error` | disk controller error | event | Notice to Error | `storage` |  | a card reader, USB disk or internal disk reports errors on the path to it and drops requests, or the System log reports a controller error on a disk. |
+| `disk_failure_predicted` | disk failure predicted | event | Error to Serious | `storage` |  | Windows or the drive warns that a hard drive is about to fail, such as a SMART failure warning, before data has been lost. |
+| `disk_io_failed` | disk io failed | event | Notice to Error | `storage` |  | a file will not save or read and the error mentions a hardware or I/O failure, or the System log reports a failed IO operation on a disk. |
+| `disk_io_retried` | disk io retried | event | Notice to Warning | `storage` |  | a program pauses briefly while reading or saving files because a disk request failed once and succeeded on retry, or the System log shows disk IO retried on the same disk. |
+| `disk_paging_error` | disk paging error | event | Notice to Error | `storage` |  | a program crashed, the machine froze or blue-screened, and the System log shows a disk error during a paging operation. |
+| `disk_surprise_removal` | disk surprise removal | event | Warning | `storage` |  | a USB or external drive disappears or was pulled without Safely Remove, or a virtual, SAN or iSCSI disk drops off. |
+| `dns_client_resolution_timed_out` | dns client resolution timed out | event | Display | `networking` |  | websites, file shares or domain sign-in fail by name while the network looks connected, because DNS lookups get no answer. |
+| `dns_registration_failed` | dns registration failed | event | Info to Warning | `networking` |  | other machines cannot reach this computer by name, or its name points to an old IP address, because it failed to update its own DNS record. |
+| `domain_secure_channel_failed` | domain secure channel failed | event | Display to Warning | `auth` |  | a domain computer cannot sign users in, says the trust relationship failed, or cannot find a domain controller. |
+| `driver_load_failed` | driver load failed | event | Info to Warning | `hardware` | benign possible | a device stops working after startup or shows a driver problem in Device Manager, or a technician needs to know which driver failed to load. |
+| `ephemeral_port_alloc_failed` | ephemeral port alloc failed | event | Notice | `networking` |  | new outbound connections fail for many programs on one machine, often clearing after a reboot and coming back, or a technician suspects port exhaustion. |
+| `failover_cluster_csv_unavailable` | failover cluster csv unavailable | event | Severe | `clustering` |  | virtual machines or file shares on a failover cluster stall or go offline because a Cluster Shared Volume paused or lost access to its storage. |
+| `failover_cluster_node_config_stale` | failover cluster node config stale | event | Error | `clustering` |  | the cluster service will not start on a node after a reboot or outage because the node's cluster configuration is out of date. |
+| `failover_cluster_node_removed` | failover cluster node removed | event | Serious | `clustering` |  | one server dropped out of a failover cluster and its virtual machines or roles moved or restarted on other nodes. |
+| `failover_cluster_resource_failed` | failover cluster resource failed | event | Serious | `clustering` |  | a clustered role such as a virtual machine, file server or SQL Server instance went offline or failed over because one of its resources failed. |
+| `failover_cluster_resource_hang` | failover cluster resource hang | event | Serious | `clustering` |  | a clustered resource froze and the cluster killed and restarted its host process, so a role dropped briefly or moved to another node. |
+| `failover_cluster_resource_host_crash` | failover cluster resource host crash | event | Serious | `clustering` |  | the cluster's resource host process crashed or was restarted, and a technician needs the resource or DLL behind it. |
+| `failover_cluster_service_down` | failover cluster service down | event | Severe | `clustering` |  | the cluster service on a node shut itself down and its roles went down or moved, for example after losing quorum or contact with the other nodes. |
+| `filesystem_corruption` | filesystem corruption | event | Verbose to Critical | `storage` |  | a drive reports errors or files that will not open, Windows asks to scan and repair the drive, chkdsk runs at startup, or NTFS says a volume needs repair. |
+| `filesystem_delayed_write_lost` | filesystem delayed write lost | event | Error to Serious | `storage` |  | a user loses part of a file while saving and Windows shows a Delayed Write Failed message, often after a USB or external drive was unplugged or dropped off. |
+| `filesystem_transaction_log_operation_failed` | filesystem transaction log operation failed | event | Notice to Error | `storage` |  | NTFS warns that it could not write or replay a volume's transaction log and that corruption may occur, often just after a USB or other removable drive went away. |
+| `gpu_driver_error` | GPU driver error | event | Notice | `hardware` |  | a technician finds NVIDIA nvlddmkm errors in the System log, often with no message text, and needs to know whether they matter when the screen did not black out and recover. |
+| `gpu_driver_reset` | gpu driver reset | event | Notice | `hardware` |  | the screen goes black or freezes for a few seconds and comes back, Windows says the display driver stopped responding and has recovered, or a game or 3D application crashes as the screen blinks. |
+| `group_policy_domain_controller_unresolved` | group policy domain controller unresolved | event | Notice | `device_management` |  | Group Policy cannot refresh because the machine cannot find any domain controller, usually because the domain name does not resolve: a laptop off the office network or VPN, or a PC using the wrong DNS servers. |
+| `group_policy_extension_apply_failed` | group policy extension apply failed | event | Info to Minor | `device_management` | benign possible | one part of Group Policy did not apply while the rest did: a logon or startup script that did not run, deployed printers, mapped drives or redirected folders that did not appear. |
+| `group_policy_processing_failed` | group policy processing failed | event | Notice to Warning | `device_management` |  | a PC is not getting new or changed Group Policy settings and gpupdate reports that processing failed, because the domain controller is known but cannot be reached over the network, bound over LDAP or read from SYSVOL. |
+| `group_policy_software_install_failed` | group policy software install failed | event | Info to Warning | `device_management` | benign possible | software assigned or published through Group Policy never installed, was not removed, or is waiting for a restart or logon before it installs. |
+| `hardware_error_corrected` | hardware error corrected | event | Notice | `hardware` |  | the log shows a corrected hardware error while the machine runs normally, and someone asks whether it matters or is an early sign of failing memory, a failing processor or a PCIe device going bad. |
+| `hardware_error_uncorrected` | hardware error uncorrected | event | Minor to Error | `hardware` |  | a machine crashed, froze or restarted on its own and the log shows a fatal or uncorrectable hardware error, and someone needs to know whether memory, the processor or a card is failing. |
+| `http_ssl_binding_created` | http ssl binding created | event | Notice | `certificates` |  | someone asks who added or replaced the HTTPS certificate on a server's site or service port, or why clients now see a different certificate. |
+| `http_ssl_binding_deleted` | http ssl binding deleted | event | Notice | `certificates` |  | an HTTPS site or service on a server stopped presenting its certificate, or someone asks who removed a certificate binding from a server port. |
+| `http_ssl_config_failed` | http ssl config failed | event | Error | `certificates` |  | an HTTPS site or service on a server fails the secure connection, often right after its certificate was renewed, replaced or expired, because HTTP.sys cannot use the SSL binding for that address and port. |
+| `hyperv_vswitch_config_restore_failed` | hyperv vswitch config restore failed | event | Info to Error | `virtualization` |  | a virtual machine comes up after a host restart without its network settings, such as a lost VLAN, or someone asks about a Hyper-V virtual switch port error at startup. |
+| `iis_apppool_disabled` | iis apppool disabled | event | Warning to Serious | `web` |  | a website goes down with 503 Service Unavailable and stays down because its application pool keeps stopping, or IIS Manager shows the pool stopped after repeated worker crashes (rapid-fail protection). |
+| `iis_apppool_identity_invalid` | iis apppool identity invalid | event | Warning to Error | `web` |  | an IIS website returns 503 Service Unavailable after the password of the account its application pool runs as was changed, reset or expired. |
+| `iis_apppool_worker_start_failed` | iis apppool worker start failed | event | Warning to Error | `web` |  | an IIS website returns 503 and its application pool will not start, often after a deployment, a configuration change or a new module, while the pool's account is fine. |
+| `iis_worker_crash` | iis worker crash | event | Warning | `web` |  | a web application crashed or the site dropped requests and users lost their session for a moment, then IIS recovered on its own. |
+| `ip_address_conflict_detected` | IP address conflict | event | Warning | `networking` |  | a user cannot get on the network or keeps dropping off, and Windows warns that another device on the network is using the same IP address. |
+| `iscsi_target_connection_lost` | iSCSI target connection lost | event | Info to Warning | `storage` |  | a server's SAN or iSCSI disk stalls or disappears, file shares, databases or virtual machines on it hang, or the iSCSI connection to the storage drops and reconnects. |
+| `kerberos_cert_domain_unresolved` | kerberos cert domain unresolved | event | Info | `auth` |  | a technician asks about a Kerberos record saying the domain in a sign-in certificate could not be resolved, or certificate or Windows Hello for Business sign-in to domain resources fails on a domain-joined device off the corporate network. |
+| `kerberos_etype_unsupported` | kerberos etype unsupported | event | Warning | `auth` |  | a user or service cannot sign in to a server or application with Kerberos, often after a Windows update or hardening that retires RC4 or DES, and the domain controller says no encryption type is shared. |
+| `kerberos_pac_verify_failed` | kerberos pac verify failed | event | Warning | `auth` |  | users suddenly get access denied on a file server or other domain service, often while Windows updates have reached only some domain controllers, or a security review asks whether a PAC signature failure is a forged ticket. |
+| `kerberos_smartcard_cert_missing` | kerberos smartcard cert missing | event | Warning | `auth` |  | smart card or certificate sign-in fails against a domain controller, or a domain controller warns it has no certificate for smart card logon, often after its certificate expired. |
+| `kerberos_weak_krbtgt_key` | kerberos weak krbtgt key | event | Warning | `auth` |  | a security audit or a domain controller warning says the krbtgt account has only old RC4 or DES keys and its password must be reset. |
+| `nic_driver_fault_reported` | nic driver fault reported | event | Warning | `networking` |  | a laptop's Intel Wi-Fi drops out or stops working and then comes back, or the adapter is reported as not functioning properly while its driver is still installed. |
+| `nic_driver_load_failed` | nic driver load failed | event | Error | `networking` |  | a laptop's Intel Wi-Fi adapter is missing or shows a Device Manager error after startup, and no wireless networks appear until the driver is fixed. |
+| `nic_link_down` | nic link down | event | Info to Warning | `networking` |  | a wired network connection drops and comes back, the network cable shows as unplugged, or the link returns at a lower speed such as 100 Mbps. |
+| `os_boot` | os boot | event | Info | `os_stability` |  | someone asks when a machine last started or rebooted, how long it has been up, or whether it restarted overnight. |
+| `os_bsod` | os bsod | event | Error to Serious | `os_stability` |  | a machine crashed to a blue screen and restarted by itself, or a user reports a stop code or "Your PC ran into a problem". |
+| `os_restart_requested` | os restart requested | event | Notice | `os_stability` |  | someone asks who or what restarted or shut down a machine, such as a reboot nobody planned, a restart during working hours or a server that rebooted outside the maintenance window. |
+| `os_shutdown` | os shutdown | event | Info | `os_stability` |  | someone asks whether a machine shut down or restarted cleanly, or whether a gap in its data was the machine being turned off. |
+| `os_sleep` | os sleep | event | Info | `hardware` |  | a laptop or desktop went to sleep or standby on its own, or a device could not be reached remotely because it may have been asleep. |
+| `os_thermal_hibernated` | Critical thermal hibernate | event | Warning to Error | `hardware` |  | a machine shut off or hibernated by itself while running hot, with a loud fan, a case hot to the touch or a server room that is too warm. |
+| `os_wake` | os wake | event | Info | `hardware` |  | a laptop or desktop woke from sleep by itself, such as at night or in a bag, or someone asks what woke it. |
+| `pagefile_extended` | pagefile extended | event | Notice | `performance` |  | a user sees "Virtual Memory Minimum Too Low" or a low on virtual memory message while Windows grows the paging file, and the machine slows down. |
+| `patch_install_deferred` | patch install deferred | event | Verbose to Info | `patching` | benign | an update shows as postponed or waiting to install, or Windows Update logs an installation failure for an app that was open or a restart that was still owed. |
+| `patch_install_failed` | patch install failed | event | Info to Minor | `patching` | benign possible | Windows Update keeps failing to install an update, asks to try again, or shows an error code such as 0x800f0922 or 0x80070002. |
+| `platform_tamper_indicator_reported` | platform tamper indicator reported | event | Warning to Error | `endpoint_protection` |  | Dell Trusted Device or SafeBIOS warns of an attack indicator on a machine, such as BIOS downgrade being allowed, a changed BIOS setting or a case that was opened. |
+| `ram_commit_exhausted` | ram commit exhausted | event | Error to Serious | `performance` |  | programs crash, refuse to open or fail to save with an out of memory message, and Windows could not give them more memory. |
+| `rds_license_server_unactivated` | rds license server unactivated | event | Warning | `licensing` |  | Remote Desktop users get temporary licences that will expire, or RD Licensing Manager shows the license server as not activated. |
+| `rds_license_tracking_failed` | rds license tracking failed | event | Warning | `licensing` |  | an RDS per-user licence report shows fewer licences in use than expected, or a license server cannot update users' licence attributes in Active Directory. |
+| `rds_licensing_service_failed` | rds licensing service failed | event | Error | `licensing` |  | the Remote Desktop Licensing service will not start, or the license server reports a database error and stops issuing licences. |
+| `secure_boot_cert_update_pending` | secure boot cert update pending | event | Warning | `hardware` |  | a device has not yet taken the 2023 Secure Boot certificates and no failure record says why, or someone asks which machines still depend on the expiring 2011 certificates. |
+| `secure_boot_certs_current` | secure boot certs current | event | Info | `hardware` | benign | someone asks whether a device is ready for the Secure Boot certificate expiry, or needs to confirm the 2023 certificates and boot manager are in place. |
+| `secure_boot_database_update_applied` | secure boot database update applied | event | Verbose | `hardware` |  | someone asks why Secure Boot settings changed after an update, or a BitLocker recovery prompt followed a Secure Boot DB or DBX update. |
+| `secure_boot_update_failed` | secure boot update failed | event | Notice | `hardware` |  | the Secure Boot certificate update keeps failing on a device, the firmware rejects it, or Microsoft has blocked it for a known firmware issue. |
+| `security_agent_service_start_failed` | security agent service start failed | event | Warning | `endpoint_protection` |  | a McAfee or Trellix component is not running after startup, or the agent's supervisor reports a module that failed to start. |
+| `security_agent_service_terminated` | security agent service terminated | event | Minor | `endpoint_protection` |  | a McAfee or Trellix component keeps stopping and restarting, or the security software drops one of its features without warning. |
+| `service_crashed` | service crashed | event | Error | `app_stability` |  | a background service keeps crashing and Windows says it terminated unexpectedly, so whatever it runs, such as backup, remote access or an application, drops out until it restarts. |
+| `service_exited_with_error` | service exited with error | event | Error | `app_stability` |  | a service stops with an error code it returned itself, such as Incorrect function or a service-specific error. |
+| `service_hang` | service hang | event | Notice | `app_stability` |  | stopping, restarting or querying a service hangs or times out, or a shutdown or restart waits on a service that does not respond. |
+| `service_hung_starting` | service hung starting | event | Notice | `app_stability` |  | a service shows Starting in Services and never reaches Running, even though its program launched and connected to Windows. |
+| `service_installed` | service installed | event | Verbose to Notice | `security_audit` | benign possible | someone asks whether a new service or remote-access tool was installed on a machine, or whether a new service could be malware set up to persist. |
+| `service_start_failed` | service start failed | event | Error | `app_stability` |  | a service will not start, shows Error 1053, Error 1069 or a missing-file error, or a background program that should run from boot stays off. |
+| `service_start_timeout` | service start timeout | event | Notice | `app_stability` |  | a service fails at boot because its program never connected to Windows within the start timeout, often followed by error 1053. |
+| `smb_delayed_write_lost` | smb delayed write lost | event | Error | `storage` |  | a file saved to a network share or mapped drive is missing recent changes or is damaged, or Windows shows a Delayed Write Failed message. |
+| `smb_server_transport_bind_failed` | smb server transport bind failed | event | Info to Warning | `networking` |  | other machines cannot reach a file server's shared folders through one of its network connections, or the Server service reports it could not bind to a transport. |
+| `smb_share_recreate_failed` | smb share recreate failed | event | Warning | `storage` |  | a shared folder or scanner drop share stops working after a server restart because the folder it pointed at was deleted, moved or renamed. |
+| `sparklogs_agent_started` | sparklogs agent started | event | Display | `rmm` |  | someone asks whether or when the log collection agent started on a machine, or whether collection resumed after a gap, a restart or an agent update. |
+| `sparklogs_agent_stopped` | SparkLogs agent stopped | event | Display to Error | `rmm` |  | logs or readings from a machine stop arriving, and someone asks whether the log collection agent was stopped, crashed or was turned off, and by whom. |
+| `storage_controller_reset` | storage controller reset | event | Notice to Warning | `storage` |  | the whole machine or an external drive freezes for several seconds while the path to a disk resets, and the System log shows a reset to device or a controller timeout. |
+| `time_sync_failed` | time sync failed | event | Info to Warning | `time_sync` |  | a machine's clock is wrong or keeps drifting, sign-ins fail with clock skew errors, or Windows Time cannot reach its time server. |
+| `tls_cert_expired` | tls cert expired | event | Error | `certificates` |  | a program on this machine cannot connect to a server because the server's certificate has expired or is not yet valid, or valid certificates fail because the clock is wrong. |
+| `tls_cert_name_mismatch` | tls cert name mismatch | event | Error | `certificates` |  | a program on this machine fails to connect with a certificate name mismatch, often because it uses a short name or IP address that the server's certificate does not list. |
+| `tls_cert_untrusted_ca` | tls cert untrusted ca | event | Error | `certificates` |  | a program on this machine fails to connect because the server's certificate is not trusted, often after a firewall starts inspecting HTTPS or with an internal or self-signed certificate authority. |
+| `tls_cipher_mismatch` | tls cipher mismatch | event | Warning | `certificates` |  | an older device or program cannot connect securely to a service on this server, such as its website, Remote Desktop or LDAPS, often after TLS or cipher settings were tightened. |
+| `tls_client_credential_failed` | tls client credential failed | event | Notice to Error | `certificates` |  | one program on this machine can no longer make secure outbound connections, often after TLS protocols or ciphers were turned off here, or because a client certificate it needs cannot be used. |
+| `tls_server_credential_failed` | tls server credential failed | event | Error | `certificates` |  | HTTPS, Remote Desktop or LDAPS on this server stops accepting secure connections, often right after a certificate renewal or import, because the service cannot read the certificate's private key. |
+| `tpm_attestation_check_failed` | tpm attestation check failed | event | Notice | `hardware` |  | a technician needs to know which TPM health check stopped a device passing attestation, such as a virtual machine or older TPM with no endorsement key certificate, or a device shown as cannot be attested. |
+| `tpm_attestation_failed` | tpm attestation failed | event | Error | `hardware` |  | a device is marked unhealthy or not compliant because the TPM checks found a critical boot component failed attestation, often after a BIOS or firmware update. |
+| `tpm_authorization_refused` | tpm authorization refused | event | Notice to Warning | `hardware` |  | Windows Hello PIN sign-in or a TPM-protected key fails to open, or the TPM is locked out after too many wrong PIN attempts. |
+| `tpm_boot_pcr_values_recorded` | tpm boot pcr values recorded | event | Info | `encryption` |  | a technician is working out why a device asked for its BitLocker recovery key and needs the boot measurements to compare with an earlier boot. |
+| `tpm_capability_probe_declined` | tpm capability probe declined | event | Debug | `hardware` | benign | someone asks whether many TPM failed-command records on a healthy device matter, where the TPM only answered that a value, algorithm or handle is not supported. |
+| `tpm_command_failed` | tpm command failed | event | Notice to Warning | `hardware` |  | BitLocker, Windows Hello or device compliance fails on a device whose TPM keeps reporting failed commands, or the TPM has gone into failure mode. |
+| `tpm_command_retry_requested` | tpm command retry requested | event | Verbose | `hardware` | benign | someone asks whether TPM records saying the TPM was busy, self-testing or asked for a retry point at a fault, when sign-in and BitLocker otherwise work. |
+| `tpm_counter_reset_on_resume` | tpm counter reset on resume | event | Verbose | `hardware` | benign | someone asks whether a TPM record after sleep or hibernate, saying the reset or resume count does not match, means the TPM or BitLocker has a problem. |
+| `tpm_hardware_failed` | tpm hardware failed | event | Error | `hardware` |  | the TPM stops working because Windows found a hardware error in it, and BitLocker, Windows Hello or compliance checks that need it fail. |
+| `unexpected_shutdown` | unexpected shutdown | event | Warning to Serious | `os_stability` |  | a machine turned off or restarted on its own without a clean shutdown, after a power cut, a crash, a freeze or someone holding the power button. |
+| `vpn_connected` | vpn connected | event | Notice | `vpn` |  | someone asks who connected to the network over VPN or dial-up, when, and with which built-in Windows VPN profile. |
+| `vss_shadow_aborted` | vss shadow aborted | event | Warning to Error | `backup` |  | a backup or restore point fails because its shadow copy snapshot was aborted or never made, or shadow copy storage is running out of room. |
+| `vss_snapshots_failing_for_space` | vss snapshots failing for space | event | Error | `backup` |  | Previous Versions or restore points for a drive have vanished, or a restore finds no shadow copies, because Windows deleted them when shadow storage could not grow. |
+| `win_app_error_dialog_shown` | win app error dialog shown | event | Minor | `app_stability` |  | a user reports an error message box popped up on screen and you need its title and text. |
+| `win_battery_critical_action_triggered` | Battery trigger action | event | Notice | `hardware` |  | a laptop shut down, slept or hibernated on its own because its battery ran low. |
+| `winre_servicing_failed` | winre servicing failed | event | Error | `patching` |  | a Windows update that services the recovery environment keeps failing, such as one that needs a larger recovery partition. |
+| `wlan_limited_connectivity` | wlan limited connectivity | event | Warning | `networking` |  | Wi-Fi shows connected but with limited or no internet, pages stop loading or calls drop, and Windows tries to recover the wireless link. |
 
 ## `av_unsigned_code_blocked`: av unsigned code blocked
 
 A security agent blocked a process whose image contained unsigned or corrupted code from performing a privileged operation.
+
+**Use when:** McAfee or Trellix blocks a program because its file is unsigned or its code does not match its signature, and that program then fails at something it needs to do.
+
+**Keywords:** McAfee, Trellix, McAfee Endpoint Security, Trellix Endpoint Security, self-protection, antivirus blocked program, security software blocked app, unsigned program blocked, unsigned executable, invalid digital signature, signature does not match, file not trusted, corrupted code, in-house app blocked, packed executable
 
 **Severity:** Serious
 
@@ -153,6 +157,10 @@ A security agent blocked a process whose image contained unsigned or corrupted c
 ## `bitlocker_key_retrieval_code_reported`: bitlocker key retrieval code reported
 
 BitLocker reported an error code while retrieving the volume master key during restart.
+
+**Use when:** a technician finds a BitLocker error about retrieving the volume master key during restart and needs to know whether it caused a recovery prompt or can be passed over.
+
+**Keywords:** volume master key, VMK, unexpected error retrieving volume master key, BitLocker error at restart, BitLocker error code, BitLocker key retrieval error, BitLocker PCR bitmap
 
 **Severity:** Verbose
 
@@ -182,6 +190,10 @@ The code this event carries has no public decode, so it is shown as written.
 
 Someone typed the BitLocker recovery password at the recovery screen to start Windows.
 
+**Use when:** a user had to type the long BitLocker recovery key to start a laptop or PC, or someone asks when a device needed its recovery key.
+
+**Keywords:** BitLocker recovery key, 48-digit recovery key, recovery key prompt, entered recovery key, typed recovery key, asked for recovery key, BitLocker recovery screen, blue recovery screen, recovery key used at startup, locked out by BitLocker, rotate recovery key, BitLocker recovery boot
+
 **Severity:** Warning
 
 **Why it matters:** The user was stopped at the BitLocker recovery screen until the recovery password was found and typed. Whoever typed it now knows the password for that drive.
@@ -210,6 +222,10 @@ Someone typed the BitLocker recovery password at the recovery screen to start Wi
 
 At boot, the measurements a BitLocker TPM protector was sealed to did not match the TPM, so the TPM would not release the drive key.
 
+**Use when:** a laptop or PC asked for its BitLocker recovery key after a BIOS or firmware update, a Secure Boot change or a boot manager change, and you need the PCR number that names which part of the boot changed.
+
+**Keywords:** recovery key after BIOS update, recovery key after firmware update, BIOS update BitLocker, UEFI update BitLocker, Secure Boot update BitLocker, DBX update, PCR mismatch, PCR 7, PCR validation profile, TPM validation profile, sealed PCR values, TPM unseal failed, boot measurements changed
+
 **Severity:** Warning
 
 **Why it matters:** The device most likely stopped at the BitLocker recovery screen for this boot. The PCR number shows which part of the boot changed.
@@ -237,6 +253,10 @@ At boot, the measurements a BitLocker TPM protector was sealed to did not match 
 ## `bitlocker_tpm_unlock_failed`: bitlocker tpm unlock failed
 
 At boot, the TPM would not release the BitLocker key for the OS drive, so the drive had to be unlocked another way: often the recovery password, sometimes a retried PIN or another protector.
+
+**Use when:** a laptop or PC would not start normally and stopped at the BitLocker recovery screen, or its BitLocker PIN was refused at boot, and you need the refusal the TPM stated: Secure Boot off or changed, PIN refused, or protector unusable.
+
+**Keywords:** BitLocker recovery screen, asks for recovery key at startup, keeps asking for recovery key, recovery key every reboot, TPM did not unlock, TPM unlock failed, TPM refused key, BitLocker PIN rejected, wrong BitLocker PIN, pre-boot PIN, Secure Boot disabled, Secure Boot configuration changed, TPM cleared, firmware update BitLocker recovery
 
 **Severity:** Warning
 
@@ -268,6 +288,10 @@ At boot, the TPM would not release the BitLocker key for the OS drive, so the dr
 
 The TPM released the BitLocker drive key at boot and Windows started normally.
 
+**Use when:** a technician needs to know whether an encrypted device started on its TPM alone, without a recovery key, on a given boot.
+
+**Keywords:** BitLocker unlocked normally, TPM unlocked drive, booted without recovery key, normal BitLocker startup, did it need recovery key, TPM protector unlocked, encrypted laptop started fine, binding ID
+
 **Severity:** Verbose
 
 **Why it matters:** None. The drive opened without its recovery key on this boot.
@@ -293,6 +317,10 @@ The TPM released the BitLocker drive key at boot and Windows started normally.
 ## `dcom_activation_timeout`: dcom activation timeout
 
 A DCOM activation timed out.
+
+**Use when:** a COM activation waits on something else, such as the service hosting the class finishing a stop, and gives up, so the program or Windows feature that asked for the component fails or hangs.
+
+**Keywords:** DCOM timeout, COM activation timeout, activation timed out, app hangs then gives up, feature hangs on start, CLSID timed out
 
 **Severity:** Minor
 
@@ -321,6 +349,10 @@ A DCOM activation timed out.
 
 A DCOM server did not register in time.
 
+**Use when:** a program reports Server execution failed because the COM server it started did not register with DCOM in time, or a technician asks about DCOM records saying a server did not register within the required timeout.
+
+**Keywords:** did not register within the required timeout, server did not register with DCOM, DCOM registration timeout, COM server hangs at start, server execution failed, 0x80080005, CO_E_SERVER_EXEC_FAILURE
+
 **Severity:** Notice
 
 **Why it matters:** The program that started the COM server waits or retries, and usually the server registers moments later. Many of these for one CLSID mean a COM server that keeps hanging at start, and the feature behind it fails for the user.
@@ -348,6 +380,10 @@ A DCOM server did not register in time.
 
 DCOM got an error while starting a service or server for a COM request.
 
+**Use when:** a program reports that a component or service cannot start when a feature is used, and the System log shows DCOM got an error starting a service.
+
+**Keywords:** DCOM got error, attempting to start the service, DCOM error 1058, DCOM error 1053, DCOM error 1084, service cannot be started because it is disabled, COM server could not start, DCOM service disabled
+
 **Severity:** Minor
 
 **Why it matters:** The program that asked for the COM component cannot use it, so the feature that depends on it fails.
@@ -373,6 +409,10 @@ DCOM got an error while starting a service or server for a COM request.
 
 Windows could not reach Microsoft's health attestation service to get a device health certificate.
 
+**Use when:** Intune marks a device not compliant for device health attestation because Windows could not reach the Microsoft attestation service through the network, proxy or firewall, or a technician asks why Windows could not get its health certificate from Microsoft.
+
+**Keywords:** device health attestation, DHA, health attestation certificate, health certificate request failed, Intune compliance device health, device not healthy, cannot verify device health, attestation service unreachable, server name could not be resolved, proxy blocks attestation
+
 **Severity:** Notice or Verbose
 
 **Why it matters:** Usually none: Windows asks again later. A device that never gets the certificate fails Intune compliance checks that require device health attestation.
@@ -397,6 +437,10 @@ Windows could not reach Microsoft's health attestation service to get a device h
 ## `disk_bad_block`: disk bad block
 
 A disk reported a bad block.
+
+**Use when:** files on a drive will not open or copy, a backup fails on the same files, or the System log reports a bad block on a hard drive.
+
+**Keywords:** bad sector, bad block, bad blocks growing, unreadable sector, remapped sectors, data error cyclic redundancy check, CRC error, I/O device error, corrupt file, cannot read file, hard drive damaged, damaged hard drive, drive failing, chkdsk bad sectors, replace hard drive
 
 **Also reported by:** `win.eventlog.storage`
 
@@ -427,6 +471,10 @@ A disk reported a bad block.
 
 A disk controller error was reported for a storage device.
 
+**Use when:** a card reader, USB disk or internal disk reports errors on the path to it and drops requests, or the System log reports a controller error on a disk.
+
+**Keywords:** controller error, disk controller error, storage controller, RAID controller, HBA, SATA cable, loose cable, card reader, SD card reader, USB drive freezing, external drive freezes, drive hangs when saving, program stalls writing to disk
+
 **Severity:** Fixed disks select Error; removable media Notice; removable disks, virtual, unknown and missing facts Warning.
 
 **Why it matters:** A request to the disk did not complete, so the program reading or writing it can stall or fail. Repeated errors on an internal disk often come before a cable, controller or drive failure.
@@ -455,6 +503,10 @@ A disk controller error was reported for a storage device.
 
 A storage device predicted its own failure.
 
+**Use when:** Windows or the drive warns that a hard drive is about to fail, such as a SMART failure warning, before data has been lost.
+
+**Keywords:** SMART, S.M.A.R.T., SMART failure predicted, predictive failure, PFA, predicted that it will fail, imminent failure, hard drive about to die, hard drive about to fail, dying hard drive, failing disk warning, Windows detected a hard disk problem, back up and replace drive
+
 **Also reported by:** `win.eventlog.storage`
 
 **Severity:** Serious on servers; Error on workstations or an unknown host class.
@@ -481,6 +533,10 @@ A storage device predicted its own failure.
 ## `disk_io_failed`: disk io failed
 
 A read or write on a disk failed.
+
+**Use when:** a file will not save or read and the error mentions a hardware or I/O failure, or the System log reports a failed IO operation on a disk.
+
+**Keywords:** IO operation failed, failed due to a hardware error, I/O device error, request failed because of an I/O device error, disk read error, disk write error, read failed, write failed, cannot save file, cannot read file, LBA
 
 **Also reported by:** `win.eventlog.storage`
 
@@ -512,6 +568,10 @@ A read or write on a disk failed.
 
 A disk IO operation had to be retried.
 
+**Use when:** a program pauses briefly while reading or saving files because a disk request failed once and succeeded on retry, or the System log shows disk IO retried on the same disk.
+
+**Keywords:** IO retried, IO operation was retried, disk retry, hard drive lagging, brief freezes opening files
+
 **Severity:** Removable disks and media select Notice; fixed, virtual, unknown and missing facts retain Warning.
 
 **Why it matters:** The request completed after the retry, but the wait slows programs using the disk, and a steady stream of retries is an early sign of a failing drive, cable or controller.
@@ -540,6 +600,10 @@ A disk IO operation had to be retried.
 ## `disk_paging_error`: disk paging error
 
 Windows reported a disk error during a paging operation.
+
+**Use when:** a program crashed, the machine froze or blue-screened, and the System log shows a disk error during a paging operation.
+
+**Keywords:** paging operation, error during paging, page file error, pagefile, inpage error, KERNEL_DATA_INPAGE_ERROR, 0x7A, blue screen disk error, program crashed reading from disk, freeze disk error
 
 **Also reported by:** `win.eventlog.storage`
 
@@ -571,6 +635,10 @@ Windows reported a disk error during a paging operation.
 
 A disk disappeared without being safely removed.
 
+**Use when:** a USB or external drive disappears or was pulled without Safely Remove, or a virtual, SAN or iSCSI disk drops off.
+
+**Keywords:** surprise removed, unplugged without ejecting, eject, safely remove hardware, external drive disappeared, USB drive disconnected, drive keeps disconnecting, backup drive missing, iSCSI disk lost, SAN path lost, virtual disk detached, loose cable
+
 **Also reported by:** `win.eventlog.storage`
 
 **Severity:** Warning
@@ -598,6 +666,10 @@ A disk disappeared without being safely removed.
 ## `dns_client_resolution_timed_out`: dns client resolution timed out
 
 A DNS name lookup timed out because none of the configured DNS servers answered.
+
+**Use when:** websites, file shares or domain sign-in fail by name while the network looks connected, because DNS lookups get no answer.
+
+**Keywords:** DNS server not responding, DNS server isn't responding, DNS not responding, DNS timeout, name resolution timed out, DNS request timed out, cannot resolve host name, VPN DNS timeout
 
 **Also reported by:** `win.eventlog.network`
 
@@ -629,6 +701,10 @@ A host with the DNS client Operational log turned on can record one timeout twic
 
 Windows could not register or update the name records of this computer in DNS.
 
+**Use when:** other machines cannot reach this computer by name, or its name points to an old IP address, because it failed to update its own DNS record.
+
+**Keywords:** dynamic DNS registration failed, DNS update failed, DDNS, DNS record not updated, stale DNS record, wrong IP in DNS, host record registration, cannot ping by name, computer not found by name, secure dynamic update
+
 **Severity:** Warning (server) / Info (workstation or unknown)
 
 **Why it matters:** Other machines can resolve this computer's name to an old address, or not at all, until a later registration succeeds. On a server that breaks connections from its clients. On a workstation away from its network it is expected.
@@ -655,6 +731,10 @@ Windows could not register or update the name records of this computer in DNS.
 ## `domain_secure_channel_failed`: domain secure channel failed
 
 The machine could not set up its secure session with a domain controller.
+
+**Use when:** a domain computer cannot sign users in, says the trust relationship failed, or cannot find a domain controller.
+
+**Keywords:** trust relationship between this workstation and primary domain, trust relationship failed, no logon servers available, secure channel broken, domain controller unreachable, cannot contact domain, machine account password, computer account, rejoin domain, domain join broken, cached credentials only
 
 **Severity:** Warning, Notice or Display
 
@@ -684,6 +764,10 @@ The machine could not set up its secure session with a domain controller.
 
 A device driver failed to load.
 
+**Use when:** a device stops working after startup or shows a driver problem in Device Manager, or a technician needs to know which driver failed to load.
+
+**Keywords:** driver failed to load, cannot load the device driver for this hardware, Code 39, yellow exclamation Device Manager, missing driver, corrupted driver, driver not found, STATUS_FAILED_DRIVER_ENTRY, device instance path, hardware stopped working after boot
+
 **Severity:** Warning or Info
 
 **Why it matters:** The device the driver serves is missing, or works without some of its features, until the driver is fixed or replaced.
@@ -710,6 +794,10 @@ A device driver failed to load.
 ## `ephemeral_port_alloc_failed`: ephemeral port alloc failed
 
 A local port could not be allocated from the ephemeral port range.
+
+**Use when:** new outbound connections fail for many programs on one machine, often clearing after a reboot and coming back, or a technician suspects port exhaustion.
+
+**Keywords:** port exhaustion, TCP port exhaustion, UDP port exhaustion, ephemeral ports, out of ports, all such ports being in use, no buffer space available, WSAENOBUFS, 10055, TIME_WAIT, socket leak, MaxUserPort, connections fail until reboot
 
 **Severity:** Notice
 
@@ -738,6 +826,10 @@ A local port could not be allocated from the ephemeral port range.
 
 A Cluster Shared Volume became unavailable or paused.
 
+**Use when:** virtual machines or file shares on a failover cluster stall or go offline because a Cluster Shared Volume paused or lost access to its storage.
+
+**Keywords:** CSV paused, CSV no longer accessible, cluster storage offline, shared storage offline, Hyper-V cluster storage, VMs offline cluster, VM storage paused, SAN path lost, CSV paused iSCSI, multipath failure
+
 **Severity:** Severe
 
 **Why it matters:** Virtual machines and file shares on the volume stall or fail while it is paused or unreachable.
@@ -765,6 +857,10 @@ A Cluster Shared Volume became unavailable or paused.
 
 The cluster service would not start on this node because the node does not hold the latest cluster configuration.
 
+**Use when:** the cluster service will not start on a node after a reboot or outage because the node's cluster configuration is out of date.
+
+**Keywords:** cluster will not start, cluster won't come up, cluster service will not start, node cannot join cluster, cluster configuration out of date, latest copy of the cluster configuration, ForceQuorum, paxos tag, ClusDB, cluster after power outage
+
 **Severity:** Error
 
 **Why it matters:** This node cannot join the cluster and runs none of its roles. If the nodes that hold the newer configuration are also down, the cluster cannot form at all.
@@ -789,6 +885,10 @@ The cluster service would not start on this node because the node does not hold 
 ## `failover_cluster_node_removed`: failover cluster node removed
 
 A failover cluster node was removed from active membership.
+
+**Use when:** one server dropped out of a failover cluster and its virtual machines or roles moved or restarted on other nodes.
+
+**Keywords:** node removed from cluster, cluster node down, node dropped out of cluster, server dropped out of cluster, heartbeat lost, missed heartbeats, SameSubnetThreshold, CrossSubnetThreshold, cluster network failure, unexpected failover, VMs failed over
 
 **Severity:** Serious
 
@@ -815,6 +915,10 @@ A failover cluster node was removed from active membership.
 ## `failover_cluster_resource_failed`: failover cluster resource failed
 
 A failover cluster resource failed.
+
+**Use when:** a clustered role such as a virtual machine, file server or SQL Server instance went offline or failed over because one of its resources failed.
+
+**Keywords:** cluster resource failed, clustered role failed, cluster role offline, role failed over, SQL Server cluster failover, file server role failed, physical disk resource failed, network name resource failed, IP address resource failed, clustered VM offline
 
 **Severity:** Serious
 
@@ -843,6 +947,10 @@ A failover cluster resource failed.
 
 A clustered resource crashed or stopped responding, and the cluster ended its host process.
 
+**Use when:** a clustered resource froze and the cluster killed and restarted its host process, so a role dropped briefly or moved to another node.
+
+**Keywords:** resource deadlock, resource deadlocked, resource did not respond, resource hang, RHS terminated, IsAlive timeout, LooksAlive, DeadlockTimeout, separate monitor, cluster resource DLL hang, clustered app froze
+
 **Severity:** Serious
 
 **Why it matters:** The resource and the others in the same host process restart, so the role they serve drops for a moment or moves to another node.
@@ -867,6 +975,10 @@ A clustered resource crashed or stopped responding, and the cluster ended its ho
 ## `failover_cluster_resource_host_crash`: failover cluster resource host crash
 
 The cluster Resource Hosting Subsystem process ended and is being restarted.
+
+**Use when:** the cluster's resource host process crashed or was restarted, and a technician needs the resource or DLL behind it.
+
+**Keywords:** RHS crash, RHS restarted, rhs.exe crashed, rhs.exe terminated, cluster resource monitor crashed, cluster monitoring process crashed, faulting module rhs.exe, third-party resource DLL, backup plugin crash cluster
 
 **Severity:** Serious
 
@@ -893,6 +1005,10 @@ The cluster Resource Hosting Subsystem process ended and is being restarted.
 
 The cluster service on this node stopped or was forced down.
 
+**Use when:** the cluster service on a node shut itself down and its roles went down or moved, for example after losing quorum or contact with the other nodes.
+
+**Keywords:** quorum lost, lost quorum, cluster went down, cluster service stopped, Cluster Service terminated, ClusSvc, quorum disk unreachable, file share witness, cloud witness, split brain, whole cluster down
+
 **Severity:** Severe
 
 **Why it matters:** This node stops running clustered roles, and the other nodes must take them over. When every node logs it, the whole cluster and all its roles are down.
@@ -917,6 +1033,10 @@ The cluster service on this node stopped or was forced down.
 ## `filesystem_corruption`: filesystem corruption
 
 NTFS found damage in the file system structures on a volume, could not correct it, or repaired it, or the disk layer reported corruption.
+
+**Use when:** a drive reports errors or files that will not open, Windows asks to scan and repair the drive, chkdsk runs at startup, or NTFS says a volume needs repair.
+
+**Keywords:** file system corruption, corrupt files, drive has errors, scan and repair drive, restart to repair drive errors, file or directory is corrupted and unreadable, 0x80070570, chkdsk, chkdsk at startup, check disk, Repair-Volume, MFT corruption, volume marked dirty, NTFS self-healing
 
 **Also reported by:** `win.eventlog.storage`
 
@@ -949,6 +1069,10 @@ NTFS found damage in the file system structures on a volume, could not correct i
 
 Windows could not save cached file data to the volume and the data was lost.
 
+**Use when:** a user loses part of a file while saving and Windows shows a Delayed Write Failed message, often after a USB or external drive was unplugged or dropped off.
+
+**Keywords:** Delayed Write Failed, Windows was unable to save all the data, lost data while saving, saved file is damaged, saved file is empty, USB drive unplugged while saving, external drive disconnected, safely remove hardware, write caching, lost delayed-write data
+
 **Severity:** Serious (path on the system volume) / Error (path anywhere else)
 
 **Why it matters:** Data an application believed it had written was discarded, and the application is not told. A file the user saved can turn out short or damaged later, and a loss on the system volume can leave a Windows or profile file damaged.
@@ -973,6 +1097,10 @@ Windows could not save cached file data to the volume and the data was lost.
 ## `filesystem_transaction_log_operation_failed`: filesystem transaction log operation failed
 
 The NTFS transaction log on a volume could not be written, replayed, or brought up.
+
+**Use when:** NTFS warns that it could not write or replay a volume's transaction log and that corruption may occur, often just after a USB or other removable drive went away.
+
+**Keywords:** NTFS transaction log, failed to flush data to the transaction log, corruption may occur, $LogFile, log replay error, transaction resource manager, Transactional NTFS, TxF, removed USB drive, volume log failure
 
 **Severity:** Warning (flush failed on a live volume, recovery error, metadata reset) / Notice (flush failed on a volume that no longer exists) / Error (resource manager could not start)
 
@@ -1001,6 +1129,10 @@ The NTFS transaction log on a volume could not be written, replayed, or brought 
 
 The NVIDIA display driver recorded an error.
 
+**Use when:** a technician finds NVIDIA nvlddmkm errors in the System log, often with no message text, and needs to know whether they matter when the screen did not black out and recover.
+
+**Keywords:** NVIDIA driver error, nvlddmkm error, description for event cannot be found nvlddmkm, NVIDIA display driver, NVIDIA graphics card, GeForce, Quadro, RTX, NVIDIA graphics driver error
+
 **Also reported by:** `win.eventlog.application`
 
 **Severity:** Notice at most.
@@ -1027,6 +1159,10 @@ The NVIDIA display driver recorded an error.
 ## `gpu_driver_reset`: gpu driver reset
 
 A display driver stopped responding, and Windows or the NVIDIA driver reset the graphics card.
+
+**Use when:** the screen goes black or freezes for a few seconds and comes back, Windows says the display driver stopped responding and has recovered, or a game or 3D application crashes as the screen blinks.
+
+**Keywords:** screen goes black for a few seconds, screen freezes then comes back, monitor blinks black, screen blacks out briefly, graphics driver crashed and recovered, display driver crash, GPU reset, TdrDelay, game crashes screen goes black, amdkmdag, igdkmd64, Radeon, GeForce, video driver stopped responding
 
 **Severity:** Notice
 
@@ -1055,6 +1191,10 @@ A display driver stopped responding, and Windows or the NVIDIA driver reset the 
 
 The machine could not find a domain controller, so Group Policy did not run.
 
+**Use when:** Group Policy cannot refresh because the machine cannot find any domain controller, usually because the domain name does not resolve: a laptop off the office network or VPN, or a PC using the wrong DNS servers.
+
+**Keywords:** could not obtain name of domain controller, no domain controller found, domain not found, domain name does not resolve, off the office network, not connected to VPN, company settings not updating, gpupdate cannot find domain, wrong DNS server domain
+
 **Also reported by:** `win.eventlog.identity_security`
 
 **Severity:** Notice
@@ -1081,6 +1221,10 @@ The machine could not find a domain controller, so Group Policy did not run.
 ## `group_policy_extension_apply_failed`: group policy extension apply failed
 
 A Group Policy extension or policy script failed to apply.
+
+**Use when:** one part of Group Policy did not apply while the rest did: a logon or startup script that did not run, deployed printers, mapped drives or redirected folders that did not appear.
+
+**Keywords:** logon script did not run, login script not running, startup script failed, shutdown script failed, script path not found, deployed printers missing, folder redirection failed, Group Policy Drive Maps failed, client-side extension failed, CSE failed, MDM Policy extension
 
 **Also reported by:** `win.eventlog.application`, `win.eventlog.identity_security`
 
@@ -1109,6 +1253,10 @@ A Group Policy extension or policy script failed to apply.
 ## `group_policy_processing_failed`: group policy processing failed
 
 A Group Policy pass failed and did not apply.
+
+**Use when:** a PC is not getting new or changed Group Policy settings and gpupdate reports that processing failed, because the domain controller is known but cannot be reached over the network, bound over LDAP or read from SYSVOL.
+
+**Keywords:** gpupdate failed, gpupdate /force fails, Group Policy not applying, GPO not applying, company settings not applied, new policies not applied, processing of Group Policy failed, lack of network connectivity to a domain controller, cannot read gpt.ini, SYSVOL not accessible, machine account password
 
 **Also reported by:** `win.eventlog.identity_security`
 
@@ -1141,6 +1289,10 @@ A Group Policy pass failed and did not apply.
 
 Group Policy software installation did not complete an assignment, install or removal, or an extension deferred its change to the next startup or logon.
 
+**Use when:** software assigned or published through Group Policy never installed, was not removed, or is waiting for a restart or logon before it installs.
+
+**Keywords:** GPO software deployment, software installation policy, assigned software not installing, pushed software never installed, published software, MSI deployment Group Policy, software install pending restart, processed before system startup or user logon, installation source for this product is not available, GPO install fatal error 1603
+
 **Severity:** Warning or Info
 
 **Why it matters:** A deferral applies at the next startup or logon. Any other code leaves the assigned software missing, or an old assignment in place, until a later pass succeeds.
@@ -1166,6 +1318,10 @@ Group Policy software installation did not complete an assignment, install or re
 ## `hardware_error_corrected`: hardware error corrected
 
 Windows Hardware Error Architecture (WHEA) reported a hardware error that the hardware corrected.
+
+**Use when:** the log shows a corrected hardware error while the machine runs normally, and someone asks whether it matters or is an early sign of failing memory, a failing processor or a PCIe device going bad.
+
+**Keywords:** corrected hardware error, hardware error but nothing wrong, WHEA warning, corrected machine check, machine check, MCE, PCIe bus error, AER, ECC corrected memory error, correctable error, early sign of failing RAM
 
 **Severity:** Notice
 
@@ -1194,6 +1350,10 @@ Windows Hardware Error Architecture (WHEA) reported a hardware error that the ha
 
 Windows Hardware Error Architecture (WHEA) reported a hardware error that the hardware could not correct.
 
+**Use when:** a machine crashed, froze or restarted on its own and the log shows a fatal or uncorrectable hardware error, and someone needs to know whether memory, the processor or a card is failing.
+
+**Keywords:** fatal hardware error, uncorrectable hardware error, WHEA_UNCORRECTABLE_ERROR, stop code 0x124, machine check exception, MCE, uncorrected memory error, bad RAM, failing CPU, unexpected restart hardware error, PCIe fatal error, CPER record
+
 **Severity:** Error or Minor
 
 **Why it matters:** The error was not contained: data in memory may be damaged, and a crash or restart often comes with it.
@@ -1219,6 +1379,10 @@ Windows Hardware Error Architecture (WHEA) reported a hardware error that the ha
 ## `http_ssl_binding_created`: http ssl binding created
 
 An HTTPS certificate binding was created for a listener endpoint on this host.
+
+**Use when:** someone asks who added or replaced the HTTPS certificate on a server's site or service port, or why clients now see a different certificate.
+
+**Keywords:** SSL certificate binding added, HTTPS certificate bound, certificate replaced on server, SSL binding after certificate renewal, new SSL certificate on port 443, sslcert, IIS HTTPS binding, WinRM HTTPS listener certificate, certificate hash changed
 
 **Severity:** Notice
 
@@ -1247,6 +1411,10 @@ An HTTPS certificate binding was created for a listener endpoint on this host.
 
 The HTTPS certificate binding for a listener endpoint was removed on this host.
 
+**Use when:** an HTTPS site or service on a server stopped presenting its certificate, or someone asks who removed a certificate binding from a server port.
+
+**Keywords:** SSL certificate binding removed, certificate binding deleted, netsh http delete sslcert, site lost its certificate, HTTPS stopped working after uninstall, sslcert removed, IIS HTTPS binding removed, certificate replacement
+
 **Severity:** Notice
 
 **Why it matters:** Clients reaching that endpoint over HTTPS get no certificate and fail to connect until a binding is put back.
@@ -1274,6 +1442,10 @@ The HTTPS certificate binding for a listener endpoint was removed on this host.
 
 An HTTPS listener endpoint on this host could not use its SSL configuration.
 
+**Use when:** an HTTPS site or service on a server fails the secure connection, often right after its certificate was renewed, replaced or expired, because HTTP.sys cannot use the SSL binding for that address and port.
+
+**Keywords:** HTTPS binding cannot use certificate, HTTPS not working after certificate renewal, SSL error after renewing certificate, expired certificate still bound, certificate missing from store, IIS HTTPS binding broken, WinRM HTTPS not working
+
 **Severity:** Error
 
 **Why it matters:** Clients connecting to that endpoint over HTTPS fail the TLS handshake until the binding or the certificate behind it is fixed.
@@ -1300,6 +1472,10 @@ An HTTPS listener endpoint on this host could not use its SSL configuration.
 
 A Hyper-V virtual switch could not restore the configuration of one of its ports.
 
+**Use when:** a virtual machine comes up after a host restart without its network settings, such as a lost VLAN, or someone asks about a Hyper-V virtual switch port error at startup.
+
+**Keywords:** VM lost network after host restart, virtual machine no network after reboot, VLAN setting lost, Hyper-V virtual switch, vSwitch, virtual switch port, VM network adapter settings lost, Hyper-V networking
+
 **Severity:** Windows' own level, up to Error (server or unknown) / Info (workstation)
 
 **Why it matters:** The virtual machine, container or host adapter on that port can start without the network settings it had, such as its VLAN or bandwidth and security settings.
@@ -1321,6 +1497,10 @@ A Hyper-V virtual switch could not restore the configuration of one of its ports
 ## `iis_apppool_disabled`: iis apppool disabled
 
 IIS rapid-fail protection disabled an application pool after its worker process failed repeatedly.
+
+**Use when:** a website goes down with 503 Service Unavailable and stays down because its application pool keeps stopping, or IIS Manager shows the pool stopped after repeated worker crashes (rapid-fail protection).
+
+**Keywords:** HTTP Error 503 the service is unavailable, app pool keeps stopping, application pool stopped, app pool stopped by itself, AppPool disabled, IIS site down, w3wp keeps crashing
 
 **Severity:** Serious (server or unknown) / Warning (workstation)
 
@@ -1347,6 +1527,10 @@ IIS rapid-fail protection disabled an application pool after its worker process 
 ## `iis_apppool_identity_invalid`: iis apppool identity invalid
 
 IIS reported that an application pool's configured identity is invalid or cannot be resolved.
+
+**Use when:** an IIS website returns 503 Service Unavailable after the password of the account its application pool runs as was changed, reset or expired.
+
+**Keywords:** 503 after password change, service account password changed, app pool identity, application pool identity password, IIS service account password expired, AppPool credentials, custom identity IIS, logon failure application pool
 
 **Severity:** Error or Warning
 
@@ -1375,6 +1559,10 @@ IIS reported that an application pool's configured identity is invalid or cannot
 
 IIS reported that an application pool's worker process failed to start.
 
+**Use when:** an IIS website returns 503 and its application pool will not start, often after a deployment, a configuration change or a new module, while the pool's account is fine.
+
+**Keywords:** HTTP Error 503, app pool will not start, app pool stops right after start, w3wp failed to start, web.config error, IIS module failed to load, missing DLL IIS, 32-bit application pool
+
 **Severity:** Error or Warning
 
 **Why it matters:** The sites in that application pool return HTTP 503 Service Unavailable until a worker process starts.
@@ -1400,6 +1588,10 @@ IIS reported that an application pool's worker process failed to start.
 ## `iis_worker_crash`: iis worker crash
 
 An IIS worker process terminated unexpectedly.
+
+**Use when:** a web application crashed or the site dropped requests and users lost their session for a moment, then IIS recovered on its own.
+
+**Keywords:** w3wp.exe crash, w3wp crashed, worker process crashed, IIS crash, web app crashed, users logged out of website, website session lost, IIS worker process died, ASP.NET application crash
 
 **Severity:** Warning
 
@@ -1427,6 +1619,10 @@ An IIS worker process terminated unexpectedly.
 ## `ip_address_conflict_detected`: IP address conflict
 
 Another device on the network is using the same IP address as this machine.
+
+**Use when:** a user cannot get on the network or keeps dropping off, and Windows warns that another device on the network is using the same IP address.
+
+**Keywords:** IP conflict, IP address conflict, duplicate IP, duplicate IP address, Windows has detected an IP address conflict, another device is using this IP address, static IP inside DHCP range, same IP two devices
 
 **Also reported by:** `win.eventlog.network`
 
@@ -1456,6 +1652,10 @@ Another device on the network is using the same IP address as this machine.
 
 The iSCSI initiator lost its connection to a storage target, or could not connect to it.
 
+**Use when:** a server's SAN or iSCSI disk stalls or disappears, file shares, databases or virtual machines on it hang, or the iSCSI connection to the storage drops and reconnects.
+
+**Keywords:** iSCSI disconnected, lost connection to SAN, SAN storage disappeared, connection to the target was lost, target failed to respond in time, iSCSI Initiator, iscsicpl, storage path down, MPIO path failure, LUN offline
+
 **Severity:** Warning or Info
 
 **Why it matters:** Disks on that target stall or disappear while the path is down; applications using them, such as file shares, databases or virtual machines, hang or fail until it reconnects.
@@ -1483,6 +1683,10 @@ The iSCSI initiator lost its connection to a storage target, or could not connec
 
 Kerberos could not resolve the domain named in a certificate offered for sign-in.
 
+**Use when:** a technician asks about a Kerberos record saying the domain in a sign-in certificate could not be resolved, or certificate or Windows Hello for Business sign-in to domain resources fails on a domain-joined device off the corporate network.
+
+**Keywords:** smart card sign-in failed, Windows Hello for Business sign-in, WHfB, certificate logon, virtual smart card, Entra joined smart card sign-in, certificate domain cannot be resolved
+
 **Severity:** Info (capped)
 
 **Why it matters:** On a domain-joined device, certificate or smart card sign-in for that domain does not complete. On a cloud-joined or standalone device the record has no effect.
@@ -1507,6 +1711,10 @@ Kerberos could not resolve the domain named in a certificate offered for sign-in
 ## `kerberos_etype_unsupported`: kerberos etype unsupported
 
 A Kerberos exchange failed because the encryption types the client, the service account and the domain controller support do not overlap.
+
+**Use when:** a user or service cannot sign in to a server or application with Kerberos, often after a Windows update or hardening that retires RC4 or DES, and the domain controller says no encryption type is shared.
+
+**Keywords:** KDC_ERR_ETYPE_NOTSUPP, encryption type not supported, encryption type mismatch, etype, RC4 disabled, RC4 deprecation, service account no AES key, Kerberos fails after update, supported encryption types
 
 **Severity:** Warning
 
@@ -1533,6 +1741,10 @@ A Kerberos exchange failed because the encryption types the client, the service 
 
 A domain controller could not verify the signature on the privilege data inside a Kerberos ticket.
 
+**Use when:** users suddenly get access denied on a file server or other domain service, often while Windows updates have reached only some domain controllers, or a security review asks whether a PAC signature failure is a forged ticket.
+
+**Keywords:** access denied after Windows update, authentication fails after patch, domain controllers different update levels, PAC validation failed, PAC hardening, Kerberos signature hardening, mixed DC patch levels, forged Kerberos ticket
+
 **Severity:** Warning
 
 **Why it matters:** The request carrying that ticket did not proceed. A client presenting the same ticket repeatedly keeps failing to authenticate to the affected service.
@@ -1556,6 +1768,10 @@ A domain controller could not verify the signature on the privilege data inside 
 ## `kerberos_smartcard_cert_missing`: kerberos smartcard cert missing
 
 A domain controller has no usable certificate for smart card logon.
+
+**Use when:** smart card or certificate sign-in fails against a domain controller, or a domain controller warns it has no certificate for smart card logon, often after its certificate expired.
+
+**Keywords:** smart card logon failed, smart card sign-in not working, domain controller certificate expired, KDC certificate, PIV card, CAC card, Windows Hello for Business certificate trust, certificate auto-enrollment
 
 **Severity:** Warning
 
@@ -1584,6 +1800,10 @@ A domain controller has no usable certificate for smart card logon.
 
 The domain ticket-granting account has no strong encryption key, so Kerberos tickets are issued using legacy cryptography.
 
+**Use when:** a security audit or a domain controller warning says the krbtgt account has only old RC4 or DES keys and its password must be reset.
+
+**Keywords:** krbtgt password reset, reset krbtgt, krbtgt AES key, krbtgt RC4, krbtgt DES, weak Kerberos encryption, New-KrbtgtKeys, AES keys missing
+
 **Severity:** Warning
 
 **Why it matters:** Every ticket the domain issues is protected by weaker cryptography than it should be. The domain stops issuing usable tickets once the legacy encryption types are refused.
@@ -1607,11 +1827,15 @@ The domain ticket-granting account has no strong encryption key, so Kerberos tic
 
 A loaded Intel wireless adapter driver reported a fault in the adapter or in itself.
 
+**Use when:** a laptop's Intel Wi-Fi drops out or stops working and then comes back, or the adapter is reported as not functioning properly while its driver is still installed.
+
+**Keywords:** Intel Wi-Fi keeps dropping, Intel wifi drops after sleep, Intel wireless, Intel Wi-Fi driver, Intel AX201, Intel AX210, Netwtw10, Netwtw14, Netwtw06, network adapter is not functioning properly, driver encountered an internal error, wireless adapter reset
+
 **Severity:** Warning
 
 **Why it matters:** Wi-Fi on that adapter drops or becomes unreliable while the fault lasts, and on most laptops it is the only way off the machine. The driver normally resets and reloads itself without anyone acting.
 
-**In practice:** The Intel wireless driver (provider Netwtw or Netwaw followed by a generation number) logs these in the System log. Event 5002 says the driver has determined the network adapter is not functioning properly, and event 5005 that the driver hit an internal error and failed. Windows then resets the adapter, and the driver writes its usual initialization records, which SparkLogs keeps at Debug. A fault with no initialization after it is an adapter that stayed down. On a device without Intel's message files the text is a bare ID line, and the event ID carries the meaning. A driver that could not load at all is logged as 5000 instead.
+**In practice:** The Intel wireless driver (provider Netwtw or Netwaw followed by a generation number) logs these in the System log. Event 5002 says the driver has determined the network adapter is not functioning properly, and event 5005 that the driver hit an internal error and failed. Windows then resets the adapter, and the driver writes its usual initialization records, which are recorded at Debug. A fault with no initialization after it is an adapter that stayed down. On a device without Intel's message files the text is a bare ID line, and the event ID carries the meaning. A driver that could not load at all is logged as 5000 instead.
 
 **When to ignore:** A single fault followed within moments by the driver's initialization, with no repeat that day.
 
@@ -1634,6 +1858,10 @@ A loaded Intel wireless adapter driver reported a fault in the adapter or in its
 ## `nic_driver_load_failed`: nic driver load failed
 
 An Intel wireless adapter driver could not load, normally because of a resource conflict.
+
+**Use when:** a laptop's Intel Wi-Fi adapter is missing or shows a Device Manager error after startup, and no wireless networks appear until the driver is fixed.
+
+**Keywords:** wifi adapter missing, no wireless networks shown, Wi-Fi option disappeared, Intel wireless driver failed to load, Wi-Fi resource conflict, Code 12, cannot find enough free resources
 
 **Severity:** Error
 
@@ -1661,11 +1889,15 @@ An Intel wireless adapter driver could not load, normally because of a resource 
 
 A network adapter reported that its link went down, or reported the link back.
 
+**Use when:** a wired network connection drops and comes back, the network cable shows as unplugged, or the link returns at a lower speed such as 100 Mbps.
+
+**Keywords:** network cable unplugged, Ethernet keeps disconnecting, wired connection drops, link down, link flapping, NIC disconnects, Intel Ethernet, Realtek Ethernet, link speed dropped, 100 Mbps instead of 1 Gbps, switch port flapping, docking station Ethernet
+
 **Severity:** Notice (workstation down) / Warning (server or unknown down) / Info (recovered)
 
 **Why it matters:** Traffic on that adapter stops until the link returns. A machine with another working adapter stays reachable; one with only this adapter is offline for the duration.
 
-**In practice:** The wired adapter's own driver logs these in the System log. Intel drivers (e1i68x64 and the other e1...x64 generations, e2fnexpress, and the e1dexpress, e1dnexpress and e1iexpress drivers) log event 27, network link is disconnected. Realtek drivers (rt640x64, rt68cx21) log event 1, the adapter is disconnected from the network. Broadcom NetXtreme (bnxtnd) logs event 2, link down, with a reminder to check the cable. The return of the link is recorded under the same reason code: Intel event 32 (and 33 or 34 on the express drivers) and Broadcom event 9 or 14, each naming the speed it came back at. Realtek's return is not collected here. A cable, a dock, a switch port or a switch restart is the usual cause.
+**In practice:** The wired adapter's own driver logs these in the System log. Intel drivers (e1i68x64 and the other e1...x64 generations, e2fnexpress, and the e1dexpress, e1dnexpress and e1iexpress drivers) log event 27, network link is disconnected. Realtek drivers (rt640x64, rt68cx21) log event 1, the adapter is disconnected from the network. Broadcom NetXtreme (bnxtnd) logs event 2, link down, with a reminder to check the cable. The return of the link is recorded under the same reason code: Intel event 32 (and 33 or 34 on e1dexpress and e1dnexpress) and Broadcom event 9 or 14, each naming the speed it came back at. The e1iexpress and Realtek returns are not recorded under this reason. A cable, a dock, a switch port or a switch restart is the usual cause.
 
 **When to ignore:** On a laptop or desktop when the link returns soon after, as with docking, undocking or moving a cable.
 
@@ -1688,6 +1920,10 @@ A network adapter reported that its link went down, or reported the link back.
 ## `os_boot`: os boot
 
 The operating system started.
+
+**Use when:** someone asks when a machine last started or rebooted, how long it has been up, or whether it restarted overnight.
+
+**Keywords:** last boot time, when did it start up, uptime, system uptime, restarted overnight, machine rebooted, startup time, power on time, boot time, LastBootUpTime, systeminfo boot time
 
 **Severity:** Info
 
@@ -1716,6 +1952,10 @@ The operating system started.
 
 Windows rebooted from a bugcheck.
 
+**Use when:** a machine crashed to a blue screen and restarted by itself, or a user reports a stop code or "Your PC ran into a problem".
+
+**Keywords:** blue screen, BSOD, blue screen of death, stop code, stop error, bugcheck, bug check, Your PC ran into a problem, crashed and restarted, blue screen restart, memory dump, minidump, MEMORY.DMP, IRQL_NOT_LESS_OR_EQUAL, CRITICAL_PROCESS_DIED, PAGE_FAULT_IN_NONPAGED_AREA
+
 **Severity:** Serious (server or unknown) / Error (workstation)
 
 **Why it matters:** The machine crashed with a blue screen and restarted, so the user lost unsaved work and every service on it was down until it came back.
@@ -1741,6 +1981,10 @@ Windows rebooted from a bugcheck.
 ## `os_restart_requested`: os restart requested
 
 A process asked Windows to restart or shut down the machine.
+
+**Use when:** someone asks who or what restarted or shut down a machine, such as a reboot nobody planned, a restart during working hours or a server that rebooted outside the maintenance window.
+
+**Keywords:** who restarted, who rebooted the server, restarted without warning, unplanned reboot, reboot reason, shutdown reason, shutdown /r, restart initiated by, on behalf of user, forced restart for updates, Windows Update restart, RMM restart, patch reboot
 
 **Severity:** Notice
 
@@ -1768,6 +2012,10 @@ A process asked Windows to restart or shut down the machine.
 
 The operating system shut down cleanly.
 
+**Use when:** someone asks whether a machine shut down or restarted cleanly, or whether a gap in its data was the machine being turned off.
+
+**Keywords:** clean shutdown, shut down properly, graceful shutdown, normal shutdown, shutdown time, when did it turn off, powered off, turned off overnight
+
 **Severity:** Info
 
 **Why it matters:** Marks the clean end of a session, so later gaps in data until the next start are the machine being off, not a fault.
@@ -1794,6 +2042,10 @@ The operating system shut down cleanly.
 
 The device went to sleep.
 
+**Use when:** a laptop or desktop went to sleep or standby on its own, or a device could not be reached remotely because it may have been asleep.
+
+**Keywords:** went to sleep, goes to sleep by itself, sleeps too soon, standby, sleep mode, hibernate, hibernation, connected standby, lid closed, idle timeout, unreachable while asleep
+
 **Severity:** Info
 
 **Why it matters:** Marks the start of a span when the device was asleep, so missing data and failed remote access during it are not faults.
@@ -1818,6 +2070,10 @@ The device went to sleep.
 ## `os_thermal_hibernated`: Critical thermal hibernate
 
 Windows hibernated the machine because it reached its critical temperature.
+
+**Use when:** a machine shut off or hibernated by itself while running hot, with a loud fan, a case hot to the touch or a server room that is too warm.
+
+**Keywords:** overheating, overheated, too hot, hot laptop, shut down when hot, fan loud, fan not working, dust in fan, thermal hibernate, critical temperature, CPU temperature, server room too hot
 
 **Severity:** Warning on a workstation, Error on a server or a machine whose type is not known.
 
@@ -1847,6 +2103,10 @@ Windows hibernated the machine because it reached its critical temperature.
 
 The device woke from sleep.
 
+**Use when:** a laptop or desktop woke from sleep by itself, such as at night or in a bag, or someone asks what woke it.
+
+**Keywords:** woke up by itself, wakes from sleep, wakes up at night, hot in bag, turns on by itself from sleep, resumed from sleep, resume from standby, wake source, wake timer, wake on LAN, network adapter wakes it, mouse wakes it
+
 **Severity:** Info
 
 **Why it matters:** Marks the end of a span when the device was asleep, and the wake source explains a device that woke when nobody was using it.
@@ -1871,6 +2131,10 @@ The device woke from sleep.
 ## `pagefile_extended`: pagefile extended
 
 Windows grew the page file because committed memory ran low.
+
+**Use when:** a user sees "Virtual Memory Minimum Too Low" or a low on virtual memory message while Windows grows the paging file, and the machine slows down.
+
+**Keywords:** low on virtual memory, virtual memory too low, pagefile, pagefile.sys, swap file, increasing the size of the paging file, commit charge, low memory warning, slow and low on memory
 
 **Severity:** Notice
 
@@ -1897,6 +2161,10 @@ Windows grew the page file because committed memory ran low.
 
 Windows Update deferred an install attempt on this device; nothing failed.
 
+**Use when:** an update shows as postponed or waiting to install, or Windows Update logs an installation failure for an app that was open or a restart that was still owed.
+
+**Keywords:** update postponed, update deferred, update pending, waiting to install, will install later, Store app update, Microsoft Store update, app in use, update waiting for restart, update retry
+
 **Severity:** Info or Verbose
 
 **Why it matters:** The update lands on a later cycle without anyone acting, and nothing on the device changed.
@@ -1921,6 +2189,10 @@ Windows Update deferred an install attempt on this device; nothing failed.
 ## `patch_install_failed`: patch install failed
 
 Windows Update reports that an update install on this device failed or was interrupted.
+
+**Use when:** Windows Update keeps failing to install an update, asks to try again, or shows an error code such as 0x800f0922 or 0x80070002.
+
+**Keywords:** update failed, updates failed to install, Windows Update failed, There were problems installing some updates, retry update, cumulative update failed, security update failed, patch failed, patching failed, 0x800f0922, 0x80070002, 0x800f081f, 0x8007000d, component store corrupted, Windows Update error code
 
 **Also reported by:** `win.eventlog.setup`
 
@@ -1952,6 +2224,10 @@ Windows Update reports that an update install on this device failed or was inter
 
 A platform-security agent reported a tamper indicator against this machine.
 
+**Use when:** Dell Trusted Device or SafeBIOS warns of an attack indicator on a machine, such as BIOS downgrade being allowed, a changed BIOS setting or a case that was opened.
+
+**Keywords:** Dell SafeBIOS, SafeBIOS, BIOS tamper, firmware tamper, tampering detected, chassis intrusion, case opened, BIOS setting changed, BIOS downgrade allowed, hardware tampering
+
 **Also reported by:** `win.eventlog.platform`
 
 **Severity:** Error or Warning
@@ -1979,6 +2255,10 @@ A platform-security agent reported a tamper indicator against this machine.
 ## `ram_commit_exhausted`: ram commit exhausted
 
 Committed memory on this host reached its limit.
+
+**Use when:** programs crash, refuse to open or fail to save with an out of memory message, and Windows could not give them more memory.
+
+**Keywords:** out of memory, Out of Virtual Memory, not enough memory, insufficient memory, low on memory, Your computer is low on memory, Close programs to prevent information loss, programs closing, memory leak, commit limit, committed memory, page file too small
 
 **Also reported by:** `win.eventlog.platform`
 
@@ -2008,6 +2288,10 @@ Committed memory on this host reached its limit.
 
 A Remote Desktop license server is not activated and is issuing only temporary licences.
 
+**Use when:** Remote Desktop users get temporary licences that will expire, or RD Licensing Manager shows the license server as not activated.
+
+**Keywords:** RDS license server not activated, activate license server, temporary license, temporary CAL, RDS CAL, TS CAL, per-device CAL, client access license, RD Licensing Manager, Terminal Services licensing
+
 **Severity:** Warning
 
 **Why it matters:** Remote Desktop clients get temporary licences that expire. Once they do, users are refused sessions with a licensing error until the server is activated.
@@ -2032,6 +2316,10 @@ A Remote Desktop license server is not activated and is issuing only temporary l
 
 A Remote Desktop license server could not record a per-user licence in the directory.
 
+**Use when:** an RDS per-user licence report shows fewer licences in use than expected, or a license server cannot update users' licence attributes in Active Directory.
+
+**Keywords:** per-user CAL, per user license report, RDS license report, license usage undercount, RDS CAL tracking, license not recorded, license server AD permissions
+
 **Severity:** Warning
 
 **Why it matters:** Per-user licence usage is not recorded for the affected users, so licence reports undercount. Sessions keep working.
@@ -2055,6 +2343,10 @@ A Remote Desktop license server could not record a per-user licence in the direc
 ## `rds_licensing_service_failed`: rds licensing service failed
 
 A Remote Desktop license server could not run, or hit an error in its licensing database.
+
+**Use when:** the Remote Desktop Licensing service will not start, or the license server reports a database error and stops issuing licences.
+
+**Keywords:** Remote Desktop Licensing service stopped, TermServLicensing, RDS licensing broken, license server not working, license database corrupt, rebuild RDS license database, RDS CAL not issued, Terminal Services Licensing service
 
 **Severity:** Error
 
@@ -2082,6 +2374,10 @@ A Remote Desktop license server could not run, or hit an error in its licensing 
 
 A Secure Boot certificate update has not been applied on this device.
 
+**Use when:** a device has not yet taken the 2023 Secure Boot certificates and no failure record says why, or someone asks which machines still depend on the expiring 2011 certificates.
+
+**Keywords:** Secure Boot certificate expiry, Secure Boot certificates expiring, 2011 certificate expiration, Microsoft UEFI CA 2023, KEK 2K CA 2023, Microsoft Corporation KEK CA 2011, Secure Boot update not applied, Secure Boot servicing, AvailableUpdates, KB5025885
+
 **Severity:** Warning
 
 **Why it matters:** The device keeps its older Secure Boot certificates. Once those expire, it can no longer receive security updates to its boot components, and future Windows or firmware updates that need the new certificates can fail.
@@ -2105,6 +2401,10 @@ A Secure Boot certificate update has not been applied on this device.
 ## `secure_boot_certs_current`: secure boot certs current
 
 The device has the 2023 Secure Boot certificates and the boot manager signed with them.
+
+**Use when:** someone asks whether a device is ready for the Secure Boot certificate expiry, or needs to confirm the 2023 certificates and boot manager are in place.
+
+**Keywords:** Secure Boot certificates updated, ready for Secure Boot expiry, 2023 certificates installed, Secure Boot update complete, UEFI CA 2023 applied, Secure Boot compliance, boot manager signed 2023
 
 **Severity:** Info
 
@@ -2131,6 +2431,10 @@ The device has the 2023 Secure Boot certificates and the boot manager signed wit
 
 Windows applied a Secure Boot database update to the firmware.
 
+**Use when:** someone asks why Secure Boot settings changed after an update, or a BitLocker recovery prompt followed a Secure Boot DB or DBX update.
+
+**Keywords:** DBX update, dbx revocation, Secure Boot revocation list, Secure Boot DB updated, forbidden signature database, BitLocker recovery after DBX update, KB5025885
+
 **Severity:** Verbose
 
 **Why it matters:** None by itself. The firmware now trusts or refuses the boot components the update names.
@@ -2156,6 +2460,10 @@ Windows applied a Secure Boot database update to the firmware.
 ## `secure_boot_update_failed`: secure boot update failed
 
 A Secure Boot certificate or revocation update from Windows did not apply to the firmware.
+
+**Use when:** the Secure Boot certificate update keeps failing on a device, the firmware rejects it, or Microsoft has blocked it for a known firmware issue.
+
+**Keywords:** Secure Boot update failed, Secure Boot variable update failed, firmware rejected update, KEK update failed, platform key, OEM KEK missing, BIOS update needed for Secure Boot, virtual machine Secure Boot keys
 
 **Severity:** Notice
 
@@ -2186,6 +2494,10 @@ A Secure Boot certificate or revocation update from Windows did not apply to the
 
 A sub-service of an endpoint protection agent failed to start.
 
+**Use when:** a McAfee or Trellix component is not running after startup, or the agent's supervisor reports a module that failed to start.
+
+**Keywords:** Trellix, McAfee ENS, Trellix ENS, mfemms, antivirus module not running, security software component not started
+
 **Severity:** Warning
 
 **Why it matters:** The named component of the security product is not running. Where the component belongs to this installation, the product is working without part of its protection.
@@ -2213,6 +2525,10 @@ A sub-service of an endpoint protection agent failed to start.
 
 A sub-service of an endpoint protection agent terminated unexpectedly.
 
+**Use when:** a McAfee or Trellix component keeps stopping and restarting, or the security software drops one of its features without warning.
+
+**Keywords:** Trellix, McAfee ENS, Trellix ENS, mfemms, antivirus module crashed, security software crashing, protection stopped by itself, McAfee component restart loop
+
 **Severity:** Minor
 
 **Why it matters:** The named component of the security product stopped, and the protection it gives is missing until it runs again. A machine that logs these over and over has a broken install that keeps losing part of its protection.
@@ -2239,6 +2555,10 @@ A sub-service of an endpoint protection agent terminated unexpectedly.
 ## `service_crashed`: service crashed
 
 A Windows service crashed or terminated unexpectedly.
+
+**Use when:** a background service keeps crashing and Windows says it terminated unexpectedly, so whatever it runs, such as backup, remote access or an application, drops out until it restarts.
+
+**Keywords:** service keeps crashing, service stopped unexpectedly, service crash, service died, service restarts by itself, background service crashing, recovery action
 
 **Severity:** Error
 
@@ -2269,6 +2589,10 @@ A Windows service crashed or terminated unexpectedly.
 
 A Windows service stopped and reported an error.
 
+**Use when:** a service stops with an error code it returned itself, such as Incorrect function or a service-specific error.
+
+**Keywords:** service terminated with error, service-specific error, service stopped with error code, service stops after starting, service will not stay running, service terminated access is denied, Incorrect function
+
 **Severity:** Error
 
 **Why it matters:** Whatever the service provides stays unavailable until it starts again, and it fails the same way until the cause of the error is fixed.
@@ -2293,6 +2617,10 @@ A Windows service stopped and reported an error.
 ## `service_hang`: service hang
 
 A Windows service did not answer a control request from Service Control Manager in time.
+
+**Use when:** stopping, restarting or querying a service hangs or times out, or a shutdown or restart waits on a service that does not respond.
+
+**Keywords:** service not responding, service will not stop, cannot stop service, service stuck stopping, stuck on stopping, service hangs on stop, timeout waiting for transaction response, slow shutdown waiting on service
 
 **Severity:** Notice
 
@@ -2322,6 +2650,10 @@ A Windows service did not answer a control request from Service Control Manager 
 
 A Windows service hung while starting.
 
+**Use when:** a service shows Starting in Services and never reaches Running, even though its program launched and connected to Windows.
+
+**Keywords:** service stuck starting, stuck at starting, service stuck in starting state, slow boot service, dependency not ready, hung on starting, Starting status never changes
+
 **Severity:** Notice
 
 **Why it matters:** The service may not have started, and services or applications that depend on it can wait or fail.
@@ -2349,6 +2681,10 @@ A Windows service hung while starting.
 ## `service_installed`: service installed
 
 A Windows service was installed.
+
+**Use when:** someone asks whether a new service or remote-access tool was installed on a machine, or whether a new service could be malware set up to persist.
+
+**Keywords:** new service installed, service created, sc create, New-Service, persistence, malicious service, suspicious service, unauthorized service installed, remote access tool installed, PsExec, PSEXESVC, AnyDesk, ScreenConnect
 
 **Also reported by:** `win.eventlog.security`, `services`
 
@@ -2380,6 +2716,10 @@ A Windows service was installed.
 
 A Windows service failed to start.
 
+**Use when:** a service will not start, shows Error 1053, Error 1069 or a missing-file error, or a background program that should run from boot stays off.
+
+**Keywords:** service will not start, Could not start the service on Local Computer, Error 1053, did not respond in a timely fashion, Error 1069, service logon failure, service account password expired, Error 2 cannot find the file
+
 **Severity:** Error
 
 **Why it matters:** Whatever the service provides is missing until it starts, often from boot onward.
@@ -2406,6 +2746,10 @@ A Windows service failed to start.
 ## `service_start_timeout`: service start timeout
 
 A Windows service did not connect to Service Control Manager before the startup timeout.
+
+**Use when:** a service fails at boot because its program never connected to Windows within the start timeout, often followed by error 1053.
+
+**Keywords:** service start timeout, timeout waiting for service to connect, service did not start in time, slow service startup, Error 1053, service not started after reboot, ServicesPipeTimeout, A timeout was reached 30000 milliseconds
 
 **Severity:** Notice
 
@@ -2436,6 +2780,10 @@ A Windows service did not connect to Service Control Manager before the startup 
 
 Windows could not save cached file data to a network share and the data was lost.
 
+**Use when:** a file saved to a network share or mapped drive is missing recent changes or is damaged, or Windows shows a Delayed Write Failed message.
+
+**Keywords:** file lost on network share, lost changes on shared folder, mapped drive save lost, network file corrupted, VPN dropped while saving, Outlook PST on network share, OneNote on network share, redirected folders, unable to save all the data
+
 **Severity:** Error
 
 **Why it matters:** A file the user saved to a share is missing the last changes, or is damaged. The application was told the save worked, so nobody is warned.
@@ -2460,6 +2808,10 @@ Windows could not save cached file data to a network share and the data was lost
 ## `smb_server_transport_bind_failed`: smb server transport bind failed
 
 The Windows file-sharing service could not bind to a network transport.
+
+**Use when:** other machines cannot reach a file server's shared folders through one of its network connections, or the Server service reports it could not bind to a transport.
+
+**Keywords:** file server shares unreachable, share unreachable on one IP address, could not bind to the transport, File and Printer Sharing, SMB server, network adapter binding, adapter not ready at boot
 
 **Severity:** Warning, or Info on a workstation
 
@@ -2487,6 +2839,10 @@ The Windows file-sharing service could not bind to a network transport.
 
 A file share could not be recreated because the folder it points at no longer exists.
 
+**Use when:** a shared folder or scanner drop share stops working after a server restart because the folder it pointed at was deleted, moved or renamed.
+
+**Keywords:** shared folder disappeared, share missing after reboot, share gone after restart, scan to folder stopped working, scanner cannot save to share, network name cannot be found, unable to recreate the share, directory no longer exists, orphaned share, deleted shared folder, SMB share, net share
+
 **Severity:** Warning
 
 **Why it matters:** Users, scanners and scripts that use that share name fail to connect until the folder is restored or the share is removed.
@@ -2509,6 +2865,10 @@ A file share could not be recreated because the folder it points at no longer ex
 ## `sparklogs_agent_started`: sparklogs agent started
 
 The SparkLogs agent service started.
+
+**Use when:** someone asks whether or when the log collection agent started on a machine, or whether collection resumed after a gap, a restart or an agent update.
+
+**Keywords:** agent started, agent service running, collection resumed, logging agent started, log collector started, agent back online, agent restarted, gap in logs, after agent update
 
 **Also reported by:** `lifecycle`
 
@@ -2536,6 +2896,10 @@ The SparkLogs agent service started.
 ## `sparklogs_agent_stopped`: SparkLogs agent stopped
 
 The SparkLogs agent stopped.
+
+**Use when:** logs or readings from a machine stop arriving, and someone asks whether the log collection agent was stopped, crashed or was turned off, and by whom.
+
+**Keywords:** agent stopped, agent service stopped, logging agent turned off, log collector stopped, agent offline, agent crashed, stopped by RMM policy, no logs from device, collection stopped, agent uninstalled
 
 **Also reported by:** `lifecycle`
 
@@ -2565,13 +2929,17 @@ The SparkLogs agent stopped.
 
 A storage controller driver reset the path to a disk, or reported a timeout or controller error.
 
+**Use when:** the whole machine or an external drive freezes for several seconds while the path to a disk resets, and the System log shows a reset to device or a controller timeout.
+
+**Keywords:** freezes then recovers, froze for a few seconds, hangs while saving, disk stalls, disk stutter, disk timeout, bus reset, controller reset, iaStorA, iaStorAC, iaStorAVC, iaStorVD, Rapid Storage Technology, SATA cable, backplane, SSD firmware, HBA
+
 **Also reported by:** `win.eventlog.storage`
 
 **Severity:** Notice on uaspstor USB-path resets; Warning on other controller resets.
 
 **Why it matters:** Disk reads and writes stall while the controller resets, so programs freeze for seconds, and requests in flight are retried or lost. Repeated resets on one path often come before a cable, backplane, controller or drive failure.
 
-**In practice:** The storage miniport driver writes these in the System log. The common one is event 129, "Reset to device, \Device\RaidPortN, was issued": the driver gave up waiting for the device and reset the path to it. It covers Warning, Error and Critical records of event 129 and of event 11 ("The driver detected a controller error on \Device\RaidPortN") from storahci (SATA AHCI) and stornvme (NVMe), and event 129 from the Intel RST (iaStor), Hyper-V (storvsc) and USB attached SCSI (uaspstor) drivers. A reset through uaspstor is a USB drive or enclosure, and shows as Notice. The event does not say whether the device is the boot disk or something plugged in; the storage port driver's own record in the Microsoft-Windows-Storport/Operational log does. Informational records from these drivers are not counted here.
+**In practice:** The storage miniport driver writes these in the System log. The common one is event 129, "Reset to device, \Device\RaidPortN, was issued": the driver gave up waiting for the device and reset the path to it. It covers Warning, Error and Critical records of event 129 and of event 11 ("The driver detected a controller error on \Device\RaidPortN") from storahci (SATA AHCI) and stornvme (NVMe), and event 129 from the Intel RST (iaStor), Hyper-V (storvsc) and USB attached SCSI (uaspstor) drivers. A reset through uaspstor is a USB drive or enclosure, and shows as Notice. The event does not say whether the device is the boot disk or something plugged in; the storage port driver's own record in the Microsoft-Windows-Storage-Storport/Operational log does. Informational records from these drivers are not counted here.
 
 **When to ignore:** A single USB drive reset when the drive was being unplugged or was waking from sleep.
 
@@ -2596,6 +2964,10 @@ A storage controller driver reset the path to a disk, or reported a timeout or c
 ## `time_sync_failed`: time sync failed
 
 Windows Time could not reach or resolve its time source.
+
+**Use when:** a machine's clock is wrong or keeps drifting, sign-ins fail with clock skew errors, or Windows Time cannot reach its time server.
+
+**Keywords:** clock is wrong, wrong time, time is off, clock out of sync, time drift, clock skew, KRB_AP_ERR_SKEW, time sync failed, time server unreachable, time source, NTP, W32Time, domain controller time sync, time.windows.com
 
 **Severity:** Warning (server or unknown) / Info (workstation)
 
@@ -2624,6 +2996,10 @@ Windows Time could not reach or resolve its time source.
 
 A remote server presented a certificate that has expired or is not yet valid, and the TLS connection failed.
 
+**Use when:** a program on this machine cannot connect to a server because the server's certificate has expired or is not yet valid, or valid certificates fail because the clock is wrong.
+
+**Keywords:** certificate expired, expired certificate, cert expired, SSL certificate expired, certificate not yet valid, validity period, SEC_E_CERT_EXPIRED, 0x80090328, CERT_E_EXPIRED, 0x800B0101, vendor certificate expired, wrong clock certificate
+
 **Severity:** Error
 
 **Why it matters:** The connection to that endpoint does not complete, and retrying does not help until the certificate is renewed or the local clock is corrected.
@@ -2650,6 +3026,10 @@ A remote server presented a certificate that has expired or is not yet valid, an
 
 A server presented a TLS certificate that does not contain the name this machine connected to.
 
+**Use when:** a program on this machine fails to connect with a certificate name mismatch, often because it uses a short name or IP address that the server's certificate does not list.
+
+**Keywords:** certificate name mismatch, name does not match certificate, hostname mismatch, CN mismatch, SAN missing, CERT_E_CN_NO_MATCH, 0x800B010F, SEC_E_WRONG_PRINCIPAL, 0x80090322, certificate target principal name is incorrect, connect by IP address, short name certificate, TLS inspection proxy
+
 **Severity:** Error
 
 **Why it matters:** The program's connection to that server fails, or, if the program ignores the check, it talks to a server whose identity is not proven.
@@ -2675,6 +3055,10 @@ A server presented a TLS certificate that does not contain the name this machine
 
 A remote server presented a certificate issued by an authority this host does not trust, and the TLS connection failed.
 
+**Use when:** a program on this machine fails to connect because the server's certificate is not trusted, often after a firewall starts inspecting HTTPS or with an internal or self-signed certificate authority.
+
+**Keywords:** certificate not trusted, untrusted certificate, untrusted root, root certificate missing, issuer not trusted, certificate chain, SEC_E_UNTRUSTED_ROOT, 0x80090325, CERT_E_UNTRUSTEDROOT, 0x800B0109, SSL inspection, HTTPS inspection, internal CA, deploy root certificate
+
 **Severity:** Error
 
 **Why it matters:** The connection to that endpoint does not complete, and the server's identity is unproven.
@@ -2699,6 +3083,10 @@ A remote server presented a certificate issued by an authority this host does no
 ## `tls_cipher_mismatch`: tls cipher mismatch
 
 A remote client offered no cipher suite this host accepts, and the TLS handshake failed.
+
+**Use when:** an older device or program cannot connect securely to a service on this server, such as its website, Remote Desktop or LDAPS, often after TLS or cipher settings were tightened.
+
+**Keywords:** no shared cipher suite, cipher suite mismatch, no common cipher, do not possess a common algorithm, SEC_E_ALGORITHM_MISMATCH, 0x80090331, TLS handshake failed, legacy TLS, old device cannot connect, disabled TLS 1.0, IIS Crypto
 
 **Severity:** Warning
 
@@ -2726,6 +3114,10 @@ A remote client offered no cipher suite this host accepts, and the TLS handshake
 
 Windows could not create a TLS client credential for a program, so that program's outbound TLS connection could not start.
 
+**Use when:** one program on this machine can no longer make secure outbound connections, often after TLS protocols or ciphers were turned off here, or because a client certificate it needs cannot be used.
+
+**Keywords:** TLS client credential, error state 10013, outbound TLS fails, app cannot connect securely, TLS 1.0 disabled, TLS 1.2 only, SCHANNEL registry settings, client certificate private key, Schannel 10013
+
 **Severity:** Notice (error state 10013) / Error (server, other states) / Warning (workstation, other states)
 
 **Why it matters:** The program that asked for the credential cannot make the TLS connections that need it, so whatever integration it serves stops working; other programs' connections are unaffected.
@@ -2752,6 +3144,10 @@ Windows could not create a TLS client credential for a program, so that program'
 
 The private key behind this host's TLS server certificate could not be accessed.
 
+**Use when:** HTTPS, Remote Desktop or LDAPS on this server stops accepting secure connections, often right after a certificate renewal or import, because the service cannot read the certificate's private key.
+
+**Keywords:** private key inaccessible, cannot access private key, private key permissions, MachineKeys, MachineKeys permissions, SSL server credential, HTTPS down after certificate renewal, certificate without private key, keyset does not exist, 0x8009030D, RDP certificate, LDAPS certificate
+
 **Severity:** Error
 
 **Why it matters:** Clients cannot negotiate TLS with the endpoint that uses that certificate until the key or its permissions are repaired.
@@ -2776,6 +3172,10 @@ The private key behind this host's TLS server certificate could not be accessed.
 ## `tpm_attestation_check_failed`: tpm attestation check failed
 
 A TPM health check Windows runs before device attestation failed.
+
+**Use when:** a technician needs to know which TPM health check stopped a device passing attestation, such as a virtual machine or older TPM with no endorsement key certificate, or a device shown as cannot be attested.
+
+**Keywords:** cannot be attested, device health attestation, pre-attestation health check, Intune compliance TPM, conditional access TPM, EK certificate missing, endorsement key certificate, Autopilot TPM attestation, virtual TPM, vTPM, security chip health check
 
 **Severity:** Notice
 
@@ -2804,6 +3204,10 @@ A TPM health check Windows runs before device attestation failed.
 
 The TPM could not attest to a critical component of this machine.
 
+**Use when:** a device is marked unhealthy or not compliant because the TPM checks found a critical boot component failed attestation, often after a BIOS or firmware update.
+
+**Keywords:** TPM attestation failed, critical component failed, not expected to pass attestation, device health attestation, Intune compliance TPM attestation, after BIOS update, security chip, cannot prove device is secure
+
 **Severity:** Error
 
 **Why it matters:** Checks that rely on the TPM's measurement of the boot, such as device health attestation used by compliance and conditional access, can mark the machine as unhealthy until the TPM or firmware state is corrected.
@@ -2827,6 +3231,10 @@ The TPM could not attest to a critical component of this machine.
 ## `tpm_authorization_refused`: tpm authorization refused
 
 The TPM refused the authorization, policy or PCR check a command presented, or is in lockout.
+
+**Use when:** Windows Hello PIN sign-in or a TPM-protected key fails to open, or the TPM is locked out after too many wrong PIN attempts.
+
+**Keywords:** TPM lockout, TPM locked out, too many incorrect PIN attempts, PIN not accepted, Windows Hello PIN locked, dictionary attack, defending against dictionary attacks, anti-hammering, security chip locked, TPM_RC_LOCKOUT, TPM_RC_AUTH_FAIL, TPM_RC_BAD_AUTH, TPM_RC_POLICY_FAIL, 0x98E, 0x921, LockedOut
 
 **Severity:** Notice for a refused authorization or policy on one command. Warning when the TPM is in lockout and refuses every authorization.
 
@@ -2855,6 +3263,10 @@ The TPM refused the authorization, policy or PCR check a command presented, or i
 ## `tpm_boot_pcr_values_recorded`: tpm boot pcr values recorded
 
 The TPM measurements of a boot that reached Windows: one value per PCR, and one fingerprint over all of them.
+
+**Use when:** a technician is working out why a device asked for its BitLocker recovery key and needs the boot measurements to compare with an earlier boot.
+
+**Keywords:** why BitLocker asked for recovery key, PCR values, boot measurements, PCR 7, PCR validation profile, boot fingerprint, Secure Boot change, compare PCR values between boots
 
 **Severity:** Info
 
@@ -2887,6 +3299,10 @@ The TPM measurements of a boot that reached Windows: one value per PCR, and one 
 
 Windows asked the TPM whether it supports a value, algorithm or handle, and the TPM said no.
 
+**Use when:** someone asks whether many TPM failed-command records on a healthy device matter, where the TPM only answered that a value, algorithm or handle is not supported.
+
+**Keywords:** TPM error harmless, TPM errors safe to ignore, noisy TPM events, unsupported algorithm, unsupported curve, handle not found, TPM_RC_VALUE, TPM_RC_CURVE, TPM_RC_HASH, TPM_RC_HANDLE
+
 **Severity:** Debug
 
 **Why it matters:** None. These records are common on healthy devices and are not evidence of a TPM, BitLocker or Windows Hello fault.
@@ -2911,6 +3327,10 @@ Windows asked the TPM whether it supports a value, algorithm or handle, and the 
 ## `tpm_command_failed`: tpm command failed
 
 A TPM command failed in the Windows TPM driver, the TPM is in failure mode, or the TPM refused it with a response that is not a known routine refusal.
+
+**Use when:** BitLocker, Windows Hello or device compliance fails on a device whose TPM keeps reporting failed commands, or the TPM has gone into failure mode.
+
+**Keywords:** TPM failure mode, TPM_RC_FAILURE, TPM not responding, TPM driver error, TPM firmware update, security chip error, TPM malfunction, BitLocker cannot use TPM, Windows Hello TPM error, fTPM, TpmReady false
 
 **Severity:** Warning or Notice
 
@@ -2940,6 +3360,10 @@ A TPM command failed in the Windows TPM driver, the TPM is in failure mode, or t
 
 The TPM was busy or short of working memory and asked Windows to retry the command.
 
+**Use when:** someone asks whether TPM records saying the TPM was busy, self-testing or asked for a retry point at a fault, when sign-in and BitLocker otherwise work.
+
+**Keywords:** TPM busy, TPM retry, TPM_RC_RETRY, TPM_RC_YIELDED, TPM_RC_TESTING, TPM_RC_NV_RATE, TPM_RC_MEMORY, TPM_RC_OBJECT_MEMORY, TPM_RC_SESSION_MEMORY, TPM self-test, NV rate limit, transient TPM warning
+
 **Severity:** Verbose
 
 **Why it matters:** None on its own. Windows retries the command.
@@ -2964,6 +3388,10 @@ The TPM was busy or short of working memory and asked Windows to retry the comma
 
 The TPM was reset while the device was asleep or hibernating, so its reset counter moved.
 
+**Use when:** someone asks whether a TPM record after sleep or hibernate, saying the reset or resume count does not match, means the TPM or BitLocker has a problem.
+
+**Keywords:** TPM reset counter, reset count, resume count, do not match expected values, S3 resume, harmless TPM warning, TPM warning after sleep, TPM count mismatch after resume
+
 **Severity:** Verbose
 
 **Why it matters:** None on its own. TPM services keep working after the resume.
@@ -2987,6 +3415,10 @@ The TPM was reset while the device was asleep or hibernating, so its reset count
 ## `tpm_hardware_failed`: tpm hardware failed
 
 The Windows TPM driver found a non-recoverable error in the TPM hardware and stopped TPM services.
+
+**Use when:** the TPM stops working because Windows found a hardware error in it, and BitLocker, Windows Hello or compliance checks that need it fail.
+
+**Keywords:** TPM hardware error, non-recoverable error in the TPM, TPM services stopped, TPM not available, security chip broken, TPM firmware update, replace motherboard, BitLocker recovery after TPM failure, Windows Hello unavailable, TpmReady false
 
 **Severity:** Error
 
@@ -3017,6 +3449,10 @@ The Windows TPM driver found a non-recoverable error in the TPM hardware and sto
 
 The previous shutdown was not clean: the host stopped without shutting down and came back on the next start.
 
+**Use when:** a machine turned off or restarted on its own without a clean shutdown, after a power cut, a crash, a freeze or someone holding the power button.
+
+**Keywords:** shut off without warning, turned off by itself, random restart, rebooted unexpectedly, spontaneous reboot, power loss, power outage, power cut, held power button, hard reset, dirty shutdown, unclean shutdown, UPS, power supply
+
 **Severity:** Serious or Error on a server or an unknown host class, depending on which record reports it and what level that record carried; Warning on a workstation.
 
 **Why it matters:** Work that was open and not saved is lost, services stopped without warning, and disks or databases may need recovery.
@@ -3046,6 +3482,10 @@ The previous shutdown was not clean: the host stopped without shutting down and 
 
 A remote-access connection was established.
 
+**Use when:** someone asks who connected to the network over VPN or dial-up, when, and with which built-in Windows VPN profile.
+
+**Keywords:** VPN connected, VPN login, who connected over VPN, connected from home, remote worker connected, remote access connection, Always On VPN, rasdial, dial-up
+
 **Severity:** Notice
 
 **Why it matters:** The record shows who connected from outside, when, and through which VPN or dial-up profile.
@@ -3070,6 +3510,10 @@ A remote-access connection was established.
 ## `vss_shadow_aborted`: vss shadow aborted
 
 A volume shadow-copy operation failed or its shadow storage could not grow.
+
+**Use when:** a backup or restore point fails because its shadow copy snapshot was aborted or never made, or shadow copy storage is running out of room.
+
+**Keywords:** snapshot failed, shadow copy failed, backup snapshot failed, not enough space for shadow copy, shadow storage full, diff area, insufficient storage for shadow copies, shadow copies aborted, restore point failed, System Restore failed, MaxSize
 
 **Severity:** Error or Warning
 
@@ -3099,6 +3543,10 @@ A volume shadow-copy operation failed or its shadow storage could not grow.
 
 Volume shadow copies were deleted because shadow storage could not grow.
 
+**Use when:** Previous Versions or restore points for a drive have vanished, or a restore finds no shadow copies, because Windows deleted them when shadow storage could not grow.
+
+**Keywords:** previous versions missing, previous versions disappeared, no previous versions available, restore points gone, restore points missing, shadow copies deleted, shadow copies disappeared, shadow storage too small, shadow copy storage could not grow, diff area
+
 **Also reported by:** `win.eventlog.application`, `vss-shadowstorage`
 
 **Severity:** Error
@@ -3124,6 +3572,10 @@ Volume shadow copies were deleted because shadow storage could not grow.
 ## `win_app_error_dialog_shown`: win app error dialog shown
 
 Windows recorded an error dialog that an application or Windows itself showed.
+
+**Use when:** a user reports an error message box popped up on screen and you need its title and text.
+
+**Keywords:** error popup, pop-up message, error message box, dialog box appeared, error window, message box, hard error, no disk in the drive, Exception Processing Message
 
 **Severity:** Minor
 
@@ -3152,6 +3604,10 @@ Windows recorded an error dialog that an application or Windows itself showed.
 
 The battery ran down to a trigger level in the power plan and Windows took the action the plan sets.
 
+**Use when:** a laptop shut down, slept or hibernated on its own because its battery ran low.
+
+**Keywords:** laptop shut down low battery, battery died, battery critical, critical battery level, low battery hibernate, laptop went to sleep by itself, battery dies quickly, worn battery, battery report, battery not charging, power plan battery action
+
 **Severity:** Notice
 
 **Why it matters:** When the action is sleep, hibernate or shut down, the machine stopped on its own; unsaved work in programs that do not survive that is lost.
@@ -3178,6 +3634,10 @@ The battery ran down to a trigger level in the power plan and Windows took the a
 
 Servicing of the Windows recovery environment failed on this device.
 
+**Use when:** a Windows update that services the recovery environment keeps failing, such as one that needs a larger recovery partition.
+
+**Keywords:** WinRE update failed, Windows Recovery Environment, recovery partition too small, resize recovery partition, KB5034441, 0x80070643, Safe OS dynamic update, WinRE
+
 **Severity:** Error
 
 **Why it matters:** The recovery environment stays at its previous state, so Startup Repair and reset tools on this device lack the update's fixes, and updates that service it can keep failing.
@@ -3201,6 +3661,10 @@ Servicing of the Windows recovery environment failed on this device.
 ## `wlan_limited_connectivity`: wlan limited connectivity
 
 Wireless networking entered limited connectivity.
+
+**Use when:** Wi-Fi shows connected but with limited or no internet, pages stop loading or calls drop, and Windows tries to recover the wireless link.
+
+**Keywords:** wifi limited, Wi-Fi limited, connected no internet, no internet secured, no internet access, wifi connected but no internet, pages not loading on wifi, calls drop on wifi, weak wifi signal
 
 **Severity:** Warning
 

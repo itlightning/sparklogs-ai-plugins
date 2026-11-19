@@ -6,23 +6,27 @@
 Each section below is complete for its reason: every public field, in the words the reference page shows.
 Search for the heading "## `<code>`" or a word from the reason's label. Do not read the whole file.
 
-| reason | label | kind | severity | service | benign |
-|---|---|---|---|---|---|
-| `appid_certificate_store_verification_failed` | appid certificate store verification failed | event | Debug | `security_audit` |  |
-| `appid_certificate_store_verified` | appid certificate store verified | event | Info | `security_audit` |  |
-| `appx_activation_failed` | appx activation failed | event | Info to Notice | `app_stability` | benign possible |
-| `appx_cleanup_residue` | appx cleanup residue | event | Debug | `patching` | benign possible |
-| `appx_deployment_failed` | appx deployment failed | event | Verbose to Notice | `patching` | benign possible |
-| `appx_deployment_requeued` | appx deployment requeued | event | Verbose | `patching` |  |
-| `appx_package_runtime_corrupt` | appx package runtime corrupt | event | Notice to Warning | `app_stability` |  |
-| `appx_provisioning_failed` | appx provisioning failed | event | Info to Notice | `app_stability` | benign possible |
-| `appx_service_start_failed` | appx service start failed | event | Info to Notice | `patching` | benign possible |
-| `perf_counter_provider_failed` | perf counter provider failed | event | Debug | `app_stability` |  |
-| `wcf_request_failed` | wcf request failed | event | Minor | `app_stability` |  |
+| reason | label | kind | severity | service | benign | use when |
+|---|---|---|---|---|---|---|
+| `appid_certificate_store_verification_failed` | appid certificate store verification failed | event | Debug | `security_audit` |  | a technician finds an Application Identity certificate-store failure while looking into AppLocker and needs to know whether it explains a blocked app. |
+| `appid_certificate_store_verified` | appid certificate store verified | event | Info | `security_audit` |  | a technician sees a routine Application Identity certificate-store success record and wants to know whether it needs action, or whether earlier verification failures have stopped. |
+| `appx_activation_failed` | appx activation failed | event | Info to Notice | `app_stability` | benign possible | a Store or packaged app, a Start menu entry or a Settings page does not open when clicked or closes at once, including apps Windows will not run under the built-in Administrator account. |
+| `appx_cleanup_residue` | appx cleanup residue | event | Debug | `patching` | benign possible | leftover folders or registry entries remain after an app was removed or updated, or a technician sees package cleanup records and wants to know whether they matter. |
+| `appx_deployment_failed` | appx deployment failed | event | Verbose to Notice | `patching` | benign possible | a Store or packaged app will not install, update or uninstall for a user, including a Store download that ends in an error code or a policy that blocks Store apps or sideloading. |
+| `appx_deployment_requeued` | appx deployment requeued | event | Verbose | `patching` |  | a Store or packaged app install or update keeps retrying and does not finish, and a technician wants to know why Windows put it back on the queue. |
+| `appx_package_runtime_corrupt` | appx package runtime corrupt | event | Notice to Warning | `app_stability` |  | a Store or packaged app will not start because Windows found its installed package damaged, and a technician needs to know whether Windows repaired it or a Repair, Reset or reinstall is needed. |
+| `appx_provisioning_failed` | appx provisioning failed | event | Info to Notice | `app_stability` | benign possible | a built-in or Store app is missing or not ready for a user after they sign in, often on a new profile's first sign-in, and a technician needs the package and result code. |
+| `appx_service_start_failed` | appx service start failed | event | Info to Notice | `patching` | benign possible | Store or packaged app installs and updates fail because the app deployment client could not start or connect to a service it depends on, and a technician needs to know which service. |
+| `perf_counter_provider_failed` | perf counter provider failed | event | Debug | `app_stability` |  | Performance Monitor or a monitoring tool shows no data or missing counters for one component, and a technician needs to know whether its counters failed to register. |
+| `wcf_request_failed` | wcf request failed | event | Minor | `app_stability` |  | a line-of-business service hosted on WCF throws exceptions on some requests, and a developer or technician needs the exception type and application domain from the WCF operational log. |
 
 ## `appid_certificate_store_verification_failed`: appid certificate store verification failed
 
 The Application Identity service could not verify the certificate store.
+
+**Use when:** a technician finds an Application Identity certificate-store failure while looking into AppLocker and needs to know whether it explains a blocked app.
+
+**Keywords:** AppLocker certificate check failed, AppLocker publisher rule certificate check, Application Identity service error, app control certificate check failed
 
 **Severity:** Debug
 
@@ -50,6 +54,10 @@ The Application Identity service could not verify the certificate store.
 
 The Application Identity service verified the certificate store.
 
+**Use when:** a technician sees a routine Application Identity certificate-store success record and wants to know whether it needs action, or whether earlier verification failures have stopped.
+
+**Keywords:** Application Identity certificate check succeeded, AppLocker certificate check passed, app control certificate check passed, AppIDSvc certificate check
+
 **Severity:** Info
 
 **Why it matters:** No problem on its own. It marks a successful check beside any failures.
@@ -73,6 +81,10 @@ The Application Identity service verified the certificate store.
 ## `appx_activation_failed`: appx activation failed
 
 A Store or packaged application did not start.
+
+**Use when:** a Store or packaged app, a Start menu entry or a Settings page does not open when clicked or closes at once, including apps Windows will not run under the built-in Administrator account.
+
+**Keywords:** Store app closes immediately, Store app opens then closes, Settings app won't open, Start menu app won't launch, UWP app won't start, MSIX app won't launch, This app can't open, app launch timeout, built-in Administrator account can't open app
 
 **Also reported by:** `win.eventlog.application`
 
@@ -103,6 +115,10 @@ A Store or packaged application did not start.
 
 During app package cleanup, Windows could not delete every file or registry entry.
 
+**Use when:** leftover folders or registry entries remain after an app was removed or updated, or a technician sees package cleanup records and wants to know whether they matter.
+
+**Keywords:** leftover app files after uninstall, leftover package folders, WindowsApps leftovers, app uninstall leftovers, package cleanup could not delete, removed app still using disk space
+
 **Severity:** Debug
 
 **Why it matters:** No effect on the user. Leftover folders can take disk space.
@@ -127,6 +143,10 @@ During app package cleanup, Windows could not delete every file or registry entr
 ## `appx_deployment_failed`: appx deployment failed
 
 Installing, updating or removing a Store or packaged app failed for a user on this device.
+
+**Use when:** a Store or packaged app will not install, update or uninstall for a user, including a Store download that ends in an error code or a policy that blocks Store apps or sideloading.
+
+**Keywords:** Store app won't install, Store app won't update, can't uninstall Store app, Microsoft Store install error, Add-AppxPackage failed, Remove-AppxPackage failed, 0x80073CF9, 0x80073CF3, MSIX install failed, sideloading blocked, Store app install blocked by policy, package in use
 
 **Severity:** Notice, Info or Verbose
 
@@ -157,6 +177,10 @@ Installing, updating or removing a Store or packaged app failed for a user on th
 
 The AppX deployment service put a package install or update back on its queue.
 
+**Use when:** a Store or packaged app install or update keeps retrying and does not finish, and a technician wants to know why Windows put it back on the queue.
+
+**Keywords:** app update stuck pending, app install keeps retrying, app update never finishes, deployment requeued, package install queued again
+
 **Severity:** Verbose
 
 **Why it matters:** The install or update is delayed, not failed. A package that keeps coming back never finishes.
@@ -185,6 +209,10 @@ These records are rate-bounded: one per package family per device per day, with 
 
 Windows found a damaged record for an installed app package.
 
+**Use when:** a Store or packaged app will not start because Windows found its installed package damaged, and a technician needs to know whether Windows repaired it or a Repair, Reset or reinstall is needed.
+
+**Keywords:** corrupt app package, damaged app package, app package corrupted, app package registration corrupt, re-register app package, Add-AppxPackage -Register, reinstall broken Store app
+
 **Severity:** Warning or Notice
 
 **Why it matters:** Apps in that package can fail to start until the package is repaired or reinstalled.
@@ -209,6 +237,10 @@ Windows found a damaged record for an installed app package.
 ## `appx_provisioning_failed`: appx provisioning failed
 
 App Readiness reported a failed app operation for a user.
+
+**Use when:** a built-in or Store app is missing or not ready for a user after they sign in, often on a new profile's first sign-in, and a technician needs the package and result code.
+
+**Keywords:** apps missing after first sign-in, new user profile missing apps, built-in apps missing for new user, app not ready after sign-in, provisioned app failed, per-user app setup failed, first logon app setup
 
 **Severity:** Notice or Info
 
@@ -236,6 +268,10 @@ App Readiness reported a failed app operation for a user.
 
 The app deployment client could not start or reach a service it needs.
 
+**Use when:** Store or packaged app installs and updates fail because the app deployment client could not start or connect to a service it depends on, and a technician needs to know which service.
+
+**Keywords:** AppXSvc not starting, app deployment service won't start, app install service unavailable, packaged app service start failed, deployment service connection failed
+
 **Severity:** Notice or Info
 
 **Why it matters:** Store and packaged app installs and updates can fail for that sign-in session.
@@ -262,6 +298,10 @@ The app deployment client could not start or reach a service it needs.
 
 A performance-counter provider could not register or create a counter.
 
+**Use when:** Performance Monitor or a monitoring tool shows no data or missing counters for one component, and a technician needs to know whether its counters failed to register.
+
+**Keywords:** performance counters missing, Performance Monitor no data, perfmon counters missing, counter not found, rebuild performance counters, performance counter registration failed, Performance Counters for Windows
+
 **Severity:** Debug
 
 **Why it matters:** A monitoring tool or Performance Monitor can miss readings from that provider.
@@ -282,6 +322,10 @@ A performance-counter provider could not register or create a counter.
 ## `wcf_request_failed`: wcf request failed
 
 A WCF service on this machine raised an exception while handling a request.
+
+**Use when:** a line-of-business service hosted on WCF throws exceptions on some requests, and a developer or technician needs the exception type and application domain from the WCF operational log.
+
+**Keywords:** WCF service exception, unhandled exception in WCF service, service host request error
 
 **Also reported by:** `win.eventlog.application`
 

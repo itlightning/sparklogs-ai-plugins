@@ -6,32 +6,36 @@
 Each section below is complete for its reason: every public field, in the words the reference page shows.
 Search for the heading "## `<code>`" or a word from the reason's label. Do not read the whole file.
 
-| reason | label | kind | severity | service | benign |
-|---|---|---|---|---|---|
-| `win_component_store_assembly_missing` | win component store assembly missing | event | Notice | `patching` |  |
-| `win_component_store_corruption` | win component store corruption | event | Notice to Warning | `patching` |  |
-| `win_component_store_corruption_recurring` | win component store corruption recurring | event | Notice | `patching` |  |
-| `win_component_store_file_flag_corruption_suspected` | win component store file flag corruption suspected | event | Notice | `patching` |  |
-| `win_component_store_file_repaired` | win component store file repaired | event | Notice | `patching` |  |
-| `win_component_store_payload_corrupt` | win component store payload corrupt | event | Notice | `patching` |  |
-| `win_component_store_payload_unrepairable` | win component store payload unrepairable | event | Warning | `patching` |  |
-| `win_component_store_repair_unavailable` | win component store repair unavailable | event | Warning | `patching` |  |
-| `win_component_store_reprojection_failed` | win component store reprojection failed | event | Notice | `patching` |  |
-| `win_component_store_scan_repaired_corruption` | win component store scan repaired corruption | event | Notice | `patching` |  |
-| `win_servicing_commit_skipped_reboot_required` | win servicing commit skipped reboot required | event | Notice | `patching` |  |
-| `win_servicing_component_manifest_unreadable` | win servicing component manifest unreadable | event | Notice | `patching` |  |
-| `win_servicing_delta_patch_failed` | win servicing delta patch failed | event | Notice | `patching` |  |
-| `win_servicing_duplicate_update_name` | win servicing duplicate update name | event | Notice | `patching` |  |
-| `win_servicing_package_manifest_unreadable` | win servicing package manifest unreadable | event | Debug | `patching` |  |
-| `win_servicing_package_stage_failed` | win servicing package stage failed | event | Warning | `patching` |  |
-| `win_servicing_source_files_missing` | win servicing source files missing | event | Warning | `patching` |  |
-| `win_servicing_startup_package_failed` | win servicing startup package failed | event | Notice | `patching` |  |
-| `win_servicing_update_package_create_failed` | win servicing update package create failed | event | Warning | `patching` |  |
-| `win_sfc_repair_started` | win sfc repair started | event | Notice | `patching` |  |
+| reason | label | kind | severity | service | benign | use when |
+|---|---|---|---|---|---|---|
+| `win_component_store_assembly_missing` | win component store assembly missing | event | Notice | `patching` |  | CBS.log reports that a component assembly is missing from WinSxS, usually found while working out why an update or optional feature will not install. |
+| `win_component_store_corruption` | win component store corruption | event | Notice to Warning | `patching` |  | an update, optional feature or repair stops because the WinSxS component store is damaged, or a scan recorded in CBS.log counted damage in it. |
+| `win_component_store_corruption_recurring` | win component store corruption recurring | event | Notice | `patching` |  | a technician needs to know how many times Windows has found damage in this machine's component store, for example whether the damage keeps coming back after repairs. |
+| `win_component_store_file_flag_corruption_suspected` | win component store file flag corruption suspected | event | Notice | `patching` |  | a technician reading a component-store scan in CBS.log finds a suspected file flag corruption line and needs to know whether it means the store is damaged. |
+| `win_component_store_file_repaired` | win component store file repaired | event | Notice | `patching` |  | SFC or a store repair reports that it found and repaired damaged system files, and someone wants to know which file it was and whether follow-up is needed. |
+| `win_component_store_payload_corrupt` | win component store payload corrupt | event | Notice | `patching` |  | a component-store scan in CBS.log lists damaged files inside WinSxS, and a technician needs to know which files before repairing the store. |
+| `win_component_store_payload_unrepairable` | win component store payload unrepairable | event | Warning | `patching` |  | a store repair such as DISM /RestoreHealth could not fix a damaged file inside the component store and needs a good copy from Windows Update or install media. |
+| `win_component_store_repair_unavailable` | win component store repair unavailable | event | Warning | `patching` |  | sfc /scannow says Windows Resource Protection found corrupt files but was unable to fix some of them. |
+| `win_component_store_reprojection_failed` | win component store reprojection failed | event | Notice | `patching` |  | a technician finds a reprojection failure in CBS.log and needs to know whether a file in the running system may not match the copy in the component store. |
+| `win_component_store_scan_repaired_corruption` | win component store scan repaired corruption | event | Notice | `patching` |  | DISM /RestoreHealth reports that it repaired the component store, and someone wants to know how much damage it fixed and whether any is left. |
+| `win_servicing_commit_skipped_reboot_required` | win servicing commit skipped reboot required | event | Notice | `patching` |  | a Windows update seems to have done nothing, or shows as pending in patch reports, because the machine has not restarted since the change was staged. |
+| `win_servicing_component_manifest_unreadable` | win servicing component manifest unreadable | event | Notice | `patching` |  | an update or repair fails on a component whose manifest in the store cannot be read, logged in CBS.log as a manifest format error. |
+| `win_servicing_delta_patch_failed` | win servicing delta patch failed | event | Notice | `patching` |  | a cumulative update fails to install because Windows could not apply a delta to one component, usually because the base file in the store is damaged or missing. |
+| `win_servicing_duplicate_update_name` | win servicing duplicate update name | event | Notice | `patching` |  | a technician finds a duplicate update name in a package in CBS.log and needs to know whether it stopped an install. |
+| `win_servicing_package_manifest_unreadable` | win servicing package manifest unreadable | event | Debug | `patching` |  | an update or optional feature may not install or change state because Windows cannot read its package manifest, the .mum file for that package. |
+| `win_servicing_package_stage_failed` | win servicing package stage failed | event | Warning | `patching` |  | an update fails before it can install because Windows could not stage it, the step that copies and prepares its files. |
+| `win_servicing_source_files_missing` | win servicing source files missing | event | Warning | `patching` |  | a store repair or an optional feature install such as .NET Framework 3.5 fails, as logged in CBS.log, because Windows cannot get the files it needs, often on a machine that takes updates from WSUS. |
+| `win_servicing_startup_package_failed` | win servicing startup package failed | event | Notice | `patching` |  | an update fails during the restart that was meant to finish installing it, and a technician needs the KB number of the package that failed. |
+| `win_servicing_update_package_create_failed` | win servicing update package create failed | event | Warning | `patching` |  | an update refuses to install because the machine needs a newer servicing stack update (SSU) first, typical of a machine months behind on patches. |
+| `win_sfc_repair_started` | win sfc repair started | event | Notice | `patching` |  | System File Checker found damaged system files and started repairing them, and a technician wants to know when and how the repair ended. |
 
 ## `win_component_store_assembly_missing`: win component store assembly missing
 
 A component assembly is missing from the store.
+
+**Use when:** CBS.log reports that a component assembly is missing from WinSxS, usually found while working out why an update or optional feature will not install.
+
+**Keywords:** component assembly missing, missing component in WinSxS, WinSxS missing files, component store missing assembly, CBS.log assembly missing, update fails missing Windows component
 
 **Severity:** Notice
 
@@ -54,6 +58,10 @@ A component assembly is missing from the store.
 ## `win_component_store_corruption`: win component store corruption
 
 Windows found its component store (WinSxS) damaged, or a servicing operation stopped because of that damage.
+
+**Use when:** an update, optional feature or repair stops because the WinSxS component store is damaged, or a scan recorded in CBS.log counted damage in it.
+
+**Keywords:** component store corrupted, component store damaged, WinSxS corrupted, WinSxS corruption, The component store is repairable, updates fail store corruption, CBS.log corruption, Windows image corrupted, store corruptions were fixed
 
 **Also reported by:** `win.eventlog.setup`
 
@@ -86,6 +94,10 @@ Windows found its component store (WinSxS) damaged, or a servicing operation sto
 
 Windows reported how often component-store corruption has been detected.
 
+**Use when:** a technician needs to know how many times Windows has found damage in this machine's component store, for example whether the damage keeps coming back after repairs.
+
+**Keywords:** corruption keeps coming back, repeated component store corruption, recurring WinSxS corruption, Count of times corruption detected, corruption detection count, store damage returns after repair, how often corruption found
+
 **Severity:** Notice
 
 **Why it matters:** Nothing on its own. A count above one means damage was found again after an earlier detection.
@@ -112,6 +124,10 @@ Windows reported how often component-store corruption has been detected.
 
 Windows suspects damaged file flags in the component store and keeps checking.
 
+**Use when:** a technician reading a component-store scan in CBS.log finds a suspected file flag corruption line and needs to know whether it means the store is damaged.
+
+**Keywords:** Suspected file flag corruption detected, file flag corruption, suspected corruption CBS.log, component store file flags, WinSxS file flags wrong
+
 **Severity:** Notice
 
 **Why it matters:** None established. Windows records a suspicion and carries on.
@@ -135,6 +151,10 @@ Windows suspects damaged file flags in the component store and keeps checking.
 ## `win_component_store_file_repaired`: win component store file repaired
 
 Windows repaired a file from its component store or backup.
+
+**Use when:** SFC or a store repair reports that it found and repaired damaged system files, and someone wants to know which file it was and whether follow-up is needed.
+
+**Keywords:** found corrupt files and successfully repaired them, sfc repaired files, SFC fixed corrupt files, system file restored, Repairing corrupted file, by copying from backup, by copying from store, same file repaired every scan
 
 **Severity:** Notice
 
@@ -160,6 +180,10 @@ Windows repaired a file from its component store or backup.
 ## `win_component_store_payload_corrupt`: win component store payload corrupt
 
 A payload file in the component store is corrupt.
+
+**Use when:** a component-store scan in CBS.log lists damaged files inside WinSxS, and a technician needs to know which files before repairing the store.
+
+**Keywords:** corrupt payload file, WinSxS file corrupt, damaged file in component store, component store file damaged, DISM ScanHealth corrupt files, many corrupt files in CBS.log
 
 **Severity:** Notice
 
@@ -187,6 +211,10 @@ A payload file in the component store is corrupt.
 
 Windows could not repair a damaged payload file.
 
+**Use when:** a store repair such as DISM /RestoreHealth could not fix a damaged file inside the component store and needs a good copy from Windows Update or install media.
+
+**Keywords:** RestoreHealth could not repair file, DISM repair failed for file, component store cannot be repaired, store file left damaged, unrepairable file
+
 **Severity:** Warning
 
 **Why it matters:** The damaged file stays in the component store. Updates and features that need it can fail until the store is repaired from another source.
@@ -210,6 +238,10 @@ Windows could not repair a damaged payload file.
 ## `win_component_store_repair_unavailable`: win component store repair unavailable
 
 Windows could not repair a damaged system file.
+
+**Use when:** sfc /scannow says Windows Resource Protection found corrupt files but was unable to fix some of them.
+
+**Keywords:** sfc could not fix files, sfc unable to fix, SFC cannot repair, sfc /scannow failed to repair, corrupt system file not fixed, same file corrupt every sfc run, System File Checker could not repair
 
 **Severity:** Warning
 
@@ -236,6 +268,10 @@ Windows could not repair a damaged system file.
 
 Windows could not reproject a component from the store into the running system.
 
+**Use when:** a technician finds a reprojection failure in CBS.log and needs to know whether a file in the running system may not match the copy in the component store.
+
+**Keywords:** reproject failed, reprojection failure, component projection failed, system file does not match WinSxS, System32 file out of sync with store
+
 **Severity:** Notice
 
 **Why it matters:** None established by this line alone. The component's files in the running system may not match the store until a later update or repair succeeds.
@@ -258,6 +294,10 @@ Windows could not reproject a component from the store into the running system.
 ## `win_component_store_scan_repaired_corruption`: win component store scan repaired corruption
 
 A component store repair fixed damage it found.
+
+**Use when:** DISM /RestoreHealth reports that it repaired the component store, and someone wants to know how much damage it fixed and whether any is left.
+
+**Keywords:** component store repaired, RestoreHealth repaired corruption, DISM fixed corruption, WinSxS repaired, store repair succeeded, corruption fixed by DISM, repaired count lower than detected
 
 **Severity:** Notice
 
@@ -286,6 +326,10 @@ A component store repair fixed damage it found.
 
 A servicing change was deferred because a reboot is pending.
 
+**Use when:** a Windows update seems to have done nothing, or shows as pending in patch reports, because the machine has not restarted since the change was staged.
+
+**Keywords:** update pending restart, servicing change pending reboot, restart required to finish update, update installed but not applied, patch not installed until reboot, transaction commit was skipped, RebootPending, update waiting for restart
+
 **Severity:** Notice
 
 **Why it matters:** The update or feature change is not in effect until the machine restarts, so patch reports can show it pending or not installed.
@@ -312,6 +356,10 @@ A servicing change was deferred because a reboot is pending.
 
 A component manifest is malformed.
 
+**Use when:** an update or repair fails on a component whose manifest in the store cannot be read, logged in CBS.log as a manifest format error.
+
+**Keywords:** manifest format error, corrupt component manifest, WinSxS manifest corrupt, component manifest XML error, component manifest damaged
+
 **Severity:** Notice
 
 **Why it matters:** An update or repair that touches that component can fail.
@@ -334,6 +382,10 @@ A component manifest is malformed.
 ## `win_servicing_delta_patch_failed`: win servicing delta patch failed
 
 Windows could not apply a delta update to a component.
+
+**Use when:** a cumulative update fails to install because Windows could not apply a delta to one component, usually because the base file in the store is damaged or missing.
+
+**Keywords:** delta update failed, forward delta failed, delta patch failed, base file missing for update, matching binary missing, cumulative update delta failed
 
 **Severity:** Notice
 
@@ -358,6 +410,10 @@ Windows could not apply a delta update to a component.
 
 Windows found a duplicate update name in a package.
 
+**Use when:** a technician finds a duplicate update name in a package in CBS.log and needs to know whether it stopped an install.
+
+**Keywords:** duplicate update name, duplicate updatename, duplicate update in package, mum file duplicate update
+
 **Severity:** Notice
 
 **Why it matters:** None established. CBS logs it and continues.
@@ -377,6 +433,10 @@ Windows found a duplicate update name in a package.
 ## `win_servicing_package_manifest_unreadable`: win servicing package manifest unreadable
 
 Windows could not parse a package manifest.
+
+**Use when:** an update or optional feature may not install or change state because Windows cannot read its package manifest, the .mum file for that package.
+
+**Keywords:** Failed to parse package manifest, mum file corrupt, package manifest corrupt, .mum file, servicing Packages folder, feature package unreadable
 
 **Severity:** Debug
 
@@ -403,6 +463,10 @@ Windows could not parse a package manifest.
 
 Windows could not stage an update package for installation.
 
+**Use when:** an update fails before it can install because Windows could not stage it, the step that copies and prepares its files.
+
+**Keywords:** update staging failed, failed to stage package, package staging error, update not staged, could not prepare update files
+
 **Severity:** Warning
 
 **Why it matters:** That update did not reach the point where it can install.
@@ -425,6 +489,10 @@ Windows could not stage an update package for installation.
 ## `win_servicing_source_files_missing`: win servicing source files missing
 
 A servicing operation could not find the source files it needed.
+
+**Use when:** a store repair or an optional feature install such as .NET Framework 3.5 fails, as logged in CBS.log, because Windows cannot get the files it needs, often on a machine that takes updates from WSUS.
+
+**Keywords:** .NET Framework 3.5 won't install, .NET 3.5 install fails, source files missing, repair source files missing, WSUS feature install fails, optional component installation and component repair, feature on demand source files missing, CBS.log source missing
 
 **Also reported by:** `win.servicing.dism`
 
@@ -452,6 +520,10 @@ A servicing operation could not find the source files it needed.
 
 A Windows update package failed while Windows processed it during startup.
 
+**Use when:** an update fails during the restart that was meant to finish installing it, and a technician needs the KB number of the package that failed.
+
+**Keywords:** update package failed during startup processing, update failed during reboot, update failed at startup, KB failed after reboot, update install failed on boot
+
 **Severity:** Notice
 
 **Why it matters:** That update did not install. Windows Update history and the RMM patch report show its status.
@@ -476,6 +548,10 @@ A Windows update package failed while Windows processed it during startup.
 
 An update could not be processed because it needs a newer servicing stack than the one installed.
 
+**Use when:** an update refuses to install because the machine needs a newer servicing stack update (SSU) first, typical of a machine months behind on patches.
+
+**Keywords:** servicing stack update required first, update needs newer SSU, install SSU first, servicing stack too old, newer servicing stack required, update needs newer update first
+
 **Severity:** Warning
 
 **Why it matters:** That update will not install until a newer servicing stack is on the machine.
@@ -499,6 +575,10 @@ An update could not be processed because it needs a newer servicing stack than t
 
 System File Checker started repairing components.
 
+**Use when:** System File Checker found damaged system files and started repairing them, and a technician wants to know when and how the repair ended.
+
+**Keywords:** SFC repair started, sfc started repairing files, System File Checker repairing, sfc found damage and started repair, Repairing components, protected system files damaged
+
 **Severity:** Notice
 
 **Why it matters:** None by itself. It shows that protected system files on this machine were damaged and SFC is replacing them.
@@ -517,6 +597,6 @@ System File Checker started repairing components.
 - `win_component_store_file_repaired`: a file SFC restored
 - `win_component_store_repair_unavailable`: a file SFC could not restore
 
-**Example:** SFC, run from an elevated prompt, starts repairing three components with damaged files.
+**Example:** SFC starts repairing three components with damaged files.
 
 **Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/feeds/servicing-cbs#win_sfc_repair_started, https://sparklogs.com/reference/reasons/win_sfc_repair_started.json

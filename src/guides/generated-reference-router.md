@@ -221,6 +221,7 @@ provider payload, and say in your findings when you were reading uncurated text.
 - `fields/family-sparklogs-destination.md`
 - `fields/family-sparklogs-episode.md`
 - `fields/family-sparklogs-epoch.md`
+- `fields/family-sparklogs-feed.md`
 - `fields/family-sparklogs-inventory.md`
 - `fields/family-sparklogs-member.md`
 - `fields/family-sparklogs-occurrence.md`
@@ -229,7 +230,9 @@ provider payload, and say in your findings when you were reading uncurated text.
 - `fields/family-sparklogs-result.md`
 - `fields/family-sparklogs-running-as.md`
 - `fields/family-sparklogs-target.md`
+- `fields/family-sparklogs-throttle.md`
 - `fields/family-sparklogs.md`
+- `fields/family-windows-record.md`
 - `fields/topic-agent-overhead.md`
 - `fields/topic-agent-pipeline.md`
 - `fields/topic-app-crashes.md`

@@ -6,48 +6,53 @@
 Each section below is complete for its reason: every public field, in the words the reference page shows.
 Search for the heading "## `<code>`" or a word from the reason's label. Do not read the whole file.
 
-| reason | label | kind | severity | service | benign |
-|---|---|---|---|---|---|
-| `applocker_audit_would_block` | applocker audit would block | event | Info to Notice | `security_audit` |  |
-| `applocker_unsupported_windows_edition` | applocker unsupported windows edition | event | Notice | `security_audit` |  |
-| `bitlocker_boot_settings_resealed` | bitlocker boot settings resealed | event | Verbose | `encryption` |  |
-| `bitlocker_key_sealed_to_tpm` | bitlocker key sealed to tpm | event | Verbose | `encryption` |  |
-| `bitlocker_protection_resume_failed` | bitlocker protection resume failed | event | Warning | `encryption` |  |
-| `bitlocker_recovery_info_read_failed` | bitlocker recovery info read failed | event | Info to Notice | `encryption` |  |
-| `bitlocker_recovery_key_backup_failed` | bitlocker recovery key backup failed | event | Info to Error | `encryption` | benign possible |
-| `bitlocker_secure_boot_unavailable` | bitlocker secure boot unavailable | event | Notice | `encryption` |  |
-| `cert_expired` | cert expired | event | Info to Warning | `certificates` | benign possible |
-| `cert_expiring` | cert expiring | event | Info to Warning | `certificates` | benign possible |
-| `code_integrity_catalog_load_failed` | code integrity catalog load failed | event | Info to Notice | `security_audit` | benign possible |
-| `code_integrity_driver_revoked` | code integrity driver revoked | event | Warning | `security_audit` |  |
-| `code_integrity_image_hash_missing` | code integrity image hash missing | event | Notice to Warning | `security_audit` |  |
-| `code_integrity_policy_audit_would_block` | code integrity policy audit would block | event | Notice | `security_audit` |  |
-| `code_integrity_policy_blocked` | code integrity policy blocked | event | Warning | `security_audit` |  |
-| `code_integrity_signing_level_blocked` | code integrity signing level blocked | event | Warning | `security_audit` |  |
-| `crypto_key_operation_failed` | crypto key operation failed | event | Debug to Notice | `certificates` | benign possible |
-| `defender_sensor_connection_failed` | defender sensor connection failed | event | Info to Warning | `endpoint_protection` | benign possible |
-| `device_encryption_enable_failed` | device encryption enable failed | event | Notice to Warning | `encryption` |  |
-| `device_registration_failed` | device registration failed | event | Notice to Warning | `device_management` |  |
-| `dpapi_unprotect_failed` | dpapi unprotect failed | event | Notice | `certificates` |  |
-| `entra_device_certificate_update_failed` | entra device certificate update failed | event | Notice to Warning | `device_management` |  |
-| `entra_sign_in_failed` | entra sign in failed | event | Notice to Warning | `auth` |  |
-| `entra_token_acquisition_failed` | entra token acquisition failed | event | Verbose to Warning | `auth` | benign possible |
-| `exploit_mitigation_audit_would_block` | exploit mitigation audit would block | event | Info | `security_audit` | benign |
-| `exploit_mitigation_blocked` | exploit mitigation blocked | event | Verbose to Notice | `security_audit` | benign possible |
-| `exploit_mitigation_shadow_stack_mismatch` | exploit mitigation shadow stack mismatch | event | Notice to Warning | `security_audit` |  |
-| `group_policy_domain_controller_unresolved` | group policy domain controller unresolved | event | Display to Warning | `device_management` |  |
-| `group_policy_extension_apply_failed` | group policy extension apply failed | event | Info to Minor | `device_management` | benign possible |
-| `group_policy_file_share_unhardened` | group policy file share unhardened | event | Notice | `device_management` |  |
-| `group_policy_processing_failed` | group policy processing failed | event | Notice to Warning | `device_management` |  |
-| `laps_password_backup_failed` | laps password backup failed | event | Warning | `auth` |  |
-| `ntlm_authentication_used` | ntlm authentication used | event | Verbose to Warning | `auth` |  |
-| `vbs_key_isolation_failed` | vbs key isolation failed | event | Info to Notice | `certificates` | benign possible |
-| `windows_hello_key_registration_failed` | windows hello key registration failed | event | Info to Notice | `auth` | benign possible |
-| `windows_hello_provisioning_blocked` | windows hello provisioning blocked | event | Info to Notice | `auth` | benign possible |
+| reason | label | kind | severity | service | benign | use when |
+|---|---|---|---|---|---|---|
+| `applocker_audit_would_block` | applocker audit would block | event | Info to Notice | `security_audit` |  | a technician testing AppLocker rules in Audit only mode needs to know which programs or DLLs would stop running once the rules are enforced. |
+| `applocker_unsupported_windows_edition` | applocker unsupported windows edition | event | Notice | `security_audit` |  | AppLocker rules deployed to a PC have no effect because its Windows edition cannot enforce AppLocker, while deployment reports still show the PC as covered. |
+| `bitlocker_boot_settings_resealed` | bitlocker boot settings resealed | event | Verbose | `encryption` |  | someone asks whether a BitLocker warning that the boot settings were resealed to the TPM after a Windows update or boot manager change is normal, or is tracing BitLocker activity before a recovery prompt. |
+| `bitlocker_key_sealed_to_tpm` | bitlocker key sealed to tpm | event | Verbose | `encryption` |  | a technician needs to know which TPM PCRs the BitLocker drive key now depends on, to judge which boot or firmware changes would make the drive ask for its recovery key. |
+| `bitlocker_protection_resume_failed` | bitlocker protection resume failed | event | Warning | `encryption` |  | BitLocker stays suspended after an update or restart and protection will not turn back on, so the OS drive shows Protection Off. |
+| `bitlocker_recovery_info_read_failed` | bitlocker recovery info read failed | event | Info to Notice | `encryption` |  | a technician needs to know why a device could not read its BitLocker recovery information back from Entra ID, often a network or name-resolution error, and whether that matters. |
+| `bitlocker_recovery_key_backup_failed` | bitlocker recovery key backup failed | event | Info to Error | `encryption` | benign possible | a device's BitLocker recovery key is missing from Entra ID or Intune, or someone asks why a recovery key was not backed up when encryption was turned on. |
+| `bitlocker_secure_boot_unavailable` | bitlocker secure boot unavailable | event | Notice | `encryption` |  | BitLocker reports it cannot use Secure Boot to check a drive's boot integrity, because Secure Boot was turned off or the firmware's boot measurement log is missing or invalid. |
+| `cert_expired` | cert expired | event | Info to Warning | `certificates` | benign possible | a technician needs to know which certificate in this device's own machine or user store has expired, for example when a certificate-based VPN, Wi-Fi or domain sign-in stops working. |
+| `cert_expiring` | cert expiring | event | Info to Warning | `certificates` | benign possible | a technician wants to know which certificate in this device's machine or user store is about to expire, and when. |
+| `code_integrity_catalog_load_failed` | code integrity catalog load failed | event | Info to Notice | `security_audit` | benign possible | Windows could not load a signature catalog file, and a technician needs to know whether the catalog is damaged or missing or the machine was only short of memory. |
+| `code_integrity_driver_revoked` | code integrity driver revoked | event | Warning | `security_audit` |  | a driver will not load because Microsoft has revoked it as a known-vulnerable driver, often one installed by a hardware vendor's utility, and the device or tool that needs it stops working. |
+| `code_integrity_image_hash_missing` | code integrity image hash missing | event | Notice to Warning | `security_audit` |  | a driver or program library will not load or is flagged because Windows cannot find its signature, and a technician needs to know which file it was and what to check, since the record cannot tell a damaged file from an unsigned or unwanted one. |
+| `code_integrity_policy_audit_would_block` | code integrity policy audit would block | event | Notice | `security_audit` |  | App Control for Business (WDAC) is in audit mode and a technician needs the list of programs, drivers or scripts that would be blocked once the policy is enforced. |
+| `code_integrity_policy_blocked` | code integrity policy blocked | event | Warning | `security_audit` |  | a program, driver or plugin will not start on a PC where an App Control for Business (WDAC) policy is enforced, and a technician needs the file and the policy that blocked it. |
+| `code_integrity_signing_level_audit_would_block` | code integrity signing level audit would block | event | Notice | `security_audit` |  | LSA protection is in audit mode and a technician needs the list of LSA plug-ins or drivers that would fail to load once LSA protection is turned on. |
+| `code_integrity_signing_level_blocked` | code integrity signing level blocked | event | Warning | `security_audit` |  | a technician needs to know why Code Integrity refused a file because its signature does not meet the signing level the loading process requires, rather than a named App Control policy. |
+| `crypto_key_operation_failed` | crypto key operation failed | event | Debug to Notice | `certificates` | benign possible | a technician needs to know why a key operation failed in the software or the TPM-backed key storage provider, for example behind a Windows Hello or device registration failure. |
+| `defender_sensor_connection_failed` | defender sensor connection failed | event | Info to Warning | `endpoint_protection` | benign possible | Microsoft Defender for Endpoint shows a device as not reporting or with impaired communications, or the sensor cannot reach the Defender cloud through the proxy or firewall. |
+| `device_encryption_enable_failed` | device encryption enable failed | event | Notice to Warning | `encryption` |  | a new or reset laptop that should encrypt itself automatically, or one where Intune or policy requires silent BitLocker encryption, still has an unencrypted system drive. |
+| `device_registration_failed` | device registration failed | event | Notice to Warning | `device_management` |  | a domain PC will not finish Microsoft Entra hybrid join, dsregcmd /status shows it not joined, or the device never appears or stays pending in Entra ID. |
+| `dpapi_unprotect_failed` | dpapi unprotect failed | event | Notice | `certificates` |  | saved passwords, credentials or a certificate's private key cannot be opened after a password reset, a profile move or a new device, and a technician needs to know whether the protected data is lost. |
+| `entra_device_certificate_update_failed` | entra device certificate update failed | event | Notice to Warning | `device_management` |  | a technician needs to know why an Entra-joined device could not renew the certificate that proves its registration, before Conditional Access stops seeing it as a registered device. |
+| `entra_sign_in_failed` | entra sign in failed | event | Notice to Warning | `auth` |  | a user cannot sign in to an Entra-joined PC with a work account, and a technician needs to know whether the password was refused or Entra ID could not be reached. |
+| `entra_token_acquisition_failed` | entra token acquisition failed | event | Verbose to Warning | `auth` | benign possible | Outlook, Teams or OneDrive keeps asking a user to sign in again on a work PC, or single sign-on to Microsoft 365 apps stops working, and a technician needs the reason the token request failed. |
+| `exploit_mitigation_audit_would_block` | exploit mitigation audit would block | event | Info | `security_audit` | benign | Exploit protection settings are in audit mode and a technician needs to know which programs would break once a mitigation is enforced. |
+| `exploit_mitigation_blocked` | exploit mitigation blocked | event | Verbose to Notice | `security_audit` | benign possible | a program fails or stops working because a Windows exploit protection mitigation is enforced on it, and a technician needs to know which mitigation stopped which process. |
+| `exploit_mitigation_shadow_stack_mismatch` | exploit mitigation shadow stack mismatch | event | Notice to Warning | `security_audit` |  | a program fails with Hardware-enforced Stack Protection turned on, or a technician needs to judge whether a shadow stack mismatch is an exploit attempt or an incompatible program. |
+| `group_policy_domain_controller_unresolved` | group policy domain controller unresolved | event | Display to Warning | `device_management` |  | Group Policy cannot refresh because no domain controller was found or one refused the machine: a laptop off the office network or VPN, a PC with the wrong DNS servers, or a broken machine account. |
+| `group_policy_extension_apply_failed` | group policy extension apply failed | event | Info to Minor | `device_management` | benign possible | one part of the company settings did not apply on a refresh while the rest did, and a technician needs to know which Group Policy extension failed, such as Drive Maps, Folder Redirection or Security, and with what code, rather than which assigned software package did not install. |
+| `group_policy_file_share_unhardened` | group policy file share unhardened | event | Notice | `device_management` |  | a security review asks whether this PC reads Group Policy files from SYSVOL, NETLOGON or another share without requiring mutual authentication and integrity. |
+| `group_policy_processing_failed` | group policy processing failed | event | Notice to Warning | `device_management` |  | Group Policy failed for a whole startup or sign-in, so new or changed company settings did not reach the PC, and a technician needs to know whether lost connectivity, the domain controller, the machine account or SYSVOL was the cause. |
+| `laps_password_backup_failed` | laps password backup failed | event | Warning | `auth` |  | the local administrator password for a device is missing or out of date in Entra ID, Intune or Active Directory because Windows LAPS cannot back it up. |
+| `ntlm_authentication_used` | ntlm authentication used | event | Verbose to Warning | `auth` |  | a technician auditing or restricting NTLM needs to know which applications, servers or users on this machine still authenticate with NTLM or NTLMv1 instead of Kerberos. |
+| `vbs_key_isolation_failed` | vbs key isolation failed | event | Info to Notice | `certificates` | benign possible | a technician needs to know why keys that should be held in memory isolated by virtualization-based security are not, or whether the device's hardware or firmware supports it. |
+| `windows_hello_key_registration_failed` | windows hello key registration failed | event | Info to Notice | `auth` | benign possible | Windows Hello for Business setup got past its checks and then failed at the key or TPM step, so the user's PIN, face or fingerprint sign-in does not work until it is set up again. |
+| `windows_hello_provisioning_blocked` | windows hello provisioning blocked | event | Info to Notice | `auth` | benign possible | Windows Hello for Business never offers PIN or face setup at sign-in, and a technician needs to know which prerequisite failed: policy, join state, TPM or a missing primary refresh token. |
 
 ## `applocker_audit_would_block`: applocker audit would block
 
-An application-control policy running in audit mode would have blocked this file under enforcement.
+An AppLocker rule running in audit mode would have blocked this file under enforcement.
+
+**Use when:** a technician testing AppLocker rules in Audit only mode needs to know which programs or DLLs would stop running once the rules are enforced.
+
+**Keywords:** AppLocker audit mode, AppLocker Audit only, would have been prevented from running, AppLocker rule testing, AppLocker EXE rules, AppLocker DLL rules, before enforcing AppLocker, AppLocker allowlisting audit, managed installer rule
 
 **Severity:** Notice for a file under the executable or script rules. Info under the DLL and managed-installer rules, where one record per file a day is kept.
 
@@ -76,6 +81,10 @@ An application-control policy running in audit mode would have blocked this file
 
 An application-control policy reached a device whose Windows edition cannot enforce it.
 
+**Use when:** AppLocker rules deployed to a PC have no effect because its Windows edition cannot enforce AppLocker, while deployment reports still show the PC as covered.
+
+**Keywords:** AppLocker not enforcing on Pro edition, AppLocker ignored on unsupported edition, AppLocker not supported on this edition, Windows edition does not support AppLocker, AppLocker unsupported SKU, upgrade Windows edition for AppLocker
+
 **Severity:** Notice
 
 **Why it matters:** The policy enforces nothing on this device, while reports of where the policy is deployed still count the device as covered.
@@ -98,6 +107,10 @@ An application-control policy reached a device whose Windows edition cannot enfo
 ## `bitlocker_boot_settings_resealed`: bitlocker boot settings resealed
 
 BitLocker resealed a drive's boot settings to the TPM.
+
+**Use when:** someone asks whether a BitLocker warning that the boot settings were resealed to the TPM after a Windows update or boot manager change is normal, or is tracing BitLocker activity before a recovery prompt.
+
+**Keywords:** BitLocker reseal, resealed to TPM, boot settings resealed, TPM reseal, BitLocker warning after update, boot manager update BitLocker, is this BitLocker warning normal
 
 **Severity:** Verbose
 
@@ -123,6 +136,10 @@ BitLocker resealed a drive's boot settings to the TPM.
 ## `bitlocker_key_sealed_to_tpm`: bitlocker key sealed to tpm
 
 BitLocker sealed the drive key to the TPM, and the event lists the PCRs that key now depends on.
+
+**Use when:** a technician needs to know which TPM PCRs the BitLocker drive key now depends on, to judge which boot or firmware changes would make the drive ask for its recovery key.
+
+**Keywords:** BitLocker PCR list, PCR7 binding, current PCR validation profile, TPM protector PCRs, which PCRs does BitLocker use, BitLocker key sealed to TPM, BitLocker sealed to Secure Boot PCR 7
 
 **Severity:** Verbose
 
@@ -151,6 +168,10 @@ BitLocker sealed the drive key to the TPM, and the event lists the PCRs that key
 
 BitLocker could not turn protection back on for the OS volume after it was suspended.
 
+**Use when:** BitLocker stays suspended after an update or restart and protection will not turn back on, so the OS drive shows Protection Off.
+
+**Keywords:** BitLocker stuck suspended, BitLocker protection off, resume BitLocker failed, Resume-BitLocker, protection suspended after update, suspended after firmware update
+
 **Severity:** Warning
 
 **Why it matters:** Until protection resumes, the key to the OS volume is stored in the clear on the disk, so the encryption does not protect a lost or stolen device.
@@ -177,6 +198,10 @@ BitLocker could not turn protection back on for the OS volume after it was suspe
 
 BitLocker could not read the recovery information escrowed for this device in Entra.
 
+**Use when:** a technician needs to know why a device could not read its BitLocker recovery information back from Entra ID, often a network or name-resolution error, and whether that matters.
+
+**Keywords:** BitLocker recovery info read failed, could not get recovery information from Entra, recovery password retrieval failed, device could not read recovery info from Entra, AAD BitLocker recovery info, escrowed recovery key read
+
 **Severity:** Notice or Info
 
 **Why it matters:** None on the drive: it stays protected and the escrowed copy is untouched. A refusal that keeps repeating may point at the device object or its recovery record in Entra ID.
@@ -201,6 +226,10 @@ BitLocker could not read the recovery information escrowed for this device in En
 ## `bitlocker_recovery_key_backup_failed`: bitlocker recovery key backup failed
 
 BitLocker reported that a recovery-key backup operation failed for a volume.
+
+**Use when:** a device's BitLocker recovery key is missing from Entra ID or Intune, or someone asks why a recovery key was not backed up when encryption was turned on.
+
+**Keywords:** recovery key not backed up, recovery key missing in Entra, recovery key not in Intune, recovery key not in Azure AD, BitLocker key escrow failed, BitLocker key backup failed, BackupToAAD-BitLockerKeyProtector, no recovery key on file, personal Microsoft account recovery key backup
 
 **Severity:** Error or Info
 
@@ -230,6 +259,10 @@ BitLocker reported that a recovery-key backup operation failed for a volume.
 
 BitLocker reported that Secure Boot integrity data could not be used for a volume.
 
+**Use when:** BitLocker reports it cannot use Secure Boot to check a drive's boot integrity, because Secure Boot was turned off or the firmware's boot measurement log is missing or invalid.
+
+**Keywords:** BitLocker cannot use Secure Boot, Secure Boot off BitLocker, PCR7 binding not possible, measured boot log invalid, boot measurement log missing, BitLocker firmware variable could not be read, BitLocker integrity validation Secure Boot
+
 **Severity:** Notice
 
 **Why it matters:** The volume is still encrypted. BitLocker could not tie its key to Secure Boot on this boot, so the key is less well protected against a tampered boot chain than intended.
@@ -253,6 +286,10 @@ BitLocker reported that Secure Boot integrity data could not be used for a volum
 ## `cert_expired`: cert expired
 
 A certificate in the machine or the user store has expired.
+
+**Use when:** a technician needs to know which certificate in this device's own machine or user store has expired, for example when a certificate-based VPN, Wi-Fi or domain sign-in stops working.
+
+**Keywords:** machine certificate expired, user certificate expired, local certificate expired, client certificate expired, certificate store expired, certlm.msc expired certificate, certmgr expired certificate, Wi-Fi certificate expired, VPN certificate expired, Entra remote desktop certificate
 
 **Severity:** Warning or Info
 
@@ -280,6 +317,10 @@ A certificate in the machine or the user store has expired.
 ## `cert_expiring`: cert expiring
 
 A certificate in the machine or the user store is about to expire.
+
+**Use when:** a technician wants to know which certificate in this device's machine or user store is about to expire, and when.
+
+**Keywords:** local certificate about to expire, store certificate expiring soon, machine store certificate expiring, user certificate expiring, auto-enrollment not renewing
 
 **Also reported by:** `win.eventlog.application`
 
@@ -309,6 +350,10 @@ A certificate in the machine or the user store is about to expire.
 
 Windows could not read a signature catalog.
 
+**Use when:** Windows could not load a signature catalog file, and a technician needs to know whether the catalog is damaged or missing or the machine was only short of memory.
+
+**Keywords:** signature catalog missing, catalog file corrupted, cannot read catalog file, .cat file, catroot, catdb
+
 **Severity:** Notice or Info
 
 **Why it matters:** Files the catalog vouches for have no valid signature until it is replaced, so a later load of one of them can fail its integrity check.
@@ -335,6 +380,10 @@ Windows could not read a signature catalog.
 
 A driver on this device is on Microsoft's revoked-driver list, and the kernel refused to load it.
 
+**Use when:** a driver will not load because Microsoft has revoked it as a known-vulnerable driver, often one installed by a hardware vendor's utility, and the device or tool that needs it stops working.
+
+**Keywords:** vulnerable driver blocklist, Microsoft Vulnerable Driver Blocklist, revoked driver, driver blocked by Windows, bring your own vulnerable driver, BYOVD, DriverSiPolicy.p7b, vendor utility driver blocked
+
 **Severity:** Warning
 
 **Why it matters:** The driver did not load, so the device or feature that needs it does not work. The file is still on disk, and whatever installed it put a known-vulnerable driver on the device.
@@ -358,6 +407,10 @@ A driver on this device is on Microsoft's revoked-driver list, and the kernel re
 ## `code_integrity_image_hash_missing`: code integrity image hash missing
 
 Windows found no signature on a file it was asked to load, so it could not verify the file's integrity.
+
+**Use when:** a driver or program library will not load or is flagged because Windows cannot find its signature, and a technician needs to know which file it was and what to check, since the record cannot tell a damaged file from an unsigned or unwanted one.
+
+**Keywords:** unable to verify the image integrity, file hash could not be found, signed incorrectly or damaged, image integrity check failed, unsigned driver hash not found
 
 **Severity:** Warning or Notice
 
@@ -386,6 +439,10 @@ Windows found no signature on a file it was asked to load, so it could not verif
 
 A configured Code Integrity policy recorded that enforcement would have refused a file, under audit mode.
 
+**Use when:** App Control for Business (WDAC) is in audit mode and a technician needs the list of programs, drivers or scripts that would be blocked once the policy is enforced.
+
+**Keywords:** WDAC audit mode, App Control audit mode, Application Control audit, WDAC would have blocked, image was allowed to load, WDAC policy testing, before enforcing WDAC, Device Guard audit, script would be blocked, Intune App Control policy audit
+
 **Severity:** Notice
 
 **Why it matters:** Nothing was denied and the file ran. Once the policy is enforced, this file is refused unless the policy allows it.
@@ -404,6 +461,7 @@ A configured Code Integrity policy recorded that enforcement would have refused 
 
 - `code_integrity_driver_revoked`: a driver refused because the vendor revoked it
 - `code_integrity_policy_blocked`: the same policy in enforcement, actually refusing the file
+- `code_integrity_signing_level_audit_would_block`: a signing level requirement in audit mode, rather than a named policy
 - `code_integrity_signing_level_blocked`: a signing level requirement refusing a file, rather than a named policy
 
 **Example:** An RMM agent's temporary PowerShell script runs under an App Control policy in audit mode that would have blocked it.
@@ -412,7 +470,11 @@ A configured Code Integrity policy recorded that enforcement would have refused 
 
 ## `code_integrity_policy_blocked`: code integrity policy blocked
 
-A configured Code Integrity policy refused a file under enforcement.
+A named App Control for Business (Code Integrity) policy refused a file under enforcement.
+
+**Use when:** a program, driver or plugin will not start on a PC where an App Control for Business (WDAC) policy is enforced, and a technician needs the file and the policy that blocked it.
+
+**Keywords:** WDAC blocked, WDAC blocked app, App Control blocked file, used Windows Defender Application Control to block, used Device Guard to block this app, blocked by application control policy, allow app in WDAC policy, WDAC supplemental policy, third-party driver blocked by WDAC
 
 **Severity:** Warning
 
@@ -436,15 +498,50 @@ A configured Code Integrity policy refused a file under enforcement.
 
 **Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/feeds/eventlog-identity-security#code_integrity_policy_blocked, https://sparklogs.com/reference/reasons/code_integrity_policy_blocked.json
 
+## `code_integrity_signing_level_audit_would_block`: code integrity signing level audit would block
+
+A file did not meet the signing level the loading process requires and was allowed to load, because the requirement is in audit mode.
+
+**Use when:** LSA protection is in audit mode and a technician needs the list of LSA plug-ins or drivers that would fail to load once LSA protection is turned on.
+
+**Keywords:** LSA protection audit mode, LSA plugin would be blocked, LSASS plug-in not signed by Microsoft, before enabling LSA protection, RunAsPPL audit, AuditLevel LSASS, Microsoft signing level requirements audit
+
+**Severity:** Notice
+
+**Why it matters:** Nothing was denied and the file loaded. Once the requirement is enforced, this file is refused unless it is signed to the required level.
+
+**In practice:** Code Integrity writes event 3066 to the Microsoft-Windows-CodeIntegrity/Operational log when a process, usually LSASS.exe, loads a file whose signature does not meet the Microsoft signing level requirements, and the policy in force lets it load. This is how LSA protection audit mode reports the plug-ins and drivers that would fail under LSA protection. Windows 11 version 22H2 and later turn this audit on by default. The requested level says which requirement applied and the validated level says what signature the file carried.
+
+**When to ignore:** While nobody plans to turn on LSA protection on the device.
+
+**What to check:**
+
+- Read the file name and find the product it belongs to.
+- Group the records by file. The distinct list is what has to be signed or removed before LSA protection is turned on.
+- Ask the vendor for a version signed to the required level.
+
+**Related:**
+
+- `code_integrity_policy_audit_would_block`: a named App Control policy in audit mode, rather than a signing level requirement
+- `code_integrity_signing_level_blocked`: the same requirement enforced, refusing the file
+
+**Example:** A third-party credential plug-in loaded into LSASS.exe on a Windows 11 laptop does not meet the Microsoft signing level, and LSA protection audit mode records that it would be blocked.
+
+**Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/feeds/eventlog-identity-security#code_integrity_signing_level_audit_would_block, https://sparklogs.com/reference/reasons/code_integrity_signing_level_audit_would_block.json
+
 ## `code_integrity_signing_level_blocked`: code integrity signing level blocked
 
-An application-control policy or a code-signing requirement on this device blocked a file from loading.
+A file was blocked from loading because its signature did not meet the signing level the loading process requires.
+
+**Use when:** a technician needs to know why Code Integrity refused a file because its signature does not meet the signing level the loading process requires, rather than a named App Control policy.
+
+**Keywords:** did not meet the signing level requirements, did not meet the Microsoft signing level requirements, signing level requirement, code signing requirement blocked file, RunAsPPL, DLL not signed by Microsoft
 
 **Severity:** Warning
 
 **Why it matters:** The file did not run. Every load attempt fails the same way until the file is signed or the policy changes.
 
-**In practice:** Code Integrity writes event 3033, 3066 or 3086 to the Microsoft-Windows-CodeIntegrity/Operational log when a file's signature does not meet the signing level the loading process requires. The requested level says which requirement applied and the validated level says what signature the file carried. Both ship as numbers, with a name where the level is published.
+**In practice:** Code Integrity writes event 3033 or 3086 to the Microsoft-Windows-CodeIntegrity/Operational log when a file's signature does not meet the signing level the loading process requires. The requested level says which requirement applied and the validated level says what signature the file carried. Both ship as numbers, with a name where the level is published.
 
 **What to check:**
 
@@ -456,6 +553,7 @@ An application-control policy or a code-signing requirement on this device block
 
 - `code_integrity_image_hash_missing`: the file carrying no signature at all, rather than one that did not qualify
 - `code_integrity_policy_blocked`: a named Code Integrity policy refusing a file, rather than a level requirement
+- `code_integrity_signing_level_audit_would_block`: the same requirement in audit mode, where the file was allowed to load
 
 **Example:** A program that requires signed libraries refuses an unsigned plug-in from a third-party vendor.
 
@@ -466,6 +564,10 @@ Not collected: Windows also logs this event when one of its own protected system
 ## `crypto_key_operation_failed`: crypto key operation failed
 
 A key operation failed against one of the Windows key-storage providers.
+
+**Use when:** a technician needs to know why a key operation failed in the software or the TPM-backed key storage provider, for example behind a Windows Hello or device registration failure.
+
+**Keywords:** key storage provider failed, KSP error, NCrypt error, CNG key failure, TPM key operation failed, Platform Crypto Provider error, PCP provider, Pluton key error, TPM keyset does not exist, private key operation failed
 
 **Severity:** Notice or Debug
 
@@ -493,6 +595,10 @@ A key operation failed against one of the Windows key-storage providers.
 
 The Microsoft Defender for Endpoint sensor cannot reach its cloud service, or cannot get a token to talk to it.
 
+**Use when:** Microsoft Defender for Endpoint shows a device as not reporting or with impaired communications, or the sensor cannot reach the Defender cloud through the proxy or firewall.
+
+**Keywords:** MDE sensor not reporting, Defender for Endpoint not communicating, impaired communications, no sensor data, sensor health inactive, Defender for Endpoint proxy, MDE connectivity test, MDEClientAnalyzer, Defender ATP sensor not reporting, MDE onboarding cloud connection
+
 **Severity:** Warning or Info
 
 **Why it matters:** While it lasts, the device sends nothing to the Defender portal, which still lists it as onboarded. Local protection keeps running.
@@ -514,6 +620,10 @@ The Microsoft Defender for Endpoint sensor cannot reach its cloud service, or ca
 ## `device_encryption_enable_failed`: device encryption enable failed
 
 Device encryption, automatic or required by policy, did not start.
+
+**Use when:** a new or reset laptop that should encrypt itself automatically, or one where Intune or policy requires silent BitLocker encryption, still has an unencrypted system drive.
+
+**Keywords:** device encryption not turned on, automatic device encryption failed, Reasons for failed automatic device encryption, silent BitLocker encryption failed, Intune BitLocker silent encryption, WinRE not configured BitLocker, TPM not available encryption, reagentc /enable for BitLocker
 
 **Severity:** Warning or Notice
 
@@ -540,6 +650,10 @@ Device encryption, automatic or required by policy, did not start.
 ## `device_registration_failed`: device registration failed
 
 The device tried to register itself with the directory and failed.
+
+**Use when:** a domain PC will not finish Microsoft Entra hybrid join, dsregcmd /status shows it not joined, or the device never appears or stays pending in Entra ID.
+
+**Keywords:** hybrid join failed, hybrid Azure AD join failed, Entra hybrid join failed, dsregcmd /status not joined, AzureAdJoined : NO, Automatic-Device-Join task, device not showing in Entra, device pending registration, device quota exceeded
 
 **Severity:** Warning or Notice
 
@@ -570,6 +684,10 @@ The device tried to register itself with the directory and failed.
 
 Windows could not decrypt a protected blob, such as a saved credential or a certificate private key.
 
+**Use when:** saved passwords, credentials or a certificate's private key cannot be opened after a password reset, a profile move or a new device, and a technician needs to know whether the protected data is lost.
+
+**Keywords:** saved passwords gone after password reset, saved credentials lost, Credential Manager passwords lost, private key unusable after password reset, profile migration saved passwords, DPAPI master key, cannot decrypt protected data
+
 **Severity:** Notice
 
 **Why it matters:** The owning application usually re-creates the blob on its next use. Where it cannot, that saved credential or private key is gone.
@@ -594,6 +712,10 @@ Windows could not decrypt a protected blob, such as a saved credential or a cert
 ## `entra_device_certificate_update_failed`: entra device certificate update failed
 
 The device failed to refresh the certificate that proves its identity to the directory.
+
+**Use when:** a technician needs to know why an Entra-joined device could not renew the certificate that proves its registration, before Conditional Access stops seeing it as a registered device.
+
+**Keywords:** device certificate renewal failed, Entra device certificate, Azure AD device certificate, AAD device certificate renewal, device identity certificate, MS-Organization-Access, device certificate expired Entra
 
 **Severity:** Warning or Notice
 
@@ -622,6 +744,10 @@ The device failed to refresh the certificate that proves its identity to the dir
 
 The Microsoft Entra sign-in plugin on this device refused a sign-in.
 
+**Use when:** a user cannot sign in to an Entra-joined PC with a work account, and a technician needs to know whether the password was refused or Entra ID could not be reached.
+
+**Keywords:** Entra sign-in failed, Azure AD sign-in failed on PC, work account sign-in refused, AAD login failed, cannot sign in to Entra joined PC, CloudAP sign-in failed, wrong password Entra joined PC, Entra ID unreachable at sign-in
+
 **Severity:** Notice for a wrong credential or an unreachable service, Warning for a refusal the event does not explain.
 
 **Why it matters:** The user is not signed in. A wrong credential is a user event; an unreachable service is a connectivity problem outside authentication.
@@ -648,6 +774,10 @@ The Microsoft Entra sign-in plugin on this device refused a sign-in.
 ## `entra_token_acquisition_failed`: entra token acquisition failed
 
 The device failed to get a token for a cloud resource.
+
+**Use when:** Outlook, Teams or OneDrive keeps asking a user to sign in again on a work PC, or single sign-on to Microsoft 365 apps stops working, and a technician needs the reason the token request failed.
+
+**Keywords:** Teams keeps asking to sign in, Outlook keeps prompting work account sign-in, OneDrive keeps asking to sign in, Microsoft 365 SSO broken, primary refresh token, PRT missing, AzureAdPrt NO, Web Account Manager, WAM token broker, token broker error
 
 **Severity:** Warning, Notice, Info or Verbose
 
@@ -679,6 +809,10 @@ The device failed to get a token for a cloud resource.
 
 Exploit protection recorded that enforcement would have stopped a process, under audit mode.
 
+**Use when:** Exploit protection settings are in audit mode and a technician needs to know which programs would break once a mitigation is enforced.
+
+**Keywords:** Exploit Protection audit mode, Exploit Guard exploit protection audit, mitigation audit mode, process mitigation would have blocked, test exploit protection before enforcing, Set-ProcessMitigation audit, exploit protection XML audit
+
 **Severity:** Info
 
 **Why it matters:** None today. An application listed here would break once the mitigation is enforced.
@@ -704,6 +838,10 @@ Exploit protection recorded that enforcement would have stopped a process, under
 ## `exploit_mitigation_blocked`: exploit mitigation blocked
 
 Exploit protection stopped a process from an action its policy forbids, under enforcement.
+
+**Use when:** a program fails or stops working because a Windows exploit protection mitigation is enforced on it, and a technician needs to know which mitigation stopped which process.
+
+**Keywords:** Exploit Protection blocked, Exploit Guard exploit protection blocked, mitigation blocked process, App and browser control exploit protection, exploit protection program settings, Set-ProcessMitigation, exploit protection override, exploit protection breaks app
 
 **Severity:** Notice or Verbose
 
@@ -735,6 +873,10 @@ The enforcing records on the kernel-mode id that arrives at volume are rate-boun
 
 A process returned to a different address from the one the hardware shadow stack recorded.
 
+**Use when:** a program fails with Hardware-enforced Stack Protection turned on, or a technician needs to judge whether a shadow stack mismatch is an exploit attempt or an incompatible program.
+
+**Keywords:** CET shadow stack, Intel CET, control-flow enforcement technology, shadow stack violation, return address mismatch, AMD shadow stack, turn off stack protection for app
+
 **Severity:** Notice on the documented compatibility path, Warning where nothing on the event explains the mismatch.
 
 **Why it matters:** Where the operation was refused, whatever the process was attempting did not happen. Where it continued, nothing changed.
@@ -760,6 +902,10 @@ A process returned to a different address from the one the hardware shadow stack
 ## `group_policy_domain_controller_unresolved`: group policy domain controller unresolved
 
 The machine could not find or could not reach a domain controller.
+
+**Use when:** Group Policy cannot refresh because no domain controller was found or one refused the machine: a laptop off the office network or VPN, a PC with the wrong DNS servers, or a broken machine account.
+
+**Keywords:** Group Policy domain controller not found, gpupdate DC discovery failed, gpupdate no domain controller, policy refresh off VPN, machine account broken Group Policy, nltest /dsgetdc
 
 **Also reported by:** `win.eventlog.system`
 
@@ -790,6 +936,10 @@ The machine could not find or could not reach a domain controller.
 
 A Group Policy client-side extension could not apply the settings from a policy object.
 
+**Use when:** one part of the company settings did not apply on a refresh while the rest did, and a technician needs to know which Group Policy extension failed, such as Drive Maps, Folder Redirection or Security, and with what code, rather than which assigned software package did not install.
+
+**Keywords:** client-side extension error, CSE error code, Software Installation extension failed, GPO security settings not applied, Drive Maps extension failed, Folder Redirection extension failed, gpresult extension errors
+
 **Also reported by:** `win.eventlog.application`, `win.eventlog.system`
 
 **Severity:** Minor or Info
@@ -819,6 +969,10 @@ A Group Policy client-side extension could not apply the settings from a policy 
 
 The machine reads Group Policy files from a file share without mutual authentication or integrity protection.
 
+**Use when:** a security review asks whether this PC reads Group Policy files from SYSVOL, NETLOGON or another share without requiring mutual authentication and integrity.
+
+**Keywords:** UNC hardening, RequireMutualAuthentication, RequireIntegrity, SYSVOL hardening, NETLOGON hardening, MS15-011, JASBUG, Group Policy man in the middle
+
 **Severity:** Notice
 
 **Why it matters:** An attacker on the network path between the machine and the policy share could tamper with policy content in transit. Nothing has gone wrong yet.
@@ -841,6 +995,10 @@ The machine reads Group Policy files from a file share without mutual authentica
 ## `group_policy_processing_failed`: group policy processing failed
 
 Group Policy failed to apply for that boot or that logon.
+
+**Use when:** Group Policy failed for a whole startup or sign-in, so new or changed company settings did not reach the PC, and a technician needs to know whether lost connectivity, the domain controller, the machine account or SYSVOL was the cause.
+
+**Keywords:** Group Policy failed at startup, computer policy failed at boot, user policy failed at logon, Group Policy processing failed, GPO not applied at logon, gpupdate failed at startup, SYSVOL read failed, gpt.ini not readable from SYSVOL
 
 **Also reported by:** `win.eventlog.system`
 
@@ -872,6 +1030,10 @@ Group Policy failed to apply for that boot or that logon.
 
 The device manages its local administrator password and the backup of that password is failing.
 
+**Use when:** the local administrator password for a device is missing or out of date in Entra ID, Intune or Active Directory because Windows LAPS cannot back it up.
+
+**Keywords:** LAPS password missing, LAPS backup failed, local admin password not in Entra, local admin password not in Intune, Get-LapsAADPassword, Get-LapsADPassword, enable LAPS in Entra device settings, LAPS not enabled for tenant
+
 **Severity:** Warning
 
 **Why it matters:** The directory may hold no current copy of the local administrator password, so nobody can retrieve it when a local sign-in is needed. The device looks compliant while its password escrow is not working.
@@ -896,6 +1058,10 @@ The device manages its local administrator password and the backup of that passw
 ## `ntlm_authentication_used`: ntlm authentication used
 
 This machine used the legacy NTLM authentication protocol, as a client or as a server.
+
+**Use when:** a technician auditing or restricting NTLM needs to know which applications, servers or users on this machine still authenticate with NTLM or NTLMv1 instead of Kerberos.
+
+**Keywords:** NTLM audit, NTLMv1, NTLM usage, restrict NTLM, disable NTLM, retire NTLM, NTLM blocking, Kerberos fallback to NTLM, LmCompatibilityLevel, NTLM when server accessed by IP address
 
 **Severity:** Warning or Verbose
 
@@ -923,6 +1089,10 @@ This machine used the legacy NTLM authentication protocol, as a client or as a s
 
 The isolated key environment that virtualization-based security provides is failing on this device.
 
+**Use when:** a technician needs to know why keys that should be held in memory isolated by virtualization-based security are not, or whether the device's hardware or firmware supports it.
+
+**Keywords:** VBS key protection, VBS key isolation, virtualization-based security key protection, isolated key environment failed, VBS not supported by hardware, virtualization-based security keys
+
 **Severity:** Notice or Info
 
 **Why it matters:** Keys that should be held in hardware-isolated memory are not. Every caller keeps working, so nothing is unavailable.
@@ -948,6 +1118,10 @@ The isolated key environment that virtualization-based security provides is fail
 
 A Windows Hello key or container operation failed after provisioning had already passed its prerequisites.
 
+**Use when:** Windows Hello for Business setup got past its checks and then failed at the key or TPM step, so the user's PIN, face or fingerprint sign-in does not work until it is set up again.
+
+**Keywords:** your PIN isn't available, Windows Hello PIN stopped working, NGC folder, certutil -deletehellocontainer, Hello for Business key registration failed, WHfB key registration, TPM attestation failed Hello, Hello key container
+
 **Severity:** Notice or Info
 
 **Why it matters:** That user's Windows Hello credential is not usable on this device until it is enrolled again. Signing in with a password is unaffected.
@@ -972,6 +1146,10 @@ A Windows Hello key or container operation failed after provisioning had already
 ## `windows_hello_provisioning_blocked`: windows hello provisioning blocked
 
 Windows Hello for Business will not set up on this device for this user.
+
+**Use when:** Windows Hello for Business never offers PIN or face setup at sign-in, and a technician needs to know which prerequisite failed: policy, join state, TPM or a missing primary refresh token.
+
+**Keywords:** Hello for Business not prompting, Windows Hello setup not offered, PIN setup does not appear, WHfB provisioning not launched, Hello for Business prerequisites, NgcSet NO, PreReqResult WillNotProvision, passwordless rollout not happening
 
 **Severity:** Notice or Info
 
