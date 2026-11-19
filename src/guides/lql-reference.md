@@ -22,9 +22,9 @@ Custom paths under `x.*` (LQL), such as `x.foo` (LQL), and the placeholders `pat
 | `=` | exact match | Pattern or regex allowed on right side. |
 | `!=` or `<>` | exact non-match | See **Negated operators (scalar vs array)** below. |
 | `>=`, `>`, `<`, `<=` | numeric/ordinal comparison | Right side must be a literal, not a pattern or regex. |
-| `<field>!` | field is present in the event | Presence check; matches even when the value is an explicit JSON `null` (other) (absent field = no match). e.g., `sparklogs.reason!` |
+| `<field>!` | field is present in the event | Presence check; matches only when the field holds a value. An explicit JSON `null` (other) counts as absent, and a field that only ever held null matches nothing. e.g., `sparklogs.reason!` |
 | `<field> between <literal> and <literal>` | inclusive range | Works for numeric, string, timestamp and severity fields. Timestamps go unquoted, with a zone: `x.foo between 2024-05-03 07:00 MDT and May 3, 2024 18:30 MDT` (LQL); a timestamp with no zone reads as UTC. Severity takes names: `severity between warning and error` (LQL). |
-| `<field> in (a, b, c)` | match any in value list | Comma-separated, parenthesized. NOT `[a, b, c]`. |
+| `<field> in (a, b, c)` | match any in value list | Comma-separated, parenthesized. NOT `[a, b, c]`. Members may be patterns or regexes; a regex member must match the entire value, as with `=`. |
 | `<field> not in (a, b, c)` | match NONE in value list | Inverse of `in` (other). |
 
 ### No `IS NULL` operator
@@ -44,7 +44,7 @@ subsource LIKE "win.eventlog/%"  <- WRONG (no LIKE; no % or _)
 ```
 
 ### No `MATCHES` (no separate regex keyword)
-Use `:`, `!:`, `=`, or `!=` followed by a slash-delimited regex.
+Use `:`, `!:`, `=`, or `!=` followed by a slash-delimited regex, or put the regex in an `in` (other) / `not in` (other) list.
 
 ```lql
 message: /[0-9A-F]{8}-[0-9A-F]{4}/    <- right (re2 syntax)
@@ -61,7 +61,7 @@ message MATCHES "regex"               <- WRONG (no MATCHES)
 
 **Array fields** (unindexed `x.tags` (LQL), not `x.tags[0]`):
 
-- `!:` and `!=` apply only when the field is present **and** is a JSON array.
+- `!:`, `!=` and `not in` (other) apply only when the field is present **and** is a JSON array.
 - Absent or non-array values do **not** match.
 - To include rows with no array: `x.tags !: noise OR NOT x.tags!` (LQL)
 
@@ -182,7 +182,8 @@ win.servicing.dism                        <- matches events with that subsource 
 
 A bare term reaches every standard field listed above. It does not reach payload leaves; `any` (other) does.
 
-**Whole terms.** In `query_logs` (tool) `lql` (arg), a term with no `*`, `?` or regex, whether bare or on `message` (LQL), `pattern` (LQL), `source` (LQL), `app` (LQL), `pattern_hash` (LQL) or `trace_id` (LQL), uses the search index and matches whole words only, split at whitespace and punctuation: `message: fail` (LQL) does not match "failed".
+**Whole terms.** In `query_logs` (tool) `lql` (arg), a bare term or a `:` term with no `*`, `?` or regex, on any string field (standard or custom), uses the search index and matches whole words only, split at whitespace and punctuation: `message: fail` (LQL) does not match "failed".
+The index drops out, and the same term matches substrings, under `NOT`, with `!:` / `!=` / `not in` (other), and inside an `OR` whose other side cannot use the index: `message: fail OR x.foo > 5` (LQL) matches "failed". So `message: fail` (LQL) and `message !: fail` (LQL) are not complements there.
 The other LQL parameters (`lql` (arg) on `query_event_counts_by_severity` (tool), and `filter_lql` (arg) / `having_lql` (arg) on `refine_query_result` (tool)) match substrings, so the same filter there also matches "failed".
 When a partial word must match in every tool, surround it with `*`:
 
@@ -203,7 +204,7 @@ pattern = "divgfo_9v7cgvjijykp0zu5"            <- same rows; the equality widens
 
 ## Regex
 
-Slash-delimited, re2 syntax. Used with operators `:`, `!:`, `=`, `!=`. **The choice of operator matters** - see below.
+Slash-delimited, re2 syntax. Used with operators `:`, `!:`, `=`, `!=`, and as members of an `in` (other) / `not in` (other) list, where each regex must match the entire value, as with `=`. **The choice of operator matters** - see below.
 
 ```lql
 message: /[0-9A-F]{8}(-[0-9A-F]{4}){3}-[0-9A-F]{12}/      <- contains a UUID anywhere in message
@@ -279,8 +280,8 @@ top/sub-folder/picture.png        <- unquoted, fine
 
 A `*` or `?` inside quotes is a literal character, not a pattern operator. Keep pattern operators outside the quotes; one value can mix both:
 ```lql
-x.foo: document*"/create"         <- starts with document, then anything, then /create
-x.foo: "document*/create"         <- the literal text document*/create
+x.foo: document*"/create"         <- contains document, then /create somewhere after it
+x.foo: "document*/create"         <- contains the literal text document*/create
 ```
 
 ---
@@ -330,7 +331,7 @@ Searches all standard string + custom fields (same standard string fields as a b
 any: "credit card"                       <- search all fields for "credit card"
 ```
 
-With a regex, `any:` (LQL) matches the regex against the custom fields as JSON text (key names, quotes and braces included), plus the standard string fields' values.
+`any:` (LQL) matches custom fields as JSON text (key names, quotes and braces included), plus the standard string fields' values, so `any: foo` (LQL) also matches an event whose custom fields have a key named foo, whatever its value. A regex is matched the same way.
 
 ```lql
 any: /KB[0-9]{7}/                        <- a KB number in any field
@@ -451,7 +452,7 @@ The `start` (arg) / `end` (arg) window is the primary time scope. To narrow furt
 t between 2026-04-23T03:00:00Z and 2026-04-23T04:00:00Z
 ```
 
-Give each timestamp a zone (`Z` or a name such as `MDT`); one with no zone reads as UTC.
+Give each timestamp a zone (`Z` or a name such as `MDT`); one with no zone reads as UTC. A date with no time is the midnight instant, not the whole day: `t between 2026-04-23 and 2026-04-23` (LQL) matches almost nothing.
 
 ---
 
