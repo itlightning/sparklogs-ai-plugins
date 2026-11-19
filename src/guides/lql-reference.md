@@ -23,7 +23,7 @@ Custom paths under `x.*` (LQL), such as `x.foo` (LQL), and the placeholders `pat
 | `!=` or `<>` | exact non-match | See **Negated operators (scalar vs array)** below. |
 | `>=`, `>`, `<`, `<=` | numeric/ordinal comparison | Right side must be a literal, not a pattern or regex. |
 | `<field>!` | field is present in the event | Presence check; matches even when the value is an explicit JSON `null` (other) (absent field = no match). e.g., `sparklogs.reason!` |
-| `<field> between <literal> and <literal>` | inclusive range | Works for numeric and timestamp fields. |
+| `<field> between <literal> and <literal>` | inclusive range | Works for numeric, string, timestamp and severity fields. Timestamps go unquoted, with a zone: `x.foo between 2024-05-03 07:00 MDT and May 3, 2024 18:30 MDT` (LQL); a timestamp with no zone reads as UTC. Severity takes names: `severity between warning and error` (LQL). |
 | `<field> in (a, b, c)` | match any in value list | Comma-separated, parenthesized. NOT `[a, b, c]`. |
 | `<field> not in (a, b, c)` | match NONE in value list | Inverse of `in` (other). |
 
@@ -57,6 +57,7 @@ message MATCHES "regex"               <- WRONG (no MATCHES)
 
 - `!:` and `!=` match when the field is **absent or NULL** as well as when the value does not match.
 - `subsource!:win.servicing.dism` (LQL) matches events with no `subsource` (LQL) value.
+- With a value list, every negation must hold: `message !: (initializing, "shutting down")` (LQL) matches when `message` (LQL) contains neither value, or is absent.
 
 **Array fields** (unindexed `x.tags` (LQL), not `x.tags[0]`):
 
@@ -64,7 +65,14 @@ message MATCHES "regex"               <- WRONG (no MATCHES)
 - Absent or non-array values do **not** match.
 - To include rows with no array: `x.tags !: noise OR NOT x.tags!` (LQL)
 
-**Search indexes:** scalar `!:` / `!=` and unary `NOT` on indexed terms do not use the search index. Positive `:` / `=` terms in the same `AND` may still use the index.
+**Search indexes:** scalar `!:` / `!=` and unary `NOT` on indexed terms do not use the search index. Positive `:` / `=` terms in the same `AND` may still use the index. Only `query_logs` (tool) `lql` (arg) uses the index at all (see **Whole terms** under Patterns).
+
+### Case
+
+- The MCP tools match case-insensitively. There is no case toggle.
+- Plain-literal `source` (LQL) equality is the exception: `=`, `!=`, `in` (other) and `not in` (other) with a plain value match the exact case (see **Single-source single-time-window scope**).
+- Hash fields such as `pattern_hash` (LQL) are stored in lower case and the value you type is lowered, so any case matches.
+- ID fields `org_id` (LQL) and `agent_id` (LQL) always ignore case.
 
 ### Empty string literals (scalar strings only)
 
@@ -174,6 +182,14 @@ win.servicing.dism                        <- matches events with that subsource 
 
 A bare term reaches every standard field listed above. It does not reach payload leaves; `any` (other) does.
 
+**Whole terms.** In `query_logs` (tool) `lql` (arg), a term with no `*`, `?` or regex, whether bare or on `message` (LQL), `pattern` (LQL), `source` (LQL), `app` (LQL), `pattern_hash` (LQL) or `trace_id` (LQL), uses the search index and matches whole words only, split at whitespace and punctuation: `message: fail` (LQL) does not match "failed".
+The other LQL parameters (`lql` (arg) on `query_event_counts_by_severity` (tool), and `filter_lql` (arg) / `having_lql` (arg) on `refine_query_result` (tool)) match substrings, so the same filter there also matches "failed".
+When a partial word must match in every tool, surround it with `*`:
+
+```lql
+message: *fail*                           <- "fail" anywhere, in every tool (no index, slower)
+```
+
 **Hash paste widening.** An equality on one of the six base fields whose literal has the hash token shape compiles to base OR twin, so a `*_hash` value pastes into either name:
 
 ```lql
@@ -261,6 +277,12 @@ top/sub-folder/picture.png        <- unquoted, fine
 "/create"                         <- right
 ```
 
+A `*` or `?` inside quotes is a literal character, not a pattern operator. Keep pattern operators outside the quotes; one value can mix both:
+```lql
+x.foo: document*"/create"         <- starts with document, then anything, then /create
+x.foo: "document*/create"         <- the literal text document*/create
+```
+
 ---
 
 ## JSON field paths
@@ -290,6 +312,12 @@ Append `#` followed by type letter:
 
 Auto-resolves type when omitted. Only use type suffix when the field has multiple types and you need to disambiguate.
 
+A field can carry values of several types. With no suffix, each predicate picks the type its value fits best (a number picks numeric, true or false picks boolean, a timestamp picks timestamp), then the first type the value can be read as (string reads anything). If no type the field carries can read the value, the query fails with an error such as `invalid numeric value`.
+
+```lql
+x.foo > 95 AND x.foo: prize      <- numeric values above 95, and string values containing "prize"
+```
+
 In a `refine_query_result` (tool) response, a `severity` (LQL) or `facility` (LQL) column reports its `schema.columns` (col) type as the enum name (severity, facility), not i or n - honest to the enum, not the integer storage.
 
 ---
@@ -300,6 +328,12 @@ Searches all standard string + custom fields (same standard string fields as a b
 
 ```lql
 any: "credit card"                       <- search all fields for "credit card"
+```
+
+With a regex, `any:` (LQL) matches the regex against the custom fields as JSON text (key names, quotes and braces included), plus the standard string fields' values.
+
+```lql
+any: /KB[0-9]{7}/                        <- a KB number in any field
 ```
 
 ---
@@ -416,6 +450,8 @@ The `start` (arg) / `end` (arg) window is the primary time scope. To narrow furt
 ```lql
 t between 2026-04-23T03:00:00Z and 2026-04-23T04:00:00Z
 ```
+
+Give each timestamp a zone (`Z` or a name such as `MDT`); one with no zone reads as UTC.
 
 ---
 
