@@ -19,7 +19,7 @@ Custom paths under `x.*` (LQL), such as `x.foo` (LQL), and the placeholders `pat
 |---|---|---|
 | `:` | field contains | For string fields, substring/pattern match. For non-string fields, equivalent to `=`. For array fields, true if any element matches. |
 | `!:` | field does NOT contain | See **Negated operators (scalar vs array)** below. |
-| `=` | exact match | Pattern or regex allowed on right side. |
+| `=` | exact match | Pattern or regex allowed on right side. `==` is the same operator. |
 | `!=` or `<>` | exact non-match | See **Negated operators (scalar vs array)** below. |
 | `>=`, `>`, `<`, `<=` | numeric/ordinal comparison | Right side must be a literal, not a pattern or regex. |
 | `<field>!` | field is present in the event | Presence check; matches only when the field holds a value. An explicit JSON `null` (other) counts as absent, and a field that only ever held null matches nothing. e.g., `sparklogs.reason!` |
@@ -34,6 +34,8 @@ Use `NOT <field>!` for is-null. Use `<field>!` for is-not-null.
 NOT sparklogs.reason!     <- is-null (uncurated events)
 sparklogs.reason!         <- is-not-null (curated events)
 ```
+
+A `!` directly after a bare word makes it a presence test, not text: `failed!` tests for a field named failed. Quote it to search the text: `"failed!"`.
 
 ### No `LIKE` (no SQL-style wildcards)
 Use pattern operators `*` and `?` directly in unquoted terms.
@@ -246,6 +248,8 @@ win.eventlog.setup.error_code = /0x8024[0-9a-f]+/   <- matches "0x80240022" only
 
 Precedence: `NOT` > `AND` > `OR`. Use parentheses for clarity.
 
+`!` is the same as `NOT` (`!timeout`, `NOT !timeout`). `-` negates only when attached to the term: `-timeout` works, `- timeout` is a syntax error. `AND`, `OR` and `NOT` are keywords in any case, so quote them to search for the words: `"or"`.
+
 ```lql
 severity >= warning AND source = "srv-x"
 (severity = error OR event_id = 7031) AND source = "srv-x"
@@ -296,6 +300,8 @@ x.foo.bar!                                               <- nested custom field 
 x."custom field"."some \"quoted\" field".final_value!   <- components with whitespace/quotes
 ```
 
+Array indexes start at zero: `x.foo[0]` (LQL) is the first element.
+
 ---
 
 ## Type suffixes (rare in agent practice)
@@ -336,6 +342,8 @@ any: "credit card"                       <- search all fields for "credit card"
 ```lql
 any: /KB[0-9]{7}/                        <- a KB number in any field
 ```
+
+`any:` (LQL) takes one value: `any: (a, b)` is refused. Write `any: a OR any: b`.
 
 ---
 
