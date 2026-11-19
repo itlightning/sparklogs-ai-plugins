@@ -322,6 +322,7 @@ lql_resident:
   - sparklogs.class
   - sparklogs.episode.replaced_id
   - sparklogs.epoch.seq
+  - sparklogs.feed.id
   - sparklogs.instance
   - sparklogs.kind
   - sparklogs.reason

@@ -17,10 +17,11 @@ There are three sets:
 | Field | What it is | Present |
 |---|---|---|
 | `source` (LQL) | The host the event is about | Every event |
-| `subsource` (LQL) | On agent data, the feed id (`win.eventlog.system` (value), `sparklogs.device.state` (value)): the join key to feed health | Every agent event. On ingest-key data, freeform and sometimes empty |
+| `subsource` (LQL) | On agent data a feed covers, the feed id (`win.eventlog.system` (value), `sparklogs.device.state` (value)): the join key to feed health. On agent data no feed covers, the same value as `origin` (LQL) (the channel name or file path) | Every agent event. On ingest-key data, freeform and sometimes empty |
 | `pattern_hash` (LQL) | Stable id of the normalized event shape | Every event |
 
 On agent data, `source` (LQL) and `subsource` (LQL) are always stamped, so `group_by=["subsource"]` on one host is a reliable first cut: it says which feeds are talking.
+A subsource is a feed only when the event also carries `sparklogs.feed.id` (LQL): a channel or file the agent collects with no feed behind it shows its `origin` (LQL) as subsource and has no `sparklogs.feed.id` (LQL).
 When the ticket already names the feed, start there and climb the rest of the ladder inside it.
 
 ---
@@ -35,7 +36,7 @@ service -> app -> subsource -> category -> pattern (finest: pattern_hash)
 |---|---|---|
 | `service` (LQL) | Ticket class the event is evidence for (`backup` (value), `patching` (value)): `guides/service-taxonomy.md` | Most agent events carry it; ingest-key data may not |
 | `app` (LQL) | Product that owns the stream: `guides/app-vocabulary.md` | Often empty, on purpose, on OS channels |
-| `subsource` (LQL) | Feed id (above) | Always on agent data |
+| `subsource` (LQL) | Feed id, or `origin` (LQL) where no feed covers the stream (above) | Always on agent data |
 | `category` (LQL) | Projection of topic, reason and class (`disk_volumes.volume_fill_rate_high.ELEVATED`): `guides/category-classes.md` | Often empty. Never parse it: read the fields it was built from |
 | `pattern` (LQL) / `pattern_hash` (LQL) | Normalized event shape | Always |
 
