@@ -184,15 +184,6 @@ win.servicing.dism                        <- matches events with that subsource 
 
 A bare term reaches every standard field listed above. It does not reach payload leaves; `any` (other) does.
 
-**Whole terms.** In `query_logs` (tool) `lql` (arg), a bare term or a `:` term with no `*`, `?` or regex, on any string field (standard or custom), uses the search index and matches whole words only, split at whitespace and punctuation: `message: fail` (LQL) does not match "failed".
-The index drops out, and the same term matches substrings, under `NOT`, with `!:` / `!=` / `not in` (other), and inside an `OR` whose other side cannot use the index: `message: fail OR x.foo > 5` (LQL) matches "failed". So `message: fail` (LQL) and `message !: fail` (LQL) are not complements there.
-The other LQL parameters (`lql` (arg) on `query_event_counts_by_severity` (tool), and `filter_lql` (arg) / `having_lql` (arg) on `refine_query_result` (tool)) match substrings, so the same filter there also matches "failed".
-When a partial word must match in every tool, surround it with `*`:
-
-```lql
-message: *fail*                           <- "fail" anywhere, in every tool (no index, slower)
-```
-
 **Hash paste widening.** An equality on one of the six base fields whose literal has the hash token shape compiles to base OR twin, so a `*_hash` value pastes into either name:
 
 ```lql
@@ -201,6 +192,17 @@ pattern = "divgfo_9v7cgvjijykp0zu5"            <- same rows; the equality widens
 ```
 
 **Permanent aliases.** `t` (LQL) and `ingested_t` (LQL) are the timestamp and the ingest timestamp; `org_id` (LQL) is the organization. They are the same names in responses and the names LQL accepts, in every LQL parameter. Inside an element scope (`[]()`) the same three names are payload keys on the element.
+
+### Indexed searches
+
+In `query_logs` (tool) `lql` (arg), a bare term or a `:` term with no `*`, `?` or regex, on any string field (standard or custom), uses the search index and matches whole words only, split at whitespace and punctuation: `message: fail` (LQL) does not match "failed".
+The index drops out, and the same term matches substrings, under `NOT`, with `!:` / `!=` / `not in` (other), and inside an `OR` whose other side cannot use the index: `message: fail OR x.foo > 5` (LQL) matches "failed". So `message: fail` (LQL) and `message !: fail` (LQL) are not complements there.
+The other LQL parameters (`lql` (arg) on `query_event_counts_by_severity` (tool), and `filter_lql` (arg) / `having_lql` (arg) on `refine_query_result` (tool)) match substrings, so the same filter there also matches "failed".
+When a partial word must match in every tool, surround it with `*`:
+
+```lql
+message: *fail*                           <- "fail" anywhere, in every tool (no index, slower)
+```
 
 ---
 
