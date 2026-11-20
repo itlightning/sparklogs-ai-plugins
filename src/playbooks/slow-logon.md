@@ -7,6 +7,8 @@ aliases:
 
 # Slow logon
 
+**Use when:** sign-in takes minutes, sits at Welcome or Please wait, a user gets a temporary profile, or Windows keeps asking for the password at logon.
+
 **Trigger.** "Logon takes `<duration>` since `<when>`", "stuck on Welcome" or "Please wait for the Group Policy Client", "I got a temporary profile", or "it asks for my password again and again".
 
 **Accuracy.** Windows writes a record at each step of a sign-in, each with its own time, and SparkLogs collects those channels beyond the curated events: Winlogon's authentication start and result, the User Profile Service's profile load, the Group Policy user pass, the session manager's session logon and shell start, and Winlogon's notice when one component holds up the sign-in for more than a minute.

@@ -6,6 +6,8 @@ aliases:
 
 # Memory or handle leak
 
+**Use when:** a PC or server gets slower over days until a reboot fixes it, memory use keeps climbing, or an application runs out of memory again and again.
+
 **Trigger.** "Machine slows over days, recovers on reboot", or an app repeatedly exhausts memory.
 
 **Accuracy.** The agent reports memory for the processes it lists in each window. For a process listed in every window, its growth curve is a measurement.

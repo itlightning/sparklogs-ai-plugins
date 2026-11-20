@@ -4,6 +4,8 @@ index: Disk full or filling
 
 # Disk full or filling fast
 
+**Use when:** a drive is almost full or filling fast, users get low disk space errors, or the C: drive has run out of room.
+
 **Trigger.** A volume crosses 90% or fills; users hit "no space" errors.
 
 **Accuracy.** State answers this category.

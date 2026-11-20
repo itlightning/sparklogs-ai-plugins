@@ -8,6 +8,8 @@ aliases:
 
 # Is SparkLogs collecting from this device
 
+**Use when:** no data arrives from a device, events are missing for a period, or the SparkLogs agent shows offline, unhealthy or not updating.
+
 **Trigger.** "There is no data from this PC since Tuesday", "is SparkLogs still collecting from the file server", "the events from last night are missing", or a device that shows offline or unhealthy in SparkLogs.
 
 **Accuracy.** Offline means no signal reached SparkLogs. It says nothing about whether the machine is running: the customer's RMM is the authority on that.

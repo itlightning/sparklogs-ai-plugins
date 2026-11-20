@@ -4,6 +4,8 @@ index: TPM errors or attestation failure
 
 # TPM errors or attestation failure
 
+**Use when:** the TPM logs errors, Windows Hello or BitLocker reports a TPM problem, or a device fails Intune device health attestation.
+
 **Trigger.** "The TPM keeps logging errors", "Windows Hello or BitLocker says the TPM is not working", or a device fails Intune device health attestation.
 
 **Accuracy.** The TPM logs event 17 in the System log for every command it does not complete, and most of those are Windows asking what the TPM supports.

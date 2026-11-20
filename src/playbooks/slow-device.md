@@ -8,6 +8,8 @@ aliases:
 
 # Slow or freezing device
 
+**Use when:** a PC or server is slow or freezes for seconds, takes long to boot or shut down, or shows high CPU, memory or disk use.
+
 **Trigger.** "The PC has been slow this week", "it freezes for a few seconds", "it takes ages to start", "shutting down takes forever", or a server responds slowly.
 
 **Accuracy.** The agent measures CPU (busy time, the queue of threads waiting for a processor, the user, kernel and interrupt split, the clock against rated speed), memory (available memory, committed memory against its limit, how long programs waited on paging), each disk (busy time, queue, latency), the network path, and the processes that used the most of each in every five-minute window.

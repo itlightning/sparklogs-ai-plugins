@@ -8,6 +8,8 @@ aliases:
 
 # Windows service will not start, keeps stopping or hangs
 
+**Use when:** a Windows service will not start, keeps stopping or crashing, hangs while starting or stopping, or an automatic service such as the print spooler is down after a reboot.
+
 **Trigger.** "The backup service keeps stopping", "the print spooler will not start", "the database service is down after a reboot", or a SparkLogs condition for a service that is not running.
 
 **Accuracy.** Service Control Manager records what Windows did to a service: a failed start and its error, a crash and the recovery action, a timeout, a stop with an error code.

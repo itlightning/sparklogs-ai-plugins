@@ -6,6 +6,8 @@ aliases:
 
 # One application slow or stalling over the network
 
+**Use when:** one program hangs, times out or loses its server connection while other apps work, often only over the VPN or from one site.
+
 **Trigger.** "Only the accounting app hangs, and only over the VPN", "Outlook stalls, everything else is fine."
 
 **Accuracy.** Per-connection rows name the program (`image_name` (col)), the remote address and port, and `scope` (col) (local or internet).

@@ -1,5 +1,7 @@
 # Investigation playbooks
 
+**Use when:** choosing which investigation playbook fits a symptom.
+
 The ask and investigate skills carry this table. Open one matching file for domain facts and starter LQL.
 A playbook is an incomplete recipe and not the event catalog: when its LQL returns little or nothing, widen as `guides/common-mistakes.md` (**Treating a playbook as the event catalog**) describes before calling the host quiet.
 Playbooks assume MCP fluency: LQL, field meaning, and claim strength, not tool walkthroughs.

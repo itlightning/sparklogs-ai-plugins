@@ -4,6 +4,8 @@ index: BitLocker recovery
 
 # BitLocker recovery prompt
 
+**Use when:** a device stops at the BitLocker recovery screen at startup and asks for the 48-digit recovery key.
+
 **Trigger.** "Machine booted to a BitLocker recovery key prompt."
 
 **Accuracy.** Nothing logs while the recovery screen is up, and a boot that stops there never reaches Windows.

@@ -9,6 +9,8 @@ aliases:
 
 # Disk, RAID array or storage path failing
 
+**Use when:** a RAID array or disk is degraded or failing, files give I/O device errors, chkdsk wants to run, a drive goes missing or shows RAW, or a SAN or iSCSI disk drops.
+
 **Trigger.** "The array reports degraded", "a drive failed in the server", "files will not open: I/O device error", "Windows wants to run chkdsk", "drive D: is gone or shows RAW", "the server freezes for a few seconds and carries on", or a SMART alert from the RMM.
 
 **Accuracy.** Windows records what its storage stack saw: a block it could not read, a request that timed out, a path it reset, a file system structure it found damaged. It does not record which part is bad. The part is named by repetition on one disk, one path or one volume, and by the layer the records sit in.

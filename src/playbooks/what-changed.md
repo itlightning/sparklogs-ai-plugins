@@ -6,6 +6,8 @@ aliases:
 
 # What changed on this device
 
+**Use when:** something worked yesterday and stopped, and the question is which update, installed software, service or scheduled task changed on the device before it broke.
+
 **Trigger.** "It worked yesterday", "what changed before this started", or another playbook's step asking what changed on the device before an onset.
 
 **Accuracy.** A change before the onset is a candidate, not a cause.

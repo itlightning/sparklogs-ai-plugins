@@ -9,6 +9,8 @@ aliases:
 
 # Certificate, TLS and enrollment failures
 
+**Use when:** users see expired or untrusted certificate warnings, TLS or Schannel errors appear, Wi-Fi, VPN or smart card sign-in stops authenticating, or certificate autoenrollment fails.
+
 **Trigger.** "The intranet site says the certificate expired", "Wi-Fi or VPN stopped authenticating", "the app cannot reach its server since Monday", "smart card or Windows Hello sign-in fails", "autoenrollment errors on the domain controllers", or a certificate reason on a device.
 
 **Accuracy.** Each side of a certificate problem logs something different, and none of it names the whole story:

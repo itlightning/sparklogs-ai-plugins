@@ -6,6 +6,8 @@ aliases:
 
 # Windows VSS
 
+**Use when:** a backup fails with a VSS or snapshot error, VSS writers fail, or shadow copies are not created or pile up.
+
 **Trigger.** Writers failing, snapshots not created, shadow copies piling up, `vssadmin` (other) looking wrong.
 This file is the Windows plumbing under a backup product; the job result itself lives in the backup console.
 

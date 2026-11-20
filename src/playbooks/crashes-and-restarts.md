@@ -7,6 +7,8 @@ aliases:
 
 # Blue screens, app crashes and unexpected restarts
 
+**Use when:** a PC blue-screens with a stop code, an application keeps crashing or closing on its own, or a server restarts unexpectedly.
+
 **Trigger.** "The PC keeps blue-screening", "this app keeps crashing", or "the server rebooted on its own".
 
 **Accuracy.** Each crash reaches SparkLogs several times, and only one record counts it.
