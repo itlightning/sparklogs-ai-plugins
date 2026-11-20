@@ -221,7 +221,7 @@ Canonical template (field definitions, right-vs-wrong examples): `references/out
 
 **Produce in this order:** title + `external_investigation_id` (arg) → EXECUTIVE SUMMARY → SCOPE CHECKED (incl. WHAT WAS NOT CHECKED) → OBSERVED CONDITIONS (Findings) → WHAT WAS EXAMINED → AUDIT TRAIL → POSSIBLE NEXT DIRECTIONS (explore-or-analyze invitation).
 
-**Non-negotiable, check before delivering:** every Finding cites `query_url` (col); Confidence on every Finding; the Executive Summary tracks Findings only; WHAT WAS NOT CHECKED is specific, every time; POSSIBLE NEXT DIRECTIONS invites `sparklogs-analyze-cause`, never performs cause analysis. Anti-patterns: `guides/common-mistakes.md`.
+**Non-negotiable, check before delivering:** every Finding cites `query_url` (col); Confidence on every Finding; the Executive Summary tracks Findings only; WHAT WAS NOT CHECKED is specific, every time; POSSIBLE NEXT DIRECTIONS invites `sparklogs-analyze-cause`, never performs cause analysis. No Finding and no Executive Summary sentence states a cause: restate it as the observation ("The cause is high CPU" becomes "Process X was at 92% CPU in Finding 4"). A change to make (restart the service, deploy the patch, close the ticket) goes in POSSIBLE NEXT DIRECTIONS, not in a Finding. Anti-patterns: `guides/common-mistakes.md`.
 
 ---
 
@@ -345,7 +345,9 @@ Bulk raw reads (>~500 events): delegate per `guides/subagent-definitions.md` whe
 
 ## Section 14. Common mistakes
 
-See `guides/common-mistakes.md` (e.g. cause analysis in this skill, claims without `query_url` (col), `query_raw_events` (tool) first, coverage inferred from counts, "no problem" instead of "no evidence in scope"). Open it when you suspect an anti-pattern; do not hold the full catalog in context.
+See `guides/common-mistakes.md` (e.g. claims without `query_url` (col), `query_raw_events` (tool) first, coverage inferred from counts, "no problem" instead of "no evidence in scope"). Open it when you suspect an anti-pattern; do not hold the full catalog in context.
+
+Its **Causes** section tells an assistant to present a likely cause as its analysis. In this skill that applies only to the `sparklogs-analyze-cause` offer: no cause in OBSERVED CONDITIONS or the EXECUTIVE SUMMARY (Section 1, Section 3). Where it says "low confidence", band the Finding `low` (value); where it says to say what you could not check, that goes in WHAT WAS NOT CHECKED.
 
 ---
 
