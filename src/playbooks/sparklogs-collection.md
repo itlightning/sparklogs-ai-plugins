@@ -17,14 +17,14 @@ The rules for writing about agent status, collection, completeness and skipped e
 Its own service starts and stops are also on `win.eventlog.system` (value).
 Agent notices carry `sparklogs.kind = agent_op` (LQL); an empty result is inconclusive (`guides/lql-reference.md`, **Ingest-health check**).
 
-**1. The agent's own row.** `resolve_scope` (tool) returns the device with its agent status, its collection status with the reasons and the time they were observed, the instant its data is complete through, advisories, why an enrolled agent is not collecting, its agent version and, after a failed update, the update status and failure reason.
+**1. The agent's own row.** `find_org_or_device` (tool) returns the device with its agent status, its collection status with the reasons and the time they were observed, the instant its data is complete through, advisories, why an enrolled agent is not collecting, its agent version and, after a failed update, the update status and failure reason.
 For a whole client, ask the same tool for the devices whose collection is unhealthy: it lists them worst first.
 An empty list means no device last reported unhealthy collection. It does not clear an offline device: one whose last report was healthy is not on the list, so read agent status too.
 An offline device keeps its last reported collection state. Say when it was reported.
 A device whose agent status says it was stopped, shut down or uninstalled told SparkLogs so on the way down; offline means no signal and an unknown cause.
 Events that keep arriving while the device reads offline are valid evidence; record the disagreement and keep the data (`guides/scope-resolution.md`, **State cross-check**).
 
-**2. The device's feed health line.** `resolve_scope` (tool) and `list_sources` (tool) carry one line per device: how many feeds are current, each feed that is not with its reason and last event time, and any skipped events.
+**2. The device's feed health line.** `find_org_or_device` (tool) and `list_sources` (tool) carry one line per device: how many feeds are current, each feed that is not with its reason and last event time, and any skipped events.
 Feed health is the agent's own report. Do not derive it from event volume.
 
 - Behind: the feed has a backlog and is still reading, often after a burst on a busy channel. A behind feed reading at a high rate is catching up.
@@ -83,7 +83,7 @@ A queue that grows while `log_delivery_failed` (value) repeats is a device that 
 
 **6. Updates.** The agent's row carries its reported update status and failure reason only after the updater reported a failure. Render the reason as written.
 An agent status of upgrading overdue is an update that started and did not come back; read it with the last contact time, since a machine that went dark mid-update reads the same.
-An agent that stays on an old version without reporting any failure is not flagged there. Compare its version with the rest of the client in the same `resolve_scope` (tool) listing, and with devices in other clients: every device in the client on the same older version is an update that has not reached them yet, not a fault on this device. For one device behind its neighbors, read the agent's own update lines:
+An agent that stays on an old version without reporting any failure is not flagged there. Compare its version with the rest of the client in the same `find_org_or_device` (tool) listing, and with devices in other clients: every device in the client on the same older version is an update that has not reached them yet, not a fault on this device. For one device behind its neighbors, read the agent's own update lines:
 
 ```lql
 source = "<host>" AND subsource = "sparklogs.agent.log" AND message: update

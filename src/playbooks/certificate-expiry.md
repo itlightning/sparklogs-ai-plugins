@@ -162,7 +162,7 @@ Other well-known causes: the machine or user lacks Enroll and Autoenroll on the 
 
 **Domain controller certificates.** `kerberos_smartcard_cert_missing` (value) is a domain controller with no usable Kerberos Authentication or Domain Controller Authentication certificate. 29 alone says so; 19 says someone tried to sign in with a certificate against this controller and could not.
 Certificate sign-in is not only physical smart cards: Windows Hello for Business in hybrid key trust or certificate trust, and virtual smart cards, use the same path, so 19 in working hours is users whose Windows Hello sign-in is failing or falling back.
-Find the client's domain controllers with `resolve_scope` (tool) by their reported role, then over those devices:
+Find the client's domain controllers with `find_org_or_device` (tool) by their reported role, then over those devices:
 
 ```lql
 sparklogs.reason in (kerberos_smartcard_cert_missing, cert_expiring, cert_enroll_failed)

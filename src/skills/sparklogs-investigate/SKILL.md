@@ -55,7 +55,7 @@ Process charts use the same tool with `view` (arg) `top_processes_over_time` (va
 
 ## Curated data (read this before opening reference files)
 
-- **`subsource` (LQL) = feed id.** Group before `query_logs` (tool): the scope ladder plus `sparklogs.reason` (LQL), in `guides/scope-ladder.md`.
+- **`subsource` (LQL) = feed id.** Group before `query_raw_events` (tool): the scope ladder plus `sparklogs.reason` (LQL), in `guides/scope-ladder.md`.
 - **Curated events** carry `sparklogs.reason` (LQL), `sparklogs.class` (LQL), and module fields. Empty `sparklogs.*` on an event means **uncurated** (not a collection-health finding).
 - **Reason** (`sparklogs.reason` (LQL)) = our curated vocabulary. **Vendor code** = NTSTATUS, HRESULT, MSI exit, Kerberos result, etc. **pattern_hash** (LQL) = stable shape id on every event.
 - **Device row** (`query_device_health` (tool), feed health, `agent_complete_through` (col)) is authoritative for collection and completeness. Event volume is not coverage.
@@ -92,7 +92,7 @@ Process charts use the same tool with `view` (arg) `top_processes_over_time` (va
 
 ## Unfamiliar `pattern_hash` (LQL)
 
-1. `describe_pattern` (tool) for text, examples, fleet spread.
+1. `describe_event_patterns` (tool) for text, examples, fleet spread.
 2. Grep `feeds/<id>/reasons.md` or `recipes.md` if a reason or pivot is the question.
 3. `patterns.md` only when the question is whether the pack meant to produce that string shape.
 <!-- END GENERATED INDEX:corpus-navigation -->
@@ -253,15 +253,15 @@ A device view's `not_measured` (col) and unreported seconds name on-endpoint gap
 
 ## Section 7. Investigation methodology - aggregation-first, progressive disclosure
 
-**Funnel before raw:** scope lightly, aggregate to narrow, then `query_logs` (tool) only over the narrowed slice.
+**Funnel before raw:** scope lightly, aggregate to narrow, then `query_raw_events` (tool) only over the narrowed slice.
 
 **Rows returned are not the population.** Read matched TOTAL and `last_event_at` (col) before any how-much / how-long claim. A missing total is not zero.
 
 **Query shape (lightest first):** (e.g., whose scope? what arrived? what's on the box? what's noisy and where? what do the events say?)
-1. **Scope and coverage:** `resolve_scope` (tool), `list_sources` (tool); then `query_device_health` (tool) when agents are in scope; `query_scope_activity` (tool) when the estate is unfamiliar.
+1. **Scope and coverage:** `find_org_or_device` (tool), `list_sources` (tool); then `query_device_health` (tool) when agents are in scope; `summarize_events_by_severity` (tool) when the estate is unfamiliar.
 2. **Device health first** when the ticket is about one device or a few: `view` (arg) `device_overview` (value) or `device_network` (value) over the complaint window, then refine the result sets it points at. Narrow events to the devices and intervals it names (`guides/device-state-fields.md`, **Read a device view**). Follow-ups on one device's inventory refine the overview's `state` (value) result set instead of new calls; its topic column is `topic` (col), not `sparklogs.topic` (LQL) (`guides/device-state-fields.md`, **Result sets**). `latest_state` (value) answers current state: do not merge changes into it yourself, and a topic reported empty is evidence of none.
-3. **Pattern mining:** `query_event_counts_by_severity` (tool) and `describe_pattern` (tool) before citing hashes.
-4. **Raw events (last resort):** one broad `query_logs` (tool) slice, then `refine_query_result` (tool) (not another backing query). `list_fields` (tool) is rare.
+3. **Pattern mining:** `count_events_matching_filter` (tool) and `describe_event_patterns` (tool) before citing hashes.
+4. **Raw events (last resort):** one broad `query_raw_events` (tool) slice, then `refine_query_result` (tool) (not another backing query). `list_fields` (tool) is rare.
 
 **Before "no evidence":** read `agent_complete_through` (col) / `advisories` (col), check `sparklogs.kind = agent_op` (value) rows, treat volume as a prompt only (not coverage). Empty `agent_op` (value) is inconclusive; name what you could not rule out in WHAT WAS NOT CHECKED.
 
@@ -275,7 +275,7 @@ Symptom playbooks: Section 2 and `playbooks/playbooks.md`.
 
 Group before you read: the event-shape ladder (`service` (LQL) -> `app` (LQL) -> `subsource` (LQL) -> `category` (LQL) -> `pattern_hash` (LQL), `source` (LQL) beside it), curated identity (`sparklogs.reason` (LQL), `sparklogs.reason_variant` (LQL), `sparklogs.class` (LQL), `sparklogs.instance` (LQL)), and device conditions. Fields, availability and the rules that change counts: `guides/scope-ladder.md`. An empty group is a field the source does not set, not a Finding.
 
-**Use it:** `query_event_counts_by_severity` (tool) with `group_by` (arg) to localize; cross-tab with 2-3 fields when the pairing is the question; drill with `pattern_hash = "..."` (LQL) or refine on cache; resolve `_hash` via `lookups` (col) before citing.
+**Use it:** `count_events_matching_filter` (tool) with `group_by` (arg) to localize; cross-tab with 2-3 fields when the pairing is the question; drill with `pattern_hash = "..."` (LQL) or refine on cache; resolve `_hash` via `lookups` (col) before citing.
 
 Full ladder, worked shapes, RCA usage: `guides/scope-ladder.md`. Controlled `service` (LQL) vocabulary: `guides/service-taxonomy.md`.
 
@@ -287,7 +287,7 @@ Before deep investigation: resolve org / sources / time window, then confirm dat
 
 **Questions before deep work:** (e.g., which org/host? is data present? is collection trustworthy? one machine or fleet? critical+ in scope?)
 
-**Resolution in brief:** explicit UUID or name via `resolve_scope` (tool); host-first when they name a device; ranked by `match_kind` (col) (`exact` (value) proceeds; ties or weak-only matches: ask). Read `agent_status` (col), collection group, `advisories` (col), `agent_complete_through` (col) on agent rows. Reuse `external_investigation_id` (arg) when scope expands.
+**Resolution in brief:** explicit UUID or name via `find_org_or_device` (tool); host-first when they name a device; ranked by `match_kind` (col) (`exact` (value) proceeds; ties or weak-only matches: ask). Read `agent_status` (col), collection group, `advisories` (col), `agent_complete_through` (col) on agent rows. Reuse `external_investigation_id` (arg) when scope expands.
 
 **Operational gates (skill-local):**
 - **Critical+ fetch-first** on curated data: `guides/category-classes.md` (Severity).
@@ -306,7 +306,7 @@ Fresh report → re-render per Section 3 with all Findings so far. Explore furth
 
 ## Section 11. Error handling - recover gracefully
 
-**Cache expired on `refine_query_result` (tool):** a cold `query_logs` (tool) cache regenerates automatically under the SAME `query_id` (arg) when you refine it (`summary.cache_status` (col) reflects it). Grouped handles can be refined within their returned shape; use a raw-event query when the question needs underlying events. A `cache_invalidated` (value) handle is dead: `guides/mcp-tool-decision-tree.md` (large responses). If the server reports the cache cannot be restored (`expired` (value)), re-issue the original backing query.
+**Cache expired on `refine_query_result` (tool):** a cold `query_raw_events` (tool) cache regenerates automatically under the SAME `query_id` (arg) when you refine it (`summary.cache_status` (col) reflects it). Grouped handles can be refined within their returned shape; use a raw-event query when the question needs underlying events. A `cache_invalidated` (value) handle is dead: `guides/mcp-tool-decision-tree.md` (large responses). If the server reports the cache cannot be restored (`expired` (value)), re-issue the original backing query.
 
 **Rate or capacity errors:** if a tool call fails with a retryable server error, retry up to 2x with a brief backoff, then surface to the engineer rather than hammering the same call.
 
@@ -345,7 +345,7 @@ Bulk raw reads (>~500 events): delegate per `guides/subagent-definitions.md` whe
 
 ## Section 14. Common mistakes
 
-See `guides/common-mistakes.md` (e.g. cause analysis in this skill, claims without `query_url` (col), `query_logs` (tool) first, coverage inferred from counts, "no problem" instead of "no evidence in scope"). Open it when you suspect an anti-pattern; do not hold the full catalog in context.
+See `guides/common-mistakes.md` (e.g. cause analysis in this skill, claims without `query_url` (col), `query_raw_events` (tool) first, coverage inferred from counts, "no problem" instead of "no evidence in scope"). Open it when you suspect an anti-pattern; do not hold the full catalog in context.
 
 ---
 

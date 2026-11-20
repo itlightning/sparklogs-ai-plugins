@@ -156,17 +156,17 @@ Required on every data call, 8 to 200 characters of free text you choose; one va
 
 **Recovery.** Before any claim about how much, how many, or how long: read the matched total, read `last_event_at` (col), and page with `refine_query_result` (tool) if you need rows the first page did not carry. If the total is larger than what you received, say which you are quoting.
 
-### Reaching for `query_logs` (tool) first
+### Reaching for `query_raw_events` (tool) first
 
-**Symptom.** First MCP call (after `resolve_scope` (tool) and `list_sources` (tool)) is `query_logs` (tool) for a broad raw retrieval.
+**Symptom.** First MCP call (after `find_org_or_device` (tool) and `list_sources` (tool)) is `query_raw_events` (tool) for a broad raw retrieval.
 
-**Why it's wrong.** Aggregation first. `query_logs` (tool) is the *last resort*, not the first. Aggregation returns a dense, denominated answer instead of a pile of raw rows: you learn what the population looks like before you spend the window reading a slice of it.
+**Why it's wrong.** Aggregation first. `query_raw_events` (tool) is the *last resort*, not the first. Aggregation returns a dense, denominated answer instead of a pile of raw rows: you learn what the population looks like before you spend the window reading a slice of it.
 
-**Recovery.** First substantive call should usually be `query_event_counts_by_severity` (tool) (group by the field the question is about). Use `query_logs` (tool) only when aggregation has narrowed to a specific small set whose raw text matters.
+**Recovery.** First substantive call should usually be `count_events_matching_filter` (tool) (group by the field the question is about). Use `query_raw_events` (tool) only when aggregation has narrowed to a specific small set whose raw text matters.
 
 ### Re-running queries instead of refining cached results
 
-**Symptom.** You issue a fresh `query_logs` (tool) or `query_event_counts_by_severity` (tool) when you already had a relevant cached query.
+**Symptom.** You issue a fresh `query_raw_events` (tool) or `count_events_matching_filter` (tool) when you already had a relevant cached query.
 
 **Why it's wrong.** Backing queries do meaningfully more work than `refine_query_result` (tool), which runs against the cache. The cache lasts a long time; reuse it.
 
@@ -191,7 +191,7 @@ The rules, the one-sentence green case, and what an absent `agent_complete_throu
 
 **Why it's wrong.** Most WEL rows have no curated reason. Empty `sparklogs.*` fields on an event mean the event is uncurated (this is not a health finding). Empty means this predicate did not match, never "no problem found" and never "the box is unhealthy." Uncurated raw text and sibling providers can still carry the ticket.
 
-**Recovery.** Drop the curated predicate. Group the host by `subsource` (LQL), then follow `guides/stream-kinds.md`. Use `query_event_counts_by_severity` (tool) on `severity` (LQL) or `pattern` (LQL) for volume. Say in WHAT WAS NOT CHECKED which curated filters you tried.
+**Recovery.** Drop the curated predicate. Group the host by `subsource` (LQL), then follow `guides/stream-kinds.md`. Use `count_events_matching_filter` (tool) on `severity` (LQL) or `pattern` (LQL) for volume. Say in WHAT WAS NOT CHECKED which curated filters you tried.
 
 ### Loading a whole `enums.md` or `reasons.md`
 
@@ -207,7 +207,7 @@ The rules, the one-sentence green case, and what an absent `agent_complete_throu
 
 **Why it's wrong.** `patterns.md` is a grammar/decision procedure (expected vs unexpected shape), not a meaning catalog. Semantic questions belong elsewhere.
 
-**Recovery.** `describe_pattern` (tool) first, then grep `reasons.md` or `recipes.md`. Use `patterns.md` only when the question is whether the pack meant to produce that string shape (search one heading).
+**Recovery.** `describe_event_patterns` (tool) first, then grep `reasons.md` or `recipes.md`. Use `patterns.md` only when the question is whether the pack meant to produce that string shape (search one heading).
 
 ### Treating a playbook as the event catalog
 
@@ -243,7 +243,7 @@ The rules, the one-sentence green case, and what an absent `agent_complete_throu
 
 ### Asking which device when one org already resolved
 
-**Symptom.** `resolve_scope` (tool) returned one exact org and many agent rows, and you asked the engineer to pick a host before answering a client- or fleet-scoped question.
+**Symptom.** `find_org_or_device` (tool) returned one exact org and many agent rows, and you asked the engineer to pick a host before answering a client- or fleet-scoped question.
 
 **Why it's wrong.** Many devices under one resolved org is the inventory, not a tie. Asking stalls a question that already has a scope.
 
@@ -251,11 +251,11 @@ The rules, the one-sentence green case, and what an absent `agent_complete_throu
 
 ### Scanning the whole fleet unprompted
 
-**Symptom.** They named one client or one host, and you opened with estate-wide `query_logs` (tool) (or a wide counts scan with no LQL) to "see if it is anywhere".
+**Symptom.** They named one client or one host, and you opened with estate-wide `query_raw_events` (tool) (or a wide counts scan with no LQL) to "see if it is anywhere".
 
 **Why it's wrong.** Default scope is what they named. A fleet hunt is a suggested next step when a finding looks serious or shared, not the first move.
 
-**Recovery.** Stay in the named scope. If the finding looks shared (same `pattern_hash` (LQL) / `service` (LQL) / reason; ransomware-class, backup-wide, identity), suggest a hunt and wait unless they already asked. Climb `query_scope_activity` (tool) and `query_event_counts_by_severity` (tool), then `describe_pattern` (tool) for spread. Raw logs only after that list is narrow.
+**Recovery.** Stay in the named scope. If the finding looks shared (same `pattern_hash` (LQL) / `service` (LQL) / reason; ransomware-class, backup-wide, identity), suggest a hunt and wait unless they already asked. Climb `summarize_events_by_severity` (tool) and `count_events_matching_filter` (tool), then `describe_event_patterns` (tool) for spread. Raw logs only after that list is narrow.
 
 ### Running past ~15 tool calls without converging
 

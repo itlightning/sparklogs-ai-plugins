@@ -37,9 +37,9 @@ Funnel, scope, LQL errors: `guides/mcp-tool-decision-tree.md`, `guides/scope-res
 - Open problems across a client, or how many devices have one → same tool, omit `view` (arg), or `group_by_reason` (arg) for device counts
 - Which processes or devices stand out across the fleet → same tool, `view` (arg) `fleet_processes` (value) or `fleet_performance` (value)
 - What is installed or configured now → same tool, `view` (arg) `latest_state` (value), or refine an overview's `state` (value) result set
-- Collection problems → `resolve_scope` (tool) with `unhealthy_collection_only` (arg); "no data from this device": `playbooks/sparklogs-collection.md`
-- Counts, patterns, when → `query_event_counts_by_severity` (tool) grouped by the fields in `guides/scope-ladder.md` (`sparklogs.reason` (LQL) first on curated data), `describe_pattern` (tool), `query_scope_activity` (tool)
-- Raw event lines → `query_logs` (tool) last, then refine
+- Collection problems → `find_org_or_device` (tool) with `unhealthy_collection_only` (arg); "no data from this device": `playbooks/sparklogs-collection.md`
+- Counts, patterns, when → `count_events_matching_filter` (tool) grouped by the fields in `guides/scope-ladder.md` (`sparklogs.reason` (LQL) first on curated data), `describe_event_patterns` (tool), `summarize_events_by_severity` (tool)
+- Raw event lines → `query_raw_events` (tool) last, then refine
 - Collector debug → `sparklogs.agent.vector` (value) / `sparklogs.agent.log` (value) only
 
 ## Where to look
@@ -56,7 +56,7 @@ Process charts use the same tool with `view` (arg) `top_processes_over_time` (va
 
 ## Curated data (read this before opening reference files)
 
-- **`subsource` (LQL) = feed id.** Group before `query_logs` (tool): the scope ladder plus `sparklogs.reason` (LQL), in `guides/scope-ladder.md`.
+- **`subsource` (LQL) = feed id.** Group before `query_raw_events` (tool): the scope ladder plus `sparklogs.reason` (LQL), in `guides/scope-ladder.md`.
 - **Curated events** carry `sparklogs.reason` (LQL), `sparklogs.class` (LQL), and module fields. Empty `sparklogs.*` on an event means **uncurated** (not a collection-health finding).
 - **Reason** (`sparklogs.reason` (LQL)) = our curated vocabulary. **Vendor code** = NTSTATUS, HRESULT, MSI exit, Kerberos result, etc. **pattern_hash** (LQL) = stable shape id on every event.
 - **Device row** (`query_device_health` (tool), feed health, `agent_complete_through` (col)) is authoritative for collection and completeness. Event volume is not coverage.
@@ -93,7 +93,7 @@ Process charts use the same tool with `view` (arg) `top_processes_over_time` (va
 
 ## Unfamiliar `pattern_hash` (LQL)
 
-1. `describe_pattern` (tool) for text, examples, fleet spread.
+1. `describe_event_patterns` (tool) for text, examples, fleet spread.
 2. Grep `feeds/<id>/reasons.md` or `recipes.md` if a reason or pivot is the question.
 3. `patterns.md` only when the question is whether the pack meant to produce that string shape.
 <!-- END GENERATED INDEX:corpus-navigation -->

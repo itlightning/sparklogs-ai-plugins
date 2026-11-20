@@ -25,7 +25,7 @@ A process whose memory or handles grow until a restart: `playbooks/memory-or-han
 Internet, Wi-Fi or the local network down, slow or dropping: `playbooks/network-connectivity.md`.
 One application slow or stalling over the network while others work: `playbooks/application-network-stall.md`.
 Changes on a device before an onset (drivers, products, services, adapters, firmware): `playbooks/what-changed.md`.
-Use `query_logs` (tool) for underlying application or system events, scoped to the device and interval the health reading named.
+Use `query_raw_events` (tool) for underlying application or system events, scoped to the device and interval the health reading named.
 A VSS writer failure does not establish a backup job's outcome; the job result lives in the backup console.
 
 Use `sparklogs.agent.vector` (value) and `sparklogs.agent.log` (value) when diagnosing SparkLogs collection.

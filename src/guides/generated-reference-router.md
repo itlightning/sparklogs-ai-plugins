@@ -26,7 +26,7 @@ the wrong one.
 | "What is on this box right now?" | none of the above | inventory rows from the MCP tools, not reference content |
 | "How do I explore this kind of stream?" | `guides/stream-kinds.md` | feed → kind → explore ladder. Not `fields.md` |
 | "What does this `app` (LQL) token mean?" | `guides/app-vocabulary.md` | pack-minted product identity; empty is normal |
-| "Unfamiliar `pattern_hash` (LQL), what is this shape?" | MCP `describe_pattern` (tool) first | pattern text, examples, fleet spread; then `reasons.md` / `recipes.md` if needed |
+| "Unfamiliar `pattern_hash` (LQL), what is this shape?" | MCP `describe_event_patterns` (tool) first | pattern text, examples, fleet spread; then `reasons.md` / `recipes.md` if needed |
 
 How much of each artifact to read (grep, one section, summary table first): the read-mode table in the skill's corpus block.
 
@@ -51,7 +51,7 @@ Two shapes deserve their own line because they are the ones people get wrong:
    subsource = "win.eventlog.security"
    ```
 
-   That is the canonical way to scope a query to one feed. Reach for `query_scope_activity` (tool) to
+   That is the canonical way to scope a query to one feed. Reach for `summarize_events_by_severity` (tool) to
    discover which subsources a client HAS, not to look up one you already know.
 2. Open that module's `README.md`. It is the module index and it is short.
 3. Open the one artifact the table above points at.
@@ -64,7 +64,7 @@ provider payload, and say in your findings when you were reading uncurated text.
 ## What this content is not
 
 - **Not separate device-health column names.** The generated field reference uses the same paths as
-  `query_device_health` (tool) condition, timeline and latest_state columns and `query_logs` (tool) filters.
+  `query_device_health` (tool) condition, timeline and latest_state columns and `query_raw_events` (tool) filters.
   The device-view result sets use short names instead (`guides/device-state-fields.md`, **Result sets**).
 - **Not a severity table.** Severity is a shared ladder across every source and is documented once,
   in `category-classes.md`. A module never defines its own bands.

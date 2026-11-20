@@ -17,13 +17,13 @@ Agent-debug feeds describe collection problems, not the device's workload health
 | Raw topic samples | `series` (value), with `topics` (arg). Each inventory part is a result row. |
 | Available topics and sampled fields | `topics` (value). |
 | Episode history or repeating changes | `event_timeline` (value). Includes all in-window events of episodes whose in-window peak meets the severity floor. Events without an episode filter individually. |
-| Crash or application problem on a device | Process crashes, service crashes and other occurrences: `event_timeline` (value) with `kinds` (arg) `["occurrence"]` (value), oldest first. App hangs, and the Windows Error Reporting detail of crashes, are on `win.eventlog.application` (value) only (`app_hang` (value), `app_crash` (value), no `sparklogs.kind` (LQL)), so the device-health views never return them: count them with `query_event_counts_by_severity` (tool) on `sparklogs.reason in (app_crash, app_hang)` (LQL). Reading the crashes: `playbooks/crashes-and-restarts.md`. |
+| Crash or application problem on a device | Process crashes, service crashes and other occurrences: `event_timeline` (value) with `kinds` (arg) `["occurrence"]` (value), oldest first. App hangs, and the Windows Error Reporting detail of crashes, are on `win.eventlog.application` (value) only (`app_hang` (value), `app_crash` (value), no `sparklogs.kind` (LQL)), so the device-health views never return them: count them with `count_events_matching_filter` (tool) on `sparklogs.reason in (app_crash, app_hang)` (LQL). Reading the crashes: `playbooks/crashes-and-restarts.md`. |
 | Open problems across a client or the fleet | Omit `view` (arg) over a window of days. A row is open unless its `sparklogs.class` (col) is `RECOVERED` (value) or `ENDED` (value); a clearing one carries `clearing_since` (col) and `closes_in_about` (col): say since when and about how long until it closes. Narrow with `reasons` (arg) or `topics` (arg). |
 | How many devices have a condition | `group_by_reason` (arg) set: one row per kind and reason with `affected_agents` (col), `episode_count` (col), `occurrence_count` (col) and `event_count` (col). For changes, `occurrence_count` (col) counts the changes and `event_count` (col) every witness of them. A device can sit in several groups: do not sum `affected_agents` (col) across rows. |
 | Which processes use the most CPU, RAM or I/O across devices | `fleet_processes` (value), `metric` (arg) `cpu` (value), `ram` (value), `io_read` (value) or `io_write` (value). `image` (arg) narrows to one executable; `group_by` (arg) `device` (value) ranks the devices instead. |
 | How one reading spreads across devices (outliers) | `fleet_performance` (value), `metric` (arg) naming the reading (default `cpu_busy_pct_avg` (value)); `group_by` (arg) `device` (value) lists the outlying devices. |
 
-Collection problems are not device health: call `resolve_scope` (tool) with `unhealthy_collection_only` (arg) (`guides/scope-resolution.md`). The symptom walk ("no data from this device") is `playbooks/sparklogs-collection.md`.
+Collection problems are not device health: call `find_org_or_device` (tool) with `unhealthy_collection_only` (arg) (`guides/scope-resolution.md`). The symptom walk ("no data from this device") is `playbooks/sparklogs-collection.md`.
 
 For current conditions, use a window of days: an open episode with no event in a narrow window will be absent.
 Latest state is an observation, not a live inspection of the endpoint.
@@ -39,7 +39,7 @@ For field units and meanings, open `fields/INDEX.md`, then the relevant topic or
 
 ## Read a device view
 
-`device_overview` (value) and `device_network` (value) answer for the devices named in `agent_ids` (arg): 1 to 25 agent ids (the `id` (col) of the agent rows `resolve_scope` (tool) returned), over a window of at most 30 days and 1 hour.
+`device_overview` (value) and `device_network` (value) answer for the devices named in `agent_ids` (arg): 1 to 25 agent ids (the `id` (col) of the agent rows `find_org_or_device` (tool) returned), over a window of at most 30 days and 1 hour.
 
 ```json
 {

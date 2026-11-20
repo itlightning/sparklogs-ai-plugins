@@ -6,15 +6,15 @@
 
 tools:
   - server_info
-  - resolve_scope
+  - find_org_or_device
   - list_sources
   - list_fields
-  - query_scope_activity
-  - describe_pattern
+  - summarize_events_by_severity
+  - describe_event_patterns
   - get_query_metadata
   - query_device_health
-  - query_logs
-  - query_event_counts_by_severity
+  - query_raw_events
+  - count_events_matching_filter
   - refine_query_result
   - send_sparklogs_feedback
   - describe_tables
@@ -80,10 +80,10 @@ args:
   - type
   - unhealthy_collection_only
 
-# Union of MCP response headers (health fieldsets, list_sources, resolve_scope,
-# counts, describe_pattern, envelope). A wire path (sparklogs.*) is a col too
+# Union of MCP response headers (health fieldsets, list_sources, find_org_or_device,
+# counts, describe_event_patterns, envelope). A wire path (sparklogs.*) is a col too
 # whenever a tool renders it under that dotted name (device-health does, for
-# every wire field it lifts); resolve_scope's own flat "kind" is unrelated.
+# every wire field it lifts); find_org_or_device's own flat "kind" is unrelated.
 cols:
   - psa_client_id
   - rmm_client_id

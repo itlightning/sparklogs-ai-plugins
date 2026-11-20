@@ -1,6 +1,6 @@
 # LQL Reference - for the SparkLogs Investigator skill
 
-The complete, verified syntax of Lightning Query Language (LQL) - the filter language used by every LQL parameter on the SparkLogs MCP tools: `lql` (arg) (on `query_logs` (tool) / `query_event_counts_by_severity` (tool)), `having` (arg) (on `query_event_counts_by_severity` (tool)), and `filter_lql` (arg) / `having_lql` (arg) (on `refine_query_result` (tool)). Read this file when composing any non-trivial LQL.
+The complete, verified syntax of Lightning Query Language (LQL) - the filter language used by every LQL parameter on the SparkLogs MCP tools: `lql` (arg) (on `query_raw_events` (tool) / `count_events_matching_filter` (tool)), `having` (arg) (on `count_events_matching_filter` (tool)), and `filter_lql` (arg) / `having_lql` (arg) (on `refine_query_result` (tool)). Read this file when composing any non-trivial LQL.
 
 An empty or omitted `lql` (arg) matches everything in the tool's `start` (arg)/`end` (arg) window and `query_scope` (arg) - useful as a starting point before narrowing.
 
@@ -67,7 +67,7 @@ message MATCHES "regex"               <- WRONG (no MATCHES)
 - Absent or non-array values do **not** match.
 - To include rows with no array: `x.tags !: noise OR NOT x.tags!` (LQL)
 
-**Search indexes:** scalar `!:` / `!=` and unary `NOT` on indexed terms do not use the search index. Positive `:` / `=` terms in the same `AND` may still use the index. Only `query_logs` (tool) `lql` (arg) uses the index at all (see **Whole terms** under Patterns).
+**Search indexes:** scalar `!:` / `!=` and unary `NOT` on indexed terms do not use the search index. Positive `:` / `=` terms in the same `AND` may still use the index. Only `query_raw_events` (tool) `lql` (arg) uses the index at all (see **Whole terms** under Patterns).
 
 ### Case
 
@@ -195,9 +195,9 @@ pattern = "divgfo_9v7cgvjijykp0zu5"            <- same rows; the equality widens
 
 ### Indexed searches
 
-In `query_logs` (tool) `lql` (arg), a bare term or a `:` term with no `*`, `?` or regex, on any string field (standard or custom), uses the search index and matches whole words only, split at whitespace and punctuation: `message: fail` (LQL) does not match "failed".
+In `query_raw_events` (tool) `lql` (arg), a bare term or a `:` term with no `*`, `?` or regex, on any string field (standard or custom), uses the search index and matches whole words only, split at whitespace and punctuation: `message: fail` (LQL) does not match "failed".
 The index drops out, and the same term matches substrings, under `NOT`, with `!:` / `!=` / `not in` (other), and inside an `OR` whose other side cannot use the index: `message: fail OR x.foo > 5` (LQL) matches "failed". So `message: fail` (LQL) and `message !: fail` (LQL) are not complements there.
-The other LQL parameters (`lql` (arg) on `query_event_counts_by_severity` (tool), and `filter_lql` (arg) / `having_lql` (arg) on `refine_query_result` (tool)) match substrings, so the same filter there also matches "failed".
+The other LQL parameters (`lql` (arg) on `count_events_matching_filter` (tool), and `filter_lql` (arg) / `having_lql` (arg) on `refine_query_result` (tool)) match substrings, so the same filter there also matches "failed".
 When a partial word must match in every tool, surround it with `*`:
 
 ```lql
@@ -353,7 +353,7 @@ any: /KB[0-9]{7}/                        <- a KB number in any field
 
 - **No JOIN** across event rows. LQL is a row predicate.
 - **No subqueries** in filter expressions.
-- **No COUNT or other aggregations in filter expressions.** `query_event_counts_by_severity` (tool) always returns `event_count` (col) plus the per-band severity counts; there is no aggregation list to pass it.
+- **No COUNT or other aggregations in filter expressions.** `count_events_matching_filter` (tool) always returns `event_count` (col) plus the per-band severity counts; there is no aggregation list to pass it.
 - **No wildcard JSON paths** (per above).
 - **No `LIKE`, `MATCHES`, `IS NULL`, `CONTAINS_ANY`, `CONTAINS_ALL`** keywords.
 
@@ -381,7 +381,7 @@ Compare severity by name with `>=`.
 source = "srv-fileshare01"       <- exact, case included
 ```
 
-`source` (LQL) equality is case-sensitive; payload leaves and `subsource` (LQL) are not. Copy the host name from `resolve_scope` (tool) or `list_sources` (tool). `source:` (LQL) is a contains match (it also matches `srv-fileshare01-old`): use it only to find the spelling, then group by `source` (LQL).
+`source` (LQL) equality is case-sensitive; payload leaves and `subsource` (LQL) are not. Copy the host name from `find_org_or_device` (tool) or `list_sources` (tool). `source:` (LQL) is a contains match (it also matches `srv-fileshare01-old`): use it only to find the spelling, then group by `source` (LQL).
 
 Combined with the `start` (arg) / `end` (arg) window parameters (which are separate from the LQL filter).
 

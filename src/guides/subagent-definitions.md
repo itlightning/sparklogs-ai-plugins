@@ -49,16 +49,16 @@ They do not recommend remediation or assert a root cause.
 
 ## Subagent: `sparklogs-pattern-enumerator`
 
-**Purpose.** Given a `query_event_counts_by_severity` (tool) result with many pattern groups, summarize the top N from the pattern text and reasons the orchestrator supplied.
+**Purpose.** Given a `count_events_matching_filter` (tool) result with many pattern groups, summarize the top N from the pattern text and reasons the orchestrator supplied.
 
 **Model tier:** fast, lightweight tier.
 
 **Inputs:**
 - The grouped rows and the result's `query_url` (col).
-- Pattern text for the top N hashes, from `describe_pattern` (tool) called by the orchestrator.
+- Pattern text for the top N hashes, from `describe_event_patterns` (tool) called by the orchestrator.
 - Top N (default 10).
 
-**Delegation heuristic:** when `query_event_counts_by_severity` (tool) returns 50+ groups and you need the top N summarized.
+**Delegation heuristic:** when `count_events_matching_filter` (tool) returns 50+ groups and you need the top N summarized.
 
 ---
 

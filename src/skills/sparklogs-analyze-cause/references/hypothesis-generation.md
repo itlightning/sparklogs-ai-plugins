@@ -35,7 +35,7 @@ When the prior investigation surfaced "X happened concurrent with Y" Findings:
 When the prior investigation surfaced "this affects N sources" Findings:
 
 - **N = 1 (single source)** -> hypothesis space includes source-specific configuration, hardware, software state.
-- **N = small subset** -> hypothesis "shared factor among the subset." Discriminator: contrast `query_event_counts_by_severity` (tool) runs over the affected and unaffected populations. Group by a field from `guides/scope-ladder.md` (`sparklogs.reason` (LQL), `service` (LQL), `app` (LQL), `subsource` (LQL)) to test whether the subset shares a component.
+- **N = small subset** -> hypothesis "shared factor among the subset." Discriminator: contrast `count_events_matching_filter` (tool) runs over the affected and unaffected populations. Group by a field from `guides/scope-ladder.md` (`sparklogs.reason` (LQL), `service` (LQL), `app` (LQL), `subsource` (LQL)) to test whether the subset shares a component.
 - **N = fleet-wide** -> hypothesis "environment-wide cause" - recent fleet-wide change (patch, GPO push, DNS change), or upstream service issue.
 
 ### Device health patterns
@@ -139,5 +139,5 @@ Write the hypothesis statement as a direct, specific claim, not a hedge. "Disk s
 
 ## When to make additional MCP calls during analysis
 
-When and when not to: `SKILL.md` Section 5. A population contrast runs `query_event_counts_by_severity` (tool) over each population separately, defined from the prior Findings, and compares the two.
+When and when not to: `SKILL.md` Section 5. A population contrast runs `count_events_matching_filter` (tool) over each population separately, defined from the prior Findings, and compares the two.
 

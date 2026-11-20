@@ -77,7 +77,7 @@ The right version is factual; the wrong version is cause analysis. Cause analysi
 Specific sources investigated (e.g., `srv-fileshare01`, ws022.acme). Not generic ("a server in Acme Dental") - name them.
 
 ### Org(s)
-The `org_id` (col)(s) the investigation was scoped to (from `resolve_scope` (tool)).
+The `org_id` (col)(s) the investigation was scoped to (from `find_org_or_device` (tool)).
 
 ### Time window
 Absolute UTC timestamps for the investigation's data window. Not relative ("last 24 hours") - bind to absolute timestamps so the summary remains interpretable when re-read days later.

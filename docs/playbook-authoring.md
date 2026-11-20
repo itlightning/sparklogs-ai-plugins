@@ -36,14 +36,14 @@ Keep this order. Drop a heading if it would be empty.
 
 ## Queries
 
-Write LQL the agent can paste into `query_event_counts_by_severity` or `query_logs`.
+Write LQL the agent can paste into `count_events_matching_filter` or `query_raw_events`.
 Put each query in a ```` ```lql ```` block: every field it names must be a real field (see `docs/identifier-names.md`).
 A query that names a raw `event_id` (`event_id = 892`, `event_id in (33, 58)`) claims Windows logs that id on these feeds.
 Confirm every id in real SparkLogs data, then put `<!-- confirmed with data on YYYY-MM-DD -->` on the line right after the block's closing fence.
 `yarn precommit` fails on a playbook query with a raw `event_id` and no marker; render strips the marker from every package.
 Group-by is part of the question: one noun, one field; two nouns, a cross-tab.
 Name the field that carries the discriminator (`reason`, `vss_writer`, `instance`, `status_meaning`).
-Do not teach `describe_pattern` or `refine_query_result` here; the skill already knows those.
+Do not teach `describe_event_patterns` or `refine_query_result` here; the skill already knows those.
 
 Device-health sections name the view, the reading parts and the result-set columns (`heat_spans`, `outages`, `private_commit_bytes_last`), reasons and the claim each encodes.
 Do not paste a full `query_device_health(...)` call; the worked calls live in `guides/device-state-fields.md`.
@@ -51,7 +51,7 @@ Text targets the newest SparkLogs MCP server build, released or not: the plugin 
 
 ## Do not
 
-- Walk through `resolve_scope` / `list_sources` / "then confirm data in the window".
+- Walk through `find_org_or_device` / `list_sources` / "then confirm data in the window".
 - Repeat MCP parameter grammar: no parameter names, argument values, flags or call plumbing. Tool names, view names, result-set columns and field names are fine. `yarn precommit` fails on an `(arg)` tag under `src/playbooks/`.
 - Infer job or product outcome from plumbing that does not carry it.
 - Dump a feed directory; one artifact per question (`guides/generated-reference-router.md`).
