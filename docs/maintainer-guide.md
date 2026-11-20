@@ -46,6 +46,7 @@ Workstation discipline: CI will not catch a stale table by itself (see the drift
 `yarn stitch-indexes` is a different command: it rebuilds SKILL / playbook index tables from **this** repo's leaf YAML, not from the library.
 
 `yarn guide-corpus` writes the guide corpus to `build/guide-corpus/`: `docs/<path>` holds each rendered document under `feeds/`, `fields/`, `guides/`, `playbooks/` and `themes/` (maintainer-only inputs excluded), and `manifest.json` lists each one with its sha256, line count and H2/H3 sections.
+A feed's `reasons.md` carries `rank_preamble: false`: its index table stays readable but is left out of search ranking, because it names every reason and would outrank the reason itself.
 It needs node only (no package install) and reads no library checkout: the library commit comes from `scripts/generated-SYNC-MANIFEST.json`.
 Every run verifies what it wrote; `yarn validate` emits it twice and diffs the two.
 

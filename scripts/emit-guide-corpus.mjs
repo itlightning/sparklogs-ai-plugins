@@ -8,6 +8,7 @@
 //
 // Output (build output, never committed):
 //   <out>/manifest.json   manifest_version, source_library_commit, documents sorted by path
+//                         (a document with rank_preamble false keeps its preamble out of search ranking)
 //   <out>/docs/<path>     each document once, as rendered: UTF-8, LF, exactly one trailing LF
 //
 // Documents are every markdown file in the corpus trees (CORPUS_TOPS) except maintainer-only build
@@ -91,6 +92,9 @@ function parseDocument(rel, text) {
   if (titles.length !== 1) throw new Error(`${rel}: needs exactly one H1, found ${titles.length}`);
   const preambleEnd = heads.length ? heads[0].line - 1 : lines.length;
   const entry = { path: rel, title: titles[0], ...readHints(lines, 0, preambleEnd, `${rel} preamble`), lines: lines.length };
+  // A feed's reasons index is a pointer table that names every reason: ranked, it outscores the
+  // reason it points at. Absent means ranked.
+  if (REASONS_DOC.test(rel)) entry.rank_preamble = false;
   const codes = new Set();
   entry.sections = heads.map((head, k) => {
     const close = heads.slice(k + 1).find((next) => next.level <= head.level);
@@ -233,6 +237,7 @@ function proveGuideCorpus() {
     path: 'feeds/x/reasons.md',
     title: 'T',
     lines: 12,
+    rank_preamble: false,
     sections: [
       { level: 2, heading: '`a_b`: x', start_line: 3, end_line: 10, reason_code: 'a_b', use_when: 'u', keywords: ['k1', 'k2'] },
       { level: 3, heading: 'Sub', start_line: 6, end_line: 10 },
