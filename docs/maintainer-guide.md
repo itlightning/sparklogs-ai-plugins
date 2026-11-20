@@ -45,10 +45,10 @@ Workstation discipline: CI will not catch a stale table by itself (see the drift
 
 `yarn stitch-indexes` is a different command: it rebuilds SKILL / playbook index tables from **this** repo's leaf YAML, not from the library.
 
-`yarn guide-corpus` writes the guide corpus to `build/guide-corpus/`: `docs/<path>` holds each rendered document under `feeds/`, `fields/`, `guides/`, `playbooks/` and `themes/` (maintainer-only inputs excluded), and `manifest.json` lists each one with its sha256, line count and H2/H3 sections.
+`yarn guide-corpus` writes the guide corpus to `build/guide-corpus/`: `docs/<path>` holds each rendered document under `feeds/`, `fields/`, `guides/`, `playbooks/` and `themes/` (maintainer-only inputs and the guides in `CORPUS_EXCLUDED`, written for the plugin's own skills, excluded), and `manifest.json` lists each one with its sha256, line count and H2/H3 sections.
 A feed's `reasons.md` carries `rank_preamble: false`: its index table stays readable but is left out of search ranking, because it names every reason and would outrank the reason itself.
 It needs node only (no package install) and reads no library checkout: the library commit comes from `scripts/generated-SYNC-MANIFEST.json`.
-Every run verifies what it wrote; `yarn validate` emits it twice and diffs the two.
+Every run verifies what it wrote, including that every corpus citation in a served document names a served document or directory; `yarn validate` emits it twice and diffs the two.
 
 Identifier tags (`docs/identifier-names.md`): authored `src/` prose backticks that match `[a-z][a-z0-9_.]*` must carry `(arg)`, `(col)`, `(LQL)`, `(tool)`, `(value)`, or `(other)`. Render strips `(tool)`, `(value)`, and `(other)`. Membership is `scripts/identifier-sot.yaml` plus a sibling library harvest. Fenced LQL/JSON is exempt. `src/feeds/`, `src/fields/`, and GENERATED blocks are skipped.
 

@@ -12,12 +12,14 @@
 //   <out>/docs/<path>     each document once, as rendered: UTF-8, LF, exactly one trailing LF
 //
 // Documents are every markdown file in the corpus trees (CORPUS_TOPS) except maintainer-only build
-// inputs. Text is the generic-host render of a package-root file: shared render core, no corpus-path
-// rewrite (a citation such as `guides/x.md` is itself a corpus path), commands named as skills.
+// inputs and CORPUS_EXCLUDED. Text is the generic-host render of a package-root file: shared render
+// core, no corpus-path rewrite (a citation such as `guides/x.md` is itself a corpus path), commands
+// named as skills.
 //
 // Every run re-reads what it wrote and verifies it against the manifest, and fails on any
-// document that breaks the format (H1 count, line endings, duplicate reason code). Node built-ins
-// only: runs from a clean checkout with no package install.
+// document that breaks the format (H1 count, line endings, duplicate reason code) or cites a corpus
+// path the corpus does not serve. Node built-ins only: runs from a clean checkout with no package
+// install.
 import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
@@ -27,6 +29,8 @@ import { MANIFEST_FILE } from './generated-references.config.mjs';
 import {
   CORPUS_TOPS,
   isFenceLine,
+  isPlaceholderRef,
+  listCorpusRefs,
   renderSharedMarkdown,
   rewriteCommandsAsSkillNames,
 } from './host-transforms.mjs';
@@ -38,6 +42,8 @@ const REASON_HEADING = /^`([a-z0-9_]+)`/;
 const USE_WHEN_LINE = /^\*\*Use when:\*\* (.+)$/;
 const KEYWORDS_LINE = /^\*\*Keywords:\*\* (.+)$/;
 const SHA1_HEX = /^[0-9a-f]{40}$/;
+// Written for the plugin's own skills, not for an agent calling the hosted guide: packages ship them.
+const CORPUS_EXCLUDED = new Set(['guides/subagent-definitions.md', 'guides/writing-voice.md']);
 
 function sha256(bytes) {
   return crypto.createHash('sha256').update(bytes).digest('hex');
@@ -170,13 +176,31 @@ function verifyCorpus(manifestText, files) {
   return manifest;
 }
 
+/**
+ * Every corpus citation in a served document names a served document, or a directory holding one.
+ * A citation the corpus does not serve is a dead link for the agent reading it. Returns the number
+ * of citations checked.
+ */
+function checkCitations(files) {
+  let checked = 0;
+  for (const [rel, bytes] of files) {
+    for (const ref of listCorpusRefs(bytes.toString('utf8'))) {
+      if (isPlaceholderRef(ref)) continue;
+      checked += 1;
+      const served = ref.endsWith('/') ? [...files.keys()].some((key) => key.startsWith(ref)) : files.has(ref);
+      if (!served) throw new Error(`${rel}: cites ${ref}, which the corpus does not serve`);
+    }
+  }
+  return checked;
+}
+
 async function walkMarkdown(dir, rel, acc) {
   const entries = await fs.readdir(dir, { withFileTypes: true });
   for (const entry of entries) {
     const full = path.join(dir, entry.name);
     const childRel = `${rel}/${entry.name}`;
     if (entry.isDirectory()) await walkMarkdown(full, childRel, acc);
-    else if (MAINTAINER_ONLY.has(entry.name)) continue;
+    else if (MAINTAINER_ONLY.has(entry.name) || CORPUS_EXCLUDED.has(childRel)) continue;
     else if (entry.name.endsWith('.md')) acc.push({ rel: childRel, full });
     else throw new Error(`corpus tree holds a file that is not markdown: src/${childRel}`);
   }
@@ -185,6 +209,11 @@ async function walkMarkdown(dir, rel, acc) {
 async function buildCorpus(root) {
   const sources = [];
   for (const top of CORPUS_TOPS) await walkMarkdown(path.join(root, 'src', top), top, sources);
+  for (const rel of CORPUS_EXCLUDED) {
+    await fs.access(path.join(root, 'src', rel)).catch(() => {
+      throw new Error(`CORPUS_EXCLUDED names src/${rel}, which does not exist`);
+    });
+  }
   sources.sort((a, b) => byPath(a.rel, b.rel));
   const files = new Map();
   const documents = [];
@@ -271,6 +300,15 @@ function proveGuideCorpus() {
   expectThrow(() => verifyCorpus(manifest([{ ...head, lines: 11, sections }]), files()), 'line count');
   const overlap = sections.map((s, i) => (i === 0 ? { ...s, end_line: 11 } : s));
   expectThrow(() => verifyCorpus(manifest([{ ...head, sections: overlap }]), files()), 'overlapping siblings');
+
+  const cites = (body) => new Map([
+    ['guides/a.md', Buffer.from(body)],
+    ['feeds/x/reasons.md', bytes],
+  ]);
+  const served = 'See `guides/a.md`, `feeds/x/`, `feeds/x/reasons.md` and `feeds/<id>/README.md`.\n';
+  if (checkCitations(cites(served)) !== 3) throw new Error('checkCitations did not count three served citations');
+  expectThrow(() => checkCitations(cites('See `guides/gone.md`.\n')), 'citation to an unserved document');
+  expectThrow(() => checkCitations(cites('See `feeds/y/`.\n')), 'citation to an unserved directory');
 }
 
 function parseArgs(argv) {
@@ -298,6 +336,7 @@ async function main() {
   await fs.writeFile(path.join(out, 'manifest.json'), manifestText, 'utf8');
   const written = await readCorpus(out);
   const manifest = verifyCorpus(written.manifestText, written.files);
+  if (checkCitations(written.files) === 0) throw new Error('corpus citation check matched nothing; the matcher is broken');
   const sections = manifest.documents.reduce((sum, doc) => sum + doc.sections.length, 0);
   const bytes = [...written.files.values()].reduce((sum, file) => sum + file.length, 0);
   console.log(`guide corpus: ${manifest.documents.length} document(s), ${sections} section(s), ${bytes} byte(s) at ${path.relative(root, out)}`);
