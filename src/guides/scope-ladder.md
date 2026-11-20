@@ -121,15 +121,13 @@ Rule of thumb: `summarize_events_by_severity` (tool) = "what app/service/subsour
 
 **DISCOVER - enumerate structure before heavy scans.** Call `summarize_events_by_severity` (tool) with org scope, the investigation window, optional `agent_ids` (arg), and the session `external_investigation_id` (arg).
 
+**DESCRIBE - read pattern text and exemplars before citing.** Call `describe_event_patterns` (tool) without `pattern_hashes` (arg) for the top patterns of the scope and window, or with the hash list, window, and session id before the pattern appears in a Finding. Required after any `top_interesting_patterns` (col) teaser row.
+
 **GROUP - find dominant or anomalous groups (filtered measure).** Call `count_events_matching_filter` (tool) with `group_by` (arg) on a ladder field or its `_hash` companion and an `lql` (arg) slice as needed.
 Group by `sparklogs.reason` (LQL) for curated signal, `pattern_hash` (LQL) for the most-repeated normalized events, `service` (LQL) or `subsource` (LQL) to localize the noisy component.
 
 **DEDUP / STABILITY - track one pattern over time.**
 A `_hash` is a stable identity: the same hash means the same normalized value or pattern, across events and across time.
-
-**DRILL - read the events behind a hash.** Narrow with `query_raw_events` (tool) or `refine_query_result` (tool) using `pattern_hash` (LQL) in `lql` (arg) or `filter_lql` (arg).
-
-**DESCRIBE - read pattern text and exemplars before citing.** Call `describe_event_patterns` (tool) with the hash list, window, and session id before the pattern appears in a Finding. Required after any `top_interesting_patterns` (col) teaser row.
 
 **CORRELATE ACROSS WINDOWS - first-occurrence detection.**
 A `pattern_hash` (LQL) or `sparklogs.reason` (LQL) present in the incident window but absent from a healthy baseline window signals new behavior. Run `count_events_matching_filter` (tool) twice, once per window, and compare the two grouped results.
@@ -142,12 +140,15 @@ Show the raw `*_hash` when it helps the engineer pivot (paste into LQL, compare 
 Do not dump hashes with no text, and do not parse or pretty-print the token.
 Always use the hash verbatim as the drill-down filter value.
 
+**DRILL - read the events behind a hash.** Narrow with `query_raw_events` (tool) or `refine_query_result` (tool) using `pattern_hash` (LQL) in `lql` (arg) or `filter_lql` (arg).
+
 ---
 
 ## Worked shape: localize then land
 
+0. For one device, start with `query_device_health` (tool) `view=device_overview` (`guides/device-state-fields.md`).
 1. `summarize_events_by_severity` (tool) or `count_events_matching_filter(group_by=["subsource"], lql='source = "<host>" AND severity >= warning', ...)`: which feeds carry the failure side.
-2. `count_events_matching_filter(group_by=["sparklogs.reason", "sparklogs.reason_variant"], lql='source = "<host>" AND subsource = "<feed>" AND severity >= warning', ...)`: which curated reasons dominate. The empty-reason group is uncurated: group it by `pattern_hash` (LQL).
+2. `count_events_matching_filter(group_by=["sparklogs.reason", "sparklogs.reason_variant"], lql='source = "<host>" AND subsource = "<feed>" AND severity >= warning', ...)`: which curated reasons dominate. The empty-reason group is uncurated: read its top patterns with `describe_event_patterns` (tool).
 3. Compare against a healthy baseline window: is the top reason or pattern new, or normal volume?
 4. `describe_event_patterns(pattern_hashes=["<h>"])` on the surviving hash, then `query_raw_events(lql='pattern_hash = "<h>"', ...)` for event-level evidence.
 

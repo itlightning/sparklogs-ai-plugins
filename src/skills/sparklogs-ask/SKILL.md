@@ -38,7 +38,7 @@ Funnel, scope, LQL errors: `guides/mcp-tool-decision-tree.md`, `guides/scope-res
 - Which processes or devices stand out across the fleet → same tool, `view` (arg) `fleet_processes` (value) or `fleet_performance` (value)
 - What is installed or configured now → same tool, `view` (arg) `latest_state` (value), or refine an overview's `state` (value) result set
 - Collection problems → `find_org_or_device` (tool) with `unhealthy_collection_only` (arg); "no data from this device": `playbooks/sparklogs-collection.md`
-- Counts, patterns, when → `count_events_matching_filter` (tool) grouped by the fields in `guides/scope-ladder.md` (`sparklogs.reason` (LQL) first on curated data), `describe_event_patterns` (tool), `summarize_events_by_severity` (tool)
+- Counts, patterns, when → `summarize_events_by_severity` (tool), `describe_event_patterns` (tool), then `count_events_matching_filter` (tool) grouped by the fields in `guides/scope-ladder.md` (`sparklogs.reason` (LQL) first on curated data)
 - Raw event lines → `query_raw_events` (tool) last, then refine
 - Collector debug → `sparklogs.agent.vector` (value) / `sparklogs.agent.log` (value) only
 

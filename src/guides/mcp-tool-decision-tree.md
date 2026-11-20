@@ -9,11 +9,11 @@ Retrieve the reference when needed, not before every call.
 
 **Parameters and columns:** follow the live description, input schema and optional detailed reference when they differ from a saved recipe.
 
-There are **fourteen** tools: `find_org_or_device` (tool), `list_sources` (tool), `summarize_events_by_severity` (tool), `query_device_health` (tool), `describe_event_patterns` (tool), `list_fields` (tool), `count_events_matching_filter` (tool), `query_raw_events` (tool), `refine_query_result` (tool), `get_query_metadata` (tool), `send_sparklogs_feedback` (tool), `server_info` (tool), `describe_tables` (tool), `query_table` (tool).
+There are **nineteen** tools: `find_org_or_device` (tool), `list_sources` (tool), `summarize_events_by_severity` (tool), `query_device_health` (tool), `describe_event_patterns` (tool), `list_fields` (tool), `count_events_matching_filter` (tool), `query_raw_events` (tool), `refine_query_result` (tool), `get_query_metadata` (tool), `send_sparklogs_feedback` (tool), `server_info` (tool), `describe_tables` (tool), `query_table` (tool), `sparklogs_guide` (tool), `describe_api_operations` (tool), `call_api_read` (tool), `call_api_write` (tool), `call_api_destructive` (tool).
 
 **Cross-cutting (full detail in MCP server instructions):**
 
-- **Funnel:** coverage before claims (`find_org_or_device` (tool) → `list_sources` (tool) → device health or activity → counts/patterns → `query_raw_events` (tool) last). For one device or a few, device health starts with a device view.
+- **Funnel:** coverage before claims (`find_org_or_device` (tool) → device overview for one device → `summarize_events_by_severity` (tool) → `describe_event_patterns` (tool) → `count_events_matching_filter` (tool) → `query_raw_events` (tool) last). For one device or a few, device health starts with a device view.
 - **`external_investigation_id` (arg):** required on every scoped/data call except `server_info` (tool); reuse within one investigation, mint fresh for a new one.
 - **Time windows:** flat `start` (arg) / `end` (arg) in RFC3339 UTC; no relative shorthand.
 - **Scope filters:** service → app → subsource → category → pattern, plus curated `sparklogs.reason` (LQL): `guides/scope-ladder.md`. An empty rung is not a finding.
@@ -40,9 +40,9 @@ Choose by the question: device state, process trends, event counts or raw eviden
 | `find_org_or_device` (tool) | You have a name (client, host, ticket) and need an `org_id` (col). Always first. Collection/completeness live here. Multiple rows at the same best `match_kind` (col): confirm with the engineer before proceeding, don't guess. |
 | `list_sources` (tool) | Before concluding anything from an absence: did this source send data in THIS window? Any source type, including ingest keys. |
 | `query_device_health` (tool) | Device conditions, inventories and trends. For one device or a few, start with `view` (arg) `device_overview` (value) or `device_network` (value), then drill down. Across devices: omit the view for open conditions, `group_by_reason` (arg) for device counts, `fleet_processes` (value) / `fleet_performance` (value) for outliers. Crash or app problem: `event_timeline` (value) with `kinds` (arg) `["occurrence"]` (value); app hangs only in Application-channel events (`guides/device-state-fields.md`). Every view: `guides/device-state-fields.md` (**Choose the view**). |
-| `summarize_events_by_severity` (tool) | You do not know what this client HAS: which apps, services and subsources exist at all. Orientation on an unfamiliar estate. |
-| `count_events_matching_filter` (tool) | "What is going on here", at any altitude. The default mid-tier tool. `group_by=["sparklogs.reason"]` or `["pattern_hash"]`; pass two fields when the question has two nouns in it. |
-| `describe_event_patterns` (tool) | You are about to cite a pattern and need its text and spread. Pass `pattern_hashes` (arg) (a list). Required before citing any teaser pattern. Mid-tier with counts. |
+| `summarize_events_by_severity` (tool) | The first events call: one row per app, service, subsource or reason in scope with severity counts. Quick over long windows, no LQL filter. |
+| `count_events_matching_filter` (tool) | A slice you can name in LQL: counts, ranking or a time series within it. `group_by` (arg) takes any field. `group_by=["sparklogs.reason"]` or `["pattern_hash"]`; pass two fields when the question has two nouns in it. |
+| `describe_event_patterns` (tool) | You are about to cite a pattern and need its text and spread. Pass `pattern_hashes` (arg) (a list), or omit it for the top patterns of the scope and window (default 30, up to 100). `min_severity` (arg), `agent_ids` (arg) and `lql` (arg) narrow it. Required before citing any teaser pattern. Mid-tier with counts. |
 | `query_raw_events` (tool) | The grouping pointed somewhere specific and you now need the actual events. Last resort, over a narrowed filter. |
 | `refine_query_result` (tool) | Page, filter or aggregate an existing result handle. Read the response for whether the handle is cached or live. |
 | `get_query_metadata` (tool) | A cached result behaved oddly and you need its filter or cache status (bookkeeping only). |
@@ -75,7 +75,7 @@ Start from device health, then read events only for what health points at.
 2. query_device_health view=device_overview (or device_network for a network complaint), agent_ids=[<id>], a window that covers the complaint
 3. Read header coverage and not_measured, then evidence, outages, heat spans, top processes or connections, events
 4. refine_query_result on the result set the reading points at (its filter_lql), or paste a next_reads entry
-5. count_events_matching_filter / query_raw_events only over the device and interval the reading named
+5. summarize_events_by_severity, describe_event_patterns, then count_events_matching_filter / query_raw_events, only over the device and interval the reading named
 ```
 
 Cite the reading's `query_url` (col) and each refine's `query_url` (col).
@@ -89,9 +89,9 @@ Use this when they asked, or after they accepted a suggested hunt. Do not open w
 
 ```
 1. find_org_or_device(<msp / org scope>)
-2. count_events_matching_filter with lql filtering to the pattern_hash, group_by=["source"]
+2. describe_event_patterns with pattern_hashes=[<hash>]: affected_senders against the org's totals, then count_events_matching_filter with lql filtering to the pattern_hash, group_by=["source"]
 3. Optional: query_raw_events + refine for first/last seen per source
-4. system condition summary output (concise - this is a quick-pivot pattern)
+4. a short cited answer
 ```
 
 ---

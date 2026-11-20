@@ -19,6 +19,11 @@ tools:
   - send_sparklogs_feedback
   - describe_tables
   - query_table
+  - sparklogs_guide
+  - describe_api_operations
+  - call_api_read
+  - call_api_write
+  - call_api_destructive
 
 args:
   - describe_tool
