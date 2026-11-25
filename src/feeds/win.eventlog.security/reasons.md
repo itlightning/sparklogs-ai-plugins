@@ -87,7 +87,7 @@ An existing user or computer account was edited.
 
 **Keywords:** user account changed, account settings changed, account properties modified, who modified the account, password never expires set, account expiration date changed, logon hours changed, trusted for delegation, UserAccountControl changed, computer account changed
 
-**Severity:** Notice. Warning when an account other than SYSTEM, LocalService or NetworkService turns on a flag that weakens the account: password not required, password never expires, reversible password encryption, either delegation flag, DES keys only, or Kerberos pre-authentication not required. When one of those three platform accounts turns on such a flag the row stays Notice; it is labeled maintenance only for password never expires, the one the fleet shows as upkeep.
+**Severity:** Notice. Warning when an account other than SYSTEM, LocalService or NetworkService turns on a flag that weakens the account: password not required, password never expires, reversible password encryption, either delegation flag, DES keys only, or Kerberos pre-authentication not required. When one of those three platform accounts turns on such a flag the row stays Notice; it is labeled maintenance only when password never expires is the only weakening flag set.
 
 **Why it matters:** The account still exists and still signs in, but what it may do can have changed: an account flag such as password never expires, an expiry date, permitted sign-in hours, or a delegation setting.
 
