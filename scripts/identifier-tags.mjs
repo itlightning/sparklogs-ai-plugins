@@ -33,21 +33,17 @@ import {
   stripAnnotation,
   vetSotLists,
 } from './lql-field-refs.mjs';
+import {
+  ALL_TAGS,
+  IDENTIFIER_BODY,
+  KEEP_TAGS,
+  STRIP_TAGS,
+  isFenceLine,
+  stripAuthoringTags,
+} from './host-transforms.mjs';
 
-export const KEEP_TAGS = new Set(['arg', 'col', 'LQL']);
-export const STRIP_TAGS = new Set(['tool', 'value', 'other']);
-export const ALL_TAGS = new Set([...KEEP_TAGS, ...STRIP_TAGS]);
-
-export const IDENTIFIER_BODY = '[a-z][a-z0-9_.]*';
 const TAG_ALT = [...ALL_TAGS].join('|');
-const TAGGED_RE = new RegExp('`(' + IDENTIFIER_BODY + ')` \\((' + TAG_ALT + ')\\)', 'g');
 const BACKTICK_RE = new RegExp('`(' + IDENTIFIER_BODY + ')`(?: \\((' + TAG_ALT + ')\\))?', 'g');
-
-const FENCE_LINE = /^(```|~~~)/;
-
-function isFenceOpen(line) {
-  return FENCE_LINE.test(line.trim());
-}
 
 // Split markdown into lintable prose vs skipped regions (fences, GENERATED).
 // fences: each fenced block's info string and body as [start, end) offsets into text.
@@ -63,7 +59,7 @@ export function proseRanges(text) {
   for (let i = 0; i < lines.length; i += 1) {
     const line = lines[i];
     const lineLen = line.length + (i < lines.length - 1 ? 1 : 0);
-    if (isFenceOpen(line)) {
+    if (isFenceLine(line)) {
       if (!fence) {
         if (offset > start) ranges.push([start, offset]);
         fence = { info: line.trim().slice(3).trim(), body: [offset + lineLen, offset + lineLen] };
@@ -85,13 +81,6 @@ export function inRanges(index, ranges) {
     if (index >= a && index < b) return true;
   }
   return false;
-}
-
-export function stripAuthoringTags(text) {
-  return text.replace(TAGGED_RE, (full, body, tag) => {
-    if (STRIP_TAGS.has(tag)) return '`' + body + '`';
-    return full;
-  });
 }
 
 function skipRel(rel) {
@@ -165,7 +154,7 @@ export function applySafeTags(text, sot) {
 
 function fixtureSot() {
   return {
-    tools: new Set(['query_logs']),
+    tools: new Set(['query_raw_events']),
     args: new Set(['lql']),
     cols: new Set(['reason']),
     lql: new Set(['sparklogs.reason', 'pattern_hash']),
@@ -176,16 +165,16 @@ function fixtureSot() {
 
 export function proveIdentifierTags() {
   const sot = fixtureSot();
-  const src = 'Use `query_logs` (tool) then `sparklogs.reason` (LQL) and `reason` (col) and `in` (other).\n';
+  const src = 'Use `query_raw_events` (tool) then `sparklogs.reason` (LQL) and `reason` (col) and `in` (other).\n';
   const stripped = stripAuthoringTags(src);
   if (stripped.includes('(tool)')) throw new Error('strip left (tool)');
   if (stripped.includes('(other)')) throw new Error('strip left (other)');
   if (!stripped.includes('`sparklogs.reason` (LQL)')) throw new Error('strip dropped (LQL)');
   if (!stripped.includes('`reason` (col)')) throw new Error('strip dropped (col)');
-  const fence = 'Prose `query_logs`\n```\nquery_logs(lql="x")\n```\n';
+  const fence = 'Prose `query_raw_events`\n```\nquery_raw_events(lql="x")\n```\n';
   const ferr = lintMarkdown(fence, 't.md', sot);
   if (!ferr.some((e) => e.includes('untagged'))) throw new Error('prose untagged not caught');
-  if (ferr.some((e) => e.includes('query_logs(lql'))) throw new Error('linted inside fence');
+  if (ferr.some((e) => e.includes('query_raw_events(lql'))) throw new Error('linted inside fence');
   const dual = lintMarkdown('x `reason` (LQL) y', 't.md', sot);
   if (!dual.some((e) => e.includes('(LQL)') && e.includes('col'))) {
     throw new Error(`denylist-via-membership missed: ${dual.join('; ')}`);
@@ -210,9 +199,9 @@ export function proveIdentifierTags() {
   }
   const unknownLql = lintMarkdown('nope `not_a_field` (LQL)', 't.md', sot);
   if (!unknownLql.some((e) => e.includes('not_a_field'))) throw new Error('unknown LQL not caught');
-  const inventory = 'Prose `query_logs`\n<!-- BEGIN GENERATED INVENTORY -->\n### `win.eventlog.security`\n<!-- END GENERATED INVENTORY -->\n';
+  const inventory = 'Prose `query_raw_events`\n<!-- BEGIN GENERATED INVENTORY -->\n### `win.eventlog.security`\n<!-- END GENERATED INVENTORY -->\n';
   const ierr = lintMarkdown(inventory, 't.md', sot);
-  if (!ierr.some((e) => e.includes('untagged `query_logs`'))) throw new Error('prose outside inventory not caught');
+  if (!ierr.some((e) => e.includes('untagged `query_raw_events`'))) throw new Error('prose outside inventory not caught');
   if (ierr.some((e) => e.includes('win.eventlog.security'))) throw new Error('linted generated inventory');
   if (!lqlMember({ lql: new Set(), families: new Set(['sparklogs.episode']) }, 'sparklogs.episode.*')) {
     throw new Error('family glob not accepted');
@@ -264,7 +253,7 @@ export function proveDistIdentifierScan() {
     'planted keep',
   );
   expectThrow(
-    () => assertShippedIdentifierTags('Use `query_logs` (tool).', 'planted strip'),
+    () => assertShippedIdentifierTags('Use `query_raw_events` (tool).', 'planted strip'),
     'leftover',
   );
   expectThrow(

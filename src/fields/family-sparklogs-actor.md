@@ -1,6 +1,8 @@
 <!-- GENERATED reference. Do not hand-edit. -->
 # Actor fields
 
+**Use when:** finding who made a change or started an action, such as the account behind a sign-in or a setting change.
+
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
 | `sparklogs.actor.id` | string |  | The principal's stable join key. |

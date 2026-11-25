@@ -6,117 +6,121 @@
 Each section below is complete for its reason: every public field, in the words the reference page shows.
 Search for the heading "## `<code>`" or a word from the reason's label. Do not read the whole file.
 
-| reason | label | kind | severity | service | benign |
-|---|---|---|---|---|---|
-| `app_crash_recurring` | Application crashing repeatedly | condition | Display to Serious | `app_stability` |  |
-| `audit_policy_changed` | Audit policy changed | change |  | `security_audit` |  |
-| `audit_policy_coverage_reduced` | Audit coverage reduced | change |  | `security_audit` |  |
-| `bios_version_changed` | BIOS version changed | change |  | `patching` |  |
-| `boot_mode_changed` | Boot mode changed | change |  | `platform` |  |
-| `cpu_busy` | CPU busy | condition | Display to Notice | `performance` |  |
-| `cpu_configuration_changed` | CPU configuration changed | change |  | `platform` |  |
-| `cpu_interrupt_storm` | CPU interrupt storm | condition | Warning to Error | `performance` |  |
-| `cpu_kernel_dominated` | CPU time mostly kernel work | condition | Notice | `performance` |  |
-| `cpu_throttled_under_load` | CPU throttled under load | condition | Warning to Error | `performance` |  |
-| `crash_dump_page_file_too_small` | Page file too small for crash dumps | condition | Notice | `os_stability` |  |
-| `crash_dump_type_changed` | Crash dump type changed | change |  | `os_stability` |  |
-| `data_volume_space_low` | Data volume low on space | condition | Display to Warning | `storage` |  |
-| `disk_brought_online` | Disk brought online | change |  | `storage` |  |
-| `disk_latency_degraded` | Disk latency degraded | condition | Display to Error | `storage` |  |
-| `disk_partition_layout_changed` | Disk partition layout changed | change |  | `storage` |  |
-| `disk_read_only_changed` | Disk read-only setting changed | change |  | `storage` |  |
-| `disk_saturated` | Disk saturated | condition | Display to Minor | `storage` |  |
-| `disk_taken_offline` | Disk taken offline | change |  | `storage` |  |
-| `disk_unresponsive` | Disk unresponsive | condition | Minor to Critical | `storage` |  |
-| `dns_lookup_redirected` | DNS lookup redirected | condition | Display to Notice | `networking` |  |
-| `domain_membership_changed` | Domain membership changed | change |  | `platform` |  |
-| `driver_installed` | Driver installed | change |  | `platform` |  |
-| `driver_removed` | Driver removed | change |  | `platform` |  |
-| `driver_updated` | Driver updated | change |  | `platform` |  |
-| `hardware_identity_changed` | Hardware identity changed | change |  | `platform` |  |
-| `host_booted` | Host booted | occurrence |  | `os_stability` |  |
-| `host_clock_stepped` | Host clock stepped | occurrence |  | `os_stability` |  |
-| `host_resume_settled` | Host resume settled | occurrence |  | `os_stability` |  |
-| `host_role_added` | Role detected | change |  | `platform` |  |
-| `host_role_removed` | Role no longer detected | change |  | `platform` |  |
-| `host_shutdown` | Host shutting down | occurrence |  | `os_stability` |  |
-| `host_sleep_entered` | Host entered sleep | occurrence |  | `os_stability` |  |
-| `host_sleep_exited` | Host resumed | occurrence |  | `os_stability` |  |
-| `host_unexpected_shutdown` | Unexpected host shutdown | occurrence |  | `os_stability` |  |
-| `installed_memory_changed` | Installed memory changed | change |  | `platform` |  |
-| `installed_product_changed` | Installed product changed | change |  | `patching` |  |
-| `installed_product_installed` | Installed product appeared | change |  | `patching` |  |
-| `installed_product_removed` | Installed product removed | change |  | `patching` |  |
-| `kernel_crash` | Windows crashed (blue screen) | occurrence |  | `os_stability` |  |
-| `kernel_crash_recurring` | Repeated Windows crashes | condition | Display to Critical | `os_stability` |  |
-| `kernel_driver_flapping` | Kernel driver loading repeatedly | condition | Notice | `platform` |  |
-| `kernel_driver_installed` | Kernel driver installed | change |  | `platform` |  |
-| `kernel_driver_installed_repeatedly` | Kernel driver installed repeatedly | condition | Display | `platform` |  |
-| `kernel_driver_loaded` | Kernel driver loaded | change |  | `platform` |  |
-| `kernel_driver_unloaded` | Kernel driver unloaded | change |  | `platform` |  |
-| `kernel_driver_updated` | Kernel driver updated | change |  | `platform` |  |
-| `network_adapter_dhcp_failed` | Network adapter DHCP failed | condition | Notice to Error | `networking` |  |
-| `network_adapter_disabled` | Network adapter disabled | change |  | `networking` |  |
-| `network_adapter_emulated` | Emulated network adapter | condition | Display to Notice | `networking` |  |
-| `network_adapter_enabled` | Network adapter enabled | change |  | `networking` |  |
-| `network_adapter_filters_changed` | Network adapter filters changed | change |  | `networking` |  |
-| `network_adapter_ipv4_dhcp_changed` | Network adapter DHCP setting changed | change |  | `networking` |  |
-| `network_adapter_link_downshifted` | Network link speed downshifted | condition | Notice to Warning | `networking` |  |
-| `network_adapter_metric_changed` | Network adapter metric changed | change |  | `networking` |  |
-| `network_adapter_mtu_changed` | Network adapter MTU changed | change |  | `networking` |  |
-| `network_adapter_saturated` | Network link saturated | condition | Display to Notice | `networking` |  |
-| `network_adapter_static_address_changed` | Network adapter static address changed | change |  | `networking` |  |
-| `network_adapter_static_dns_changed` | Network adapter static DNS changed | change |  | `networking` |  |
-| `network_adapter_static_gateway_changed` | Network adapter static gateway changed | change |  | `networking` |  |
-| `network_context_changed` | Primary network changed | occurrence |  | `networking` |  |
-| `network_ipv6_broken` | IPv6 broken while advertised | condition | Display to Notice | `networking` |  |
-| `network_share_added` | Network share added | change |  | `file_sharing` |  |
-| `network_share_path_changed` | Network share path changed | change |  | `file_sharing` |  |
-| `network_share_permissions_changed` | Network share permissions changed | change |  | `file_sharing` |  |
-| `network_share_removed` | Network share removed | change |  | `file_sharing` |  |
-| `operating_system_changed` | Operating system changed | change |  | `patching` |  |
-| `os_clock_drift` | Clock drifting | condition |  | `performance` |  |
-| `os_volume_space_low` | OS volume low on space | condition | Notice to Severe | `storage` |  |
-| `page_file_configuration_changed` | Page file configuration changed | change |  | `performance` |  |
-| `patch_scan_stale` | Windows Update scan out of date | condition | Warning | `patching` |  |
-| `patch_updates_paused` | Windows Updates paused | condition | Notice to Error | `patching` |  |
-| `power_wake_loop` | Power wake loop | condition | Display | `platform` |  |
-| `primary_dns_suffix_changed` | Primary DNS suffix changed | change |  | `networking` |  |
-| `process_cpu_high` | Process using high CPU | condition |  | `performance` |  |
-| `process_crash` | Application crashed | occurrence |  | `app_stability` |  |
-| `process_handle_count_high` | Process handle count high | condition | Display | `performance` |  |
-| `ram_commit_near_limit` | Memory commit near its limit | condition | Notice to Critical | `performance` |  |
-| `ram_pressure` | Memory pressure slowing the host | condition | Notice to Severe | `performance` |  |
-| `secure_boot_disabled` | Secure Boot disabled | change |  | `security_audit` |  |
-| `secure_boot_enabled` | Secure Boot enabled | change |  | `security_audit` |  |
-| `service_auto_not_running` | Automatic service not running | condition | Display to Severe | `app_stability` |  |
-| `service_command_line_changed` | Service command changed | change |  | `security_audit` |  |
-| `service_flapping` | Service crashing and restarting | condition | Display to Serious | `app_stability` |  |
-| `service_installed` | Service installed | change |  | `security_audit` |  |
-| `service_logon_account_changed` | Service account changed | change |  | `security_audit` |  |
-| `service_removed` | Service removed | change |  | `security_audit` |  |
-| `service_start_type_changed` | Service start type changed | change |  | `security_audit` |  |
-| `service_stuck_pending` | Service stuck starting or stopping | condition | Display to Severe | `app_stability` |  |
-| `sparklogs_agent_cpu_over_budget` | SparkLogs agent CPU over budget | condition | Notice | `rmm` |  |
-| `sparklogs_agent_handle_over_budget` | SparkLogs agent handles over budget | condition | Notice | `rmm` |  |
-| `sparklogs_agent_memory_over_budget` | SparkLogs agent memory over budget | condition | Notice | `rmm` |  |
-| `sparklogs_agent_started` | SparkLogs agent started | occurrence |  | `rmm` |  |
-| `sparklogs_agent_stopped` | SparkLogs agent stopped | occurrence |  | `rmm` |  |
-| `tpm_chip_changed` | TPM chip changed | change |  | `platform` |  |
-| `tpm_firmware_changed` | TPM firmware changed | change |  | `platform` |  |
-| `tpm_presence_changed` | TPM presence changed | change |  | `platform` |  |
-| `tpm_version_changed` | TPM specification changed | change |  | `platform` |  |
-| `virtualization_changed` | Virtualization changed | change |  | `platform` |  |
-| `volume_bitlocker_protection_dropped` | BitLocker protection dropped | condition | Notice | `storage` |  |
-| `volume_fill_rate_high` | Volume filling quickly | condition | Display | `storage` |  |
-| `volume_unreadable` | Volume unreadable | condition | Serious to Severe | `storage` |  |
-| `vss_snapshots_failing_for_space` | Shadow copies failing for space | condition | Notice to Error | `backup` |  |
-| `vss_writer_failed` | VSS writer failed | condition | Display to Warning | `backup` |  |
-| `winhttp_proxy_changed` | WinHTTP proxy changed | change |  | `networking` |  |
+| reason | label | kind | severity | service | benign | use when |
+|---|---|---|---|---|---|---|
+| `app_crash_recurring` | Application crashing repeatedly | condition | Display to Serious | `app_stability` |  | one program keeps closing by itself every day or two, and a technician wants to know how often it crashes and whether the same module and exception are behind each crash. |
+| `audit_policy_changed` | Audit policy changed | change |  | `security_audit` |  | the Security log fills sooner after an audit baseline or Group Policy turned on more auditing, or someone asks whether a change turned on more auditing on a machine. |
+| `audit_policy_coverage_reduced` | Audit coverage reduced | change |  | `security_audit` |  | some security events stopped appearing in the Security log, and someone needs which audit subcategories stopped recording compared with before, whether an attacker or a policy change turned them off. |
+| `bios_version_changed` | BIOS version changed | change |  | `patching` |  | a problem started after a BIOS or UEFI firmware update, or someone needs to confirm that a firmware rollout reached the machine and which version it now runs. |
+| `boot_mode_changed` | Boot mode changed | change |  | `platform` |  | a machine switched between UEFI and legacy BIOS boot, such as a disk conversion before a Windows 11 upgrade or a firmware reset that turned legacy boot on, or someone asks when its boot mode changed. |
+| `cpu_busy` | CPU busy | condition | Display to Notice | `performance` |  | a machine or server is slow because its processor stays at or near 100% for minutes at a time, and someone asks what is using the CPU. |
+| `cpu_configuration_changed` | CPU configuration changed | change |  | `platform` |  | a machine's processor model or core count changed, such as a virtual machine given more or fewer virtual CPUs or moved to another host, a processor swap, or hyper-threading turned off, or someone checks per-core licensing against it. |
+| `cpu_interrupt_storm` | CPU interrupt storm | condition | Warning to Error | `performance` |  | a machine stutters, with crackling audio, a lagging pointer or stalled transfers, while no program looks busy enough to explain it. |
+| `cpu_kernel_dominated` | CPU time mostly kernel work | condition | Notice | `performance` |  | the CPU is busy but most of the time goes to Windows and its drivers rather than to programs, often because antivirus, backup or encryption software inspects every file. |
+| `cpu_throttled_under_load` | CPU throttled under load | condition | Warning to Error | `performance` |  | a physical server runs jobs slowly while its CPU usage looks normal, because heat, power or a power-saving setting holds the processor below its rated speed. |
+| `crash_dump_page_file_too_small` | Page file too small for crash dumps | condition | Notice | `os_stability` |  | a technician needs to know whether the page file is too small or turned off for the crash dump Windows is set to write, before or after a blue screen that left no dump. |
+| `crash_dump_type_changed` | Crash dump type changed | change |  | `os_stability` |  | someone asks when and how crash dumps were turned off or the dump type changed, or a blue screen left no dump because dumps were set to none. |
+| `data_volume_space_low` | Data volume low on space | condition | Display to Warning | `storage` |  | a data drive other than the Windows drive, such as a D: or E: drive on a file or database server, is nearly full, and shares, databases or backups that write to it are about to fail. |
+| `disk_brought_online` | Disk brought online | change |  | `storage` |  | a disk and its drive letters came back after being offline, or someone asks what turned a disk online, including a shared SAN or iSCSI disk that may now be online on two servers. |
+| `disk_latency_degraded` | Disk latency degraded | condition | Display to Error | `storage` |  | a disk keeps answering slowly even though little is asking it for work, which points at a failing drive, a cable, a controller or the path to SAN storage rather than heavy load. |
+| `disk_partition_layout_changed` | Disk partition layout changed | change |  | `storage` |  | a partition was deleted, shrunk, extended or added, a recovery partition was resized after an update, or someone asks what changed on a disk's partitions. |
+| `disk_read_only_changed` | Disk read-only setting changed | change |  | `storage` |  | saves to a fixed or SAN disk suddenly fail as write protected, or a disk was switched to read-only or back to writable. |
+| `disk_saturated` | Disk saturated | condition | Display to Minor | `storage` |  | a disk is busy all the time with a long queue of requests, so programs open and save slowly, and the question is which workload is overloading it. |
+| `disk_taken_offline` | Disk taken offline | change |  | `storage` |  | every drive letter and share on one disk vanished at once because the disk was taken offline, or someone asks what took a disk offline. |
+| `disk_unresponsive` | Disk unresponsive | condition | Minor to Critical | `storage` |  | a disk has stopped completing reads and writes, so programs, shares or the whole machine hang on it until it comes back or the machine is restarted. |
+| `dns_lookup_redirected` | DNS lookup redirected | condition | Display to Notice | `networking` |  | a laptop on hotel, guest or public Wi-Fi shows connected but websites fail or open a sign-in page, because name lookups come back with the wrong addresses. |
+| `domain_membership_changed` | Domain membership changed | change |  | `platform` |  | a machine joined or left an Active Directory domain or Microsoft Entra ID, dropped back to a workgroup or was renamed to another domain, or someone asks when its join state changed, rather than a still-joined machine losing its trust. |
+| `driver_installed` | Driver installed | change |  | `platform` |  | a device or the machine started failing soon after new hardware was connected or a new driver package arrived for a device, or someone asks which driver was installed and when. |
+| `driver_removed` | Driver removed | change |  | `platform` |  | a device stopped working or fell back to a basic Microsoft driver, such as a screen stuck at low resolution, after its driver was uninstalled, or someone asks which driver was removed. |
+| `driver_updated` | Driver updated | change |  | `platform` |  | problems started after Windows Update, a vendor tool or a patch policy updated a device's driver, or someone needs the old and new driver version to roll back or hold it. |
+| `hardware_identity_changed` | Hardware identity changed | change |  | `platform` |  | an asset record, warranty lookup or RMM entry no longer matches the machine after a motherboard replacement, a disk moved into a new PC or a virtual machine clone, or Windows asks to reactivate after such a change. |
+| `host_booted` | Host booted | occurrence |  | `os_stability` |  | someone asks when a machine last started, whether that was a full restart or a Fast Startup, or how the run before it ended. |
+| `host_clock_stepped` | Host clock stepped | occurrence |  | `os_stability` |  | a machine's clock jumped forward or back, log times on one machine do not line up, or someone asks whether the time was changed or corrected and by how much. |
+| `host_resume_settled` | Host resume settled | occurrence |  | `os_stability` |  | a technician needs to know whether a performance, disk or network problem began after the burst of activity that follows a wake from sleep had ended, or was part of it. |
+| `host_role_added` | Role detected | change |  | `platform` |  | someone asks when a machine became a domain controller, DNS server, Hyper-V host, SQL Server, Exchange mailbox server or FSLogix host, or finds a server role nobody planned on a workstation or member server. |
+| `host_role_removed` | Role no longer detected | change |  | `platform` |  | a domain controller was demoted or a DNS, Hyper-V, SQL Server, Exchange or FSLogix service was uninstalled, and someone asks when the role left the machine or why clients lost what it served. |
+| `host_shutdown` | Host shutting down | occurrence |  | `os_stability` |  | someone asks when a machine began a clean shutdown or restart, or how long it was down before it started again. |
+| `host_sleep_entered` | Host entered sleep | occurrence |  | `os_stability` |  | a laptop or desktop went to sleep, standby or hibernation, and someone needs when it went to sleep, for how long, and for Modern Standby what started it: the lid, the power button, the display timeout or the battery. |
+| `host_sleep_exited` | Host resumed | occurrence |  | `os_stability` |  | something stopped working right after a laptop or desktop woke from sleep or hibernation, or someone asks when it woke and how long it was asleep. |
+| `host_unexpected_shutdown` | Unexpected host shutdown | occurrence |  | `os_stability` |  | a machine turned off or restarted without a clean shutdown, from a blue screen, a power cut, a dead battery or a held power button, and a technician wants the last time it was known running before it failed. |
+| `installed_memory_changed` | Installed memory changed | change |  | `platform` |  | a machine reports less installed RAM than before, such as after a memory module failed or came loose, or someone asks when memory was added to or removed from a machine or virtual machine. |
+| `installed_product_changed` | Installed product changed | change |  | `patching` |  | a problem started after a program updated, or someone asks which version a program had before, or why a program was downgraded or now lists another publisher. |
+| `installed_product_installed` | Installed product appeared | change |  | `patching` |  | someone asks when a program appeared in a machine's installed programs, by any installer, whether a deployment reached it, or whether unapproved software such as a remote-access tool was added. |
+| `installed_product_removed` | Installed product removed | change |  | `patching` |  | a program is missing from a machine, or a security agent, backup client or remote-access tool was uninstalled, and someone asks when it left. |
+| `kernel_crash` | Windows crashed (blue screen) | occurrence |  | `os_stability` |  | a machine crashed to a blue screen, and a technician wants the stop code and the driver the crash dump points at for that one crash. |
+| `kernel_crash_recurring` | Repeated Windows crashes | condition | Display to Critical | `os_stability` |  | a machine keeps crashing to blue screens over days or weeks, and a technician wants to know how often and whether one stop code or driver is behind them. |
+| `kernel_driver_flapping` | Kernel driver loading repeatedly | condition | Notice | `platform` |  | a kernel driver keeps loading and unloading, often the driver of a security or monitoring tool reloading in a loop, and someone needs to know which driver and how often. |
+| `kernel_driver_installed` | Kernel driver installed | change |  | `platform` |  | a technician needs to know whether a new kernel or file-system driver was registered on a machine, such as before crashes started or a security tool stopped working, including a driver that was gone a moment later. |
+| `kernel_driver_installed_repeatedly` | Kernel driver installed repeatedly | condition | Display | `platform` |  | the same kernel driver is installed many times an hour, usually by a hardware monitoring or overclocking tool, and someone asks whether a tool explains it. |
+| `kernel_driver_loaded` | Kernel driver loaded | change |  | `platform` |  | someone asks which kernel driver loaded on a machine and whether it is signed, such as before crashes started, when a security tool stopped working, or when an unsigned driver appeared. |
+| `kernel_driver_unloaded` | Kernel driver unloaded | change |  | `platform` |  | a security, backup or monitoring tool stopped working and someone asks whether its driver unloaded, or which driver left the machine and when. |
+| `kernel_driver_updated` | Kernel driver updated | change |  | `platform` |  | a crash, or a security or backup tool misbehaving, started soon after a loaded kernel driver file changed version on disk, such as WdFilter after a Defender platform update, or someone needs the old and new file version or path. |
+| `network_adapter_dhcp_failed` | Network adapter DHCP failed | condition | Notice to Error | `networking` |  | an adapter set to get its address automatically has held only a self-assigned address for minutes, not just failed one renewal, so the device shows no internet on it or is offline. |
+| `network_adapter_disabled` | Network adapter disabled | change |  | `networking` |  | a machine lost its network because a person, script or VPN or security tool turned a network adapter off in Windows, and a technician needs to know when. |
+| `network_adapter_emulated` | Emulated network adapter | condition | Display to Notice | `networking` |  | file copies or other network work on a virtual machine are slow, or its link shows 100 Mb/s, because it still uses an emulated network card instead of the hypervisor's fast one. |
+| `network_adapter_enabled` | Network adapter enabled | change |  | `networking` |  | a technician needs to know when a network adapter that was turned off in Windows came back on, or an adapter that policy keeps off, such as a second network card, was turned on. |
+| `network_adapter_filters_changed` | Network adapter filters changed | change |  | `networking` |  | networking slowed or broke right after a VPN, security, web-filtering, Npcap or Wireshark install or update, and a technician needs to see which filter driver was added to or removed from the adapter. |
+| `network_adapter_ipv4_dhcp_changed` | Network adapter DHCP setting changed | change |  | `networking` |  | a machine lost the network after someone set a static IP, or a server dropped its fixed address, because the adapter switched between getting an address automatically and a manual one. |
+| `network_adapter_link_downshifted` | Network link speed downshifted | condition | Notice to Warning | `networking` |  | one machine's wired network is slow while others on the same network are fine, because its link has stayed at a lower speed than it normally runs, such as 100 Mb/s on a gigabit port. |
+| `network_adapter_metric_changed` | Network adapter metric changed | change |  | `networking` |  | traffic suddenly leaves by the wrong adapter, such as Wi-Fi instead of Ethernet or around a VPN, after someone or some software changed an adapter's metric. |
+| `network_adapter_mtu_changed` | Network adapter MTU changed | change |  | `networking` |  | large transfers, iSCSI or backup traffic stall while small requests still work, after an adapter's frame size was changed, often for jumbo frames. |
+| `network_adapter_saturated` | Network link saturated | condition | Display to Notice | `networking` |  | transfers are slow and latency is high on a physical machine whose wired link is running near its full speed, often during a backup or large copy. |
+| `network_adapter_static_address_changed` | Network adapter static address changed | change |  | `networking` |  | mapped drives, printers or DNS records stopped reaching a machine after someone changed its manually set IP address or subnet, and a technician needs the old and new address. |
+| `network_adapter_static_dns_changed` | Network adapter static DNS changed | change |  | `networking` |  | names stop resolving, or domain sign-in or Group Policy starts failing, after the DNS servers set by hand on an adapter were changed, by a person, a tool or malware. |
+| `network_adapter_static_gateway_changed` | Network adapter static gateway changed | change |  | `networking` |  | a machine with a manually set address reaches its own subnet but nothing beyond it after its default gateway was changed, such as during a router replacement. |
+| `network_context_changed` | Primary network changed | occurrence |  | `networking` |  | a problem began when a laptop moved to another network, such as office to home or dock to Wi-Fi, and a technician needs the time of the move and the adapter it moved to. |
+| `network_ipv6_broken` | IPv6 broken while advertised | condition | Display to Notice | `networking` |  | applications stall or time out before connecting while IPv4 works, because the network hands out IPv6 addresses but IPv6 traffic to the internet fails. |
+| `network_share_added` | Network share added | change |  | `file_sharing` |  | a new or unexpected shared folder or printer appears on a machine, and someone needs its folder and who its permissions let in. |
+| `network_share_path_changed` | Network share path changed | change |  | `file_sharing` |  | a share or mapped drive still opens by the same name but shows the wrong files, missing files or an empty folder after a data move or server migration. |
+| `network_share_permissions_changed` | Network share permissions changed | change |  | `file_sharing` |  | users are suddenly refused on a share they used to open, a scanner can no longer save to it, or a share was opened to Everyone and someone asks when its permissions changed. |
+| `network_share_removed` | Network share removed | change |  | `file_sharing` |  | mapped drives, scan-to-folder or an application stop working with "The network name cannot be found" because a share was deleted and stayed gone. |
+| `operating_system_changed` | Operating system changed | change |  | `patching` |  | a problem started after a Windows update or upgrade, or someone needs to confirm when a machine's Windows build, version or edition changed. |
+| `os_clock_drift` | Clock drifting | condition |  | `performance` |  |  |
+| `os_volume_space_low` | OS volume low on space | condition | Notice to Severe | `storage` |  | the C: drive Windows runs from is nearly full, with low disk space warnings, updates failing for lack of space, or profiles and programs that cannot save. |
+| `page_file_configuration_changed` | Page file configuration changed | change |  | `performance` |  | a technician needs to know whether and when the page file was moved, resized or turned off, for example by a tuning script, before memory or crash dump problems began. |
+| `patch_scan_stale` | Windows Update scan out of date | condition | Warning | `patching` |  | a machine has not checked for Windows updates in weeks, or never has, so it misses patches while patch reports may still show it current. |
+| `patch_updates_paused` | Windows Updates paused | condition | Notice to Error | `patching` |  | a user paused Windows Update, often to put off a restart, and it has stayed paused, so the machine installs no updates. |
+| `power_wake_loop` | Power wake loop | condition | Display | `platform` |  | a laptop or desktop keeps waking from sleep over and over by itself, so it comes out of a bag hot or drained or is found awake, and the repeated wakes need a cause. |
+| `primary_dns_suffix_changed` | Primary DNS suffix changed | change |  | `networking` |  | other machines stop finding a computer by its full name, or its short names stop resolving, after its domain, domain join or Group Policy changed the suffix Windows adds to its name. |
+| `process_cpu_high` | Process using high CPU | condition |  | `performance` |  |  |
+| `process_crash` | Application crashed | occurrence |  | `app_stability` |  | a program suddenly closed without warning, and a technician wants that crash's faulting module and exception together with the module the crash dump analysis blames outside the Windows folder. |
+| `process_handle_count_high` | Process handle count high | condition | Display | `performance` |  | a technician suspects a process or service of leaking handles, with its handle count climbing into the millions. |
+| `ram_commit_near_limit` | Memory commit near its limit | condition | Notice to Critical | `performance` |  | programs are close to being refused memory, or crash for lack of it, while Task Manager may still show free RAM, because committed memory has neared what RAM and the page file can back. |
+| `ram_pressure` | Memory pressure slowing the host | condition | Notice to Severe | `performance` |  | a machine feels frozen or slow because it has run out of physical memory and is paging to disk. |
+| `secure_boot_disabled` | Secure Boot disabled | change |  | `security_audit` |  | Secure Boot shows as off on a machine that had it on, or a technician needs to know whether Secure Boot was turned off before BitLocker asked for its recovery key. |
+| `secure_boot_enabled` | Secure Boot enabled | change |  | `security_audit` |  | Secure Boot was switched on for a Windows 11 upgrade or hardening and afterwards a boot tool or second operating system will not start, or a technician needs to know whether Secure Boot was turned on before BitLocker asked for its recovery key. |
+| `service_auto_not_running` | Automatic service not running | condition | Display to Severe | `app_stability` |  | a service set to start automatically shows Stopped and stays down after an error, so whatever it provides is gone while the machine looks fine. |
+| `service_command_line_changed` | Service command changed | change |  | `security_audit` |  | someone asks whether a service was hijacked to run a different program, or why the program a service runs moved to a new folder. |
+| `service_flapping` | Service crashing and restarting | condition | Display to Serious | `app_stability` |  | a service keeps crashing and coming back many times a day, so it looks running when checked but drops its work and connections at each crash. |
+| `service_installed` | Service installed | change |  | `security_audit` |  | a new or unknown service shows up on a machine, and someone needs the start type, run-as account and command it was registered with, to judge whether a remote-access tool or malware set it up. |
+| `service_logon_account_changed` | Service account changed | change |  | `security_audit` |  | someone asks why a service now runs as LocalSystem, an administrator or a domain account, or when the account a service logs on as changed. |
+| `service_removed` | Service removed | change |  | `security_audit` |  | a Windows service is gone from Services, such as one an antivirus, backup or RMM product ran, and someone needs its last start type, account and command. |
+| `service_start_type_changed` | Service start type changed | change |  | `security_audit` |  | a service no longer starts at boot because someone or something set it to Manual or Disabled, or someone asks when a service's startup type changed. |
+| `service_stuck_pending` | Service stuck starting or stopping | condition | Display to Severe | `app_stability` |  | a service stays in Starting or Stopping for many minutes with no progress, and Services cannot start, stop or restart it. |
+| `sparklogs_agent_cpu_over_budget` | SparkLogs agent CPU over budget | condition | Notice | `rmm` |  | the SparkLogs agent process shows high CPU in Task Manager, or someone asks whether the monitoring agent is slowing a machine down. |
+| `sparklogs_agent_handle_over_budget` | SparkLogs agent handles over budget | condition | Notice | `rmm` |  | the SparkLogs agent process shows an unusually high or rising handle count in Task Manager, or someone suspects the agent is leaking handles. |
+| `sparklogs_agent_memory_over_budget` | SparkLogs agent memory over budget | condition | Notice | `rmm` |  | the SparkLogs agent or its log collector uses a lot of memory in Task Manager, or someone asks whether the monitoring agent is using too much RAM. |
+| `sparklogs_agent_started` | SparkLogs agent started | occurrence |  | `rmm` |  | someone asks when the log collection agent came back after a gap in readings, or whether its last run ended in a crash or with the machine going down. |
+| `sparklogs_agent_stopped` | SparkLogs agent stopped | occurrence |  | `rmm` |  | logs or readings from a machine stop arriving, and someone needs the cause the agent recorded for its own stop: an agent update, Windows shutting down, someone stopping the service, or an error. |
+| `tpm_chip_changed` | TPM chip changed | change |  | `platform` |  | BitLocker asked for its recovery key or Windows Hello PINs stopped working after the firmware was switched between the processor's firmware TPM and a discrete TPM chip, or after a board or chip swap brought a TPM from another maker. |
+| `tpm_firmware_changed` | TPM firmware changed | change |  | `platform` |  | someone asks whether a TPM firmware update reached a machine, such as the fix for a TPM security advisory, or BitLocker or Windows Hello acted up after one. |
+| `tpm_presence_changed` | TPM presence changed | change |  | `platform` |  | a machine no longer sees its TPM, or a TPM appeared, such as after a BIOS update or reset turned the firmware TPM off, and BitLocker wants its recovery key or Windows Hello stops working. |
+| `tpm_version_changed` | TPM specification changed | change |  | `platform` |  | a TPM switched between specification 1.2 and 2.0, such as with a vendor firmware tool ahead of a Windows 11 upgrade, or someone asks when a machine's TPM moved to 2.0. |
+| `virtualization_changed` | Virtualization changed | change |  | `platform` |  | a physical machine was moved into a virtual machine or a virtual machine moved to another hypervisor or cloud, and leftover drivers and tools, lost static IP settings or activation need checking. |
+| `volume_bitlocker_protection_dropped` | BitLocker protection dropped | condition | Notice | `storage` |  | a drive that BitLocker used to protect has stayed unprotected for a day or more, often because the machine has not restarted since an update suspended protection, or because protection was turned off or the drive is being decrypted. |
+| `volume_fill_rate_high` | Volume filling quickly | condition | Display | `storage` |  | a drive's free space is disappearing unusually fast, from a runaway log, a crash-dump loop, a sync client or a backup aimed at the wrong drive, before the drive is actually low. |
+| `volume_unreadable` | Volume unreadable | condition | Serious to Severe | `storage` |  | an internal drive shows as RAW, its drive letter or shares are gone, or Windows offers to format it, and it stays unreadable. |
+| `vss_snapshots_failing_for_space` | Shadow copies failing for space | condition | Notice to Error | `backup` |  | shadow copies on a drive keep being deleted because their storage could not grow in time, or new shadow copies or restore points keep failing at the shadow storage limit, again and again over a day or a week. |
+| `vss_writer_failed` | VSS writer failed | condition | Display to Warning | `backup` |  | a VSS writer has stayed failed across backups, so a backup of SQL Server, Exchange, Hyper-V or another application may not restore cleanly even when the job reports success. |
+| `winhttp_proxy_changed` | WinHTTP proxy changed | change |  | `networking` |  | Windows Update, Defender updates or a management agent stop reaching the internet while browsing still works, after the machine-wide WinHTTP proxy was set, changed or cleared. |
 
 ## `app_crash_recurring`: Application crashing repeatedly
 
 One program on this machine keeps crashing.
+
+**Use when:** one program keeps closing by itself every day or two, and a technician wants to know how often it crashes and whether the same module and exception are behind each crash.
+
+**Keywords:** program keeps crashing, app keeps closing, program crashes every day, app crashes several times a week, program keeps shutting down by itself, repeated application crashes, recurring app crash, same faulting module every time, Outlook keeps crashing, program crashes since its last update
 
 **Severity:** Starts at 3 crashes in 5 days, or 5 in 10 days. A program SparkLogs lists by name becomes more severe as the crashes come faster, up to the level SparkLogs sets for it, at most Serious. Any other program goes no higher than Notice, at 10 crashes in a day.
 
@@ -154,6 +158,10 @@ One program on this machine keeps crashing.
 
 The machine's audit policy now records more kinds of Security events than before.
 
+**Use when:** the Security log fills sooner after an audit baseline or Group Policy turned on more auditing, or someone asks whether a change turned on more auditing on a machine.
+
+**Keywords:** auditing turned on, more security events logged, Security log growing after an audit change, advanced audit policy added auditing, audit GPO turned on more auditing, auditpol /set success enable
+
 **Also reported by:** `win.eventlog.security`
 
 **Why it matters:** Windows writes more Security events, so the Security log wraps sooner and log volume rises.
@@ -178,6 +186,10 @@ The machine's audit policy now records more kinds of Security events than before
 
 The machine's audit policy stopped recording some Security events it recorded before.
 
+**Use when:** some security events stopped appearing in the Security log, and someone needs which audit subcategories stopped recording compared with before, whether an attacker or a policy change turned them off.
+
+**Keywords:** logon auditing turned off on a server, audit subcategories stopped recording, security events missing, no logon events, defense evasion audit policy, audit baseline drift, auditpol /clear
+
 **Why it matters:** Events that are no longer recorded cannot be recovered later: with logon auditing off on a server, an intrusion leaves no trail of who signed in.
 
 **In practice:** At least one audit subcategory stopped recording success or failure events, even if the same change turned others on. An attacker covering their tracks makes this change, and so do a security tool, a cleanup script, or a Group Policy edit that went wider than intended. SparkLogs also collects Security event 4719 from the same machine, which records each audit policy change; when the change was made on the machine itself, it names the account.
@@ -201,6 +213,10 @@ The machine's audit policy stopped recording some Security events it recorded be
 
 The machine's BIOS or firmware version changed.
 
+**Use when:** a problem started after a BIOS or UEFI firmware update, or someone needs to confirm that a firmware rollout reached the machine and which version it now runs.
+
+**Keywords:** BIOS update, BIOS upgrade, BIOS flashed, UEFI firmware update, BIOS firmware updated, new BIOS version, BIOS version history, which BIOS version is installed, BIOS capsule update, problems after BIOS update, blue screen after BIOS update, sleep broken after firmware update, BIOS settings reset after update
+
 **Why it matters:** A firmware update can bring new faults, such as blue screens, failed sleep or devices that stop working, and it can reset firmware settings such as Secure Boot, the TPM or the boot order.
 
 **In practice:** The version string the firmware reports changed, usually from a BIOS or UEFI update by the vendor's update tool, Windows Update or a technician. It confirms that a firmware rollout reached the machine. Firmware changes take effect at a restart, so the event follows the restart that applied it.
@@ -219,6 +235,10 @@ The machine's BIOS or firmware version changed.
 
 The machine now boots in a different mode, UEFI or legacy BIOS.
 
+**Use when:** a machine switched between UEFI and legacy BIOS boot, such as a disk conversion before a Windows 11 upgrade or a firmware reset that turned legacy boot on, or someone asks when its boot mode changed.
+
+**Keywords:** legacy BIOS, UEFI boot, BIOS mode, legacy boot enabled, CSM, Compatibility Support Module, MBR2GPT switched to UEFI, switched to UEFI, UEFI required for Windows 11
+
 **Why it matters:** Secure Boot and Windows 11 need UEFI boot, and a machine with BitLocker can ask for its recovery key at the first start after the switch.
 
 **In practice:** Converting the system disk from MBR to GPT with `mbr2gpt` and switching the firmware to UEFI is the usual planned change. A firmware reset to defaults, or a technician turning on legacy boot to start an old tool, is the usual unplanned one. A machine on legacy boot reports no Secure Boot state, so a move to legacy does not also raise Secure Boot disabled. Firmware changes take effect at a restart, so the event follows the restart that applied it.
@@ -236,6 +256,10 @@ The machine now boots in a different mode, UEFI or legacy BIOS.
 ## `cpu_busy`: CPU busy
 
 The CPU has been near full load for most of the last several minutes.
+
+**Use when:** a machine or server is slow because its processor stays at or near 100% for minutes at a time, and someone asks what is using the CPU.
+
+**Keywords:** CPU at 100%, high CPU usage, CPU maxed out, CPU pegged, processor maxed out, sustained high CPU, slow because CPU is busy, what is using the CPU, not enough CPU cores
 
 **Severity:** More severe when the processor queue length has also stayed at 4 or more per core for an hour.
 
@@ -268,6 +292,10 @@ The CPU has been near full load for most of the last several minutes.
 
 The machine's processor model or its number of logical processors changed.
 
+**Use when:** a machine's processor model or core count changed, such as a virtual machine given more or fewer virtual CPUs or moved to another host, a processor swap, or hyper-threading turned off, or someone checks per-core licensing against it.
+
+**Keywords:** vCPU count changed, virtual CPUs, processor changed, core count changed, fewer cores, hyperthreading disabled, SMT disabled, CPU upgrade, per-core licensing
+
 **Why it matters:** Per-core licenses, such as SQL Server's and Windows Server's, follow the core count, and fewer logical processors leave less room for the same work.
 
 **In practice:** On a virtual machine, a changed virtual CPU count or a move to a host with a different processor is the usual cause. On a physical machine, it is a processor swap, or a firmware setting such as hyper-threading or a core limit. Per-core figures, such as processor queue length per core, are divided by the new count from here on.
@@ -287,11 +315,15 @@ The machine's processor model or its number of logical processors changed.
 
 CPU time is dominated by interrupt and DPC handling.
 
+**Use when:** a machine stutters, with crackling audio, a lagging pointer or stalled transfers, while no program looks busy enough to explain it.
+
+**Keywords:** high DPC time, System interrupts high CPU, interrupt CPU usage, audio crackling with high System interrupts, mouse lag with no busy program, pointer stutters, LatencyMon, high interrupt time, lag when docked, stutter after driver update, % Interrupt Time, % DPC Time
+
 **Severity:** More severe at 45% of CPU time than at 30%.
 
 **Why it matters:** The machine stutters: audio crackles, the pointer lags and transfers stall, while no process looks busy.
 
-**In practice:** Windows charges time spent handling hardware interrupts and deferred procedure calls (DPCs) to no process, so Task Manager and per-process alerts miss it. A faulty or outdated driver is the usual cause, most often for a network, storage, audio or USB device or a docking station.
+**In practice:** Windows charges time spent handling hardware interrupts and deferred procedure calls (DPCs) to no process, so per-process alerts miss it, and Task Manager shows it only as one System interrupts line that does not name the driver. A faulty or outdated driver is the usual cause, most often for a network, storage, audio or USB device or a docking station.
 
 **What to check:**
 
@@ -312,6 +344,10 @@ CPU time is dominated by interrupt and DPC handling.
 ## `cpu_kernel_dominated`: CPU time mostly kernel work
 
 Busy CPU time is mostly kernel work, excluding interrupts and deferred procedure calls.
+
+**Use when:** the CPU is busy but most of the time goes to Windows and its drivers rather than to programs, often because antivirus, backup or encryption software inspects every file.
+
+**Keywords:** high kernel time, high privileged time, % Privileged Time, kernel mode CPU, show kernel times, antivirus slowing the server, real-time scanning slows builds, antivirus exclusions to cut kernel time, filter driver overhead, DLP agent slow, encryption filter driver slow
 
 **Why it matters:** Applications get less done than the CPU figure suggests, because most of the busy time goes to Windows and its drivers.
 
@@ -341,6 +377,10 @@ Busy CPU time is mostly kernel work, excluding interrupts and deferred procedure
 
 A physical server's CPU is running below its rated speed while it is busy.
 
+**Use when:** a physical server runs jobs slowly while its CPU usage looks normal, because heat, power or a power-saving setting holds the processor below its rated speed.
+
+**Keywords:** server CPU throttling, server CPU below base speed, server CPU clock speed low, thermal throttling on a server, server overheating, Balanced power plan on a server, server slower than it should be
+
 **Severity:** More severe the further the clock falls below rated speed.
 
 **Why it matters:** Every job on the server takes longer, while its CPU usage looks normal.
@@ -368,6 +408,10 @@ A physical server's CPU is running below its rated speed while it is busy.
 
 The page file is too small for the configured crash dump.
 
+**Use when:** a technician needs to know whether the page file is too small or turned off for the crash dump Windows is set to write, before or after a blue screen that left no dump.
+
+**Keywords:** no dump because page file too small, DedicatedDumpFile, page file disabled to save space, page file too small for MEMORY.DMP, page file smaller than RAM for complete dump
+
 **Why it matters:** After the next blue screen, Windows may not be able to write the memory dump it is set to write, which leaves the crash with a stop code and no dump to analyse.
 
 **In practice:** Windows writes a crash dump through the page file, or through a dedicated dump file when one is set, and that space must hold the dump. The page file here is too small for the configured dump type by more than 10%, or is turned off. A complete memory dump needs about as much room as installed memory; a kernel or automatic dump needs far less. It applies only to a page file of fixed size, a page file turned off, or a dedicated dump file of set size. A page file Windows manages raises nothing, and neither do the small memory dump and "none" settings. A common cause is a page file fixed small or turned off to save disk space, often on a server set to write complete memory dumps.
@@ -393,6 +437,10 @@ The page file is too small for the configured crash dump.
 
 The type of memory dump the machine writes after a crash changed.
 
+**Use when:** someone asks when and how crash dumps were turned off or the dump type changed, or a blue screen left no dump because dumps were set to none.
+
+**Keywords:** crash dumps turned off, memory dump disabled, dump set to none, Write debugging information, minidump setting, no minidumps created, CrashDumpEnabled, dump settings changed
+
 **Why it matters:** With dumps set to none, the next blue screen leaves no dump to analyse.
 
 **In practice:** The setting under Startup and Recovery changed between none, small memory dump, kernel, complete and automatic. Disk cleanup and tuning scripts often set it to none, and troubleshooting a crash often sets it to complete. A complete dump needs a page file about the size of installed memory, and Page file too small for crash dumps reports when the page file is short for the type chosen.
@@ -409,6 +457,10 @@ The type of memory dump the machine writes after a crash changed.
 ## `data_volume_space_low`: Data volume low on space
 
 A fixed drive other than the Windows drive is low on free space.
+
+**Use when:** a data drive other than the Windows drive, such as a D: or E: drive on a file or database server, is nearly full, and shares, databases or backups that write to it are about to fail.
+
+**Keywords:** data drive full, D drive full, E drive full, file server drive full, drive almost full, running out of disk space, not enough space on data drive, share full, backup drive full, database drive full
 
 **Severity:** Display while the drive is only low; Notice while it is still filling, and Warning once a filling drive is down to 2 GB or 2% free. It goes no higher.
 
@@ -446,6 +498,10 @@ A fixed drive other than the Windows drive is low on free space.
 
 A disk was brought online.
 
+**Use when:** a disk and its drive letters came back after being offline, or someone asks what turned a disk online, including a shared SAN or iSCSI disk that may now be online on two servers.
+
+**Keywords:** disk came online, disk set online, drive letter came back, LUN brought online, Online Disk, online disk command, shared disk online on two servers, cluster disk moved to this node, disk witness moved to this node
+
 **Why it matters:** The disk's volumes, drive letters and shares come back. A SAN or iSCSI disk online on two servers that are not clustered can have its file system corrupted.
 
 **In practice:** An administrator (Disk Management, `diskpart`, `Set-Disk`), a script, or a failover cluster moving the disk to this node turns it online. Windows' SAN policy leaves new shared disks offline on a server until someone does this. It applies only to fixed disks, not removable media.
@@ -463,6 +519,10 @@ A disk was brought online.
 ## `disk_latency_degraded`: Disk latency degraded
 
 Disk operations repeatedly take a second or more each, while only a few requests are waiting.
+
+**Use when:** a disk keeps answering slowly even though little is asking it for work, which points at a failing drive, a cable, a controller or the path to SAN storage rather than heavy load.
+
+**Keywords:** high disk latency, disk response time high, slow disk with low load, disk slow but not busy, Avg. Disk sec/Read, Avg. Disk sec/Write, SSD slow with low load, drive retrying reads, SAN latency, iSCSI latency, storage path unstable
 
 **Severity:** Starts at Display. On a permanently attached disk (internal, SAN or virtual, not USB) it is higher on a server, and becomes more severe as more of the last hour is slow, up to Error at 9 slow five-minute periods on a disk that holds a writable volume. Removable disks stay at Display.
 
@@ -498,6 +558,10 @@ Disk operations repeatedly take a second or more each, while only a few requests
 
 A partition on a disk was created, deleted, resized or changed type, or the disk's partition style changed.
 
+**Use when:** a partition was deleted, shrunk, extended or added, a recovery partition was resized after an update, or someone asks what changed on a disk's partitions.
+
+**Keywords:** partition deleted, partition missing, partition resized, shrink volume, extend volume, WinRE partition resized, MBR2GPT partition change, partition table changed, lost partition
+
 **Why it matters:** A deleted or shrunk partition can take its drive letter and data with it, and a moved or shrunk recovery partition can break Windows recovery.
 
 **In practice:** The event carries the disk's whole partition table before and after, with each partition's offset, size, type and attributes (hidden, no drive letter, read-only). Disk Management, `diskpart`, PowerShell, imaging and partitioning tools and Windows setup make these changes, and a Windows update or a recovery-partition fix can resize the recovery partition. Initializing a new disk as GPT or MBR, and converting MBR to GPT, count too.
@@ -516,6 +580,10 @@ A partition on a disk was created, deleted, resized or changed type, or the disk
 
 A disk's read-only setting changed.
 
+**Use when:** saves to a fixed or SAN disk suddenly fail as write protected, or a disk was switched to read-only or back to writable.
+
+**Keywords:** disk is read-only, disk read only, disk read-only attribute set, clear read-only attribute, Current Read-only State, LUN presented read-only, snapshot LUN read-only
+
 **Why it matters:** While a disk is read-only every write to it fails: saves error with "The media is write protected", and databases, shares and logs on it stop accepting changes.
 
 **In practice:** This is the read-only attribute of the whole disk, which `diskpart` (`attributes disk`), `Set-Disk -IsReadOnly`, storage software and Windows' SAN policy set. A SAN snapshot or replica presented to a server for a restore is often read-only. A read-only flag on one partition is reported as a partition layout change instead.
@@ -533,6 +601,10 @@ A disk's read-only setting changed.
 ## `disk_saturated`: Disk saturated
 
 The disk is working flat out, with a long queue of requests and slow responses.
+
+**Use when:** a disk is busy all the time with a long queue of requests, so programs open and save slowly, and the question is which workload is overloading it.
+
+**Keywords:** disk at 100%, 100% disk usage, high disk usage, disk active time 100%, disk queue length high, disk bottleneck, disk overloaded, IOPS limit, backup slowing the server, storage contention, noisy neighbor VM
 
 **Severity:** Display at first, and more severe the longer it lasts: Notice after 1 hour, higher over the following days. It reaches Minor only on a server's permanently attached disk; other fixed disks stop at Warning, and removable disks stay at Display.
 
@@ -572,6 +644,10 @@ The disk is working flat out, with a long queue of requests and slow responses.
 
 A disk was taken offline.
 
+**Use when:** every drive letter and share on one disk vanished at once because the disk was taken offline, or someone asks what took a disk offline.
+
+**Keywords:** disk offline, disk went offline, disk set offline, drive letters disappeared, drive gone after disk set offline, LUN offline, Offline Disk, cluster disk moved to another node, disk witness moved to another node
+
 **Why it matters:** Every volume, drive letter and share on the disk disappears at once, and anything using them fails.
 
 **In practice:** An administrator (Disk Management, `diskpart`, `Set-Disk -IsOffline`), a script, or a failover cluster moving the disk to another node takes it offline. It applies only to fixed disks, not removable media.
@@ -589,6 +665,10 @@ A disk was taken offline.
 ## `disk_unresponsive`: Disk unresponsive
 
 The disk has requests waiting but has almost stopped completing them.
+
+**Use when:** a disk has stopped completing reads and writes, so programs, shares or the whole machine hang on it until it comes back or the machine is restarted.
+
+**Keywords:** disk hung, disk not responding, drive stopped responding, storage hang, I/O hang, IO stuck, NVMe hang, disk hung after SAN path lost, lost connection to storage, server froze on disk
 
 **Severity:** Minor on its own. More severe when the disk is permanently attached and holds a writable volume, and Critical when that disk is on a server and the hang lasts 30 minutes.
 
@@ -623,6 +703,10 @@ The disk has requests waiting but has almost stopped completing them.
 
 DNS lookups on this network are answered with the wrong addresses.
 
+**Use when:** a laptop on hotel, guest or public Wi-Fi shows connected but websites fail or open a sign-in page, because name lookups come back with the wrong addresses.
+
+**Keywords:** captive portal not loading, hotel Wi-Fi sign-in page, guest Wi-Fi login page, public Wi-Fi login not showing, DNS hijacking, DNS interception, lookup returns private IP, nslookup wrong address, websites redirect to login page
+
 **Why it matters:** Names may resolve to a portal or a filter instead of their servers, so connections to them can fail or reach the wrong host.
 
 **In practice:** The agent regularly looks up a test name whose real addresses it knows, and the answers come back with other addresses, often private ones. A captive portal on hotel or guest Wi-Fi, or a device on the network that intercepts DNS and answers with its own addresses, is the usual cause. Ping and other network checks can stay green, because the network itself is up.
@@ -648,6 +732,10 @@ A lookup reported as `filtered` (a filter blocks the probe domain while the reso
 
 The machine joined or left an Active Directory domain or Microsoft Entra ID, or its domain or workgroup name changed.
 
+**Use when:** a machine joined or left an Active Directory domain or Microsoft Entra ID, dropped back to a workgroup or was renamed to another domain, or someone asks when its join state changed, rather than a still-joined machine losing its trust.
+
+**Keywords:** joined to domain, removed from domain, unjoined from domain, left the domain, Azure AD joined, AAD join, Entra join, hybrid joined, moved to workgroup, domain join date, Add-Computer, Remove-Computer, Access work or school
+
 **Why it matters:** After a change nobody planned, users cannot sign in with their domain accounts, and Group Policy, drive mappings and printers stop applying.
 
 **In practice:** The event covers the join type (workgroup, Entra joined, Active Directory joined, or hybrid, which is both) and the domain or workgroup name. A planned join of a new machine, a move between domains, or a rebuild that left the machine in a workgroup is the usual cause.
@@ -665,6 +753,10 @@ The machine joined or left an Active Directory domain or Microsoft Entra ID, or 
 ## `driver_installed`: Driver installed
 
 A device on this machine started using a driver package it did not use before.
+
+**Use when:** a device or the machine started failing soon after new hardware was connected or a new driver package arrived for a device, or someone asks which driver was installed and when.
+
+**Keywords:** new driver installed, driver install history, which driver was installed, plugged in new device, new hardware detected, driver package, pnputil /add-driver, problems after new driver
 
 **Why it matters:** A new driver is the first suspect when a device, a new peripheral or the whole machine starts failing soon after, including blue screens.
 
@@ -684,6 +776,10 @@ A device on this machine started using a driver package it did not use before.
 
 No device on this machine uses a driver package it used before.
 
+**Use when:** a device stopped working or fell back to a basic Microsoft driver, such as a screen stuck at low resolution, after its driver was uninstalled, or someone asks which driver was removed.
+
+**Keywords:** driver uninstalled, driver deleted, driver removed, low resolution after driver removed, Basic Display Adapter after driver uninstall, fell back to basic driver, Display Driver Uninstaller, DDU
+
 **Why it matters:** A device whose driver is gone stops working, or falls back to a basic Microsoft driver with less function, such as a display at low resolution.
 
 **In practice:** The event names the package that left, with its provider, version and date, so the same version can be put back. An uninstall, a cleanup tool, Uninstall device in Device Manager, or a replacement driver from a different provider does this. A newer package from the same provider replacing the old one is reported as an update.
@@ -700,6 +796,10 @@ No device on this machine uses a driver package it used before.
 ## `driver_updated`: Driver updated
 
 A driver's version or date changed, or a newer package replaced it.
+
+**Use when:** problems started after Windows Update, a vendor tool or a patch policy updated a device's driver, or someone needs the old and new driver version to roll back or hold it.
+
+**Keywords:** after driver update, driver update broke, new driver version, driver rollback, driver downgraded, previous driver version, graphics driver updated by Windows Update, stop driver reinstalling, Dell Command Update driver, Lenovo Vantage driver update, HP Support Assistant driver update
 
 **Why it matters:** A driver update is the first change to rule out when a device or the whole machine starts failing soon after: blue screens, a dropped network link, a device that stops working.
 
@@ -719,6 +819,10 @@ A driver's version or date changed, or a newer package replaced it.
 
 The machine's manufacturer, model or serial number changed.
 
+**Use when:** an asset record, warranty lookup or RMM entry no longer matches the machine after a motherboard replacement, a disk moved into a new PC or a virtual machine clone, or Windows asks to reactivate after such a change.
+
+**Keywords:** service tag changed, serial number changed, BIOS serial number, motherboard replaced, system board replacement, serial number shows Default string, system model changed after board swap, cloned VM, asset record mismatch, not activated after motherboard replacement
+
 **Why it matters:** Asset records, warranty lookups and RMM entries keyed by serial number now point at the wrong hardware, and Windows activation tied to the old hardware may need redoing.
 
 **In practice:** The manufacturer, model or serial number the firmware reports changed under the same Windows installation. On a physical machine, a motherboard replaced under warranty or a disk moved into a new PC is the usual cause. On a virtual machine, a clone, a migration or a change to the virtual hardware is. A replacement board whose serial number was not written back can report placeholder text, such as "To be filled by O.E.M.", which the agent reports as it is.
@@ -735,6 +839,10 @@ The machine's manufacturer, model or serial number changed.
 ## `host_booted`: Host booted
 
 The machine started, after a restart, a power-on, or a Fast Startup.
+
+**Use when:** someone asks when a machine last started, whether that was a full restart or a Fast Startup, or how the run before it ended.
+
+**Keywords:** when did it reboot, last boot time, machine rebooted, HiberbootEnabled, hybrid boot, shut down does not reset uptime
 
 **Why it matters:** A restart nobody planned means users lost open work and the machine's services were down while it restarted.
 
@@ -754,6 +862,10 @@ The machine started, after a restart, a power-on, or a Fast Startup.
 
 The machine's clock jumped forward or back by ten seconds or more.
 
+**Use when:** a machine's clock jumped forward or back, log times on one machine do not line up, or someone asks whether the time was changed or corrected and by how much.
+
+**Keywords:** clock jumped, time jumped, time changed by itself, time went backwards, logs out of order, timestamps do not line up, CMOS battery, Hyper-V time synchronization, VMware Tools time sync, time correction
+
 **Why it matters:** Log times on either side of the jump do not line up with each other or with other machines. Before a large correction the clock was off by that much, and Kerberos rejects sign-ins from a clock more than five minutes from the domain controller's, the Windows default.
 
 **In practice:** Windows Time correcting a drifted clock, an administrator setting the time, or a virtual machine catching up after the hypervisor paused or restored it is the usual cause. Sleep does not count: the clock moving across a sleep is not a jump. Repeated large jumps point at a bad time source, two sources setting the clock (domain time and the hypervisor's time sync on a virtual machine), or a failing motherboard clock battery. Windows Time failing to reach its source is reported separately, from the System log.
@@ -772,6 +884,10 @@ The machine's clock jumped forward or back by ten seconds or more.
 
 The agent's short wait after a wake from sleep ended.
 
+**Use when:** a technician needs to know whether a performance, disk or network problem began after the burst of activity that follows a wake from sleep had ended, or was part of it.
+
+**Keywords:** settle period after wake, grace period after resume, activity burst after resume, post-resume
+
 **Why it matters:** A performance, disk or network problem raised after this point is not the burst of activity that follows a wake.
 
 **In practice:** After a wake from sleep, the agent waits a short time before it judges performance, disk and network readings, so the burst of activity that follows every resume does not open conditions. This marks when the last of those waits ended.
@@ -787,6 +903,10 @@ The agent's short wait after a wake from sleep ended.
 ## `host_role_added`: Role detected
 
 The machine now runs a server role SparkLogs recognizes, such as domain controller or SQL Server.
+
+**Use when:** someone asks when a machine became a domain controller, DNS server, Hyper-V host, SQL Server, Exchange mailbox server or FSLogix host, or finds a server role nobody planned on a workstation or member server.
+
+**Keywords:** promoted to domain controller, DC promotion, Hyper-V enabled on workstation, SQL Server installed, DNS server role added, FSLogix installed, Hyper-V role installed
 
 **Why it matters:** A role nobody planned, such as Hyper-V on a workstation or a DNS server on a member server, is a workload that needs patching, backup and monitoring like any server.
 
@@ -805,6 +925,10 @@ The machine now runs a server role SparkLogs recognizes, such as domain controll
 
 A server role SparkLogs recognized on the machine is gone.
 
+**Use when:** a domain controller was demoted or a DNS, Hyper-V, SQL Server, Exchange or FSLogix service was uninstalled, and someone asks when the role left the machine or why clients lost what it served.
+
+**Keywords:** domain controller demoted, DC demotion, SQL Server uninstalled, Hyper-V role removed, DNS server role removed
+
 **Why it matters:** If nobody planned it, whatever the role served (sign-in, name resolution, virtual machines, mail, profiles or databases) is no longer on this machine.
 
 **In practice:** The role's service was uninstalled, or the domain controller was demoted. A stopped service does not remove a role: it stays detected while its service is installed.
@@ -821,6 +945,10 @@ A server role SparkLogs recognized on the machine is gone.
 ## `host_shutdown`: Host shutting down
 
 Windows began shutting down or restarting the machine.
+
+**Use when:** someone asks when a machine began a clean shutdown or restart, or how long it was down before it started again.
+
+**Keywords:** shut down properly, when did it turn off, how long was it down, planned restart
 
 **Why it matters:** Users' sessions and the machine's services stop, and a server stays unavailable until it starts again.
 
@@ -839,6 +967,10 @@ Windows began shutting down or restarting the machine.
 
 The machine went to sleep, into Modern Standby, or into hibernation.
 
+**Use when:** a laptop or desktop went to sleep, standby or hibernation, and someone needs when it went to sleep, for how long, and for Modern Standby what started it: the lid, the power button, the display timeout or the battery.
+
+**Keywords:** S0 low power idle, offline overnight, server goes to sleep, missed backup because asleep, how long was it asleep before, Modern Standby entered by lid close, slept after display timeout
+
 **Why it matters:** While asleep the machine runs no scheduled tasks, backups or patching, and remote support cannot reach it.
 
 **In practice:** SparkLogs reports a sleep when the machine wakes, dated to when it went to sleep, so a machine that is still asleep has no sleep event yet. Sleeps shorter than thirty seconds do not count, and a virtual machine that the hypervisor pauses or saves is not reported as asleep. For Modern Standby the event says what started it: the lid, the power button, a sleep request, the display timeout or the battery. A server, or a machine that should run overnight jobs, going to sleep points at its power plan.
@@ -856,6 +988,10 @@ The machine went to sleep, into Modern Standby, or into hibernation.
 
 The machine woke from sleep, Modern Standby or hibernation.
 
+**Use when:** something stopped working right after a laptop or desktop woke from sleep or hibernation, or someone asks when it woke and how long it was asleep.
+
+**Keywords:** resumed from sleep, woke from hibernation, no Wi-Fi after sleep, black screen after sleep, dock not working after sleep, monitors not detected after waking, USB not working after sleep, how long was it asleep, after opening the lid
+
 **Why it matters:** A driver that mishandles the wake leaves users with no Wi-Fi, a black screen, or a dock, display or USB device that stops working until a restart.
 
 **In practice:** The event carries how long the machine was asleep. Problems that start right after a wake are often a driver's power management at fault, and this event dates them. Repeated wakes with nobody at the machine are the Power wake loop condition.
@@ -872,6 +1008,10 @@ The machine woke from sleep, Modern Standby or hibernation.
 ## `host_unexpected_shutdown`: Unexpected host shutdown
 
 The machine started again with no record that it shut down cleanly.
+
+**Use when:** a machine turned off or restarted without a clean shutdown, from a blue screen, a power cut, a dead battery or a held power button, and a technician wants the last time it was known running before it failed.
+
+**Keywords:** turned off by itself, shut off without warning, rebooted unexpectedly, laptop battery died and it shut off, UPS power loss, why did the computer shut down unexpectedly, last time it was running before shutdown
 
 **Severity:** Warning on a server, Display on a workstation.
 
@@ -897,6 +1037,10 @@ The machine started again with no record that it shut down cleanly.
 
 The amount of memory installed in this machine changed.
 
+**Use when:** a machine reports less installed RAM than before, such as after a memory module failed or came loose, or someone asks when memory was added to or removed from a machine or virtual machine.
+
+**Keywords:** installed RAM dropped, RAM dropped, memory module not detected, memory stick failed, DIMM failed, RAM upgrade, memory upgrade, VM memory changed
+
 **Why it matters:** After a drop the same work has less memory, so a machine that was fine starts paging and slows down.
 
 **In practice:** The installed memory the firmware reports changed. The memory Windows can use, which moves with Hyper-V dynamic memory, is not compared. A drop on a physical machine can mean a memory module failed its power-on test or came loose, and the firmware stopped using it. On a virtual machine, a change to its configured memory raises it.
@@ -913,6 +1057,10 @@ The amount of memory installed in this machine changed.
 ## `installed_product_changed`: Installed product changed
 
 An installed program's version or publisher changed.
+
+**Use when:** a problem started after a program updated, or someone asks which version a program had before, or why a program was downgraded or now lists another publisher.
+
+**Keywords:** program updated, software updated, app version changed, software downgraded, version rollback, which version was installed before, auto-update changed version, software change history, problems after program update
 
 **Why it matters:** A program that changed version just before a problem started is the first suspect for it.
 
@@ -932,6 +1080,10 @@ An installed program's version or publisher changed.
 
 A program appeared in the machine's list of installed programs.
 
+**Use when:** someone asks when a program appeared in a machine's installed programs, by any installer, whether a deployment reached it, or whether unapproved software such as a remote-access tool was added.
+
+**Keywords:** new software installed, unapproved software, unauthorized software, unknown program installed, remote access tool installed, second antivirus installed, did the deployment reach the machine, when was this program installed, software inventory change
+
 **Why it matters:** Software nobody approved, such as a remote-access tool, a second antivirus or a bundled browser add-on, can let outsiders in or conflict with what the MSP manages.
 
 **In practice:** A new entry appeared in the machine-wide list behind Programs and Features, which confirms that a deployment reached the machine. Programs installed for one user only, and Microsoft Store and MSIX apps such as the current Teams, are not in that list and do not raise it.
@@ -948,6 +1100,10 @@ A program appeared in the machine's list of installed programs.
 ## `installed_product_removed`: Installed product removed
 
 A program left the machine's list of installed programs.
+
+**Use when:** a program is missing from a machine, or a security agent, backup client or remote-access tool was uninstalled, and someone asks when it left.
+
+**Keywords:** software uninstalled, program missing, app missing from installed programs, antivirus uninstalled, EDR removed, security agent removed, backup agent uninstalled, RMM agent uninstalled, remote access tool removed, when was it uninstalled, uninstall history, protection removed
 
 **Why it matters:** When it was a security agent, backup client or remote-access tool, the machine has lost that protection or that way in, often with nobody noticing.
 
@@ -966,6 +1122,10 @@ A program left the machine's list of installed programs.
 ## `kernel_crash`: Windows crashed (blue screen)
 
 Windows stopped with a bug check (blue screen).
+
+**Use when:** a machine crashed to a blue screen, and a technician wants the stop code and the driver the crash dump points at for that one crash.
+
+**Keywords:** BSOD, bugcheck, Your PC ran into a problem, blue screen driver, which driver caused the blue screen, crash dump analysis, minidump, IRQL_NOT_LESS_OR_EQUAL, MEMORY_MANAGEMENT stop code, DRIVER_POWER_STATE_FAILURE
 
 **Why it matters:** The machine restarted without warning: users lost unsaved work, and on a server every share, database and remote session dropped until Windows was back.
 
@@ -989,6 +1149,10 @@ Windows stopped with a bug check (blue screen).
 ## `kernel_crash_recurring`: Repeated Windows crashes
 
 Windows on this machine keeps crashing with blue screens.
+
+**Use when:** a machine keeps crashing to blue screens over days or weeks, and a technician wants to know how often and whether one stop code or driver is behind them.
+
+**Keywords:** keeps blue screening, frequent blue screens, repeated BSOD, recurring BSOD, blue screens every day, random blue screens, same stop code every time, different stop codes each time
 
 **Severity:** Starts at 2 blue screens in 30 days; more severe as the crashes come closer together, up to Critical at 3 in one day.
 
@@ -1021,6 +1185,10 @@ Windows on this machine keeps crashing with blue screens.
 
 A kernel driver keeps loading and unloading.
 
+**Use when:** a kernel driver keeps loading and unloading, often the driver of a security or monitoring tool reloading in a loop, and someone needs to know which driver and how often.
+
+**Keywords:** driver load unload loop, driver restart loop, filter driver keeps reloading, EDR driver reloading, security driver load loop, antivirus driver reloading
+
 **Severity:** Notice from 4 loads in an hour; it does not become more severe.
 
 **Why it matters:** This is not normal for a driver. It is often a crashing or restarting driver or tool, and whatever depends on the driver loses it each time it goes.
@@ -1052,6 +1220,10 @@ A kernel driver keeps loading and unloading.
 
 A kernel or file-system driver was installed on this machine.
 
+**Use when:** a technician needs to know whether a new kernel or file-system driver was registered on a machine, such as before crashes started or a security tool stopped working, including a driver that was gone a moment later.
+
+**Keywords:** new kernel driver, driver service created, unknown driver installed, suspicious driver path, driver installed from temp folder, new .sys driver, kernel service installed
+
 **Why it matters:** A driver runs with full control of the machine, so a new one is the first suspect when a machine starts crashing or a security tool stops working, even if it was gone a moment later.
 
 **In practice:** This comes from Service Control Manager event 7045 in the System log, so it reports a driver the once-a-minute check of loaded drivers never saw. The record means the driver's entry was registered, not that the driver ran. It can appear a few minutes after the install. A tool that leaves its service in place logs no record when it loads the driver again, and when one driver is installed over and over the separate changes stop, and Kernel driver installed repeatedly takes over. If the agent was not running for more than an hour, installs in that gap are not reported, though the System log still holds them.
@@ -1075,6 +1247,10 @@ A kernel or file-system driver was installed on this machine.
 ## `kernel_driver_installed_repeatedly`: Kernel driver installed repeatedly
 
 A kernel driver is being installed over and over.
+
+**Use when:** the same kernel driver is installed many times an hour, usually by a hardware monitoring or overclocking tool, and someone asks whether a tool explains it.
+
+**Keywords:** driver reinstalled every minute, hardware monitoring tool driver, temperature monitoring tool driver, overclocking utility driver, WinRing0 installed every minute
 
 **Severity:** Display from 10 installs in an hour; it does not become more severe.
 
@@ -1107,6 +1283,10 @@ A kernel driver is being installed over and over.
 
 A kernel or file-system driver loaded on this machine.
 
+**Use when:** someone asks which kernel driver loaded on a machine and whether it is signed, such as before crashes started, when a security tool stopped working, or when an unsigned driver appeared.
+
+**Keywords:** unsigned driver, unsigned driver loaded, driver not signed, new driver loaded, loaded drivers list, driverquery
+
 **Why it matters:** A driver runs with full control of the machine, so a new one is the first suspect when a machine starts crashing or a security tool stops working, and an unsigned one needs explaining.
 
 **In practice:** The agent checks the Service Control Manager's list of loaded drivers every minute, and a load waits one more check before it is reported, so a driver loaded for less than about a minute does not appear; Kernel driver installed reports short-lived drivers. Plugging in hardware, starting a tool and installing software are the usual sources. Loads during startup are not reported. This list is what Windows reports, so it is an inventory and not a rootkit check.
@@ -1131,6 +1311,10 @@ A kernel or file-system driver loaded on this machine.
 
 A kernel or file-system driver unloaded from this machine.
 
+**Use when:** a security, backup or monitoring tool stopped working and someone asks whether its driver unloaded, or which driver left the machine and when.
+
+**Keywords:** driver unloaded, filter driver unloaded, antivirus driver stopped, EDR driver stopped, backup filter driver gone, fltmc unload
+
 **Why it matters:** A driver that leaves takes its function with it: a filter driver unloading can mean a security or backup tool stopped working.
 
 **In practice:** A driver has to stay gone for a couple of minutes before this is reported, so one that reloads quickly during an update does not appear. Closing a tool, unplugging hardware and stopping a product are the usual sources.
@@ -1152,6 +1336,10 @@ A kernel or file-system driver unloaded from this machine.
 
 A loaded driver's file changed version or location.
 
+**Use when:** a crash, or a security or backup tool misbehaving, started soon after a loaded kernel driver file changed version on disk, such as WdFilter after a Defender platform update, or someone needs the old and new file version or path.
+
+**Keywords:** driver file version changed, sys file updated, Defender driver updated, WdFilter, DriverStore FileRepository
+
 **Why it matters:** A new driver version is the first suspect when a device or the whole machine starts failing soon after, including blue screens.
 
 **In practice:** The version is read from the file on disk, checked about once an hour, so this can appear up to an hour after the file changed, and the file can be newer than the copy in memory until the driver reloads. Defender platform updates and Windows Update are the usual sources. A forward version from the same publisher, still trusted, is marked as maintenance; a move to a file Windows does not accept reads as a Warning, as such a load does.
@@ -1172,6 +1360,10 @@ A loaded driver's file changed version or location.
 ## `network_adapter_dhcp_failed`: Network adapter DHCP failed
 
 A network adapter could not get an address from DHCP.
+
+**Use when:** an adapter set to get its address automatically has held only a self-assigned address for minutes, not just failed one renewal, so the device shows no internet on it or is offline.
+
+**Keywords:** Autoconfiguration IPv4 Address, stuck on 169.254, doesn't have a valid IP configuration, server lost its address after reboot, still on 169.254 after minutes, APIPA address will not clear
 
 **Severity:** More severe on a server, or when the machine has no other route out (IPv6 on the same adapter counts as one); most severe on a server with no other route out.
 
@@ -1201,6 +1393,10 @@ A network adapter could not get an address from DHCP.
 
 A network adapter was disabled.
 
+**Use when:** a machine lost its network because a person, script or VPN or security tool turned a network adapter off in Windows, and a technician needs to know when.
+
+**Keywords:** network adapter disabled, Ethernet adapter disabled, NIC disabled, network card turned off, adapter greyed out in Network Connections, who disabled the network adapter, VPN disables other adapters
+
 **Why it matters:** Every connection through this adapter drops, and if it was the machine's only way out, the machine is offline.
 
 **In practice:** Windows reports the adapter as turned off while the device is still installed, as after Disable in Network Connections or `Disable-NetAdapter`. A user troubleshooting, an administrator, a script, or VPN or security software that turns off other adapters does this. An adapter that was unplugged or removed does not raise it.
@@ -1217,6 +1413,10 @@ A network adapter was disabled.
 ## `network_adapter_emulated`: Emulated network adapter
 
 This virtual machine's network adapter is an emulated card model, which is slower than the hypervisor's paravirtual adapter.
+
+**Use when:** file copies or other network work on a virtual machine are slow, or its link shows 100 Mb/s, because it still uses an emulated network card instead of the hypervisor's fast one.
+
+**Keywords:** slow VM network, slow file copy on virtual machine, virtual machine network capped at 100 Mbps, VM NIC type, paravirtual NIC, Intel 82574L in a VM, Intel PRO/1000 MT, install NetKVM virtio driver, VM migrated from another hypervisor
 
 **Severity:** More severe on Hyper-V and VMware, which always offer a paravirtual adapter, than on other hypervisors.
 
@@ -1243,6 +1443,10 @@ This virtual machine's network adapter is an emulated card model, which is slowe
 
 A network adapter was enabled.
 
+**Use when:** a technician needs to know when a network adapter that was turned off in Windows came back on, or an adapter that policy keeps off, such as a second network card, was turned on.
+
+**Keywords:** network adapter enabled, NIC re-enabled, Ethernet adapter turned back on, who enabled the network adapter, second NIC enabled, second NIC bridges two networks
+
 **Why it matters:** A second adapter coming up can change which network the machine uses, or connect it to one it should not reach.
 
 **In practice:** An adapter that was turned off in Windows was turned on again. With the disable before it, it shows how long the adapter was off. It also shows an adapter turned on that policy keeps off, such as a second network card that bridges two networks.
@@ -1258,6 +1462,10 @@ A network adapter was enabled.
 ## `network_adapter_filters_changed`: Network adapter filters changed
 
 A network adapter's filter drivers changed.
+
+**Use when:** networking slowed or broke right after a VPN, security, web-filtering, Npcap or Wireshark install or update, and a technician needs to see which filter driver was added to or removed from the adapter.
+
+**Keywords:** NDIS filter driver, network filter driver, lightweight filter, filter bound to adapter, packet capture driver installed, network slow after installing VPN client, network drops after installing security software, web filter driver
 
 **Why it matters:** A filter driver sees every packet on the adapter, so a faulty one drops or slows the machine's traffic.
 
@@ -1277,6 +1485,10 @@ A network adapter's filter drivers changed.
 
 A network adapter switched between DHCP and a static IPv4 address.
 
+**Use when:** a machine lost the network after someone set a static IP, or a server dropped its fixed address, because the adapter switched between getting an address automatically and a manual one.
+
+**Keywords:** set static IP, switched to static IP, switched to DHCP, obtain an IP address automatically, manual IP address, server lost static IP, lost network after setting static IP
+
 **Why it matters:** A mistyped static address, mask or gateway cuts the machine off, and a server moved to DHCP can get an address its clients and DNS records do not know.
 
 **In practice:** The adapter's IPv4 addressing changed from automatic (DHCP) to manual, or back. A machine that lost the network after someone "set a static IP", or a server that dropped its fixed address, starts here. It covers physical adapters and virtual adapters that hold a routable address.
@@ -1293,6 +1505,10 @@ A network adapter switched between DHCP and a static IPv4 address.
 ## `network_adapter_link_downshifted`: Network link speed downshifted
 
 A wired network link is running far slower than its recent peak speed.
+
+**Use when:** one machine's wired network is slow while others on the same network are fine, because its link has stayed at a lower speed than it normally runs, such as 100 Mb/s on a gigabit port.
+
+**Keywords:** link stays at 100 Mbps, gigabit running at 100 Mbps, Ethernet only 100 Mbps, NIC negotiating at 10 Mbps, bad Ethernet cable, damaged patch cable, auto-negotiation dropped to 100 Mbps, dock Ethernet slow, one PC slow on wired network
 
 **Severity:** More severe on a server than on a workstation.
 
@@ -1322,6 +1538,10 @@ A wired network link is running far slower than its recent peak speed.
 
 A network adapter's interface metric was set by hand, changed, or returned to automatic.
 
+**Use when:** traffic suddenly leaves by the wrong adapter, such as Wi-Fi instead of Ethernet or around a VPN, after someone or some software changed an adapter's metric.
+
+**Keywords:** traffic using Wi-Fi instead of Ethernet, wrong network adapter used, adapter priority, network adapter order, route priority, automatic metric unchecked, Set-NetIPInterface InterfaceMetric
+
 **Why it matters:** Windows prefers the adapter with the lower metric, so a change can move traffic to Wi-Fi instead of Ethernet, or into or around a VPN.
 
 **In practice:** An administrator, script or VPN client changed the adapter's IPv4 or IPv6 interface metric, or switched it between automatic and manual. Changes Windows makes on its own to an automatic metric do not raise it. When traffic suddenly leaves by the wrong adapter, a metric change is a common cause.
@@ -1338,6 +1558,10 @@ A network adapter's interface metric was set by hand, changed, or returned to au
 ## `network_adapter_mtu_changed`: Network adapter MTU changed
 
 A network adapter's MTU changed.
+
+**Use when:** large transfers, iSCSI or backup traffic stall while small requests still work, after an adapter's frame size was changed, often for jumbo frames.
+
+**Keywords:** MTU mismatch, MTU 9000, iSCSI disconnects after MTU change, large copies hang after MTU change, Packet needs to be fragmented but DF set, IP fragmentation
 
 **Why it matters:** If switches or the far end do not carry frames of the new size, large transfers and storage traffic stall while small requests still work.
 
@@ -1356,6 +1580,10 @@ A network adapter's MTU changed.
 ## `network_adapter_saturated`: Network link saturated
 
 The busiest wired network link is running near its full speed.
+
+**Use when:** transfers are slow and latency is high on a physical machine whose wired link is running near its full speed, often during a backup or large copy.
+
+**Keywords:** network maxed out, bandwidth saturated, network utilization 100 percent, high network usage, backup saturating network, slow network during backup, bandwidth hog
 
 **Severity:** More severe at 90% of link speed than at 80%.
 
@@ -1388,6 +1616,10 @@ The busiest wired network link is running near its full speed.
 
 A network adapter's static address changed.
 
+**Use when:** mapped drives, printers or DNS records stopped reaching a machine after someone changed its manually set IP address or subnet, and a technician needs the old and new address.
+
+**Keywords:** static IP changed, server IP changed, re-IP, subnet mask changed, who changed the server IP, mapped drive broke after IP change, printer cannot reach server after IP change
+
 **Why it matters:** Mapped drives, printers, scanners and DNS records that point at the old address stop reaching the machine, and a mistyped address or prefix length can cut it off or clash with another device.
 
 **In practice:** A manually configured IPv4 or IPv6 address, or its prefix length, was added, removed or changed. Addresses from DHCP, router advertisements and link-local addressing do not count. It applies to physical adapters and to virtual adapters that carry a default route, such as a Hyper-V External switch's host adapter, and not to the Hyper-V Default Switch, WSL or Docker adapters that Windows readdresses itself.
@@ -1405,6 +1637,10 @@ A network adapter's static address changed.
 ## `network_adapter_static_dns_changed`: Network adapter static DNS changed
 
 A network adapter's manually set DNS servers changed.
+
+**Use when:** names stop resolving, or domain sign-in or Group Policy starts failing, after the DNS servers set by hand on an adapter were changed, by a person, a tool or malware.
+
+**Keywords:** DNS server changed, DNS settings changed, preferred DNS server, alternate DNS server, who changed DNS settings, public DNS on domain computer, DNS changer malware, domain controller replaced DNS
 
 **Why it matters:** The machine now resolves names through the new servers: if they are wrong or unreachable, names fail or resolve to the wrong place, and domain sign-in and Group Policy fail with them.
 
@@ -1424,6 +1660,10 @@ A network adapter's manually set DNS servers changed.
 
 A network adapter's manually set IPv4 default gateway changed.
 
+**Use when:** a machine with a manually set address reaches its own subnet but nothing beyond it after its default gateway was changed, such as during a router replacement.
+
+**Keywords:** default gateway changed, wrong default gateway, gateway IP changed, new router gateway, router replacement static IP, static IP machine lost internet after router swap
+
 **Why it matters:** With a wrong gateway the machine still reaches its own subnet but nothing beyond it.
 
 **In practice:** The IPv4 default gateway configured by hand on the adapter changed; gateways from DHCP or router advertisements do not count. An address change during a network move or router replacement usually comes with it.
@@ -1441,6 +1681,10 @@ A network adapter's manually set IPv4 default gateway changed.
 
 The device connected to a different primary network.
 
+**Use when:** a problem began when a laptop moved to another network, such as office to home or dock to Wi-Fi, and a technician needs the time of the move and the adapter it moved to.
+
+**Keywords:** laptop changed networks, moved from office to home, undocked laptop, switched Wi-Fi network, VPN fails after leaving office, drives missing after working from home, roaming laptop
+
 **Why it matters:** A problem that starts right after a move (a VPN that will not connect, missing drives or printers, a proxy that stops answering) usually belongs to the new network.
 
 **In practice:** Marks the moment a device moved to a different network, such as a laptop leaving the office LAN for home Wi-Fi. It names the adapter in use, so you can tell an undock from a Wi-Fi change.
@@ -1456,6 +1700,10 @@ The device connected to a different primary network.
 ## `network_ipv6_broken`: IPv6 broken while advertised
 
 This network gives the device IPv6 addresses, but IPv6 traffic to the internet fails while IPv4 works.
+
+**Use when:** applications stall or time out before connecting while IPv4 works, because the network hands out IPv6 addresses but IPv6 traffic to the internet fails.
+
+**Keywords:** IPv6 not working, IPv4 works IPv6 doesn't, IPv6 no route, IPv6 router advertisement, ISP IPv6 outage, slow first connection to websites, should I disable IPv6
 
 **Why it matters:** Applications that try IPv6 first can stall or time out before falling back to IPv4.
 
@@ -1481,6 +1729,10 @@ This network gives the device IPv6 addresses, but IPv6 traffic to the internet f
 
 A network share was added.
 
+**Use when:** a new or unexpected shared folder or printer appears on a machine, and someone needs its folder and who its permissions let in.
+
+**Keywords:** new shared folder, unexpected share, folder shared on network, new SMB share, share appeared, shared printer added, admin share recreated, share exposing data, New-SmbShare, share created with net share
+
 **Also reported by:** `win.eventlog.security`
 
 **Severity:** Notice by default; configurable from Info through Warning.
@@ -1504,6 +1756,10 @@ A network share was added.
 
 A network share now points at a different folder.
 
+**Use when:** a share or mapped drive still opens by the same name but shows the wrong files, missing files or an empty folder after a data move or server migration.
+
+**Keywords:** share shows wrong files, share empty after migration, share points to wrong folder, share moved to new drive, share recreated after migration, share folder unavailable
+
 **Severity:** Notice by default; configurable from Info through Warning.
 
 **Why it matters:** Users and mapped drives that open the share by name see different files, or none, and new files are saved to the new folder.
@@ -1522,6 +1778,10 @@ A network share now points at a different folder.
 ## `network_share_permissions_changed`: Network share permissions changed
 
 The share-level permissions on a network share changed.
+
+**Use when:** users are suddenly refused on a share they used to open, a scanner can no longer save to it, or a share was opened to Everyone and someone asks when its permissions changed.
+
+**Keywords:** share permissions changed, share permission change removed write access, scanner lost share permission, share open to Everyone, Everyone full control share, share security descriptor
 
 **Severity:** Notice by default; configurable from Info through Warning.
 
@@ -1544,6 +1804,10 @@ The share-level permissions on a network share changed.
 
 A network share was removed.
 
+**Use when:** mapped drives, scan-to-folder or an application stop working with "The network name cannot be found" because a share was deleted and stayed gone.
+
+**Keywords:** share deleted, shared folder removed, share gone, System error 67, 0x80070043, admin shares disabled, C$ missing, ADMIN$ missing
+
 **Severity:** Notice by default; configurable from Info through Warning.
 
 **Why it matters:** Mapped drives, scan-to-folder and applications that use the share fail with "The network name cannot be found".
@@ -1563,6 +1827,10 @@ A network share was removed.
 ## `operating_system_changed`: Operating system changed
 
 The Windows edition, version, build or update revision changed.
+
+**Use when:** a problem started after a Windows update or upgrade, or someone needs to confirm when a machine's Windows build, version or edition changed.
+
+**Keywords:** Windows upgraded, feature update installed, cumulative update installed, Patch Tuesday update applied, OS build changed, Windows build number changed, UBR, Windows 10 to Windows 11 upgrade, in-place upgrade, Windows edition changed, OS version history, problems after Windows update
 
 **Severity:** Display for a monthly update that changes only the build or revision, Notice for a feature update or an edition change.
 
@@ -1591,6 +1859,10 @@ The host clock is drifting from reference time.
 ## `os_volume_space_low`: OS volume low on space
 
 The drive Windows runs from is low on free space.
+
+**Use when:** the C: drive Windows runs from is nearly full, with low disk space warnings, updates failing for lack of space, or profiles and programs that cannot save.
+
+**Keywords:** C drive full, low disk space, Low Disk Space warning, running out of space on C, free up disk space, There is not enough space on the disk, 0x80070070, Windows Update not enough space, Windows.old, WinSxS too large, hiberfil.sys, Storage Sense
 
 **Severity:** Starts at 15% and 10 GB free; more severe as space runs lower, and one step higher while the drive is still filling. At the lowest level a server's Windows drive rates higher than a workstation's.
 
@@ -1627,6 +1899,10 @@ The drive Windows runs from is low on free space.
 
 The machine's page file configuration changed.
 
+**Use when:** a technician needs to know whether and when the page file was moved, resized or turned off, for example by a tuning script, before memory or crash dump problems began.
+
+**Keywords:** pagefile disabled, page file turned off, no paging file, pagefile.sys, swap file, virtual memory settings changed, paging file size changed, pagefile moved to another drive, system managed size, debloat script disabled page file
+
 **Why it matters:** A page file that is too small, or removed, lowers how much memory Windows can promise programs, so they fail or crash sooner, and Windows may not be able to write a crash dump.
 
 **In practice:** The page file's location, its initial or maximum size, or whether Windows manages its size changed, or the page file was removed. Tuning scripts that fix a small size, moving it to a data drive, and turning it off to save disk space are the usual causes. Memory commit near its limit and Page file too small for crash dumps report the effects.
@@ -1643,6 +1919,10 @@ The machine's page file configuration changed.
 ## `patch_scan_stale`: Windows Update scan out of date
 
 Windows Update has not checked for updates in a long time, or never has.
+
+**Use when:** a machine has not checked for Windows updates in weeks, or never has, so it misses patches while patch reports may still show it current.
+
+**Keywords:** not checking for updates, last checked for updates weeks ago, Windows Update not scanning, last successful update scan, missing patches because scans stopped, Windows Update service disabled, wuauserv disabled, stale patch status, update scan not running, machine falling behind on patches
 
 **Why it matters:** The machine finds no new updates, so it falls behind on security fixes while patch reports can still show it as current.
 
@@ -1672,6 +1952,10 @@ Windows Update has not checked for updates in a long time, or never has.
 
 Someone paused Windows Update on this machine, and it has stayed paused.
 
+**Use when:** a user paused Windows Update, often to put off a restart, and it has stayed paused, so the machine installs no updates.
+
+**Keywords:** updates paused, Windows Update paused, user paused updates, pause for 1 week, updates will resume, paused to avoid a restart, stop users pausing updates
+
 **Severity:** Starts at Notice; more severe the longer the pause lasts, reaching Error at 14 days.
 
 **Why it matters:** Until the pause ends, the machine installs no updates, security fixes included.
@@ -1699,6 +1983,10 @@ Someone paused Windows Update on this machine, and it has stayed paused.
 
 The machine keeps waking from sleep with nobody at it.
 
+**Use when:** a laptop or desktop keeps waking from sleep over and over by itself, so it comes out of a bag hot or drained or is found awake, and the repeated wakes need a cause.
+
+**Keywords:** keeps waking up, won't stay asleep, wakes up repeatedly, laptop hot in bag from repeated wakes, network adapter keeps waking, Allow this device to wake the computer, wake timers keep waking it, wakes many times an hour
+
 **Why it matters:** A laptop comes out of a bag hot or with a flat battery, and a desktop that should sleep is found awake.
 
 **In practice:** The machine has woken by itself, with nobody at it, 8 or more times in every hour for 2 hours. A wake timer from a scheduled task or an update, a network adapter allowed to wake the machine, or a mouse or USB device is the usual cause.
@@ -1722,6 +2010,10 @@ The machine keeps waking from sleep with nobody at it.
 ## `primary_dns_suffix_changed`: Primary DNS suffix changed
 
 The machine's primary DNS suffix changed.
+
+**Use when:** other machines stop finding a computer by its full name, or its short names stop resolving, after its domain, domain join or Group Policy changed the suffix Windows adds to its name.
+
+**Keywords:** FQDN changed, domain suffix changed, short names not resolving, DNS record under wrong domain, DNS suffix changed in domain migration, Change primary DNS suffix when domain membership changes
 
 **Why it matters:** Windows registers the machine's name under the new suffix and tries that suffix first when completing short names, so other machines can stop finding it by its old full name and short names can stop resolving.
 
@@ -1748,6 +2040,10 @@ A process is consuming CPU continuously.
 
 A program on this machine crashed.
 
+**Use when:** a program suddenly closed without warning, and a technician wants that crash's faulting module and exception together with the module the crash dump analysis blames outside the Windows folder.
+
+**Keywords:** program crashed, APPCRASH, faulting application name, faulting module name, 0xc0000005, 0xc0000409, 0xe0434352, LocalDumps, STATUS_ACCESS_VIOLATION, STATUS_STACK_BUFFER_OVERRUN
+
 **Why it matters:** The program closed without warning: its user lost unsaved work, and a service it ran stopped until it was restarted.
 
 **In practice:** Windows logs Application Error event 1000 when a program stops on an error it did not handle; each event is one crash. It names the exception code, the module the fault was in, and the program's version; a .NET program also reports its exception type and stack. The faulting module often matters more than the program: a printer driver, an Office add-in or a security product's library loaded into the program makes the program look broken. When Windows kept a local dump of the crash, the agent analyses it and names the first module on the crashing stack outside the Windows folder. A program that crashes again and again also raises Application crashing repeatedly.
@@ -1765,6 +2061,10 @@ A program on this machine crashed.
 ## `process_handle_count_high`: Process handle count high
 
 A process has a very high handle count.
+
+**Use when:** a technician suspects a process or service of leaking handles, with its handle count climbing into the millions.
+
+**Keywords:** handle leak, leaking handles, too many handles, high handle count, handle count keeps growing, svchost handle leak, service leaking handles, paged pool growing from handle leak
 
 **Why it matters:** A process that keeps leaking handles slowly uses up kernel memory the whole machine shares, and in the end it fails to open files, registry keys or network connections.
 
@@ -1790,6 +2090,10 @@ A process has a very high handle count.
 ## `ram_commit_near_limit`: Memory commit near its limit
 
 Memory allocations on this host are close to failing, or failing.
+
+**Use when:** programs are close to being refused memory, or crash for lack of it, while Task Manager may still show free RAM, because committed memory has neared what RAM and the page file can back.
+
+**Keywords:** commit charge, committed memory high, commit limit nearly reached, out of memory with free RAM, memory leak, process memory keeps growing, private bytes growing, virtual memory nearly exhausted, page file too small for the workload
 
 **Severity:** More severe the closer Task Manager's Committed figure gets to its maximum; Serious after an hour at the limit or once a program has crashed because it ran out of memory; Critical while Windows reports that virtual memory is exhausted and such a crash is recent.
 
@@ -1826,6 +2130,10 @@ Memory allocations on this host are close to failing, or failing.
 
 This host is running out of physical memory and slowing down from paging.
 
+**Use when:** a machine feels frozen or slow because it has run out of physical memory and is paging to disk.
+
+**Keywords:** not enough RAM, RAM full, high memory usage, memory usage 95%, low available memory, slow from low memory, paging to disk, thrashing, hard faults, needs more RAM, disk busy from paging
+
 **Severity:** Starts when Available memory in Task Manager falls below 5%; more severe once Windows is paging heavily in both directions, and again when that paging slows the disk; most severe when that lasts hours in a day or recurs on several days.
 
 **Why it matters:** Programs wait on the disk for memory they were using, so the machine feels frozen or slow.
@@ -1860,6 +2168,10 @@ This host is running out of physical memory and slowing down from paging.
 
 Secure Boot was disabled.
 
+**Use when:** Secure Boot shows as off on a machine that had it on, or a technician needs to know whether Secure Boot was turned off before BitLocker asked for its recovery key.
+
+**Keywords:** Secure Boot off, Secure Boot turned off, Secure Boot State Off, Secure Boot disabled in BIOS, Secure Boot disabled in UEFI, disabled Secure Boot to boot Linux USB, forgot to re-enable Secure Boot
+
 **Why it matters:** The machine boots unsigned boot loaders again, so a bootkit can load before Windows and its security software.
 
 **In practice:** Secure Boot was switched off in the firmware setup, usually by a technician starting an older tool, a Linux USB stick or another operating system, who did not switch it back on. A firmware update or a reset to defaults can also turn it off. BitLocker that checks Secure Boot asks for its recovery key at the next start. Firmware changes take effect at a restart, so the event follows the restart that applied it.
@@ -1877,6 +2189,10 @@ Secure Boot was disabled.
 
 Secure Boot was enabled.
 
+**Use when:** Secure Boot was switched on for a Windows 11 upgrade or hardening and afterwards a boot tool or second operating system will not start, or a technician needs to know whether Secure Boot was turned on before BitLocker asked for its recovery key.
+
+**Keywords:** Secure Boot turned on, Secure Boot State On, Secure Boot enabled in BIOS, Windows 11 Secure Boot requirement, USB boot stick will not start, dual boot stopped after enabling Secure Boot, Secure Boot violation
+
 **Why it matters:** Unsigned boot loaders and older boot tools stop starting, and BitLocker can ask for its recovery key at the first start after the change.
 
 **In practice:** Secure Boot was switched on in firmware, often in a Windows 11 upgrade or a hardening baseline, or by a firmware reset to defaults. Firmware changes take effect at a restart, so the event follows the restart that applied it.
@@ -1893,6 +2209,10 @@ Secure Boot was enabled.
 ## `service_auto_not_running`: Automatic service not running
 
 A service set to start automatically has stopped with an error and stayed down.
+
+**Use when:** a service set to start automatically shows Stopped and stays down after an error, so whatever it provides is gone while the machine looks fine.
+
+**Keywords:** service not running, service is stopped, automatic service stopped, set to Automatic but stopped, service down, service did not come back, automatic service stopped with error and stayed down
 
 **Severity:** More severe the longer it stays down and the more the service matters: an important service shows within 30 minutes, a critical one is Warning within 15 minutes, and an ordinary one rises past Display only on a server.
 
@@ -1933,6 +2253,10 @@ A service set to start automatically has stopped with an error and stayed down.
 
 The command Windows runs to start a service changed: its program path or its arguments.
 
+**Use when:** someone asks whether a service was hijacked to run a different program, or why the program a service runs moved to a new folder.
+
+**Keywords:** service path changed, ImagePath changed, service binary path changed, service hijacked by changing its path, sc config binPath=, service runs PowerShell
+
 **Why it matters:** The next time the service starts, Windows runs the new command with the service's account and privileges.
 
 **In practice:** Updates often move a service to a new versioned folder under the vendor's install directory. A new path in a folder ordinary users can write to (Temp, a user profile, much of ProgramData), a script host such as `cmd.exe` or `powershell.exe`, or a program the client does not use is how attackers take over a trusted service. The event shows the old and new command as the registry stores it, with environment variables such as `%SystemRoot%` not expanded.
@@ -1950,6 +2274,10 @@ The command Windows runs to start a service changed: its program path or its arg
 ## `service_flapping`: Service crashing and restarting
 
 A Windows service keeps crashing and restarting.
+
+**Use when:** a service keeps crashing and coming back many times a day, so it looks running when checked but drops its work and connections at each crash.
+
+**Keywords:** service keeps restarting, service restarts over and over, service crash loop, flapping service, service keeps crashing, has done this time(s), terminated unexpectedly repeatedly, service recovery restarts
 
 **Severity:** More severe with more crashes in the past day, and sooner for a service that matters more; it shows from 2 crashes in a day.
 
@@ -1983,6 +2311,10 @@ A Windows service keeps crashing and restarting.
 
 A new Windows service was registered on this device.
 
+**Use when:** a new or unknown service shows up on a machine, and someone needs the start type, run-as account and command it was registered with, to judge whether a remote-access tool or malware set it up.
+
+**Keywords:** sc create, New-Service, unauthorized service, remote access tool installed as service, service persistence, unknown service in services.msc, new service run-as account
+
 **Also reported by:** `win.eventlog.security`, `win.eventlog.system`
 
 **Why it matters:** A service runs with nobody signed in and starts again after every restart, often as LocalSystem, so an unwanted one gives its program lasting, privileged access.
@@ -2006,6 +2338,10 @@ A new Windows service was registered on this device.
 
 A service now runs as a different account.
 
+**Use when:** someone asks why a service now runs as LocalSystem, an administrator or a domain account, or when the account a service logs on as changed.
+
+**Keywords:** Log On As changed, service logon account changed, service runs as LocalSystem, service account changed, service run-as user changed, gMSA, sc config obj=
+
 **Why it matters:** The service runs with the access of its new account, which can be more or less than before.
 
 **In practice:** Planned work moves services to a dedicated or managed service account. An unplanned move to LocalSystem or to an administrator account gives the service's program that account's access, and so anyone who can replace the program. Windows applies the new account the next time the service starts. The event shows the old and new account.
@@ -2026,6 +2362,10 @@ A service now runs as a different account.
 ## `service_removed`: Service removed
 
 A Windows service was removed from this device.
+
+**Use when:** a Windows service is gone from Services, such as one an antivirus, backup or RMM product ran, and someone needs its last start type, account and command.
+
+**Keywords:** service deleted, service missing, service gone, sc delete, Remove-Service, backup agent removed, RMM agent removed, security software removed
 
 **Why it matters:** What the service did stops for good. A removed security, backup or RMM service leaves the machine unprotected, unbacked-up or unmanaged.
 
@@ -2048,6 +2388,10 @@ A Windows service was removed from this device.
 
 A service's startup type changed, for example from Automatic to Disabled.
 
+**Use when:** a service no longer starts at boot because someone or something set it to Manual or Disabled, or someone asks when a service's startup type changed.
+
+**Keywords:** startup type changed, service set to disabled, service set to manual, service disabled, Print Spooler disabled, Windows Update service set to Disabled, antivirus service disabled, sc config start= disabled, Set-Service StartupType
+
 **Why it matters:** A service set to Disabled or Manual stops starting at boot, so what it provides goes missing after the next restart.
 
 **In practice:** Hardening scripts, Group Policy and troubleshooting change startup types on purpose. Malware sets security and update services to Disabled. The event shows the old and new startup type: Automatic, Automatic (Delayed Start), Manual or Disabled. Windows changes BITS, IsolationSession and TrustedInstaller on its own, and those changes are not reported.
@@ -2065,6 +2409,10 @@ A service's startup type changed, for example from Automatic to Disabled.
 ## `service_stuck_pending`: Service stuck starting or stopping
 
 A Windows service is stuck starting or stopping.
+
+**Use when:** a service stays in Starting or Stopping for many minutes with no progress, and Services cannot start, stop or restart it.
+
+**Keywords:** stuck on Starting, start pending, stop pending, hung service, Error 1061, cannot accept control messages at this time, kill a hung service
 
 **Severity:** More severe the longer it stays stuck and the more the service matters; a critical service is Warning within 15 minutes, and an ordinary one rises past Display only on a server.
 
@@ -2101,6 +2449,10 @@ A Windows service is stuck starting or stopping.
 
 The SparkLogs agent is using more CPU than its budget.
 
+**Use when:** the SparkLogs agent process shows high CPU in Task Manager, or someone asks whether the monitoring agent is slowing a machine down.
+
+**Keywords:** SparkLogsAgent high CPU, SparkLogs agent using too much CPU, monitoring agent CPU usage, SparkLogs agent slowing machine, SparkLogs agent overhead, SparkLogs agent resource usage
+
 **Severity:** Notice; it goes no higher.
 
 **Why it matters:** On a busy machine, the CPU the agent uses is taken from the client's programs.
@@ -2118,13 +2470,17 @@ The SparkLogs agent is using more CPU than its budget.
 
 - `sparklogs.data.agent_overhead.cpu_pct_of_one_core_avg`
 
-**Example:** An application starts writing thousands of log events a minute, and reading them takes more than a full CPU core.
+**Example:** The agent process holds at about one and a half CPU cores for ten minutes, while its log collector stays near idle.
 
 **Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/topics/agent-overhead#sparklogs_agent_cpu_over_budget, https://sparklogs.com/reference/reasons/sparklogs_agent_cpu_over_budget.json
 
 ## `sparklogs_agent_handle_over_budget`: SparkLogs agent handles over budget
 
 The SparkLogs agent is holding more open handles than its budget.
+
+**Use when:** the SparkLogs agent process shows an unusually high or rising handle count in Task Manager, or someone suspects the agent is leaking handles.
+
+**Keywords:** SparkLogsAgent handle count, SparkLogs agent handle leak, SparkLogs agent handle count rising, SparkLogs agent overhead, SparkLogs agent resource usage
 
 **Severity:** Notice; it goes no higher.
 
@@ -2150,6 +2506,10 @@ The SparkLogs agent is holding more open handles than its budget.
 ## `sparklogs_agent_memory_over_budget`: SparkLogs agent memory over budget
 
 The SparkLogs agent and its log collector together use more memory than their budget.
+
+**Use when:** the SparkLogs agent or its log collector uses a lot of memory in Task Manager, or someone asks whether the monitoring agent is using too much RAM.
+
+**Keywords:** SparkLogsAgent high memory, SparkLogsVector memory, SparkLogs agent using too much RAM, monitoring agent memory usage, SparkLogs agent memory leak, SparkLogs agent working set, SparkLogs agent overhead, SparkLogs agent resource usage
 
 **Severity:** Notice; it goes no higher.
 
@@ -2177,6 +2537,10 @@ The SparkLogs agent and its log collector together use more memory than their bu
 
 The SparkLogs agent started.
 
+**Use when:** someone asks when the log collection agent came back after a gap in readings, or whether its last run ended in a crash or with the machine going down.
+
+**Keywords:** agent came back online, agent crashed and restarted, gap in readings, agent restart after update, how the last agent run ended
+
 **Also reported by:** `win.eventlog.system`
 
 **Severity:** Notice when the agent's previous run ended without recording its stop, Display otherwise.
@@ -2201,6 +2565,10 @@ The SparkLogs agent started.
 ## `sparklogs_agent_stopped`: SparkLogs agent stopped
 
 The SparkLogs agent stopped.
+
+**Use when:** logs or readings from a machine stop arriving, and someone needs the cause the agent recorded for its own stop: an agent update, Windows shutting down, someone stopping the service, or an error.
+
+**Keywords:** agent stopped, stopped by RMM policy, no readings from device, agent stopped on error, device last seen hours ago, why the SparkLogs agent stopped
 
 **Also reported by:** `win.eventlog.system`
 
@@ -2228,6 +2596,10 @@ The SparkLogs agent stopped.
 
 The machine's TPM now comes from a different maker.
 
+**Use when:** BitLocker asked for its recovery key or Windows Hello PINs stopped working after the firmware was switched between the processor's firmware TPM and a discrete TPM chip, or after a board or chip swap brought a TPM from another maker.
+
+**Keywords:** fTPM to dTPM, discrete TPM, dTPM, switched from Intel PTT to discrete TPM, switched TPM in BIOS, TPM manufacturer changed, TPM vendor changed
+
 **Why it matters:** Keys sealed in the old TPM do not move to the new one, so BitLocker asks for its recovery key at start, and Windows Hello PINs and other keys held in the TPM have to be set up again.
 
 **In practice:** The TPM stayed present, but its maker changed, such as Intel's firmware TPM (`INTC`) to a discrete Infineon chip (`IFX`). The usual cause is a firmware setting that switches between the processor's firmware TPM and a discrete chip; a motherboard or chip swap shows here only when the new TPM comes from another maker. The new TPM's firmware and specification come with it and are not reported separately. Firmware changes take effect at a restart, so the event follows the restart that applied it.
@@ -2246,6 +2618,10 @@ The machine's TPM now comes from a different maker.
 
 The TPM's firmware version changed.
 
+**Use when:** someone asks whether a TPM firmware update reached a machine, such as the fix for a TPM security advisory, or BitLocker or Windows Hello acted up after one.
+
+**Keywords:** TPM firmware update, TPM firmware version, Infineon TPM update, TPM security advisory, TPM update tool, ROCA, CVE-2017-15361, ManufacturerVersion
+
 **Why it matters:** A TPM firmware update can clear the TPM or change what it measures, so BitLocker can ask for its recovery key at the next start, and TPM-backed keys such as Windows Hello's may need to be set up again.
 
 **In practice:** The same TPM now runs another firmware version, usually from a BIOS update, a vendor TPM update tool or Windows Update. Vendors ship TPM firmware updates to fix security flaws, so the event confirms that a fix reached the machine. Firmware changes take effect at a restart, so the event follows the restart that applied it.
@@ -2262,6 +2638,10 @@ The TPM's firmware version changed.
 ## `tpm_presence_changed`: TPM presence changed
 
 The machine's TPM appeared or disappeared.
+
+**Use when:** a machine no longer sees its TPM, or a TPM appeared, such as after a BIOS update or reset turned the firmware TPM off, and BitLocker wants its recovery key or Windows Hello stops working.
+
+**Keywords:** TPM missing, TPM not found, Compatible TPM cannot be found, TPM disappeared, TPM disabled in BIOS, PTT disabled, fTPM disabled, security processor missing, Hello PIN stopped after TPM disabled
 
 **Severity:** Warning when the TPM disappears, Notice when one appears.
 
@@ -2283,6 +2663,10 @@ The machine's TPM appeared or disappeared.
 
 The TPM specification version changed.
 
+**Use when:** a TPM switched between specification 1.2 and 2.0, such as with a vendor firmware tool ahead of a Windows 11 upgrade, or someone asks when a machine's TPM moved to 2.0.
+
+**Keywords:** TPM 1.2 to 2.0, upgrade TPM to 2.0, TPM spec version, SpecVersion, Specification Version
+
 **Why it matters:** Windows 11 needs TPM 2.0, and switching a TPM's version can clear it, so keys held in it, such as BitLocker's and Windows Hello's, may need to be set up again.
 
 **In practice:** The TPM stayed present but now reports another specification version, such as 1.2 to 2.0. Some vendors switch a TPM between 1.2 and 2.0 with a firmware update tool. Firmware changes take effect at a restart, so the event follows the restart that applied it.
@@ -2299,6 +2683,10 @@ The TPM specification version changed.
 ## `virtualization_changed`: Virtualization changed
 
 The machine became virtual or physical, or moved to a different hypervisor.
+
+**Use when:** a physical machine was moved into a virtual machine or a virtual machine moved to another hypervisor or cloud, and leftover drivers and tools, lost static IP settings or activation need checking.
+
+**Keywords:** P2V, physical to virtual, V2V, VMware to Hyper-V migration, static IP lost after migration, hidden network adapter, ghost network adapter, VMware Tools left over, install guest tools after migration, already assigned to another adapter
 
 **Why it matters:** Drivers and tools from the old platform stay installed, network adapters come up as new devices without their static settings, and Windows activation may need redoing.
 
@@ -2317,6 +2705,10 @@ The machine became virtual or physical, or moved to a different hypervisor.
 ## `volume_bitlocker_protection_dropped`: BitLocker protection dropped
 
 BitLocker protection is off or suspended on a drive it used to protect, and has stayed off.
+
+**Use when:** a drive that BitLocker used to protect has stayed unprotected for a day or more, often because the machine has not restarted since an update suspended protection, or because protection was turned off or the drive is being decrypted.
+
+**Keywords:** BitLocker suspended, Protection Off for a day, BitLocker turned off, BitLocker disabled, drive decrypting, decryption in progress, Suspend-BitLocker, Disable-BitLocker, RebootCount 0, encrypted laptop no longer protected
 
 **Why it matters:** If the machine is lost or stolen, whoever has it can read the drive without the recovery key.
 
@@ -2344,6 +2736,10 @@ BitLocker protection is off or suspended on a drive it used to protect, and has 
 
 A drive's free space is falling fast.
 
+**Use when:** a drive's free space is disappearing unusually fast, from a runaway log, a crash-dump loop, a sync client or a backup aimed at the wrong drive, before the drive is actually low.
+
+**Keywords:** disk filling up fast, drive filling quickly, free space dropping, disk space disappearing, something eating disk space, runaway log file, log file growing, OneDrive filling the drive, backup to wrong drive
+
 **Why it matters:** Nothing fails yet, but growth this fast fills even a large drive, and writes to it then fail.
 
 **In practice:** Free space has been shrinking by 1 GB an hour or more across the last hour, and is still shrinking, however much space is left. It applies to every fixed drive, the Windows drive included. Typical causes are a log or trace left on verbose, a crash-dump loop, a sync client pulling down a whole library, or a backup or copy writing to the wrong drive. It stays at Display. The two low-space conditions report a drive that is actually running short.
@@ -2368,6 +2764,10 @@ A drive's free space is falling fast.
 ## `volume_unreadable`: Volume unreadable
 
 A fixed drive's file system is unmounted, shows as RAW, or cannot be read.
+
+**Use when:** an internal drive shows as RAW, its drive letter or shares are gone, or Windows offers to format it, and it stays unreadable.
+
+**Keywords:** RAW drive, RAW file system, drive shows RAW, internal drive asks to be formatted, drive inaccessible, data drive missing after power cut, file system unrecognized
 
 **Severity:** Severe on a server, Serious on a workstation.
 
@@ -2400,6 +2800,10 @@ A fixed drive's file system is unmounted, shows as RAW, or cannot be read.
 
 Windows is deleting shadow copies on a volume, or failing to create them, because their storage could not grow.
 
+**Use when:** shadow copies on a drive keep being deleted because their storage could not grow in time, or new shadow copies or restore points keep failing at the shadow storage limit, again and again over a day or a week.
+
+**Keywords:** previous versions keep vanishing, restore points keep disappearing, shadow copies deleted again and again, shadow storage limit, VSS out of space
+
 **Also reported by:** `win.eventlog.application`, `win.eventlog.system`
 
 **Severity:** Notice at the first failure; more severe as failures repeat, and Error once 3 happen in one day.
@@ -2428,6 +2832,10 @@ Windows is deleting shadow copies on a volume, or failing to create them, becaus
 ## `vss_writer_failed`: VSS writer failed
 
 A VSS writer has stayed in a failed state.
+
+**Use when:** a VSS writer has stayed failed across backups, so a backup of SQL Server, Exchange, Hyper-V or another application may not restore cleanly even when the job reports success.
+
+**Keywords:** writer in failed state, writer stuck failed, Last error: Timed out, Last error: Retryable error, Last error: Non-retryable error, backup not application consistent, SqlServerWriter failed, Hyper-V VSS Writer stays failed, NTDS writer still failed
 
 **Also reported by:** `win.eventlog.application`
 
@@ -2458,6 +2866,10 @@ A VSS writer has stayed in a failed state.
 ## `winhttp_proxy_changed`: WinHTTP proxy changed
 
 The machine's default WinHTTP proxy changed.
+
+**Use when:** Windows Update, Defender updates or a management agent stop reaching the internet while browsing still works, after the machine-wide WinHTTP proxy was set, changed or cleared.
+
+**Keywords:** system-wide proxy, machine proxy, Windows Update fails behind proxy, Defender definitions not updating proxy, browsing works but updates fail, RMM agent offline after proxy change, proxy set by malware, proxy bypass list
 
 **Why it matters:** Windows services and management agents that use this proxy can stop reaching the internet when it is wrong: Windows Update searches and Microsoft Defender updates through Windows Update can fail, while browsing still works.
 

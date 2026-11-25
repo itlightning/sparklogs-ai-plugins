@@ -1,7 +1,7 @@
 # Device state: inventories, trends and observation limits
 
 Start device CPU, RAM, disk, network, software and condition questions with `query_device_health` (tool).
-For one device or a few, start with a device view (next section) and drill down from what it points at.
+To diagnose a problem on one device or a few, a device view (next section) gives the big picture; drill down from what it points at.
 For a ticket about another system or application, use device health where it helps interpret the evidence.
 Agent-debug feeds describe collection problems, not the device's workload health.
 
@@ -17,13 +17,13 @@ Agent-debug feeds describe collection problems, not the device's workload health
 | Raw topic samples | `series` (value), with `topics` (arg). Each inventory part is a result row. |
 | Available topics and sampled fields | `topics` (value). |
 | Episode history or repeating changes | `event_timeline` (value). Includes all in-window events of episodes whose in-window peak meets the severity floor. Events without an episode filter individually. |
-| Crash or application problem on a device | Process crashes, service crashes and other occurrences: `event_timeline` (value) with `kinds` (arg) `["occurrence"]` (value), oldest first. App hangs, and the Windows Error Reporting detail of crashes, are on `win.eventlog.application` (value) only (`app_hang` (value), `app_crash` (value), no `sparklogs.kind` (LQL)), so the device-health views never return them: count them with `query_event_counts_by_severity` (tool) on `sparklogs.reason in (app_crash, app_hang)` (LQL). Reading the crashes: `playbooks/crashes-and-restarts.md`. |
+| Crash or application problem on a device | Process crashes, service crashes and other occurrences: `event_timeline` (value) with `kinds` (arg) `["occurrence"]` (value), oldest first. App hangs, and the Windows Error Reporting detail of crashes, are on `win.eventlog.application` (value) only (`app_hang` (value), `app_crash` (value), no `sparklogs.kind` (LQL)), so the device-health views never return them: count them with `count_events_matching_filter` (tool) on `sparklogs.reason in (app_crash, app_hang)` (LQL). Reading the crashes: `playbooks/crashes-and-restarts.md`. |
 | Open problems across a client or the fleet | Omit `view` (arg) over a window of days. A row is open unless its `sparklogs.class` (col) is `RECOVERED` (value) or `ENDED` (value); a clearing one carries `clearing_since` (col) and `closes_in_about` (col): say since when and about how long until it closes. Narrow with `reasons` (arg) or `topics` (arg). |
 | How many devices have a condition | `group_by_reason` (arg) set: one row per kind and reason with `affected_agents` (col), `episode_count` (col), `occurrence_count` (col) and `event_count` (col). For changes, `occurrence_count` (col) counts the changes and `event_count` (col) every witness of them. A device can sit in several groups: do not sum `affected_agents` (col) across rows. |
 | Which processes use the most CPU, RAM or I/O across devices | `fleet_processes` (value), `metric` (arg) `cpu` (value), `ram` (value), `io_read` (value) or `io_write` (value). `image` (arg) narrows to one executable; `group_by` (arg) `device` (value) ranks the devices instead. |
 | How one reading spreads across devices (outliers) | `fleet_performance` (value), `metric` (arg) naming the reading (default `cpu_busy_pct_avg` (value)); `group_by` (arg) `device` (value) lists the outlying devices. |
 
-Collection problems are not device health: call `resolve_scope` (tool) with `unhealthy_collection_only` (arg) (`guides/scope-resolution.md`). The symptom walk ("no data from this device") is `playbooks/sparklogs-collection.md`.
+Collection problems are not device health: call `find_org_or_device` (tool) with `unhealthy_collection_only` (arg) (`guides/scope-resolution.md`). The symptom walk ("no data from this device") is `playbooks/sparklogs-collection.md`.
 
 For current conditions, use a window of days: an open episode with no event in a narrow window will be absent.
 Latest state is an observation, not a live inspection of the endpoint.
@@ -39,7 +39,7 @@ For field units and meanings, open `fields/INDEX.md`, then the relevant topic or
 
 ## Read a device view
 
-`device_overview` (value) and `device_network` (value) answer for the devices named in `agent_ids` (arg): 1 to 25 agent ids (the `id` (col) of the agent rows `resolve_scope` (tool) returned), over a window of at most 30 days and 1 hour.
+`device_overview` (value) and `device_network` (value) answer for the devices named in `agent_ids` (arg): 1 to 25 agent ids (the `id` (col) of the agent rows `find_org_or_device` (tool) returned), over a window of at most 30 days and 1 hour.
 
 ```json
 {
@@ -62,7 +62,17 @@ Up to 5 devices get a full reading each.
 With 6 to 25 devices, each device gets its `device_summary` (value) row and a few notable changes.
 Use that light form to choose the devices and intervals worth a full reading, then call again with at most 5.
 
-### The reading, part by part
+### The overview reading
+
+`device_overview` (value) gives each device, in order: `device` (col), `system` (col), `digest` (col), `days` (col), `power` (col), `heat_blocks` (col), `user_present` (col), `moments` (col), `conditions` (col), `changes` (col), `occurrences` (col), `log_events` (col), `top_processes` (col), `state` (col) and `next_reads` (col).
+It is an extract: each part shows a few rows and its totals and names the result set that holds the rest.
+`summary.scope` (col) and `summary.reading_notes` (col) say how to read it and how to weigh a heat band and a severity: follow them.
+Every time in the reading is device local, and `device` (col) states the offset.
+Severity reads as lower-case names, and byte sizes as KB, MB and GB (1024-based).
+The programs a heat block lists ran at the same time and are not proven causes.
+The agent does not measure application response time, per-process disk latency, UDP, or what the far end of a connection saw: carry the ones that matter for the ticket into WHAT WAS NOT CHECKED.
+
+### The network reading, part by part
 
 1. `header` (col): window, `bucket_s` (col), `measured` (col) and `not_measured` (col), and coverage when part of the window was asleep, powered off or unreported.
    Coverage splits the window into observed, asleep, powered-off and unreported seconds.
@@ -71,35 +81,35 @@ Use that light form to choose the devices and intervals worth a full reading, th
    Unreported time is unknown, not quiet, and limits every claim about that stretch.
    `not_measured` (col) lists the lanes with no reading in this window, then what the agent does not measure: application response time, per-process disk latency, UDP, and what the far end of a connection saw.
    Carry the entries that matter for the ticket into WHAT WAS NOT CHECKED.
-2. `device_network` (value) only: `outages` (col), one row per probe outage (see **Network outages** below).
+2. `outages` (col): one row per probe outage (see **Network outages** below).
 3. `evidence` (col): witnesses with interval, value, unit and a `filter_lql` (col) over the result set named in `result` (col).
    `support` (col) is the number of rows that filter returns.
-   Both views carry `unreported` (value), `asleep` (value), `powered_off` (value), `physical_link_down` (value), `wifi_drops` (value), `ncsi_internet_lost` (value) and `dns_resolution_timeouts` (value).
-   `device_overview` (value) adds `probe_down` (value) per probe role.
-   `device_network` (value) adds `probe_blips` (value), `network_changed` (value), `occurrences` (value) (device-state networking occurrences, one row per reason) and `tcp_timeout_connections_total` (value) per route class.
+   Kinds: `unreported` (value), `asleep` (value), `powered_off` (value), `physical_link_down` (value), `wifi_drops` (value), `ncsi_internet_lost` (value), `dns_resolution_timeouts` (value), `probe_blips` (value), `network_changed` (value), `occurrences` (value) (device-state networking occurrences, one row per reason) and `tcp_timeout_connections_total` (value) per route class.
    An outage that stopped traffic can leave no heat at all: read evidence even when no heat span exists.
 4. `domains` (col): the window in coarse buckets with each domain's reading and band.
    `heat_spans` (col): stretches where a domain's heat was above `ok` (value), found at `bucket_s` (col).
    Bands are `ok` (value), `warm` (value), `hot` (value) and `very_hot` (value).
-   Each span carries its peak band and time, the `driver` (col) reading that set the peak and its value, on `device_overview` (value) where the peak sat against the device's typical range from before the window (`device_network` (value) spans carry `medium` (col) instead) (`below` (value), `within` (value), `above` (value)), up to 3 contributors with their share, the episodes that opened or took a step in the span or the bucket before it, and the changes observed there. An episode open since before the span with no step in it is not linked.
-   A span says when a measure ran high, not why. Contributors ran at the same time and are not proven causes.
-   Disk heat is the busiest disk's busy time, pushed up by its queue depth. Latency is not an input, so slow I/O at moderate busy time can leave no disk span.
-   Read `disk_latency_ms` (col) in `domains` (col) and `latency_ms_p90_10s` (col) in the `storage` (value) result set for latency. A span names no disk: `busiest_disk` (col) in the `buckets` (value) result set does.
+   Each span carries its peak band and time, the `driver` (col) reading that set the peak and its value, `medium` (col), up to 3 contributors with their share, the episodes that opened or took a step in the span or the bucket before it, and the changes observed there. An episode open since before the span with no step in it is not linked.
+   A span says how bad, not why. Contributors ran at the same time and are not proven causes.
    An incident shorter than `bucket_s` (col) shows in evidence, outages and events, which keep their own times.
-5. `top_processes` (col) (`device_overview` (value)) or `top_connections` (col) (`device_network` (value)): window figures over the observations the agent retained.
-   The agent reports its top processes and connections per window, so these figures are lower bounds and a short burst can be missing.
+5. `top_connections` (col): window figures over the observations the agent retained.
+   The agent reports its top connections per window, so these figures are lower bounds and a short burst can be missing.
    `window_rank_by` (col) names the rankings a row led. It is empty for a row kept further down a ranking.
-   A `top_processes` (col) row combines every instance of one executable. A `top_connections` (col) row folds one process's connections to one remote end and port, counted in `connections` (col); `pid` (col) is set only when they all came from one process instance.
+   A row folds one process's connections to one remote end and port, counted in `connections` (col); `pid` (col) is set only when they all came from one process instance.
    To read a row's connections per bucket, filter the `connections` (value) result set on the columns the header's `top_connections` (col) pivot names in `narrow_by` (col), with the row's values; leave out a term whose cell is empty.
-6. `events` (col): the most relevant episodes and changes, open episodes first.
+6. `events` (col): the most relevant network episodes and changes, open episodes first.
    An episode appears only when it had an event inside the window. One open since before the start with no event in the window is absent, so use a window of days for what is open now.
-   Changes also cover the 48 hours before the window. Each device keeps its newest 200 changes (on `device_network` (value), network changes only); when older ones were dropped the `events` (value) entry's `truncated` (col) says so, `changes_capped` (col) is true on that device's `device_summary` (value) row, and the listed changes are complete only from the oldest one listed. The bound counts changes of every severity, so Debug and Verbose firewall rule churn can fill it. For an onset before that, read the changes grouped by reason and the change timeline (`playbooks/what-changed.md`, **Busy devices**).
-   In the `events` (value) set, `entry` (col) says what a row is (`episode` (value), `episode_step` (value), `change` (value), `occurrence` (value)). `class` (col) is empty on firewall rule changes, episode steps and occurrences: find changes by `entry` (col) and severity, not by `class` (col).
-   On `device_overview` (value), crashes and other occurrences are in neither this part nor the `events` (value) result set, whose only occurrences are the boot, sleep, shutdown, restart request and agent start and stop marks: read them with the `next_reads` (col) `event_timeline` (value) call (`kinds` (arg) `["occurrence"]` (value)). On `device_network` (value) the `events` (value) set holds networking occurrences and those marks.
 7. `next_reads` (col): calls with their arguments ready to paste beside your `external_investigation_id` (arg).
 
 A list that left rows out counts them in `omitted` (col).
 Timestamps are RFC3339 UTC.
+
+### Changes on both views
+
+Changes also cover the 48 hours before the window.
+The `events` (value) set keeps up to 200 changes per device (on `device_network` (value), network changes only): Info and above first, newest first, then the newest below Info.
+When some were dropped, the set's `truncated` (col) note says which, and `changes_capped` (col) is true on that device's `device_summary` (value) row. For an onset before the kept changes, read the changes grouped by reason and the change timeline (`playbooks/what-changed.md`, **Busy devices**).
+In the `events` (value) set, `entry` (col) says what a row is (`episode` (value), `episode_step` (value), `change` (value), `occurrence` (value)). `class` (col) is empty on firewall rule changes, episode steps and occurrences: find changes by `entry` (col) and severity, not by `class` (col).
 
 ### Result sets
 
@@ -111,7 +121,7 @@ A result set read after its stored rows expired is rebuilt by re-running the ori
 
 | View | Result sets |
 |---|---|
-| `device_overview` (value) | `device_summary` (value), `buckets` (value), `processes` (value), `storage` (value), `events` (value), `state` (value) |
+| `device_overview` (value) | `device_summary` (value), `buckets` (value), `processes` (value), `storage` (value), `events` (value), `state` (value), `log_events` (value), `occurrence_change_counts` (value) |
 | `device_network` (value) | `device_summary` (value), `network_buckets` (value), `adapters` (value), `connections` (value), `events` (value) |
 
 Every set leads with `agent_id` (col) and `org_id` (col), and bucketed sets with `bucket_start` (col).
@@ -154,8 +164,7 @@ On `device_network` (value), each `outages` (col) row is one probe role (gateway
 `state` (col) `confirmed` (value) means the agent counted confirmed down seconds (`down_s` (col), and per bucket in `down_by_bucket` (col)).
 `pending` (value) is a run of failed probes that ended with no answer and no confirmed down seconds. A run ends at the window's end, and also at a change of network, sleep, power-off or a link-down. Report failed probes, not an outage.
 Failures that a later probe answered before any down time was confirmed are `probe_blips` (value) evidence, not outage rows.
-On `device_overview` (value), a probe role listed in `not_measured` (col) had no reading in the window. That path was not measured, which says nothing about whether it was up.
-On `device_network` (value), a gateway that ignores ping still lists its attempts, so its role counts as measured. The signs are an outage whose `ownership` (col) reads not placed, and `gateway_probe_attempts` (col) of 0 in `network_buckets` (value).
+A gateway that ignores ping still lists its attempts, so its role counts as measured. The signs are an outage whose `ownership` (col) reads not placed, and `gateway_probe_attempts` (col) of 0 in `network_buckets` (value).
 `ownership` (col) says where an outage sits, from the device's own evidence: its own link, between it and its gateway, beyond the gateway, or at the DNS resolver. It reads not placed when no gateway probe was counted during the outage.
 Beyond the gateway covers both the router's internet connection and the ISP. Endpoint data cannot tell those apart, so do not name the ISP as the cause.
 `compare_start` (col) and `compare_end` (col) bound a comparison: the matching `next_reads` (col) entry reads every device in the org over those buckets.

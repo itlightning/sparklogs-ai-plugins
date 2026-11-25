@@ -9,6 +9,7 @@ import {
   BRAND_ASSETS,
   HOSTS,
   HOST_LAYOUT,
+  MAINTAINER_ONLY,
   MAX_DIST_BYTES,
   MAX_PACKAGE_BYTES,
   METADATA_FILE,
@@ -19,8 +20,8 @@ import {
 } from './dist-layout.mjs';
 import { MODULES } from './generated-references.config.mjs';
 import { AUTHORING_FRONTMATTER_KEYS, parseFrontmatter } from './skill-indexes.mjs';
+import { KEEP_TAGS } from './host-transforms.mjs';
 import {
-  KEEP_TAGS,
   leftoverAuthoringTags,
   keepTagKindsFound,
   proveDistIdentifierScan,
@@ -33,7 +34,6 @@ const DIST = path.resolve(ROOT, process.argv[2] ?? 'build/dist');
 const LICENSE = await fs.readFile(path.join(ROOT, 'LICENSE'));
 const ALLOWED_EXTS = new Set(['.md', '.json', '.svg', '.png']);
 const ALLOWED_NAMES = new Set(['README.md', 'LICENSE', '.mcp.json', 'mcp.json']);
-const MAINTAINER_ONLY = ['SYNC-MANIFEST.json', 'reference-navigation.md'];
 const ALLOWED_MCP_HOSTS = new Set(['mcp.sparklogs.app', 'us.mcp.sparklogs.app', 'eu.mcp.sparklogs.app']);
 const SEMVER = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/;
 
@@ -131,7 +131,7 @@ async function validatePackage(host) {
       packageBytes += stat.size;
       const ext = path.extname(file);
       const name = path.basename(file);
-      if (MAINTAINER_ONLY.includes(name)) {
+      if (MAINTAINER_ONLY.has(name)) {
         throw new Error(`${host} package ships a maintainer-only build input: ${relative}`);
       }
       const classified = classifyPackageRel(relative);

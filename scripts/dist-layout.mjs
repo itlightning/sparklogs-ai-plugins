@@ -17,6 +17,11 @@ export const RULES_DIR = 'src/rules';
 export const ASSETS_DIR = 'src/assets';
 export const METADATA_FILE = 'src/metadata/plugin.json';
 
+// Build inputs under src/ that never ship as files: render skips them, the rendered-package and
+// guide-corpus checks refuse them. reference-navigation.md is the stitch source for every SKILL.md
+// corpus block, not a guide.
+export const MAINTAINER_ONLY = new Set(['SYNC-MANIFEST.json', 'reference-navigation.md']);
+
 export const THEME_FILES = [
   'windows-updates-and-patching.md',
   'windows-security-and-audit.md',

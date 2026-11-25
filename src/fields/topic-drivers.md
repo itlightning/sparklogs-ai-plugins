@@ -1,7 +1,13 @@
 <!-- GENERATED reference. Do not hand-edit. -->
-# Device drivers fields
+# Device drivers
 
-Full inventory every day. Supported changes are reported when the agent observes them.
+Each driver package used by at least one device Windows has set up, including devices not connected now, with its device class, INF file, provider, version, driver date and device count; Microsoft packages are included, and loaded drivers are in Kernel drivers.
+
+**Use when:** a device misbehaves after a driver update, or a question about which driver version a machine has or when it was installed, updated or removed.
+
+The driver date is the driver's own release date, not when it was installed; an install, update or removal is dated when the hourly read saw it.
+
+Full inventory every day. Changes are reported between inventories.
 
 | Field | Type | Unit | Meaning |
 |---|---|---|---|

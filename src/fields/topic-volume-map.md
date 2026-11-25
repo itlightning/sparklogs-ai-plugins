@@ -1,7 +1,13 @@
 <!-- GENERATED reference. Do not hand-edit. -->
-# Volume map fields
+# Volume map
 
-Full inventory every hour. Supported changes are reported when the agent observes them.
+Every volume the operating system lists, mounted or not (including EFI and recovery partitions, thumb drives and optical drives), with its drive letter and mount paths, size, file system and label, drive type, and the disks and extents behind it.
+
+**Use when:** finding which disk a drive letter lives on, or why a drive has no space or IO readings in Disk volumes or Storage IO.
+
+Mapped network drives are not listed.
+
+Full inventory every hour. Changes are reported between inventories.
 
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
@@ -12,7 +18,7 @@ Full inventory every hour. Supported changes are reported when the agent observe
 | `sparklogs.data.volume_map.mounts` | string_array |  | Every path this volume is mounted at. Empty is a valid state: zero mounts is not an error. |
 | `sparklogs.data.volume_map.filesystem_type` | string |  | The volume's filesystem type. |
 | `sparklogs.data.volume_map.filesystem_label` | string |  | The volume's filesystem label. |
-| `sparklogs.data.volume_map.drive_type` | string |  | What kind of drive this volume sits on. Carried for every volume, monitored or not: it is the fact that explains why an optical or network volume has no space or IO measurements anywhere else. |
+| `sparklogs.data.volume_map.drive_type` | string |  | What kind of drive this volume sits on. Carried for every volume, monitored or not: it is the fact that explains why an optical drive or removable media volume has no space or IO measurements anywhere else. Mapped network drives are not listed. |
 | `sparklogs.data.volume_map.backing_device_ids` | string_array |  | The terminal storage devices visible at this observation boundary that back this volume, deduplicated. Never a claim about ultimate physical media. |
 | `sparklogs.data.volume_map.backing_resolution` | string |  | How completely the backing devices could be resolved: `complete`, `partial`, `unavailable`, or `not_applicable`. |
 | `sparklogs.data.volume_map.logical_bytes` | integer | bytes | The filesystem's logical size, duplicated from the same observation `disk_volumes` reads. Informational only. |

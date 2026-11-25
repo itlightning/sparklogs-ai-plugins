@@ -77,7 +77,7 @@ The right version is factual; the wrong version is cause analysis. Cause analysi
 Specific sources investigated (e.g., `srv-fileshare01`, ws022.acme). Not generic ("a server in Acme Dental") - name them.
 
 ### Org(s)
-The `org_id` (col)(s) the investigation was scoped to (from `resolve_scope` (tool)).
+The `org_id` (col)(s) the investigation was scoped to (from `find_org_or_device` (tool)).
 
 ### Time window
 Absolute UTC timestamps for the investigation's data window. Not relative ("last 24 hours") - bind to absolute timestamps so the summary remains interpretable when re-read days later.
@@ -118,7 +118,7 @@ Format: `<subject> was <state> at <time>`, or `<event class> occurred N times in
 - "Backups are failing."
 
 ### Evidence
-One or more `query_url` (col) values from the MCP tool responses that produced the evidence for this Finding. The engineer clicks these to verify in the SparkLogs cached-query explorer. **If you don't have a query_url, you don't have the evidence - don't make the claim.** A Finding about a device also links the device's page (SKILL.md Section 4).
+One or more links from the MCP tool responses that produced the evidence for this Finding: `query_url` (col) values, or the device page link when the evidence is a device view. The engineer clicks these to verify in SparkLogs. **If you don't have a link, you don't have the evidence - don't make the claim.** A Finding about a device also links the device's page (SKILL.md Section 4).
 
 ### Confidence
 One of: `high` (value), `medium` (value), `low` (value), `insufficient_evidence` (value). See SKILL.md Section 5 for calibration guidance.
@@ -219,13 +219,13 @@ Finding 4: KB5034441 was installed on srv-fileshare01 at 2026-04-23 02:45 UTC
   Time window of evidence: 2026-04-23 02:45 UTC
   Note: Temporal proximity to Finding 1 is observation only - causality is not asserted in this summary.
 
-Finding 5: device_overview for 2026-04-23 02:30 to 04:00 UTC: observed for the whole window, one disk heat span (hot, 03:10 to 03:20 UTC) on the busiest disk
-  Evidence: <meta.device_url as returned>; <query_url as returned> (query_id: qC5g7n3p2k8m1y4r)
+Finding 5: device_overview for 2026-04-23 02:30 to 04:00 UTC: no data missing in the window, one disk heat block (hot, 03:10 to 03:20 UTC) on the busiest disk
+  Evidence: <meta.device_url as returned> (query_id: qC5g7n3p2k8m1y4r)
   Confidence: high
   Sources contributing: srv-fileshare01
   Time window of evidence: 2026-04-23 02:30 to 04:00 UTC
-  Note: The span lists VeeamAgent.exe and sqlservr.exe as contributors; they ran at the same time
-        and are not proven causes.
+  Note: The block lists VeeamAgent.exe and sqlservr.exe as its top programs by process IO; they ran
+        at the same time and are not proven causes.
 
 Finding 6: The same pattern_hash fired on 7 other sources in this MSP fleet during the same window
   Evidence: <query_url as returned> (query_id: qF2h9k4n7m3p1c8y)
@@ -279,8 +279,8 @@ SCOPE CHECKED
 
 OBSERVED CONDITIONS
 
-Finding 1: device_overview for srv-fileshare02 from 2026-04-23 13:00 to 14:30 UTC: no heat spans, every domain band ok
-  Evidence: <meta.device_url as returned>; <query_url as returned> (query_id: qN3k7m1p2r8t4c9y)
+Finding 1: device_overview for srv-fileshare02 from 2026-04-23 13:00 to 14:30 UTC: no heat blocks, no hot hours in any area
+  Evidence: <meta.device_url as returned> (query_id: qN3k7m1p2r8t4c9y)
   Confidence: high
   Sources contributing: srv-fileshare02
   Time window of evidence: 2026-04-23 13:00 to 14:30 UTC

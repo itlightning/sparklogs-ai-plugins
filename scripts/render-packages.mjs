@@ -16,21 +16,21 @@ import {
   DOCS_URL,
   HOSTS,
   HOST_LAYOUT,
+  MAINTAINER_ONLY,
   METADATA_FILE,
   THEME_FILES,
   classifySrcPath,
 } from './dist-layout.mjs';
 import {
   CORPUS_TOPS,
-  applyHostVariants,
+  renderSharedMarkdown,
   rewriteArgumentsForCursor,
   rewriteCommandsAsSkillNames,
   rewriteCommandsForCursor,
   rewriteCorpusForClaude,
   rewriteCorpusRelative,
 } from './host-transforms.mjs';
-import { formatFrontmatter, parseFrontmatter, shipMarkdown } from './skill-indexes.mjs';
-import { stripAuthoringTags } from './identifier-tags.mjs';
+import { formatFrontmatter, parseFrontmatter } from './skill-indexes.mjs';
 
 assertRepoRoot(import.meta);
 
@@ -41,10 +41,6 @@ const HOST_LABELS = {
   cursor: 'Cursor',
   generic: 'generic Agent Plugins hosts',
 };
-// Build inputs that must never ride into a shipped package. validate-rendered.mjs asserts the same
-// list, so an addition here without one there fails the build rather than shipping quietly.
-// reference-navigation.md is the stitch source for every SKILL.md corpus block, not a guide.
-const MAINTAINER_ONLY = new Set(['SYNC-MANIFEST.json', 'reference-navigation.md']);
 const SEMVER = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-z.-]+)?$/;
 const DIST_README_TEMPLATE_REL = 'scripts/templates/dist-README.md';
 const DIST_README_TEMPLATE = path.join(ROOT, DIST_README_TEMPLATE_REL);
@@ -120,9 +116,7 @@ async function writeText(file, text) {
 // then apply the host dialect for corpus citations and command invocations. pkgRel is the file's
 // path inside the rendered package, which is what the corpus rewrite measures against.
 function renderMarkdownText(text, srcLabel, host, pkgRel) {
-  let out = shipMarkdown(text, srcLabel);
-  out = stripAuthoringTags(out);
-  out = applyHostVariants(out, { commands: HOST_LAYOUT[host].commands }, srcLabel);
+  let out = renderSharedMarkdown(text, srcLabel, { commands: HOST_LAYOUT[host].commands });
   if (/^skills\/[^/]+\//.test(pkgRel)) {
     out = rewriteCorpusInSkill(out, pkgRel);
   } else if (host === 'claude') {

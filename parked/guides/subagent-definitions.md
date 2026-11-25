@@ -2,7 +2,7 @@
 
 ## Subagent: `sparklogs-cluster-interpreter`
 
-**Not usable yet.** This subagent depends on `cluster_event_contexts` (other), which does not exist. Approximate clustering with a `query_logs` (tool) slice narrowed to the pattern plus `refine_query_result` (tool) group_by over the surrounding context fields.
+**Not usable yet.** This subagent depends on `cluster_event_contexts` (other), which does not exist. Approximate clustering with a `query_raw_events` (tool) slice narrowed to the pattern plus `refine_query_result` (tool) group_by over the surrounding context fields.
 
 **Purpose.** Given a `cluster_event_contexts` (other) result with multiple distinct clusters, interpret each cluster's representative_surround and produce a structured human-readable description.
 

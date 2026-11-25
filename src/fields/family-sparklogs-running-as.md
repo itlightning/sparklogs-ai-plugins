@@ -1,6 +1,8 @@
 <!-- GENERATED reference. Do not hand-edit. -->
 # Running-as fields
 
+**Use when:** finding the account a process actually ran under when it differs from the one that started it.
+
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
 | `sparklogs.running_as.id` | string |  | The execution principal's stable join key. |

@@ -1,6 +1,8 @@
 <!-- GENERATED reference. Do not hand-edit. -->
 # Epoch fields
 
+**Use when:** putting an inventory and the changes after it back together for one device and topic, or checking whether a device's state history started over.
+
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
 | `sparklogs.epoch.id` | string |  | Globally unique inventory epoch ID. Parts and subsequent changes share this ID. |

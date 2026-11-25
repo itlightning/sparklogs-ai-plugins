@@ -4,6 +4,8 @@ index: Disk full or filling
 
 # Disk full or filling fast
 
+**Use when:** a drive is almost full or filling fast, users get low disk space errors, or the C: drive has run out of room.
+
 **Trigger.** A volume crosses 90% or fills; users hit "no space" errors.
 
 **Accuracy.** State answers this category.
@@ -14,9 +16,9 @@ Fleet totals: the device count per space-low reason (`affected_agents` (col)). A
 
 **Device health first.** The space-low and `volume_fill_rate_high` (value) conditions, then `latest_state` (value) on the `disk_volumes` (value) topic for free space, and, while the volume is filling, its fill rate and projected time to full.
 Who is writing: `device_overview` (value) over the filling interval.
-Its `top_processes` (col) carry `io_write_mb` (col) per executable, and `storage` (value) carries write throughput per volume by bucket.
+Its `top_processes` (col) rank programs by process IO, the `processes` (value) result set carries each program's write rate by bucket, and `storage` (value) carries write throughput per volume by bucket.
 Process write bytes include writes that do not reach the disk: they rank writers without measuring what landed on the volume.
-`events` (col) on the same reading show the changes that overlapped the start of the fill, such as a product install or a new network share.
+`changes` (col) on the same reading show the changes that overlapped the start of the fill, such as a product install or a new network share.
 
 **Events, for what health named.** A volume that fills because something is failing (a backup retrying, a log growing on errors) shows those errors on the device. Disk, controller and file system errors on the volume itself: `playbooks/raid-or-storage-degraded.md`.
 

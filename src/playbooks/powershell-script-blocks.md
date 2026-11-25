@@ -6,6 +6,8 @@ aliases:
 
 # PowerShell script blocks
 
+**Use when:** an EDR or antivirus alert names PowerShell, an encoded or obfuscated PowerShell command shows up, or someone asks what a script did on a device.
+
 **Trigger.** "The EDR flagged PowerShell on `<host>`", "what did this script do", "someone deleted shadow copies or turned Defender off", or an encoded command in an alert.
 
 **Accuracy.** A script-block event records that PowerShell processed the block, not that a command ran or succeeded: confirm the outcome from the events the outcome writes (Did it take effect, below).

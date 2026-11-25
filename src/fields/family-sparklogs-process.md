@@ -1,6 +1,8 @@
 <!-- GENERATED reference. Do not hand-edit. -->
 # Process fields
 
+**Use when:** finding which program an event is about, by its process ID, executable path or product category.
+
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
 | `sparklogs.process.id` | string |  | The process id in decimal form. |

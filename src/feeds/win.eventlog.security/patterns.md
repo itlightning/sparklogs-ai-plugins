@@ -29,14 +29,46 @@ Its rendered text cannot survive pattern derivation, so a string that appears to
 
 An unexpected pattern is one of three things, in falling order of likelihood: a curated surface this catalog does not list, a vocabulary that gained a value, or a token rendered from something that is not a closed vocabulary at all. The third is the one that matters.
 
-This module has 82 curated surface(s) and a legal-pattern language of 32843 strings.
+This module has 85 curated surface(s) and a legal-pattern language of 32870 strings.
 That number is why this file is a procedure and not a list.
 
 ## Surfaces
 
 `(absent)` is legal in every slot and is not listed per row.
 
-### `account_changed` / `default`
+### `account_changed` / `other_subject`
+
+**When:** An edit by any subject other than the platform accounts (a person, a service account, a domain account or a computer account).
+
+**Renders:** `account_changed: NOTABLE: account attributes changed`
+
+**Event ids:** 4738, 4742
+
+| # | Slot | Legal values |
+|---|---|---|
+| 1 | `target_kind` | `by_account` `by_machine` `by_system` `by_service` `by_local_service` `by_network_service` `by_anonymous` `by_group` |
+
+Legal pattern count for this surface: 9 (every slot independently present or absent).
+Most of those cannot physically occur; the count is a bound on the language, not a prediction.
+
+### `account_changed` / `platform_subject`
+
+**When:** An edit by a platform account (LocalSystem, LocalService or NetworkService, by SubjectUserSid) that newly sets no weakening flag, or sets password never expires and no other weakening flag.
+
+**Renders:** `account_changed: NOTABLE: account attributes changed`
+
+**Event ids:** 4738, 4742
+
+| # | Slot | Legal values |
+|---|---|---|
+| 1 | `target_kind` | `by_account` `by_machine` `by_system` `by_service` `by_local_service` `by_network_service` `by_anonymous` `by_group` |
+
+Legal pattern count for this surface: 9 (every slot independently present or absent).
+Most of those cannot physically occur; the count is a bound on the language, not a prediction.
+
+### `account_changed` / `platform_weakening`
+
+**When:** An edit by a platform account (LocalSystem, LocalService or NetworkService, by SubjectUserSid) that newly sets any weakening flag other than password never expires: password not required, reversible password encryption allowed, trusted for delegation, trusted to authenticate for delegation, DES keys only, or Kerberos pre-authentication not required.
 
 **Renders:** `account_changed: NOTABLE: account attributes changed`
 
@@ -122,9 +154,24 @@ Most of those cannot physically occur; the count is a bound on the language, not
 Legal pattern count for this surface: 9 (every slot independently present or absent).
 Most of those cannot physically occur; the count is a bound on the language, not a prediction.
 
-### `account_password_reset` / `default`
+### `account_password_reset` / `other_subject`
 
-**When:** Every completed reset, whoever the actor (a person, a service account, a domain account or SYSTEM) and whatever the account.
+**When:** Every completed reset by a subject other than the platform accounts (a person, a service account or a domain account), whatever the account.
+
+**Renders:** `account_password_reset: NOTABLE: account password reset by another principal`
+
+**Event ids:** 4724
+
+| # | Slot | Legal values |
+|---|---|---|
+| 1 | `target_kind` | `by_account` `by_machine` `by_system` `by_service` `by_local_service` `by_network_service` `by_anonymous` `by_group` |
+
+Legal pattern count for this surface: 9 (every slot independently present or absent).
+Most of those cannot physically occur; the count is a bound on the language, not a prediction.
+
+### `account_password_reset` / `platform_subject`
+
+**When:** Every completed reset by a platform account (LocalSystem, LocalService or NetworkService, by SubjectUserSid), whatever the account.
 
 **Renders:** `account_password_reset: NOTABLE: account password reset by another principal`
 
@@ -1022,6 +1069,8 @@ These surfaces share a head and headline, so a pattern matching one is attribute
 
 | Renders | Surfaces |
 |---|---|
+| `account_changed: NOTABLE: account attributes changed` | `account_changed` / `other_subject`, `account_changed` / `platform_subject`, `account_changed` / `platform_weakening` |
+| `account_password_reset: NOTABLE: account password reset by another principal` | `account_password_reset` / `other_subject`, `account_password_reset` / `platform_subject` |
 | `cryptographic key file operation` | `key_file_operation`, `key_file_operation_succeeded` |
 | `cryptographic key migration operation` | `key_migration_operation`, `key_migration_operation_succeeded` |
 | `cryptographic operation` | `crypto_operation`, `crypto_operation_succeeded` |

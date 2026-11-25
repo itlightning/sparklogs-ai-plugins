@@ -7,7 +7,7 @@ A default-view row is the latest event of each episode that emitted inside the r
 What is on the box is `view` (arg) `latest_state` (value).
 Process charts: `view` (arg) `top_processes_over_time` (value). Raw measurements: `series` (value) with `topics` (arg). RCA: `view` (arg) `event_timeline` (value) on the same tool.
 
-**Event stream:** `query_logs` (tool) on `subsource` (LQL) `=` `"sparklogs.device.state"`.
+**Event stream:** `query_raw_events` (tool) on `subsource` (LQL) `=` `"sparklogs.device.state"`.
 Group `sparklogs.kind` (LQL), `sparklogs.topic` (LQL), `sparklogs.reason` (LQL).
 
 No `provider_name` (LQL). Do not explore this feed like WEL.
@@ -18,7 +18,7 @@ Start at `fields/INDEX.md`, then open the topic table for its exact names, types
 ## Which reading
 
 Which `query_device_health` (tool) view answers which question: `guides/device-state-fields.md` (**Choose the view**).
-Underlying log events and fields outside the health projection: `query_logs` (tool) on this `subsource` (LQL), as below.
+Underlying log events and fields outside the health projection: `query_raw_events` (tool) on this `subsource` (LQL), as below.
 
 MCP column names paste straight into LQL now: `sparklogs.kind` (col) on a device-health row is `sparklogs.kind` (LQL) in logs, same spelling.
 `subsource` (col) on health rows is the feed id `sparklogs.device.state` (value), the same stamp as logs.
@@ -123,7 +123,7 @@ sparklogs.data.installed_products[](name: Edge)
 sparklogs.data.performance.commit_pct>55
 ```
 
-Add `group_by: ["source"]` on `query_event_counts_by_severity` (tool) to turn any of these into the list of devices and how often each one matched.
+Add `group_by: ["source"]` on `count_events_matching_filter` (tool) to turn any of these into the list of devices and how often each one matched.
 
 ## Bound versus uncorrelated
 
@@ -165,7 +165,7 @@ Naming the array itself (`select: ["sparklogs.data.processes"]`) returns every e
 Item leaves group and aggregate: `group_by` (arg) on `sparklogs.data.services[].current_state` makes every item a row, so each count is a count of items. Row columns aggregate the same way; pull one cache and refine it.
 
 ```
-1. query_logs   lql: sparklogs.topic="performance"
+1. query_raw_events   lql: sparklogs.topic="performance"
                 select: ["t", "source", "sparklogs.data.performance.cpu_busy_pct_avg"]
 2. refine_query_result on that query_id
                 group_by: ["source"]
@@ -183,7 +183,7 @@ ws-022              12       0.129166  48.65
 
 `select` (arg) on step 1 shrinks the response only. The cache keeps every column, so step 2 can aggregate the commit_pct path even though step 1 never returned it.
 
-For a fleet count of one condition, `query_event_counts_by_severity` (tool) with the element filter and `group_by: ["source"]` answers in one call and needs no cache.
+For a fleet count of one condition, `count_events_matching_filter` (tool) with the element filter and `group_by: ["source"]` answers in one call and needs no cache.
 
 ## Chart process CPU, memory or I/O
 

@@ -7,6 +7,8 @@ aliases:
 
 # Slow logon
 
+**Use when:** sign-in takes minutes, sits at Welcome or Please wait, a user gets a temporary profile, or Windows keeps asking for the password at logon.
+
 **Trigger.** "Logon takes `<duration>` since `<when>`", "stuck on Welcome" or "Please wait for the Group Policy Client", "I got a temporary profile", or "it asks for my password again and again".
 
 **Accuracy.** Windows writes a record at each step of a sign-in, each with its own time, and SparkLogs collects those channels beyond the curated events: Winlogon's authentication start and result, the User Profile Service's profile load, the Group Policy user pass, the session manager's session logon and shell start, and Winlogon's notice when one component holds up the sign-in for more than a minute.
@@ -49,7 +51,7 @@ When user policy is synchronous, the session manager writes 21 and 22 only after
 
 **Device health first.** `query_device_health` (tool); views and how to read them: `guides/device-state-fields.md` (**Choose the view**).
 
-- The device's overview reading over a window that holds several slow sign-ins, at the narrowest bucket the window allows: CPU or disk heat that starts at the sign-in times, and its contributors, shows what the machine was busy with. A sign-in is short, so read the evidence and events as well as the heat spans; pressure shorter than a bucket leaves no span. Boots and resumes (`host_booted` (value), `host_resume_settled` (value)) say whether each slow sign-in was the first after a boot, when the machine is busiest.
+- The device's overview reading over a window that holds several slow sign-ins, at the narrowest bucket the window allows: CPU or disk heat blocks that start at the sign-in times, and the programs they list, show what the machine was busy with. A sign-in is short, so read the moments, conditions and changes as well as the heat blocks; pressure shorter than a bucket leaves no block. Boots and resumes (`host_booted` (value), `host_resume_settled` (value)) say whether each slow sign-in was the first after a boot, when the machine is busiest.
 - Its performance readings carry `sparklogs.data.performance.user_session_count` (LQL) and `sparklogs.data.performance.user_session_disconnected_count` (LQL): counts of signed-in sessions, no names. On a terminal server they show how many sessions were open at the slow time.
 - Its network reading over the same window: DNS and gateway outages, link drops, Wi-Fi drops, network changes and TCP by route class (LAN, VPN, internet). A sign-in at a boot with the link down, Wi-Fi not joined or no VPN cannot reach a domain controller; `playbooks/network-connectivity.md` for the network itself.
 - Its system identity in the current state: `sparklogs.data.system_info.domain_join_type` (LQL) (`ad` (other), `hybrid` (other), `entra` (other), `workgroup` (other)). An Entra-only or workgroup device has no domain policy and no domain controller wait; its sign-in waits are profile load, Entra and the machine.

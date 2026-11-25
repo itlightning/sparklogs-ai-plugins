@@ -74,7 +74,7 @@ async function lintSrc() {
 
 proveLayoutGuards();
 console.log('layout guards: planted negatives all fired');
-proveShipMarkdown();
+await proveShipMarkdown();
 console.log('shipMarkdown guards: planted negatives all fired');
 proveBalancedMarkers();
 console.log('balanced-marker guards: planted negatives all fired');

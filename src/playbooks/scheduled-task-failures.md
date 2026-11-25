@@ -7,6 +7,8 @@ aliases:
 
 # Scheduled task did not run or failed
 
+**Use when:** a nightly or scheduled script did not run, a scheduled task fails, was disabled or disappeared, or a task stopped working after an account password change.
+
 **Trigger.** "The nightly script did not run", "the backup pre-job task fails every night", "the cleanup task stopped working after the password change", or a scheduled-task reason on a device.
 
 **Accuracy.** Task Scheduler's operational log says what the scheduler did: it launched a task, could not launch it, could not sign in as its account, skipped it, stopped it, or saw it registered, changed, disabled or deleted.
