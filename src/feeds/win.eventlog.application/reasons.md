@@ -44,14 +44,14 @@ Search for the heading "## `<code>`" or a word from the reason's label. Do not r
 | `vpn_dial_failed` | vpn dial failed | event | Minor | `vpn` |  | a user's built-in Windows VPN or dial-up connection will not connect, with a remote access error such as 691 (user name or password not recognized). |
 | `vss_optimization_time_budget_reached` | vss optimization time budget reached | event | Debug | `backup` | benign | a technician sees VSS warnings that the shadow copy optimization writer ran out of time excluding temporary files, often the Windows Update cache, and asks whether backups are affected. |
 | `vss_provider_class_not_registered` | vss provider class not registered | event | Error | `backup` |  | every backup or restore point on a machine fails to create a shadow copy with 0x80040154 (class not registered), often after an old backup product was removed. |
-| `vss_snapshot_call_failed` | vss snapshot call failed | event | Warning | `backup` |  | a backup agent or administrator cannot change a volume's shadow storage size because VSS is refused with access denied, or a snapshot prepare or commit call is rejected as an invalid parameter. |
+| `vss_snapshot_call_failed` | vss snapshot call failed | event | Notice to Warning | `backup` |  | a backup agent or administrator cannot change a volume's shadow storage size because VSS is refused with access denied, or a snapshot prepare or commit call is rejected as an invalid parameter. |
 | `vss_snapshots_failing_for_space` | vss snapshots failing for space | event | Error | `backup` |  | System Restore points or Previous Versions keep disappearing, or new shadow copies stop being made, because shadow copy storage on the volume is full. |
 | `vss_writer_callback_query` | vss writer callback query | event | Info | `backup` | benign | a technician finds a VSS error that it could not query a writer's callback interface (access denied) on a host whose backups still finish, and asks whether it matters. |
 | `vss_writer_failed` | vss writer failed | event | Error | `backup` |  | a backup of SQL Server, Exchange, Hyper-V, Active Directory or another database-backed store failed or warned that a VSS writer failed, even when the job reported success. |
 | `wcf_request_failed` | wcf request failed | event | Minor | `web` |  | a line-of-business service built on WCF returns a fault to its callers, often because a client asked for an endpoint or .svc address the host does not have. |
 | `win_msi_operation_failed` | win msi operation failed | event | Info to Minor | `patching` | benign possible | a software install, update or uninstall fails or rolls back, and Windows Installer reports a code such as 1603 (fatal error), 1618 (another installation in progress) or 1730 (needs an administrator). |
 | `win_msi_product_install_succeeded` | win msi product install succeeded | event | Notice | `patching` |  | someone asks when a Windows Installer (MSI) program was installed on this machine, or whether a deployment's MSI install actually completed. |
-| `win_msi_product_reconfigure_succeeded` | win msi product reconfigure succeeded | event | Notice | `patching` |  | someone asks who or what repaired, modified or changed the features of an installed program, or why a product keeps reconfiguring itself. |
+| `win_msi_product_reconfigure_succeeded` | win msi product reconfigure succeeded | event | Info | `patching` |  | someone asks who or what repaired, modified or changed the features of an installed program, or why a product keeps reconfiguring itself. |
 | `win_msi_product_removal_succeeded` | win msi product removal succeeded | event | Notice | `patching` |  | someone asks when or whether a program was uninstalled from this machine, or who removed an application that is now missing. |
 | `win_user_profile_file_access_failed` | User profile file access failed | event | Notice | `user_profiles` |  | some of a user's settings are missing at sign-in because Windows could not load one of the profile's registry files, or an old or TEMP profile folder cannot be deleted. |
 | `win_user_profile_load_failed` | win user profile load failed | event | Warning to Serious | `user_profiles` |  | a user signs in to an empty desktop or the message "You've been signed in with a temporary profile", or cannot sign in because the User Profile Service failed the sign-in. |
@@ -1127,11 +1127,11 @@ A call the Volume Shadow Copy Service makes while working with shadow copies was
 
 **Keywords:** cannot resize shadow storage, resize shadowstorage access denied, shadow storage maximum size refused, VSS E_ACCESSDENIED, VSS E_INVALIDARG, VSS invalid parameter, third-party shadow copy provider, VSS device control call failed
 
-**Severity:** Warning
+**Severity:** Warning or Notice
 
 **Why it matters:** Shadow copy handling on that volume is limited: the storage area cannot be resized, or a snapshot phase did not complete. Backups may still succeed, so treat this as context for a backup problem, not proof of one.
 
-**In practice:** VSS writes event 12289 to the Application log (source VSS) when a control call into the volume stack fails, naming the call and the operation it was made for. Two cases land here. Access denied (0x80070005) while changing the shadow storage maximum size leaves the storage area on that volume the size it is. An invalid parameter (0x80070057) during a snapshot preparation or commit phase points at the storage driver or a third-party shadow copy provider. Both show as Warning. Neither says the backup failed: the event sees one call, not the job.
+**In practice:** VSS writes event 12289 to the Application log (source VSS) when a control call into the volume stack fails, naming the call and the operation it was made for. Two cases land here. Access denied (0x80070005) while changing the shadow storage maximum size leaves the storage area on that volume the size it is. An invalid parameter (0x80070057) during a snapshot preparation or commit phase points at the storage driver or a third-party shadow copy provider. The refused resize shows as Notice, since shadow copies are still created under the existing limit, and the rejected phase call as Warning. Neither says the backup failed: the event sees one call, not the job.
 
 **When to ignore:** When the backup product reports the job succeeded. Calls abandoned during shutdown, or made against a process that already exited, are not part of this reason.
 
@@ -1350,11 +1350,11 @@ A Windows Installer product configuration operation completed successfully.
 
 **Keywords:** Configuration completed successfully, program repaired, MSI repair install, modify installed program, feature change, Apps and Features repair, msiexec /f, product keeps reconfiguring, MSI repair
 
-**Severity:** Notice
+**Severity:** Info
 
 **Why it matters:** The product's installed configuration changed. The record is the change-history anchor for what was reconfigured and when.
 
-**In practice:** Windows Installer writes event 11728 (configuration completed successfully) to the Application log (source MsiInstaller) when a repair, a feature change or a reconfiguration of an installed product finishes. The line names the product. It shows as Notice for the change history.
+**In practice:** Windows Installer writes event 11728 (configuration completed successfully) to the Application log (source MsiInstaller) when a repair, a feature change or a reconfiguration of an installed product finishes. The line names the product. It shows as Info: most of these are a product repairing itself on a schedule.
 
 **When to ignore:** When it matches a repair or deployment you ran, or a management agent's schedule.
 

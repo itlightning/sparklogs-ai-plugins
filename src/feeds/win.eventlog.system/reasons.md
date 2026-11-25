@@ -15,7 +15,7 @@ Search for the heading "## `<code>`" or a word from the reason's label. Do not r
 | `bitlocker_tpm_unlock_failed` | bitlocker tpm unlock failed | event | Warning | `encryption` |  | a laptop or PC would not start normally and stopped at the BitLocker recovery screen, or its BitLocker PIN was refused at boot, and you need the refusal the TPM stated: Secure Boot off or changed, PIN refused, or protector unusable. |
 | `bitlocker_tpm_unlock_succeeded` | bitlocker tpm unlock succeeded | event | Verbose | `encryption` |  | a technician needs to know whether an encrypted device started on its TPM alone, without a recovery key, on a given boot. |
 | `dcom_activation_timeout` | dcom activation timeout | event | Minor | `app_stability` |  | a COM activation waits on something else, such as the service hosting the class finishing a stop, and gives up, so the program or Windows feature that asked for the component fails or hangs. |
-| `dcom_register_timeout` | dcom register timeout | event | Notice | `app_stability` |  | a program reports Server execution failed because the COM server it started did not register with DCOM in time, or a technician asks about DCOM records saying a server did not register within the required timeout. |
+| `dcom_register_timeout` | dcom register timeout | event | Info | `app_stability` |  | a program reports Server execution failed because the COM server it started did not register with DCOM in time, or a technician asks about DCOM records saying a server did not register within the required timeout. |
 | `dcom_start_failed` | dcom start failed | event | Minor | `app_stability` |  | a program reports that a component or service cannot start when a feature is used, and the System log shows DCOM got an error starting a service. |
 | `device_health_cert_service_unreachable` | device health cert service unreachable | event | Verbose to Notice | `networking` | benign possible | Intune marks a device not compliant for device health attestation because Windows could not reach the Microsoft attestation service through the network, proxy or firewall, or a technician asks why Windows could not get its health certificate from Microsoft. |
 | `disk_bad_block` | disk bad block | event | Warning to Serious | `storage` |  | files on a drive will not open or copy, a backup fails on the same files, or the System log reports a bad block on a hard drive. |
@@ -353,7 +353,7 @@ A DCOM server did not register in time.
 
 **Keywords:** did not register within the required timeout, server did not register with DCOM, DCOM registration timeout, COM server hangs at start, server execution failed, 0x80080005, CO_E_SERVER_EXEC_FAILURE
 
-**Severity:** Notice
+**Severity:** Info
 
 **Why it matters:** The program that started the COM server waits or retries, and usually the server registers moments later. Many of these for one CLSID mean a COM server that keeps hanging at start, and the feature behind it fails for the user.
 
@@ -740,9 +740,9 @@ The machine could not set up its secure session with a domain controller.
 
 **Why it matters:** Domain sign-in, Group Policy and access to domain resources fall back to cached state or fail until the session is set up. A refused machine does not recover on its own.
 
-**In practice:** NETLOGON logs event 5719 in the System log, "This computer was not able to set up a secure session with a domain controller in domain EXAMPLE due to the following," followed by the cause. The cause is a Windows error code, and it decides what the event means. No domain controller reachable (1311, 1722, 1726, 1355, 53) is everyday on a laptop off the network or a machine that has just booted, and clears when a controller answers. A controller that refused the machine (1789 trust relationship failed, 1787 or 1786 no trust account or secret, 5 access denied, 1396 wrong target name) means its computer account or trust no longer matches, and it stays broken until someone repairs it. An internal error (1359) names no cause and usually clears on the next attempt.
+**In practice:** NETLOGON logs event 5719 in the System log, "This computer was not able to set up a secure session with a domain controller in domain EXAMPLE due to the following," followed by the cause. The cause is a Windows error code, and it decides what the event means. No domain controller reachable (1311, 1722, 1726, 1355, 53) is everyday on a laptop off the network or a machine that has just booted, and clears when a controller answers. A controller that refused the machine (1789 trust relationship failed, 1787 or 1786 no trust account or secret, 5 access denied, 1396 wrong target name) means its computer account or trust no longer matches, and it stays broken until someone repairs it. An internal error (1359) names no cause. Where it appears it is usually present all day, repeated about every four hours, on many domain desktops, with domain sign-in, Group Policy and Kerberos still working.
 
-**When to ignore:** An unreachable or internal-error cause on a laptop away from the office, or once around a boot, with sign-in working.
+**When to ignore:** An unreachable cause on a laptop away from the office or once around a boot, or an internal error (1359) that repeats every few hours, with sign-in and Group Policy working.
 
 **What to check:**
 

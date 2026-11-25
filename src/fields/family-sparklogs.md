@@ -1,6 +1,8 @@
 <!-- GENERATED reference. Do not hand-edit. -->
 # SparkLogs fields
 
+**Use when:** telling an event from a state row, a change or a condition, or finding which topic and reason code an event carries.
+
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
 | `sparklogs.kind` | string |  | The event category that selects its row contract and downstream handling. Producers define additive values; consumers must not infer a closed vocabulary from this field. |

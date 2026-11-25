@@ -1,6 +1,8 @@
 <!-- GENERATED reference. Do not hand-edit. -->
 # Windows event record fields
 
+**Use when:** a question needs a Windows event log record's own fields, such as the event ID, provider, record number, level or the raw event data.
+
 Each Windows event log event keeps the record Windows wrote, under these names. The channel is in `origin`.
 
 | Field | Type | Unit | Present | Meaning |

@@ -8,7 +8,7 @@ Search for the heading "## `<code>`" or a word from the reason's label. Do not r
 
 | reason | label | kind | severity | service | benign | use when |
 |---|---|---|---|---|---|---|
-| `account_changed` | account changed | event | Notice | `security_audit` |  | someone asks who changed a user or computer account's settings, such as password never expires, an account expiry date, allowed sign-in hours or delegation. |
+| `account_changed` | account changed | event | Notice to Warning | `security_audit` |  | someone asks who changed a user or computer account's settings, such as password never expires, an account expiry date, allowed sign-in hours or delegation. |
 | `account_created` | account created | event | Notice | `security_audit` |  | an account appears that nobody asked for, or someone asks who created a user or computer account, locally or in the domain. |
 | `account_deleted` | account deleted | event | Notice | `security_audit` |  | a user's or computer's account is gone and someone asks who deleted it, or services and permissions still name an account that was removed. |
 | `account_disabled` | account disabled | event | Notice | `security_audit` |  | a user cannot sign in because their account was turned off, or someone asks who disabled an account. |
@@ -87,7 +87,7 @@ An existing user or computer account was edited.
 
 **Keywords:** user account changed, account settings changed, account properties modified, who modified the account, password never expires set, account expiration date changed, logon hours changed, trusted for delegation, UserAccountControl changed, computer account changed
 
-**Severity:** Notice
+**Severity:** Notice. Warning when an account other than SYSTEM, LocalService or NetworkService turns on a flag that weakens the account: password not required, password never expires, reversible password encryption, either delegation flag, DES keys only, or Kerberos pre-authentication not required. When one of those three platform accounts turns on such a flag the row stays Notice; it is labeled maintenance only for password never expires, the one the fleet shows as upkeep.
 
 **Why it matters:** The account still exists and still signs in, but what it may do can have changed: an account flag such as password never expires, an expiry date, permitted sign-in hours, or a delegation setting.
 
@@ -116,6 +116,8 @@ An existing user or computer account was edited.
 The target is the principal that was edited and the actor is the principal that edited it.
 config_change.target names the same account again, as the identity of what changed rather than
 as a principal join key; the two answer different questions and both are populated.
+An edit made by SYSTEM, LocalService or NetworkService is categorized as maintenance, which sets
+a management agent's upkeep of its own account apart from the edits people made.
 
 ## `account_created`: account created
 
@@ -342,6 +344,8 @@ One account reset another account's password, and the reset completed.
 The value the credential was set to is never recorded by the event and never reaches any field.
 Every completed reset is recorded at Notice: help-desk resets, LAPS rotating the built-in
 Administrator and management agents rotating their own local account all produce this event.
+A reset made by SYSTEM, LocalService or NetworkService is categorized as maintenance, which
+sets the scheduled rotations apart from the resets people made.
 Check the actor and target fields to tell a requested reset from an unexpected one.
 
 ## `account_password_reset_failed`: account password reset failed

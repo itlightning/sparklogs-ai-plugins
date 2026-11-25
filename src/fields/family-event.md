@@ -1,6 +1,8 @@
 <!-- GENERATED reference. Do not hand-edit. -->
 # Event fields
 
+**Use when:** filtering, sorting or grouping any event by its time, severity, service, source or feed, or finding the original value a feed replaced.
+
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
 | `t` | string | timestamp | When the thing being reported was observed. For an occurrence this is when the fact happened, not when the agent found it. Stored as the event time, the time queries filter and sort on. |

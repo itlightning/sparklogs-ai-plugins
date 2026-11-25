@@ -100,6 +100,7 @@ Prefer these over the per-feed fields for anything that spans feeds.
 
 | LQL path | Family means |
 |---|---|
+| `sparklogs.throttle.window_s` |  |
 | `sparklogs.destination.host` | Where it was going. Both are present when the event names both ends. On sign-in events only the other machine is named, because the reporting machine is the near end. |
 
 ## Tail keys and where the value is queryable
@@ -163,6 +164,7 @@ The last column is different in kind: it is the author's account of the row or e
 | `device_registration_failed` / `directory_refused` | 204, 220, 221, 233, 252, 258, 304, 307 | `win.eventlog.identity_security.directory_error_subcode` `win.eventlog.identity_security.http_status` `win.eventlog.identity_security.registration_attribute` |  |
 | `device_registration_failed` / `directory_unreachable` | 204, 220, 221, 233, 252, 258, 304, 307 | `win.eventlog.identity_security.directory_error_subcode` `win.eventlog.identity_security.http_status` `win.eventlog.identity_security.registration_attribute` |  |
 | `device_registration_failed` / `duplicate_identity` | 204, 220, 221, 233, 252, 258, 304, 307 | `win.eventlog.identity_security.directory_error_code` `win.eventlog.identity_security.directory_error_subcode` `win.eventlog.identity_security.http_status` `win.eventlog.identity_security.registration_attribute` |  |
+| `device_registration_failed` / `not_configured` | 204, 220, 221, 233, 252, 258, 304, 307 | `win.eventlog.identity_security.directory_error_code` `win.eventlog.identity_security.directory_error_subcode` `win.eventlog.identity_security.http_status` `win.eventlog.identity_security.registration_attribute` |  |
 | `device_registration_failed` / `quota_exceeded` | 204, 220, 221, 233, 252, 258, 304, 307 | `win.eventlog.identity_security.directory_error_code` `win.eventlog.identity_security.directory_error_subcode` `win.eventlog.identity_security.http_status` `win.eventlog.identity_security.registration_attribute` |  |
 | `dpapi_unprotect_failed` / `bad_key_state` | 8196, 8198, 8202, 8204, 8205 | `win.eventlog.identity_security.dpapi_failure_reason` `win.eventlog.identity_security.dpapi_master_key_guid` |  |
 | `dpapi_unprotect_failed` / `credential_mismatch` | 8196, 8198, 8202, 8204, 8205 | `win.eventlog.identity_security.dpapi_failure_reason` `win.eventlog.identity_security.dpapi_master_key_guid` |  |
@@ -179,6 +181,8 @@ The last column is different in kind: it is the author's account of the row or e
 | `entra_token_acquisition_failed` / `fallback_step` | 1084, 1094, 1097, 1098, 1112, 1155, 1202, 1215 | `win.eventlog.identity_security.correlation_id` `win.eventlog.identity_security.entra_error_message` |  |
 | `entra_token_acquisition_failed` / `first_party_preauthorization` | 1084, 1094, 1097, 1098, 1112, 1155, 1202, 1215 | `win.eventlog.identity_security.correlation_id` `win.eventlog.identity_security.entra_error_message` |  |
 | `entra_token_acquisition_failed` / `interaction_required` | 1084, 1094, 1097, 1098, 1112, 1155, 1202, 1215 | `win.eventlog.identity_security.correlation_id` `win.eventlog.identity_security.entra_error_message` |  |
+| `entra_token_acquisition_failed` / `non_failure_code` | 1084, 1094, 1097, 1098, 1112, 1155, 1202, 1215 | `win.eventlog.identity_security.correlation_id` `win.eventlog.identity_security.entra_error_message` |  |
+| `entra_token_acquisition_failed` / `not_registered` | 1084, 1094, 1097, 1098, 1112, 1155, 1202, 1215 | `win.eventlog.identity_security.correlation_id` `win.eventlog.identity_security.entra_error_message` |  |
 | `entra_token_acquisition_failed` / `transport` | 1084, 1094, 1097, 1098, 1112, 1155, 1202, 1215 | `win.eventlog.identity_security.correlation_id` `win.eventlog.identity_security.entra_error_message` |  |
 | `entra_token_acquisition_failed` / `unclassified` | 1084, 1094, 1097, 1098, 1112, 1155, 1202, 1215 | `win.eventlog.identity_security.correlation_id` `win.eventlog.identity_security.entra_error_message` |  |
 | `exploit_mitigation_audit_would_block` / `default` | 1, 3, 11 | `win.eventlog.identity_security.mitigation_process` |  |
@@ -206,6 +210,7 @@ The last column is different in kind: it is the author's account of the row or e
 | `ntlm_authentication_used` / `legacy_version` | 4020, 4021, 4022, 4023 | `win.eventlog.identity_security.ntlm_channel_binding` `win.eventlog.identity_security.ntlm_mic_status` `win.eventlog.identity_security.ntlm_usage_reason` `win.eventlog.identity_security.ntlm_version` |  |
 | `ntlm_authentication_used` / `outbound` | 4020, 4021, 4022, 4023 | `win.eventlog.identity_security.ntlm_channel_binding` `win.eventlog.identity_security.ntlm_mic_status` `win.eventlog.identity_security.ntlm_usage_reason` `win.eventlog.identity_security.ntlm_version` |  |
 | `vbs_key_isolation_failed` / `isolation_failed` | 13, 26 | `win.eventlog.identity_security.crypto_function` `win.eventlog.identity_security.vbs_can_be_enabled` `win.eventlog.identity_security.vbs_restart_attempts` `win.eventlog.identity_security.vbs_restart_successes` |  |
+| `vbs_key_isolation_failed` / `stored_key_unreadable` | 13, 26 | `win.eventlog.identity_security.crypto_function` `win.eventlog.identity_security.vbs_can_be_enabled` `win.eventlog.identity_security.vbs_restart_attempts` `win.eventlog.identity_security.vbs_restart_successes` |  |
 | `vbs_key_isolation_failed` / `unavailable` | 13, 26 | `win.eventlog.identity_security.crypto_function` `win.eventlog.identity_security.vbs_can_be_enabled` `win.eventlog.identity_security.vbs_restart_attempts` `win.eventlog.identity_security.vbs_restart_successes` |  |
 | `windows_hello_key_registration_failed` / `key_operation_failed` | 303, 310, 311, 317, 385, 6010, 7002, 7611 | `win.eventlog.identity_security.whfb_key_status` |  |
 | `windows_hello_key_registration_failed` / `no_attestation_hardware` | 303, 310, 311, 317, 385, 6010, 7002, 7611 | `win.eventlog.identity_security.whfb_key_status` |  |

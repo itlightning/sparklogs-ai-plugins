@@ -241,6 +241,7 @@ The last column is different in kind: it is the author's account of the row or e
 | `dns_client_resolution_timed_out` / `default` | 1014 | `win.eventlog.system.dns_query_name` |  |
 | `dns_registration_failed` / `default` | 8015, 8016, 8017, 8018, 8019, 8020, 8021, 8022, 8023, 8024, 8025, 8026, 8033, 8034, 8035, 8036, 8037, 8038 | **fields: none** |  |
 | `domain_secure_channel_failed` / `dc_unreachable` | 5719 | **fields: none** |  |
+| `domain_secure_channel_failed` / `internal_error` | 5719 | **fields: none** |  |
 | `domain_secure_channel_failed` / `other_cause` | 5719 | **fields: none** |  |
 | `domain_secure_channel_failed` / `trust_broken` | 5719 | **fields: none** |  |
 | `driver_load_failed` / `failed` | 219 | `win.eventlog.system.device_instance` `win.eventlog.system.driver_name` |  |
@@ -423,6 +424,7 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `disk_surprise_removal` / `default`
 - `dns_registration_failed` / `default`
 - `domain_secure_channel_failed` / `dc_unreachable`
+- `domain_secure_channel_failed` / `internal_error`
 - `domain_secure_channel_failed` / `other_cause`
 - `domain_secure_channel_failed` / `trust_broken`
 - `ephemeral_port_alloc_failed` / `default`

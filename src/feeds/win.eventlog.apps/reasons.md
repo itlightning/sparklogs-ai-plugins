@@ -15,7 +15,7 @@ Search for the heading "## `<code>`" or a word from the reason's label. Do not r
 | `appx_deployment_failed` | appx deployment failed | event | Verbose to Notice | `patching` | benign possible | a Store or packaged app will not install, update or uninstall for a user, including a Store download that ends in an error code or a policy that blocks Store apps or sideloading. |
 | `appx_deployment_requeued` | appx deployment requeued | event | Verbose | `patching` |  | a Store or packaged app install or update keeps retrying and does not finish, and a technician wants to know why Windows put it back on the queue. |
 | `appx_package_runtime_corrupt` | appx package runtime corrupt | event | Notice to Warning | `app_stability` |  | a Store or packaged app will not start because Windows found its installed package damaged, and a technician needs to know whether Windows repaired it or a Repair, Reset or reinstall is needed. |
-| `appx_provisioning_failed` | appx provisioning failed | event | Info to Notice | `app_stability` | benign possible | a built-in or Store app is missing or not ready for a user after they sign in, often on a new profile's first sign-in, and a technician needs the package and result code. |
+| `appx_provisioning_failed` | appx provisioning failed | event | Verbose to Notice | `app_stability` | benign possible | a built-in or Store app is missing or not ready for a user after they sign in, often on a new profile's first sign-in, and a technician needs the package and result code. |
 | `appx_service_start_failed` | appx service start failed | event | Info to Notice | `patching` | benign possible | Store or packaged app installs and updates fail because the app deployment client could not start or connect to a service it depends on, and a technician needs to know which service. |
 | `perf_counter_provider_failed` | perf counter provider failed | event | Debug | `app_stability` |  | Performance Monitor or a monitoring tool shows no data or missing counters for one component, and a technician needs to know whether its counters failed to register. |
 | `wcf_request_failed` | wcf request failed | event | Minor | `app_stability` |  | a line-of-business service hosted on WCF throws exceptions on some requests, and a developer or technician needs the exception type and application domain from the WCF operational log. |
@@ -242,11 +242,11 @@ App Readiness reported a failed app operation for a user.
 
 **Keywords:** apps missing after first sign-in, new user profile missing apps, built-in apps missing for new user, app not ready after sign-in, provisioned app failed, per-user app setup failed, first logon app setup
 
-**Severity:** Notice or Info
+**Severity:** Notice, Info or Verbose
 
 **Why it matters:** A built-in or provisioned app may be missing or not ready for the user until a later attempt succeeds.
 
-**In practice:** App Readiness prepares packaged apps for each user, for example at a user's first sign-in. It writes events 10, 214, 215, 218 and 319 to the Microsoft-Windows-AppReadiness/Admin log and events 11 and 304 to its Operational log. The line carries the package, the operation and the result code. Event 218 means App Readiness scheduled another attempt, and result 0x80073d02 means the package was in use. Both show as Info. Other failures show as Notice.
+**In practice:** App Readiness prepares packaged apps for each user, for example at a user's first sign-in. It writes events 10, 214, 215, 218 and 319 to the Microsoft-Windows-AppReadiness/Admin log and events 11 and 304 to its Operational log. The line carries the package, the operation and the result code. Event 218 means App Readiness scheduled another attempt and shows as Info. Result 0x80073d02 means the package was in use, and shows as Verbose. Other failures show as Notice.
 
 **When to ignore:** Event 218 (retry scheduled) and result 0x80073d02 (package in use) are routine.
 

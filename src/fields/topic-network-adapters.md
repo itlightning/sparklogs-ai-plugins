@@ -1,7 +1,13 @@
 <!-- GENERATED reference. Do not hand-edit. -->
-# Network adapters fields
+# Network adapters
 
-Full inventory every hour. Supported changes are reported when the agent observes them.
+Every network adapter the operating system lists, physical, virtual, VPN and disconnected alike, with its type, link status and speed, MAC address, IP addresses and how each was assigned, DNS servers, gateways, DHCP and metric settings, and filter drivers.
+
+**Use when:** no network or a 169.254 address, a wired link running slower than usual, a slow emulated network card on a VM, or a static IP, DNS server or gateway that changed.
+
+Named change events cover configured settings (enabled or disabled, MTU, IPv4 DHCP, metric, static addresses, DNS and gateways, filter drivers); other moves such as link state or DHCP-assigned addresses show as ordinary changes. No change says who made it.
+
+Full inventory every hour. Changes are reported between inventories.
 
 | Field | Type | Unit | Meaning |
 |---|---|---|---|

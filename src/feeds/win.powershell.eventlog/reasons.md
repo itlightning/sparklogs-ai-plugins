@@ -24,9 +24,9 @@ A PowerShell script block that is generated code, such as the proxy module Power
 
 **Why it matters:** None on its own. It shows which PowerShell command sets are imported on the host.
 
-**In practice:** PowerShell writes event 4104 (Event Viewer, Applications and Services Logs, Microsoft, Windows, PowerShell, Operational) for each script block it processes while script block logging is on. This line reads "framework block" and names the signature that matched, the functions the block declares, the commands it calls and a content hash. The block is code PowerShell or a module generated: a CIM cmdlet proxy set, the proxy module Import-PSSession builds for implicit remoting or one of the proxy functions in it, a diagnostic package, or a module manifest's data block. It is the same on every host that imports the same module, so it shows which command sets are in use there, not what anyone ran. Generated code is not attached. A manifest data block keeps its text.
+**In practice:** PowerShell writes event 4104 (Event Viewer, Applications and Services Logs, Microsoft, Windows, PowerShell, Operational) for each script block it processes while script block logging is on. This line reads "framework block" and names the signature that matched, the functions the block declares, the commands it calls and a content hash. The block is code PowerShell or a module generated: a CIM cmdlet proxy set, one of the proxy functions Import-PSSession builds for implicit remoting, a diagnostic package, or a module manifest's data block. It is the same on every host that imports the same module, so it shows which command sets are in use there, not what anyone ran. Generated code is not attached. A manifest data block keeps its text.
 
-**When to ignore:** Pass over the command names inside these blocks: a storage proxy names Format-Volume and Remove-Item without either one running.
+**When to ignore:** Pass over the command names inside these blocks: a storage proxy declares Format-Volume and Remove-Item without either one running.
 
 **What to check:**
 
@@ -36,7 +36,7 @@ A PowerShell script block that is generated code, such as the proxy module Power
 **Related:**
 
 - `win_powershell_script_block_repeated`: a rerun of a block already stored in full, shipped as a count
-- `win_powershell_script_block_sensitive_command`: a block naming a watched command. Generated code that wraps such commands lands here instead
+- `win_powershell_script_block_sensitive_command`: a block naming a watched command. A block with a framework signature that also names one lands there instead
 
 **Example:** Importing a CIM-based module compiles its cmdletization proxy, which declares __cmdletization_BindCommonParameters and calls Set-StrictMode.
 
@@ -82,15 +82,15 @@ A PowerShell script block named a command on the watchlist of operations worth r
 
 **Use when:** someone asks whether risky PowerShell commands, such as deleting shadow copies, turning off Defender, clearing a log or downloading files, appeared in a script processed on this machine.
 
-**Keywords:** suspicious PowerShell, risky PowerShell command, malicious PowerShell script, vssadmin delete shadows, delete shadow copies script, Set-MpPreference, PowerShell script changing Defender settings, Clear-EventLog, wevtutil cl, Disable-BitLocker, ConvertTo-SecureString, plaintext password in script, EncodedCommand, mimikatz, Invoke-WebRequest download
+**Keywords:** suspicious PowerShell, risky PowerShell command, malicious PowerShell script, vssadmin delete shadows, delete shadow copies script, Set-MpPreference, PowerShell script changing Defender settings, Clear-EventLog, wevtutil cl, Disable-BitLocker, ConvertTo-SecureString, plaintext password in script, ConvertTo-SecureString AsPlainText, EncodedCommand, mimikatz, Invoke-WebRequest download
 
-**Severity:** Warning when the block names a high-impact command (deleting shadow copies, backups, volumes, directory objects or virtual machines, clearing a log, disabling BitLocker, System Restore or Defender, building a credential from plaintext); Notice for every other watched command. A rerun of a script from a management agent directory is Info. Never a failure claim: the event records the block, not an outcome.
+**Severity:** Warning when the block names a high-impact command (deleting shadow copies, backups, volumes, directory objects or virtual machines, clearing a log, disabling BitLocker, System Restore or Defender, building a credential from plaintext); Notice for every other watched command. A routine block from a management agent directory is Info, and so is a rerun of a high-impact one. Never a failure claim: the event records the block, not an outcome.
 
 **Why it matters:** The named command was in a block processed on this host. Whether it ran, and what it did, is not recorded here, so treat it as a pointer into the script, not an outcome.
 
-**In practice:** PowerShell writes event 4104 to the Microsoft-Windows-PowerShell/Operational log for each script block it processes while script block logging is on. This line names the family of the watched command the block contains, such as "script block with a watched data-removal command", then the tokens that matched, the commands it calls and any path, host or account its parameters name. The event records that the block was processed. It does not say the command ran or succeeded. A short high-impact set (deleting shadow copies, backups or volumes, clearing a log, disabling BitLocker or Defender, building a credential from plaintext) shows as Warning. Downloads, remoting, recursive deletes, execution-policy changes and the rest show as Notice. A rerun of a script from a known management agent's folder shows as Info.
+**In practice:** PowerShell writes event 4104 to the Microsoft-Windows-PowerShell/Operational log for each script block it processes while script block logging is on. This line names the family of the watched command the block contains, such as "script block with a watched data-removal command", then the tokens that matched, the commands it calls and any path, host or account its parameters name. The event records that the block was processed. It does not say the command ran or succeeded. A short high-impact set (deleting shadow copies, backups or volumes, clearing a log, disabling BitLocker or Defender, building a credential from plaintext) shows as Warning. Downloads, remoting, recursive deletes, execution-policy changes and the rest show as Notice. ConvertTo-SecureString counts as high impact only with -AsPlainText; without it the cmdlet decrypts a stored protected string. A script from a known management agent's folder shows as Info, except that the first copy of a high-impact block keeps Warning.
 
-**When to ignore:** Matching reads text, so a command named in a comment or a string scores like one the block calls. Read the block before trusting the family. Reruns from your own RMM or management tools are routine.
+**When to ignore:** Matching reads text, so a command named in a comment or a string scores like one the block calls. Read the block before trusting the family. Scripts from your own RMM or management tools are routine.
 
 **What to check:**
 

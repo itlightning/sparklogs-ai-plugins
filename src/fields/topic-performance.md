@@ -1,5 +1,11 @@
 <!-- GENERATED reference. Do not hand-edit. -->
-# Host performance fields
+# Host performance
+
+Whole-machine CPU load and run queue, memory, commit and page file pressure, disk and physical network throughput, TCP resends and round-trip times, Wi-Fi signal, and the agent's gateway, internet and DNS tests, plus an event when the machine settles on a different main network.
+
+**Use when:** a slow or unresponsive machine, high CPU or memory alerts, a laptop that keeps waking from sleep, or the internet being slow or dropping.
+
+Readings are 5-minute averages; disks and adapters appear only as machine totals plus the busiest disk, busiest physical adapter, Wi-Fi radio and paging disk, with per-disk detail in Storage device IO and per-adapter detail in Network adapter IO. A network move is reported only once the new network lasts a couple of minutes.
 
 Reported every 5 minutes on clock boundaries for the window ending at `t`. `sparklogs.window_coverage_pct` is below 100 when collection covered only part of the window. Use chart buckets at least 5 minutes wide.
 

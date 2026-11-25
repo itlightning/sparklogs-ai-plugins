@@ -1,6 +1,8 @@
 <!-- GENERATED reference. Do not hand-edit. -->
 # Rate limit fields
 
+**Use when:** a repeating event shows up less often than it happens, or the question is how many of its kind were left out.
+
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
 | `sparklogs.throttle.key` | string |  | The group the limit counts events in. |

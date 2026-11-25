@@ -28,7 +28,7 @@ Search for the heading "## `<code>`" or a word from the reason's label. Do not r
 | `crypto_key_operation_failed` | crypto key operation failed | event | Debug to Notice | `certificates` | benign possible | a technician needs to know why a key operation failed in the software or the TPM-backed key storage provider, for example behind a Windows Hello or device registration failure. |
 | `defender_sensor_connection_failed` | defender sensor connection failed | event | Info to Warning | `endpoint_protection` | benign possible | Microsoft Defender for Endpoint shows a device as not reporting or with impaired communications, or the sensor cannot reach the Defender cloud through the proxy or firewall. |
 | `device_encryption_enable_failed` | device encryption enable failed | event | Notice to Warning | `encryption` |  | a new or reset laptop that should encrypt itself automatically, or one where Intune or policy requires silent BitLocker encryption, still has an unencrypted system drive. |
-| `device_registration_failed` | device registration failed | event | Notice to Warning | `device_management` |  | a domain PC will not finish Microsoft Entra hybrid join, dsregcmd /status shows it not joined, or the device never appears or stays pending in Entra ID. |
+| `device_registration_failed` | device registration failed | event | Info to Warning | `device_management` | benign possible | a domain PC will not finish Microsoft Entra hybrid join, dsregcmd /status shows it not joined, or the device never appears or stays pending in Entra ID. |
 | `dpapi_unprotect_failed` | dpapi unprotect failed | event | Notice | `certificates` |  | saved passwords, credentials or a certificate's private key cannot be opened after a password reset, a profile move or a new device, and a technician needs to know whether the protected data is lost. |
 | `entra_device_certificate_update_failed` | entra device certificate update failed | event | Notice to Warning | `device_management` |  | a technician needs to know why an Entra-joined device could not renew the certificate that proves its registration, before Conditional Access stops seeing it as a registered device. |
 | `entra_sign_in_failed` | entra sign in failed | event | Notice to Warning | `auth` |  | a user cannot sign in to an Entra-joined PC with a work account, and a technician needs to know whether the password was refused or Entra ID could not be reached. |
@@ -54,7 +54,7 @@ An AppLocker rule running in audit mode would have blocked this file under enfor
 
 **Keywords:** AppLocker audit mode, AppLocker Audit only, would have been prevented from running, AppLocker rule testing, AppLocker EXE rules, AppLocker DLL rules, before enforcing AppLocker, AppLocker allowlisting audit, managed installer rule
 
-**Severity:** Notice for a file under the executable or script rules. Info under the DLL and managed-installer rules, where one record per file a day is kept.
+**Severity:** Notice for a file under the executable rules, where one record per file every 12 hours is kept. Info under the DLL and managed-installer rules, where one record per file a day is kept.
 
 **Why it matters:** Nothing was blocked and the file ran. Once the policy is enforced, this file stops running unless a rule allows it.
 
@@ -655,13 +655,13 @@ The device tried to register itself with the directory and failed.
 
 **Keywords:** hybrid join failed, hybrid Azure AD join failed, Entra hybrid join failed, dsregcmd /status not joined, AzureAdJoined : NO, Automatic-Device-Join task, device not showing in Entra, device pending registration, device quota exceeded
 
-**Severity:** Warning or Notice
+**Severity:** Warning, Notice or Info
 
 **Why it matters:** The device has no directory identity, so Conditional Access and other policies that depend on device state do not apply to it. The user can still work on it.
 
-**In practice:** Windows writes these events to the Microsoft-Windows-User Device Registration/Admin log when the device's attempt to register itself, such as a Microsoft Entra hybrid join, fails. The outcome events carry the same exit code on every failure, so the cause comes from the events beside them. Event 220 means the device could not resolve its own fully qualified name. Event 221 means it could not connect to a domain controller over LDAP, or connected and was refused. A server response naming the directory object quota, or an error_hostname_duplicate subcode, means the directory refused the device itself. The task tries again on its own schedule.
+**In practice:** Windows writes these events to the Microsoft-Windows-User Device Registration/Admin log when the device's attempt to register itself, such as a Microsoft Entra hybrid join, fails. The outcome events carry the same exit code on every failure, so the cause comes from the events beside them. Event 220 means the device could not resolve its own fully qualified name. Event 221 means it could not connect to a domain controller over LDAP, or connected and was refused. A server response naming the directory object quota, or an error_hostname_duplicate subcode, means the directory refused the device itself. Exit code 0x801C001D means the device found no service connection point in Active Directory, which is how a domain without hybrid join looks; it shows as Info. The task tries again on its own schedule.
 
-**When to ignore:** Event 220 or 221 that could not reach the directory, on a laptop off the corporate network that registers once it is back.
+**When to ignore:** Event 220 or 221 that could not reach the directory, on a laptop off the corporate network that registers once it is back, and exit code 0x801C001D where the client never set up hybrid join.
 
 **What to check:**
 
@@ -669,6 +669,7 @@ The device tried to register itself with the directory and failed.
 - Work bottom up: when event 220 or 221 appears, the registration failure is a symptom of name resolution or domain controller reach.
 - A refusal (an LDAP result from the server, or access denied on the lookup) points at the computer object, the rights on it or the credentials presented, so a connectivity check finds nothing.
 - If only the outcome events appear, check the service connection point in Active Directory.
+- Exit code 0x801C001D means hybrid join is not configured for the domain. Configure the service connection point only if the client wants hybrid join.
 - A quota or duplicate-name response needs directory cleanup: remove stale device objects, or rename one of the two devices.
 
 **Related:**
@@ -783,9 +784,9 @@ The device failed to get a token for a cloud resource.
 
 **Why it matters:** Depends on the cause. A disabled or locked account or device, or a device key fault, keeps the resource behind that token unavailable to the user until it is fixed (a lockout clears itself after its period), and a tenant configuration error affects every device in the tenant. A fallback step or a sign-in prompt is normal flow, and an application registration error affects only that application.
 
-**In practice:** The Microsoft Entra plugin writes events 1084, 1094, 1097, 1098, 1112, 1155, 1202 and 1215 to the Microsoft-Windows-AAD/Operational log when a token for a cloud resource was not obtained. The error message on the event, written by the authentication library, says why. The numeric code alone does not separate the cases. Most records are normal flow: one step of the fallback chain (refresh token, then primary refresh token, then Windows integrated authentication), or a request for the user to sign in again. A disabled or locked user or device (AADSTS50057, AADSTS50053, AADSTS135011, AADSTS130007), or a device key the TPM could not use, is a real fault and ships at Warning.
+**In practice:** The Microsoft Entra plugin writes events 1084, 1094, 1097, 1098, 1112, 1155, 1202 and 1215 to the Microsoft-Windows-AAD/Operational log when a token for a cloud resource was not obtained. The error message on the event, written by the authentication library, says why. The numeric code alone does not separate the cases. Most records are normal flow: one step of the fallback chain (refresh token, then primary refresh token, then Windows integrated authentication), or a request for the user to sign in again. On a device joined to Active Directory only, file not found (0x80070002) and 0xCAA9004D on event 1097 mean the device has no Entra registration, so there was no token to get. A disabled or locked user or device (AADSTS50057, AADSTS50053, AADSTS135011, AADSTS130007), or a device key the TPM could not use, is a real fault and ships at Warning.
 
-**When to ignore:** Fallback steps, sign-in prompts, transport errors on a device off the network, and the Microsoft first-party preauthorization record, which ship at Info or Verbose.
+**When to ignore:** Fallback steps, sign-in prompts, transport errors on a device off the network, the not-registered record on a device joined to Active Directory only, and the Microsoft first-party preauthorization record, which ship at Info or Verbose.
 
 **What to check:**
 
@@ -847,9 +848,9 @@ Exploit protection stopped a process from an action its policy forbids, under en
 
 **Why it matters:** The process could not perform the forbidden action. If the application needed it, the application fails or stops working.
 
-**In practice:** Exploit protection writes events 2, 4, 6, 10, 12, 32, 34 and 36 to the Microsoft-Windows-Security-Mitigations/KernelMode log when an enforced mitigation stops a process. Each ID belongs to a different mitigation, and the record names the process. Browsers, collaboration clients and document viewers turn these mitigations on for their own sandboxed child processes, so a refusal for a program under the Windows or Program Files folders is usually the design working, and it ships at Verbose. A program running from anywhere else, such as a user profile or a temp folder, ships at Notice. Not collected: event 2 at Information level or below, which Windows writes as it applies mitigations at every process start.
+**In practice:** Exploit protection writes events 2, 4, 6, 10, 12, 32, 34 and 36 to the Microsoft-Windows-Security-Mitigations/KernelMode log when an enforced mitigation stops a process. Each ID belongs to a different mitigation, and the record names the process. Browsers, collaboration clients and document viewers turn these mitigations on for their own sandboxed child processes, so a refusal for a program under the Windows or Program Files folders is usually the design working, and it ships at Verbose. So do Microsoft Defender's own platform folder, C:\ProgramData\Microsoft\Windows Defender\Platform, and the Defender for Endpoint sensor folder, C:\ProgramData\Microsoft\Windows Defender Advanced Threat Protection. Each of these folders counts only at the root of a drive. A program running from anywhere else, such as a user profile or a temp folder, ships at Notice. Not collected: event 2 at Information level or below, which Windows writes as it applies mitigations at every process start.
 
-**When to ignore:** Verbose records for programs under the Windows or Program Files folders, which are vendor sandboxes working as designed.
+**When to ignore:** Verbose records for programs under the Windows or Program Files folders, the Defender platform folder or the Defender for Endpoint sensor folder, which are vendor sandboxes or Defender itself working as designed.
 
 **What to check:**
 
@@ -867,7 +868,7 @@ Exploit protection stopped a process from an action its policy forbids, under en
 
 **Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/feeds/eventlog-identity-security#exploit_mitigation_blocked, https://sparklogs.com/reference/reasons/exploit_mitigation_blocked.json
 
-The enforcing records on the kernel-mode id that arrives at volume are rate-bounded: three per image path per device per day, with the count of what a day suppressed carried on the next day's first record. Read the paths, not the counts.
+The enforcing records are rate-bounded: three per event ID and image path per device per day, with the count of what a day suppressed carried on the next day's first record. The first record of a program on an ID always ships. Read the paths, not the counts.
 
 ## `exploit_mitigation_shadow_stack_mismatch`: exploit mitigation shadow stack mismatch
 
@@ -1087,23 +1088,24 @@ This machine used the legacy NTLM authentication protocol, as a client or as a s
 
 ## `vbs_key_isolation_failed`: vbs key isolation failed
 
-The isolated key environment that virtualization-based security provides is failing on this device.
+The isolated key environment that virtualization-based security provides is failing on this device, or a key handed to it could not be decrypted there.
 
 **Use when:** a technician needs to know why keys that should be held in memory isolated by virtualization-based security are not, or whether the device's hardware or firmware supports it.
 
-**Keywords:** VBS key protection, VBS key isolation, virtualization-based security key protection, isolated key environment failed, VBS not supported by hardware, virtualization-based security keys
+**Keywords:** VBS key protection, VBS key isolation, virtualization-based security key protection, isolated key environment failed, VBS not supported by hardware, virtualization-based security keys, NTE_VBS_CANNOT_DECRYPT_KEY
 
-**Severity:** Notice or Info
+**Severity:** Notice, Display or Info
 
-**Why it matters:** Keys that should be held in hardware-isolated memory are not. Every caller keeps working, so nothing is unavailable.
+**Why it matters:** A key meant to be held in memory isolated by virtualization-based security is not getting that protection. The program that asked for the key decides whether it falls back, and the event does not show whether it did.
 
-**In practice:** Windows writes event 13 or 26 to the Microsoft-Windows-Crypto-NCrypt/Operational log when the isolated environment that virtualization-based security uses to hold keys fails. Event 26 carries counts of restart attempts and successes, and whether the feature can be enabled at all. When the platform says it cannot be enabled, the hardware or firmware lacks support, Windows keeps retrying, and those records ship at Info.
+**In practice:** Windows writes event 13 or 26 to the Microsoft-Windows-Crypto-NCrypt/Operational log when the isolated environment that virtualization-based security uses to hold keys fails. Event 26 carries counts of restart attempts and successes, and whether the feature can be enabled at all. When the platform says it cannot be enabled, the hardware or firmware lacks support, Windows keeps retrying, and those records ship at Info. Event 13 with status 0x8009003a (NTE_VBS_CANNOT_DECRYPT_KEY) is different: a key handed to the isolated environment could not be decrypted there. The event names neither the key nor the program that asked for it. It usually repeats a couple of times an hour, all day, and those records ship at Display. The event does not say why the key could not be decrypted.
 
-**When to ignore:** When the platform states the feature cannot be enabled on this hardware.
+**When to ignore:** When the platform states the feature cannot be enabled on this hardware, or when event 13 with status 0x8009003a repeats and no program on the device reports a key or sign-in failure.
 
 **What to check:**
 
 - Check whether virtualization-based security should be on for this device. `msinfo32` shows its state.
+- For event 13 with status 0x8009003a, the status reports a key that could not be decrypted rather than an unavailable feature, so the virtualization-based security setting is not the first thing to check. Check whether a program on the device reports a key or sign-in failure at the same times.
 - Where the platform states the feature cannot be enabled, the hardware or firmware cannot support it and retrying does not change the outcome.
 
 **Related:**
