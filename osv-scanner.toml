@@ -1,0 +1,8 @@
+# The only exceptions to `scripts/check-advisories.mjs`: one entry per advisory, each with the
+# advisory id and why it does not apply or cannot be fixed yet. No severity threshold and no
+# package-wide ignore; the script rejects any other key or syntax. Format (one line per value):
+#
+#   [[IgnoredVulns]]
+#   id = "GHSA-xxxx-xxxx-xxxx"
+#   reason = "Why this advisory does not reach us, or what blocks the upgrade."
+#   ignoreUntil = 2027-01-31  # optional: the ignore lapses and the check goes red again

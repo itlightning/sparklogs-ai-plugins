@@ -167,6 +167,23 @@ running them locally before tagging:
   LQL paths and app tokens from committed `src/feeds/` and `guides/app-vocabulary.md` when the
   sibling is missing. An explicit `SPARKLOGS_SOURCE_LIBRARY_DIR` that is unusable still fails.
 
+## Dependency advisories (`scripts/check-advisories.mjs`)
+
+`yarn validate` starts with this check (alone: `yarn check-advisories`), so the required `validate` check and every release run it.
+It scans every tracked lockfile (today `yarn.lock`) with a pinned osv-scanner against the live OSV database and fails on any advisory, whatever its severity.
+It also fails when the database cannot be reached, when a lockfile yields no packages, and when a tracked `package.json` (or other manifest) has no lockfile beside it: none of those is a clean result.
+It needs network on every run, including on a workstation.
+
+The scanner is pinned in `scripts/osv-scanner-pin.yaml`: one URL and sha256 per platform, taken from the release's own `osv-scanner_SHA256SUMS`.
+It downloads to `build/osv-scanner/<version>/` on first use and the digest is checked on every run; a mismatched file is deleted.
+To bump it, change the version, both URLs and both digests together.
+
+When the check fails, upgrade the dependency (the smallest release that fixes it).
+The only exception is an `[[IgnoredVulns]]` entry in `osv-scanner.toml` with the advisory `id`, a `reason` saying why it does not reach us or what blocks the fix, and optionally `ignoreUntil = YYYY-MM-DD`, after which the check goes red again.
+Each entry is reviewed like code.
+The script reads that file with a strict one-line-per-value grammar and rejects anything else, so a package-wide or severity-based exception cannot be written.
+Dependabot security updates stay on; they propose the upgrades this check demands.
+
 ## Versioning
 
 All hosts share one product version. Source files do not contain a release version. The release workflow derives `VERSION` from a human-created tag such as `v1.2.3`.
@@ -266,13 +283,13 @@ Completed at v1.0.0 launch. Keep this section for new repos, disaster recovery, 
 
 - Set **`dist`** as the **default branch** (marketplace install docs assume the default branch).
 - Copy final brand assets from marketing into `assets/`: `logo.svg`, `logo.png`, `icon.svg`, `icon-256.png`, `icon-512.png`.
-- Disable squash merges; allow merge commits and/or rebase merges only.
+- Allow squash merges only (the `source` ruleset also limits merges to squash).
 - Configure **GitHub rulesets** (not legacy branch protection). See [GitHub rulesets](#github-rulesets) below.
 - Create the **release GitHub App**, **`release` environment** (secrets + deployment branch policy), and **`dist`** ruleset App bypass. See [Release GitHub App and `release` environment](#release-github-app-and-release-environment).
 - Require 2FA for org members and outside collaborators.
 - Enable secret scanning and push protection.
 - Enable Dependabot security updates for `package.json` and `yarn.lock`; do not auto-merge dependency PRs.
-- DCO on `source`: enforced by the **DCO check** step in [`.github/workflows/validate.yml`](.github/workflows/validate.yml) (no separate GitHub App or repo setting). Ruleset on `source` must require status check **`Validate / validate`**. Optional: install the [DCO](https://github.com/apps/dco) App for a redundant check (not needed if CI + ruleset are in place).
+- DCO on `source`: enforced by the **DCO check** step in [`.github/workflows/validate.yml`](.github/workflows/validate.yml) (no separate GitHub App or repo setting). Ruleset on `source` must require status checks **`validate`** and **`pinact`**. Optional: install the [DCO](https://github.com/apps/dco) App for a redundant check (not needed if CI + ruleset are in place).
 - Set `security@itlightning.com` as the vulnerability reporting channel.
 - Repo **Settings → Actions → General → Fork pull request workflows**: keep the default (no secrets on fork workflows).
 
@@ -290,7 +307,7 @@ Use **Settings → Rules → Rulesets** (branch rulesets + tag rulesets). Do **n
 |------|---------|
 | Require a pull request before merging | On, **1** approval |
 | Require review from Code Owners | On ([`CODEOWNERS`](CODEOWNERS)) |
-| Require status checks to pass | **`Validate / validate`** |
+| Require status checks to pass | **`validate`** and **`pinact`** |
 | Require conversation resolution | On |
 | Block force pushes | On |
 | Restrict deletions | On |

@@ -45,9 +45,7 @@ jobs:
               exit 1
             }
           done
-      - name: Informational dependency audit
-        run: yarn npm audit --severity high || true
-      - name: Validate source and reproducibility
+      - name: Validate source, dependency advisories and reproducibility
         run: yarn run validate
       - name: Validate rendered packages
         run: yarn run validate:rendered
