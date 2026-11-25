@@ -161,8 +161,8 @@ If pressed again, keep the same limits: certainty rises with new evidence, not w
 **Why it's wrong.** Raw events are the last step.
 A grouped result shows what the population looks like before you spend the context window reading a slice of it.
 
-**Recovery.** For a question about one device, first call `query_device_health` (tool) with `view` (arg) `device_overview` (value) over a window that opens before the problem.
-Then read events from wide to narrow: `summarize_events_by_severity` (tool), then `describe_event_patterns` (tool), then `count_events_matching_filter` (tool) with an LQL filter, and `query_raw_events` (tool) once the list is narrow.
+**Recovery.** To diagnose a problem on one device, `query_device_health` (tool) with `view` (arg) `device_overview` (value) over a window that opens before the problem gives the big picture.
+Read events from wide to narrow: `summarize_events_by_severity` (tool), then `describe_event_patterns` (tool), then `count_events_matching_filter` (tool) with an LQL filter, and `query_raw_events` (tool) once the list is narrow.
 
 ### Re-running queries instead of refining cached results
 

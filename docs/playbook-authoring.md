@@ -45,7 +45,7 @@ Group-by is part of the question: one noun, one field; two nouns, a cross-tab.
 Name the field that carries the discriminator (`reason`, `vss_writer`, `instance`, `status_meaning`).
 Do not teach `describe_event_patterns` or `refine_query_result` here; the skill already knows those.
 
-Device-health sections name the view, the reading parts and the result-set columns (`heat_spans`, `outages`, `private_commit_bytes_last`), reasons and the claim each encodes.
+Device-health sections name the view, the reading parts and the result-set columns (`heat_blocks`, `outages`, `private_commit_bytes_peak`), reasons and the claim each encodes.
 Do not paste a full `query_device_health(...)` call; the worked calls live in `guides/device-state-fields.md`.
 Text targets the newest SparkLogs MCP server build, released or not: the plugin and the server ship together, so keep no wording or fallback for an older response shape. Check every name against that build's tool input schema and a real response before committing.
 

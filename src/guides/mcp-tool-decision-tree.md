@@ -3,7 +3,7 @@
 Decision tree for which tool to use when, plus judgment the live tool descriptions do not carry.
 
 Use the live server contract for parameter names, limits and result semantics.
-If your host omitted server instructions or a term is unclear, call `server_info` (tool) with `include_instructions: true`.
+If your host omitted server instructions or a term is unclear, call `server_info` (tool).
 For view selection, fieldset membership, aggregation or paging details missing from the short description, use `describe_tool` (arg) with that tool name.
 Retrieve the reference when needed, not before every call.
 
@@ -13,9 +13,9 @@ There are **nineteen** tools: `find_org_or_device` (tool), `list_sources` (tool)
 
 **Cross-cutting (full detail in MCP server instructions):**
 
-- **Funnel:** coverage before claims (`find_org_or_device` (tool) → device overview for one device → `summarize_events_by_severity` (tool) → `describe_event_patterns` (tool) → `count_events_matching_filter` (tool) → `query_raw_events` (tool) last). For one device or a few, device health starts with a device view.
+- **Funnel:** coverage before claims (`find_org_or_device` (tool) → `summarize_events_by_severity` (tool) → `describe_event_patterns` (tool) → `count_events_matching_filter` (tool) → `query_raw_events` (tool) last). The device overview gives one device's big picture; the server instructions say when to reach for it.
 - **`external_investigation_id` (arg):** required on every scoped/data call except `server_info` (tool); reuse within one investigation, mint fresh for a new one.
-- **Time windows:** flat `start` (arg) / `end` (arg) in RFC3339 UTC; no relative shorthand.
+- **Time windows:** flat `start` (arg) / `end` (arg) as a date and time; one with no offset is read as UTC; no relative shorthand.
 - **Scope filters:** service → app → subsource → category → pattern, plus curated `sparklogs.reason` (LQL): `guides/scope-ladder.md`. An empty rung is not a finding.
 - **Prohibitions:** volume and first/last bounds never prove interior coverage; absence of a feed report is not evidence.
 
@@ -39,8 +39,8 @@ Choose by the question: device state, process trends, event counts or raw eviden
 |---|---|
 | `find_org_or_device` (tool) | You have a name (client, host, ticket) and need an `org_id` (col). Always first. Collection/completeness live here. Multiple rows at the same best `match_kind` (col): confirm with the engineer before proceeding, don't guess. |
 | `list_sources` (tool) | Before concluding anything from an absence: did this source send data in THIS window? Any source type, including ingest keys. |
-| `query_device_health` (tool) | Device conditions, inventories and trends. For one device or a few, start with `view` (arg) `device_overview` (value) or `device_network` (value), then drill down. Across devices: omit the view for open conditions, `group_by_reason` (arg) for device counts, `fleet_processes` (value) / `fleet_performance` (value) for outliers. Crash or app problem: `event_timeline` (value) with `kinds` (arg) `["occurrence"]` (value); app hangs only in Application-channel events (`guides/device-state-fields.md`). Every view: `guides/device-state-fields.md` (**Choose the view**). |
-| `summarize_events_by_severity` (tool) | The first events call: one row per app, service, subsource or reason in scope with severity counts. Quick over long windows, no LQL filter. |
+| `query_device_health` (tool) | Device conditions, inventories and trends. To diagnose one device or a few, `view` (arg) `device_overview` (value) or `device_network` (value) gives the big picture, then drill down. Across devices: omit the view for open conditions, `group_by_reason` (arg) for device counts, `fleet_processes` (value) / `fleet_performance` (value) for outliers. Crash or app problem: `event_timeline` (value) with `kinds` (arg) `["occurrence"]` (value); app hangs only in Application-channel events (`guides/device-state-fields.md`). Every view: `guides/device-state-fields.md` (**Choose the view**). |
+| `summarize_events_by_severity` (tool) | The first events call: one row per app, service, subsource or reason in scope with severity counts. Quick over long windows; its `lql` (arg) filters only its own columns. |
 | `count_events_matching_filter` (tool) | A slice you can name in LQL: counts, ranking or a time series within it. `group_by` (arg) takes any field. `group_by=["sparklogs.reason"]` or `["pattern_hash"]`; pass two fields when the question has two nouns in it. |
 | `describe_event_patterns` (tool) | You are about to cite a pattern and need its text and spread. Pass `pattern_hashes` (arg) (a list), or omit it for the top patterns of the scope and window (default 30, up to 100). `min_severity` (arg), `agent_ids` (arg) and `lql` (arg) narrow it. Required before citing any teaser pattern. Mid-tier with counts. |
 | `query_raw_events` (tool) | The grouping pointed somewhere specific and you now need the actual events. Last resort, over a narrowed filter. |
@@ -73,14 +73,14 @@ Start from device health, then read events only for what health points at.
 ```
 1. find_org_or_device(<device or client>): the agent row's id and org_id
 2. query_device_health view=device_overview (or device_network for a network complaint), agent_ids=[<id>], a window that covers the complaint
-3. Read header coverage and not_measured, then evidence, outages, heat spans, top processes or connections, events
+3. Read the reading's parts and its summary.reading_notes (device_network: header coverage and not_measured, then evidence, outages, heat spans, connections, events)
 4. refine_query_result on the result set the reading points at (its filter_lql), or paste a next_reads entry
 5. summarize_events_by_severity, describe_event_patterns, then count_events_matching_filter / query_raw_events, only over the device and interval the reading named
 ```
 
-Cite the reading's `query_url` (col) and each refine's `query_url` (col).
+A device view returns no `query_url` (col): cite the reading by the device's page, below, and each refine of its result sets by the refine's `query_url` (col).
 Link each device's page: `meta.device_url` (col) on a one-device reading, the filled `meta.device_url_template` (col) otherwise.
-The reading's `not_measured` (col) list seeds WHAT WAS NOT CHECKED.
+On `device_network` (value), the reading's `not_measured` (col) list seeds WHAT WAS NOT CHECKED.
 Several devices: name up to 25 for the light form, then up to 5 for full readings.
 
 ### Recipe: "Is this just us? Fleet pivot from a specific pattern"

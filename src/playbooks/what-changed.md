@@ -49,12 +49,12 @@ Change signals that carry no kind:
 4. The window runs from last known good to onset, and at least 48 hours before the onset. Widen it to the reading before for an observed change near its start.
 5. A change after the onset is not a cause. Reinstalls and rollbacks right after it are someone's reaction; they say what people already suspected.
 
-**Device health first.** The device overview over the window links each heat span to the changes observed in it or just before it, and lists the episodes and changes, including the 48 hours before the window.
+**Device health first.** The device overview over the window lists the conditions and changes and the changes inside each heat block it reads in full; its `events` (value) result set also keeps changes from the 48 hours before the window.
 On a busy device it keeps only the newest changes and says so: `changes_capped` (col) on its `device_summary` (value) row, and the `events` (value) set's `truncated` (col) note saying the oldest changes were dropped. The changes before an onset can then be missing from it: never conclude from that list that nothing changed before the onset.
 For the full list, read the device's change timeline, oldest first. For what is on the device now against an earlier day, read the latest state with the changes after it.
 Which `query_device_health` (tool) reading answers each: `guides/device-state-fields.md` (**Choose the view**).
 
-**Busy devices.** The bound counts changes of every severity, so routine firewall rule churn (`firewall_rule_created` (value), `firewall_rule_deleted` (value), `firewall_rule_changed` (value)) at Debug and Verbose can fill it and push the changes just before an onset out of the list. When `changes_capped` (col) is true:
+**Busy devices.** The bound keeps Info and above first, so routine firewall rule churn (`firewall_rule_created` (value), `firewall_rule_deleted` (value), `firewall_rule_changed` (value)) at Debug and Verbose fills only what is left. A device with many changes at Info and above can still push the changes just before an onset out of the list. When `changes_capped` (col) is true:
 
 1. Re-anchor: read the device again over a window that ends at the onset and starts about 48 hours before it, so the changes it keeps cover that stretch.
 2. If the re-anchored reading is still capped, do not keep narrowing the window. Ask for the changes directly: `query_device_health` (tool) grouped by reason over changes in the pre-onset window gives every change reason on the device with its count of changes (`occurrence_count` (col)) and its first and last time, however many there are.

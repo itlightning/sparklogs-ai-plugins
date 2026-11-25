@@ -45,7 +45,7 @@ Workstation discipline: CI will not catch a stale table by itself (see the drift
 
 `yarn stitch-indexes` is a different command: it rebuilds SKILL / playbook index tables from **this** repo's leaf YAML, not from the library.
 
-`yarn guide-corpus` writes the guide corpus to `build/guide-corpus/`: `docs/<path>` holds each rendered document under `feeds/`, `fields/`, `guides/`, `playbooks/` and `themes/` (maintainer-only inputs and the guides in `CORPUS_EXCLUDED`, written for the plugin's own skills, excluded), and `manifest.json` lists each one with its sha256, line count and H2/H3 sections.
+`yarn guide-corpus` writes the guide corpus to `build/guide-corpus/`: `docs/<path>` holds each rendered document under `feeds/`, `fields/`, `guides/`, `playbooks/` and `themes/` (maintainer-only inputs and the guides in `CORPUS_EXCLUDED` excluded: those written for the plugin's own skills, and `guides/server-instructions.md`, the server's own instructions, which the server already sends), and `manifest.json` lists each one with its sha256, line count and H2/H3 sections.
 A feed's `reasons.md` carries `rank_preamble: false`: its index table stays readable but is left out of search ranking, because it names every reason and would outrank the reason itself.
 It needs node only (no package install) and reads no library checkout: the library commit comes from `scripts/generated-SYNC-MANIFEST.json`.
 Every run verifies what it wrote, including that every corpus citation in a served document names a served document or directory; `yarn validate` emits it twice and diffs the two.
@@ -60,6 +60,9 @@ Agents run `make precommit` (or `yarn precommit`) before commit. It is fail-clos
 It does not ship on `dist`.
 Do not hand-edit anything under `src/feeds/`, `src/fields/`, or the generated table in `src/guides/app-vocabulary.md`:
 an edit is reverted by the next sync and fails the drift check in the meantime.
+
+`src/guides/server-instructions.md` is a copy of the SparkLogs MCP server's instructions, for hosts whose model takes no instructions from tool output; the skills point at it.
+SparkLogs supplies it, generated from the server's instructions, and it is not edited by hand; its header names the server revision it was taken from.
 
 `yarn validate:generated` runs the gates and then the drift check. **They are enforced in different
 places, and the split is worth knowing:**

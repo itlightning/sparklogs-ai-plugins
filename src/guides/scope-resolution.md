@@ -106,7 +106,7 @@ Use these readings in the cross-check below; do not treat a silent source as hea
 
 ### Step 9: Sub-org expansion
 
-A name matching one org returns that org's tree in `summary.query_scope` (col), every org listed by id. Pass it to the data tools, with the investigation `start` (arg)/`end` (arg) (RFC3339 UTC) and the session `external_investigation_id` (arg).
+A name matching one org returns that org's tree in `summary.query_scope` (col), every org listed by id. Pass it to the data tools, with the investigation `start` (arg)/`end` (arg) (a date and time; one with no offset is read as UTC) and the session `external_investigation_id` (arg).
 
 If the engineer scopes to one sub-org only, set `org_ids` (arg) to that sub-org.
 Pass the `summary.query_scope` (col) that `find_org_or_device` (tool) returned, unchanged: it already lists every org to query. Set `include_sub_orgs` (arg) yourself only when the engineer named a parent org and wants its descendants.
@@ -123,7 +123,7 @@ Note scope changes in the EXECUTIVE SUMMARY.
 
 Before concluding anything from an absence, confirm the source(s) of interest sent data in the investigation window. For one device, the `find_org_or_device` (tool) agent row (`last_data_at` (col), feed health) and the device view's coverage often answer this already.
 
-Use the investigation's actual **`start` (arg)** / **`end` (arg)** (RFC3339 UTC).
+Use the investigation's actual **`start` (arg)** / **`end` (arg)** (a date and time; one with no offset is read as UTC).
 Do **not** infer scope from recent heartbeat alone; historical windows need historical event presence.
 
 Call `list_sources` (tool) with the `query_scope` (arg) from `find_org_or_device` (tool), the investigation window, `include_top_interesting_patterns: true` (arg) when you want the teaser, and the session `external_investigation_id` (arg).

@@ -113,7 +113,7 @@ bridge; everything else about severity in this doc set points here.
 | Where you see it | Form | Example |
 |---|---|---|
 | Prose you write, LQL filters and `min_severity` (arg) | lowercase rung name | `severity >= warning` (LQL), `min_severity: "error"` |
-| The `severity` (LQL) cell on a returned row | UPPERCASE rung name | `ERROR`, `CRITICAL`, and `WARN2` / `WARN3` for rungs between the named ones |
+| The `severity` (LQL) cell on a returned row | UPPERCASE rung name (the device overview reading writes lowercase names) | `ERROR`, `CRITICAL`, and `WARN2` / `WARN3` for rungs between the named ones |
 | `severity_level` (col) | integer 1-24 | `17`. Filter by the name, not the number |
 | Anything that COUNTS events: the `cnt_<band>` columns and `summary.severity_histogram` (col) | lowercase band name, one of nine | `critical_plus` (value), `info_or_notice` (value) |
 

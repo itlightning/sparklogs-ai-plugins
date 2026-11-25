@@ -103,10 +103,10 @@ All six are drill-down handles only: values to pass back into a filter, not stri
 
 See `mcp-tool-decision-tree.md` (Investigation discipline) for why order matters.
 
-**`summarize_events_by_severity` (tool)** (**bounded discovery**, not LQL-filtered):
+**`summarize_events_by_severity` (tool)** (**bounded discovery**, over its own columns):
 - Capped, pre-aggregated structure for app / service / subsource, or reasons, in org scope and time window.
 - Per-row triage: `event_count` (col), `cnt_interesting` (col), one count per failure-side severity band (`cnt_warning` (col) through `cnt_critical_plus` (col); the bands are defined in `category-classes.md`), `distinct_interesting` (col), `first_event_at` (col), `last_event_at` (col).
-- Narrow with `agent_ids` (arg) (collector UUIDs), `source` (arg) substring, or `field_match` (arg), which matches the source, app, service and subsource values (not field names).
+- Narrow with `agent_ids` (arg) (collector UUIDs), `source` (arg) substring, `field_match` (arg), which matches the source, app, service and subsource values (not field names), or `lql` (arg) over `agent_id` (LQL), `source` (LQL), `app` (LQL), `service` (LQL), `subsource` (LQL) and `sparklogs.reason` (LQL).
 - Summary may include `top_interesting_patterns` (col) teaser; call **`describe_event_patterns` (tool)** before citing any teaser pattern.
 
 **`count_events_matching_filter` (tool)** (**LQL-filtered measure**):
@@ -146,7 +146,7 @@ Always use the hash verbatim as the drill-down filter value.
 
 ## Worked shape: localize then land
 
-0. For one device, start with `query_device_health` (tool) `view=device_overview` (`guides/device-state-fields.md`).
+0. To diagnose one device, `query_device_health` (tool) `view=device_overview` gives the big picture (`guides/device-state-fields.md`); a narrow request can start at step 1.
 1. `summarize_events_by_severity` (tool) or `count_events_matching_filter(group_by=["subsource"], lql='source = "<host>" AND severity >= warning', ...)`: which feeds carry the failure side.
 2. `count_events_matching_filter(group_by=["sparklogs.reason", "sparklogs.reason_variant"], lql='source = "<host>" AND subsource = "<feed>" AND severity >= warning', ...)`: which curated reasons dominate. The empty-reason group is uncurated: read its top patterns with `describe_event_patterns` (tool).
 3. Compare against a healthy baseline window: is the top reason or pattern new, or normal volume?

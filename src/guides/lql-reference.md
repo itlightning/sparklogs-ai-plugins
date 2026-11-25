@@ -1,6 +1,6 @@
 # LQL Reference - for the SparkLogs Investigator skill
 
-The complete, verified syntax of Lightning Query Language (LQL) - the filter language used by every LQL parameter on the SparkLogs MCP tools: `lql` (arg) (on `query_raw_events` (tool) / `count_events_matching_filter` (tool)), `having` (arg) (on `count_events_matching_filter` (tool)), `lql` (arg) on `describe_event_patterns` (tool) (hourly statistics fields only), and `filter_lql` (arg) / `having_lql` (arg) (on `refine_query_result` (tool)). Read this file when composing any non-trivial LQL.
+The complete, verified syntax of Lightning Query Language (LQL) - the filter language used by every LQL parameter on the SparkLogs MCP tools: `lql` (arg) (on `query_raw_events` (tool) / `count_events_matching_filter` (tool)), `having` (arg) (on `count_events_matching_filter` (tool)), `lql` (arg) on `describe_event_patterns` (tool) (hourly statistics fields only), `lql` (arg) on `summarize_events_by_severity` (tool) (its own columns only), and `filter_lql` (arg) / `having_lql` (arg) (on `refine_query_result` (tool)). Read this file when composing any non-trivial LQL.
 
 An empty or omitted `lql` (arg) matches everything in the tool's `start` (arg)/`end` (arg) window and `query_scope` (arg) - useful as a starting point before narrowing.
 

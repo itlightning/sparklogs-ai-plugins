@@ -43,7 +43,8 @@ const USE_WHEN_LINE = /^\*\*Use when:\*\* (.+)$/;
 const KEYWORDS_LINE = /^\*\*Keywords:\*\* (.+)$/;
 const SHA1_HEX = /^[0-9a-f]{40}$/;
 // Written for the plugin's own skills, not for an agent calling the hosted guide: packages ship them.
-const CORPUS_EXCLUDED = new Set(['guides/subagent-definitions.md', 'guides/writing-voice.md']);
+// server-instructions.md is the server's own instructions, which the server already sends.
+const CORPUS_EXCLUDED = new Set(['guides/server-instructions.md', 'guides/subagent-definitions.md', 'guides/writing-voice.md']);
 
 function sha256(bytes) {
   return crypto.createHash('sha256').update(bytes).digest('hex');

@@ -296,6 +296,19 @@ cols:
   - disk_latency_ms
   - latency_ms_p90_10s
   - busiest_disk
+  - device
+  - system
+  - digest
+  - days
+  - power
+  - heat_blocks
+  - user_present
+  - moments
+  - conditions
+  - changes
+  - occurrences
+  - log_events
+  - summary.reading_notes
 
 # Resident LQL: query-engine / wire fields the pack field tables do not own.
 # Module paths (win.eventlog.*) come from the library harvest.
@@ -472,6 +485,8 @@ values:
     - adapters
     - connections
     - state
+    - log_events
+    - occurrence_change_counts
   device_view_evidence_kinds:
     - unreported
     - asleep
