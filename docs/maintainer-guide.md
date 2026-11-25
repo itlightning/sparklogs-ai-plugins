@@ -266,13 +266,13 @@ Completed at v1.0.0 launch. Keep this section for new repos, disaster recovery, 
 
 - Set **`dist`** as the **default branch** (marketplace install docs assume the default branch).
 - Copy final brand assets from marketing into `assets/`: `logo.svg`, `logo.png`, `icon.svg`, `icon-256.png`, `icon-512.png`.
-- Disable squash merges; allow merge commits and/or rebase merges only.
+- Allow squash merges only (the `source` ruleset also limits merges to squash).
 - Configure **GitHub rulesets** (not legacy branch protection). See [GitHub rulesets](#github-rulesets) below.
 - Create the **release GitHub App**, **`release` environment** (secrets + deployment branch policy), and **`dist`** ruleset App bypass. See [Release GitHub App and `release` environment](#release-github-app-and-release-environment).
 - Require 2FA for org members and outside collaborators.
 - Enable secret scanning and push protection.
 - Enable Dependabot security updates for `package.json` and `yarn.lock`; do not auto-merge dependency PRs.
-- DCO on `source`: enforced by the **DCO check** step in [`.github/workflows/validate.yml`](.github/workflows/validate.yml) (no separate GitHub App or repo setting). Ruleset on `source` must require status check **`Validate / validate`**. Optional: install the [DCO](https://github.com/apps/dco) App for a redundant check (not needed if CI + ruleset are in place).
+- DCO on `source`: enforced by the **DCO check** step in [`.github/workflows/validate.yml`](.github/workflows/validate.yml) (no separate GitHub App or repo setting). Ruleset on `source` must require status checks **`validate`** and **`pinact`**. Optional: install the [DCO](https://github.com/apps/dco) App for a redundant check (not needed if CI + ruleset are in place).
 - Set `security@itlightning.com` as the vulnerability reporting channel.
 - Repo **Settings → Actions → General → Fork pull request workflows**: keep the default (no secrets on fork workflows).
 
@@ -290,7 +290,7 @@ Use **Settings → Rules → Rulesets** (branch rulesets + tag rulesets). Do **n
 |------|---------|
 | Require a pull request before merging | On, **1** approval |
 | Require review from Code Owners | On ([`CODEOWNERS`](CODEOWNERS)) |
-| Require status checks to pass | **`Validate / validate`** |
+| Require status checks to pass | **`validate`** and **`pinact`** |
 | Require conversation resolution | On |
 | Block force pushes | On |
 | Restrict deletions | On |
