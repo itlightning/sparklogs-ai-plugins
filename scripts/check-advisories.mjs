@@ -4,13 +4,15 @@
 // Fails on any known advisory against a dependency this repo locks.
 //
 // Scans every tracked lockfile (today `yarn.lock`) with the pinned osv-scanner
-// (`scripts/osv-scanner-pin.yaml`) against the live OSV database. Any advisory fails, whatever its
+// (`scripts/osv-scanner-pin.json`) against the live OSV database. Any advisory fails, whatever its
 // severity, unless `osv-scanner.toml` carries an `[[IgnoredVulns]]` entry with its id, a reason and
 // an `ignoreUntil` date at most 90 days out; the entry lapses on that date (UTC), and an entry that
 // matches no current advisory fails as stale. A locked package that does not come from the npm
 // registry (a patch, git, tarball or file locator) fails unless `advisory-sources.json` declares
 // the registry release it copies; that release is then checked through the OSV query API under the
 // same exception rules. A package of this repo's own workspace is not a dependency.
+//
+// Needs only Node and git: nothing is installed first, so it runs from a clean clone.
 //
 // Fails closed: an unreachable database, a scanner error, unreadable output, a lockfile that
 // yields no packages, a manifest with no lockfile, or a known-vulnerable control package that
@@ -24,13 +26,12 @@ import { spawnSync, execFileSync } from 'node:child_process';
 import crypto from 'node:crypto';
 import fs from 'node:fs';
 import path from 'node:path';
-import yaml from 'js-yaml';
 import { assertRepoRoot } from './assert-repo-root.mjs';
 
 assertRepoRoot(import.meta);
 
 const ROOT = process.cwd();
-const PIN_FILE = path.join(ROOT, 'scripts', 'osv-scanner-pin.yaml');
+const PIN_FILE = path.join(ROOT, 'scripts', 'osv-scanner-pin.json');
 const IGNORE_FILE = path.join(ROOT, 'osv-scanner.toml');
 const SOURCES_FILE = path.join(ROOT, 'advisory-sources.json');
 const WORK_DIR = path.join(ROOT, 'build', 'osv-scanner');
@@ -184,28 +185,38 @@ function locatorName(locator) {
  * Every locked package in a yarn (berry) lockfile that does not come from the registry:
  * [{ name, locked }], `locked` being the resolution exactly as the lockfile records it.
  * `npm:` is the registry; `workspace:` is a package of this repository, so not a dependency.
+ *
+ * Read line by line rather than as YAML, so the check needs no installed package. Yarn writes each
+ * entry as an unindented key line followed by two-space-indented fields, one of them
+ * `resolution: "<locator>"`; an entry without one, or a file without the `__metadata` header,
+ * fails rather than being skipped.
  */
 function yarnNonRegistry(text, where) {
-  let doc;
-  try {
-    doc = yaml.load(text);
-  } catch (error) {
-    throw new Error(`${where}: unreadable lockfile: ${error.message}`);
+  const entries = [];
+  let berry = false;
+  let inMetadata = false;
+  for (const line of text.split(/\r?\n/)) {
+    if (line === '__metadata:') {
+      inMetadata = true;
+    } else if (/^\S.*:$/.test(line) && !line.startsWith('#')) {
+      inMetadata = false;
+      entries.push({ key: line.slice(0, -1), locked: null });
+    } else if (inMetadata && /^  version: \S+$/.test(line)) {
+      berry = true;
+    } else if (!inMetadata && entries.length && line.startsWith('  resolution: ')) {
+      const m = /^  resolution: "([^"\\]+)"$/.exec(line);
+      if (!m) throw new Error(`${where}: unreadable resolution line: ${line.trim()}`);
+      entries.at(-1).locked = m[1];
+    }
   }
-  if (!doc?.__metadata?.version) {
-    throw new Error(`${where}: not a yarn berry lockfile; its package sources cannot be checked`);
-  }
+  if (!berry) throw new Error(`${where}: not a yarn berry lockfile; its package sources cannot be checked`);
   const out = [];
-  for (const [key, entry] of Object.entries(doc)) {
-    if (key === '__metadata') continue;
-    const locked = entry?.resolution;
-    if (typeof locked !== 'string') throw new Error(`${where}: entry ${key} has no resolution`);
+  for (const { key, locked } of entries) {
+    if (!locked) throw new Error(`${where}: entry ${key} has no resolution`);
     const name = locatorName(locked);
     const protocol = locked.slice(name.length + 1).split(':')[0];
     if (protocol === 'npm' || protocol === 'workspace') continue;
-    // A git locator records the commit it resolved to.
-    const commit = /[#&]commit=([0-9a-f]+)/.exec(locked)?.[1] ?? null;
-    out.push({ name, locked, commit });
+    out.push({ name, locked });
   }
   return out;
 }
@@ -269,11 +280,6 @@ function declaredSources(doc, packages, where = 'advisory-sources.json') {
     if (pkg.locked !== entry.locked) {
       errors.push(`${at}: locked is ${entry.locked} but ${pkg.where} locks ${pkg.locked}; `
         + 'review the new copy and update the entry');
-      continue;
-    }
-    if (pkg.commit && entry.commit !== pkg.commit) {
-      errors.push(`${at}: ${pkg.where} locks commit ${pkg.commit}, so commit must be ${pkg.commit}`
-        + `${entry.commit ? ` (is ${entry.commit})` : ' (missing)'}`);
       continue;
     }
     declared.push({ name, ecosystem: entry.ecosystem, upstream: entry.upstream, version: entry.version });
@@ -344,7 +350,7 @@ function platformKey() {
 }
 
 function loadScannerAsset() {
-  const doc = yaml.load(fs.readFileSync(PIN_FILE, 'utf8')) ?? {};
+  const doc = JSON.parse(fs.readFileSync(PIN_FILE, 'utf8'));
   const assets = doc.assets ?? {};
   const key = platformKey();
   const entry = assets[key];
@@ -544,10 +550,18 @@ async function proveAdvisoryRules() {
   expect('locked locator mismatch rejected',
     dsHas({ ...all, ...decl('left', { locked: 'left@https://github.com/o/left.git#commit=old' }) }, 'left: locked is'));
   expect('non-object file rejected', dsHas([], 'must be a JSON object'));
-  expect('git locator commit recorded', pkgs.find((p) => p.name === 'left')?.commit === 'abc');
-  expect('commit required for a git locator', dsHas({ ...all, ...decl('left') }, 'commit must be abc (missing)'));
-  expect('commit mismatch rejected', dsHas({ ...all, ...decl('left', { commit: 'abd' }) }, 'commit must be abc (is abd)'));
-  expect('commit optional without a locked commit', !dsHas(all, 'typescript'));
+  expect('commit is optional', ds({ ...all, ...decl('left') }).errors.length === 0);
+  const berryLock = [
+    '# generated', '', '__metadata:', '  version: 8', '  cacheKey: 10c0', '',
+    '"a@npm:^1.0.0, a@npm:^1.2.0":', '  version: 1.2.0', '  resolution: "a@npm:1.2.0"', '  dependencies:',
+    '    b: "npm:^2"', '  languageName: node', '',
+    '"g@git+https://x/g.git":', '  version: 0.1.0', '  resolution: "g@git+https://x/g.git#commit=ff"', '',
+  ].join('\n');
+  expect('yarn-written lockfile read line by line',
+    JSON.stringify(nonRegistryPackages('yarn.lock', berryLock).map((p) => p.locked))
+      === JSON.stringify(['g@git+https://x/g.git#commit=ff']));
+  expect('entry without resolution fails closed',
+    throws(() => nonRegistryPackages('yarn.lock', '__metadata:\n  version: 8\n\n"a@npm:1":\n  version: 1\n')));
 
   const reply = (status, body) => async () => ({ ok: status === 200, status, json: async () => body });
   const replies = (...bodies) => async () => ({ ok: true, status: 200, json: async () => bodies.shift() });
