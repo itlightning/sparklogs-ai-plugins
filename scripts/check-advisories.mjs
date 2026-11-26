@@ -148,12 +148,14 @@ function readExceptions(text, today, where = 'osv-scanner.toml') {
     if (!(keys.reason ?? '').trim()) errors.push(`${at}: entry needs a reason`);
     const until = keys.ignoreUntil;
     const untilDay = dayNumber(until);
-    if (until === undefined) {
-      errors.push(`${at}: entry needs ignoreUntil = YYYY-MM-DD, at most ${MAX_EXCEPTION_DAYS} days out`);
-    } else if (Number.isNaN(untilDay)) {
+    if (until !== undefined && Number.isNaN(untilDay)) {
       errors.push(`${at}: ignoreUntil ${until} is not a date YYYY-MM-DD`);
     } else if (untilDay <= todayDay) {
       errors.push(`${at}: ${id} lapsed on ${until} (today ${today} UTC); upgrade, or review and renew it`);
+    }
+    // Every entry is dated, at most MAX_EXCEPTION_DAYS out.
+    if (until === undefined) {
+      errors.push(`${at}: entry needs ignoreUntil = YYYY-MM-DD, at most ${MAX_EXCEPTION_DAYS} days out`);
     } else if (untilDay - todayDay > MAX_EXCEPTION_DAYS) {
       errors.push(`${at}: ignoreUntil ${until} is more than ${MAX_EXCEPTION_DAYS} days after ${today}`);
     }
@@ -492,9 +494,9 @@ async function proveAdvisoryRules() {
   expect('multi-line string rejected', has('[[IgnoredVulns]]\nid = "A"\nreason = """x\ny"""\n', 'planted.toml:3'));
   expect('escaped string rejected', has('[[IgnoredVulns]]\nid = "A"\nreason = "a\\"b"\n', 'planted.toml:3'));
   expect('repeated key rejected', has('[[IgnoredVulns]]\nid = "A"\nid = "B"\nreason = "x"\n', 'given twice'));
-  expect('missing ignoreUntil rejected', has(entry(''), 'needs ignoreUntil'));
   expect('impossible ignoreUntil date rejected', has(entry('ignoreUntil = 2027-02-30\n'), 'is not a date'));
   expect('quoted ignoreUntil rejected', has(entry('ignoreUntil = "2027-01-01"\n'), 'is not a date'));
+  expect('missing ignoreUntil rejected', has(entry(''), 'needs ignoreUntil'));
   expect('ignoreUntil 90 days out accepted', errs(entry('ignoreUntil = 2027-02-23\n')).length === 0);
   expect('ignoreUntil 91 days out rejected', has(entry('ignoreUntil = 2027-02-24\n'), 'more than 90 days'));
   expect('entry lapses on its date', has(entry('ignoreUntil = 2026-11-25\n'), 'lapsed on 2026-11-25'));
