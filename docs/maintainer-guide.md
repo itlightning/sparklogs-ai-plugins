@@ -187,9 +187,9 @@ To bump it, change the version, both URLs and both digests together.
 CI runs it on the exact Node version in `.node-version`.
 
 A locked package that does not come from the npm registry (a Yarn `patch:`, git, tarball or `file:` locator) fails the check unless `advisory-sources.json` declares it, keyed by package name:
-`ecosystem`, `upstream` (the registry package it copies), `version` (the newest upstream release the copy fully contains), `why`, `locked` (the resolution exactly as `yarn.lock` records it) and optionally `commit` (the upstream commit it is based on).
+`ecosystem`, `upstream` (the registry package it copies), `version` (the newest upstream release the copy fully contains), `why`, `locked` (the resolution exactly as `yarn.lock` records it) and `commit` (the commit it is based on; required, and equal to it, when the locked resolution records a commit, as a git locator does).
 The check queries OSV for `upstream` at `version` and treats each advisory as its own.
-An entry that matches no such package, misses a field, or whose `locked` differs from the lockfile fails, so a bump of the copy forces the entry to be reviewed.
+An entry that matches no such package, misses a field, or whose `locked` or `commit` differs from the lockfile fails, so a bump of the copy forces the entry to be reviewed.
 A package of this repository's own workspace is not a dependency and needs no entry.
 The file stays committed when empty (`{}`).
 

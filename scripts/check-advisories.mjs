@@ -203,7 +203,9 @@ function yarnNonRegistry(text, where) {
     const name = locatorName(locked);
     const protocol = locked.slice(name.length + 1).split(':')[0];
     if (protocol === 'npm' || protocol === 'workspace') continue;
-    out.push({ name, locked });
+    // A git locator records the commit it resolved to.
+    const commit = /[#&]commit=([0-9a-f]+)/.exec(locked)?.[1] ?? null;
+    out.push({ name, locked, commit });
   }
   return out;
 }
@@ -267,6 +269,11 @@ function declaredSources(doc, packages, where = 'advisory-sources.json') {
     if (pkg.locked !== entry.locked) {
       errors.push(`${at}: locked is ${entry.locked} but ${pkg.where} locks ${pkg.locked}; `
         + 'review the new copy and update the entry');
+      continue;
+    }
+    if (pkg.commit && entry.commit !== pkg.commit) {
+      errors.push(`${at}: ${pkg.where} locks commit ${pkg.commit}, so commit must be ${pkg.commit}`
+        + `${entry.commit ? ` (is ${entry.commit})` : ' (missing)'}`);
       continue;
     }
     declared.push({ name, ecosystem: entry.ecosystem, upstream: entry.upstream, version: entry.version });
@@ -537,6 +544,10 @@ async function proveAdvisoryRules() {
   expect('locked locator mismatch rejected',
     dsHas({ ...all, ...decl('left', { locked: 'left@https://github.com/o/left.git#commit=old' }) }, 'left: locked is'));
   expect('non-object file rejected', dsHas([], 'must be a JSON object'));
+  expect('git locator commit recorded', pkgs.find((p) => p.name === 'left')?.commit === 'abc');
+  expect('commit required for a git locator', dsHas({ ...all, ...decl('left') }, 'commit must be abc (missing)'));
+  expect('commit mismatch rejected', dsHas({ ...all, ...decl('left', { commit: 'abd' }) }, 'commit must be abc (is abd)'));
+  expect('commit optional without a locked commit', !dsHas(all, 'typescript'));
 
   const reply = (status, body) => async () => ({ ok: status === 200, status, json: async () => body });
   const replies = (...bodies) => async () => ({ ok: true, status: 200, json: async () => bodies.shift() });
@@ -618,4 +629,9 @@ async function main(outputFile) {
   }
 }
 
-await main(githubOutputPath());
+// exitCode rather than an unhandled rejection or process.exit: Node on Windows can abort with a
+// libuv assertion when it exits while a fetch socket is closing.
+await main(githubOutputPath()).catch((error) => {
+  console.error(error.message ?? error);
+  process.exitCode = 1;
+});
