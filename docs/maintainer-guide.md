@@ -170,6 +170,7 @@ running them locally before tagging:
 ## Dependency advisories (`scripts/check-advisories.mjs`)
 
 `yarn validate` starts with this check (alone: `yarn check-advisories`), so the required `validate` check and every release run it.
+The `Dependency advisories` workflow also runs it alone as job `advisories` on every pull request and push to `source`, and on demand.
 It scans every tracked lockfile (today `yarn.lock`) with a pinned osv-scanner against the live OSV database and fails on any advisory, whatever its severity.
 It also fails when the database cannot be reached, when its output cannot be read, when a lockfile yields no packages, and when a tracked `package.json` (or other manifest) has no lockfile beside it: none of those is a clean result.
 Each scan includes a known-vulnerable control package (`lodash` 4.17.15) whose advisory must come back, so an empty answer cannot pass as clean.
@@ -178,6 +179,7 @@ It needs network on every run, including on a workstation.
 The scanner is pinned in `scripts/osv-scanner-pin.yaml`: one URL and sha256 per platform, taken from the release's own `osv-scanner_SHA256SUMS`.
 It downloads to `build/osv-scanner/<version>/` on first use and the digest is checked on every run; a mismatched file is deleted.
 To bump it, change the version, both URLs and both digests together.
+CI runs it on the exact Node version in `.node-version`.
 
 A locked package that does not come from the npm registry (a Yarn `patch:`, git, tarball or `file:` locator) fails the check unless `advisory-sources.json` declares it, keyed by package name:
 `ecosystem`, `upstream` (the registry package it copies), `version` (the newest upstream release the copy fully contains), `why`, `locked` (the resolution exactly as `yarn.lock` records it) and optionally `commit` (the upstream commit it is based on).
