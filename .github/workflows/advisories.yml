@@ -1,12 +1,14 @@
 name: Dependency advisories
 
-# The advisory check alone (no build or test). `yarn validate` runs the same check on every pull
-# request.
+# The advisory check alone (no build or test), so a new advisory against an unchanged lockfile
+# turns this red within a day. `yarn validate` runs the same check on every pull request.
 on:
   pull_request:
     branches: [source]
   push:
     branches: [source]
+  schedule:
+    - cron: '41 5 * * *'
   workflow_dispatch:
 
 permissions:
@@ -35,3 +37,21 @@ jobs:
         id: scan
         run: node scripts/check-advisories.mjs --github-output "$GITHUB_OUTPUT"
 
+  record:
+    needs: advisories
+    if: ${{ always() && github.event_name != 'pull_request' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+      - name: Record the result as an issue
+        uses: ./.github/actions/advisory-issue
+        with:
+          result: ${{ needs.advisories.result }}
+          findings: ${{ needs.advisories.outputs.findings }}
