@@ -171,15 +171,11 @@ running them locally before tagging:
 ## Dependency advisories (`scripts/check-advisories.mjs`)
 
 `yarn validate` starts with this check (alone: `yarn check-advisories`), so the required `validate` check and every release run it.
-The `Dependency advisories` workflow runs it alone as job `advisories` on every pull request and push to `source`, daily, and on demand, so a new advisory against an unchanged lockfile turns red within a day.
+The `Dependency advisories` workflow also runs it alone as job `advisories` on every pull request and push to `source`, and on demand.
 It scans every tracked lockfile (today `yarn.lock`) with a pinned osv-scanner against the live OSV database and fails on any advisory, whatever its severity.
 It also fails when the database cannot be reached, when its output cannot be read, when a lockfile yields no packages, and when a tracked `package.json` (or other manifest) has no lockfile beside it: none of those is a clean result.
 Each scan includes a known-vulnerable control package (`lodash` 4.17.15) whose advisory must come back, so an empty answer cannot pass as clean.
 It needs network on every run, including on a workstation.
-
-On a run that is not a pull request, the workflow's `record` job keeps one open issue labeled `dependency-advisory` while the check fails and closes it on the next pass.
-Its action, `.github/actions/advisory-issue/`, is a shared template copied byte for byte; change the template, never the copy.
-GitHub turns off scheduled runs in a public repository after 60 days without activity; re-enable the workflow if that happens.
 
 The scanner is pinned in `scripts/osv-scanner-pin.yaml`: one URL and sha256 per platform, taken from the release's own `osv-scanner_SHA256SUMS`.
 It downloads to `build/osv-scanner/<version>/` on first use and the digest is checked on every run; a mismatched file is deleted.
