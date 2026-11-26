@@ -1,5 +1,7 @@
 # BitLocker recovery prompt
 
+**Use when:** a device stops at the BitLocker recovery screen at startup and asks for the 48-digit recovery key.
+
 **Trigger.** "Machine booted to a BitLocker recovery key prompt."
 
 **Accuracy.** Nothing logs while the recovery screen is up, and a boot that stops there never reaches Windows.
@@ -14,8 +16,8 @@ BitLocker's own management log, with the seals and reseals, is `win.eventlog.ide
 Observed changes between readings are `sparklogs.device.state`.
 
 **Device health first.** `device_overview` from before the last good boot through the prompt.
-Its `events` (col), and the `events` result set for the full list, carry the device's own observed changes between boots: `bios_version_changed`, `boot_mode_changed`, `secure_boot_disabled`, `secure_boot_enabled`, `tpm_presence_changed`, `tpm_version_changed`, `tpm_chip_changed`, `tpm_firmware_changed`, `hardware_identity_changed` and `volume_bitlocker_protection_dropped`.
-The boot and shutdown marks around them are rows of the `events` result set only.
+Its `changes` (col), and the `events` result set for the full list, carry the device's own observed changes between boots: `bios_version_changed`, `boot_mode_changed`, `secure_boot_disabled`, `secure_boot_enabled`, `tpm_presence_changed`, `tpm_version_changed`, `tpm_chip_changed`, `tpm_firmware_changed`, `hardware_identity_changed` and `volume_bitlocker_protection_dropped`.
+Its `power` (col) part lists the boots and shutdowns around them, and every mark is a row of the `events` result set.
 An observed change says the setting moved between two readings, not who moved it or when inside that gap.
 `latest_state` on the `disk_volumes` topic gives each volume's `sparklogs.data.disk_volumes[].bitlocker_protection` (LQL) and `sparklogs.data.disk_volumes[].bitlocker_encryption_method` (LQL). The method says how the volume is encrypted (`hardware` is the drive's own encryption). Absent means BitLocker status could not be read or the volume is not encryptable, not that the volume is unprotected.
 A TPM that disappeared, or a TPM failing on its own, is `tpm-health.md`.

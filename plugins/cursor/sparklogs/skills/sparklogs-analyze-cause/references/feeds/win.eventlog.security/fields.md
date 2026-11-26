@@ -25,7 +25,7 @@ The rendered `key=value` tail exists to be READ, not re-parsed: its values are n
 
 ## Reconstruction guarantee
 
-71 curated surface(s) drop the vendor body text below the synthesized first line.
+74 curated surface(s) drop the vendor body text below the synthesized first line.
 That is never data loss: the provider payload is retained at rest, so a dropped body can be reconstructed from it.
 What the body said is derivable; what it cost to ship it repeatedly is not.
 
@@ -192,14 +192,17 @@ The last column is different in kind: it is the author's account of the row or e
 
 | Surface | Event ids | Fields set | Row fields |
 |---|---|---|---|
-| `account_changed` / `default` | 4738, 4742 | **fields: none** |  |
+| `account_changed` / `other_subject` | 4738, 4742 | **fields: none** |  |
+| `account_changed` / `platform_subject` | 4738, 4742 | **fields: none** |  |
+| `account_changed` / `platform_weakening` | 4738, 4742 | **fields: none** |  |
 | `account_created` / `default` | 4720, 4741 | **fields: none** |  |
 | `account_deleted` / `default` | 4726, 4743 | **fields: none** |  |
 | `account_disabled` / `default` | 4725 | **fields: none** |  |
 | `account_enabled` / `default` | 4722 | **fields: none** |  |
 | `account_locked_out` / `default` | 4740 | `win.eventlog.security.caller_computer` |  |
 | `account_password_change_failed` / `default` | 4723 | **fields: none** |  |
-| `account_password_reset` / `default` | 4724 | **fields: none** |  |
+| `account_password_reset` / `other_subject` | 4724 | **fields: none** |  |
+| `account_password_reset` / `platform_subject` | 4724 | **fields: none** |  |
 | `account_password_reset_failed` / `default` | 4724 | **fields: none** |  |
 | `adcs_audit_evidence_tampered` / `default` | 4885, 4896 | **fields: none** |  |
 | `adcs_config_changed` / `default` | 4882, 4890 | **fields: none** |  |
@@ -331,13 +334,16 @@ The last column is different in kind: it is the author's account of the row or e
 These carry class, reason and message text only.
 A predicate over them uses the reason, the class, or the retained payload; there is no promoted field to filter on.
 
-- `account_changed` / `default`
+- `account_changed` / `other_subject`
+- `account_changed` / `platform_subject`
+- `account_changed` / `platform_weakening`
 - `account_created` / `default`
 - `account_deleted` / `default`
 - `account_disabled` / `default`
 - `account_enabled` / `default`
 - `account_password_change_failed` / `default`
-- `account_password_reset` / `default`
+- `account_password_reset` / `other_subject`
+- `account_password_reset` / `platform_subject`
 - `account_password_reset_failed` / `default`
 - `adcs_audit_evidence_tampered` / `default`
 - `adcs_config_changed` / `default`

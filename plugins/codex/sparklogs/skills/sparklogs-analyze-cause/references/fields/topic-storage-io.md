@@ -1,5 +1,11 @@
 <!-- GENERATED reference. Do not hand-edit. -->
-# Storage IO fields
+# Storage IO
+
+For each fixed or RAM disk volume: busy time, read and write IOPS and throughput, latency and queue depth; disk alerts are in Storage device IO.
+
+**Use when:** finding which drive letter carries the load on a busy disk, or comparing volumes that share one disk.
+
+Readings are 5-minute averages.
 
 Reported every 5 minutes on clock boundaries for the window ending at `t`. `sparklogs.window_coverage_pct` is below 100 when collection covered only part of the window. Use chart buckets at least 5 minutes wide.
 

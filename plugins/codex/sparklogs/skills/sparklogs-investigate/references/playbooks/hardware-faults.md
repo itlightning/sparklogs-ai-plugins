@@ -1,5 +1,7 @@
 # Hardware faults: WHEA errors, GPU resets, failing devices, heat and power
 
+**Use when:** Event Viewer fills with WHEA hardware errors, the screen goes black and the display driver recovers, a USB device or dock keeps disconnecting, Device Manager shows a yellow warning, or a laptop overheats and shuts down.
+
 **Trigger.** "Event Viewer is full of WHEA errors", "the screen goes black and comes back", "the dock or this USB device keeps dropping", "Device Manager shows a yellow mark", or "the laptop shuts itself off when it gets hot".
 
 **Accuracy.** Hardware records say what Windows and the firmware reported, not which part is bad. The part is named by repetition: the same error source, device or zone again and again.

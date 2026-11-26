@@ -1,5 +1,7 @@
 # Blue screens, app crashes and unexpected restarts
 
+**Use when:** a PC blue-screens with a stop code, an application keeps crashing or closing on its own, or a server restarts unexpectedly.
+
 **Trigger.** "The PC keeps blue-screening", "this app keeps crashing", or "the server rebooted on its own".
 
 **Accuracy.** Each crash reaches SparkLogs several times, and only one record counts it.
@@ -35,7 +37,7 @@ Windows' own records: `win.eventlog.system` (stop errors, unclean stops, restart
   The `kernel_crashes` rows give each signature's counts, `sparklogs.data.kernel_crashes[].first_seen_ts` (LQL), parameters, dump format and last analysis. The `app_crashes` rows do the same per program, with its version, faulting module and newest exception.
   The `crash_dump_config` row says what Windows will write next time: `sparklogs.data.crash_dump_config.dump_type` (LQL).
   Inventories refresh every few hours; the occurrences arrive as each crash is found, so the newest crash can be in the timeline before the counts show it.
-- The device's crash timeline: its occurrences oldest first, which interleave crashes with the boot, shutdown, sleep and wake marks. The device overview does not list crashes, so read the timeline for them.
+- The device's crash timeline: its occurrences oldest first, which interleave crashes with the boot, shutdown, sleep and wake marks. The device overview counts crashes by reason and instance in its `occurrences` (col) part; the timeline gives each one in order.
 - Open conditions: `kernel_crash_recurring` and `app_crash_recurring`, each naming the shared stop code or program. A program SparkLogs does not classify never rises above Notice, however often it crashes: do not drop crash storms by severity.
 
 ## Blue screens

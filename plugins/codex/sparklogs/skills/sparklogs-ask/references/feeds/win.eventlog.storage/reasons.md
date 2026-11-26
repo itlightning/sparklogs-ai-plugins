@@ -6,22 +6,26 @@
 Each section below is complete for its reason: every public field, in the words the reference page shows.
 Search for the heading "## `<code>`" or a word from the reason's label. Do not read the whole file.
 
-| reason | label | kind | severity | service | benign |
-|---|---|---|---|---|---|
-| `disk_bad_block` | disk bad block | event | Info to Serious | `storage` | benign possible |
-| `disk_failure_predicted` | disk failure predicted | event | Warning to Serious | `storage` |  |
-| `disk_io_failed` | disk io failed | event | Debug to Warning | `storage` |  |
-| `disk_paging_error` | disk paging error | event | Notice to Error | `storage` |  |
-| `disk_surprise_removal` | disk surprise removal | event | Info to Warning | `storage` |  |
-| `filesystem_corruption` | filesystem corruption | event | Error | `storage` |  |
-| `storage_controller_reset` | storage controller reset | event | Warning to Error | `storage` |  |
-| `storage_device_command_failed` | storage device command failed | event | Debug to Notice | `storage` |  |
-| `storage_request_slow` | Storage request slow | event | Display | `storage` |  |
-| `volume_mount_failed` | volume mount failed | event | Info to Warning | `storage` | benign possible |
+| reason | label | kind | severity | service | benign | use when |
+|---|---|---|---|---|---|---|
+| `disk_bad_block` | disk bad block | event | Info to Serious | `storage` | benign possible | a file will not open or copy, a backup stops on the same file every run, or Windows reports a bad block, bad sector or I/O device error on a drive. |
+| `disk_failure_predicted` | disk failure predicted | event | Warning to Serious | `storage` |  | a drive warns that it is failing or worn out before anything has broken: its own health or reliability warning (SMART), or an SSD at the end of its rated life. |
+| `disk_io_failed` | disk io failed | event | Debug to Warning | `storage` |  | copying, backing up or writing to a drive fails with an I/O error and nothing points to a damaged sector. |
+| `disk_paging_error` | disk paging error | event | Notice to Error | `storage` |  | programs crash or the machine stops with an in-page error, and the cause may be the drive holding the page file. |
+| `disk_surprise_removal` | disk surprise removal | event | Info to Warning | `storage` |  | an external or USB drive vanished, was unplugged without ejecting, or a disk dropped off the machine while in use. |
+| `filesystem_corruption` | filesystem corruption | event | Error | `storage` |  | the question is whether NTFS on this machine has left its normal corruption-handling state, before any event names a volume. |
+| `storage_controller_reset` | storage controller reset | event | Warning to Error | `storage` |  | a machine or an external drive freezes for several seconds and then carries on, or the storage driver reports a reset or timeout on a disk. |
+| `storage_device_command_failed` | storage device command failed | event | Debug to Notice | `storage` |  | a drive is still present but misbehaves, and the storage driver logged a failed SCSI command with sense data. |
+| `storage_request_slow` | Storage request slow | event | Display | `storage` |  | a machine pauses or hangs whenever it touches one disk, and the question is whether single requests to that disk are slow. |
+| `volume_mount_failed` | volume mount failed | event | Info to Warning | `storage` | benign possible | a volume did not come up because NTFS was asked to mount it and could not, so its files, shares or databases are unavailable. |
 
 ## `disk_bad_block`: disk bad block
 
 A storage device returned a fault instead of the data.
+
+**Use when:** a file will not open or copy, a backup stops on the same file every run, or Windows reports a bad block, bad sector or I/O device error on a drive.
+
+**Keywords:** bad sector, bad block, unreadable sector, medium error, data error, cyclic redundancy check, CRC, I/O device error, cannot read file, hard drive damaged, drive failing, replace drive, chkdsk, StorDiag
 
 **Also reported by:** `win.eventlog.system`
 
@@ -55,6 +59,10 @@ The file NTFS names is not shown here. It carries user document paths.
 
 A storage device reported that its own reliability is degraded or that it has passed its rated write endurance.
 
+**Use when:** a drive warns that it is failing or worn out before anything has broken: its own health or reliability warning (SMART), or an SSD at the end of its rated life.
+
+**Keywords:** SMART, S.M.A.R.T., predictive failure, failure predicted, hard drive about to die, dying drive, failing disk warning, SSD wear, worn out, end of life, write endurance, percentage used, TBW, NVMe health, reliability degraded
+
 **Also reported by:** `win.eventlog.system`
 
 **Severity:** Serious when a server's drive reports its reliability degraded, Error for the same report on any other host, Warning when the drive has only passed its rated write endurance.
@@ -81,6 +89,10 @@ A storage device reported that its own reliability is degraded or that it has pa
 ## `disk_io_failed`: disk io failed
 
 A read or write to a storage device failed.
+
+**Use when:** copying, backing up or writing to a drive fails with an I/O error and nothing points to a damaged sector.
+
+**Keywords:** copy fails, copying error, write failed, read failed, I/O error, IO error, transfer failed, external drive error, USB drive error, StorDiag, SRB status, NTSTATUS
 
 **Also reported by:** `win.eventlog.system`
 
@@ -110,6 +122,10 @@ A read or write to a storage device failed.
 ## `disk_paging_error`: disk paging error
 
 A paging read or write to a storage device failed.
+
+**Use when:** programs crash or the machine stops with an in-page error, and the cause may be the drive holding the page file.
+
+**Keywords:** page file, pagefile, paging operation, in-page error, KERNEL_DATA_INPAGE_ERROR, 0x7A, STATUS_IN_PAGE_ERROR, 0xC0000006, swap, StorDiag
 
 **Also reported by:** `win.eventlog.system`
 
@@ -141,6 +157,10 @@ A paging read or write to a storage device failed.
 
 A storage device disappeared without being safely removed.
 
+**Use when:** an external or USB drive vanished, was unplugged without ejecting, or a disk dropped off the machine while in use.
+
+**Keywords:** unplugged, pulled out, not safely removed, eject, safely remove hardware, drive disappeared, drive disconnected, drive dropped, cable bumped, external hard drive, USB stick, flash drive
+
 **Also reported by:** `win.eventlog.system`
 
 **Severity:** Info on Storport551 USB or mounted-virtual-disk detaches; Warning on other removals.
@@ -169,6 +189,10 @@ A storage device disappeared without being safely removed.
 
 NTFS moved this machine's corruption-handling state away from normal.
 
+**Use when:** the question is whether NTFS on this machine has left its normal corruption-handling state, before any event names a volume.
+
+**Keywords:** file system corruption, chkdsk, check disk, Repair-Volume
+
 **Also reported by:** `win.eventlog.system`
 
 **Severity:** Error
@@ -193,6 +217,10 @@ Microsoft publishes the template with no value map, so the state number ships un
 ## `storage_controller_reset`: storage controller reset
 
 The storage port driver reset the path to a device.
+
+**Use when:** a machine or an external drive freezes for several seconds and then carries on, or the storage driver reports a reset or timeout on a disk.
+
+**Keywords:** freezes then recovers, froze for a few seconds, hangs briefly, stalls, disk timeout, reset to device, bus reset, adapter reset, controller reset, storahci, stornvme, RaidPort, SATA cable, backplane, HBA
 
 **Also reported by:** `win.eventlog.system`
 
@@ -223,6 +251,10 @@ The storage port driver reset the path to a device.
 
 A storage device did not complete a command, and reported sense data saying why.
 
+**Use when:** a drive is still present but misbehaves, and the storage driver logged a failed SCSI command with sense data.
+
+**Keywords:** SCSI command failed, check condition, sense key, additional sense code, ASC, ASCQ, sense data, SRB status, unit attention, TRIM, UNMAP, unmap rejected, StorDiag
+
 **Severity:** Info when the device is announcing a change to itself, Debug for a drive rejecting TRIM, Notice otherwise. One occurrence claims no fault.
 
 **Why it matters:** A single occurrence usually reaches no application, because the driver reissues the command. A rising count against one drive is an early sign of it going bad.
@@ -246,6 +278,10 @@ Sense data is the device's own account of a failure, so it is the one place a dr
 ## `storage_request_slow`: Storage request slow
 
 One request to a disk took longer than the storage driver's threshold.
+
+**Use when:** a machine pauses or hangs whenever it touches one disk, and the question is whether single requests to that disk are slow.
+
+**Keywords:** slow disk, slow drive, slow hard drive, disk latency, IO latency, request took too long, IO took longer than expected, hangs on disk access, disk busy
 
 **Severity:** Display
 
@@ -272,6 +308,10 @@ One request to a disk took longer than the storage driver's threshold.
 ## `volume_mount_failed`: volume mount failed
 
 NTFS could not mount a volume.
+
+**Use when:** a volume did not come up because NTFS was asked to mount it and could not, so its files, shares or databases are unavailable.
+
+**Keywords:** volume will not mount, mount failed, device offline
 
 **Severity:** Warning or Info
 

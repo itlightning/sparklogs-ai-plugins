@@ -1,5 +1,11 @@
 <!-- GENERATED reference. Do not hand-edit. -->
-# Top processes fields
+# Top processes
+
+For each 5-minute window, the busiest processes by CPU, memory, committed memory, reads and writes, and TCP traffic received and sent, plus rows for hardware interrupt and deferred procedure call CPU and one row totaling every other process.
+
+**Use when:** which program was eating CPU, memory or I/O at a given time, or charting the busiest programs across a day.
+
+Each ranking lists up to its top ten, merged into one row per process, so a process appears only in windows where it ranked. The System Idle Process is never listed, and TCP fields are absent for a window the agent did not measure TCP in.
 
 Reported every 5 minutes on clock boundaries for the window ending at `t`. `sparklogs.window_coverage_pct` is below 100 when collection covered only part of the window. Use chart buckets at least 5 minutes wide.
 `sparklogs.window_measured_s` gives the unrounded duration in seconds used to calculate this topic's rates. It counts accepted intervals only and is absent when none were accepted.
@@ -13,7 +19,7 @@ Reported every 5 minutes on clock boundaries for the window ending at `t`. `spar
 | `sparklogs.data.top_processes.pid` | integer |  | The process ID. With `create_time_ts`, it identifies the process. Absent on system and remainder rows. |
 | `sparklogs.data.top_processes.create_time_ts` | string | timestamp | When the process started, in UTC. Absent on system and remainder rows, which are not processes. |
 | `sparklogs.data.top_processes.image_name` | string |  | The process's executable file name. On a system or remainder row, the row's name: `(hardware interrupts)`, `(deferred procedure calls)` or `(other processes)`. |
-| `sparklogs.data.top_processes.image_path` | string |  | The full path of the process's executable. Absent when the agent could not read it while the process ran, and on system and remainder rows. The agent never collects command-line arguments. |
+| `sparklogs.data.top_processes.image_path` | string |  | The full path of the process's executable. Absent when the agent could not read it while the process ran, and on system and remainder rows. The agent never reports command-line arguments. |
 | `sparklogs.data.top_processes.services` | string_array |  | The Windows services this process hosts, sorted. Absent when it hosts none. |
 | `sparklogs.data.top_processes.entry_kind` | string |  | What the row is: `process` for one listed process; `system` for CPU spent on hardware interrupts or deferred procedure calls (DPCs), with no memory or I/O fields; `remainder` for every process not listed. The remainder's CPU is the machine's busy time minus the other rows, never below 0; when the machine-wide CPU counters could not be read or disagree with the machine's processor count, the system rows are left out and the remainder's CPU is the sum of the unlisted processes. |
 | `sparklogs.data.top_processes.top_by` | string_array |  | The rankings that listed this process, each taking its ten largest: `cpu`, `ram` (resident memory), `private_commit` (private committed memory), `io_read`, `io_write`, `net_rx` and `net_tx` (TCP payload received and sent, since 1.14.1). Empty on system and remainder rows. |

@@ -1,5 +1,7 @@
 # File share or mapped drive unreachable or slow
 
+**Use when:** users cannot open a mapped drive or network share, get access denied or a red X on the drive, a NAS or scan-to-folder stops working, or files open slowly from the server.
+
 **Trigger.** "Users cannot open the S: drive", "the share says access denied", "the mapped drive shows a red X", "the NAS stopped working after the upgrade", "the scanner cannot save to the folder", or "opening files on the server is slow."
 
 **Accuracy.** The SMB client on the user's device and the SMB server on the file server each log their own half of a connection.

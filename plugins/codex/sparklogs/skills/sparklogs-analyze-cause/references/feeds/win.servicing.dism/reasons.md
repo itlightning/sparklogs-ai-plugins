@@ -6,17 +6,21 @@
 Each section below is complete for its reason: every public field, in the words the reference page shows.
 Search for the heading "## `<code>`" or a word from the reason's label. Do not read the whole file.
 
-| reason | label | kind | severity | service | benign |
-|---|---|---|---|---|---|
-| `win_dism_command_failed` | win dism command failed | event | Info | `patching` |  |
-| `win_dism_feature_change_failed` | win dism feature change failed | event | Info | `patching` |  |
-| `win_dism_health_command_run` | win dism health command run | event | Info | `patching` |  |
-| `win_dism_reboot_required` | win dism reboot required | event | Info | `patching` |  |
-| `win_servicing_source_files_missing` | win servicing source files missing | event | Notice | `patching` |  |
+| reason | label | kind | severity | service | benign | use when |
+|---|---|---|---|---|---|---|
+| `win_dism_command_failed` | win dism command failed | event | Info | `patching` |  | a DISM command run by a technician, a script or an RMM tool ends in error, and a technician needs the error code and which command failed. |
+| `win_dism_feature_change_failed` | win dism feature change failed | event | Info | `patching` |  | turning a Windows optional feature on or off with DISM or PowerShell, such as .NET Framework 3.5, SMB 1.0 or Hyper-V, fails and leaves it in its old state. |
+| `win_dism_health_command_run` | win dism health command run | event | Info | `patching` |  | someone asks whether a person or script ran a DISM health check or repair on this machine, and when. |
+| `win_dism_reboot_required` | win dism reboot required | event | Info | `patching` |  | a feature, package or repair made with DISM is not finished until the machine restarts, and someone asks whether the change has taken effect yet. |
+| `win_servicing_source_files_missing` | win servicing source files missing | event | Notice | `patching` |  | DISM /RestoreHealth or a feature install such as .NET Framework 3.5 stops because the source files could not be found, often on a machine that takes updates from WSUS. |
 
 ## `win_dism_command_failed`: win dism command failed
 
 A DISM command reported failure.
+
+**Use when:** a DISM command run by a technician, a script or an RMM tool ends in error, and a technician needs the error code and which command failed.
+
+**Keywords:** DISM failed, DISM error, DISM command failed, DISM error code, dism.log error, DISM HRESULT
 
 **Severity:** Info
 
@@ -44,6 +48,10 @@ A DISM command reported failure.
 
 A Windows optional feature could not be enabled or disabled.
 
+**Use when:** turning a Windows optional feature on or off with DISM or PowerShell, such as .NET Framework 3.5, SMB 1.0 or Hyper-V, fails and leaves it in its old state.
+
+**Keywords:** DISM feature enable failed, enable feature failed, disable feature failed, Enable-WindowsOptionalFeature, Disable-WindowsOptionalFeature, /Enable-Feature, features could not be enabled, optional feature install failed, SMB1 enable failed, Hyper-V enable failed
+
 **Severity:** Info
 
 **Why it matters:** The feature is not in the state that was asked for: an enable left it off, a disable left it on.
@@ -68,6 +76,10 @@ A Windows optional feature could not be enabled or disabled.
 ## `win_dism_health_command_run`: win dism health command run
 
 A DISM health or repair command was run on this machine.
+
+**Use when:** someone asks whether a person or script ran a DISM health check or repair on this machine, and when.
+
+**Keywords:** when was DISM run, DISM was run, DISM repair run, DISM health check, DISM RestoreHealth ran, Cleanup-Image, component cleanup run, Windows image repair tool
 
 **Severity:** Info
 
@@ -96,6 +108,10 @@ A DISM health or repair command was run on this machine.
 
 A DISM change needs a reboot to take effect.
 
+**Use when:** a feature, package or repair made with DISM is not finished until the machine restarts, and someone asks whether the change has taken effect yet.
+
+**Keywords:** DISM restart required, DISM reboot required, Do you want to restart the computer now, DISM exit code 3010, feature needs restart, restart to finish feature install, DISM change pending
+
 **Severity:** Info
 
 **Why it matters:** The change DISM made is not complete until the machine restarts.
@@ -119,6 +135,10 @@ A DISM change needs a reboot to take effect.
 ## `win_servicing_source_files_missing`: win servicing source files missing
 
 A DISM operation could not find the source files it needed.
+
+**Use when:** DISM /RestoreHealth or a feature install such as .NET Framework 3.5 stops because the source files could not be found, often on a machine that takes updates from WSUS.
+
+**Keywords:** DISM source files not found, DISM /Source, LimitAccess, install.wim source, install media as repair source, RestoreHealth source missing, .NET 3.5 DISM fails, WSUS repair source
 
 **Also reported by:** `win.servicing.cbs`
 

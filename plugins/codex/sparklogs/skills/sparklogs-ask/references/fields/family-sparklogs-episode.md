@@ -1,6 +1,8 @@
 <!-- GENERATED reference. Do not hand-edit. -->
 # Episode fields
 
+**Use when:** following a condition from when it opened to when it cleared: how long it lasted, how bad it got at its worst, and when it was last confirmed.
+
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
 | `sparklogs.episode.id` | string |  | Unique episode ID, retained throughout the condition's lifecycle. |

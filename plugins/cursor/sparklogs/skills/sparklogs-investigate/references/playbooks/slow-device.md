@@ -1,12 +1,14 @@
 # Slow or freezing device
 
+**Use when:** a PC or server is slow or freezes for seconds, takes long to boot or shut down, or shows high CPU, memory or disk use.
+
 **Trigger.** "The PC has been slow this week", "it freezes for a few seconds", "it takes ages to start", "shutting down takes forever", or a server responds slowly.
 
 **Accuracy.** The agent measures CPU (busy time, the queue of threads waiting for a processor, the user, kernel and interrupt split, the clock against rated speed), memory (available memory, committed memory against its limit, how long programs waited on paging), each disk (busy time, queue, latency), the network path, and the processes that used the most of each in every five-minute window.
 It does not measure how long an application took to respond, per-process disk latency, graphics load, temperatures, or what a hypervisor holds back from a virtual machine.
 A device can feel slow with every measured lane quiet: the delay can sit inside the application, at its server, at the far end of a connection, or in the host under a virtual machine.
 Say which lanes were measured and quiet, and name the unmeasured ones, instead of calling the device healthy.
-A heat span says when a lane ran high, not why. Its contributors ran at the same time and are not proven causes.
+A heat band says how badly work waited in a lane, not why. The programs listed beside it ran at the same time and are not proven causes.
 Process figures are lower bounds over the processes the agent kept in each window. A row combines every instance of one executable, and process I/O includes file, pipe and network I/O that never reaches a disk.
 A condition opens only on sustained load, minutes of it. No condition does not clear a device that froze for seconds, was asleep, or did not report.
 Boot and shutdown times are Windows' own measurements, written after the boot or shutdown finished, not the agent's.
@@ -18,7 +20,7 @@ Windows' records: `win.eventlog.platform` (Diagnostics-Performance boot, shutdow
 
 | What the device shows | Read |
 |---|---|
-| `cpu_busy`, CPU heat driven by the processor queue | **CPU saturation** |
+| `cpu_busy`, CPU heat driven by the processor queue on a busy CPU | **CPU saturation** |
 | `cpu_kernel_dominated` | **Kernel time** |
 | `cpu_interrupt_storm`, interrupt and DPC time high in the CPU split | **Interrupts and DPCs** |
 | `cpu_throttled_under_load` | **Throttling** |
@@ -34,10 +36,10 @@ Windows' records: `win.eventlog.platform` (Diagnostics-Performance boot, shutdow
 
 **Device health first.** `query_device_health`. How to read each part: `../guides/device-state-fields.md` (**Read a device view**).
 
-- The device overview over the complaint window, up to 30 days. Its header says which lanes were measured and which stretches were asleep, powered off or unreported (unreported is unknown, not quiet). Its heat spans name the lane, the reading that set the peak, where the peak sat against the device's own typical range, and the top contributors. A peak within the device's typical range is not new for this device: ask what changed in the user's work, not on the machine.
+- The device overview over the complaint window, up to 30 days. Its digest and day rows give the hours the device was on, asleep, off or sent no data (no data is unknown, not quiet), and the hot hours per lane. Its heat blocks name the lane, the band, the reading behind it (the part states each scale once), and the top programs in the block. The `device_summary` result set holds the device's usual range from before the window: a peak within it is not new for this device, so ask what changed in the user's work, not on the machine.
   Its CPU, memory and disk rows per bucket carry the user, kernel and interrupt split, available and committed memory, paging waits, and the busiest disk's busy time, queue and latency. Disk heat is busy time pushed up by queue depth; latency is not in it, so read the disk latency figures for a slow disk at moderate load.
-  Its episodes and changes say which conditions opened and what changed around each span. Ranking those changes against the onset: `what-changed.md`.
-- When the complaint names times, read the overview again over those hours with a narrow bucket. A freeze shorter than the bucket leaves no span. It can still show in the evidence and events, which keep their own times.
+  Its conditions, changes and moments say which conditions opened and what changed around each block. Ranking those changes against the onset: `what-changed.md`.
+- When the complaint names times, read the overview again over those hours with a narrow bucket. A freeze shorter than the bucket leaves no heat block. It can still show in the moments, conditions and changes, which keep their own times.
 - The process chart over the window, ranked by CPU, memory or I/O, tells a burst from a steady load and one instance from a restart cycle. A process on top of one span only is a burst. The same executable on top every working day is the workload.
 - Several devices slow, or a client-wide complaint: the fleet performance reading ranks devices by one reading (CPU, paging waits, disk latency), and the fleet process reading ranks the executables using the most CPU, memory or I/O across them. Then read the overview on the outliers. Several devices slow on one network: compare devices with the same network key (`../guides/device-state-fields.md`, **Network outages**).
 
@@ -189,7 +191,7 @@ When the slowness follows one kind of work, not the machine:
 ## Findings
 
 Lead with the lane and its measured reading over the complaint window (for example, "the processor queue held 30 threads per core for three days"), then the process or disk that carried it, then the change or schedule that matches its onset.
-Name a cause only with its evidence: a contributor during a span is a lead, a change before the onset is a candidate.
+Name a cause only with its evidence: a program listed in a heat block is a lead, a change before the onset is a candidate.
 List the lanes measured and quiet, and the unmeasured ones that matter for this ticket (application response time, the hypervisor, the storage array, the far end), in WHAT WAS NOT CHECKED.
 
 **Off-endpoint** (HM12): application servers and SaaS backends, file servers without the agent, the virtualization host and its storage, a SAN or iSCSI array and its switches, the server's management controller.

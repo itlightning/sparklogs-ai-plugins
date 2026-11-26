@@ -39,7 +39,7 @@ A `subsource` (LQL) not in this table is either ingest-key data or an agent feed
 
 ## Which channels are collected
 
-To see which Windows Event Log channels a host sends, count its events grouped by `subsource` (LQL) and `origin` (LQL) over a few days (`query_event_counts_by_severity` with `group_by=["subsource", "origin"]` and `source = "<host>"` (LQL)).
+To see which Windows Event Log channels a host sends, count its events grouped by `subsource` (LQL) and `origin` (LQL) over a few days (`count_events_matching_filter` with `group_by=["subsource", "origin"]` and `source = "<host>"` (LQL)).
 On a host whose feeds report current, a channel absent from that list is not collected, or logged nothing in the window. Quiet channels exist, so widen the window before saying a channel is not collected.
 The Windows Event Log feeds collect Microsoft channels plus a few vendor channels; a backup, EDR or RMM vendor's own channel is not among them.
 
@@ -51,5 +51,5 @@ Most WEL rows do not carry them; absence is a missing promotion, not a missing e
 ## Device state vs events
 
 Device questions go to `query_device_health`: which view answers which question is `device-state-fields.md` (**Choose the view**).
-The event stream of the same feed is `query_logs` scoped to `subsource` (LQL) `=` `"sparklogs.device.state"`.
+The event stream of the same feed is `query_raw_events` scoped to `subsource` (LQL) `=` `"sparklogs.device.state"`.
 MCP column names (`sparklogs.kind` (col), `sparklogs.instance` (col), `sparklogs.episode.replaced_id` (col)) are the same dotted `sparklogs.*` spelling as the LQL path. Detail: `device-state-fields.md`.

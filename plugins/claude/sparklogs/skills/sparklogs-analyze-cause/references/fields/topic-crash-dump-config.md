@@ -1,7 +1,13 @@
 <!-- GENERATED reference. Do not hand-edit. -->
-# Crash dump config fields
+# Crash dump configuration
 
-Full inventory every 8 hours. Supported changes are reported when the agent observes them.
+The crash dump type Windows is set to write, the page file size settings, how much room that dump needs and how far short the page file falls, and how many minidumps Windows wrote recently and how old the newest is.
+
+**Use when:** a blue screen left no dump to analyze, or checking that a machine will write one before the next crash.
+
+Covers blue screen dumps only, not application crash dumps. Dumps turned off raise no alert here; the named dump-type change event is in System information.
+
+Full inventory every 8 hours. Changes are reported between inventories.
 
 | Field | Type | Unit | Meaning |
 |---|---|---|---|

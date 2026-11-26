@@ -10,11 +10,11 @@ Two shapes share this ladder:
 
 ## Explore
 
-1. Confirm the host emits this `subsource` (LQL) (`query_scope_activity` / counts grouped by `subsource` (LQL)).
+1. Confirm the host emits this `subsource` (LQL) (`summarize_events_by_severity` / counts grouped by `subsource` (LQL)).
 2. Multi-channel feeds: group by **`origin` (LQL)** to see which channels are talking.
 3. Group by **`provider_name` (LQL)**. Application and System have many publishers; this is the first useful split there.
 4. Inside a publisher: `event_id` (LQL), then `pattern` (LQL) / `pattern_hash` (LQL), then `sparklogs.reason` (LQL) when curated.
-5. Narrow `query_logs` on the dominant groups. Raw `message` (LQL) last.
+5. Narrow `query_raw_events` on the dominant groups. Raw `message` (LQL) last.
 
 `service` (LQL) is ticket-class taxonomy when filled. Empty `service` (LQL) is still a real event. Do not require it.
 On the multi-channel feeds, start a failure sweep with `severity >= warning` (LQL) or `sparklogs.reason!` (LQL): the Debug bulk is retained chatter.

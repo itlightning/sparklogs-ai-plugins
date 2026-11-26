@@ -1,5 +1,7 @@
 # Windows Update and patch failures
 
+**Use when:** patches fail to install or roll back, a device is months behind or not scanning for updates, a feature update keeps failing, or DISM or SFC report component store corruption.
+
 **Trigger.** "Patching reports `<KB>` failed", "this machine is months behind", "the 24H2 upgrade keeps failing", "updates install and then roll back", or a SparkLogs condition that the device is not scanning or has paused updates.
 
 **Accuracy.** An update passes through stages, and each stage has its own witness: Windows Update scans a service for what the device needs, downloads it, hands it to the servicing stack (CBS) to stage and install, and often finishes it during the next restart.

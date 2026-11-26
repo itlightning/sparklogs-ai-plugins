@@ -1,5 +1,7 @@
 # Memory or handle leak
 
+**Use when:** a PC or server gets slower over days until a reboot fixes it, memory use keeps climbing, or an application runs out of memory again and again.
+
 **Trigger.** "Machine slows over days, recovers on reboot", or an app repeatedly exhausts memory.
 
 **Accuracy.** The agent reports memory for the processes it lists in each window. For a process listed in every window, its growth curve is a measurement.
@@ -13,13 +15,11 @@ Read open conditions with `sparklogs.episode.age_basis` (col): `observed` suppor
 
 **Device health first.** `device_overview` over days, covering the slowdown and the last reboot if you can.
 
-- `top_processes` (col): `private_commit_bytes_first` (col), `private_commit_bytes_last` (col) and `private_commit_bytes_peak` (col) give each executable's private commit across the window.
-  `resident_bytes_peak` (col) is resident memory, which shared pages inflate.
-  The reading keeps memory rows by resident peak, so a process that commits much and stays mostly paged out can be missing from it: read the `processes` result set.
-- `processes`: filter on `image_name` (col) and read `private_commit_bytes_avg` (col) by `bucket_start` (col) for the curve.
-- `heat_spans` (col) with `domain` (col) `ram`: when memory pressure reached the machine as a whole.
-- `events` (col): `ram_commit_near_limit`, `ram_pressure` and `process_handle_count_high` episodes. The handle condition opens only at a very high count, so its absence does not clear a slower handle leak: read the handle counts below.
-- The reboot that ended a slowdown: `powered_off` evidence, and its shutdown and boot marks in the `events` result set.
+- `top_processes` (col): the leading programs by memory at their peak. A process that commits much and stays mostly paged out can be missing from it: read the `processes` result set.
+- `processes`: filter on `image_name` (col) and read `private_commit_bytes_avg` (col) and `private_commit_bytes_peak` (col) by `bucket_start` (col) for the curve.
+- `heat_blocks` (col) in the memory area: when memory pressure reached the machine as a whole.
+- `conditions` (col): `ram_commit_near_limit`, `ram_pressure` and `process_handle_count_high` episodes. The handle condition opens only at a very high count, so its absence does not clear a slower handle leak: read the handle counts below.
+- The reboot that ended a slowdown: the `power` (col) part, and its shutdown and boot marks in the `events` result set.
 - One instance or a restart cycle: `top_processes_over_time`, ranked by memory with one row per process instance (`../guides/device-state-fields.md`).
   A curve that starts over with each new instance is a restart cycle. One instance climbing until it exits is the leak shape.
 - Handles: `sparklogs.data.processes[].handle_count` (LQL) on `latest_state` rows for the `processes` topic.

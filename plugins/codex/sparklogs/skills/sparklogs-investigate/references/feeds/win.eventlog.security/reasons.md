@@ -6,84 +6,88 @@
 Each section below is complete for its reason: every public field, in the words the reference page shows.
 Search for the heading "## `<code>`" or a word from the reason's label. Do not read the whole file.
 
-| reason | label | kind | severity | service | benign |
-|---|---|---|---|---|---|
-| `account_changed` | account changed | event | Notice | `security_audit` |  |
-| `account_created` | account created | event | Notice | `security_audit` |  |
-| `account_deleted` | account deleted | event | Notice | `security_audit` |  |
-| `account_disabled` | account disabled | event | Notice | `security_audit` |  |
-| `account_enabled` | account enabled | event | Notice | `security_audit` |  |
-| `account_locked_out` | account locked out | event | Warning to Error | `auth` |  |
-| `account_password_change_failed` | account password change failed | event | Info | `security_audit` |  |
-| `account_password_reset` | account password reset | event | Notice | `security_audit` |  |
-| `account_password_reset_failed` | account password reset failed | event | Warning | `security_audit` |  |
-| `adcs_audit_evidence_tampered` | adcs audit evidence tampered | event | Serious | `certificates` |  |
-| `adcs_config_changed` | adcs config changed | event | Error | `certificates` |  |
-| `adcs_request_failed` | adcs request failed | event | Warning | `certificates` |  |
-| `anonymous_remote_sign_in` | anonymous remote sign in | event | Verbose to Warning | `auth` |  |
-| `audit_event_processing_failed` | audit event processing failed | event | Warning | `security_audit` |  |
-| `audit_events_dropped` | audit events dropped | event | Error | `security_audit` |  |
-| `audit_log_cleared` | audit log cleared | event | Critical | `security_audit` |  |
-| `audit_log_full` | audit log full | event | Serious | `security_audit` |  |
-| `audit_policy_changed` | audit policy changed | event | Notice | `security_audit` |  |
-| `audit_subcategory_changed` | audit subcategory changed | event | Verbose | `security_audit` |  |
-| `crypto_selftest_failed` | crypto selftest failed | event | Error | `os_stability` |  |
-| `directory_object_access_denied` | directory object access denied | event | Notice | `directory_services` |  |
-| `directory_object_changed` | directory object changed | event | Warning | `directory_services` |  |
-| `directory_object_created` | directory object created | event | Warning | `directory_services` |  |
-| `directory_object_deleted` | directory object deleted | event | Warning | `directory_services` |  |
-| `directory_replication_access_requested` | directory replication access requested | event | Warning | `directory_services` |  |
-| `domain_policy_changed` | domain policy changed | event | Warning | `security_audit` |  |
-| `dsrm_password_change_failed` | dsrm password change failed | event | Error | `security_audit` |  |
-| `dsrm_password_changed` | dsrm password changed | event | Serious | `security_audit` |  |
-| `event_logging_stopped` | event logging stopped | event | Info | `security_audit` |  |
-| `explicit_credential_used` | explicit credential used | event | Info | `auth` |  |
-| `firewall_rule_changed` | firewall rule changed | event | Verbose | `networking` |  |
-| `firewall_rule_created` | firewall rule created | event | Verbose | `networking` |  |
-| `firewall_rule_deleted` | firewall rule deleted | event | Verbose | `networking` |  |
-| `firewall_service_stopped` | firewall service stopped | event | Info to Warning | `networking` |  |
-| `firewall_setting_applied` | firewall setting applied | event | Info to Warning | `networking` |  |
-| `group_member_added` | group member added | event | Error | `security_audit` |  |
-| `group_member_removed` | group member removed | event | Warning | `security_audit` |  |
-| `guest_account_sign_in` | guest account sign in | event | Notice | `auth` |  |
-| `kerberos_duplicate_request_rejected` | kerberos duplicate request rejected | event | Warning | `auth` |  |
-| `kerberos_preauth_failed` | kerberos preauth failed | event | Warning | `auth` |  |
-| `kerberos_rc4_ticket_issued` | kerberos rc4 ticket issued | event | Warning | `auth` |  |
-| `kerberos_ticket_failed` | kerberos ticket failed | event | Warning | `auth` |  |
-| `logon_right_granted` | logon right granted | event | Notice | `security_audit` |  |
-| `logon_right_removed` | logon right removed | event | Notice | `security_audit` |  |
-| `network_share_added` | network share added | event | Info to Warning | `file_sharing` |  |
-| `nps_access_denied` | nps access denied | event | Warning | `auth` |  |
-| `nps_lockout` | nps lockout | event | Warning to Error | `auth` |  |
-| `nps_request_discarded` | nps request discarded | event | Warning | `auth` |  |
-| `ntlm_validation_failed` | ntlm validation failed | event | Warning | `auth` |  |
-| `principal_renamed` | principal renamed | event | Notice | `security_audit` |  |
-| `process_exited_abnormally` | process exited abnormally | event | Notice | `security_audit` |  |
-| `psdirect_handshake_probe` | psdirect handshake probe | event | Debug | `auth` | benign |
-| `scheduled_task_created` | scheduled task created | event | Display to Notice | `scheduled_tasks` |  |
-| `scheduled_task_deleted` | scheduled task deleted | event | Display to Notice | `scheduled_tasks` |  |
-| `scheduled_task_disabled` | scheduled task disabled | event | Info | `scheduled_tasks` |  |
-| `scheduled_task_updated` | scheduled task updated | event | Display to Notice | `scheduled_tasks` |  |
-| `security_group_changed` | security group changed | event | Warning | `security_audit` |  |
-| `security_group_created` | security group created | event | Warning | `security_audit` |  |
-| `security_group_deleted` | security group deleted | event | Warning | `security_audit` |  |
-| `service_installed` | service installed | event | Debug to Notice | `security_audit` | benign possible |
-| `sid_history_add_failed` | sid history add failed | event | Error | `security_audit` |  |
-| `sid_history_added` | sid history added | event | Serious | `security_audit` |  |
-| `sign_in_failed` | sign in failed | event | Verbose to Warning | `auth` | benign possible |
-| `special_group_sign_in` | special group sign in | event | Warning | `security_audit` |  |
-| `system_time_changed` | system time changed | event | Debug to Warning | `time_sync` |  |
-| `user_audit_subcategory_changed` | user audit subcategory changed | event | Notice | `security_audit` |  |
-| `win_insecure_boot_config` | win insecure boot config | event | Warning | `security_audit` |  |
-| `win_registry_value_changed` | win registry value changed | event | Verbose to Warning | `security_audit` |  |
-| `win_registry_value_created` | win registry value created | event | Verbose to Warning | `security_audit` |  |
-| `win_registry_value_deleted` | win registry value deleted | event | Warning | `security_audit` |  |
+| reason | label | kind | severity | service | benign | use when |
+|---|---|---|---|---|---|---|
+| `account_changed` | account changed | event | Notice to Warning | `security_audit` |  | someone asks who changed a user or computer account's settings, such as password never expires, an account expiry date, allowed sign-in hours or delegation. |
+| `account_created` | account created | event | Notice | `security_audit` |  | an account appears that nobody asked for, or someone asks who created a user or computer account, locally or in the domain. |
+| `account_deleted` | account deleted | event | Notice | `security_audit` |  | a user's or computer's account is gone and someone asks who deleted it, or services and permissions still name an account that was removed. |
+| `account_disabled` | account disabled | event | Notice | `security_audit` |  | a user cannot sign in because their account was turned off, or someone asks who disabled an account. |
+| `account_enabled` | account enabled | event | Notice | `security_audit` |  | someone asks who turned a disabled account back on, such as a departed user's account, the built-in Administrator or the Guest account. |
+| `account_locked_out` | account locked out | event | Warning to Error | `auth` |  | a user's account keeps getting locked, and a technician needs the lockout record naming the machine the failed attempts came from (Caller Computer Name). |
+| `account_password_change_failed` | account password change failed | event | Info | `security_audit` |  | a user cannot change their own password because Windows rejects the new one or the current one is wrong. |
+| `account_password_reset` | account password reset | event | Notice | `security_audit` |  | someone asks who reset a user's password, or a user's password stopped working because another account set a new one. |
+| `account_password_reset_failed` | account password reset failed | event | Warning | `security_audit` |  | a help desk or admin reset of someone else's password does not go through, or someone asks why one account tried to reset another account's password. |
+| `adcs_audit_evidence_tampered` | adcs audit evidence tampered | event | Serious | `certificates` |  | someone asks whether a certificate server's audit settings were narrowed or records were deleted from its certificate database, which can hide certificates it issued. |
+| `adcs_config_changed` | adcs config changed | event | Error | `certificates` |  | someone asks who changed permissions on a certificate authority, such as who may manage the CA or issue and approve certificates. |
+| `adcs_request_failed` | adcs request failed | event | Warning | `certificates` |  | a certificate request to the company certificate authority is denied, or certificate enrollment keeps failing and the CA is the suspect. |
+| `anonymous_remote_sign_in` | anonymous remote sign in | event | Verbose to Warning | `auth` |  | the Security log shows a successful sign-in with no username from another machine, and someone asks who is connecting anonymously. |
+| `audit_event_processing_failed` | audit event processing failed | event | Warning | `security_audit` |  | a technician needs to know whether security events are missing because the event logging service could not write one. |
+| `audit_events_dropped` | audit events dropped | event | Error | `security_audit` |  | a technician asks whether security events were lost on a busy machine because Windows dropped them before they reached the Security log. |
+| `audit_log_cleared` | audit log cleared | event | Critical | `security_audit` |  | someone wiped the Security log, and a technician needs to know who cleared it and whether an intruder was covering tracks. |
+| `audit_log_full` | audit log full | event | Serious | `security_audit` |  | the Security log stops recording new events because it reached its maximum size and is set not to overwrite. |
+| `audit_policy_changed` | audit policy changed | event | Notice | `security_audit` |  | someone asks what an audit policy SACL change in the Security log added or removed. |
+| `audit_subcategory_changed` | audit subcategory changed | event | Verbose | `security_audit` |  | someone asks who changed what Windows audits, or why a kind of security event stopped appearing in the Security log. |
+| `crypto_selftest_failed` | crypto selftest failed | event | Error | `os_stability` |  | Windows reports that its cryptographic self-tests failed at startup, and someone asks whether encryption on the machine can still be trusted. |
+| `directory_object_access_denied` | directory object access denied | event | Notice | `directory_services` |  | a technician needs to know which account was refused access to an Active Directory object that someone chose to audit. |
+| `directory_object_changed` | directory object changed | event | Warning | `directory_services` |  | someone asks who changed or moved something in Active Directory, such as an attribute, a Group Policy link or an object moved to another OU. |
+| `directory_object_created` | directory object created | event | Warning | `directory_services` |  | someone asks who created or restored something in Active Directory, such as an OU, a Group Policy object or a contact. |
+| `directory_object_deleted` | directory object deleted | event | Warning | `directory_services` |  | something disappeared from Active Directory, such as an OU, a Group Policy object or a contact, and someone asks who deleted it or how to bring it back. |
+| `directory_replication_access_requested` | directory replication access requested | event | Warning | `directory_services` |  | someone suspects an attacker is pulling password hashes from a domain controller through directory replication (DCSync), or asks why an account that is not a domain controller requested directory replication rights. |
+| `domain_policy_changed` | domain policy changed | event | Warning | `security_audit` |  | someone asks who changed the domain's password or lockout rules, such as minimum length, expiry or how many wrong passwords lock an account. |
+| `dsrm_password_change_failed` | dsrm password change failed | event | Error | `security_audit` |  | setting the Directory Services Restore Mode password with ntdsutil fails on a domain controller, or someone asks whether a failed attempt was maintenance or probing. |
+| `dsrm_password_changed` | dsrm password changed | event | Serious | `security_audit` |  | someone asks who set the Directory Services Restore Mode password on a domain controller, or whether a recovery password change nobody scheduled means an intruder kept a way back in. |
+| `event_logging_stopped` | event logging stopped | event | Info | `security_audit` |  | a technician sees the event logging service shut down in the Security log and wants to know whether it is just a restart, or where a gap in the log came from. |
+| `explicit_credential_used` | explicit credential used | event | Info | `auth` |  | someone asks why a program or user signed in with another account's typed or saved credentials, such as runas, a drive mapped as another user or remote PowerShell. |
+| `firewall_rule_changed` | firewall rule changed | event | Verbose | `networking` |  | a technician reviewing the Security log needs to know which Windows Firewall rule was modified, or traffic a rule used to allow or block behaves differently after an edit. |
+| `firewall_rule_created` | firewall rule created | event | Verbose | `networking` |  | a technician reviewing the Security log needs to know which Windows Firewall rule was added, such as an inbound allow that opens a port. |
+| `firewall_rule_deleted` | firewall rule deleted | event | Verbose | `networking` |  | a technician reviewing the Security log needs to know which Windows Firewall rule was removed, or a program lost network access after a rule went missing. |
+| `firewall_service_stopped` | firewall service stopped | event | Info to Warning | `networking` |  | the Windows Firewall service or its driver stopped or started, and a technician needs to know whether the machine went unfiltered and for how long. |
+| `firewall_setting_applied` | firewall setting applied | event | Info to Warning | `networking` |  | someone asks whether a Windows Firewall profile was turned off or set to allow inbound traffic by default, or which value a firewall setting holds after a policy refresh. |
+| `group_member_added` | group member added | event | Error | `security_audit` |  | someone asks who added an account to Administrators, Domain Admins or another security group, or whether a new membership gave a user admin rights. |
+| `group_member_removed` | group member removed | event | Warning | `security_audit` |  | a user lost admin rights or group-based access, someone was taken out of Administrators or another security group, or a machine is left with no working administrator. |
+| `guest_account_sign_in` | guest account sign in | event | Notice | `auth` |  | someone signed in as Guest, the Guest account turns out to be enabled, or an old NAS, copier or scanner reaches this machine's shares as guest. |
+| `kerberos_duplicate_request_rejected` | kerberos duplicate request rejected | event | Warning | `auth` |  | a server reports a Kerberos replay attack and a technician needs to know whether duplicated network packets, a client retrying too fast or a replayed ticket is behind it. |
+| `kerberos_preauth_failed` | kerberos preauth failed | event | Warning | `auth` |  | a domain account keeps failing Kerberos sign-in, and a technician needs each failed attempt's client address and failure code from the domain controller, such as when the lockout names no useful caller. |
+| `kerberos_rc4_ticket_issued` | kerberos rc4 ticket issued | event | Warning | `auth` |  | a security review asks whether weak RC4 encryption is still used for Kerberos, which service accounts lack AES keys, or whether someone is Kerberoasting. |
+| `kerberos_ticket_failed` | kerberos ticket failed | event | Warning | `auth` |  | a domain user or service is refused a Kerberos ticket for a server, share or application, for example an unknown service name (missing SPN), or a ticket request or renewal is refused for a disabled or unknown account, and a technician needs the domain controller's reason. |
+| `logon_right_granted` | logon right granted | event | Notice | `security_audit` |  | someone asks who gave an account permission to sign in to a machine through Remote Desktop, locally, over the network, as a service or as a batch job, or why an account can now sign in where it could not before. |
+| `logon_right_removed` | logon right removed | event | Notice | `security_audit` |  | a service, scheduled task or user that used to sign in to a machine stopped being allowed to, or someone asks who removed a sign-in right such as Log on as a service. |
+| `network_share_added` | network share added | event | Info to Warning | `file_sharing` |  | someone asks who shared a folder from a machine, or a new or unexpected shared folder appears on a workstation or server. |
+| `nps_access_denied` | nps access denied | event | Warning | `auth` |  | a user's VPN, Wi-Fi or 802.1X wired connection is rejected by the RADIUS server, and a technician needs the reason Network Policy Server gave. |
+| `nps_lockout` | nps lockout | event | Warning to Error | `auth` |  | a user stays blocked from VPN or Wi-Fi through Network Policy Server after repeated failures, even though their domain account is not locked. |
+| `nps_request_discarded` | nps request discarded | event | Warning | `auth` |  | every user of one VPN server, wireless controller or switch fails to authenticate and Network Policy Server answers none of their requests, often after a shared secret or RADIUS client change. |
+| `ntlm_validation_failed` | ntlm validation failed | event | Warning | `auth` |  | a technician needs each failed NTLM password check, on a domain controller or the machine holding a local account, with the workstation it came from. |
+| `principal_renamed` | principal renamed | event | Notice | `security_audit` |  | someone asks when or why a user, computer or group got a new account name (the pre-Windows 2000 logon name), or a report, script or saved search stops finding an account after a name change. |
+| `process_exited_abnormally` | process exited abnormally | event | Notice | `security_audit` |  | a technician needs the Security log's record of a program ending with a crash status, such as a background process that crashed and left no Application Error record. |
+| `psdirect_handshake_probe` | psdirect handshake probe | event | Debug | `auth` | benign | a Hyper-V host or guest shows failed sign-ins that no person made, and a technician wants to know whether they are real or PowerShell Direct opening a session. |
+| `scheduled_task_created` | scheduled task created | event | Display to Notice | `scheduled_tasks` |  | someone asks who set up a new scheduled task on a machine, or whether a new task could be malware set up to run at startup or sign-in. |
+| `scheduled_task_deleted` | scheduled task deleted | event | Display to Notice | `scheduled_tasks` |  | a backup, maintenance or update job stopped running and its task is gone from Task Scheduler, or someone asks who deleted a scheduled task. |
+| `scheduled_task_disabled` | scheduled task disabled | event | Info | `scheduled_tasks` |  | a scheduled job is still listed in Task Scheduler but shows Disabled and no longer runs, or someone asks who switched off a backup, antivirus or update task. |
+| `scheduled_task_updated` | scheduled task updated | event | Display to Notice | `scheduled_tasks` |  | someone asks who changed what an existing scheduled task runs, when it runs or which account it runs as. |
+| `security_group_changed` | security group changed | event | Warning | `security_audit` |  | someone asks who changed a security group's scope, type, description or other settings, not its members, or why a group stopped granting access after it became a distribution group. |
+| `security_group_created` | security group created | event | Warning | `security_audit` |  | someone asks who created a new security group on a machine or in Active Directory, or whether a new group is privileged. |
+| `security_group_deleted` | security group deleted | event | Warning | `security_audit` |  | users suddenly lose access to a share or application because a group behind it was deleted, or someone asks who deleted a security group. |
+| `service_installed` | service installed | event | Debug to Notice | `security_audit` | benign possible | an unknown service appears and a technician needs the Security log's install record, written when Audit Security System Extension is on, with the program path and run-as account. |
+| `sid_history_add_failed` | sid history add failed | event | Error | `security_audit` |  | a domain migration tool such as ADMT fails to copy SID History, or someone asks whether a failed SID History write outside a migration is an attack attempt. |
+| `sid_history_added` | sid history added | event | Serious | `security_audit` |  | someone asks whether SID History added to an account is part of a domain migration or a hidden way to give it another account's administrator or cross-domain rights. |
+| `sign_in_failed` | sign in failed | event | Verbose to Warning | `auth` | benign possible | a user or service cannot sign in to a machine and a technician needs the failed logon record with its cause, source address and logon type, or someone asks whether a run of failed sign-ins is password guessing. |
+| `special_group_sign_in` | special group sign in | event | Warning | `security_audit` |  | someone wants to see when an account in a group on the machine's Special Logon watch list (SpecialGroups), such as Domain Admins, signed in. |
+| `system_time_changed` | system time changed | event | Debug to Warning | `time_sync` |  | a machine's clock or date suddenly jumped, someone set the time by hand, or a technician needs to know which process or account changed the system time. |
+| `user_audit_subcategory_changed` | user audit subcategory changed | event | Notice | `security_audit` |  | someone asks whether auditing for one account was turned up or excluded, or who changed per-user audit policy. |
+| `win_insecure_boot_config` | win insecure boot config | event | Warning | `security_audit` |  | a machine shows Test Mode on the desktop, or someone asks whether test signing, kernel debugging or integrity checks were left turned off at boot. |
+| `win_registry_value_changed` | win registry value changed | event | Verbose to Warning | `security_audit` |  | someone asks who or which process changed a value under a registry key that has auditing set. |
+| `win_registry_value_created` | win registry value created | event | Verbose to Warning | `security_audit` |  | someone asks which process added a new value, such as a startup Run entry, under an audited registry key. |
+| `win_registry_value_deleted` | win registry value deleted | event | Warning | `security_audit` |  | someone asks who removed a value from an audited registry key, such as a hardening setting that fell back to its default. |
 
 ## `account_changed`: account changed
 
 An existing user or computer account was edited.
 
-**Severity:** Notice
+**Use when:** someone asks who changed a user or computer account's settings, such as password never expires, an account expiry date, allowed sign-in hours or delegation.
+
+**Keywords:** user account changed, account settings changed, account properties modified, who modified the account, password never expires set, account expiration date changed, logon hours changed, trusted for delegation, UserAccountControl changed, computer account changed
+
+**Severity:** Notice. Warning when an account other than SYSTEM, LocalService or NetworkService turns on a flag that weakens the account: password not required, password never expires, reversible password encryption, either delegation flag, DES keys only, or Kerberos pre-authentication not required. When one of those three platform accounts turns on such a flag the row stays Notice; it is labeled maintenance only when password never expires is the only weakening flag set.
 
 **Why it matters:** The account still exists and still signs in, but what it may do can have changed: an account flag such as password never expires, an expiry date, permitted sign-in hours, or a delegation setting.
 
@@ -112,10 +116,16 @@ An existing user or computer account was edited.
 The target is the principal that was edited and the actor is the principal that edited it.
 config_change.target names the same account again, as the identity of what changed rather than
 as a principal join key; the two answer different questions and both are populated.
+An edit made by SYSTEM, LocalService or NetworkService is categorized as maintenance, which sets
+a management agent's upkeep of its own account apart from the edits people made.
 
 ## `account_created`: account created
 
 A user or computer account was created, in the domain or in the machine's local accounts.
+
+**Use when:** an account appears that nobody asked for, or someone asks who created a user or computer account, locally or in the domain.
+
+**Keywords:** new user account created, new local account, new domain user, unexpected user account, unknown account appeared, who created this account, unauthorized account created, backdoor account, computer account created, net user /add, New-ADUser, New-LocalUser
 
 **Severity:** Notice
 
@@ -146,6 +156,10 @@ A user or computer account was created, in the domain or in the machine's local 
 
 A user or computer account was deleted, from the domain or from the machine's local accounts.
 
+**Use when:** a user's or computer's account is gone and someone asks who deleted it, or services and permissions still name an account that was removed.
+
+**Keywords:** user account deleted, account removed, who deleted the account, account disappeared, computer account deleted, offboarding account deleted, restore deleted user account, net user /delete, Remove-ADUser, Remove-LocalUser
+
 **Severity:** Notice
 
 **Why it matters:** The account can no longer sign in. Services, scheduled tasks and permissions that still name it fail, or show an unresolved SID.
@@ -173,6 +187,10 @@ A user or computer account was deleted, from the domain or from the machine's lo
 ## `account_disabled`: account disabled
 
 A user or computer account was disabled and can no longer sign in.
+
+**Use when:** a user cannot sign in because their account was turned off, or someone asks who disabled an account.
+
+**Keywords:** account disabled, Your account has been disabled, who disabled the account, user disabled in Active Directory, account turned off, offboarding disabled account, computer account disabled, Disable-ADAccount, Disable-LocalUser, net user /active:no
 
 **Severity:** Notice
 
@@ -202,6 +220,10 @@ A user or computer account was disabled and can no longer sign in.
 
 A disabled user or computer account was enabled and can sign in again.
 
+**Use when:** someone asks who turned a disabled account back on, such as a departed user's account, the built-in Administrator or the Guest account.
+
+**Keywords:** account enabled, account re-enabled, disabled account turned back on, who enabled the account, former employee account enabled, dormant account reactivated, built-in Administrator enabled, Guest account enabled, Enable-ADAccount, Enable-LocalUser, net user /active:yes
+
 **Severity:** Notice
 
 **Why it matters:** The account can sign in from now on. An unexpected enable of an admin, service or long-unused account hands someone a working identity.
@@ -228,6 +250,10 @@ A disabled user or computer account was enabled and can sign in again.
 ## `account_locked_out`: account locked out
 
 An account was locked out after too many failed sign-ins. The event names the machine the failed attempts came from.
+
+**Use when:** a user's account keeps getting locked, and a technician needs the lockout record naming the machine the failed attempts came from (Caller Computer Name).
+
+**Keywords:** account locked out, account keeps locking, keeps getting locked out, locked after too many wrong passwords, The referenced account is currently locked out, find lockout source, lockout source machine, locked out after password change, old password on phone, stale saved credentials, LockoutStatus, Unlock-ADAccount
 
 **Severity:** Warning (built-in Administrator, any name) / Error (other accounts)
 
@@ -257,6 +283,10 @@ Highest ticket-value auth pivot on many fleets: find the noisy device, fix the c
 
 An account tried to change its own password and Windows refused the change.
 
+**Use when:** a user cannot change their own password because Windows rejects the new one or the current one is wrong.
+
+**Keywords:** password change failed, cannot change my password, new password rejected, Unable to update the password, password complexity requirements, password history requirement, password changed too recently, password too short, password reused
+
 **Severity:** Info
 
 **Why it matters:** Nothing changed: the user keeps their current password. Repeated failures for one user usually mean the new password keeps breaking the password rules.
@@ -282,6 +312,10 @@ An account tried to change its own password and Windows refused the change.
 ## `account_password_reset`: account password reset
 
 One account reset another account's password, and the reset completed.
+
+**Use when:** someone asks who reset a user's password, or a user's password stopped working because another account set a new one.
+
+**Keywords:** password reset succeeded, admin reset password, help desk password reset, who reset the password, password reset by another account, password changed without my knowledge, Set-ADAccountPassword, LAPS rotated Administrator password, local administrator password rotated, account takeover password reset
 
 **Severity:** Notice
 
@@ -310,11 +344,17 @@ One account reset another account's password, and the reset completed.
 The value the credential was set to is never recorded by the event and never reaches any field.
 Every completed reset is recorded at Notice: help-desk resets, LAPS rotating the built-in
 Administrator and management agents rotating their own local account all produce this event.
+A reset made by SYSTEM, LocalService or NetworkService is categorized as maintenance, which
+sets the scheduled rotations apart from the resets people made.
 Check the actor and target fields to tell a requested reset from an unexpected one.
 
 ## `account_password_reset_failed`: account password reset failed
 
 One account tried to reset another account's password, and the reset did not complete.
+
+**Use when:** a help desk or admin reset of someone else's password does not go through, or someone asks why one account tried to reset another account's password.
+
+**Keywords:** AD password reset failed, cannot reset user password, admin password reset rejected, reset password not allowed, no permission to reset password, access denied resetting password, password does not meet the password policy requirements, Set-ADAccountPassword failed
 
 **Severity:** Warning
 
@@ -345,6 +385,10 @@ reset.
 ## `adcs_audit_evidence_tampered`: adcs audit evidence tampered
 
 A certification authority's audit filter changed, or rows were deleted from its database.
+
+**Use when:** someone asks whether a certificate server's audit settings were narrowed or records were deleted from its certificate database, which can hide certificates it issued.
+
+**Keywords:** AD CS audit filter changed, CA audit settings changed, certificate authority auditing turned off, certificate database rows deleted, issued certificate records deleted, certutil -deleterow, Certificate Services audit tampering, CA evidence deleted
 
 **Severity:** Serious
 
@@ -377,6 +421,10 @@ and certificate-manager changes are adcs_config_changed.
 
 A certification authority's security permissions changed, or who may act as a certificate manager changed.
 
+**Use when:** someone asks who changed permissions on a certificate authority, such as who may manage the CA or issue and approve certificates.
+
+**Keywords:** CA permissions changed, certificate authority security changed, ManageCA permission, certificate managers changed, certificate manager restrictions, AD CS permissions changed, who can approve certificates, ESC7
+
 **Severity:** Error
 
 **Why it matters:** Who can administer the CA or approve certificates is different, and stays different until someone reverses it. Control of an enterprise CA lets an account issue certificates that sign in as other users.
@@ -408,6 +456,10 @@ carry a lower severity than the audit-filter and database-deletion pair.
 
 A certification authority denied a certificate request.
 
+**Use when:** a certificate request to the company certificate authority is denied, or certificate enrollment keeps failing and the CA is the suspect.
+
+**Keywords:** certificate request denied, cert request denied, enrollment denied by CA, Denied by Policy Module, certificate template permission, Enroll permission missing, autoenrollment denied by CA, certreq denied, pending request denied by certificate manager
+
 **Severity:** Warning
 
 **Why it matters:** The requester did not get a certificate. Enrollment that keeps failing breaks whatever needs the certificate: Wi-Fi or VPN sign-in, smart cards, web server certificates.
@@ -434,6 +486,10 @@ A certification authority denied a certificate request.
 ## `anonymous_remote_sign_in`: anonymous remote sign in
 
 A sign-in with no identity (ANONYMOUS LOGON) succeeded from another machine.
+
+**Use when:** the Security log shows a successful sign-in with no username from another machine, and someone asks who is connecting anonymously.
+
+**Keywords:** null session from network, null session enumeration, anonymous logon from network, anonymous logon from internet, sign-in without username or password, share and user enumeration, RestrictAnonymous
 
 **Severity:** Warning (public origin address) / Verbose (local network or no address)
 
@@ -462,6 +518,10 @@ A sign-in with no identity (ANONYMOUS LOGON) succeeded from another machine.
 
 The event logging service failed to process an incoming event, so some security events may be missing.
 
+**Use when:** a technician needs to know whether security events are missing because the event logging service could not write one.
+
+**Keywords:** encountered an error while processing an incoming event, security event could not be written, event log publisher error, incomplete security record
+
 **Severity:** Warning
 
 **Why it matters:** Security events from around this time may not have been written. A gap here can hide sign-ins or changes.
@@ -485,6 +545,10 @@ The event logging service failed to process an incoming event, so some security 
 ## `audit_events_dropped`: audit events dropped
 
 Windows discarded security audit events before they reached the Security log. The event states how many.
+
+**Use when:** a technician asks whether security events were lost on a busy machine because Windows dropped them before they reached the Security log.
+
+**Keywords:** audit events dropped, lost security events, security events lost under load, audit volume too high, too much auditing, file auditing overload, dropped audit events count zero
 
 **Severity:** Error when records were discarded; Debug when the count is zero
 
@@ -515,6 +579,10 @@ does not match that template ships with no count. A row with no count is reporte
 ## `audit_log_cleared`: audit log cleared
 
 The Security log was cleared.
+
+**Use when:** someone wiped the Security log, and a technician needs to know who cleared it and whether an intruder was covering tracks.
+
+**Keywords:** Security log cleared, Security log wiped, who cleared the Security log, security history deleted, covering tracks, anti-forensics, Security log tampering, wevtutil cl Security, Clear-EventLog Security
 
 **Severity:** Critical (non-system clearer) / Error
 
@@ -548,6 +616,10 @@ event itself proves, and it is what separates the two severities.
 
 The Security log is full and set not to overwrite, so new security events are not being written.
 
+**Use when:** the Security log stops recording new events because it reached its maximum size and is set not to overwrite.
+
+**Keywords:** security log full, security log full stopped recording, Security log maximum size reached, Security log out of room, archive the log when full, CrashOnAuditFail, blue screen when security log full
+
 **Severity:** Serious
 
 **Why it matters:** Sign-ins and changes on this machine leave no trace until someone fixes the log settings. With the policy "Audit: Shut down system immediately if unable to log security audits" on, the machine stops with a blue screen instead.
@@ -572,6 +644,10 @@ The Security log is full and set not to overwrite, so new security events are no
 ## `audit_policy_changed`: audit policy changed
 
 The audit settings (SACL) on an object changed.
+
+**Use when:** someone asks what an audit policy SACL change in the Security log added or removed.
+
+**Keywords:** SACL changed, audit entry added, audit entry removed, system access control list changed, SDDL audit ACE
 
 **Also reported by:** `audit-policy`
 
@@ -601,6 +677,10 @@ The audit settings (SACL) on an object changed.
 
 The system audit policy for one subcategory changed.
 
+**Use when:** someone asks who changed what Windows audits, or why a kind of security event stopped appearing in the Security log.
+
+**Keywords:** audit policy changed, advanced audit policy changed, auditing turned off, auditing disabled, auditpol /set /subcategory, Success and Failure auditing removed, security events stopped being logged, audit settings changed by Group Policy
+
 **Severity:** Verbose
 
 **Why it matters:** If Success or Failure auditing was removed, events of that kind stop being written from now on, and nothing else reports it.
@@ -626,6 +706,10 @@ The system audit policy for one subcategory changed.
 
 A FIPS cryptographic self-test failed.
 
+**Use when:** Windows reports that its cryptographic self-tests failed at startup, and someone asks whether encryption on the machine can still be trusted.
+
+**Keywords:** cryptographic self-test failure, crypto module failure, encryption self-check failed, known answer test failed, FIPS mode self-test failed
+
 **Severity:** Error
 
 **Why it matters:** Windows' cryptographic functions on this machine may not be trustworthy, and encryption, TLS connections and signature checks all rely on them.
@@ -650,6 +734,10 @@ A FIPS cryptographic self-test failed.
 ## `directory_object_access_denied`: directory object access denied
 
 An account was refused access to an audited Active Directory object.
+
+**Use when:** a technician needs to know which account was refused access to an Active Directory object that someone chose to audit.
+
+**Keywords:** directory object access failure, service account denied AD access, insufficient rights on AD object, DS Access audit failure, audited AD object access denied
 
 **Severity:** Notice
 
@@ -677,6 +765,10 @@ An account was refused access to an audited Active Directory object.
 ## `directory_object_changed`: directory object changed
 
 An audited Active Directory object was modified or moved.
+
+**Use when:** someone asks who changed or moved something in Active Directory, such as an attribute, a Group Policy link or an object moved to another OU.
+
+**Keywords:** AD object modified, AD attribute changed, who changed an AD attribute, object moved to another OU, gPLink changed, GPO link changed, GPO modified, Set-ADObject, Move-ADObject
 
 **Severity:** Warning
 
@@ -712,6 +804,10 @@ than assuming one value.
 
 An audited Active Directory object was created or restored.
 
+**Use when:** someone asks who created or restored something in Active Directory, such as an OU, a Group Policy object or a contact.
+
+**Keywords:** AD object created, new object in Active Directory, new OU created, new GPO created, object restored from AD Recycle Bin, undeleted AD object, Restore-ADObject, New-ADObject
+
 **Severity:** Warning
 
 **Why it matters:** A new directory object can change what policy applies or who has access: a new organizational unit, Group Policy object, computer or contact.
@@ -743,6 +839,10 @@ An audited Active Directory object was created or restored.
 
 An audited Active Directory object was deleted.
 
+**Use when:** something disappeared from Active Directory, such as an OU, a Group Policy object or a contact, and someone asks who deleted it or how to bring it back.
+
+**Keywords:** AD object deleted, deleted from Active Directory, OU deleted, GPO deleted, accidental deletion in AD, restore deleted AD object, AD Recycle Bin restore, Remove-ADObject
+
 **Severity:** Warning
 
 **Why it matters:** Grants, policy links and lookups that depended on the object now resolve to nothing, and nothing reports the failures as coming from this delete.
@@ -773,6 +873,10 @@ An audited Active Directory object was deleted.
 ## `directory_replication_access_requested`: directory replication access requested
 
 An account asked a domain controller for directory replication rights, the access that reads the whole directory, password data included.
+
+**Use when:** someone suspects an attacker is pulling password hashes from a domain controller through directory replication (DCSync), or asks why an account that is not a domain controller requested directory replication rights.
+
+**Keywords:** password hash dump over replication, DCSync credential dumping, Mimikatz DCSync, Impacket secretsdump, DS-Replication-Get-Changes-All, Get-Changes-All, MSOL_ account replication request
 
 **Severity:** Warning (any other account) / Info (a domain controller, a platform identity, or a directory-sync connector under its default name)
 
@@ -809,6 +913,10 @@ authorized.
 
 The password or lockout policy for a domain changed.
 
+**Use when:** someone asks who changed the domain's password or lockout rules, such as minimum length, expiry or how many wrong passwords lock an account.
+
+**Keywords:** password policy changed, lockout policy changed, company password rules changed, minimum password length changed, maximum password age changed, password expiration policy changed, account lockout threshold changed, lockout duration changed, password complexity turned off
+
 **Severity:** Warning; Debug for the platform writing a new machine's own setup policy
 
 **Why it matters:** Password strength and lockout protection for every account under that domain are different from now on. A weakening shows up nowhere else.
@@ -837,6 +945,10 @@ setting list stays in the retained event payload rather than becoming fields.
 ## `dsrm_password_change_failed`: dsrm password change failed
 
 An attempt to set the Directory Services Restore Mode (DSRM) password on a domain controller failed.
+
+**Use when:** setting the Directory Services Restore Mode password with ntdsutil fails on a domain controller, or someone asks whether a failed attempt was maintenance or probing.
+
+**Keywords:** DSRM password change failed, cannot set DSRM password, DSRM password reset failed, ntdsutil set dsrm password failed, restore mode password not set
 
 **Severity:** Error
 
@@ -867,6 +979,10 @@ DC-only in practice. The event proves the attempt, not that any password was use
 
 The Directory Services Restore Mode (DSRM) password was set on a domain controller.
 
+**Use when:** someone asks who set the Directory Services Restore Mode password on a domain controller, or whether a recovery password change nobody scheduled means an intruder kept a way back in.
+
+**Keywords:** DSRM password reset, DSRM password changed, restore mode password, reset DSRM administrator password, safe mode administrator password domain controller, DSRM backdoor, DsrmAdminLogonBehavior
+
 **Severity:** Serious
 
 **Why it matters:** Whoever holds the new password can start this controller in recovery mode and change its directory database offline. Intruders set it to keep a way back in.
@@ -896,6 +1012,10 @@ DC-only in practice. The event proves the change, not that the password was used
 
 The Windows event logging service stopped, which is what a clean shutdown or restart looks like in the Security log.
 
+**Use when:** a technician sees the event logging service shut down in the Security log and wants to know whether it is just a restart, or where a gap in the log came from.
+
+**Keywords:** event log service stopped, eventlog service shutdown, Security log gap after restart, restart recorded in Security log, clean shutdown record, gap in Security log
+
 **Severity:** Info
 
 **Why it matters:** Nothing is wrong. A gap in the Security log that starts with this event is the machine being down.
@@ -922,6 +1042,10 @@ This row describes the HOST event log service, not the SparkLogs collector.
 ## `explicit_credential_used`: explicit credential used
 
 A process signed in with credentials supplied explicitly (as runas does), and the caller was not one of Windows' own sign-in components.
+
+**Use when:** someone asks why a program or user signed in with another account's typed or saved credentials, such as runas, a drive mapped as another user or remote PowerShell.
+
+**Keywords:** run as different user, alternate credentials, logon with another user's credentials, net use /user, Start-Process -Credential, Enter-PSSession -Credential, saved credentials used
 
 **Severity:** Info
 
@@ -951,6 +1075,10 @@ on the reason and read the calling process, rather than filtering by severity.
 ## `firewall_rule_changed`: firewall rule changed
 
 A Windows Firewall rule was modified.
+
+**Use when:** a technician reviewing the Security log needs to know which Windows Firewall rule was modified, or traffic a rule used to allow or block behaves differently after an edit.
+
+**Keywords:** firewall rule modified, firewall rule edited, firewall exception changed, inbound rule edited, Security log rule change by Set-NetFirewallRule
 
 **Also reported by:** `win.eventlog.network`
 
@@ -983,6 +1111,10 @@ A Windows Firewall rule was modified.
 
 A Windows Firewall rule was added.
 
+**Use when:** a technician reviewing the Security log needs to know which Windows Firewall rule was added, such as an inbound allow that opens a port.
+
+**Keywords:** firewall rule added, new firewall rule, inbound allow rule added, port opened in firewall, firewall exception added, Security log rule added by New-NetFirewallRule
+
 **Also reported by:** `win.eventlog.network`
 
 **Severity:** Verbose
@@ -1013,6 +1145,10 @@ A Windows Firewall rule was added.
 
 A Windows Firewall rule was deleted.
 
+**Use when:** a technician reviewing the Security log needs to know which Windows Firewall rule was removed, or a program lost network access after a rule went missing.
+
+**Keywords:** firewall rule deleted, firewall rule removed, firewall rule missing, firewall exception removed, Security log rule removed by Remove-NetFirewallRule
+
 **Also reported by:** `win.eventlog.network`
 
 **Severity:** Verbose
@@ -1042,11 +1178,15 @@ A Windows Firewall rule was deleted.
 
 The Windows Firewall service or driver stopped, or started again.
 
+**Use when:** the Windows Firewall service or its driver stopped or started, and a technician needs to know whether the machine went unfiltered and for how long.
+
+**Keywords:** firewall service stopped, Windows Firewall service not running, Windows Defender Firewall service stopped, MpsSvc stopped, mpsdrv stopped, firewall driver stopped, firewall service started again
+
 **Severity:** Warning or Info
 
 **Why it matters:** While it is stopped, Windows Firewall does not filter traffic, so services on the machine are reachable from any network it is on.
 
-**In practice:** Security log, event ID 5025 (the firewall service stopped) or 5034 (the firewall driver stopped); 5024 and 5033 record them starting again. No extra audit setting is needed to see them. A stop with a start soon after, around an update or a restart, is normal. A stop with no start after it, made by hand or by software, leaves the machine unfiltered.
+**In practice:** Security log, event ID 5025 (the firewall service stopped) or 5034 (the firewall driver stopped); 5024 and 5033 record them starting again. No extra audit setting is needed to see them. A stop with a start soon after, around an update or a restart, is normal. A stop with no start after it, such as one made by software, leaves the machine unfiltered.
 
 **When to ignore:** A stop followed by a start minutes later during updates or a restart.
 
@@ -1060,13 +1200,17 @@ The Windows Firewall service or driver stopped, or started again.
 
 - `firewall_rule_changed`: a rule changed while the firewall kept running
 
-**Example:** The firewall service is stopped by hand on a server and not started again.
+**Example:** The firewall service stops on a server and does not start again.
 
 **Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/feeds/eventlog-security#firewall_service_stopped, https://sparklogs.com/reference/reasons/firewall_service_stopped.json
 
 ## `firewall_setting_applied`: firewall setting applied
 
 A Windows Firewall setting was written, with the value it now holds.
+
+**Use when:** someone asks whether a Windows Firewall profile was turned off or set to allow inbound traffic by default, or which value a firewall setting holds after a policy refresh.
+
+**Keywords:** firewall turned off, firewall disabled, firewall profile off, firewall setting changed, inbound connections allowed by default, firewall setting changed by Group Policy, firewall turned off with Set-NetFirewallProfile, firewall turned off with netsh
 
 **Severity:** Info, and Warning when the setting switches the firewall off or allows inbound traffic by default.
 
@@ -1093,6 +1237,10 @@ A Windows Firewall setting was written, with the value it now holds.
 ## `group_member_added`: group member added
 
 A member was added to a security group. Adds to privileged groups (Administrators, Domain Admins and similar) are reported at Error.
+
+**Use when:** someone asks who added an account to Administrators, Domain Admins or another security group, or whether a new membership gave a user admin rights.
+
+**Keywords:** added to administrators group, added to local admins, made local admin, added to Domain Admins, admin rights granted, who gave admin rights, privilege escalation group membership, net localgroup administrators /add, Add-LocalGroupMember, Add-ADGroupMember
 
 **Severity:** Error (privileged group) / Notice (any other security group)
 
@@ -1123,6 +1271,10 @@ A member was added to a security group. Adds to privileged groups (Administrator
 
 A member was removed from a security group. Removals from privileged groups are reported at Warning.
 
+**Use when:** a user lost admin rights or group-based access, someone was taken out of Administrators or another security group, or a machine is left with no working administrator.
+
+**Keywords:** removed from administrators group, removed from local admins, lost admin rights, admin rights removed, taken out of admin group, removed from Domain Admins, removed from Protected Users, no administrator left on machine, Remove-LocalGroupMember, Remove-ADGroupMember, net localgroup /delete
+
 **Severity:** Warning (privileged group) / Notice (any other security group)
 
 **Why it matters:** The member loses the group's rights. A privileged removal can leave a machine with nobody able to administer it, or take away an account's credential protections.
@@ -1150,6 +1302,10 @@ A member was removed from a security group. Removals from privileged groups are 
 ## `guest_account_sign_in`: guest account sign in
 
 The built-in Guest account signed in. Windows ships it disabled, so someone enabled it.
+
+**Use when:** someone signed in as Guest, the Guest account turns out to be enabled, or an old NAS, copier or scanner reaches this machine's shares as guest.
+
+**Keywords:** signed in as guest, guest account active, net user guest, disable guest account, NAS connects as guest
 
 **Severity:** Notice
 
@@ -1181,6 +1337,10 @@ a principal that exists and is normally switched off.
 
 Windows rejected a Kerberos request that repeated one it had just received.
 
+**Use when:** a server reports a Kerberos replay attack and a technician needs to know whether duplicated network packets, a client retrying too fast or a replayed ticket is behind it.
+
+**Keywords:** replay attack detected, Kerberos replay, duplicate Kerberos request, repeat request detected, authenticator replay, ticket replay, duplicated packets Kerberos replay
+
 **Severity:** Warning
 
 **Why it matters:** That one request failed and the client has to try again. Network gear or a retrying client usually causes it, but a replayed stolen ticket writes the same event.
@@ -1209,6 +1369,10 @@ event does not say what produced the duplicate, and it does not show that any ac
 ## `kerberos_preauth_failed`: kerberos preauth failed
 
 Kerberos pre-authentication failed at the domain controller. The cause is on the line, so a wrong password reads differently from a disabled account or a drifted clock.
+
+**Use when:** a domain account keeps failing Kerberos sign-in, and a technician needs each failed attempt's client address and failure code from the domain controller, such as when the lockout names no useful caller.
+
+**Keywords:** Kerberos pre-authentication failed, Kerberos preauth failed, KDC_ERR_PREAUTH_FAILED, bad password on domain controller, Kerberos password spray
 
 **Severity:** Warning (account state or broken infrastructure) / Notice (wrong password, unknown client, undecoded)
 
@@ -1239,6 +1403,10 @@ Kerberos pre-authentication failed at the domain controller. The cause is on the
 
 A domain controller issued a Kerberos service ticket with weak RC4 encryption, for a service that runs under a user account.
 
+**Use when:** a security review asks whether weak RC4 encryption is still used for Kerberos, which service accounts lack AES keys, or whether someone is Kerberoasting.
+
+**Keywords:** Kerberos RC4 still in use, find Kerberos RC4 usage, weak Kerberos encryption, Kerberoasting, Kerberoast, RC4-HMAC, service account still gets RC4 tickets, move Kerberos to AES, disable RC4 for Kerberos
+
 **Severity:** Warning
 
 **Why it matters:** Anyone holding the ticket can try to crack the service account's password offline (Kerberoasting), and RC4 is far easier to crack than AES. It also shows the service account still accepts RC4.
@@ -1264,6 +1432,10 @@ A domain controller issued a Kerberos service ticket with weak RC4 encryption, f
 ## `kerberos_ticket_failed`: kerberos ticket failed
 
 A Kerberos ticket request, service ticket request or renewal was refused. The cause the domain gave is on the line, and the line says which of the three failed.
+
+**Use when:** a domain user or service is refused a Kerberos ticket for a server, share or application, for example an unknown service name (missing SPN), or a ticket request or renewal is refused for a disabled or unknown account, and a technician needs the domain controller's reason.
+
+**Keywords:** Kerberos ticket request failed, TGT request failed, service ticket failed, Kerberos ticket renewal failed, KDC_ERR_S_PRINCIPAL_UNKNOWN, KDC_ERR_C_PRINCIPAL_UNKNOWN, KDC_ERR_CLIENT_REVOKED, missing SPN, SPN not found, service principal name not registered
 
 **Severity:** Warning (account state or broken infrastructure) / Notice (wrong password, unknown principal, expired, undecoded)
 
@@ -1293,6 +1465,10 @@ A Kerberos ticket request, service ticket request or renewal was refused. The ca
 
 A sign-in right (local, network, batch, service or Remote Desktop sign-in, or a deny counterpart) was granted to an account or group in local security policy.
 
+**Use when:** someone asks who gave an account permission to sign in to a machine through Remote Desktop, locally, over the network, as a service or as a batch job, or why an account can now sign in where it could not before.
+
+**Keywords:** sign-in user right granted, logon right granted, allow log on through Remote Desktop Services, log on as a service granted, log on as a batch job granted, deny logon right granted, SeRemoteInteractiveLogonRight, SeInteractiveLogonRight, SeNetworkLogonRight, SeServiceLogonRight, SeBatchLogonRight
+
 **Severity:** Notice
 
 **Why it matters:** Who may sign in to this machine, and how, changed. A grant of Remote Desktop or service sign-in to an unexpected account is a way to keep access; a granted deny right blocks that path instead.
@@ -1320,6 +1496,10 @@ A sign-in right (local, network, batch, service or Remote Desktop sign-in, or a 
 
 A sign-in right (local, network, batch, service or Remote Desktop sign-in, or a deny counterpart) was removed from an account or group in local security policy.
 
+**Use when:** a service, scheduled task or user that used to sign in to a machine stopped being allowed to, or someone asks who removed a sign-in right such as Log on as a service.
+
+**Keywords:** sign-in user right removed, logon right removed, log on as a service right removed, lost log on as a service, log on as a batch job removed, Remote Desktop sign-in right removed, deny logon right removed, SeServiceLogonRight, SeBatchLogonRight, SeRemoteInteractiveLogonRight, SeDenyNetworkLogonRight
+
 **Severity:** Notice
 
 **Why it matters:** Whatever relied on the right fails at its next sign-in, such as a service or scheduled task. Removing a deny right widens access instead.
@@ -1346,6 +1526,10 @@ A sign-in right (local, network, batch, service or Remote Desktop sign-in, or a 
 ## `network_share_added`: network share added
 
 A network share was added on this machine.
+
+**Use when:** someone asks who shared a folder from a machine, or a new or unexpected shared folder appears on a workstation or server.
+
+**Keywords:** new shared folder, folder shared, new file share, new SMB share, share created, who created share, unexpected share, New-SmbShare, net share
 
 **Also reported by:** `network-shares`
 
@@ -1378,6 +1562,10 @@ The event cannot tell a share created now from one Windows publishes again at ea
 
 Network Policy Server denied a connection request. The decision is on the line, so a wrong password reads differently from a request that matched no policy.
 
+**Use when:** a user's VPN, Wi-Fi or 802.1X wired connection is rejected by the RADIUS server, and a technician needs the reason Network Policy Server gave.
+
+**Keywords:** Access-Reject, VPN login rejected by RADIUS, Wi-Fi login rejected by RADIUS, 802.1X authentication failed, PEAP authentication failed, EAP rejected by NPS, no matching network policy, dial-in permission denied, NPS reason code 16, NPS reason code 48, NPS reason code 65, NPS reason code 66
+
 **Severity:** Warning (policy or infrastructure defect) / Notice (credentials, account state, undecoded)
 
 **Why it matters:** The user did not get VPN, Wi-Fi or wired network access through RADIUS. Repeated denials can lock them out.
@@ -1407,6 +1595,10 @@ Network Policy Server denied a connection request. The decision is on the line, 
 
 Network Policy Server locked an account after repeated failed attempts, so it cannot connect through RADIUS until the lockout clears.
 
+**Use when:** a user stays blocked from VPN or Wi-Fi through Network Policy Server after repeated failures, even though their domain account is not locked.
+
+**Keywords:** NPS account lockout, RADIUS account lockout, VPN locked out but AD account not locked, remote access account lockout, unlock NPS account, MaxDenials
+
 **Severity:** Warning (built-in Administrator, any name) / Error (other accounts)
 
 **Why it matters:** The user cannot connect to VPN or Wi-Fi through this server, even though their domain account can look healthy.
@@ -1433,6 +1625,10 @@ Network Policy Server locked an account after repeated failed attempts, so it ca
 ## `nps_request_discarded`: nps request discarded
 
 Network Policy Server discarded a connection request without making a policy decision.
+
+**Use when:** every user of one VPN server, wireless controller or switch fails to authenticate and Network Policy Server answers none of their requests, often after a shared secret or RADIUS client change.
+
+**Keywords:** RADIUS shared secret mismatch, wrong shared secret, RADIUS client not configured, unknown RADIUS client, NPS discarded request, malformed RADIUS request, RADIUS server ignores all requests
 
 **Severity:** Warning
 
@@ -1461,6 +1657,10 @@ tail and the field, so those rows stay countable.
 
 NTLM password validation failed for an account. The cause is on the line.
 
+**Use when:** a technician needs each failed NTLM password check, on a domain controller or the machine holding a local account, with the workstation it came from.
+
+**Keywords:** NTLM authentication failed, NTLM logon failure, NTLM password check failed, credential validation failed, Audit Credential Validation, MICROSOFT_AUTHENTICATION_PACKAGE_V1_0, bad password from workstation, unknown user name from workstation
+
 **Severity:** Warning (account state) / Notice (wrong password, unknown username, undecoded)
 
 **Why it matters:** NTLM sign-in for that account fails from the reported workstation until the password or the account is fixed. Repeated failures lead to lockout.
@@ -1488,6 +1688,10 @@ NTLM password validation failed for an account. The cause is on the line.
 ## `principal_renamed`: principal renamed
 
 An account or group was renamed. Its SID is unchanged, so events before and after describe the same account under two names.
+
+**Use when:** someone asks when or why a user, computer or group got a new account name (the pre-Windows 2000 logon name), or a report, script or saved search stops finding an account after a name change.
+
+**Keywords:** account renamed, user renamed, group renamed, computer account renamed, renamed administrator account, sAMAccountName changed, Rename-LocalUser, pre-Windows 2000 logon name changed
 
 **Severity:** Notice for a rename that changed the name; Debug when the old and new names are identical
 
@@ -1519,6 +1723,10 @@ rather than assuming a user account.
 
 A process ended with a crash status, such as a memory access violation or a corrupted heap. It did not exit on its own terms.
 
+**Use when:** a technician needs the Security log's record of a program ending with a crash status, such as a background process that crashed and left no Application Error record.
+
+**Keywords:** abnormal process exit, process terminated abnormally, crash exit code, background process crashed, process crashed with no Application Error, 0xC0000005 process exit
+
 **Severity:** Notice
 
 **Why it matters:** Whatever the process was doing did not finish. One crash says little about the machine: most are background helpers that start again unnoticed.
@@ -1544,6 +1752,10 @@ A process ended with a crash status, such as a memory access violation or a corr
 ## `psdirect_handshake_probe`: psdirect handshake probe
 
 Hyper-V opened a PowerShell Direct channel to a guest virtual machine. Windows records the older handshake as a failed sign-in, but no account was involved.
+
+**Use when:** a Hyper-V host or guest shows failed sign-ins that no person made, and a technician wants to know whether they are real or PowerShell Direct opening a session.
+
+**Keywords:** failed logon Hyper-V guest, Hyper-V failed sign-in noise, Enter-PSSession -VMName, Invoke-Command -VMName, vmicvmsession
 
 **Severity:** Debug
 
@@ -1571,6 +1783,10 @@ field carries handshake bytes rather than a domain name. Neither is a value to p
 ## `scheduled_task_created`: scheduled task created
 
 A scheduled task was created.
+
+**Use when:** someone asks who set up a new scheduled task on a machine, or whether a new task could be malware set up to run at startup or sign-in.
+
+**Keywords:** new scheduled task, scheduled task created, schtasks /create, Register-ScheduledTask, scheduled task persistence, malicious scheduled task, suspicious scheduled task
 
 **Severity:** Notice or Display
 
@@ -1602,6 +1818,10 @@ A scheduled task was created.
 
 A scheduled task was deleted.
 
+**Use when:** a backup, maintenance or update job stopped running and its task is gone from Task Scheduler, or someone asks who deleted a scheduled task.
+
+**Keywords:** scheduled task deleted, scheduled task missing, task gone from Task Scheduler, schtasks /delete, Unregister-ScheduledTask, backup task deleted, scheduled task cleanup by attacker
+
 **Severity:** Notice or Display
 
 **Why it matters:** Whatever the task did will not happen again, and nothing restores it. A deleted backup or maintenance job fails silently.
@@ -1630,6 +1850,10 @@ A scheduled task was deleted.
 
 A scheduled task was disabled. The task still exists and no longer runs.
 
+**Use when:** a scheduled job is still listed in Task Scheduler but shows Disabled and no longer runs, or someone asks who switched off a backup, antivirus or update task.
+
+**Keywords:** scheduled task disabled, task shows disabled, Disable-ScheduledTask, schtasks /change /disable, backup task disabled, antivirus task disabled, update task turned off
+
 **Severity:** Info
 
 **Why it matters:** Whatever the task did stops until someone enables it again. Disabling a monitoring, backup or antivirus task is a quiet way to switch it off.
@@ -1656,6 +1880,10 @@ A scheduled task was disabled. The task still exists and no longer runs.
 ## `scheduled_task_updated`: scheduled task updated
 
 An existing scheduled task's definition was changed.
+
+**Use when:** someone asks who changed what an existing scheduled task runs, when it runs or which account it runs as.
+
+**Keywords:** scheduled task modified, scheduled task changed, task action changed, task trigger changed, task run-as account changed, Set-ScheduledTask, hijacked scheduled task, task now runs PowerShell
 
 **Severity:** Notice or Display
 
@@ -1685,6 +1913,10 @@ An existing scheduled task's definition was changed.
 
 A security group's scope, type or attributes changed. Changes to privileged groups (Administrators, Domain Admins and similar) are reported at Warning.
 
+**Use when:** someone asks who changed a security group's scope, type, description or other settings, not its members, or why a group stopped granting access after it became a distribution group.
+
+**Keywords:** group scope changed, group type changed, security group converted to distribution, global to universal group, group description changed, group attributes modified, group settings changed, Set-ADGroup
+
 **Severity:** Warning for a privileged group, Notice for any other security group, Info when Windows configures its own builtin groups.
 
 **Why it matters:** What the group grants changes everywhere it is used, for every member at once. A group converted from security to distribution stops granting access to anything.
@@ -1713,6 +1945,10 @@ A security group's scope, type or attributes changed. Changes to privileged grou
 
 A security group was created. Creation of a privileged group is reported at Warning.
 
+**Use when:** someone asks who created a new security group on a machine or in Active Directory, or whether a new group is privileged.
+
+**Keywords:** new security group, security group created, local group created, AD group created, New-ADGroup, New-LocalGroup
+
 **Severity:** Warning for a privileged group, Notice for any other security group, Info when Windows provisions its own builtin groups.
 
 **Why it matters:** The group grants nothing yet; whatever it is given later reaches every member added to it.
@@ -1739,6 +1975,10 @@ A security group was created. Creation of a privileged group is reported at Warn
 ## `security_group_deleted`: security group deleted
 
 A security group was deleted. Deletion of a privileged group is reported at Warning.
+
+**Use when:** users suddenly lose access to a share or application because a group behind it was deleted, or someone asks who deleted a security group.
+
+**Keywords:** security group deleted, group deleted, AD group deleted, local group deleted, restore deleted group, Remove-ADGroup, Remove-LocalGroup
 
 **Severity:** Warning for a privileged group, Notice for any other security group.
 
@@ -1767,6 +2007,10 @@ A security group was deleted. Deletion of a privileged group is reported at Warn
 ## `service_installed`: service installed
 
 A Windows service was installed. The System log records the same install by default as event 7045.
+
+**Use when:** an unknown service appears and a technician needs the Security log's install record, written when Audit Security System Extension is on, with the program path and run-as account.
+
+**Keywords:** unknown service appeared, remote support tool service installed, ScreenConnect service installed, AnyDesk service installed, service installed audit event
 
 **Also reported by:** `win.eventlog.system`, `services`
 
@@ -1797,6 +2041,10 @@ A Windows service was installed. The System log records the same install by defa
 
 An attempt to add SID History to an account failed.
 
+**Use when:** a domain migration tool such as ADMT fails to copy SID History, or someone asks whether a failed SID History write outside a migration is an attack attempt.
+
+**Keywords:** SID History add failed, ADMT SID History error, DsAddSidHistory, domain migration SID History, SID History injection attempt
+
 **Severity:** Error
 
 **Why it matters:** The account's rights are unchanged. The attempt still needs accounting for, since success would have given the account another account's rights.
@@ -1825,6 +2073,10 @@ The event proves the attempt, not that any rights were inherited.
 ## `sid_history_added`: sid history added
 
 SID History was added to an account.
+
+**Use when:** someone asks whether SID History added to an account is part of a domain migration or a hidden way to give it another account's administrator or cross-domain rights.
+
+**Keywords:** SID History added, sIDHistory, SID History injection, SID History added by ADMT, hidden domain admin rights, cross-domain access via SID History
 
 **Severity:** Serious
 
@@ -1857,6 +2109,10 @@ inherited rights were used.
 ## `sign_in_failed`: sign in failed
 
 A sign-in attempt failed. A disabled, locked or expired account, or one denied by policy, needs action; a single wrong password usually does not.
+
+**Use when:** a user or service cannot sign in to a machine and a technician needs the failed logon record with its cause, source address and logon type, or someone asks whether a run of failed sign-ins is password guessing.
+
+**Keywords:** failed logon, failed login, logon failure, user name or password is incorrect, unknown user name or bad password, 0xC000006D, Sub Status, logon type not granted, 0xC000015B, audit failure logon, RDP failed logins, RDP brute force, password guessing
 
 **Severity:** Warning (account-state) / Notice (other) / Verbose (credential-less probe)
 
@@ -1893,6 +2149,10 @@ other than the failing principal.
 
 An account in a group an administrator chose to watch signed in.
 
+**Use when:** someone wants to see when an account in a group on the machine's Special Logon watch list (SpecialGroups), such as Domain Admins, signed in.
+
+**Keywords:** domain admin logon alert, watched group logon
+
 **Severity:** Warning
 
 **Why it matters:** A watched account signed in to this machine. Someone set up the watch list on purpose, so each of these is a sign-in they wanted to see.
@@ -1917,6 +2177,10 @@ An account in a group an administrator chose to watch signed in.
 ## `system_time_changed`: system time changed
 
 The system clock was changed. Corrections by the Windows Time service are routine; changes by any other process are not.
+
+**Use when:** a machine's clock or date suddenly jumped, someone set the time by hand, or a technician needs to know which process or account changed the system time.
+
+**Keywords:** clock changed, clock jumped, time set back, date and time changed manually, Set-Date, system time changed by hand
 
 **Severity:** Warning (non-time-service) / Debug (routine time service)
 
@@ -1945,6 +2209,10 @@ The system clock was changed. Corrections by the Windows Time service are routin
 
 The per-user audit policy for one account changed.
 
+**Use when:** someone asks whether auditing for one account was turned up or excluded, or who changed per-user audit policy.
+
+**Keywords:** per-user audit policy, per user auditing, account excluded from auditing, audit exclusion for account, hide account activity from Security log
+
 **Severity:** Notice
 
 **Why it matters:** Auditing for that account may now record more or less than system policy says; the event does not show the effect.
@@ -1969,6 +2237,10 @@ The per-user audit policy for one account changed.
 ## `win_insecure_boot_config`: win insecure boot config
 
 The machine started with test signing, kernel debugging or integrity checks turned off in its boot configuration.
+
+**Use when:** a machine shows Test Mode on the desktop, or someone asks whether test signing, kernel debugging or integrity checks were left turned off at boot.
+
+**Keywords:** Test Mode watermark, Test Mode on desktop, testsigning on, nointegritychecks on, bcdedit /debug on, kernel debugging enabled, boot configuration insecure
 
 **Severity:** Warning
 
@@ -1997,6 +2269,10 @@ Flag names ride the message kv tail (InsecureBootFlags) when labeled.
 ## `win_registry_value_changed`: win registry value changed
 
 An audited registry value was changed.
+
+**Use when:** someone asks who or which process changed a value under a registry key that has auditing set.
+
+**Keywords:** registry value modified, registry value changed, who changed an audited registry value, registry change audit
 
 **Severity:** Warning or Verbose
 
@@ -2027,6 +2303,10 @@ An audited registry value was changed.
 
 An audited registry value was created.
 
+**Use when:** someone asks which process added a new value, such as a startup Run entry, under an audited registry key.
+
+**Keywords:** new registry value, registry value created, Run key entry added, startup entry added in registry, registry persistence, CurrentVersion\Run, Run key added with reg add
+
 **Severity:** Warning or Verbose
 
 **Why it matters:** A new value can add a startup program, a policy or a service setting. An unexpected one under a Run key or a security setting can mean persistence or a weakened control.
@@ -2055,6 +2335,10 @@ An audited registry value was created.
 ## `win_registry_value_deleted`: win registry value deleted
 
 An audited registry value was deleted.
+
+**Use when:** someone asks who removed a value from an audited registry key, such as a hardening setting that fell back to its default.
+
+**Keywords:** registry value deleted, registry value removed, hardening setting removed, startup entry removed from registry
 
 **Severity:** Warning
 

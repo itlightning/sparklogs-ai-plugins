@@ -1,11 +1,14 @@
 # Disk, RAID array or storage path failing
 
+**Use when:** a RAID array or disk is degraded or failing, files give I/O device errors, chkdsk wants to run, a drive goes missing or shows RAW, or a SAN or iSCSI disk drops.
+
 **Trigger.** "The array reports degraded", "a drive failed in the server", "files will not open: I/O device error", "Windows wants to run chkdsk", "drive D: is gone or shows RAW", "the server freezes for a few seconds and carries on", or a SMART alert from the RMM.
 
 **Accuracy.** Windows records what its storage stack saw: a block it could not read, a request that timed out, a path it reset, a file system structure it found damaged. It does not record which part is bad. The part is named by repetition on one disk, one path or one volume, and by the layer the records sit in.
 A hardware RAID controller shows Windows its virtual disks, not its member drives. Member drive health, rebuilds, patrol reads and the controller battery reach the logs only when the vendor's agent writes them, and the pack does not curate those records: read them by provider (**Array controllers and vendor tools**). A controller with no agent installed is invisible here.
 SparkLogs does not read SMART counters, Storage Spaces pool health or the RAID controller's own log, and the disk inventory has no health column.
 No storage record does not clear the disk: a drive can wear out silently until it fails, a degraded array keeps serving I/O, and the Storport operational channel, which carries the richer reset and removal records, is off by default on client Windows.
+A disk fault comes from the storage stack: the Disk, NTFS, Storport, class driver and miniport providers on the System and storage channels, or a known vendor tool, and it usually leaves more than one trace (a latency reading, a disk condition, records on the same disk number). An Application-log record from any other provider, with none of those beside it, is that program's claim, not a disk fault: report it as logged and do not recommend replacing the disk on it (`../guides/common-mistakes.md`, **Taking an alarming record at its word**).
 Count disks and days, not rows. One failing drive can write hundreds of rows an hour, and the pack keeps one row per five minutes for some repeating records.
 
 **Feeds.** Windows Event Log, scoped with `subsource` (LQL). Reasons and fields are in each feed's `reasons.md` and `fields.md`. Storage files under `service = storage` (LQL) (`../guides/service-taxonomy.md`).
@@ -32,8 +35,8 @@ Blue screens: `crashes-and-restarts.md`. Hardware errors on the PCI Express link
 
 **Device health first.** `query_device_health`. Views are in `../guides/device-state-fields.md` (**Choose the view**).
 
-- The device overview over the complaint's window. Its storage readings carry `latency_ms_p90_10s` (col), `queue_depth_avg` (col) and `busy_pct_avg` (col) per disk and volume per bucket, and its disk latency reading, `disk_latency_ms` (col), shows when I/O slowed (`../guides/device-state-fields.md`, **Read a device view**). Disk heat is busy time and queue depth, not latency: a failing drive at light load can leave no disk heat at all.
-  Its episodes carry `disk_latency_degraded`, `disk_unresponsive` (**Slow or stalled disk**) and `volume_unreadable` (a fixed volume unmounted, RAW or unreadable). Its changes carry `disk_taken_offline`, `disk_brought_online`, `disk_read_only_changed` and `disk_partition_layout_changed`.
+- The device overview over the complaint's window. Its `storage` result set carries `latency_ms_p90_10s` (col), `queue_depth_avg` (col) and `busy_pct_avg` (col) per disk and volume per bucket, and shows when I/O slowed (`../guides/device-state-fields.md`, **Result sets**). Disk heat is busy time and queue depth, not latency: a failing drive at light load can leave no disk heat at all.
+  Its conditions carry `disk_latency_degraded`, `disk_unresponsive` (**Slow or stalled disk**) and `volume_unreadable` (a fixed volume unmounted, RAW or unreadable). Its changes carry `disk_taken_offline`, `disk_brought_online`, `disk_read_only_changed` and `disk_partition_layout_changed`.
   A disk condition's instance is the disk, labelled as Windows numbers it ("Disk 1"), so the episode names the disk the events must be read on.
 - The device's current `storage_devices` inventory names each disk: `sparklogs.data.storage_devices[].disk_number` (LQL), `sparklogs.data.storage_devices[].model` (LQL), `sparklogs.data.storage_devices[].vendor` (LQL), `sparklogs.data.storage_devices[].transport` (LQL), `sparklogs.data.storage_devices[].presentation` (LQL) and `sparklogs.data.storage_devices[].removable` (LQL).
   Event records name disks by number: `\Device\Harddisk2` (other) and "Disk 2" in a message, and `win.eventlog.storage.device_number` (LQL) on the class driver's records, are disk number 2. Windows renumbers disks when they come and go, so match against the inventory from the same day.

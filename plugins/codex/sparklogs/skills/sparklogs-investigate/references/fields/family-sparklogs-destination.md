@@ -1,6 +1,8 @@
 <!-- GENERATED reference. Do not hand-edit. -->
 # Destination fields
 
+**Use when:** finding where a connection went, by address, host name or port.
+
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
 | `sparklogs.destination.ip` | string |  | The receiving endpoint's IP address. |

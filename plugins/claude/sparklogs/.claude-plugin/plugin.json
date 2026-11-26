@@ -14,6 +14,7 @@
   ],
   "license": "Apache-2.0",
   "name": "sparklogs",
+  "privacyPolicyUrl": "https://sparklogs.com/docs/legal/privacy-policy",
   "repository": "https://github.com/itlightning/sparklogs-ai-plugins",
-  "version": "1.12.12"
+  "version": "1.12.13"
 }

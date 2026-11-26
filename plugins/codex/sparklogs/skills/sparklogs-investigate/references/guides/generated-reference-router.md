@@ -26,7 +26,7 @@ the wrong one.
 | "What is on this box right now?" | none of the above | inventory rows from the MCP tools, not reference content |
 | "How do I explore this kind of stream?" | `stream-kinds.md` | feed → kind → explore ladder. Not `fields.md` |
 | "What does this `app` (LQL) token mean?" | `app-vocabulary.md` | pack-minted product identity; empty is normal |
-| "Unfamiliar `pattern_hash` (LQL), what is this shape?" | MCP `describe_pattern` first | pattern text, examples, fleet spread; then `reasons.md` / `recipes.md` if needed |
+| "Unfamiliar `pattern_hash` (LQL), what is this shape?" | MCP `describe_event_patterns` first | pattern text, examples, fleet spread; then `reasons.md` / `recipes.md` if needed |
 
 How much of each artifact to read (grep, one section, summary table first): the read-mode table in the skill's corpus block.
 
@@ -51,7 +51,7 @@ Two shapes deserve their own line because they are the ones people get wrong:
    subsource = "win.eventlog.security"
    ```
 
-   That is the canonical way to scope a query to one feed. Reach for `query_scope_activity` to
+   That is the canonical way to scope a query to one feed. Reach for `summarize_events_by_severity` to
    discover which subsources a client HAS, not to look up one you already know.
 2. Open that module's `README.md`. It is the module index and it is short.
 3. Open the one artifact the table above points at.
@@ -64,7 +64,7 @@ provider payload, and say in your findings when you were reading uncurated text.
 ## What this content is not
 
 - **Not separate device-health column names.** The generated field reference uses the same paths as
-  `query_device_health` condition, timeline and latest_state columns and `query_logs` filters.
+  `query_device_health` condition, timeline and latest_state columns and `query_raw_events` filters.
   The device-view result sets use short names instead (`device-state-fields.md`, **Result sets**).
 - **Not a severity table.** Severity is a shared ladder across every source and is documented once,
   in `category-classes.md`. A module never defines its own bands.
@@ -219,6 +219,7 @@ provider payload, and say in your findings when you were reading uncurated text.
 - `../fields/family-sparklogs-destination.md`
 - `../fields/family-sparklogs-episode.md`
 - `../fields/family-sparklogs-epoch.md`
+- `../fields/family-sparklogs-feed.md`
 - `../fields/family-sparklogs-inventory.md`
 - `../fields/family-sparklogs-member.md`
 - `../fields/family-sparklogs-occurrence.md`
@@ -227,7 +228,9 @@ provider payload, and say in your findings when you were reading uncurated text.
 - `../fields/family-sparklogs-result.md`
 - `../fields/family-sparklogs-running-as.md`
 - `../fields/family-sparklogs-target.md`
+- `../fields/family-sparklogs-throttle.md`
 - `../fields/family-sparklogs.md`
+- `../fields/family-windows-record.md`
 - `../fields/topic-agent-overhead.md`
 - `../fields/topic-agent-pipeline.md`
 - `../fields/topic-app-crashes.md`

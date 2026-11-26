@@ -1,5 +1,11 @@
 <!-- GENERATED reference. Do not hand-edit. -->
-# Top kernel memory fields
+# Top kernel memory
+
+Each hour, the Windows pool tags holding the most nonpaged and paged kernel memory and the ones whose daily low rose most, with bytes held, allocations not yet freed, change over the hour, and the drivers whose files contain the tag, plus a remainder row for each pool.
+
+**Use when:** nonpaged or paged pool keeps growing, a server runs short of memory with no process to blame, or a driver memory leak is suspected.
+
+A driver listed for a tag is where the tag is allocated, not proof it holds the memory. The daily low starts over at each boot.
 
 Reported every hour on clock boundaries for the window ending at `t`. `sparklogs.window_coverage_pct` is below 100 when collection covered only part of the window. Use chart buckets at least 1 hour wide.
 

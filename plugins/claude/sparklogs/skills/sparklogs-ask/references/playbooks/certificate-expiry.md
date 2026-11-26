@@ -1,5 +1,7 @@
 # Certificate, TLS and enrollment failures
 
+**Use when:** users see expired or untrusted certificate warnings, TLS or Schannel errors appear, Wi-Fi, VPN or smart card sign-in stops authenticating, or certificate autoenrollment fails.
+
 **Trigger.** "The intranet site says the certificate expired", "Wi-Fi or VPN stopped authenticating", "the app cannot reach its server since Monday", "smart card or Windows Hello sign-in fails", "autoenrollment errors on the domain controllers", or a certificate reason on a device.
 
 **Accuracy.** Each side of a certificate problem logs something different, and none of it names the whole story:
@@ -151,7 +153,7 @@ Other well-known causes: the machine or user lacks Enroll and Autoenroll on the 
 
 **Domain controller certificates.** `kerberos_smartcard_cert_missing` is a domain controller with no usable Kerberos Authentication or Domain Controller Authentication certificate. 29 alone says so; 19 says someone tried to sign in with a certificate against this controller and could not.
 Certificate sign-in is not only physical smart cards: Windows Hello for Business in hybrid key trust or certificate trust, and virtual smart cards, use the same path, so 19 in working hours is users whose Windows Hello sign-in is failing or falling back.
-Find the client's domain controllers with `resolve_scope` by their reported role, then over those devices:
+Find the client's domain controllers with `find_org_or_device` by their reported role, then over those devices:
 
 ```lql
 sparklogs.reason in (kerberos_smartcard_cert_missing, cert_expiring, cert_enroll_failed)

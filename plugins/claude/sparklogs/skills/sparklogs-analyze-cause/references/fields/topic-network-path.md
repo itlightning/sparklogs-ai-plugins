@@ -1,5 +1,11 @@
 <!-- GENERATED reference. Do not hand-edit. -->
-# Network path fields
+# Network path
+
+Machine-wide TCP, UDP, IP and ICMP counters for IPv4 and IPv6, TCP bytes, resends, timeouts and round-trip times split into LAN, VPN and internet traffic, and the result and latency of the agent's recent test pings and DNS lookups.
+
+**Use when:** raw evidence behind a network complaint, such as which test pings or lookups failed and when, or whether loss is on the LAN, the VPN or the internet.
+
+Readings are per 5-minute window, and the protocol counters include loopback, so on a quiet machine local traffic can make up most of them. A window keeps at most 32 test results (newest kept, the rest only counted), and LAN means a non-public peer, not proof it is on the local network.
 
 Reported every 5 minutes on clock boundaries for the window ending at `t`. `sparklogs.window_coverage_pct` is below 100 when collection covered only part of the window. Use chart buckets at least 5 minutes wide.
 

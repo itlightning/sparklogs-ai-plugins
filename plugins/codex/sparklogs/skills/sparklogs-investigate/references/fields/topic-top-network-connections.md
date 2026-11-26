@@ -1,5 +1,11 @@
 <!-- GENERATED reference. Do not hand-edit. -->
-# Top network connections fields
+# Top network connections
+
+For each 5-minute window, the busiest TCP connections with their owning program, addresses and ports, bytes received and sent, resent share, retransmit timeouts and round-trip time, plus up to five struggling connections and local and internet rows for everything not listed.
+
+**Use when:** which program is using the bandwidth, where a machine is connecting to, or which connection keeps stalling or resending.
+
+TCP only: UDP and QUIC traffic is not counted. Public remote addresses are shown in full, as a prefix or as an opaque ID per the workspace privacy setting, or under the aggregate setting combined into one row per program and port with no address.
 
 Reported every 5 minutes on clock boundaries for the window ending at `t`. `sparklogs.window_coverage_pct` is below 100 when collection covered only part of the window. Use chart buckets at least 5 minutes wide.
 
@@ -15,10 +21,10 @@ Reported every 5 minutes on clock boundaries for the window ending at `t`. `spar
 | `sparklogs.data.top_network_connections.pid` | integer |  | The ID of the process that owns the connection, as Windows reports it. Absent on remainders and when combined connections disagree. Connections served by kernel-mode servers, such as SMB, show as System. |
 | `sparklogs.data.top_network_connections.create_time_ts` | string | timestamp | When the owning process started, in UTC. Absent when the agent could not confirm the process, or combined connections disagree. |
 | `sparklogs.data.top_network_connections.image_name` | string |  | The owning process's executable file name. Absent when the agent could not confirm the process, or combined connections disagree; when absent but `image_path` is present, take the file name from the path. |
-| `sparklogs.data.top_network_connections.image_path` | string |  | The full path of the owning process's executable. Absent when the agent could not confirm the process, or combined connections disagree. The agent never collects command-line arguments. |
+| `sparklogs.data.top_network_connections.image_path` | string |  | The full path of the owning process's executable. Absent when the agent could not confirm the process, or combined connections disagree. The agent never reports command-line arguments. |
 | `sparklogs.data.top_network_connections.local_address` | string |  | This machine's address on the connection, with any IPv6 scope ID. Absent on combined and remainder rows. |
 | `sparklogs.data.top_network_connections.local_port` | integer |  | This machine's TCP port; on an inbound combined row, the listening port. Absent on outbound or unknown-direction combined rows and on remainders. |
-| `sparklogs.data.top_network_connections.remote_address` | string |  | The remote address: in full for a non-public address; for a public one, in full, as a prefix or as an opaque ID, per the workspace's privacy setting. Absent on combined and remainder rows. |
+| `sparklogs.data.top_network_connections.remote_address` | string |  | The remote address: in full for a non-public address, except a local-use translation IPv6 address, which is always shown as a prefix; for a public one, in full, as a prefix or as an opaque ID per the workspace's privacy setting. Absent on combined and remainder rows. |
 | `sparklogs.data.top_network_connections.remote_port` | integer |  | The remote TCP port; on an outbound combined row, the service port. Absent on inbound or unknown-direction combined rows and on remainders. |
 | `sparklogs.data.top_network_connections.connections` | integer |  | How many connections with traffic this row covers. Absent on remainders, which have no exact count. |
 | `sparklogs.data.top_network_connections.rx_bytes_5m` | integer | bytes | TCP payload received over the measured part of the 5-minute window. When the agent tracks more connections than it can list, the remainder rows carry the bytes of those left out. |

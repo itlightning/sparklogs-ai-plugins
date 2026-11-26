@@ -1,7 +1,13 @@
 <!-- GENERATED reference. Do not hand-edit. -->
-# Installed products fields
+# Installed products
 
-Full inventory every day. Supported changes are reported when the agent observes them.
+Each program installed for the whole machine, from the Windows uninstall list, with its version, publisher, install folder and install date, plus Office and other installer updates linked to their product; per-user installs and hidden system components are not listed.
+
+**Use when:** a question about which version of an application a machine runs, or when software was installed, upgraded or removed.
+
+The install date moves each time Windows Installer patches or repairs a product, so it is not always the first install date. A product with both 64-bit and 32-bit builds shows as two rows, the second named with "(32-bit)".
+
+Full inventory every day. Changes are reported between inventories.
 
 | Field | Type | Unit | Meaning |
 |---|---|---|---|

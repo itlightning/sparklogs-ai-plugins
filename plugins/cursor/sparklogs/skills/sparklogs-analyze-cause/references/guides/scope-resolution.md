@@ -17,7 +17,7 @@ Every log event carries two distinct identity fields:
 
 **"Collector" means one thing only:** the log-shipping process on the device that the agent supervises. It is not a synonym for the sender and not a synonym for the agent.
 
-**Public row kinds from `resolve_scope`:** `org`, `agent` (a registered SparkLogs Agent), `ingest_key` (API ingest credential; never call it an agent in reports).
+**Public row kinds from `find_org_or_device`:** `org`, `agent` (a registered SparkLogs Agent), `ingest_key` (API ingest credential; never call it an agent in reports).
 Ingest keys participate in name matching and appear when `include_agents` (arg) is true (default). That parameter means "include agents and ingest keys," not agents alone.
 
 **Correlation ids.** Org and agent rows carry `rmm_client_id` (col) and `psa_client_id` (col), read live; pass them back as the arguments of the same name. In an automated workflow (per-ticket automation), pass one: it is an EXACT lookup that returns the single org holding that id, or nothing, and never falls back to name matching. An absent correlation id means none was captured.
@@ -30,9 +30,9 @@ Approach in order of preference; stop at the first step that gives an unambiguou
 
 ### Step 1: Parse the engineer's message for an explicit ID
 
-If the message includes an org ID, agent UUID, or customer name or code (e.g. "ACME-DENT", a full UUID), pass it as `org_ids` (arg) when it is already a UUID you recognize, or as `query` (arg) otherwise. An RMM or PSA client id goes in `rmm_client_id` (arg) or `psa_client_id` (arg) (Correlation ids, above). Call `resolve_scope` with that value and the session `external_investigation_id` (arg).
+If the message includes an org ID, agent UUID, or customer name or code (e.g. "ACME-DENT", a full UUID), pass it as `org_ids` (arg) when it is already a UUID you recognize, or as `query` (arg) otherwise. An RMM or PSA client id goes in `rmm_client_id` (arg) or `psa_client_id` (arg) (Correlation ids, above). Call `find_org_or_device` with that value and the session `external_investigation_id` (arg).
 
-If `resolve_scope` returns a single row with `match_kind` (col) **`exact`**, proceed with that scope.
+If `find_org_or_device` returns a single row with `match_kind` (col) **`exact`**, proceed with that scope.
 
 ### Step 2: Host-first path
 
@@ -44,7 +44,7 @@ If several agents share similar names across orgs, ask which org or site the eng
 
 ### Step 3: Org name match
 
-If no host match, try the org or customer name verbatim via `query` (arg) on `resolve_scope`.
+If no host match, try the org or customer name verbatim via `query` (arg) on `find_org_or_device`.
 
 Org names use the same ranked matching as agents (see **match_kind** below).
 
@@ -77,7 +77,7 @@ Otherwise return the candidate list and wait for their pick.
 
 ### Step 6: If no matches, surface closest candidates
 
-If `resolve_scope` returns zero rows for a non-empty `query` (arg), surface the closest names the engineer might have meant and ask:
+If `find_org_or_device` returns zero rows for a non-empty `query` (arg), surface the closest names the engineer might have meant and ask:
 
 > "I don't see an organization or host that exactly matches 'Acme Demtal'. Closest names: Acme Dental, Acme Demolition, Acme Construction. Did you mean one of these, or can you provide the customer ID directly?"
 
@@ -94,8 +94,8 @@ Agent rows carry `agent_status` (col), `stuck_reason` (col), the collection grou
 The server instructions (IS THE AGENT ONLINE AND COLLECTING?) define each one: read them before writing about a device's state.
 Keep `agent_status` (col) and `collection_status` (col) as two statements, and keep an offline device's last-reported collection group with the time it was reported.
 
-For collection problems across a client, call `resolve_scope` with `unhealthy_collection_only` (arg) set: it lists only devices whose collection is neither healthy nor onboarding, worst first. When none matches, the response says so and carries no `summary.query_scope` (col): report that, and do not widen to every org.
-`summary.feed_health` (col) on `resolve_scope` and `list_sources` gives one line per device: how many feeds are current, and each feed that is not, with its reason and last event time.
+For collection problems across a client, call `find_org_or_device` with `unhealthy_collection_only` (arg) set: it lists only devices whose collection is neither healthy nor onboarding, worst first. When none matches, the response says so and carries no `summary.query_scope` (col): report that, and do not widen to every org.
+`summary.feed_health` (col) on `find_org_or_device` and `list_sources` gives one line per device: how many feeds are current, and each feed that is not, with its reason and last event time.
 
 Ingest-key rows have no heartbeat, no feeds and no collection group: read `last_data_at` (col) for freshness and stop there.
 
@@ -106,10 +106,10 @@ Use these readings in the cross-check below; do not treat a silent source as hea
 
 ### Step 9: Sub-org expansion
 
-A name matching one org returns that org's tree in `summary.query_scope` (col), every org listed by id. Pass it to the data tools, with the investigation `start` (arg)/`end` (arg) (RFC3339 UTC) and the session `external_investigation_id` (arg).
+A name matching one org returns that org's tree in `summary.query_scope` (col), every org listed by id. Pass it to the data tools, with the investigation `start` (arg)/`end` (arg) (a date and time; one with no offset is read as UTC) and the session `external_investigation_id` (arg).
 
 If the engineer scopes to one sub-org only, set `org_ids` (arg) to that sub-org.
-Pass the `summary.query_scope` (col) that `resolve_scope` returned, unchanged: it already lists every org to query. Set `include_sub_orgs` (arg) yourself only when the engineer named a parent org and wants its descendants.
+Pass the `summary.query_scope` (col) that `find_org_or_device` returned, unchanged: it already lists every org to query. Set `include_sub_orgs` (arg) yourself only when the engineer named a parent org and wants its descendants.
 
 ### Step 10: Scope can expand during the investigation
 
@@ -121,12 +121,12 @@ Note scope changes in the EXECUTIVE SUMMARY.
 
 ## Source discovery with `list_sources`
 
-Before concluding anything from an absence, confirm the source(s) of interest sent data in the investigation window. For one device, the `resolve_scope` agent row (`last_data_at` (col), feed health) and the device view's coverage often answer this already.
+Before concluding anything from an absence, confirm the source(s) of interest sent data in the investigation window. For one device, the `find_org_or_device` agent row (`last_data_at` (col), feed health) and the device view's coverage often answer this already.
 
-Use the investigation's actual **`start` (arg)** / **`end` (arg)** (RFC3339 UTC).
+Use the investigation's actual **`start` (arg)** / **`end` (arg)** (a date and time; one with no offset is read as UTC).
 Do **not** infer scope from recent heartbeat alone; historical windows need historical event presence.
 
-Call `list_sources` with the `query_scope` (arg) from `resolve_scope`, the investigation window, `include_top_interesting_patterns: true` (arg) when you want the teaser, and the session `external_investigation_id` (arg).
+Call `list_sources` with the `query_scope` (arg) from `find_org_or_device`, the investigation window, `include_top_interesting_patterns: true` (arg) when you want the teaser, and the session `external_investigation_id` (arg).
 
 ### Per-row fields (shipped)
 
@@ -145,7 +145,7 @@ Each row is one **(sender, source, `collector_source_kind` (col))** combination 
 | `first_event_at` (col), `last_event_at` (col) | Exact window bounds for this pair |
 
 The summary may include **`top_interesting_patterns` (col)**: a short ranked teaser (~8 entries) of high-signal patterns in scope.
-Teaser rows are previews only. **Before citing any pattern in a Finding, call `describe_pattern(pattern_hashes=[...])`** for full pattern text, stats, fleet spread, and diverse example messages with recurrence.
+Teaser rows are previews only. **Before citing any pattern in a Finding, call `describe_event_patterns(pattern_hashes=[...])`** for full pattern text, stats, fleet spread, and diverse example messages with recurrence.
 The tool response includes a hint when the teaser is present.
 
 ### Decision logic
@@ -205,7 +205,7 @@ Do not filter `list_sources` by "reporting now" when the engineer asked about a 
 
 ## Sender-first LQL scoping
 
-After scope resolution, prefer **`agent_id` (LQL)** filters when the question is about everything one sender shipped. Call `query_event_counts_by_severity` with an `lql` (arg) filter such as `agent_id = "<uuid from resolve_scope or list_sources>"` (LQL) and a `group_by` (arg) such as `pattern` (LQL).
+After scope resolution, prefer **`agent_id` (LQL)** filters when the question is about everything one sender shipped. Call `count_events_matching_filter` with an `lql` (arg) filter such as `agent_id = "<uuid from find_org_or_device or list_sources>"` (LQL) and a `group_by` (arg) such as `pattern` (LQL).
 
 Use **`source = "hostname"` (LQL)**, with the name exactly as the tools returned it, when the question is about the origin host label, or combine both when you need on-host events from one agent:
 
@@ -220,7 +220,7 @@ For fleet-wide origin pivots, group by `source` (LQL) or filter `source` (LQL) d
 
 ## Structure discovery vs filtered measure
 
-`query_scope_activity` shows what app, service, subsource or reason values exist; `query_event_counts_by_severity` measures within an LQL-filtered slice. Detail: `scope-ladder.md`.
+`summarize_events_by_severity` shows what app, service, subsource or reason values exist; `count_events_matching_filter` measures within an LQL-filtered slice. Detail: `scope-ladder.md`.
 
 ---
 
@@ -247,7 +247,7 @@ If timezone is unclear, **ask**; do not assume.
 
 **Conflating sender and origin.** Ingest-key data needs both `agent_id` (LQL) and `source` (LQL) in vocabulary and LQL.
 
-**Citing teaser patterns without `describe_pattern`.** Teaser previews are not evidence-grade pattern text.
+**Citing teaser patterns without `describe_event_patterns`.** Teaser previews are not evidence-grade pattern text.
 
 **Rewriting the returned scope.** Pass `summary.query_scope` (col) as returned; add sub-orgs only for a named parent org.
 

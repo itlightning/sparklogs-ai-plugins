@@ -1,7 +1,13 @@
 <!-- GENERATED reference. Do not hand-edit. -->
-# Network shares fields
+# Network shares
 
-Full inventory every day. Supported changes are reported when the agent observes them.
+Each share this machine offers, including administrative shares such as C$ and ADMIN$, with its type (disk, print, device or IPC), the local folder it exposes, its comment, its share permissions, and whether it is offered now or saved to return at startup.
+
+**Use when:** a shared folder went missing or appeared, users lose access to a share, or an audit asks what this machine shares and with whom.
+
+Permissions are the share's own access list, not the folder's NTFS permissions, and a change carries no user or exact time; Windows records who made it only when file share auditing is turned on.
+
+Full inventory every day. Changes are reported between inventories.
 
 | Field | Type | Unit | Meaning |
 |---|---|---|---|

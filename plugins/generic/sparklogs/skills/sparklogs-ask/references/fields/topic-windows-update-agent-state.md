@@ -1,7 +1,13 @@
 <!-- GENERATED reference. Do not hand-edit. -->
-# Update agent state fields
+# Windows Update status
 
-Full inventory every 6 hours. Supported changes are reported when the agent observes them.
+One row per machine: whether Windows Update is paused and for how long, how long since it last checked for updates successfully, whether it has never checked, and the Windows Update service's startup type; it lists no installed or missing updates.
+
+**Use when:** a machine is not getting patches, updates look paused, or the Windows Update service may be disabled.
+
+A disabled Windows Update service is reported as a changed setting, not an alert; alerts come from a long pause or a long stretch with no successful check.
+
+Full inventory every 6 hours. Changes are reported between inventories.
 
 | Field | Type | Unit | Meaning |
 |---|---|---|---|

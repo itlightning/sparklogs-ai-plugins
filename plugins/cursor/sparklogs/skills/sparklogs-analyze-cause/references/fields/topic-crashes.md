@@ -1,7 +1,13 @@
 <!-- GENERATED reference. Do not hand-edit. -->
-# Crashes fields
+# Crashes
 
-Full inventory every 8 hours. Supported changes are reported when the agent observes them.
+Blue screens and application crashes, one event each with the stop or exception code, program and version, and faulting module, plus the blamed driver and stack when the agent analyzed a dump, a row counting recent crashes, and an alert for repeated blue screens.
+
+**Use when:** blue screen tickets, a program that closed unexpectedly, or a request for the stop code or faulting driver.
+
+A blue screen is reported after the machine restarts, and either kind of crash can wait many minutes (up to about an hour) for Windows to finish the dump; dump analysis is rationed, so in a burst some crashes arrive without it. A power loss or reset with no stop code is not a crash here; it shows as an unexpected shutdown in Host and agent lifecycle.
+
+Full inventory every 8 hours. No change events between inventories. Events are sent as the agent finds them.
 
 | Field | Type | Unit | Meaning |
 |---|---|---|---|

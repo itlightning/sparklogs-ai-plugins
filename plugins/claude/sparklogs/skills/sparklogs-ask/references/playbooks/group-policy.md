@@ -1,5 +1,7 @@
 # Group Policy not applying
 
+**Use when:** a new policy, mapped drive, printer or setting does not reach a computer, gpupdate reports errors, or startup hangs at Applying computer settings.
+
 **Trigger.** "The new policy is not reaching this PC", "the mapped drive or printer did not appear", "settings we pushed are missing", "startup sits on Applying computer settings", or a run of Group Policy reasons on a device.
 
 **Accuracy.** Windows records every Group Policy pass in Microsoft-Windows-GroupPolicy/Operational, and SparkLogs collects that channel beyond the curated events: the start and end of each pass with its duration, the domain controller it found and how long that took, the link speed it measured, the policy objects that applied and those filtered out, and each extension's result and time.

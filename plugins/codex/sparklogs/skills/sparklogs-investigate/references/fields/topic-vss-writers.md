@@ -1,7 +1,13 @@
 <!-- GENERATED reference. Do not hand-edit. -->
-# VSS writers fields
+# VSS writers
 
-Full inventory every 6 hours. Supported changes are reported when the agent observes them.
+Each Volume Shadow Copy writer that vssadmin lists, such as the System, Registry, SQL Server, Exchange or Hyper-V writer, with its state, its last error, and whether backups depend on it when a recognized backup product is installed.
+
+**Use when:** a backup failed or warned about VSS or a writer, or a SQL Server, Exchange or Hyper-V backup may not be application-consistent.
+
+Writers are read about every 6 hours, so a writer that failed during a backup and recovered before the next reading may not show here.
+
+Full inventory every 6 hours. Changes are reported between inventories.
 
 | Field | Type | Unit | Meaning |
 |---|---|---|---|

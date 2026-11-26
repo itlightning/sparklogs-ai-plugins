@@ -6,17 +6,21 @@
 Each section below is complete for its reason: every public field, in the words the reference page shows.
 Search for the heading "## `<code>`" or a word from the reason's label. Do not read the whole file.
 
-| reason | label | kind | severity | service | benign |
-|---|---|---|---|---|---|
-| `sparklogs_agent_config_rejected` | sparklogs agent config rejected | event | Warning | `rmm` |  |
-| `sparklogs_agent_emission_capped` | sparklogs agent emission capped | event | Warning | `rmm` |  |
-| `sparklogs_agent_event_too_large_dropped` | sparklogs agent event too large dropped | event | Warning | `rmm` |  |
-| `sparklogs_agent_spool_dropped` | sparklogs agent spool dropped | event | Warning | `rmm` |  |
-| `sparklogs_agent_spool_expired` | sparklogs agent spool expired | event | Warning | `rmm` |  |
+| reason | label | kind | severity | service | benign | use when |
+|---|---|---|---|---|---|---|
+| `sparklogs_agent_config_rejected` | sparklogs agent config rejected | event | Warning | `rmm` |  | new data collection settings sent to a device did not take effect there, and a technician needs to know which settings the device is still running. |
+| `sparklogs_agent_emission_capped` | sparklogs agent emission capped | event | Warning | `rmm` |  | routine change records for one device-state category, such as processes or services, are missing for a stretch, and a technician needs to know whether the agent held them back at its limit. |
+| `sparklogs_agent_event_too_large_dropped` | sparklogs agent event too large dropped | event | Warning | `rmm` |  | a single device-state record, such as one process or inventory change, is missing at one point in time, and a technician needs to know whether the agent left it out for its size. |
+| `sparklogs_agent_spool_dropped` | sparklogs agent spool dropped | event | Warning | `rmm` |  | on a current agent (1.14.1 or later), a device that could not send for a long time is missing its oldest device-state data, and a technician needs to know whether the agent deleted it to stay under its disk limit. |
+| `sparklogs_agent_spool_expired` | sparklogs agent spool expired | event | Warning | `rmm` |  | a device on an agent older than 1.14.1 is missing device-state data from a stretch of more than a day when it could not send, such as a laptop kept off the network. |
 
 ## `sparklogs_agent_config_rejected`: sparklogs agent config rejected
 
 The data collection settings sent to this device were invalid, so the previous ones stayed active.
+
+**Use when:** new data collection settings sent to a device did not take effect there, and a technician needs to know which settings the device is still running.
+
+**Keywords:** collection settings not applied, agent settings did not take effect, new collection settings ignored, invalid collection settings, agent configuration rejected, previous collection settings still active
 
 **Severity:** Warning
 
@@ -38,6 +42,10 @@ The data collection settings sent to this device were invalid, so the previous o
 
 The agent held back routine change events for one device-state category after it reached its limit for the period.
 
+**Use when:** routine change records for one device-state category, such as processes or services, are missing for a stretch, and a technician needs to know whether the agent held them back at its limit.
+
+**Keywords:** missing process change records, missing service change records, change history gap from rate limit, change events rate limited, change events held back, change events suppressed, too many change events, agent change limit reached
+
 **Severity:** Warning
 
 **Why it matters:** Some routine changes in that category were not sent for that period, so a quiet stretch there means held back, not unchanged.
@@ -58,6 +66,10 @@ The agent held back routine change events for one device-state category after it
 
 The agent left out one device-state event because it was larger than the per-event size limit.
 
+**Use when:** a single device-state record, such as one process or inventory change, is missing at one point in time, and a technician needs to know whether the agent left it out for its size.
+
+**Keywords:** event too large, event exceeds size limit, oversized event dropped, maximum event size, one change record missing, single inventory record missing, device state event dropped
+
 **Severity:** Warning
 
 **Why it matters:** That one event is missing from SparkLogs, so the category named in topic has a gap at that time.
@@ -77,6 +89,10 @@ The agent left out one device-state event because it was larger than the per-eve
 ## `sparklogs_agent_spool_dropped`: sparklogs agent spool dropped
 
 The agent deleted its oldest queued device-state file before it was sent, to stay under its disk limit.
+
+**Use when:** on a current agent (1.14.1 or later), a device that could not send for a long time is missing its oldest device-state data, and a technician needs to know whether the agent deleted it to stay under its disk limit.
+
+**Keywords:** agent queue full, queued data deleted, oldest queued data dropped, agent disk limit reached, unsent data deleted, backlog dropped to save disk space, device state gap after long outage
 
 **Severity:** Warning
 
@@ -99,6 +115,10 @@ The agent deleted its oldest queued device-state file before it was sent, to sta
 ## `sparklogs_agent_spool_expired`: sparklogs agent spool expired
 
 Before agent 1.14.1, the agent deleted queued device-state data that was still unsent after 24 hours.
+
+**Use when:** a device on an agent older than 1.14.1 is missing device-state data from a stretch of more than a day when it could not send, such as a laptop kept off the network.
+
+**Keywords:** agent older than 1.14.1, queued data deleted after 24 hours, unsent data expired, data older than a day discarded, old agent laptop offline device state missing, old agent version data gap
 
 **Severity:** Warning
 

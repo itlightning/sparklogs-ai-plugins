@@ -1,6 +1,8 @@
 <!-- GENERATED reference. Do not hand-edit. -->
 # SparkLogs fields
 
+**Use when:** telling an event from a state row, a change or a condition, or finding which topic and reason code an event carries.
+
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
 | `sparklogs.kind` | string |  | The event category that selects its row contract and downstream handling. Producers define additive values; consumers must not infer a closed vocabulary from this field. |
@@ -22,3 +24,4 @@
 | `sparklogs.elapsed_s` | integer | seconds | On an inventory: seconds since the previous inventory, measured on a clock that counts sleep and ignores wall-clock changes. Absent when a restart of the device came between them; then use `t` minus `epoch.prev_t`. |
 | `sparklogs.data` | object |  | The readings, under `sparklogs.data.<topic>`. A table topic writes an array of row objects; a host-scoped topic writes one flat object. An inventory and a delta write the same path, so one predicate finds a value whichever way the evidence arrived. |
 | `sparklogs.reason_variant` | string |  | Which case of a multi-case reason the event matched, so two events with one reason can be told apart (for example `tpm_refused` against `secure_boot_changed`). Absent on a reason with a single case and on a reason's default case. A value is stable once it has shipped. Each reason's reference card lists its cases. |
+| `sparklogs.malformed_event` | bool |  | True when the event described a state or a change but named no event type SparkLogs recognizes, so it is filed as malformed rather than guessed at. Absent otherwise. |

@@ -1,7 +1,13 @@
 <!-- GENERATED reference. Do not hand-edit. -->
-# Feed health fields
+# Feed health
 
-Full inventory every 2 hours. Supported changes are reported when the agent observes them.
+One row per log feed (Windows event log and file feeds) with whether it is caught up, catching up, behind, stuck or blocked and why, how far behind it is, which event log channels hold it back, and ranges of events Windows could not provide.
+
+**Use when:** logs from a device look missing, late or incomplete, or a feed shows blocked or behind; for device-state topics, see Collector health.
+
+Disabled feeds get no row, and status measures reading from the source, not upload to SparkLogs. A new status is reported only after it holds for two checks in a row (about 10 minutes), and a row that changes more than 6 times in a day is held at its last status.
+
+Full inventory every 2 hours. Changes are reported between inventories.
 
 | Field | Type | Unit | Meaning |
 |---|---|---|---|

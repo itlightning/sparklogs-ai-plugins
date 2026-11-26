@@ -35,14 +35,14 @@ When the prior investigation surfaced "X happened concurrent with Y" Findings:
 When the prior investigation surfaced "this affects N sources" Findings:
 
 - **N = 1 (single source)** -> hypothesis space includes source-specific configuration, hardware, software state.
-- **N = small subset** -> hypothesis "shared factor among the subset." Discriminator: contrast `query_event_counts_by_severity` runs over the affected and unaffected populations. Group by a field from `guides/scope-ladder.md` (`sparklogs.reason` (LQL), `service` (LQL), `app` (LQL), `subsource` (LQL)) to test whether the subset shares a component.
+- **N = small subset** -> hypothesis "shared factor among the subset." Discriminator: contrast `count_events_matching_filter` runs over the affected and unaffected populations. Group by a field from `guides/scope-ladder.md` (`sparklogs.reason` (LQL), `service` (LQL), `app` (LQL), `subsource` (LQL)) to test whether the subset shares a component.
 - **N = fleet-wide** -> hypothesis "environment-wide cause" - recent fleet-wide change (patch, GPO push, DNS change), or upstream service issue.
 
 ### Device health patterns
 
 When the prior investigation cited a device view:
 
-- **Heat span with contributors** -> hypothesis "a contributor's load caused the pressure." Discriminator: does the span recur without that executable, and does the executable's own trajectory (the `processes` result set) rise with the span?
+- **Heat block or span with its programs** (an overview heat block's top programs, a network heat span's contributors) -> hypothesis "that program's load caused the pressure." Discriminator: does the block or span recur without that executable, and does the executable's own trajectory (the `processes` result set) rise with it?
 - **Confirmed outage beyond the gateway** -> hypotheses "the site's internet connection" and "something on this device's path past the router." Discriminator: the org comparison over the outage's `compare_start` (col) to `compare_end` (col), kept to devices with the same network key (an org can span sites; `guides/device-state-fields.md`, **Network outages**). Other devices down in the same buckets points at the shared connection or the probe target. This device alone points at its own path. Placement limits: `guides/device-state-fields.md` (**Network outages**).
 - **Recent change overlapping a span or outage** -> hypothesis "the change caused it." Discriminator: did the span or outage start after the change, and does it appear on devices without the change?
 
@@ -139,5 +139,5 @@ Write the hypothesis statement as a direct, specific claim, not a hedge. "Disk s
 
 ## When to make additional MCP calls during analysis
 
-When and when not to: `SKILL.md` Section 5. A population contrast runs `query_event_counts_by_severity` over each population separately, defined from the prior Findings, and compares the two.
+When and when not to: `SKILL.md` Section 5. A population contrast runs `count_events_matching_filter` over each population separately, defined from the prior Findings, and compares the two.
 

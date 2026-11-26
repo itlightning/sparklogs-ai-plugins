@@ -1,7 +1,13 @@
 <!-- GENERATED reference. Do not hand-edit. -->
-# Disk volumes fields
+# Disk volumes
 
-Full inventory every 15 minutes. Supported changes are reported when the agent observes them.
+Free space, fill rate and time to full, BitLocker state, file system and mount state for each mounted fixed or RAM disk volume, including external USB, SAN and iSCSI drives the operating system reports as fixed; thumb drives, optical drives and unmounted partitions are only in Volume map.
+
+**Use when:** low disk space or a drive filling fast, BitLocker suspended or off, or a drive showing as RAW or unreadable.
+
+A drive that goes away opens no alert: servers get one notice for a long-present drive that is not USB, other machines just drop it from the list. A dropped-BitLocker alert needs the agent to have seen that drive protected before.
+
+Full inventory every 15 minutes. Changes are reported between inventories.
 
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
@@ -9,8 +15,8 @@ Full inventory every 15 minutes. Supported changes are reported when the agent o
 | `sparklogs.data.disk_volumes.display_name` | string |  | The volume's drive letter. Absent when the volume has no drive letter. |
 | `sparklogs.data.disk_volumes.volume_label` | string |  | The volume's label, as File Explorer shows it. |
 | `sparklogs.data.disk_volumes.aliases` | string_array |  | Other names the volume is known by, such as its label, besides its drive letter or mount path and its GUID. |
-| `sparklogs.data.disk_volumes.drive_type` | string |  | The kind of drive Windows reports for the volume, such as `fixed` or `removable`. |
-| `sparklogs.data.disk_volumes.volume_role` | string |  | What the volume is used for: `os` (the Windows volume), `fixed_data` (another fixed volume) or `removable`. Absent when unknown; conditions that need a known role do not open then. |
+| `sparklogs.data.disk_volumes.drive_type` | string |  | The kind of drive Windows reports for the volume: `fixed` or `ramdisk`. Other drive types are listed only in Volume map. |
+| `sparklogs.data.disk_volumes.volume_role` | string |  | What the volume is used for: `os` (the Windows volume) or `fixed_data` (another fixed volume). Absent when unknown; conditions that need a known role do not open then. |
 | `sparklogs.data.disk_volumes.volume_role_code` | integer |  | A numeric code for the volume's role. |
 | `sparklogs.data.disk_volumes.free_bytes` | integer | bytes | Free space on the volume. |
 | `sparklogs.data.disk_volumes.free_pct` | float | percent | Free space as a percentage of the volume's size. |

@@ -1,6 +1,8 @@
 <!-- GENERATED reference. Do not hand-edit. -->
 # Capture fields
 
+**Use when:** checking whether rows from two topics came from the same collection pass, or whether a row was read with no stored state to compare it against.
+
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
 | `sparklogs.capture.id` | string |  | Collection group name identifying topics read together. |

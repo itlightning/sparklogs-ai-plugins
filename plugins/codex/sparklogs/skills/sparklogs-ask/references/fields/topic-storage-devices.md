@@ -1,7 +1,13 @@
 <!-- GENERATED reference. Do not hand-edit. -->
-# Storage devices fields
+# Storage devices
 
-Full inventory every hour. Supported changes are reported when the agent observes them.
+Each disk the machine can address, whether internal, SAN, virtual or removable, with its vendor, model, serial numbers and WWNs, bus and media type, size, partition table and partitions, and offline and read-only flags.
+
+**Use when:** auditing drive models or serials, or a disk that went offline, turned read-only, or had a partition created, deleted or resized.
+
+Holds no drive health (SMART) data, so a failing disk looks the same as a healthy one here. Offline, read-only and partition changes are reported only for non-removable disks the operating system identifies the same way after a restart.
+
+Full inventory every hour. Changes are reported between inventories.
 
 | Field | Type | Unit | Meaning |
 |---|---|---|---|

@@ -1,6 +1,8 @@
 <!-- GENERATED reference. Do not hand-edit. -->
 # Member fields
 
+**Use when:** finding which account was added to or removed from a group.
+
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
 | `sparklogs.member.id` | string |  | The member principal's stable join key. |

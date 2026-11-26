@@ -1,5 +1,11 @@
 <!-- GENERATED reference. Do not hand-edit. -->
-# Network adapter IO fields
+# Network adapter IO
+
+Per adapter: bytes and packets sent and received, packet error and discard rates, link use against link speed, how often the link dropped, and for Wi-Fi the signal strength, band, Wi-Fi generation, channel changes and frame retries.
+
+**Use when:** a saturated or flapping link, packet errors on one adapter, or weak or unstable Wi-Fi.
+
+Readings are 5-minute averages. Rates, error shares and link use are measured only for physical adapters; virtual and VPN adapters carry raw counts only.
 
 Reported every 5 minutes on clock boundaries for the window ending at `t`. `sparklogs.window_coverage_pct` is below 100 when collection covered only part of the window. Use chart buckets at least 5 minutes wide.
 

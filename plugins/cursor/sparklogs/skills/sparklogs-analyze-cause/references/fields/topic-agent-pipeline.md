@@ -1,7 +1,13 @@
 <!-- GENERATED reference. Do not hand-edit. -->
-# Agent pipeline fields
+# Agent pipeline
 
-Full inventory on its own schedule. Supported changes are reported when the agent observes them.
+One row with the size of the agent's on-disk event queue, how full it is against its limit, how fast it is growing or draining, when every log feed was last caught up, and the agent's combined CPU and memory.
+
+**Use when:** logs from a device arrive late or in bursts, or the agent is using more disk than expected.
+
+The row is reported only alongside Agent overhead, every 15 minutes, and never as a change event, so read its trend across reports.
+
+Reported with each Agent overhead inventory. No change events.
 
 | Field | Type | Unit | Meaning |
 |---|---|---|---|

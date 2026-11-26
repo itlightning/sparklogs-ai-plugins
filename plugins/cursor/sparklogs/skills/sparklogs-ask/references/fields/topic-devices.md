@@ -1,7 +1,13 @@
 <!-- GENERATED reference. Do not hand-edit. -->
-# Devices fields
+# Devices
 
-Full inventory every day. Supported changes are reported when the agent observes them.
+Each device connected now that Device Manager shows, with its name, type, bus, vendor and product IDs, status and error code, and its kernel driver and driver package; hidden devices, print queues and software devices with no driver appear only while they report a problem.
+
+**Use when:** a device shows an error code in Device Manager, stopped working or was disabled, or someone asks what hardware is attached.
+
+A device that develops a problem raises no alert here; it shows as a changed row, and Windows logs its own device errors in the event log.
+
+Full inventory every day. Changes are reported between inventories.
 
 | Field | Type | Unit | Meaning |
 |---|---|---|---|

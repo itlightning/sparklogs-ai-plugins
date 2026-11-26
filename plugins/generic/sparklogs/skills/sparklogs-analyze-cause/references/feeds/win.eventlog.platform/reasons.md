@@ -6,39 +6,43 @@
 Each section below is complete for its reason: every public field, in the words the reference page shows.
 Search for the heading "## `<code>`" or a word from the reason's label. Do not read the whole file.
 
-| reason | label | kind | severity | service | benign |
-|---|---|---|---|---|---|
-| `device_install_reboot_pending` | device install reboot pending | event | Notice | `hardware` |  |
-| `device_removal_vetoed` | device removal vetoed | event | Notice | `hardware` |  |
-| `device_removed_after_failure` | device removed after failure | event | Warning | `hardware` |  |
-| `device_security_assessment_failed` | device security assessment failed | event | Notice | `hardware` |  |
-| `device_security_assessment_passed` | device security assessment passed | event | Info to Notice | `hardware` |  |
-| `device_software_install_failed` | device software install failed | event | Info to Warning | `hardware` | benign possible |
-| `device_start_failed` | device start failed | event | Warning | `hardware` |  |
-| `fasr_pcr_validation_mismatch` | fasr pcr validation mismatch | event | Verbose to Notice | `os_stability` | benign possible |
-| `firmware_event_store_unavailable` | firmware event store unavailable | event | Notice to Warning | `hardware` |  |
-| `firmware_verification_scan_failed` | firmware verification scan failed | event | Info to Notice | `hardware` | benign possible |
-| `font_load_allowed` | font load allowed | event | Info | `os_stability` | benign |
-| `font_load_blocked` | font load blocked | event | Notice | `os_stability` |  |
-| `gpu_resources_saturated` | gpu resources saturated | event | Notice | `performance` |  |
-| `live_kernel_dump_requested` | live kernel dump requested | event | Notice | `os_stability` |  |
-| `measured_boot_failed` | measured boot failed | event | Warning | `os_stability` |  |
-| `os_boot_duration_high` | os boot duration high | event | Info to Warning | `performance` |  |
-| `os_clock_drift` | os clock drift | event | Notice | `time_sync` |  |
-| `os_crash_dump_unavailable` | os crash dump unavailable | event | Warning | `os_stability` |  |
-| `os_shutdown_duration_high` | os shutdown duration high | event | Info to Warning | `performance` |  |
-| `platform_tamper_indicator_reported` | platform tamper indicator reported | event | Notice to Error | `endpoint_protection` |  |
-| `portable_device_unresponsive` | portable device unresponsive | event | Info | `hardware` |  |
-| `ram_commit_exhausted` | ram commit exhausted | event | Info to Warning | `performance` |  |
-| `secure_boot_revocation_update_failed` | secure boot revocation update failed | event | Info | `os_stability` |  |
-| `thermal_cooling_engaged` | thermal cooling engaged | event | Info to Notice | `hardware` |  |
-| `tpm_initialization_failed` | tpm initialization failed | event | Display to Warning | `os_stability` |  |
-| `usb_controller_error` | usb controller error | event | Notice | `hardware` |  |
-| `win_trace_session_failed` | win trace session failed | event | Info to Warning | `os_stability` | benign possible |
+| reason | label | kind | severity | service | benign | use when |
+|---|---|---|---|---|---|---|
+| `device_install_reboot_pending` | device install reboot pending | event | Notice | `hardware` |  | a new device or driver update says a restart is needed to finish installing, or the same device keeps asking for a restart after every reboot. |
+| `device_removal_vetoed` | device removal vetoed | event | Notice | `hardware` |  | a user cannot safely eject a USB drive or other device because Windows says it is still in use, and someone needs to know which program, service or driver is holding it. |
+| `device_removed_after_failure` | device removed after failure | event | Warning | `hardware` |  | a USB device, a dock's network adapter or an internal card drops off the machine on its own after it had been failing, rather than being unplugged by someone. |
+| `device_security_assessment_failed` | device security assessment failed | event | Notice | `hardware` |  | a Dell machine's security assessment comes back failed, and someone asks which security settings it marked as failing and what to fix first. |
+| `device_security_assessment_passed` | device security assessment passed | event | Info to Notice | `hardware` |  | a Dell machine's security assessment passed, possibly with warnings, and someone asks whether anything still needs to change. |
+| `device_software_install_failed` | device software install failed | event | Info to Warning | `hardware` | benign possible | a newly connected printer, phone or other device works only partly, or has no control panel or vendor utility, because Windows could not install its driver or companion software. |
+| `device_start_failed` | device start failed | event | Warning | `hardware` |  | a device in Device Manager shows a problem code such as 10, 12 or 43 and does not work, or a graphics card fails to start and the display falls back to the basic display driver. |
+| `fasr_pcr_validation_mismatch` | fasr pcr validation mismatch | event | Verbose to Notice | `os_stability` | benign possible | a technician sees a FASR validation line at startup and needs to know whether that boot differed from the firmware manifest and so left the Secured-core boot path. |
+| `firmware_event_store_unavailable` | firmware event store unavailable | event | Notice to Warning | `hardware` |  | a Dell machine's security agent says its secure firmware event log cannot be verified or repaired, and someone asks whether its tamper reports can still be trusted. |
+| `firmware_verification_scan_failed` | firmware verification scan failed | event | Info to Notice | `hardware` | benign possible | a Dell BIOS, Intel ME or component verification scan stopped or never finished, often because the machine could not reach Dell's verification service through a proxy or firewall. |
+| `font_load_allowed` | font load allowed | event | Info | `os_stability` | benign | untrusted font blocking is in audit mode, and an administrator wants to know which fonts and programs would break if it were switched to block. |
+| `font_load_blocked` | font load blocked | event | Notice | `os_stability` |  | a program shows or prints text in the wrong font, or cannot use its own fonts, after untrusted font blocking was turned on. |
+| `gpu_resources_saturated` | gpu resources saturated | event | Notice | `performance` |  | windows and animations stutter, drop frames or lag on a machine driving several or high-resolution monitors, usually on integrated graphics, without the graphics driver resetting. |
+| `live_kernel_dump_requested` | live kernel dump requested | event | Notice | `os_stability` |  | a machine froze for a few seconds and kept running without a blue screen, and Windows saved a live kernel dump, or someone finds dump files in the LiveKernelReports folder and asks why. |
+| `measured_boot_failed` | measured boot failed | event | Warning | `os_stability` |  | a technician sees a boot-measurement failure at startup, often after a BIOS update, and needs to know whether it explains a device health check failing for that boot. |
+| `os_boot_duration_high` | os boot duration high | event | Info to Warning | `performance` |  | a computer takes a long time to start or to reach a usable desktop, and someone asks which startup app, driver or service is slowing it down. |
+| `os_clock_drift` | os clock drift | event | Notice | `time_sync` |  | a machine's clock gains or loses time between synchronizations, or the time service keeps applying large corrections because the clock hardware runs fast or slow. |
+| `os_crash_dump_unavailable` | os crash dump unavailable | event | Warning | `os_stability` |  | a machine crashed or blue-screened and left no memory dump to analyze, or a technician sees crash dump setup failing at every boot. |
+| `os_shutdown_duration_high` | os shutdown duration high | event | Info to Warning | `performance` |  | shutting down or restarting takes a long time or sits on the shutting down screen, and someone asks which service held it up. |
+| `platform_tamper_indicator_reported` | platform tamper indicator reported | event | Notice to Error | `endpoint_protection` |  | a Dell machine's security agent reports tampering or an indicator of attack, such as the case being opened or a BIOS setting that weakens firmware protection. |
+| `portable_device_unresponsive` | portable device unresponsive | event | Info | `hardware` |  | a phone, camera or media player connected by USB stops responding during a photo or file copy, or the copy stalls and fails. |
+| `ram_commit_exhausted` | ram commit exhausted | event | Info to Warning | `performance` |  | a technician reviewing a low-memory episode wants the resource exhaustion detector's own records beside the System log's low-memory event, which names the programs using the most memory. |
+| `secure_boot_revocation_update_failed` | secure boot revocation update failed | event | Info | `os_stability` |  | a technician sees that the firmware refused the SBAT revocation level Windows tried to write at boot, often on a machine that also boots Linux or on a model that needs a firmware update. |
+| `thermal_cooling_engaged` | thermal cooling engaged | event | Info to Notice | `hardware` |  | a laptop or PC gets warm and slows down under load, with the processor throttled or the fans ramping up, without shutting itself off. |
+| `tpm_initialization_failed` | tpm initialization failed | event | Display to Warning | `os_stability` |  | a technician sees a TPM initialization failure at startup, often after a firmware update or on a virtual machine with no virtual TPM, and needs to know whether BitLocker or attestation was affected for that boot. |
+| `usb_controller_error` | usb controller error | event | Notice | `hardware` |  | USB ports, a USB-C dock or USB-C charging stop working until a replug or restart because the USB controller or the USB-C connector manager faulted. |
+| `win_trace_session_failed` | win trace session failed | event | Info to Warning | `os_stability` | benign possible | a diagnostic, performance or security tool stops collecting trace data, or a technician needs to know why an event tracing session failed to start or write. |
 
 ## `device_install_reboot_pending`: device install reboot pending
 
 Windows installed a driver and cannot finish until the host restarts.
+
+**Use when:** a new device or driver update says a restart is needed to finish installing, or the same device keeps asking for a restart after every reboot.
+
+**Keywords:** restart required to finish installing device, driver needs restart, reboot pending driver, device needs restart to work, keeps asking to restart after driver install, driver update pending restart, Code 14, cannot work properly until you restart
 
 **Severity:** Notice
 
@@ -64,6 +68,10 @@ Windows installed a driver and cannot finish until the host restarts.
 ## `device_removal_vetoed`: device removal vetoed
 
 Something on the device still holds the hardware open, so Windows refused the removal request.
+
+**Use when:** a user cannot safely eject a USB drive or other device because Windows says it is still in use, and someone needs to know which program, service or driver is holding it.
+
+**Keywords:** cannot eject USB drive, Problem Ejecting USB Mass Storage Device, This device is currently in use, safely remove hardware not working, USB drive in use, external drive will not eject, eject blocked, PNP_VetoOutstandingOpen
 
 **Severity:** Notice
 
@@ -91,6 +99,10 @@ Something on the device still holds the hardware open, so Windows refused the re
 
 A device dropped off its bus while the driver was still reporting it as failing.
 
+**Use when:** a USB device, a dock's network adapter or an internal card drops off the machine on its own after it had been failing, rather than being unplugged by someone.
+
+**Keywords:** device disappeared after failing, failed device removed, device dropped off the bus, surprise removal of a failed device, dock network adapter dropped off, USB network adapter disappeared, PCI device disappeared, device gone until restart, device vanished from Device Manager
+
 **Severity:** Warning
 
 **Why it matters:** The device is gone from the machine until it is reconnected or the machine restarts. For an internal storage or network device, that can take a disk or the network connection with it.
@@ -115,6 +127,10 @@ A device dropped off its bus while the driver was still reporting it as failing.
 ## `device_security_assessment_failed`: device security assessment failed
 
 A Dell security assessment reported a failing result for this machine's platform posture.
+
+**Use when:** a Dell machine's security assessment comes back failed, and someone asks which security settings it marked as failing and what to fix first.
+
+**Keywords:** Dell security assessment failed, Dell security score low, Dell security check failed, Result: FAILED, Dell assessment BIOS administrator password not set, Dell assessment disk encryption failed, failed security areas
 
 **Severity:** Notice
 
@@ -141,6 +157,10 @@ A Dell security assessment reported a failing result for this machine's platform
 
 A Dell security assessment reported a passing result (with or without warnings) for this machine's platform posture.
 
+**Use when:** a Dell machine's security assessment passed, possibly with warnings, and someone asks whether anything still needs to change.
+
+**Keywords:** Dell security assessment passed, Dell assessment passed with warnings, Result: PASSED, Dell security score passed, Dell security check okay, security assessment warning areas
+
 **Severity:** Notice or Info
 
 **Why it matters:** The machine meets the assessment. A pass with warnings names softer areas an administrator may still want to change.
@@ -165,6 +185,10 @@ A Dell security assessment reported a passing result (with or without warnings) 
 ## `device_software_install_failed`: device software install failed
 
 Windows failed to install companion software or a driver for a device.
+
+**Use when:** a newly connected printer, phone or other device works only partly, or has no control panel or vendor utility, because Windows could not install its driver or companion software.
+
+**Keywords:** device software did not install, companion app did not install, printer software not installed, vendor utility missing after plugging in, device companion installer exit code, Device Setup Manager, device setup did not finish, removed device still listed
 
 **Severity:** Warning when a vendor installer exit code is present, Notice otherwise; Info for retry or stopped-update cases
 
@@ -193,6 +217,10 @@ Windows failed to install companion software or a driver for a device.
 
 Windows enumerated a device and its driver refused to start it.
 
+**Use when:** a device in Device Manager shows a problem code such as 10, 12 or 43 and does not work, or a graphics card fails to start and the display falls back to the basic display driver.
+
+**Keywords:** This device cannot start, stopped this device because it has reported problems, cannot find enough free resources, device resource conflict, Device Manager problem code, CM_PROB_FAILED_START, device failed to start, graphics card failed to start, fell back to Microsoft Basic Display Adapter, display adapter failed to start
+
 **Severity:** Warning
 
 **Why it matters:** The device does not work until someone fixes the driver or the hardware conflict.
@@ -220,6 +248,10 @@ Windows enumerated a device and its driver refused to start it.
 
 Windows checked this boot against the FASR firmware manifest. The line says whether a PCR differed.
 
+**Use when:** a technician sees a FASR validation line at startup and needs to know whether that boot differed from the firmware manifest and so left the Secured-core boot path.
+
+**Keywords:** Firmware Attack Surface Reduction, Secured-core boot check, PcrMismatchIndex, firmware manifest mismatch, FASR PCR mismatch after firmware update, FASR mismatch after BIOS setup
+
 **Severity:** Notice or Verbose
 
 **Why it matters:** None when no PCR differed. A mismatch means this boot did not take the certified boot path, so the device does not count as Secured-core for that boot.
@@ -246,6 +278,10 @@ Windows checked this boot against the FASR firmware manifest. The line says whet
 
 A Dell secure firmware-event store cannot be verified.
 
+**Use when:** a Dell machine's security agent says its secure firmware event log cannot be verified or repaired, and someone asks whether its tamper reports can still be trusted.
+
+**Keywords:** Dell secure firmware log cannot be verified, BIOS event store, Dell event store signing keys missing, event store repair failed, tamper-evident log, reinstall Dell Trusted Device to repair event store, firmware event log untrusted
+
 **Severity:** Warning or Notice
 
 **Why it matters:** The Dell security agent cannot vouch for the records in that store, so BIOS events and tamper indicators it would report from it cannot be trusted until the store is rebuilt.
@@ -269,6 +305,10 @@ A Dell secure firmware-event store cannot be verified.
 ## `firmware_verification_scan_failed`: firmware verification scan failed
 
 A vendor firmware verification scan did not finish.
+
+**Use when:** a Dell BIOS, Intel ME or component verification scan stopped or never finished, often because the machine could not reach Dell's verification service through a proxy or firewall.
+
+**Keywords:** BIOS verification scan did not finish, Intel ME verification incomplete, Management Engine verification, Dell SCV, firmware vulnerability scan, firmware scan did not finish, off-host BIOS verification, Dell verification service blocked by proxy, Dell verification unsupported platform, BIOS integrity check incomplete
 
 **Severity:** Notice or Info
 
@@ -296,6 +336,10 @@ A vendor firmware verification scan did not finish.
 
 A process loaded a font under an audit-mode font-loading policy.
 
+**Use when:** untrusted font blocking is in audit mode, and an administrator wants to know which fonts and programs would break if it were switched to block.
+
+**Keywords:** Log events without blocking untrusted fonts, untrusted font audit mode, font loaded in audit mode, before enabling untrusted font blocking
+
 **Severity:** Info
 
 **Why it matters:** Nothing was refused. The record shows which fonts the block policy would stop if it were switched from audit to block.
@@ -320,6 +364,10 @@ A process loaded a font under an audit-mode font-loading policy.
 
 A process tried to load a font while a font-loading restriction was in force, and Windows refused it.
 
+**Use when:** a program shows or prints text in the wrong font, or cannot use its own fonts, after untrusted font blocking was turned on.
+
+**Keywords:** Untrusted Font Blocking, Block untrusted fonts and log events, untrusted font blocked, wrong font after security policy, fonts missing after Group Policy change, program cannot load its own font, font substituted by policy, font mitigation policy, fonts outside the Windows font folder
+
 **Severity:** Notice
 
 **Why it matters:** The named application shows or prints text in the wrong font until the font is installed system-wide or the application is exempted.
@@ -341,6 +389,10 @@ A process tried to load a font while a font-loading restriction was in force, an
 ## `gpu_resources_saturated`: gpu resources saturated
 
 The desktop compositor ran short of graphics memory or bandwidth.
+
+**Use when:** windows and animations stutter, drop frames or lag on a machine driving several or high-resolution monitors, usually on integrated graphics, without the graphics driver resetting.
+
+**Keywords:** DWM heavy resource contention, desktop stutters with multiple monitors, choppy window animations, laggy desktop on a dock, two 4K monitors lag, desktop dropped frames, desktop video memory low, integrated graphics too slow for monitors, graphics memory shortage
 
 **Severity:** Notice
 
@@ -368,6 +420,10 @@ The desktop compositor ran short of graphics memory or bandwidth.
 
 A kernel component requested a live kernel dump and Windows completed the request.
 
+**Use when:** a machine froze for a few seconds and kept running without a blue screen, and Windows saved a live kernel dump, or someone finds dump files in the LiveKernelReports folder and asks why.
+
+**Keywords:** live dump, kernel dump without a crash, LiveKernelEvent, WATCHDOG dump, freeze with live kernel dump, dump file created with no crash, watchdog timeout dump, brief system freeze dump
+
 **Severity:** Notice
 
 **Why it matters:** The machine kept running, but the component that asked for the dump, often a network, graphics or power driver, stalled long enough to trip a watchdog, and users may have noticed a freeze.
@@ -391,6 +447,10 @@ A kernel component requested a live kernel dump and Windows completed the reques
 ## `measured_boot_failed`: measured boot failed
 
 Windows reported a boot-measurement library failure during boot.
+
+**Use when:** a technician sees a boot-measurement failure at startup, often after a BIOS update, and needs to know whether it explains a device health check failing for that boot.
+
+**Keywords:** measured boot failure, TCG event log, MeasuredBoot logs, boot measurement failed, TPM event log incomplete, boot log incomplete after BIOS update, PCR measurement error
 
 **Severity:** Warning
 
@@ -416,6 +476,10 @@ Windows reported a boot-measurement library failure during boot.
 ## `os_boot_duration_high`: os boot duration high
 
 Windows logged a slow boot or a slow startup component.
+
+**Use when:** a computer takes a long time to start or to reach a usable desktop, and someone asks which startup app, driver or service is slowing it down.
+
+**Keywords:** slow boot, slow startup, takes forever to start, long boot time, startup takes minutes, boot degradation, startup apps slowing boot, MainPathBootTime, BootPostBootTime, slow startup after updates
 
 **Severity:** Warning for whole boot at 120 s or with BootIsDegradation; Notice for component degradation at 30 s or whole boot at 60 s
 
@@ -443,6 +507,10 @@ Windows logged a slow boot or a slow startup component.
 
 This host's clock hardware runs at the wrong rate.
 
+**Use when:** a machine's clock gains or loses time between synchronizations, or the time service keeps applying large corrections because the clock hardware runs fast or slow.
+
+**Keywords:** clock gains time, clock loses time while running, clock runs fast, clock runs slow, clock frequency error, ppm clock error, hardware clock inaccurate, virtual machine clock drift, large daily time correction
+
 **Severity:** Notice
 
 **Why it matters:** The clock is right for now because the time service keeps correcting it. If synchronization stops, the clock walks away at the stated rate, and sign-ins, certificates and log timestamps start failing or disagreeing.
@@ -462,6 +530,10 @@ This host's clock hardware runs at the wrong rate.
 ## `os_crash_dump_unavailable`: os crash dump unavailable
 
 Windows could not set up the path it writes a crash dump through.
+
+**Use when:** a machine crashed or blue-screened and left no memory dump to analyze, or a technician sees crash dump setup failing at every boot.
+
+**Keywords:** no crash dump, no minidump after blue screen, MEMORY.DMP missing, dump file not created, crash dump not saved, no page file on the system drive, page file moved to another drive, crash dump setup failed
 
 **Severity:** Warning
 
@@ -488,6 +560,10 @@ Windows could not set up the path it writes a crash dump through.
 
 Windows logged a slow shutdown or a service that delayed shutdown.
 
+**Use when:** shutting down or restarting takes a long time or sits on the shutting down screen, and someone asks which service held it up.
+
+**Keywords:** slow shutdown, takes forever to shut down, stuck on shutting down, restart takes a long time, shutdown hangs, service delayed shutdown, WaitToKillServiceTimeout, service slow to stop at shutdown
+
 **Severity:** Warning when ShutdownIsDegradation is true; Notice for long shutdown or slow service
 
 **Why it matters:** Restarts and shutdowns take longer, and a user who gives up and holds the power button causes an unclean shutdown.
@@ -512,6 +588,10 @@ Windows logged a slow shutdown or a service that delayed shutdown.
 ## `platform_tamper_indicator_reported`: platform tamper indicator reported
 
 A platform-security agent reported a tamper indicator against this machine.
+
+**Use when:** a Dell machine's security agent reports tampering or an indicator of attack, such as the case being opened or a BIOS setting that weakens firmware protection.
+
+**Keywords:** Dell indicator of attack, Dell tamper detected, Dell tamper alert, Dell event log chassis intrusion, Dell event log case opened, BIOS tampering, Dell event log BIOS downgrade allowed, capsule firmware update enabled, tamper indicator cleared
 
 **Also reported by:** `win.eventlog.system`
 
@@ -538,6 +618,10 @@ A platform-security agent reported a tamper indicator against this machine.
 
 A phone, camera, or media player on USB stopped answering.
 
+**Use when:** a phone, camera or media player connected by USB stops responding during a photo or file copy, or the copy stalls and fails.
+
+**Keywords:** MTP device not responding, phone not responding during file transfer, Android file transfer stuck, photo copy from phone stalled, camera import stopped, phone disconnects during transfer, phone locked during transfer
+
 **Severity:** Info
 
 **Why it matters:** A file transfer to or from the device stopped. Nothing on the computer itself is affected.
@@ -557,6 +641,10 @@ A phone, camera, or media player on USB stopped answering.
 ## `ram_commit_exhausted`: ram commit exhausted
 
 Committed memory on this host reached its limit.
+
+**Use when:** a technician reviewing a low-memory episode wants the resource exhaustion detector's own records beside the System log's low-memory event, which names the programs using the most memory.
+
+**Keywords:** commit charge, low-memory notification
 
 **Also reported by:** `win.eventlog.system`
 
@@ -581,6 +669,10 @@ Committed memory on this host reached its limit.
 ## `secure_boot_revocation_update_failed`: secure boot revocation update failed
 
 Windows tried to write its boot revocation level into firmware and the firmware refused.
+
+**Use when:** a technician sees that the firmware refused the SBAT revocation level Windows tried to write at boot, often on a machine that also boots Linux or on a model that needs a firmware update.
+
+**Keywords:** SBAT update failed, SbatLevel, Secure Boot Advanced Targeting, shim revocation, GRUB revocation, dual boot Secure Boot revocation, firmware refused boot revocation update, firmware variable write refused
 
 **Severity:** Info
 
@@ -607,6 +699,10 @@ Windows tried to write its boot revocation level into firmware and the firmware 
 
 The platform reached a temperature trip point and engaged cooling.
 
+**Use when:** a laptop or PC gets warm and slows down under load, with the processor throttled or the fans ramping up, without shutting itself off.
+
+**Keywords:** thermal throttling, CPU throttling from heat, slow when hot, laptop slows down when warm, processor slowed by heat, fans ramp up under load, passive cooling, active cooling, laptop on a bed or blanket
+
 **Severity:** Notice or Info
 
 **Why it matters:** Active cooling is fan noise. Passive cooling slows the processor, so the machine feels sluggish while the heat lasts.
@@ -632,6 +728,10 @@ The platform reached a temperature trip point and engaged cooling.
 ## `tpm_initialization_failed`: tpm initialization failed
 
 Windows reported a TPM initialization failure during boot.
+
+**Use when:** a technician sees a TPM initialization failure at startup, often after a firmware update or on a virtual machine with no virtual TPM, and needs to know whether BitLocker or attestation was affected for that boot.
+
+**Keywords:** TPM failed to initialize, TPM not initialized at boot, virtual TPM missing, vTPM missing at boot, TPM disabled in BIOS boot error, TPM settings reset after BIOS update
 
 **Severity:** Warning or Display
 
@@ -660,6 +760,10 @@ Windows reported a TPM initialization failure during boot.
 
 The USB host controller or USB-C connector manager reported a fault.
 
+**Use when:** USB ports, a USB-C dock or USB-C charging stop working until a replug or restart because the USB controller or the USB-C connector manager faulted.
+
+**Keywords:** USB ports stopped working, all USB ports dead, USB-C dock not working, USB-C dock fault after sleep, USB host controller reset, UCSI, UCM-UCSI ACPI Device, USB 3 controller fault
+
 **Severity:** Notice
 
 **Why it matters:** Devices on that controller, or on a dock behind it, stop working or charging until it resets.
@@ -683,6 +787,10 @@ The USB host controller or USB-C connector manager reported a fault.
 ## `win_trace_session_failed`: win trace session failed
 
 A Windows tracing session could not start, write, or continue.
+
+**Use when:** a diagnostic, performance or security tool stops collecting trace data, or a technician needs to know why an event tracing session failed to start or write.
+
+**Keywords:** ETW session failed, Event Tracing for Windows, trace session failed to start, AutoLogger, logman trace failed, data collector set trace failed, STATUS_OBJECT_NAME_COLLISION, STATUS_LOG_FILE_FULL, trace session disk full, trace file full, ReadyBoot stopped 0xC0000188, Circular Kernel Context Logger 0xC0000035
 
 **Severity:** Warning or Info
 

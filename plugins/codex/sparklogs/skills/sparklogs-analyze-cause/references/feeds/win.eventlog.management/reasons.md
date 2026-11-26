@@ -6,35 +6,39 @@
 Each section below is complete for its reason: every public field, in the words the reference page shows.
 Search for the heading "## `<code>`" or a word from the reason's label. Do not read the whole file.
 
-| reason | label | kind | severity | service | benign |
-|---|---|---|---|---|---|
-| `bitlocker_os_drive_encrypted_beyond_policy_scope` | bitlocker os drive encrypted beyond policy scope | event | Verbose | `device_management` | benign |
-| `bitlocker_policy_noncompliant` | bitlocker policy noncompliant | event | Info to Warning | `device_management` |  |
-| `bits_transfer_failed` | bits transfer failed | event | Verbose to Info | `patching` |  |
-| `dfsr_dirty_shutdown_detected` | DFSR dirty shutdown detected | event | Info to Notice | `directory_services` |  |
-| `dfsr_partner_communication_failed` | dfsr partner communication failed | event | Warning | `directory_services` |  |
-| `dfsr_replication_stopped` | dfsr replication stopped | event | Warning to Serious | `directory_services` |  |
-| `dfsr_sysvol_initial_sync_pending` | dfsr sysvol initial sync pending | event | Warning | `directory_services` |  |
-| `hyperv_replication_failed` | hyperv replication failed | event | Notice to Warning | `virtualization` |  |
-| `hyperv_vm_backup_checkpoint_failed` | hyperv vm backup checkpoint failed | event | Info to Warning | `virtualization` | benign possible |
-| `hyperv_vm_start_failed` | hyperv vm start failed | event | Warning | `virtualization` |  |
-| `hyperv_vm_storage_request_slow` | hyperv vm storage request slow | event | Warning to Minor | `virtualization` |  |
-| `hyperv_vm_vhd_chain_corrupted` | hyperv vm vhd chain corrupted | event | Info to Serious | `virtualization` | benign possible |
-| `mdm_policy_apply_failed` | mdm policy apply failed | event | Info to Warning | `device_management` | benign possible |
-| `patch_download_failed` | patch download failed | event | Warning | `patching` |  |
-| `patch_scan_failed` | patch scan failed | event | Info to Warning | `patching` | benign possible |
-| `print_connection_reopen_failed` | print connection reopen failed | event | Info to Warning | `printing` | benign possible |
-| `printer_driver_install_failed` | printer driver install failed | event | Notice to Warning | `printing` |  |
-| `scheduled_task_action_failed` | scheduled task action failed | event | Display to Notice | `scheduled_tasks` |  |
-| `scheduled_task_engine_failed` | scheduled task engine failed | event | Info to Warning | `scheduled_tasks` | benign possible |
-| `scheduled_task_load_failed` | scheduled task load failed | event | Notice to Warning | `scheduled_tasks` |  |
-| `scheduled_task_sign_in_failed` | scheduled task sign in failed | event | Warning | `scheduled_tasks` |  |
-| `scheduled_task_start_failed` | scheduled task start failed | event | Debug to Warning | `scheduled_tasks` | benign possible |
-| `win_locale_registry_read_failed` | win locale registry read failed | event | Warning | `user_profiles` |  |
+| reason | label | kind | severity | service | benign | use when |
+|---|---|---|---|---|---|---|
+| `bitlocker_os_drive_encrypted_beyond_policy_scope` | bitlocker os drive encrypted beyond policy scope | event | Verbose | `device_management` | benign | an MDM or Intune BitLocker report says the wrong encryption type was used on the operating-system drive because it is fully encrypted while the policy asks for used space only, and someone asks whether that is a real gap. |
+| `bitlocker_policy_noncompliant` | bitlocker policy noncompliant | event | Info to Warning | `device_management` |  | an Intune or other MDM encryption report shows a device as not compliant with its BitLocker policy, or someone asks which devices have a drive left unencrypted, a missing TPM protector or the wrong encryption method. |
+| `bits_transfer_failed` | bits transfer failed | event | Verbose to Info | `patching` |  | a program's background download, such as an Outlook offline address book or a vendor updater, fails on one attempt and retries, and someone needs the job name and the error code. |
+| `dfsr_dirty_shutdown_detected` | DFSR dirty shutdown detected | event | Info to Notice | `directory_services` |  | a file server came back from a power loss or a forced restart and DFS Replication is recovering its database, so shared-folder changes reach the other servers late, and someone asks whether it will recover on its own. |
+| `dfsr_partner_communication_failed` | dfsr partner communication failed | event | Warning | `directory_services` |  | changes to shared folders are not copying to the other office's server because DFS Replication cannot reach its partner, while it keeps retrying the link. |
+| `dfsr_replication_stopped` | dfsr replication stopped | event | Warning to Serious | `directory_services` |  | shared-folder replication between servers has stopped and does not resume on its own, for example after a server was offline for weeks, shut down uncleanly with automatic recovery off, or could not reach a domain controller. |
+| `dfsr_sysvol_initial_sync_pending` | dfsr sysvol initial sync pending | event | Warning | `directory_services` |  | a new or restored domain controller does not share SYSVOL or NETLOGON, so logon scripts and Group Policy are missing from it while it waits for its first copy from a partner. |
+| `hyperv_replication_failed` | hyperv replication failed | event | Notice to Warning | `virtualization` |  | Hyper-V Replica copies of virtual machines on a second server or site stop updating or fall behind, or the primary host cannot reach or is refused by the replica server. |
+| `hyperv_vm_backup_checkpoint_failed` | hyperv vm backup checkpoint failed | event | Info to Warning | `virtualization` | benign possible | a host-level backup of a Hyper-V virtual machine fails or ends only crash-consistent because the backup checkpoint could not be taken, the guest's shadow-copy writers did not finish, or the backup integration service is off. |
+| `hyperv_vm_start_failed` | hyperv vm start failed | event | Warning | `virtualization` |  | a Hyper-V virtual machine will not start or turn on, or did not come back after a host reboot, including when the host had no memory left for it. |
+| `hyperv_vm_storage_request_slow` | hyperv vm storage request slow | event | Warning to Minor | `virtualization` |  | Hyper-V virtual machines are slow or stall while the host's storage is busy, such as during a backup window, and someone needs to know which virtual disk waited and for how long. |
+| `hyperv_vm_vhd_chain_corrupted` | hyperv vm vhd chain corrupted | event | Info to Serious | `virtualization` | benign possible | a Hyper-V checkpoint, merge or backup fails because a differencing disk no longer matches its parent, often after disk files were copied, moved or restored by hand. |
+| `mdm_policy_apply_failed` | mdm policy apply failed | event | Info to Warning | `device_management` | benign possible | the device reports an error at sync for a setting or profile assigned in Intune or another MDM console. |
+| `patch_download_failed` | patch download failed | event | Warning | `patching` |  | Windows Update finds an update but cannot download it, often on a device short of disk space, and someone needs the download error code. |
+| `patch_scan_failed` | patch scan failed | event | Info to Warning | `patching` | benign possible | a device stops getting patches or shows an error when it checks for updates, such as when it still points at a WSUS server that is down, moved or gone. |
+| `print_connection_reopen_failed` | print connection reopen failed | event | Info to Warning | `printing` | benign possible | one user's mapped or network printers disappear after a restart or a spooler restart, because the spooler could not read the printer connections saved in their profile. |
+| `printer_driver_install_failed` | printer driver install failed | event | Notice to Warning | `printing` |  | adding or connecting to a printer fails because its driver will not install, for example with an access denied or unsigned driver error, on a workstation or a print server. |
+| `scheduled_task_action_failed` | scheduled task action failed | event | Display to Notice | `scheduled_tasks` |  | a scheduled task runs on time but its program or script exits with a failure code, shown as the task's Last Run Result in Task Scheduler. |
+| `scheduled_task_engine_failed` | scheduled task engine failed | event | Info to Warning | `scheduled_tasks` | benign possible | scheduled tasks on a machine do not launch at all because Task Scheduler cannot start the host process that runs them, rather than one task failing. |
+| `scheduled_task_load_failed` | scheduled task load failed | event | Notice to Warning | `scheduled_tasks` |  | a scheduled task has vanished from Task Scheduler or quietly stopped running after a restart or a software upgrade, because its saved definition could not be loaded rather than being deleted. |
+| `scheduled_task_sign_in_failed` | scheduled task sign in failed | event | Warning | `scheduled_tasks` |  | a scheduled task stopped running after the password of the account it runs as was changed or expired, or that account was locked out or disabled. |
+| `scheduled_task_start_failed` | scheduled task start failed | event | Debug to Warning | `scheduled_tasks` | benign possible | a scheduled task did not run at its trigger, or Task Scheduler says it failed to launch the action, because the program or script it points at is missing or access was denied. |
+| `win_locale_registry_read_failed` | win locale registry read failed | event | Warning | `user_profiles` |  | a program shows default date, time or number formats instead of the user's regional settings, or a technician sees one process filling the International log with locale registry errors. |
 
 ## `bitlocker_os_drive_encrypted_beyond_policy_scope`: bitlocker os drive encrypted beyond policy scope
 
 The operating-system drive is encrypted in full where the BitLocker policy asks for used space only.
+
+**Use when:** an MDM or Intune BitLocker report says the wrong encryption type was used on the operating-system drive because it is fully encrypted while the policy asks for used space only, and someone asks whether that is a real gap.
+
+**Keywords:** full disk encryption instead of used space only, fully encrypted OS drive, used space only encryption policy, DataOnly encryption, encryption type mismatch, Intune BitLocker encryption type
 
 **Severity:** Verbose
 
@@ -59,6 +63,10 @@ The operating-system drive is encrypted in full where the BitLocker policy asks 
 ## `bitlocker_policy_noncompliant`: bitlocker policy noncompliant
 
 A device does not match the BitLocker encryption policy set for it: a drive is not protected, lacks a protector the policy requires, or is encrypted with a method or scope the policy does not allow.
+
+**Use when:** an Intune or other MDM encryption report shows a device as not compliant with its BitLocker policy, or someone asks which devices have a drive left unencrypted, a missing TPM protector or the wrong encryption method.
+
+**Keywords:** BitLocker not compliant, BitLocker noncompliant, encryption not compliant, disk encryption compliance, Intune encryption report, which devices are not encrypted, unencrypted OS drive, fixed data drive not encrypted, TPM protector missing, startup PIN required by policy, XTS-AES 256 required, encryption method mismatch, cipher strength mismatch, only used space encrypted
 
 **Severity:** Warning when the operating-system drive is not protected. Notice for a missing TPM protector, an unprotected data drive, used-space-only encryption where policy wants the full drive, and other unmet requirements. Display for a summary whose only issues are cipher strength or encryption scope, and Info for the cipher-strength event itself.
 
@@ -92,6 +100,10 @@ The management client is the authority on what the policy requires. The device's
 
 A Background Intelligent Transfer Service job reported an error on one transfer attempt.
 
+**Use when:** a program's background download, such as an Outlook offline address book or a vendor updater, fails on one attempt and retries, and someone needs the job name and the error code.
+
+**Keywords:** BITS job error, BITS transfer failed, background download failed, BITS job keeps retrying, Outlook offline address book download, OAB download 401, Dell updater download 404, BG_E_HTTP_ERROR_401, BG_E_HTTP_ERROR_404, bitsadmin job error, BITS proxy
+
 **Severity:** Info or Verbose
 
 **Why it matters:** One attempt inside a transfer that BITS keeps retrying. The record names the job and the error code; whether the download finally failed is reported by the program that asked for it.
@@ -120,6 +132,10 @@ BITS retries a failed transfer, so these records come in runs. The stream is rat
 
 DFS Replication found its database on a volume was not shut down cleanly and is recovering it.
 
+**Use when:** a file server came back from a power loss or a forced restart and DFS Replication is recovering its database, so shared-folder changes reach the other servers late, and someone asks whether it will recover on its own.
+
+**Keywords:** DFSR dirty shutdown recovered on its own, DFS-R database recovery, DFSR database recovering, DFS replication after power loss, file server power outage replication, unexpected shutdown DFSR, replication slow after restart
+
 **Severity:** Notice or Info
 
 **Why it matters:** Replication on that volume is slower until recovery finishes, so changes reach the other members later than usual.
@@ -144,6 +160,10 @@ DFS Replication found its database on a volume was not shut down cleanly and is 
 ## `dfsr_partner_communication_failed`: dfsr partner communication failed
 
 DFS Replication could not reach a replication partner for a replication group.
+
+**Use when:** changes to shared folders are not copying to the other office's server because DFS Replication cannot reach its partner, while it keeps retrying the link.
+
+**Keywords:** DFSR cannot connect to partner, DFS replication partner unreachable, DFSR partner offline, DFSR partner link down files not syncing, branch office file server not syncing, DFSR RPC error, DFSR firewall blocking RPC, DFSR WAN link down, DFS-R connection failed
 
 **Severity:** Warning
 
@@ -172,6 +192,10 @@ The partner and the replication group are named in the message text rather than 
 ## `dfsr_replication_stopped`: dfsr replication stopped
 
 DFS Replication stopped replicating a folder or a volume, or stopped because it could not read its own configuration.
+
+**Use when:** shared-folder replication between servers has stopped and does not resume on its own, for example after a server was offline for weeks, shut down uncleanly with automatic recovery off, or could not reach a domain controller.
+
+**Keywords:** DFSR stopped replicating, DFS replication stopped, DFS-R replication stopped, file servers out of sync, replicated folders drifting apart, MaxOfflineTimeInDays, content freshness, DFSR resume replication, ResumeReplication, StopReplicationOnAutoRecovery, DFSR WMI providers, DFSR cannot read configuration from domain controller, DFSR dirty shutdown, DFSR not shut down cleanly
 
 **Severity:** Serious, Error or Warning
 
@@ -205,6 +229,10 @@ The replicated folder, the partner and the directory server are named in the mes
 
 A server holds a SYSVOL copy that has never completed its first synchronization with a partner.
 
+**Use when:** a new or restored domain controller does not share SYSVOL or NETLOGON, so logon scripts and Group Policy are missing from it while it waits for its first copy from a partner.
+
+**Keywords:** SYSVOL not shared, NETLOGON not shared, SYSVOL initial sync, SYSVOL initial replication, new domain controller no SYSVOL, logon scripts missing on new DC, DC promotion not finished, SysvolReady, authoritative SYSVOL restore, non-authoritative SYSVOL restore, msDFSR-Options
+
 **Severity:** Warning
 
 **Why it matters:** That server does not serve Group Policy or logon scripts from its SYSVOL copy, and a domain controller promotion in progress has not finished.
@@ -232,6 +260,10 @@ The partner and the local path are named in the message text rather than in fiel
 ## `hyperv_replication_failed`: hyperv replication failed
 
 Hyper-V could not replicate a virtual machine to its replica server.
+
+**Use when:** Hyper-V Replica copies of virtual machines on a second server or site stop updating or fall behind, or the primary host cannot reach or is refused by the replica server.
+
+**Keywords:** Hyper-V Replica failed, Hyper-V replication failed, replica server not responding, replica falling behind, VM replication behind, replication health critical, Hyper-V Replica certificate, Hyper-V Replica port, recovery copy out of date, Resume-VMReplication, Measure-VMReplication
 
 **Severity:** Warning or Notice
 
@@ -263,6 +295,10 @@ The machine keeps running throughout, so nobody finds out the copy is stale unti
 
 A backup of a virtual machine did not take a consistent snapshot.
 
+**Use when:** a host-level backup of a Hyper-V virtual machine fails or ends only crash-consistent because the backup checkpoint could not be taken, the guest's shadow-copy writers did not finish, or the backup integration service is off.
+
+**Keywords:** Hyper-V backup failed, backup checkpoint failed, recovery checkpoint failed, crash-consistent backup, not application consistent, guest VSS writers failed, Backup (volume shadow copy) integration service, VSS_E_SNAPSHOT_SET_IN_PROGRESS, overlapping backup jobs, leftover checkpoint after failed backup
+
 **Severity:** Warning, Notice or Info
 
 **Why it matters:** That backup run either produced no restore point or produced one that is only crash-consistent, so applications such as SQL Server or Exchange may need recovery after a restore from it.
@@ -292,6 +328,10 @@ A failed guest writer still usually leaves a crash-consistent copy, which is not
 
 A virtual machine, or the worker process that runs one, did not start.
 
+**Use when:** a Hyper-V virtual machine will not start or turn on, or did not come back after a host reboot, including when the host had no memory left for it.
+
+**Keywords:** Hyper-V VM will not start, Hyper-V VM won't turn on, Hyper-V virtual machine failed to start, VM did not start after host reboot, attempting to start the selected virtual machine, Not enough memory in the system to start, Hyper-V not enough memory, vmwp.exe failed to start, Hyper-V worker process failed to start
+
 **Severity:** Warning
 
 **Why it matters:** A workload that was supposed to be running is not, and the services on it are down for its users.
@@ -317,6 +357,10 @@ These templates carry no result code, so the machine name and the id are what th
 ## `hyperv_vm_storage_request_slow`: hyperv vm storage request slow
 
 A storage request a virtualization host made for one of its guests took longer than expected to complete.
+
+**Use when:** Hyper-V virtual machines are slow or stall while the host's storage is busy, such as during a backup window, and someone needs to know which virtual disk waited and for how long.
+
+**Keywords:** Hyper-V VM disk slow, slow virtual disk IO, guest storage latency, VHDX slow, Hyper-V host storage latency, SAN latency Hyper-V, VMs slow during backup
 
 **Severity:** Warning for a slow request. Minor where the request took thirty seconds or longer.
 
@@ -346,6 +390,10 @@ The duration measures one request rather than how long a condition has held.
 
 A differencing virtual disk and its parent disagree on the parent identity, so the disk chain cannot be merged or checkpointed.
 
+**Use when:** a Hyper-V checkpoint, merge or backup fails because a differencing disk no longer matches its parent, often after disk files were copied, moved or restored by hand.
+
+**Keywords:** chain of virtual hard disks is corrupted, mismatch in the identifiers of the parent, 0xC03A000E, differencing disk parent mismatch, parent disk ID mismatch, checkpoint merge failed parent mismatch, broken checkpoint chain, AVHDX not merging, AVHDX keeps growing, Inspect Disk, Set-VHD ParentPath, IgnoreIdMismatch
+
 **Severity:** Serious or Info
 
 **Why it matters:** The machine keeps running, but its checkpoints and backups fail, its disk files keep growing because they cannot merge, and a restore from that chain can fail.
@@ -373,6 +421,10 @@ The machine keeps running while this holds, so nothing else reports it until a r
 ## `mdm_policy_apply_failed`: mdm policy apply failed
 
 A device management command did not take effect on the device.
+
+**Use when:** the device reports an error at sync for a setting or profile assigned in Intune or another MDM console.
+
+**Keywords:** Intune setting error on device, Intune configuration profile error, profile shows error in Intune, MDM sync error, CSP error, OMA-URI setting failed, device restriction not applied, Access work or school sync, Intune throttling, MDM access denied
 
 **Severity:** Warning, Notice or Info
 
@@ -402,6 +454,10 @@ This family repeats at the management sync cadence, so one unresolved setting pr
 
 Windows Update could not download an update the device needed.
 
+**Use when:** Windows Update finds an update but cannot download it, often on a device short of disk space, and someone needs the download error code.
+
+**Keywords:** update will not download, update download failed, Windows Update download error, cannot download updates, not enough disk space for updates, low disk space update, cumulative update download failed, 0x80070070, 0x8007000E
+
 **Severity:** Warning
 
 **Why it matters:** That update is not installed, and the device stays exposed to whatever it fixes until a later attempt succeeds.
@@ -429,6 +485,10 @@ The client retries on its own cycle, so a single record is not proof the update 
 ## `patch_scan_failed`: patch scan failed
 
 A Windows Update scan did not complete, so the device was offered no updates on that cycle.
+
+**Use when:** a device stops getting patches or shows an error when it checks for updates, such as when it still points at a WSUS server that is down, moved or gone.
+
+**Keywords:** check for updates failed, failed to check for updates, Windows Update scan failed, update detection failed, WSUS unreachable, WSUS server decommissioned, old WSUS server, Specify intranet Microsoft update service location, WUServer, 0x8024402C, 0x80244022, 0x8024401C
 
 **Severity:** Warning or Info
 
@@ -458,6 +518,10 @@ The update client retries on its own cycle, so single records are expected on a 
 
 The print spooler could not read one profile's saved printer connections when it restarted.
 
+**Use when:** one user's mapped or network printers disappear after a restart or a spooler restart, because the spooler could not read the printer connections saved in their profile.
+
+**Keywords:** user printer connections lost after restart, printer connections lost, user printers missing after reboot, printers gone after spooler restart, Printers Connections registry key, per-user printer connections
+
 **Severity:** Warning or Info
 
 **Why it matters:** On a real user's profile, their mapped printers are gone until they reconnect or sign in again.
@@ -485,6 +549,10 @@ Built-in service accounts produce this line as a matter of course, because they 
 ## `printer_driver_install_failed`: printer driver install failed
 
 A printer driver did not install, and the stage and code say which part of the install failed.
+
+**Use when:** adding or connecting to a printer fails because its driver will not install, for example with an access denied or unsigned driver error, on a workstation or a print server.
+
+**Keywords:** printer driver install failed, printer driver will not install, cannot add printer driver, Point and Print driver install, Point and Print restrictions, RestrictDriverInstallationToAdministrators, KB5005652, unsigned printer driver, printer driver package, driver store printer driver, print server driver install
 
 **Severity:** Warning where an add or an import failed. Notice where the spooler was only asking the driver store whether it already held the driver.
 
@@ -515,6 +583,10 @@ One install attempt can report from several of these ids, on both print channels
 
 A scheduled task ran, and the program it started exited with a failure code.
 
+**Use when:** a scheduled task runs on time but its program or script exits with a failure code, shown as the task's Last Run Result in Task Scheduler.
+
+**Keywords:** Last Run Result 0x1, task completed with error, task exit code, scheduled script failed, batch file task fails, PowerShell scheduled task failed, task return code nonzero, backup pre-job script failed
+
 **Severity:** Notice for anyone else's task. Display for a task Windows or a Microsoft component registered for itself.
 
 **Why it matters:** Whatever that run was meant to do may not have happened. On a backup pre-job or an update task, nothing else reports it.
@@ -542,6 +614,10 @@ Some programs exit non-zero for a warning rather than a failure, so read the pro
 ## `scheduled_task_engine_failed`: scheduled task engine failed
 
 Task Scheduler could not start the host process a scheduled task runs inside.
+
+**Use when:** scheduled tasks on a machine do not launch at all because Task Scheduler cannot start the host process that runs them, rather than one task failing.
+
+**Keywords:** Task Scheduler failed to start task engine, task engine process, task host process failed, taskhostw.exe failed to start, no scheduled tasks running, all scheduled tasks not running
 
 **Severity:** Warning or Info
 
@@ -571,6 +647,10 @@ A per-user task engine only starts when that user has a session, so this line is
 
 A scheduled task definition could not be read at service start, so the task is not in the schedule at all.
 
+**Use when:** a scheduled task has vanished from Task Scheduler or quietly stopped running after a restart or a software upgrade, because its saved definition could not be loaded rather than being deleted.
+
+**Keywords:** scheduled task missing, task disappeared from Task Scheduler, task gone after reboot, task image is corrupt, corrupt task XML, task definition corrupt, System32 Tasks folder, TaskCache registry, task not registered
+
 **Severity:** Notice for a Windows or Microsoft component task whose definition is not found, Warning for any other code or task.
 
 **Why it matters:** The task is gone rather than failing, so nothing else reports that its work has stopped.
@@ -599,6 +679,10 @@ The two event ids report one load attempt twice, so they arrive as a pair for th
 
 Task Scheduler could not log on as the account a scheduled task stores, so the task did not run.
 
+**Use when:** a scheduled task stopped running after the password of the account it runs as was changed or expired, or that account was locked out or disabled.
+
+**Keywords:** scheduled task password changed, task run as account password expired, service account password changed task, task stored credentials, Run whether user is logged on or not, task account locked out, task account disabled, update task password, Task Scheduler failed to log on
+
 **Severity:** Warning
 
 **Why it matters:** Every task registered to that account is in the same state, and none of them is running.
@@ -625,13 +709,17 @@ A service-account password change is the usual cause, and the tasks stop silentl
 
 A scheduled task did not run, and the result code says whether the program was missing, the identity was refused, or the action itself failed.
 
-**Severity:** Warning where a named automation stopped running. Notice where a Windows or Microsoft component task failed or was refused, and lower still where Windows removed the program it points at. Info where the task was not started because Windows was shutting down.
+**Use when:** a scheduled task did not run at its trigger, or Task Scheduler says it failed to launch the action, because the program or script it points at is missing or access was denied.
+
+**Keywords:** task did not run, scheduled task not running, scheduled job did not run overnight, task failed to start, Task Scheduler failed to launch action, task points to deleted script, task program not found, task access denied, 0x80070003, 0x8007045B
+
+**Severity:** Warning where a named automation stopped running. Notice where a Windows task that maintains Secure Boot, BitLocker, the TPM, certificate enrollment or hybrid join failed or was refused. Display where any other Windows or Microsoft component task failed or was refused, and lower still where Windows removed the program it points at. Info where the task was not started because Windows was shutting down.
 
 **Why it matters:** Whatever that task does is not being done. On a backup pre-job or a patch orchestration task, that is a gap nothing else reports.
 
-**In practice:** Task Scheduler writes events 101, 103, 202 and 203 in Microsoft-Windows-TaskScheduler/Operational when a task fails to start or its action fails, at the provider's Error level, with the task path and the result code. A file-not-found or path-not-found result (0x80070002, 0x80070003) means the program the task points at is not there. Access denied (0x80070005) means the account the task runs as was refused. A shutdown-in-progress result (0x8007045B) means the trigger fired while Windows was shutting down, and the task runs again on its next trigger. Tasks Windows and Microsoft components register for themselves are maintenance that retries on its own schedule, so they are recorded lower than anyone else's task: tasks under \Microsoft\, and a few registered outside it, such as the Edge and OneDrive updaters and the Windows Spotlight tasks under \SoftLanding\. Not collected: the Windows Update orchestrator notification broker task (USO_UxBroker) reporting its own program missing, which Windows removed and nobody can fix.
+**In practice:** Task Scheduler writes events 101, 103, 202 and 203 in Microsoft-Windows-TaskScheduler/Operational when a task fails to start or its action fails, at the provider's Error level, with the task path and the result code. A file-not-found or path-not-found result (0x80070002, 0x80070003) means the program the task points at is not there. Access denied (0x80070005) means the account the task runs as was refused. A shutdown-in-progress result (0x8007045B) means the trigger fired while Windows was shutting down, and the task runs again on its next trigger. Tasks Windows and Microsoft components register for themselves are maintenance that retries on its own schedule, so they are recorded lower than anyone else's task: tasks under \Microsoft\, and a few registered outside it, such as the Edge and OneDrive updaters and the Windows Spotlight tasks under \SoftLanding\. Windows tasks that maintain Secure Boot, BitLocker, the TPM, certificate enrollment or hybrid join are recorded a rung higher than other Windows tasks, because their failure weakens a protection nothing else reports. Not collected: the Windows Update orchestrator notification broker task (USO_UxBroker) reporting its own program missing, which Windows removed and nobody can fix.
 
-**When to ignore:** Debug and Notice rows for Windows and Microsoft component tasks are maintenance retrying on its own schedule, unless the same task fails for weeks. Info rows with a shutdown-in-progress result are starts skipped while the machine shut down.
+**When to ignore:** Debug and Display rows for Windows and Microsoft component tasks are maintenance retrying on its own schedule, unless the same task fails for weeks. Info rows with a shutdown-in-progress result are starts skipped while the machine shut down.
 
 **What to check:**
 
@@ -654,6 +742,10 @@ The four event ids report one launch from four places, so a single failed run ca
 ## `win_locale_registry_read_failed`: win locale registry read failed
 
 A process could not open the registry key holding the machine or user locale settings, and fell back to a default.
+
+**Use when:** a program shows default date, time or number formats instead of the user's regional settings, or a technician sees one process filling the International log with locale registry errors.
+
+**Keywords:** locale registry key cannot be opened, regional settings ignored, regional format not applied, locale settings registry, default locale fallback, Control Panel International registry key, damaged user profile registry permissions
 
 **Severity:** Warning
 

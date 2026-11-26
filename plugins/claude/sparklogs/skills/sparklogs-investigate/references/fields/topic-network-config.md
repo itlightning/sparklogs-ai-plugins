@@ -1,7 +1,13 @@
 <!-- GENERATED reference. Do not hand-edit. -->
-# Network configuration fields
+# Network configuration
 
-Full inventory every hour. Supported changes are reported when the agent observes them.
+The machine's default routes by adapter, its primary DNS suffix, legacy IPv4 DNS server list, DNS suffix search lists (configured and Group Policy), and the machine-wide WinHTTP proxy and bypass list.
+
+**Use when:** traffic leaving by the wrong adapter, short names that do not resolve, apps failing behind a proxy, or a proxy or DNS suffix that changed.
+
+The proxy is the machine's WinHTTP default only, not a user's browser proxy or PAC script. Per-adapter DNS servers and gateways are in Network adapters.
+
+Full inventory every hour. Changes are reported between inventories.
 
 | Field | Type | Unit | Meaning |
 |---|---|---|---|

@@ -24,13 +24,13 @@ Stored flat under the `sparklogs.agent.vector.` prefix.
 
 | LQL path | Type | Meaning |
 |---|---|---|
-| `sparklogs.agent.vector.component_id` | string |  |
-| `sparklogs.agent.vector.channel` | string |  |
-| `sparklogs.agent.vector.missing_records` | int |  |
-| `sparklogs.agent.vector.previous_record_id` | int |  |
-| `sparklogs.agent.vector.record_id` | int |  |
-| `sparklogs.agent.vector.resume_rung` | string |  |
-| `sparklogs.agent.vector.skip_cause` | string |  |
+| `sparklogs.agent.vector.component_id` | string | Name of the agent collection component that reported the problem, as the agent configuration names it. Says which feed or delivery path is affected by a failure to start, read or send. |
+| `sparklogs.agent.vector.channel` | string | Windows Event Log channel the row is about: the channel with missing records, or the channel that is not being collected. |
+| `sparklogs.agent.vector.missing_records` | int | Number of event records in the channel that were not collected, for the gap this row reports. |
+| `sparklogs.agent.vector.previous_record_id` | int | Event record ID (as Event Viewer shows it on the Details tab) of the last record collected before the gap. The records after it were not collected. |
+| `sparklogs.agent.vector.record_id` | int | Event record ID (as Event Viewer shows it on the Details tab) of the first record collected after the gap. The records just before it were not collected. |
+| `sparklogs.agent.vector.resume_rung` | string | How far the agent moved forward in the channel to start reading again when it could not continue from its saved place: not at all (the saved place worked), one record or one moment, a jump of a few seconds up to half an hour, or straight to new records, skipping everything already in the channel. |
+| `sparklogs.agent.vector.skip_cause` | string | Why a channel configured for collection is not being collected: the channel does not exist on this machine, Windows does not allow a subscription to it, the custom event query configured for it is invalid, or access to it was denied. |
 
 ## Portable families
 

@@ -1,5 +1,11 @@
 <!-- GENERATED reference. Do not hand-edit. -->
-# Agent overhead fields
+# Agent overhead
+
+CPU, memory, handle counts, read and write I/O, restarts in the last hour, and memory or handle growth for the SparkLogs Agent and its log collector (Vector), one row each.
+
+**Use when:** a customer asks whether the SparkLogs Agent is slowing a machine, or an agent CPU, memory or handle over-budget alert fired.
+
+Readings are 15-minute averages. The memory budget counts the agent and Vector together and is carried on the agent's row only; the CPU and handle budgets read the agent's own row.
 
 Reported every 15 minutes on clock boundaries for the window ending at `t`. `sparklogs.window_coverage_pct` is below 100 when collection covered only part of the window. Use chart buckets at least 15 minutes wide.
 

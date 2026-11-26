@@ -6,22 +6,26 @@
 Each section below is complete for its reason: every public field, in the words the reference page shows.
 Search for the heading "## `<code>`" or a word from the reason's label. Do not read the whole file.
 
-| reason | label | kind | severity | service | benign |
-|---|---|---|---|---|---|
-| `log_collection_feed_not_collecting` | log collection feed not collecting | event | Warning | `rmm` |  |
-| `log_collection_feed_unavailable` | log collection feed unavailable | event | Debug to Warning | `rmm` |  |
-| `log_collection_query_filter_not_applied` | log collection query filter not applied | event | Notice | `rmm` |  |
-| `log_collection_query_filter_rejected` | log collection query filter rejected | event | Warning | `rmm` |  |
-| `log_collection_read_failed` | log collection read failed | event | Warning to Error | `rmm` |  |
-| `log_collection_restarted_from_oldest` | log collection restarted from oldest | event | Notice | `rmm` |  |
-| `log_collection_skipped_records_overwritten` | log collection skipped records overwritten | event | Error | `rmm` |  |
-| `log_collection_skipped_to_recover` | log collection skipped to recover | event | Error | `rmm` |  |
-| `log_collection_stream_not_started` | log collection stream not started | event | Error | `rmm` |  |
-| `log_delivery_failed` | log delivery failed | event | Warning to Error | `rmm` |  |
+| reason | label | kind | severity | service | benign | use when |
+|---|---|---|---|---|---|---|
+| `log_collection_feed_not_collecting` | log collection feed not collecting | event | Warning | `rmm` |  | an event log on the device's collection list never shows any data, or a channel is marked as not collected, and a technician needs the cause, such as the log not existing on that machine or its access settings refusing the collector. |
+| `log_collection_feed_unavailable` | log collection feed unavailable | event | Debug to Warning | `rmm` |  | events from one Windows event log stop arriving after a product update, reinstall or removal, or the collector reports a channel it was reading is missing or the event log service is not answering, and keeps retrying. |
+| `log_collection_query_filter_not_applied` | log collection query filter not applied | event | Notice | `rmm` |  | a technician sees a notice that a channel with a custom (QueryList) event query cannot take the filter that skips always-discarded events, and asks whether data is lost. |
+| `log_collection_query_filter_rejected` | log collection query filter rejected | event | Warning | `rmm` |  | a technician sees a notice that Windows refused the filtered query for a channel, and asks whether data is lost. |
+| `log_collection_read_failed` | log collection read failed | event | Warning to Error | `rmm` |  | events from one source may be missing for a stretch, and the collector reported an error reading that source rather than a channel that stopped and recovered. |
+| `log_collection_restarted_from_oldest` | log collection restarted from oldest | event | Notice | `rmm` |  | a channel with a custom event query shows a sudden burst of old records arriving again, and a technician needs to know whether it is new activity or a re-read. |
+| `log_collection_skipped_records_overwritten` | log collection skipped records overwritten | event | Error | `rmm` |  | records are missing from a Windows event log both on the device and in collected data, because the log filled and overwrote them first, and a technician needs to know whether to raise the log size. |
+| `log_collection_skipped_to_recover` | log collection skipped to recover | event | Error | `rmm` |  | records from one Windows event log are missing from collected data but may still be on the device, because the collector could not resume where it left off and moved forward past them. |
+| `log_collection_stream_not_started` | log collection stream not started | event | Error | `rmm` |  | one whole stream, such as a log file or a group of event logs, never arrives from a device while its other data does, and no per-channel cause is recorded for it. |
+| `log_delivery_failed` | log delivery failed | event | Warning to Error | `rmm` |  | a device's data arrives late or stops arriving and the collector reports it could not send it, often after a firewall, proxy or network change. |
 
 ## `log_collection_feed_not_collecting`: log collection feed not collecting
 
 A Windows Event Log channel on this device's collection list is not being collected, and the cause says why.
+
+**Use when:** an event log on the device's collection list never shows any data, or a channel is marked as not collected, and a technician needs the cause, such as the log not existing on that machine or its access settings refusing the collector.
+
+**Keywords:** event log not collected, channel not collected, event log channel skipped, event log channel does not exist, role-specific log missing, event log access settings refuse collector, analytic or debug log not collected, configured event query invalid
 
 **Severity:** Warning when the channel exists and something stops us reading it; everyday when the channel is simply absent on this host; Debug when the platform does not permit subscription
 
@@ -48,7 +52,11 @@ because of it.
 
 ## `log_collection_feed_unavailable`: log collection feed unavailable
 
-The collector lost access to a Windows Event Log channel it collects from, and keeps retrying.
+The collector could not read a Windows Event Log channel it collects from, because the channel is missing or the event log service did not answer, and keeps retrying.
+
+**Use when:** events from one Windows event log stop arriving after a product update, reinstall or removal, or the collector reports a channel it was reading is missing or the event log service is not answering, and keeps retrying.
+
+**Keywords:** event log channel stopped collecting, channel disappeared after update, event log channel re-registered, event log service not answering, collection retrying on one channel, channel recovered, events from one log arriving late
 
 **Severity:** Warning, Notice or Debug
 
@@ -75,6 +83,10 @@ The collector lost access to a Windows Event Log channel it collects from, and k
 
 The channel's event query has no place for the filter that skips events SparkLogs always discards, so the collector reads those events and discards them itself.
 
+**Use when:** a technician sees a notice that a channel with a custom (QueryList) event query cannot take the filter that skips always-discarded events, and asks whether data is lost.
+
+**Keywords:** discard filter not applied, custom channel query filter not applied, collector reads and discards events, filter cannot be added to query, extra event log reading, collector reading more than needed
+
 **Severity:** Notice
 
 **Why it matters:** Nothing is lost and the stored events are the same. The collector does extra reading on that channel.
@@ -97,6 +109,10 @@ The channel's event query has no place for the filter that skips events SparkLog
 
 Windows refused the event log query that skips events SparkLogs always discards, so the collector reads those events and discards them itself. Nothing is lost.
 
+**Use when:** a technician sees a notice that Windows refused the filtered query for a channel, and asks whether data is lost.
+
+**Keywords:** filtered event query refused, discard filter rejected, collector reads channel unfiltered
+
 **Severity:** Warning
 
 **Why it matters:** Stored events are unchanged. The collector does more work on that channel until it restarts, and on a busy machine that can make the channel fall behind.
@@ -118,6 +134,10 @@ Windows refused the event log query that skips events SparkLogs always discards,
 
 The collector failed to read from one of its sources, so some events were not collected.
 
+**Use when:** events from one source may be missing for a stretch, and the collector reported an error reading that source rather than a channel that stopped and recovered.
+
+**Keywords:** collector read error, source read failed, collection gap from read error, events not collected from source
+
 **Severity:** Warning
 
 **Why it matters:** Events from that source may be missing for the time of the failure, and the gap does not show in that stream itself.
@@ -138,6 +158,10 @@ The collector failed to read from one of its sources, so some events were not co
 ## `log_collection_restarted_from_oldest`: log collection restarted from oldest
 
 A channel with a custom event query could not resume from its last position, so the collector read it from the oldest record instead. Nothing was lost.
+
+**Use when:** a channel with a custom event query shows a sudden burst of old records arriving again, and a technician needs to know whether it is new activity or a re-read.
+
+**Keywords:** burst of duplicate events on one channel, duplicate records after channel re-read, channel re-read from oldest record, custom event query resume failed, resume position query rejected, same events collected twice
 
 **Severity:** Notice
 
@@ -161,6 +185,10 @@ A channel with a custom event query could not resume from its last position, so 
 ## `log_collection_skipped_records_overwritten`: log collection skipped records overwritten
 
 Records were overwritten in a Windows Event Log channel before the collector read them, so they were never collected.
+
+**Use when:** records are missing from a Windows event log both on the device and in collected data, because the log filled and overwrote them first, and a technician needs to know whether to raise the log size.
+
+**Keywords:** event log full and overwrote records, event log overwritten, event log wrapped, overwrite events as needed, event log size too small for collection, records overwritten before collection, record IDs missing after log overwrote
 
 **Severity:** Error
 
@@ -187,6 +215,10 @@ the same channel join directly.
 
 The collector could not resume a Windows Event Log channel from its last position and moved forward past records, which were never collected.
 
+**Use when:** records from one Windows event log are missing from collected data but may still be on the device, because the collector could not resume where it left off and moved forward past them.
+
+**Keywords:** collector skipped records, collector skipped ahead, resume position invalid, saved position lost and records skipped, skipped records still in Event Viewer, record gap after failed resume
+
 **Severity:** Error, or Warning when the collector gave up only a single record or boundary tick
 
 **Why it matters:** SparkLogs is missing the records the collector stepped over on the named channel. They are not collected later, though they may still be in the channel on the device.
@@ -212,6 +244,10 @@ channel recovery, even where a spelling looks the same.
 
 A collector component failed to start, so one telemetry stream is missing from this device.
 
+**Use when:** one whole stream, such as a log file or a group of event logs, never arrives from a device while its other data does, and no per-channel cause is recorded for it.
+
+**Keywords:** collector component failed to start, collector component failed to build, one data stream missing from device, stream never started, collector startup configuration error
+
 **Severity:** Error
 
 **Why it matters:** Nothing from that stream reaches SparkLogs, so searches and findings that depend on it come back empty, which can look like a quiet machine.
@@ -231,6 +267,10 @@ A collector component failed to start, so one telemetry stream is missing from t
 ## `log_delivery_failed`: log delivery failed
 
 The collector failed to deliver data from this device, so recent events may be missing or delayed.
+
+**Use when:** a device's data arrives late or stops arriving and the collector reports it could not send it, often after a firewall, proxy or network change.
+
+**Keywords:** device data upload failing, data upload failed, agent outbound HTTPS blocked, proxy blocking SparkLogs agent, firewall blocking SparkLogs agent, TLS inspection breaking agent, agent cannot reach SparkLogs
 
 **Severity:** Warning
 

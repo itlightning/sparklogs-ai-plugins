@@ -1,5 +1,7 @@
 # Directory replication failure
 
+**Use when:** domain controllers disagree, Group Policy or logon scripts differ between sites or DCs, SYSVOL or DFSR replication stops, or Entra Connect sync reports errors.
+
 **Trigger.** "Domain controllers are out of sync", or authentication behaves differently per site.
 
 **Accuracy.** SYSVOL replication (DFS Replication) and Entra Connect sync are curated.

@@ -1,6 +1,8 @@
 <!-- GENERATED reference. Do not hand-edit. -->
 # Config change fields
 
+**Use when:** a setting changed and the question is what changed, its old and new values, and how the change is known.
+
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
 | `sparklogs.config_change.type` | string |  | The kind of configuration object that changed. |

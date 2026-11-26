@@ -241,6 +241,7 @@ The last column is different in kind: it is the author's account of the row or e
 | `dns_client_resolution_timed_out` / `default` | 1014 | `win.eventlog.system.dns_query_name` |  |
 | `dns_registration_failed` / `default` | 8015, 8016, 8017, 8018, 8019, 8020, 8021, 8022, 8023, 8024, 8025, 8026, 8033, 8034, 8035, 8036, 8037, 8038 | **fields: none** |  |
 | `domain_secure_channel_failed` / `dc_unreachable` | 5719 | **fields: none** |  |
+| `domain_secure_channel_failed` / `internal_error` | 5719 | **fields: none** |  |
 | `domain_secure_channel_failed` / `other_cause` | 5719 | **fields: none** |  |
 | `domain_secure_channel_failed` / `trust_broken` | 5719 | **fields: none** |  |
 | `driver_load_failed` / `failed` | 219 | `win.eventlog.system.device_instance` `win.eventlog.system.driver_name` |  |
@@ -306,8 +307,8 @@ The last column is different in kind: it is the author's account of the row or e
 | `kerberos_weak_krbtgt_key` / `default` | 42 | **fields: none** |  |
 | `nic_driver_fault_reported` / `default` | 5002, 5005 | **fields: none** |  |
 | `nic_driver_load_failed` / `default` | 5000 | **fields: none** |  |
-| `nic_link_down` / `down` | 1, 2, 27, 32, 33, 34 | **fields: none** |  |
-| `nic_link_down` / `recovered` | 1, 2, 27, 32, 33, 34 | **fields: none** |  |
+| `nic_link_down` / `down` | 1, 2, 9, 14, 27, 32, 33, 34 | **fields: none** |  |
+| `nic_link_down` / `recovered` | 1, 2, 9, 14, 27, 32, 33, 34 | **fields: none** |  |
 | `os_boot` / `default` | 12 | **fields: none** |  |
 | `os_bsod` / `default` | 1001 | `win.eventlog.system.bugcheck_name` `win.eventlog.system.bugcheck_text` `win.eventlog.system.dump_file` `win.eventlog.system.report_id` |  |
 | `os_restart_requested` / `default` | 1074 | `win.eventlog.system.shutdown_comment` `win.eventlog.system.shutdown_reason` `win.eventlog.system.shutdown_reason_code` `win.eventlog.system.shutdown_type` `win.eventlog.system.shutdown_type_text` |  |
@@ -423,6 +424,7 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `disk_surprise_removal` / `default`
 - `dns_registration_failed` / `default`
 - `domain_secure_channel_failed` / `dc_unreachable`
+- `domain_secure_channel_failed` / `internal_error`
 - `domain_secure_channel_failed` / `other_cause`
 - `domain_secure_channel_failed` / `trust_broken`
 - `ephemeral_port_alloc_failed` / `default`

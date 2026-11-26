@@ -1,5 +1,7 @@
 # RMM connectivity
 
+**Use when:** a device shows offline in the RMM while the user says it works, or the RMM agent keeps losing its connection.
+
 **Trigger.** "Endpoint shows offline in the RMM but the user says it is working", or the RMM agent keeps dropping off.
 
 **Accuracy.** SparkLogs sees the RMM vendor's agent only as Windows services and the events they write to the Windows logs.

@@ -1,7 +1,13 @@
 <!-- GENERATED reference. Do not hand-edit. -->
-# App crashes fields
+# Application crash recurrence
 
-Full inventory every 8 hours. Supported changes are reported when the agent observes them.
+One row per program that crashed in the last 30 days (up to 64, most crashes first), with crash counts over 1, 5 and 10 days, days since the last crash, version, exception code, faulting module and the module a dump analysis blamed.
+
+**Use when:** the same program keeps crashing for a user, or deciding whether a crash is a one-off or a pattern.
+
+One crash in 30 days is enough for a row; the alert for a program that keeps crashing is raised here only when the count is high enough. The table is rebuilt every 8 hours with no changes in between, so a new crash shows in Crashes first.
+
+Full inventory every 8 hours. No change events between inventories.
 
 | Field | Type | Unit | Meaning |
 |---|---|---|---|

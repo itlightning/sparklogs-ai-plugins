@@ -1,7 +1,13 @@
 <!-- GENERATED reference. Do not hand-edit. -->
-# Kernel drivers fields
+# Kernel drivers
 
-Full inventory every day. Supported changes are reported when the agent observes them.
+Each kernel and file-system driver loaded now, with its start type, file path and version, publisher, signature check result and filter-stack position (antivirus, backup and other filter drivers), plus how often it loaded or was installed in the last hour.
+
+**Use when:** a suspect third-party or unsigned driver, an antivirus or backup filter driver question, or a driver that keeps loading, unloading or reinstalling.
+
+A driver loaded for under about a minute is not reported as a load, and a driver with no service entry is never listed, so this is an inventory and not a rootkit check. Loads show within about two minutes, unloads within about three, and installs come from Service Control Manager event 7045.
+
+Full inventory every day. Changes are reported between inventories.
 
 | Field | Type | Unit | Meaning |
 |---|---|---|---|

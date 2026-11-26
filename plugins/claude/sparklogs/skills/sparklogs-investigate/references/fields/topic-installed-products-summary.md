@@ -1,7 +1,13 @@
 <!-- GENERATED reference. Do not hand-edit. -->
-# Product summary fields
+# Installed product summary
 
-Full inventory on its own schedule. Supported changes are reported when the agent observes them.
+One number per machine: how many products Installed products lists; it carries no antivirus or other protection coverage.
+
+**Use when:** comparing how much software machines carry; for what was installed or removed, read Installed products.
+
+The count is refreshed with the Installed products list and never raises a change event.
+
+Reported with each Installed products inventory. No change events.
 
 | Field | Type | Unit | Meaning |
 |---|---|---|---|

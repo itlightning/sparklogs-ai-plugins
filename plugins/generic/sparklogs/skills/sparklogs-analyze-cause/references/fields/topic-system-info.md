@@ -1,7 +1,13 @@
 <!-- GENERATED reference. Do not hand-edit. -->
-# System info fields
+# System information
 
-Full inventory every hour. Supported changes are reported when the agent observes them.
+One row per machine with its maker, model and serial number, BIOS version, operating system edition and build, Secure Boot and TPM status, domain or workgroup, and whether a restart is pending and why.
+
+**Use when:** an asset or warranty lookup, a machine that keeps asking to restart, or a question about when its operating system build, firmware, memory or domain join changed.
+
+A missing Secure Boot reading means the agent could not read it or the machine starts in legacy BIOS mode (see boot mode); a missing TPM reading means the agent could not tell, while "no TPM" is reported as such.
+
+Full inventory every hour. Changes are reported between inventories.
 
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
@@ -10,7 +16,7 @@ Full inventory every hour. Supported changes are reported when the agent observe
 | `sparklogs.data.system_info.sku` | string |  | The manufacturer's SKU (product number) for the machine. |
 | `sparklogs.data.system_info.serial_number` | string |  | The machine's hardware serial number, for asset tracking. |
 | `sparklogs.data.system_info.host_class` | string |  | Whether the agent treats this machine as a `workstation` or a `server`; `unknown` when it could not tell. A change raises no change event. |
-| `sparklogs.data.system_info.chassis_type` | string |  | The machine's enclosure type, such as `desktop`, `laptop` or `server`. |
+| `sparklogs.data.system_info.chassis_type` | string |  | The machine's enclosure type, such as `desktop`, `laptop`, `main_server_chassis` or `rack_mount_chassis`; an unrecognized type reads as its number. |
 | `sparklogs.data.system_info.bios_version` | string |  | The firmware (BIOS or UEFI) version, as the machine reports it. |
 | `sparklogs.data.system_info.bios_date` | string | date | The firmware's release date: a calendar date, sent as UTC midnight; read it as a date, not an instant. A two-digit year is read as 20YY. Absent when the firmware reports something that is not a date. |
 | `sparklogs.data.system_info.bios_date_raw` | string |  | The firmware's release date as the firmware writes it in its SMBIOS table (BIOS Information, Release Date), with surrounding spaces removed, such as `06/16/23`. Present whenever the firmware gives one, whether or not it reads as a date. Absent when the firmware gives none. |

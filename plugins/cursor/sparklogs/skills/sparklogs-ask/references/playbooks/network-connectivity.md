@@ -1,5 +1,7 @@
 # Internet down, slow or dropping
 
+**Use when:** the internet is down, slow or keeps dropping, Wi-Fi disconnects during the day, or websites will not load while the network shows connected.
+
 **Trigger.** "The internet keeps going down", "the internet is slow", or "Wi-Fi drops several times a day."
 
 **Accuracy.** The agent probes the gateway, an internet target and DNS from the device, and measures TCP by route class (LAN, VPN, internet) and the adapters' link and Wi-Fi state.

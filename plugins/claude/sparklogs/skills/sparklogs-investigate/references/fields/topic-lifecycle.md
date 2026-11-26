@@ -1,7 +1,13 @@
 <!-- GENERATED reference. Do not hand-edit. -->
-# Lifecycle fields
+# Host and agent lifecycle
 
-Full inventory on its own schedule. Supported changes are reported when the agent observes them.
+Boots, clean and unexpected shutdowns, sleep and wake (including Modern Standby and hibernation), Fast Startup, clock jumps, and SparkLogs Agent starts and stops with why it stopped, one event each with uptime and awake time.
+
+**Use when:** a user says the machine restarted on its own, lost power, or went to sleep or woke when they did not expect it, or log times look wrong after a clock jump.
+
+Boots and shutdowns from while the agent was not running are rebuilt from the System log, but sleeps and clock jumps in that gap are not, and no event says what woke the machine.
+
+Events only: one event per transition, with no periodic inventory.
 
 | Field | Type | Unit | Meaning |
 |---|---|---|---|

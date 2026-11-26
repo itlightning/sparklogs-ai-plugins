@@ -1,6 +1,8 @@
 <!-- GENERATED reference. Do not hand-edit. -->
 # Result fields
 
+**Use when:** an event carries an error or status code and the question is its published name or whether it means failure.
+
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
 | `sparklogs.result.code` | string |  | The normalized result code as logged. |

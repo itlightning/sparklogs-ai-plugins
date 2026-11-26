@@ -1,5 +1,11 @@
 <!-- GENERATED reference. Do not hand-edit. -->
-# Storage device IO fields
+# Storage device IO
+
+For each non-removable disk that holds at least one volume: busy time, read and write IOPS and throughput, latency, queue depth, and how often I/O was slow or stuck; Storage IO has the same readings per volume.
+
+**Use when:** a slow machine where the disk is suspected, disk at 100 percent in Task Manager, or slow SAN or iSCSI storage.
+
+Readings are 5-minute summaries of 10-second samples, and the alerts describe slow or stuck I/O, not drive failure.
 
 Reported every 5 minutes on clock boundaries for the window ending at `t`. `sparklogs.window_coverage_pct` is below 100 when collection covered only part of the window. Use chart buckets at least 5 minutes wide.
 
@@ -12,7 +18,7 @@ Reported every 5 minutes on clock boundaries for the window ending at `t`. `spar
 | `sparklogs.data.storage_device_io.presentation` | string |  | What the device presents as: `local_physical`, `san_lun`, `guest_virtual` (a virtual disk a hypervisor gives this virtual machine), `software_virtual` (Storage Spaces or a mounted VHD), `cloud_block`, `removable` or `unknown`. |
 | `sparklogs.data.storage_device_io.io_completed_count_5m` | float |  | How many I/O requests the device completed in the 5-minute window. |
 | `sparklogs.data.storage_device_io.media_code` | integer |  | A numeric code for the device's media, used to pick disk latency thresholds: 0 unknown, 1 HDD, 2 SSD. |
-| `sparklogs.data.storage_device_io.volumes` | string_array |  | The mounted volumes stored on this device. |
+| `sparklogs.data.storage_device_io.volumes` | string_array |  | The volumes stored on this device, by mount path, or by volume ID for a volume with no mount (such as EFI or recovery). |
 | `sparklogs.data.storage_device_io.total_iops_avg` | float | iops | Average reads and writes per second, together, over the window. |
 | `sparklogs.data.storage_device_io.total_mb_per_s_avg` | float | megabytes_per_second | Average read and write throughput, together, over the window. |
 | `sparklogs.data.storage_device_io.bus_permanent` | bool |  | Whether the device is connected by a permanent bus, not USB. |

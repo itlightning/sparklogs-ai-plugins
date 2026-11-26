@@ -1,7 +1,13 @@
 <!-- GENERATED reference. Do not hand-edit. -->
-# Windows services fields
+# Services
 
-Full inventory every 6 hours. Supported changes are reported when the agent observes them.
+Each service with its current state, startup type, logon account and command line, how many times it crashed in the last day, and how long it has been down; loaded drivers are in Kernel drivers.
+
+**Use when:** a service will not start, keeps crashing, hangs while starting or stopping, or someone changed its startup type, account or command line.
+
+A stopped automatic service is flagged only when it stopped with an error and has no start trigger or delayed start to explain it, so a quiet stopped automatic service can be normal. Changes show within a minute or two; the full list repeats every 6 hours.
+
+Full inventory every 6 hours. Changes are sent in one batch every minute; an entry that appeared and went away inside one batch is only counted.
 
 | Field | Type | Unit | Meaning |
 |---|---|---|---|

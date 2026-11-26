@@ -6,46 +6,50 @@
 Each section below is complete for its reason: every public field, in the words the reference page shows.
 Search for the heading "## `<code>`" or a word from the reason's label. Do not read the whole file.
 
-| reason | label | kind | severity | service | benign |
-|---|---|---|---|---|---|
-| `dhcp_lease_denied` | dhcp lease denied | event | Warning | `networking` |  |
-| `dhcp_lease_failed` | dhcp lease failed | event | Warning | `networking` |  |
-| `dns_client_resolution_timed_out` | dns client resolution timed out | event | Display | `networking` |  |
-| `firewall_rule_changed` | firewall rule changed | event | Verbose | `networking` |  |
-| `firewall_rule_created` | firewall rule created | event | Debug to Verbose | `networking` |  |
-| `firewall_rule_deleted` | firewall rule deleted | event | Debug to Notice | `networking` | benign possible |
-| `ip_address_conflict_detected` | IP address conflict | event | Warning | `networking` |  |
-| `ncsi_internet_lost` | ncsi internet lost | event | Notice to Warning | `networking` |  |
-| `offline_files_slow_link_transition_blocked` | offline files slow link transition blocked | event | Warning | `file_sharing` |  |
-| `offline_files_sync_failed` | offline files sync failed | event | Warning | `file_sharing` |  |
-| `rds_redirected_printer_setup_failed` | rds redirected printer setup failed | event | Warning | `printing` |  |
-| `smb_anonymous_access_denied` | smb anonymous access denied | event | Verbose to Warning | `file_sharing` |  |
-| `smb_anonymous_access_enabled` | smb anonymous access enabled | event | Notice | `file_sharing` |  |
-| `smb_client_auth_context_failed` | smb client auth context failed | event | Warning | `file_sharing` |  |
-| `smb_client_mutual_auth_lost` | smb client mutual auth lost | event | Warning | `file_sharing` |  |
-| `smb_client_security_call_slow` | smb client security call slow | event | Notice | `file_sharing` |  |
-| `smb_connect_failed` | smb connect failed | event | Notice to Warning | `file_sharing` |  |
-| `smb_insecure_guest_allowed` | smb insecure guest allowed | event | Warning | `file_sharing` |  |
-| `smb_insecure_guest_rejected` | smb insecure guest rejected | event | Warning | `file_sharing` |  |
-| `smb_legacy_dialect_rejected` | smb legacy dialect rejected | event | Notice | `file_sharing` |  |
-| `smb_security_setting_nondefault` | smb security setting nondefault | event | Notice | `file_sharing` |  |
-| `smb_server_name_unresolved` | smb server name unresolved | event | Display | `file_sharing` |  |
-| `smb_server_operation_slow` | smb server operation slow | event | Notice | `file_sharing` |  |
-| `smb_session_auth_failed` | smb session auth failed | event | Notice to Warning | `file_sharing` |  |
-| `smb_session_lost` | smb session lost | event | Info to Display | `file_sharing` |  |
-| `smb_session_reopen_failed` | smb session reopen failed | event | Warning | `file_sharing` |  |
-| `smb_share_access_denied` | smb share access denied | event | Info | `file_sharing` |  |
-| `smb_share_connection_lost` | smb share connection lost | event | Info to Display | `file_sharing` |  |
-| `smb_signing_validation_failed` | smb signing validation failed | event | Warning | `file_sharing` |  |
-| `wfp_transaction_watchdog_timeout` | wfp transaction watchdog timeout | event | Display | `networking` |  |
-| `wlan_connect_failed` | wlan connect failed | event | Info to Warning | `networking` |  |
-| `wlan_disconnected` | wlan disconnected | event | Notice | `networking` |  |
-| `wlan_disconnected_by_request` | wlan disconnected by request | event | Display | `networking` |  |
-| `wlan_security_handshake_failed` | wlan security handshake failed | event | Warning | `networking` |  |
+| reason | label | kind | severity | service | benign | use when |
+|---|---|---|---|---|---|---|
+| `dhcp_lease_denied` | dhcp lease denied | event | Warning | `networking` |  | a device that moved to another network or subnet loses its connection while the DHCP server refuses the address it asked to keep. |
+| `dhcp_lease_failed` | dhcp lease failed | event | Warning | `networking` |  | an adapter gets no address from DHCP and falls back to a 169.254 address, or ipconfig /renew cannot reach a DHCP server. |
+| `dns_client_resolution_timed_out` | dns client resolution timed out | event | Display | `networking` |  | websites, file shares or domain sign-in fail by name while the network looks connected, because DNS lookups get no answer, on a device where the DNS Client Operational log, which is off by default, is turned on. |
+| `firewall_rule_changed` | firewall rule changed | event | Verbose | `networking` |  | someone asks who edited a Windows Firewall rule, or traffic that a rule used to allow or block behaves differently after an edit. |
+| `firewall_rule_created` | firewall rule created | event | Debug to Verbose | `networking` |  | a technician needs to know what added a Windows Firewall rule, such as an inbound allow that opens a port or a new block that stops a program's traffic. |
+| `firewall_rule_deleted` | firewall rule deleted | event | Debug to Notice | `networking` | benign possible | Windows Firewall rules went missing or were reset on a device, and someone asks who removed them. |
+| `ip_address_conflict_detected` | IP address conflict | event | Warning | `networking` |  | a device drops off the network or gets a different address than expected, because the address DHCP gave it is already used by another device. |
+| `ncsi_internet_lost` | ncsi internet lost | event | Notice to Warning | `networking` |  | the network icon changed to no internet on a wired or wireless connection, and a technician needs to know when Windows decided that connection lost internet access. |
+| `offline_files_slow_link_transition_blocked` | offline files slow link transition blocked | event | Warning | `file_sharing` |  | an Offline Files or redirected folder stays offline after the server is reachable again, or will not switch between offline and online mode. |
+| `offline_files_sync_failed` | offline files sync failed | event | Warning | `file_sharing` |  | files in an Offline Files or redirected folder are out of date on the device or the server, or Sync Center shows sync errors or conflicts. |
+| `rds_redirected_printer_setup_failed` | rds redirected printer setup failed | event | Warning | `printing` |  | in a Remote Desktop session a redirected printer is not the default, or prints with default settings instead of the user's own. |
+| `smb_anonymous_access_denied` | smb anonymous access denied | event | Verbose to Warning | `file_sharing` |  | a file server turns away a device that connects without a username, such as a copier or old backup job, or an internet address probing its file sharing port, and you need the server's own record of who it refused. |
+| `smb_anonymous_access_enabled` | smb anonymous access enabled | event | Notice | `file_sharing` |  | someone asks whether this Windows server offers its shares or named pipes to anyone without signing in (null sessions), and needs the server's own record of that setting. |
+| `smb_client_auth_context_failed` | smb client auth context failed | event | Warning | `file_sharing` |  | a user cannot open a share or mapped drive on one server because signing in to it fails, often when the server is reached through a DNS alias or no domain controller answers. |
+| `smb_client_mutual_auth_lost` | smb client mutual auth lost | event | Warning | `file_sharing` |  | a technician needs to know why a session to a file server fell back from Kerberos to NTLM, which no longer proves the server is genuine. |
+| `smb_client_security_call_slow` | smb client security call slow | event | Notice | `file_sharing` |  | mapping a drive or first opening a share pauses for seconds, and the delay is the client waiting on sign-in or credential checks. |
+| `smb_connect_failed` | smb connect failed | event | Notice to Warning | `file_sharing` |  | a share or mapped drive will not open because the connection to a server whose name resolved times out or is refused, such as when port 445 is blocked or the server is down. |
+| `smb_insecure_guest_allowed` | smb insecure guest allowed | event | Warning | `file_sharing` |  | from this PC, a share on a NAS or old server opens without asking for a login, and someone asks whether that is safe. |
+| `smb_insecure_guest_rejected` | smb insecure guest rejected | event | Warning | `file_sharing` |  | a NAS or old server share stops opening, often after a Windows upgrade, and Windows says the organization's security policies block unauthenticated guest access. |
+| `smb_legacy_dialect_rejected` | smb legacy dialect rejected | event | Notice | `file_sharing` |  | an old copier, NAS or appliance can no longer save to or read from a Windows file server's shared folder because it only speaks SMB 1.0, and you need the server's own record of the refused client. |
+| `smb_security_setting_nondefault` | smb security setting nondefault | event | Notice | `file_sharing` |  | someone asks why file-sharing security on a device, such as SMB signing, guest logons or the LAN Manager authentication level, differs from the Windows default. |
+| `smb_server_name_unresolved` | smb server name unresolved | event | Display | `file_sharing` |  | a share or mapped drive cannot be reached by its server name, yet may work by IP address, or a drive or shortcut points at a server that no longer exists. |
+| `smb_server_operation_slow` | smb server operation slow | event | Notice | `file_sharing` |  | a file server is slow for its users, with files on its shares taking long to open, and you need the server's own record of how long its file system, network side or session setup took. |
+| `smb_session_auth_failed` | smb session auth failed | event | Notice to Warning | `file_sharing` |  | users or a service on other machines cannot sign in to this server's shares, such as after a password change, and a technician needs the server's own record of the refused sign-in. |
+| `smb_session_lost` | smb session lost | event | Info to Display | `file_sharing` |  | mapped drives or open network files to one server drop and reconnect, usually around sleep, resume or a network change, because the whole session to that server was lost. |
+| `smb_session_reopen_failed` | smb session reopen failed | event | Warning | `file_sharing` |  | a document a user had open on a file server errors, hangs or loses unsaved changes after their laptop wakes or reconnects, and you need the file server's own record of why it could not reopen the file. |
+| `smb_share_access_denied` | smb share access denied | event | Info | `file_sharing` |  | a signed-in user gets access denied on a shared folder, and you need the file server's own record of it. |
+| `smb_share_connection_lost` | smb share connection lost | event | Info to Display | `file_sharing` |  | one shared folder or mapped drive briefly disconnects and comes back, and a technician needs to tell a lost share from a lost connection to the whole server. |
+| `smb_signing_validation_failed` | smb signing validation failed | event | Warning | `file_sharing` |  | copies or file opens from one server or NAS fail or the connection resets on a client that checks SMB signing or encryption. |
+| `wfp_transaction_watchdog_timeout` | wfp transaction watchdog timeout | event | Display | `networking` |  | firewall changes or VPN connections are slow to apply on a device, and a technician wants to know which security or VPN product held the filtering platform busy. |
+| `wlan_connect_failed` | wlan connect failed | event | Info to Warning | `networking` |  | a device will not join a saved Wi-Fi network, or keeps failing to reconnect to one, and you need the failure reason Windows gives. |
+| `wlan_disconnected` | wlan disconnected | event | Notice | `networking` |  | Wi-Fi keeps dropping on its own on a laptop, or on many with the same adapter, without a user or a policy disconnecting it. |
+| `wlan_disconnected_by_request` | wlan disconnected by request | event | Display | `networking` |  | a laptop leaves one Wi-Fi network for another, or stops connecting to it automatically, and someone asks whether a user, a policy or the switch caused it rather than a fault. |
+| `wlan_security_handshake_failed` | wlan security handshake failed | event | Warning | `networking` |  | Wi-Fi keeps asking for the password or tries to connect and never gets on, because the security exchange with the access point fails. |
 
 ## `dhcp_lease_denied`: dhcp lease denied
 
 A DHCP server refused the address this device asked for.
+
+**Use when:** a device that moved to another network or subnet loses its connection while the DHCP server refuses the address it asked to keep.
+
+**Keywords:** DHCPNAK, DHCP NAK, DHCP NACK, DHCP refused address, lease request denied, laptop moved to another subnet, second DHCP server
 
 **Severity:** Warning
 
@@ -73,6 +77,10 @@ A DHCP server refused the address this device asked for.
 
 The DHCP client could not get or renew an address for an adapter.
 
+**Use when:** an adapter gets no address from DHCP and falls back to a 169.254 address, or ipconfig /renew cannot reach a DHCP server.
+
+**Keywords:** 169.254, APIPA, self-assigned IP address, no IP address from DHCP, cannot get an IP address, doesn't have a valid IP configuration, unable to contact your DHCP server, DHCP lease renewal failed, DHCP server not responding, DHCP scope full, out of DHCP addresses, DHCP IP helper address, DHCP relay, switch port on wrong VLAN, 802.1X port blocked
+
 **Severity:** Warning
 
 **Why it matters:** A failed renewal keeps the current address until its lease runs out. A failed request leaves the adapter with no usable IPv4 address, so the device cannot reach anything past the local link.
@@ -99,6 +107,10 @@ The DHCP client could not get or renew an address for an adapter.
 ## `dns_client_resolution_timed_out`: dns client resolution timed out
 
 A DNS name lookup timed out because none of the configured DNS servers answered.
+
+**Use when:** websites, file shares or domain sign-in fail by name while the network looks connected, because DNS lookups get no answer, on a device where the DNS Client Operational log, which is off by default, is turned on.
+
+**Keywords:** DNS server not responding, DNS server isn't responding, DNS not responding, DNS timeout, name resolution timed out, DNS request timed out, cannot resolve host name, VPN DNS timeout
 
 **Also reported by:** `win.eventlog.system`
 
@@ -130,6 +142,10 @@ A host with the DNS client Operational log turned on can record one timeout twic
 
 A Windows Firewall rule was changed.
 
+**Use when:** someone asks who edited a Windows Firewall rule, or traffic that a rule used to allow or block behaves differently after an edit.
+
+**Keywords:** firewall rule modified, firewall rule edited, who changed the firewall, firewall exception changed, rule changed by Set-NetFirewallRule, firewall rule profile changed
+
 **Also reported by:** `win.eventlog.security`
 
 **Severity:** Verbose
@@ -159,6 +175,10 @@ A Windows Firewall rule was changed.
 ## `firewall_rule_created`: firewall rule created
 
 A Windows Firewall rule was added.
+
+**Use when:** a technician needs to know what added a Windows Firewall rule, such as an inbound allow that opens a port or a new block that stops a program's traffic.
+
+**Keywords:** firewall rule added, new firewall rule, inbound allow rule, port opened in firewall, firewall exception added, rule added by New-NetFirewallRule
 
 **Also reported by:** `win.eventlog.security`
 
@@ -190,6 +210,10 @@ A Windows Firewall rule was added.
 
 A Windows Firewall rule was removed, or every rule in one rule store was removed at once.
 
+**Use when:** Windows Firewall rules went missing or were reset on a device, and someone asks who removed them.
+
+**Keywords:** firewall rule deleted, firewall rule removed, firewall rules missing, firewall rules disappeared, firewall reset, restore firewall defaults, rule removed by Remove-NetFirewallRule, all firewall rules cleared
+
 **Also reported by:** `win.eventlog.security`
 
 **Severity:** Verbose for one rule removed; Debug for an application sandbox's own short-lived Block rule, which the firewall service removes on the sandbox's behalf; Info for the whole-store reset (2033), which reads like every rule being lost and is the firewall service's own routine; Notice when a person, or SYSTEM through a scripting or administration tool, removes every rule in a store. A removal by the firewall service or a SYSTEM service for itself is categorized as maintenance.
@@ -220,6 +244,10 @@ A Windows Firewall rule was removed, or every rule in one rule store was removed
 
 Another device on the network is using the same IP address as this machine.
 
+**Use when:** a device drops off the network or gets a different address than expected, because the address DHCP gave it is already used by another device.
+
+**Keywords:** IP conflict, IP address conflict, duplicate IP, duplicate IP address, DHCP address already in use, static IP inside DHCP range, same IP two devices, DHCP address conflict, IPv6 address conflict, DHCPv6 conflict
+
 **Also reported by:** `win.eventlog.system`
 
 **Severity:** Warning
@@ -248,6 +276,10 @@ Another device on the network is using the same IP address as this machine.
 
 Windows reported that a network interface lost internet access for one address family: its connectivity changed from Internet to local network only, or to none.
 
+**Use when:** the network icon changed to no internet on a wired or wireless connection, and a technician needs to know when Windows decided that connection lost internet access.
+
+**Keywords:** network icon says no internet, globe icon on network, msftconnecttest, msftncsi, connectivity test blocked by proxy, internet connectivity lost on interface
+
 **Severity:** Notice (workstation) / Warning (server or unknown host class)
 
 **Why it matters:** Windows now shows this interface as having no internet access, as the taskbar network icon does. Whether any application lost access needs other evidence, such as connection failures, DNS timeouts, or another interface or a VPN still carrying traffic.
@@ -275,6 +307,10 @@ Windows reported that a network interface lost internet access for one address f
 
 Offline Files could not switch a folder between slow-link (offline) and online mode.
 
+**Use when:** an Offline Files or redirected folder stays offline after the server is reachable again, or will not switch between offline and online mode.
+
+**Keywords:** folder stuck offline, Offline Files working offline, network folder stuck in offline mode, Offline Files slow link, client-side caching, CSC, redirected folder stuck offline
+
 **Severity:** Warning
 
 **Why it matters:** The folder stays in its previous mode: users keep working from the local copy, or keep waiting on the server, until the switch is allowed.
@@ -299,6 +335,10 @@ Offline Files could not switch a folder between slow-link (offline) and online m
 ## `offline_files_sync_failed`: offline files sync failed
 
 Offline Files background sync failed for a folder.
+
+**Use when:** files in an Offline Files or redirected folder are out of date on the device or the server, or Sync Center shows sync errors or conflicts.
+
+**Keywords:** Offline Files not syncing, Sync Center errors, Sync Center conflicts, offline folder not updating, client-side caching, CSC, folder redirection sync, redirected Documents not syncing
 
 **Severity:** Warning
 
@@ -326,6 +366,10 @@ Offline Files background sync failed for a folder.
 
 Remote Desktop Services could not finish setting up a printer redirected from the user's own computer.
 
+**Use when:** in a Remote Desktop session a redirected printer is not the default, or prints with default settings instead of the user's own.
+
+**Keywords:** RDP redirected printer wrong default, wrong default printer in RDP, default printer not set in session, printer settings lost in remote session
+
 **Severity:** Warning
 
 **Why it matters:** In the remote session, users print to the wrong default printer or with the printer's default settings.
@@ -352,6 +396,10 @@ Remote Desktop Services could not finish setting up a printer redirected from th
 
 This server refused a client that tried to use it without credentials.
 
+**Use when:** a file server turns away a device that connects without a username, such as a copier or old backup job, or an internet address probing its file sharing port, and you need the server's own record of who it refused.
+
+**Keywords:** anonymous SMB, null session, null session refused, SMB without credentials, anonymous connection refused, copier cannot connect without login, port 445 exposed to internet, TCP 445 from internet, SMB scanning
+
 **Severity:** Warning (public client address) / Verbose (local network or no address)
 
 **Why it matters:** From a local network address, the refusal is expected when anonymous access is off. From a public address it means the server's file-sharing port answers from the internet.
@@ -377,6 +425,10 @@ This server refused a client that tried to use it without credentials.
 ## `smb_anonymous_access_enabled`: smb anonymous access enabled
 
 The SMB server reported that one or more named pipes or shares allow anonymous access.
+
+**Use when:** someone asks whether this Windows server offers its shares or named pipes to anyone without signing in (null sessions), and needs the server's own record of that setting.
+
+**Keywords:** SMB anonymous access, anonymous share access, null session shares, null session pipes, RestrictNullSessAccess, named pipes accessible anonymously
 
 **Severity:** Notice
 
@@ -405,6 +457,10 @@ The SMB server reported that one or more named pipes or shares allow anonymous a
 
 The SMB client could not authenticate to a server, so no session was set up.
 
+**Use when:** a user cannot open a share or mapped drive on one server because signing in to it fails, often when the server is reached through a DNS alias or no domain controller answers.
+
+**Keywords:** network drive authentication failed, mapped drive login fails, cannot authenticate to file server, Kerberos SMB failure, DNS alias file server, CNAME file share, missing SPN for file server alias, SMB session setup authentication failed
+
 **Severity:** Warning
 
 **Why it matters:** The user cannot open shares on that server, and mapped drives to it show as disconnected, until authentication works.
@@ -430,6 +486,10 @@ The SMB client could not authenticate to a server, so no session was set up.
 
 SMB mutual authentication was lost after the client re-authenticated.
 
+**Use when:** a technician needs to know why a session to a file server fell back from Kerberos to NTLM, which no longer proves the server is genuine.
+
+**Keywords:** Kerberos to NTLM fallback, SMB mutual authentication, server identity not verified, file share by IP address uses NTLM, SMB reauthentication, impostor file server
+
 **Severity:** Warning
 
 **Why it matters:** The session keeps working, but the client no longer proves it is talking to the real server, so an impostor server could stand in.
@@ -453,6 +513,10 @@ SMB mutual authentication was lost after the client re-authenticated.
 ## `smb_client_security_call_slow`: smb client security call slow
 
 An SMB client call into Windows security took longer than its slow-call threshold.
+
+**Use when:** mapping a drive or first opening a share pauses for seconds, and the delay is the client waiting on sign-in or credential checks.
+
+**Keywords:** slow to map network drive, mapped drive slow to connect, share slow to open first time, slow SMB authentication, Kerberos ticket delay, slow drive mapping over VPN
 
 **Severity:** Notice
 
@@ -479,6 +543,10 @@ An SMB client call into Windows security took longer than its slow-call threshol
 ## `smb_connect_failed`: smb connect failed
 
 An SMB connection to a server, or to a share on it, failed after the server name resolved.
+
+**Use when:** a share or mapped drive will not open because the connection to a server whose name resolved times out or is refused, such as when port 445 is blocked or the server is down.
+
+**Keywords:** mapped drive not connecting, cannot connect to file server, file server offline, port 445 blocked, ADMIN$ access denied, C$ access denied, NTLM blocked for SMB
 
 **Severity:** Notice (admin-share 31010) / Warning (other access denied) / Notice (connection failures)
 
@@ -508,6 +576,10 @@ An SMB connection to a server, or to a share on it, failed after the server name
 
 The SMB client connected to a server as an unauthenticated guest.
 
+**Use when:** from this PC, a share on a NAS or old server opens without asking for a login, and someone asks whether that is safe.
+
+**Keywords:** SMB guest access, guest share, NAS guest share, share opens without password, no login prompt for share, unauthenticated share access, unsigned SMB session
+
 **Severity:** Warning
 
 **Why it matters:** Traffic to that server is neither signed nor encrypted, and the client cannot tell the real server from an impostor.
@@ -532,6 +604,10 @@ The SMB client connected to a server as an unauthenticated guest.
 
 The SMB client refused an unauthenticated guest session from a server.
 
+**Use when:** a NAS or old server share stops opening, often after a Windows upgrade, and Windows says the organization's security policies block unauthenticated guest access.
+
+**Keywords:** block unauthenticated guest access, organization's security policies block, can't access this shared folder, NAS share stopped working after upgrade, guest access disabled, SMB guest access blocked, AllowInsecureGuestAuth, Enable insecure guest logons
+
 **Severity:** Warning
 
 **Why it matters:** The share on that server stays unreachable until the server accepts real credentials.
@@ -555,6 +631,10 @@ The SMB client refused an unauthenticated guest session from a server.
 ## `smb_legacy_dialect_rejected`: smb legacy dialect rejected
 
 This server refused a client that tried to connect with SMB 1.0.
+
+**Use when:** an old copier, NAS or appliance can no longer save to or read from a Windows file server's shared folder because it only speaks SMB 1.0, and you need the server's own record of the refused client.
+
+**Keywords:** SMB1, SMBv1, SMB 1.0/CIFS, CIFS, SMB1 disabled, server refuses SMB1 client, scanner SMB1, scan to folder needs SMBv1, copier cannot save to Windows share, Windows XP cannot connect to share, Server 2003 cannot connect
 
 **Severity:** Notice
 
@@ -581,6 +661,10 @@ This server refused a client that tried to connect with SMB 1.0.
 ## `smb_security_setting_nondefault`: smb security setting nondefault
 
 An SMB security setting on this device differs from the Windows default.
+
+**Use when:** someone asks why file-sharing security on a device, such as SMB signing, guest logons or the LAN Manager authentication level, differs from the Windows default.
+
+**Keywords:** SMB signing disabled, SMB signing setting, RequireSecuritySignature, insecure guest logons enabled, NTLMv1 allowed, LM authentication, security baseline drift, file sharing security changed
 
 **Severity:** Notice
 
@@ -610,6 +694,10 @@ An SMB security setting on this device differs from the Windows default.
 
 The SMB client could not resolve a server name.
 
+**Use when:** a share or mapped drive cannot be reached by its server name, yet may work by IP address, or a drive or shortcut points at a server that no longer exists.
+
+**Keywords:** works by IP but not by name, cannot reach file server by name, file server name not found, server name does not resolve, UNC path name lookup, mapped drive to retired server, shortcut to old server, file server DNS suffix
+
 **Severity:** Display
 
 **Why it matters:** Shares and mapped drives on that server name stay unreachable from this device while the name does not resolve.
@@ -637,6 +725,10 @@ The SMB client could not resolve a server name.
 
 An SMB server operation took longer than its slow threshold.
 
+**Use when:** a file server is slow for its users, with files on its shares taking long to open, and you need the server's own record of how long its file system, network side or session setup took.
+
+**Keywords:** slow file server, file share slow, slow opening files on share, antivirus slowing file server, SMB latency, file server performance, slow session setup on file server
+
 **Severity:** Notice
 
 **Why it matters:** Users of that share see Explorer pause or files open slowly. The operation did complete.
@@ -662,6 +754,10 @@ An SMB server operation took longer than its slow threshold.
 ## `smb_session_auth_failed`: smb session auth failed
 
 A client failed to authenticate an SMB session on this server.
+
+**Use when:** users or a service on other machines cannot sign in to this server's shares, such as after a password change, and a technician needs the server's own record of the refused sign-in.
+
+**Keywords:** file server login failed, SMB logon failure, SMB authentication failed, wrong password to file share, service account old password, SMB 0xC000006D, NTLMv1 client refused
 
 **Severity:** Warning or Notice
 
@@ -690,6 +786,10 @@ A client failed to authenticate an SMB session on this server.
 
 The SMB client lost its session to a server, or got it back.
 
+**Use when:** mapped drives or open network files to one server drop and reconnect, usually around sleep, resume or a network change, because the whole session to that server was lost.
+
+**Keywords:** network drive disconnects, lost connection to file server, file server connection drops, mapped drive reconnects, network error while saving, mapped drive lost after sleep, SMB session dropped
+
 **Severity:** Display or Info
 
 **Why it matters:** Open files and copies on that session stall or fail until the client reconnects, and an application saving a file can report a network error.
@@ -716,6 +816,10 @@ The SMB client lost its session to a server, or got it back.
 
 The server could not reopen an SMB file after the client returned.
 
+**Use when:** a document a user had open on a file server errors, hangs or loses unsaved changes after their laptop wakes or reconnects, and you need the file server's own record of why it could not reopen the file.
+
+**Keywords:** durable handle, persistent handle, resilient handle, continuous availability reopen failed, document error after reconnect, unsaved changes lost after reconnect, file server failover open file, open file lost after sleep
+
 **Severity:** Warning
 
 **Why it matters:** The application holding the file can hang or report a lost document, and unsaved changes can be lost, until the user reopens the file.
@@ -738,6 +842,10 @@ The server could not reopen an SMB file after the client returned.
 ## `smb_share_access_denied`: smb share access denied
 
 A share on this server denied a signed-in user the access they asked for.
+
+**Use when:** a signed-in user gets access denied on a shared folder, and you need the file server's own record of it.
+
+**Keywords:** access denied on shared folder, you do not have permission to access, shared folder permissions, file server access denied, request access from network administrator, permission to use this network resource
 
 **Severity:** Info
 
@@ -764,6 +872,10 @@ A share on this server denied a signed-in user the access they asked for.
 
 The SMB client lost its connection to a share on a server, or got it back.
 
+**Use when:** one shared folder or mapped drive briefly disconnects and comes back, and a technician needs to tell a lost share from a lost connection to the whole server.
+
+**Keywords:** share disconnected, network folder disappeared briefly, share connection lost, share reconnected, one network folder reconnects, mapped share drops
+
 **Severity:** Display or Info
 
 **Why it matters:** Applications using files on that share get errors until the share reconnects.
@@ -789,6 +901,10 @@ The SMB client lost its connection to a share on a server, or got it back.
 
 A message from an SMB server failed its signature or encryption check on this client.
 
+**Use when:** copies or file opens from one server or NAS fail or the connection resets on a client that checks SMB signing or encryption.
+
+**Keywords:** signature validation failed, SMB signature mismatch, SMB decryption failed, SMB encryption error, NAS signing firmware, connection reset by NAS, SMB tampering
+
 **Severity:** Warning
 
 **Why it matters:** The client discards the message, so the file operation fails or the connection resets.
@@ -813,6 +929,10 @@ A message from an SMB server failed its signature or encryption check on this cl
 
 A Windows Filtering Platform transaction stayed open past the watchdog time.
 
+**Use when:** firewall changes or VPN connections are slow to apply on a device, and a technician wants to know which security or VPN product held the filtering platform busy.
+
+**Keywords:** WFP watchdog, BFE transaction timeout, firewall rule changes slow, VPN client filter driver, security product filter driver, filter transaction timeout
+
 **Severity:** Display
 
 **Why it matters:** Other changes to filtering wait while one process holds the transaction open. Filters already in force keep working, so this alone does not block traffic.
@@ -833,6 +953,10 @@ A Windows Filtering Platform transaction stayed open past the watchdog time.
 ## `wlan_connect_failed`: wlan connect failed
 
 Windows failed to connect to a wireless network using a saved profile.
+
+**Use when:** a device will not join a saved Wi-Fi network, or keeps failing to reconnect to one, and you need the failure reason Windows gives.
+
+**Keywords:** Can't connect to this network, wifi will not connect, saved wifi not connecting, 802.1X wifi will not connect, Wi-Fi join failed, office wifi will not connect, netsh wlan show wlanreport
 
 **Severity:** Warning or Info
 
@@ -859,6 +983,10 @@ Windows failed to connect to a wireless network using a saved profile.
 ## `wlan_disconnected`: wlan disconnected
 
 The wireless adapter's driver dropped the connection to a wireless network.
+
+**Use when:** Wi-Fi keeps dropping on its own on a laptop, or on many with the same adapter, without a user or a policy disconnecting it.
+
+**Keywords:** wifi keeps dropping, Wi-Fi keeps disconnecting, wifi drops randomly, wireless disconnects, wifi drops every few minutes, wifi adapter power saving, wifi drops adapter driver
 
 **Severity:** Notice
 
@@ -888,6 +1016,10 @@ The wireless adapter's driver dropped the connection to a wireless network.
 
 A wireless network was disconnected by something other than the driver, usually a user, a policy or a switch to another network.
 
+**Use when:** a laptop leaves one Wi-Fi network for another, or stops connecting to it automatically, and someone asks whether a user, a policy or the switch caused it rather than a fault.
+
+**Keywords:** wifi switched networks, left wifi for another network, connect automatically off, auto connect disabled, user disconnected wifi, Wi-Fi profile pushed by policy, Wi-Fi policy change, guest wifi to corporate wifi
+
 **Severity:** Display
 
 **Why it matters:** Wi-Fi traffic on that profile stops, and normally another network or a wired connection takes over.
@@ -911,6 +1043,10 @@ A wireless network was disconnected by something other than the driver, usually 
 ## `wlan_security_handshake_failed`: wlan security handshake failed
 
 The wireless security handshake with an access point did not finish.
+
+**Use when:** Wi-Fi keeps asking for the password or tries to connect and never gets on, because the security exchange with the access point fails.
+
+**Keywords:** wrong wifi password, Wi-Fi password changed, keeps asking for network security key, Enter the network security key, 4-way handshake, WPA2 handshake failed, 802.1X wifi certificate, EAP authentication failed, RADIUS reject
 
 **Severity:** Warning
 

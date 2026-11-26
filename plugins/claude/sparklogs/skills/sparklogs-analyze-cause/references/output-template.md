@@ -67,7 +67,7 @@ A plain-language statement of the candidate cause. State it directly and specifi
 
 **Right (direct, specific):**
 - "Hypothesis #1: KB5034441 (installed at 02:45 UTC per Finding 4) changed something in the storage stack that interacts negatively with Veeam VSS operations on this Windows version."
-- "Hypothesis #2: Disk contention during the snapshot (Finding 5 disk heat span) is a separate factor compounding with the patch-related issue."
+- "Hypothesis #2: Disk contention during the snapshot (Finding 5 disk heat block) is a separate factor compounding with the patch-related issue."
 - "Hypothesis #1: Disk signature collision on Harddisk2."
 
 **Wrong (vague hedging - state it directly instead):**
@@ -151,11 +151,11 @@ HYPOTHESIS #1: KB5034441 (installed ~30 minutes before the failure per Finding 4
                           installed; or identify sources with KB5034441 that show no Veeam pattern.
   Off-endpoint check needed: no (all evidence is on-endpoint)
 
-HYPOTHESIS #2: Disk contention during the snapshot (the hot disk span in Finding 5) pushed
+HYPOTHESIS #2: Disk contention during the snapshot (the hot disk block in Finding 5) pushed
  the SQL Server writer past its freeze budget, compounding the patch-related issue.
-  Evidence support: Finding 5 (hot disk span 03:10 to 03:20 UTC, overlapping the failure)
-  Confidence: low (one device, one span; contributors ran at the same time and are not proven causes)
-  What would confirm this: device_overview on the 7 other affected sources shows a disk heat span
+  Evidence support: Finding 5 (hot disk block 03:10 to 03:20 UTC, overlapping the failure)
+  Confidence: low (one device, one block; its top programs ran at the same time and are not proven causes)
+  What would confirm this: device_overview on the 7 other affected sources shows a disk heat block
                            overlapping each failure.
   What would refute this: the other affected sources failed with no disk heat around the failure.
   Off-endpoint check needed: no

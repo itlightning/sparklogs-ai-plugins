@@ -37,7 +37,7 @@ Stored flat under the `win.powershell.eventlog.` prefix.
 | `win.powershell.eventlog.block_partial` | bool | True when fewer fragments arrived than the block stated, so the script body is only the start of the script. |
 | `win.powershell.eventlog.body_truncated` | bool | True when the script body was cut at 256 KB and ends with a note saying how many bytes were cut. The hash, character count and byte length still describe the whole block. |
 | `win.powershell.eventlog.body_length` | int | Size of the whole script block in bytes, before any truncation. Recognized framework blocks ship no body but still report their size here. |
-| `win.powershell.eventlog.block_framework` | string | Name of the generated framework code the block matched, such as a CDXML proxy module, or the data section of a module manifest. Such blocks are code PowerShell or a module generated, not a script someone wrote. Empty when the block matched none. |
+| `win.powershell.eventlog.block_framework` | string | Name of the generated framework code the block matched, such as a CDXML proxy module, or the data section of a module manifest. Such blocks are code PowerShell or a module generated, not a script someone wrote. Empty when the block matched none, or matched a signature but also named a watchlist command, which ships it as an ordinary block. |
 | `win.powershell.eventlog.block_watchlist` | array | Watchlist categories the block matched: credentials, egress (network transfers), execution, encoding, persistence, defence (security settings), privilege, removal, cloud and remoting. Empty when nothing matched. |
 | `win.powershell.eventlog.block_watchlist_hits` | array | The first eight watchlist terms the block matched: cmdlet names, or command text such as `vssadmin delete shadows`. Shows why a block landed in a watchlist category. |
 | `win.powershell.eventlog.block_watchlist_high_impact` | bool | True when the block matched a high-impact watchlist term: deleting shadow copies, backups, volumes, partitions, directory objects or virtual machines, clearing event logs, disabling BitLocker or System Restore, changing or stopping Defender, or handling a credential directly. Counts every matched term and the decoded text of a base64 payload. Absent when nothing matched. |
@@ -50,7 +50,12 @@ Stored flat under the `win.powershell.eventlog.` prefix.
 
 ## Portable families
 
-This module populates no portable family.
+Cross-feed families: the same path means the same thing on every data feed that populates it, so a query written against one channel transfers.
+Prefer these over the per-feed fields for anything that spans feeds.
+
+| LQL path | Family means |
+|---|---|
+| `sparklogs.throttle.window_s` |  |
 
 ## Tail keys and where the value is queryable
 

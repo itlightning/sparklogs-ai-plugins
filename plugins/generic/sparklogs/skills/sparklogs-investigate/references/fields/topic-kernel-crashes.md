@@ -1,7 +1,13 @@
 <!-- GENERATED reference. Do not hand-edit. -->
-# Kernel crashes fields
+# Kernel crash signature recurrence
 
-Full inventory every 8 hours. Supported changes are reported when the agent observes them.
+One row per blue screen signature (stop code plus the blamed driver, when a dump analysis named one) from the last 30 days, with crash counts over 1, 5 and 10 days, first and last crash time, stop code parameters and dump format.
+
+**Use when:** a machine keeps blue-screening and the question is whether one driver or several causes are behind it.
+
+Raises no alerts, and one crash is enough for a row; the alert for repeated blue screens is in Crashes. The table is rebuilt every 8 hours with no changes in between, so a new blue screen shows in Crashes first.
+
+Full inventory every 8 hours. No change events between inventories.
 
 | Field | Type | Unit | Meaning |
 |---|---|---|---|

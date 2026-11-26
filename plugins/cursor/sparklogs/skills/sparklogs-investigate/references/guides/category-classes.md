@@ -113,7 +113,7 @@ bridge; everything else about severity in this doc set points here.
 | Where you see it | Form | Example |
 |---|---|---|
 | Prose you write, LQL filters and `min_severity` (arg) | lowercase rung name | `severity >= warning` (LQL), `min_severity: "error"` |
-| The `severity` (LQL) cell on a returned row | UPPERCASE rung name | `ERROR`, `CRITICAL`, and `WARN2` / `WARN3` for rungs between the named ones |
+| The `severity` (LQL) cell on a returned row | UPPERCASE rung name (the device overview reading writes lowercase names) | `ERROR`, `CRITICAL`, and `WARN2` / `WARN3` for rungs between the named ones |
 | `severity_level` (col) | integer 1-24 | `17`. Filter by the name, not the number |
 | Anything that COUNTS events: the `cnt_<band>` columns and `summary.severity_histogram` (col) | lowercase band name, one of nine | `critical_plus`, `info_or_notice` |
 
@@ -128,7 +128,7 @@ spelling to trust:
 Severity bands, same on every tool: cnt_debug_or_below (severity 6 and below), cnt_verbose (7-8), cnt_info_or_notice (9-12), cnt_warning (13-15), cnt_minor (16), cnt_error (17), cnt_serious (18), cnt_severe (19), cnt_critical_plus (20 and above). Listings of problems carry the failure side only (cnt_warning and above). Tools that count all traffic carry every band.
 
 `summary.severity_histogram` (col) is an ORDERED list of `{band, count}` over those bands, worst-last.
-`query_event_counts_by_severity` lists every band, with zeros; `list_sources` and `query_scope_activity` list only the bands present. A missing band is a zero.
+`count_events_matching_filter` lists every band, with zeros; `list_sources` and `summarize_events_by_severity` list only the bands present. A missing band is a zero.
 The failure-side subset is the five columns `cnt_warning` (col) through `cnt_critical_plus` (col), and a listing
 that carries them is not hiding the quiet traffic: it never counted it.
 

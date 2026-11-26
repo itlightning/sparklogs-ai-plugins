@@ -6,25 +6,29 @@
 Each section below is complete for its reason: every public field, in the words the reference page shows.
 Search for the heading "## `<code>`" or a word from the reason's label. Do not read the whole file.
 
-| reason | label | kind | severity | service | benign |
-|---|---|---|---|---|---|
-| `av_config_changed` | av config changed | event | Warning | `endpoint_protection` |  |
-| `av_definition_update_failed` | av definition update failed | event | Warning to Error | `endpoint_protection` |  |
-| `av_engine_failed` | av engine failed | event | Error | `endpoint_protection` |  |
-| `av_protection_disabled` | av protection disabled | event | Notice to Serious | `endpoint_protection` |  |
-| `av_scan_failed` | av scan failed | event | Warning | `endpoint_protection` |  |
-| `av_suspicious_behavior_detected` | av suspicious behavior detected | event | Warning | `endpoint_protection` |  |
-| `av_tamper_blocked` | av tamper blocked | event | Warning | `endpoint_protection` |  |
-| `av_threat_detected` | av threat detected | event | Warning to Error | `endpoint_protection` |  |
-| `av_threat_not_remediated` | av threat not remediated | event | Serious | `endpoint_protection` |  |
-| `av_threat_remediated` | av threat remediated | event | Warning | `endpoint_protection` |  |
-| `av_threat_remediation_failed` | av threat remediation failed | event | Error | `endpoint_protection` |  |
-| `defender_asr_blocked` | defender asr blocked | event | Warning | `endpoint_protection` |  |
-| `defender_network_protection_blocked` | defender network protection blocked | event | Warning | `endpoint_protection` |  |
+| reason | label | kind | severity | service | benign | use when |
+|---|---|---|---|---|---|---|
+| `av_config_changed` | av config changed | event | Warning | `endpoint_protection` |  | someone or something changed a Defender setting that weakens protection, such as adding an exclusion or changing cloud protection reporting, and a technician needs the setting name and its old and new value. |
+| `av_definition_update_failed` | av definition update failed | event | Warning to Error | `endpoint_protection` |  | Defender definitions are out of date, or a security intelligence or engine update keeps failing on a machine. |
+| `av_engine_failed` | av engine failed | event | Error | `endpoint_protection` |  | Defender real-time protection stopped working or shows as off when nobody turned it off, or the Defender engine stopped on an error. |
+| `av_protection_disabled` | av protection disabled | event | Notice to Serious | `endpoint_protection` |  | Defender real-time, antivirus or antispyware protection was switched off or back on, and someone needs to know when, for how long, and whether policy, another antivirus or tampering did it. |
+| `av_scan_failed` | av scan failed | event | Warning | `endpoint_protection` |  | a Defender quick, full or scheduled scan ends with an error instead of completing. |
+| `av_suspicious_behavior_detected` | av suspicious behavior detected | event | Warning | `endpoint_protection` |  | Defender warns that a program is behaving suspiciously, such as launching files from a temp folder, rather than naming a known malicious file. |
+| `av_tamper_blocked` | av tamper blocked | event | Warning | `endpoint_protection` |  | an attempt to change Defender settings, by a person, script, installer or Group Policy, was refused, or a Defender policy reports success but does not take effect. |
+| `av_threat_detected` | av threat detected | event | Warning to Error | `endpoint_protection` |  | Defender reports it found a virus, malware or potentially unwanted app on a machine, and someone needs to know what it was and where. |
+| `av_threat_not_remediated` | av threat not remediated | event | Serious | `endpoint_protection` |  | Defender found something but it is still on the machine because a user, administrator or policy chose to allow it. |
+| `av_threat_remediated` | av threat remediated | event | Warning | `endpoint_protection` |  | someone asks what Defender did with a threat it found, such as quarantining or removing a file, or why a file disappeared after an antivirus alert. |
+| `av_threat_remediation_failed` | av threat remediation failed | event | Error | `endpoint_protection` |  | Defender found a threat but could not quarantine or remove it, so it may still be on the disk or running. |
+| `defender_asr_blocked` | defender asr blocked | event | Warning | `endpoint_protection` |  | Defender stops a program from doing something, such as Word or Excel starting another program, and a business application fails or someone needs to know which rule fired. |
+| `defender_network_protection_blocked` | defender network protection blocked | event | Warning | `endpoint_protection` |  | a browser or program on the machine cannot reach a website or address because Defender Network Protection blocked it, as malicious or by your policy. |
 
 ## `av_config_changed`: av config changed
 
 Microsoft Defender recorded a change to a setting that controls how much it protects.
+
+**Use when:** someone or something changed a Defender setting that weakens protection, such as adding an exclusion or changing cloud protection reporting, and a technician needs the setting name and its old and new value.
+
+**Keywords:** Defender exclusion added, folder excluded from Defender, Defender protection setting weakened, Set-MpPreference, Add-MpPreference, ExclusionPath, cloud-delivered protection turned off, MAPS reporting changed, unapproved Defender exclusion
 
 **Severity:** Warning
 
@@ -53,6 +57,10 @@ Microsoft Defender recorded a change to a setting that controls how much it prot
 
 Microsoft Defender failed to update its security intelligence or engine, or rolled its security intelligence back to an earlier version.
 
+**Use when:** Defender definitions are out of date, or a security intelligence or engine update keeps failing on a machine.
+
+**Keywords:** virus definitions out of date, antivirus definitions not updating, security intelligence update failed, Defender signature update failed, Defender definition update error, Defender definitions rolled back, Defender engine update failed, stale antivirus definitions, MpCmdRun SignatureUpdate
+
 **Severity:** Error / Warning
 
 **Why it matters:** Defender keeps scanning with the definitions it had, so new threats can go unrecognized until a later update succeeds.
@@ -80,6 +88,10 @@ Microsoft Defender failed to update its security intelligence or engine, or roll
 
 A Microsoft Defender real-time protection feature failed, or the engine stopped on an unexpected error.
 
+**Use when:** Defender real-time protection stopped working or shows as off when nobody turned it off, or the Defender engine stopped on an error.
+
+**Keywords:** real-time protection stopped working, real-time scanning failed, Defender engine stopped, MsMpEng stopped, MsMpEng crashed, Antimalware Service Executable stopped, Defender feature failed, on-access protection failed, repair Defender platform
+
 **Severity:** Error
 
 **Why it matters:** Files may be opened and programs run without being scanned until the feature or engine recovers. The Windows Security app can show protection as off when nobody turned it off.
@@ -106,6 +118,10 @@ A Microsoft Defender real-time protection feature failed, or the engine stopped 
 ## `av_protection_disabled`: av protection disabled
 
 Microsoft Defender real-time, antispyware or antivirus protection was turned off, or turned back on.
+
+**Use when:** Defender real-time, antivirus or antispyware protection was switched off or back on, and someone needs to know when, for how long, and whether policy, another antivirus or tampering did it.
+
+**Keywords:** real-time protection turned off, real-time protection disabled, Defender antivirus turned off, Defender protection switched back on, third-party antivirus took over, Defender disabled by another antivirus, malware disabled antivirus, antispyware disabled
 
 **Severity:** Serious or Notice
 
@@ -135,6 +151,10 @@ Microsoft Defender real-time, antispyware or antivirus protection was turned off
 
 A Microsoft Defender scan failed before completing.
 
+**Use when:** a Defender quick, full or scheduled scan ends with an error instead of completing.
+
+**Keywords:** Defender scan failed, antivirus scan failed, scheduled scan failing, Defender full scan error, Defender quick scan error, scan ends with an error, Start-MpScan failed, MpCmdRun scan failed
+
 **Severity:** Warning
 
 **Why it matters:** That scheduled or requested scan did not cover the machine, so a threat it would have found is still undetected.
@@ -162,6 +182,10 @@ A Microsoft Defender scan failed before completing.
 
 Microsoft Defender behavior monitoring detected suspicious behavior.
 
+**Use when:** Defender warns that a program is behaving suspiciously, such as launching files from a temp folder, rather than naming a known malicious file.
+
+**Keywords:** suspicious behavior detected, behavior monitoring alert, program acting suspicious, suspicious process flagged, behavioral detection
+
 **Severity:** Warning
 
 **Why it matters:** A program on the machine did something Defender links to malware, such as dropping or launching files in unusual places. Whether it was stopped shows in the detection and action events that follow.
@@ -187,6 +211,10 @@ Microsoft Defender behavior monitoring detected suspicious behavior.
 
 Microsoft Defender tamper protection blocked a settings change.
 
+**Use when:** an attempt to change Defender settings, by a person, script, installer or Group Policy, was refused, or a Defender policy reports success but does not take effect.
+
+**Keywords:** tamper protection blocked, Defender setting change blocked, cannot turn off real-time protection with PowerShell, Defender exclusion change blocked, Group Policy Defender setting ignored, Defender GPO not applying, Defender policy not taking effect, attempted Defender tampering
+
 **Severity:** Warning
 
 **Why it matters:** Something tried to weaken Defender and was stopped, so protection is intact. Repeated blocks mean a script, installer or policy keeps trying, or someone is attempting to disable protection.
@@ -211,6 +239,10 @@ Microsoft Defender tamper protection blocked a settings change.
 ## `av_threat_detected`: av threat detected
 
 Microsoft Defender detected malware or potentially unwanted software.
+
+**Use when:** Defender reports it found a virus, malware or potentially unwanted app on a machine, and someone needs to know what it was and where.
+
+**Keywords:** virus found, virus detected, malware detected, Threats found, Trojan detected, PUA detected, potentially unwanted app, PUP, infected file
 
 **Severity:** Error or Warning
 
@@ -240,6 +272,10 @@ Microsoft Defender detected malware or potentially unwanted software.
 
 Microsoft Defender detected a threat and allowed it to stay.
 
+**Use when:** Defender found something but it is still on the machine because a user, administrator or policy chose to allow it.
+
+**Keywords:** threat allowed, allowed threat, Allow on device, Defender allowed threat, user allowed flagged program, allowed threats list, PUA allowed by user
+
 **Severity:** Serious
 
 **Why it matters:** The detected item is still on the machine and can run. Defender stops alerting on an allowed item, so this is the last record of it.
@@ -265,6 +301,10 @@ Microsoft Defender detected a threat and allowed it to stay.
 ## `av_threat_remediated`: av threat remediated
 
 Microsoft Defender took an action on a detected threat.
+
+**Use when:** someone asks what Defender did with a threat it found, such as quarantining or removing a file, or why a file disappeared after an antivirus alert.
+
+**Keywords:** threat quarantined, file quarantined, Defender quarantined file, threat removed, antivirus deleted my file, file deleted by antivirus, threat cleaned
 
 **Severity:** Warning
 
@@ -293,6 +333,10 @@ Microsoft Defender took an action on a detected threat.
 
 Microsoft Defender tried to remediate a detected threat and failed.
 
+**Use when:** Defender found a threat but could not quarantine or remove it, so it may still be on the disk or running.
+
+**Keywords:** could not remove virus, Defender remediation failed, quarantine failed, threat removal failed, antivirus cannot delete file, malware will not quarantine, restart required to remove threat
+
 **Severity:** Error
 
 **Why it matters:** The threat may still be on disk or running, because the cleanup did not complete.
@@ -318,6 +362,10 @@ Microsoft Defender tried to remediate a detected threat and failed.
 ## `defender_asr_blocked`: defender asr blocked
 
 A Microsoft Defender attack surface reduction rule blocked an operation.
+
+**Use when:** Defender stops a program from doing something, such as Word or Excel starting another program, and a business application fails or someone needs to know which rule fired.
+
+**Keywords:** ASR rule blocked, ASR block, attack surface reduction false positive, Office child process blocked, Word blocked from starting program, Block Office applications from creating child processes, Block credential stealing from LSASS, PSExec and WMI process creation blocked, ASR exclusion, AttackSurfaceReductionOnlyExclusions
 
 **Severity:** Warning
 
@@ -345,6 +393,10 @@ A Microsoft Defender attack surface reduction rule blocked an operation.
 ## `defender_network_protection_blocked`: defender network protection blocked
 
 Microsoft Defender Network Protection blocked a connection.
+
+**Use when:** a browser or program on the machine cannot reach a website or address because Defender Network Protection blocked it, as malicious or by your policy.
+
+**Keywords:** website blocked by Network Protection, Network Protection block, connection blocked by Defender, Chrome site blocked by Defender, Defender custom indicator block, allow blocked site in Defender
 
 **Severity:** Warning
 

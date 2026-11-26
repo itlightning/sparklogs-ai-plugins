@@ -1,5 +1,7 @@
 # TPM errors or attestation failure
 
+**Use when:** the TPM logs errors, Windows Hello or BitLocker reports a TPM problem, or a device fails Intune device health attestation.
+
 **Trigger.** "The TPM keeps logging errors", "Windows Hello or BitLocker says the TPM is not working", or a device fails Intune device health attestation.
 
 **Accuracy.** The TPM logs event 17 in the System log for every command it does not complete, and most of those are Windows asking what the TPM supports.
@@ -15,7 +17,7 @@ Each reason's arm is on `sparklogs.reason_variant` (LQL).
 On a TPM 2.0 the same row names the chip: `sparklogs.data.system_info.tpm_manufacturer` (LQL) is the maker's vendor ID (`IFX` (other) Infineon, `INTC` (other) Intel firmware TPM, `AMD` (other) AMD firmware TPM, `NTC` (other) Nuvoton, `STM` (other) STMicroelectronics, `MSFT` (other) a virtual machine's TPM or a Pluton security processor), `sparklogs.data.system_info.tpm_firmware_version` (LQL) the firmware the chip runs, and `sparklogs.data.system_info.tpm_spec_revision` (LQL) the specification revision it implements.
 Check the maker and firmware version against the maker's security advisories.
 These three are absent on a TPM 1.2 and when the TPM did not answer the agent: their absence does not mean there is no TPM, which `sparklogs.data.system_info.tpm_present` (col) answers.
-`device_overview` over the window: its `events` (col) carry `tpm_presence_changed` (a TPM appeared or disappeared, usually a firmware setting, firmware update or board replacement), `tpm_version_changed`, `tpm_chip_changed` (the TPM now comes from another maker, usually a firmware setting switching between the processor's firmware TPM and a discrete chip), `tpm_firmware_changed` (the same TPM runs another firmware version) and `bios_version_changed`.
+`device_overview` over the window: its `changes` (col), and the `events` result set for the full list, carry `tpm_presence_changed` (a TPM appeared or disappeared, usually a firmware setting, firmware update or board replacement), `tpm_version_changed`, `tpm_chip_changed` (the TPM now comes from another maker, usually a firmware setting switching between the processor's firmware TPM and a discrete chip), `tpm_firmware_changed` (the same TPM runs another firmware version) and `bios_version_changed`.
 Each takes effect at a restart, so it follows the restart that applied it.
 A TPM that disappeared, changed version or changed maker explains every TPM error after it. A firmware change can start or end a firmware defect. Look for that change before reading event 17; other changes before the first error: `what-changed.md`.
 

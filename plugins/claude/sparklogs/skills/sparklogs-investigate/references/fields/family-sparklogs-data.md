@@ -1,6 +1,8 @@
 <!-- GENERATED reference. Do not hand-edit. -->
 # State row fields
 
+**Use when:** finding which row a change is about, which fields moved and what the row held before, or when a removed row first went missing.
+
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
 | `sparklogs.data.instance` | string |  | The subject ID of this inventory or change row. |

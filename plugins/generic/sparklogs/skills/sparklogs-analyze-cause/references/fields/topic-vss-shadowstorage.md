@@ -1,7 +1,13 @@
 <!-- GENERATED reference. Do not hand-edit. -->
-# VSS shadow storage fields
+# VSS shadow storage
 
-Full inventory every 6 hours. Supported changes are reported when the agent observes them.
+Each volume with shadow copy storage set up, with the share of its storage limit in use, whether it is at the limit, and shadow copy failures from the System log over the last day and week; a volume with no shadow storage has no row.
+
+**Use when:** shadow copies or Previous Versions are missing, or shadow copies keep failing or being deleted for lack of space.
+
+Being at the limit is normal: Windows deletes the oldest shadow copies to make room, and only shadow copies failing for space raises an alert. Read about every 6 hours.
+
+Full inventory every 6 hours. Changes are reported between inventories.
 
 | Field | Type | Unit | Meaning |
 |---|---|---|---|

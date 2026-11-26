@@ -1,7 +1,13 @@
 <!-- GENERATED reference. Do not hand-edit. -->
-# Audit policy fields
+# Audit policy
 
-Full inventory every day. Supported changes are reported when the agent observes them.
+One row per machine listing which Windows Advanced Audit Policy subcategories record successes and failures, such as logon, process creation, account management and policy change.
+
+**Use when:** security events you expect, such as logons or process starts, are missing from the logs, or someone turned auditing down.
+
+A subcategory that is not audited raises no alert; only a change to the policy is reported, and a change that drops any audited event is reported as reduced coverage.
+
+Full inventory every day. Changes are reported between inventories.
 
 | Field | Type | Unit | Meaning |
 |---|---|---|---|
