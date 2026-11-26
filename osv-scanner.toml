@@ -1,11 +1,11 @@
 # The only exceptions to `scripts/check-advisories.mjs`: one entry per advisory, each with the
 # advisory id and why it does not apply or cannot be fixed yet. An entry for an advisory that does
 # apply starts its reason with its vulnerability register row (VULN-YYYYMMDD-N: ...). An optional
-# ignoreUntil lapses the entry on that date (UTC) and the check goes red again. No severity
+# effectiveUntil lapses the entry on that date (UTC) and the check goes red again. No severity
 # threshold and no package-wide ignore; the script rejects any other key or syntax, and an entry
 # that matches no current advisory. Format (one line per value):
 #
 #   [[IgnoredVulns]]
 #   id = "GHSA-xxxx-xxxx-xxxx"
 #   reason = "Why this advisory does not reach us, or VULN-YYYYMMDD-N: what blocks the upgrade."
-#   ignoreUntil = 2027-01-31  # optional
+#   effectiveUntil = 2027-01-31  # optional

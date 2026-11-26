@@ -6,7 +6,7 @@
 // Scans every tracked lockfile (today `yarn.lock`) with the pinned osv-scanner
 // (`scripts/osv-scanner-pin.json`) against the live OSV database. Any advisory fails, whatever its
 // severity, unless `osv-scanner.toml` carries an `[[IgnoredVulns]]` entry with its id and a reason.
-// An entry with `ignoreUntil` lapses on that date (UTC); an entry for an advisory that does apply
+// An entry with `effectiveUntil` lapses on that date (UTC); an entry for an advisory that does apply
 // starts its reason with its vulnerability register row (`VULN-YYYYMMDD-N: ...`); an entry that
 // matches no current advisory fails as stale. A locked package that does not come from the npm
 // registry (a patch, git, tarball or file locator) fails unless `advisory-sources.json` declares
@@ -102,7 +102,9 @@ function dayNumber(iso) {
 const COMMENT = String.raw`\s*(?:#.*)?$`;
 const HEADER_RE = new RegExp(String.raw`^\s*\[\[\s*IgnoredVulns\s*\]\]${COMMENT}`);
 const STRING_RE = new RegExp(String.raw`^\s*(id|reason)\s*=\s*"([^"\\]*)"${COMMENT}`);
-const DATE_RE = new RegExp(String.raw`^\s*(ignoreUntil)\s*=\s*([^\s#]+)${COMMENT}`);
+// PROVENANCE: `effectiveUntil`, osv-scanner 2.7.1, which warns that the older `ignoreUntil` is
+// deprecated in its favor on `[[IgnoredVulns]]` (observed 2026-11-25).
+const DATE_RE = new RegExp(String.raw`^\s*(effectiveUntil)\s*=\s*([^\s#]+)${COMMENT}`);
 const SKIP_RE = new RegExp(String.raw`^${COMMENT}`);
 // One exact advisory id. Matching is by equality, so no entry can cover more than one id; this
 // refuses text that looks like a pattern.
@@ -137,7 +139,7 @@ function readExceptions(text, today, where = 'osv-scanner.toml') {
     const m = STRING_RE.exec(line) ?? DATE_RE.exec(line);
     if (!m) {
       errors.push(`${at}: not allowed; the only exception is an [[IgnoredVulns]] entry with `
-        + 'id = "...", reason = "..." and optional ignoreUntil = YYYY-MM-DD, one line each');
+        + 'id = "...", reason = "..." and optional effectiveUntil = YYYY-MM-DD, one line each');
       return;
     }
     const entry = entries.at(-1);
@@ -160,10 +162,10 @@ function readExceptions(text, today, where = 'osv-scanner.toml') {
     const reason = (keys.reason ?? '').trim();
     if (!reason) errors.push(`${at}: entry needs a reason`);
     else errors.push(...registerRowErrors(reason, at));
-    const until = keys.ignoreUntil;
+    const until = keys.effectiveUntil;
     const untilDay = dayNumber(until);
     if (until !== undefined && Number.isNaN(untilDay)) {
-      errors.push(`${at}: ignoreUntil ${until} is not a date YYYY-MM-DD`);
+      errors.push(`${at}: effectiveUntil ${until} is not a date YYYY-MM-DD`);
     } else if (untilDay <= todayDay) {
       errors.push(`${at}: ${id} lapsed on ${until} (today ${today} UTC); upgrade, or review and renew it`);
     }
@@ -486,14 +488,15 @@ async function proveAdvisoryRules() {
   const has = (text, needle, day = today) => errs(text, day).some((e) => e.includes(needle));
   const entry = (until) => `[[IgnoredVulns]]\nid = "GHSA-1"\nreason = "not reached"\n${until}`;
 
-  expect('id + reason + ignoreUntil entry accepted', errs(entry('ignoreUntil = 2027-01-31  # note\n')).length === 0);
-  expect('entry without reason rejected', has('[[IgnoredVulns]]\nid = "GHSA-1"\nignoreUntil = 2027-01-01\n', 'needs a reason'));
+  expect('id + reason + effectiveUntil entry accepted', errs(entry('effectiveUntil = 2027-01-31  # note\n')).length === 0);
+  expect('entry without reason rejected', has('[[IgnoredVulns]]\nid = "GHSA-1"\neffectiveUntil = 2027-01-01\n', 'needs a reason'));
   expect('blank reason rejected', has('[[IgnoredVulns]]\nid = "GHSA-1"\nreason = "  "\n', 'needs a reason'));
   expect('entry without id rejected', has('[[IgnoredVulns]]\nreason = "x"\n', 'needs an advisory id'));
   expect('wildcard id rejected',
-    has('[[IgnoredVulns]]\nid = "GHSA-*"\nreason = "x"\nignoreUntil = 2027-01-01\n', 'not one advisory id'));
+    has('[[IgnoredVulns]]\nid = "GHSA-*"\nreason = "x"\neffectiveUntil = 2027-01-01\n', 'not one advisory id'));
   expect('duplicate id rejected',
     has('[[IgnoredVulns]]\nid = "A"\nreason = "x"\n[[IgnoredVulns]]\nid = "A"\nreason = "y"\n', 'listed twice'));
+  expect('deprecated ignoreUntil key rejected', has(entry('ignoreUntil = 2027-01-01\n'), 'planted.toml:4'));
   expect('package-wide ignore rejected',
     has('[[PackageOverrides]]\nname = "js-yaml"\necosystem = "npm"\nignore = true\n', 'planted.toml:1'));
   expect('unknown entry key rejected',
@@ -502,10 +505,10 @@ async function proveAdvisoryRules() {
   expect('multi-line string rejected', has('[[IgnoredVulns]]\nid = "A"\nreason = """x\ny"""\n', 'planted.toml:3'));
   expect('escaped string rejected', has('[[IgnoredVulns]]\nid = "A"\nreason = "a\\"b"\n', 'planted.toml:3'));
   expect('repeated key rejected', has('[[IgnoredVulns]]\nid = "A"\nid = "B"\nreason = "x"\n', 'given twice'));
-  expect('impossible ignoreUntil date rejected', has(entry('ignoreUntil = 2027-02-30\n'), 'is not a date'));
-  expect('quoted ignoreUntil rejected', has(entry('ignoreUntil = "2027-01-01"\n'), 'is not a date'));
-  expect('entry without ignoreUntil accepted', errs(entry('')).length === 0);
-  expect('far ignoreUntil accepted', errs(entry('ignoreUntil = 2030-01-01\n')).length === 0);
+  expect('impossible effectiveUntil date rejected', has(entry('effectiveUntil = 2027-02-30\n'), 'is not a date'));
+  expect('quoted effectiveUntil rejected', has(entry('effectiveUntil = "2027-01-01"\n'), 'is not a date'));
+  expect('entry without effectiveUntil accepted', errs(entry('')).length === 0);
+  expect('far effectiveUntil accepted', errs(entry('effectiveUntil = 2030-01-01\n')).length === 0);
   const row = (reason) => errs(`[[IgnoredVulns]]\nid = "GHSA-1"\nreason = "${reason}"\n`);
   expect('register row first accepted', row('VULN-20261125-1: fix blocked upstream').length === 0);
   expect('register row with an impossible date rejected', row('VULN-20261132-1: x').length === 1);
@@ -513,9 +516,9 @@ async function proveAdvisoryRules() {
   expect('register row not first rejected', row('tolerated, see VULN-20261125-1').length === 1);
   expect('register row with a short date rejected', row('VULN-2026112-1: x').length === 1);
   expect('register row with sequence zero rejected', row('VULN-20261125-0: x').length === 1);
-  expect('entry lapses on its date', has(entry('ignoreUntil = 2026-11-25\n'), 'lapsed on 2026-11-25'));
-  expect('entry holds the day before its date', errs(entry('ignoreUntil = 2026-11-26\n')).length === 0);
-  expect('lapse across a month end', has(entry('ignoreUntil = 2026-12-01\n'), 'lapsed', '2026-12-01'));
+  expect('entry lapses on its date', has(entry('effectiveUntil = 2026-11-25\n'), 'lapsed on 2026-11-25'));
+  expect('entry holds the day before its date', errs(entry('effectiveUntil = 2026-11-26\n')).length === 0);
+  expect('lapse across a month end', has(entry('effectiveUntil = 2026-12-01\n'), 'lapsed', '2026-12-01'));
   expect('today is the UTC date', utcToday(new Date('2026-11-25T23:30:00-05:00')) === '2026-11-26');
 
   const applied = applyExceptions([{ id: 'A', line: 'A' }, { id: 'B', line: 'B' }],
