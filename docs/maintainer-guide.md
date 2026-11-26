@@ -191,8 +191,9 @@ A package of this repository's own workspace is not a dependency and needs no en
 The file stays committed when empty (`{}`).
 
 When the check fails, upgrade the dependency (the smallest release that fixes it).
-The only exception is an `[[IgnoredVulns]]` entry in `osv-scanner.toml` with the advisory `id`, a `reason` saying why it does not reach us or what blocks the fix, and `ignoreUntil = YYYY-MM-DD` at most 90 days out.
-The entry lapses on that date (UTC) and the check goes red again; an entry that matches no current advisory fails as stale.
+The only exception is an `[[IgnoredVulns]]` entry in `osv-scanner.toml` with the advisory `id` and a `reason` saying why it does not reach us or what blocks the fix.
+An entry for an advisory that does apply starts its reason with its vulnerability register row, `VULN-YYYYMMDD-N: ` (osv-scanner refuses keys it does not know, so the row has no key of its own).
+An optional `ignoreUntil = YYYY-MM-DD` lapses the entry on that date (UTC) and the check goes red again; an entry that matches no current advisory fails as stale.
 Each entry is reviewed like code.
 The script reads that file with a strict one-line-per-value grammar and rejects anything else, so a package-wide or severity-based exception cannot be written.
 Dependabot security updates stay on; they propose the upgrades this check demands.

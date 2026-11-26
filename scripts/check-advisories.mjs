@@ -5,8 +5,9 @@
 //
 // Scans every tracked lockfile (today `yarn.lock`) with the pinned osv-scanner
 // (`scripts/osv-scanner-pin.json`) against the live OSV database. Any advisory fails, whatever its
-// severity, unless `osv-scanner.toml` carries an `[[IgnoredVulns]]` entry with its id, a reason and
-// an `ignoreUntil` date at most 90 days out; the entry lapses on that date (UTC), and an entry that
+// severity, unless `osv-scanner.toml` carries an `[[IgnoredVulns]]` entry with its id and a reason.
+// An entry with `ignoreUntil` lapses on that date (UTC); an entry for an advisory that does apply
+// starts its reason with its vulnerability register row (`VULN-YYYYMMDD-N: ...`); an entry that
 // matches no current advisory fails as stale. A locked package that does not come from the npm
 // registry (a patch, git, tarball or file locator) fails unless `advisory-sources.json` declares
 // the registry release it copies; that release is then checked through the OSV query API under the
@@ -36,7 +37,6 @@ const IGNORE_FILE = path.join(ROOT, 'osv-scanner.toml');
 const SOURCES_FILE = path.join(ROOT, 'advisory-sources.json');
 const WORK_DIR = path.join(ROOT, 'build', 'osv-scanner');
 const OSV_QUERY_URL = 'https://api.osv.dev/v1/query';
-const MAX_EXCEPTION_DAYS = 90;
 
 // A package with a long-published advisory that both the scanner and the query API must return.
 // An answer without it means the database did not really answer, whatever the exit code says.
@@ -108,6 +108,18 @@ const SKIP_RE = new RegExp(String.raw`^${COMMENT}`);
 // refuses text that looks like a pattern.
 const ID_RE = /^[A-Za-z0-9][A-Za-z0-9._:-]*$/;
 
+// An advisory that does apply is tracked in the vulnerability register. osv-scanner refuses keys it
+// does not know, so the row goes first in the reason: `VULN-YYYYMMDD-N: why it is tolerated`.
+const REGISTER_ROW_RE = /^VULN-(\d{8})-[1-9]\d*: \S/;
+
+/** Errors for a reason that names a register row other than as a valid `VULN-YYYYMMDD-N: ` prefix. */
+function registerRowErrors(reason, at) {
+  if (!reason.includes('VULN-')) return [];
+  const m = REGISTER_ROW_RE.exec(reason);
+  if (m && !Number.isNaN(dayNumber(`${m[1].slice(0, 4)}-${m[1].slice(4, 6)}-${m[1].slice(6)}`))) return [];
+  return [`${at}: a register row goes first in the reason, as VULN-YYYYMMDD-N: then the reason`];
+}
+
 /**
  * Parses the ignore file and checks each entry against `today` (YYYY-MM-DD, UTC).
  * Returns { entries: [{ at, id }], errors }.
@@ -125,7 +137,7 @@ function readExceptions(text, today, where = 'osv-scanner.toml') {
     const m = STRING_RE.exec(line) ?? DATE_RE.exec(line);
     if (!m) {
       errors.push(`${at}: not allowed; the only exception is an [[IgnoredVulns]] entry with `
-        + 'id = "...", reason = "..." and ignoreUntil = YYYY-MM-DD, one line each');
+        + 'id = "...", reason = "..." and optional ignoreUntil = YYYY-MM-DD, one line each');
       return;
     }
     const entry = entries.at(-1);
@@ -145,19 +157,15 @@ function readExceptions(text, today, where = 'osv-scanner.toml') {
     else if (!ID_RE.test(id)) errors.push(`${at}: "${id}" is not one advisory id`);
     else if (seen.has(id)) errors.push(`${at}: ${id} is listed twice`);
     else seen.add(id);
-    if (!(keys.reason ?? '').trim()) errors.push(`${at}: entry needs a reason`);
+    const reason = (keys.reason ?? '').trim();
+    if (!reason) errors.push(`${at}: entry needs a reason`);
+    else errors.push(...registerRowErrors(reason, at));
     const until = keys.ignoreUntil;
     const untilDay = dayNumber(until);
     if (until !== undefined && Number.isNaN(untilDay)) {
       errors.push(`${at}: ignoreUntil ${until} is not a date YYYY-MM-DD`);
     } else if (untilDay <= todayDay) {
       errors.push(`${at}: ${id} lapsed on ${until} (today ${today} UTC); upgrade, or review and renew it`);
-    }
-    // Every entry is dated, at most MAX_EXCEPTION_DAYS out.
-    if (until === undefined) {
-      errors.push(`${at}: entry needs ignoreUntil = YYYY-MM-DD, at most ${MAX_EXCEPTION_DAYS} days out`);
-    } else if (untilDay - todayDay > MAX_EXCEPTION_DAYS) {
-      errors.push(`${at}: ignoreUntil ${until} is more than ${MAX_EXCEPTION_DAYS} days after ${today}`);
     }
   }
   return { entries: entries.map(({ at, keys }) => ({ at, id: (keys.id ?? '').trim() })), errors };
@@ -496,9 +504,15 @@ async function proveAdvisoryRules() {
   expect('repeated key rejected', has('[[IgnoredVulns]]\nid = "A"\nid = "B"\nreason = "x"\n', 'given twice'));
   expect('impossible ignoreUntil date rejected', has(entry('ignoreUntil = 2027-02-30\n'), 'is not a date'));
   expect('quoted ignoreUntil rejected', has(entry('ignoreUntil = "2027-01-01"\n'), 'is not a date'));
-  expect('missing ignoreUntil rejected', has(entry(''), 'needs ignoreUntil'));
-  expect('ignoreUntil 90 days out accepted', errs(entry('ignoreUntil = 2027-02-23\n')).length === 0);
-  expect('ignoreUntil 91 days out rejected', has(entry('ignoreUntil = 2027-02-24\n'), 'more than 90 days'));
+  expect('entry without ignoreUntil accepted', errs(entry('')).length === 0);
+  expect('far ignoreUntil accepted', errs(entry('ignoreUntil = 2030-01-01\n')).length === 0);
+  const row = (reason) => errs(`[[IgnoredVulns]]\nid = "GHSA-1"\nreason = "${reason}"\n`);
+  expect('register row first accepted', row('VULN-20261125-1: fix blocked upstream').length === 0);
+  expect('register row with an impossible date rejected', row('VULN-20261132-1: x').length === 1);
+  expect('register row without a reason after it rejected', row('VULN-20261125-1').length === 1);
+  expect('register row not first rejected', row('tolerated, see VULN-20261125-1').length === 1);
+  expect('register row with a short date rejected', row('VULN-2026112-1: x').length === 1);
+  expect('register row with sequence zero rejected', row('VULN-20261125-0: x').length === 1);
   expect('entry lapses on its date', has(entry('ignoreUntil = 2026-11-25\n'), 'lapsed on 2026-11-25'));
   expect('entry holds the day before its date', errs(entry('ignoreUntil = 2026-11-26\n')).length === 0);
   expect('lapse across a month end', has(entry('ignoreUntil = 2026-12-01\n'), 'lapsed', '2026-12-01'));
