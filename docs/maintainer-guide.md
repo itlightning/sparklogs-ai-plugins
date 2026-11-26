@@ -57,6 +57,7 @@ LQL field vet (same script): every field named in a ```` ```lql ```` block or an
 Agents run `make precommit` (or `yarn precommit`) before commit. It is fail-closed without a usable sibling library checkout. CI `yarn validate` still SKIPPED-passes drift when the library is absent.
 
 `scripts/generated-SYNC-MANIFEST.json` records the library branch and commit the current content came from.
+The drift check compares content, not that commit: a library commit that changes nothing here does not fail it.
 It does not ship on `dist`.
 Do not hand-edit anything under `src/feeds/`, `src/fields/`, or the generated table in `src/guides/app-vocabulary.md`:
 an edit is reverted by the next sync and fails the drift check in the meantime.
@@ -170,16 +171,29 @@ running them locally before tagging:
 ## Dependency advisories (`scripts/check-advisories.mjs`)
 
 `yarn validate` starts with this check (alone: `yarn check-advisories`), so the required `validate` check and every release run it.
+It needs only Node and git, nothing installed: from a clean clone, `node scripts/check-advisories.mjs` runs it (`--github-output <file>` also appends the failing advisory ids as `findings=<ids>`).
+The `Dependency advisories` workflow runs it that way, as job `advisories`, on every pull request and push to `source`, and on demand.
 It scans every tracked lockfile (today `yarn.lock`) with a pinned osv-scanner against the live OSV database and fails on any advisory, whatever its severity.
-It also fails when the database cannot be reached, when a lockfile yields no packages, and when a tracked `package.json` (or other manifest) has no lockfile beside it: none of those is a clean result.
+It also fails when the database cannot be reached, when its output cannot be read, when a lockfile yields no packages, and when a tracked `package.json` (or other manifest) has no lockfile beside it: none of those is a clean result.
+Each scan includes a known-vulnerable control package (`lodash` 4.17.15) whose advisory must come back, so an empty answer cannot pass as clean.
 It needs network on every run, including on a workstation.
 
-The scanner is pinned in `scripts/osv-scanner-pin.yaml`: one URL and sha256 per platform, taken from the release's own `osv-scanner_SHA256SUMS`.
+The scanner is pinned in `scripts/osv-scanner-pin.json`: one URL and sha256 per platform, taken from the release's own `osv-scanner_SHA256SUMS`.
 It downloads to `build/osv-scanner/<version>/` on first use and the digest is checked on every run; a mismatched file is deleted.
 To bump it, change the version, both URLs and both digests together.
+CI runs it on the exact Node version in `.node-version`.
+
+A locked package that does not come from the npm registry (a Yarn `patch:`, git, tarball or `file:` locator) fails the check unless `advisory-sources.json` declares it, keyed by package name:
+`ecosystem`, `upstream` (the registry package it copies), `version` (the newest upstream release the copy fully contains), `why`, `locked` (the resolution exactly as `yarn.lock` records it) and optionally `commit` (for a fork of upstream's main branch, the upstream commit it is based on).
+The check queries OSV for `upstream` at `version` and treats each advisory as its own.
+An entry that matches no such package, misses a field, or whose `locked` differs from the lockfile fails, so a bump of the copy forces the entry to be reviewed.
+A package of this repository's own workspace is not a dependency and needs no entry.
+The file stays committed when empty (`{}`).
 
 When the check fails, upgrade the dependency (the smallest release that fixes it).
-The only exception is an `[[IgnoredVulns]]` entry in `osv-scanner.toml` with the advisory `id`, a `reason` saying why it does not reach us or what blocks the fix, and optionally `ignoreUntil = YYYY-MM-DD`, after which the check goes red again.
+The only exception is an `[[IgnoredVulns]]` entry in `osv-scanner.toml` with the advisory `id` and a `reason` saying why it does not reach us or what blocks the fix.
+An entry for an advisory that does apply starts its reason with its vulnerability register row, `VULN-YYYYMMDD-N: ` (osv-scanner refuses keys it does not know, so the row has no key of its own).
+An optional `effectiveUntil = YYYY-MM-DD` lapses the entry on that date (UTC) and the check goes red again; an entry that matches no current advisory fails as stale.
 Each entry is reviewed like code.
 The script reads that file with a strict one-line-per-value grammar and rejects anything else, so a package-wide or severity-based exception cannot be written.
 Dependabot security updates stay on; they propose the upgrades this check demands.

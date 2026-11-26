@@ -1,0 +1,30 @@
+name: Dependency advisories
+
+# The advisory check alone, with Node and nothing installed, as it runs from a clean clone.
+# `yarn validate` runs the same check inside the required validate check.
+on:
+  pull_request:
+    branches: [source]
+  push:
+    branches: [source]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  advisories:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+      - name: Setup Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: .node-version
+      - name: Check dependency advisories
+        run: node scripts/check-advisories.mjs
+
