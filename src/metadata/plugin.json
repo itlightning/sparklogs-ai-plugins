@@ -12,6 +12,7 @@
     "msp"
   ],
   "homepage": "https://sparklogs.com/",
+  "privacyPolicyUrl": "https://sparklogs.com/docs/legal/privacy-policy",
   "repository": "https://github.com/itlightning/sparklogs-ai-plugins",
   "bugs": "https://github.com/itlightning/sparklogs-ai-plugins/issues",
   "license": "Apache-2.0",

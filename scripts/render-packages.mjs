@@ -234,11 +234,18 @@ function commonManifest(metadata, version) {
   };
 }
 
-/** Claude plugin manifest: the documented field set. There is no icon field in it. */
+/**
+ * Claude plugin manifest: the documented field set. Its `icon` is read only by Anthropic's directory
+ * and is not set. The privacy policy link belongs here and not in the marketplace entry, where the
+ * validator reports it as unknown. Cursor and Agent Plugins manifests have no privacy policy field.
+ * PROVENANCE: `privacyPolicyUrl`, Claude Code plugin manifest reference, directory listing fields
+ * (code.claude.com/docs/en/plugins-reference), read 2026-11-25.
+ */
 function claudeManifest(metadata, version) {
   return {
     ...commonManifest(metadata, version),
     displayName: metadata.hosts?.claude?.displayName ?? metadata.displayName,
+    privacyPolicyUrl: metadata.privacyPolicyUrl,
   };
 }
 
@@ -258,6 +265,9 @@ function cursorManifest(metadata, version) {
  * Codex plugin manifest: components are path pointers, display metadata sits under interface.
  * `mcpServers` is a path to the bundled config, not an inline object, and Codex requires the `./`
  * prefix and a target inside the plugin root.
+ * PROVENANCE: `interface.privacyPolicyURL`, the key in the Codex plugin build docs
+ * (developers.openai.com/codex/plugins/build) and the serde alias on `privacy_policy_url` in
+ * openai/codex codex-rs/core-plugins/src/manifest.rs, read 2026-11-25.
  */
 function codexManifest(metadata, version) {
   return {
@@ -267,6 +277,7 @@ function codexManifest(metadata, version) {
     interface: {
       displayName: metadata.hosts?.codex?.displayName ?? metadata.displayName,
       category: pluginCategory(metadata),
+      privacyPolicyURL: metadata.privacyPolicyUrl,
     },
   };
 }
