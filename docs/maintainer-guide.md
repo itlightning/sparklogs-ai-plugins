@@ -57,6 +57,7 @@ LQL field vet (same script): every field named in a ```` ```lql ```` block or an
 Agents run `make precommit` (or `yarn precommit`) before commit. It is fail-closed without a usable sibling library checkout. CI `yarn validate` still SKIPPED-passes drift when the library is absent.
 
 `scripts/generated-SYNC-MANIFEST.json` records the library branch and commit the current content came from.
+The drift check compares content, not that commit: a library commit that changes nothing here does not fail it.
 It does not ship on `dist`.
 Do not hand-edit anything under `src/feeds/`, `src/fields/`, or the generated table in `src/guides/app-vocabulary.md`:
 an edit is reverted by the next sync and fails the drift check in the meantime.

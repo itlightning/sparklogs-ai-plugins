@@ -10,7 +10,9 @@
 // Usage:
 //   node scripts/sync-generated-references.mjs           write references, router inventory,
 //                                                        and guides/app-vocabulary.md
-//   node scripts/sync-generated-references.mjs --check   fail if those differ from a re-sync
+//   node scripts/sync-generated-references.mjs --check   fail if those differ from a re-sync; the
+//                                                        library commit recorded in the manifest
+//                                                        is provenance, not compared
 //
 // The library checkout is located by SPARKLOGS_SOURCE_LIBRARY_DIR, falling back to the sibling
 // path. A path that is set but unusable is a hard failure rather than a fallback: a drift guard
@@ -76,6 +78,18 @@ function libraryCommit(dir) {
   const branch = execFileSync('git', ['rev-parse', '--abbrev-ref', 'HEAD'], { cwd: dir, encoding: 'utf8' }).trim();
   const dirty = execFileSync('git', ['status', '--porcelain'], { cwd: dir, encoding: 'utf8' }).trim();
   return { sha, branch, dirty: dirty.length > 0 };
+}
+
+/** The { sha, branch } a committed sync manifest records, or null when it records none. */
+function recordedSource(text) {
+  let source;
+  try {
+    source = JSON.parse(text ?? 'null')?.source;
+  } catch {
+    return null;
+  }
+  if (typeof source?.commit !== 'string' || typeof source?.branch !== 'string') return null;
+  return { sha: source.commit, branch: source.branch };
 }
 
 async function readModule(libDir, module) {
@@ -215,7 +229,8 @@ async function main() {
   const modules = [];
   for (const module of MODULES) modules.push([module, await readModule(dir, module)]);
   const fields = await readFields(dir);
-  const manifest = `${JSON.stringify(manifestBody(commit, modules, fields), null, 2)}\n`;
+  const manifestText = (source) => `${JSON.stringify(manifestBody(source, modules, fields), null, 2)}\n`;
+  const manifest = manifestText(commit);
   const router = await renderRouter(modules, fields);
 
   if (CHECK) {
@@ -244,9 +259,14 @@ async function main() {
     for (const name of presentFields) {
       if (!fields.has(name)) drifted.push(`${path.relative(ROOT, path.join(fieldDest, name))} (not produced by the sync)`);
     }
+    // The recorded library commit and branch say where the content came from; they are not
+    // content. A library commit that changed nothing here is not drift, so the manifest is compared
+    // with its own source fields kept.
     const manifestPath = path.join(ROOT, MANIFEST_FILE);
     const currentManifest = await exists(manifestPath) ? await fs.readFile(manifestPath, 'utf8') : null;
-    if (currentManifest !== manifest) drifted.push(MANIFEST_FILE);
+    const recorded = recordedSource(currentManifest);
+    const expectedManifest = recorded ? manifestText(recorded) : manifest;
+    if (currentManifest !== expectedManifest) drifted.push(MANIFEST_FILE);
     if (router.current !== router.body) drifted.push(ROUTER_FILE);
     for (const orphan of extraFeedDirs(await listedFeedDirs(), MODULES)) {
       drifted.push(`src/feeds/${orphan} (not in MODULES)`);
@@ -254,7 +274,8 @@ async function main() {
     if (drifted.length > 0) {
       throw new Error(`Generated references differ from a re-sync of ${commit.sha}:\n  ${drifted.join('\n  ')}\nRun: yarn sync-generated`);
     }
-    console.log(`generated-references drift: clean against ${commit.branch} ${commit.sha}`);
+    console.log(`generated-references drift: clean against ${commit.branch} ${commit.sha}`
+      + `${recorded && recorded.sha !== commit.sha ? ` (content synced from ${recorded.branch} ${recorded.sha})` : ''}`);
     await syncAppVocabulary({ check: true });
     return;
   }
