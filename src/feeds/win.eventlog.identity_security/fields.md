@@ -41,7 +41,9 @@ Stored flat under the `win.eventlog.identity_security.` prefix.
 | `win.eventlog.identity_security.shadow_stack_nonenforcement_reason` | int | Reason code Windows gave for letting a process keep running after a shadow stack (hardware-enforced stack protection) mismatch, from `NonenforcementReason` on Security-Mitigations event 25, as a number. SparkLogs does not decode it. |
 | `win.eventlog.identity_security.shadow_stack_control_pc_image` | string | File name (without folder) of the module the mismatched return address points into, from `ControlPcImageName` on Security-Mitigations events 25 and 28. Usually names the module that caused the mismatch. |
 | `win.eventlog.identity_security.entra_error_message` | string | Error text the Microsoft Entra sign-in library wrote for a failed token request, from `ErrorMessage` on AAD Operational events. Tells a network failure from a tenant configuration problem. |
-| `win.eventlog.identity_security.correlation_id` | string | Correlation ID Microsoft Entra stamped on one sign-in or token attempt, from `CorrelationID` on AAD Operational events 1085, 1086, 1094, 1131, 1155, 1160 to 1162 and 1202, and from `Target` on 1084 and 1256. The token errors 1097, 1098 and 1112 carry none. Each attempt gets a new one. Use it to find the same attempt in the Entra sign-in logs. |
+| `win.eventlog.identity_security.correlation_id` | string | Correlation ID Microsoft Entra stamped on one sign-in or token attempt, from `CorrelationID` on every AAD Operational event that carries it, and from `Target` on 1084 and 1256. The token errors 1097, 1098 and 1112 carry none. Each attempt gets a new one, and the events of the attempt that carry an ID share it. Use it to find the same attempt's other events on this device, and the Entra sign-in log entry when the tenant could resolve the user. |
+| `win.eventlog.identity_security.aadsts_code` | string | Microsoft Entra service error code (the digits after `AADSTS`, such as 50034 for a user that does not exist in the directory), from the error text on AAD Operational token and sign-in failure events. The code to look up in the Entra error code reference. |
+| `win.eventlog.identity_security.credential_type` | int | Type of credential the device sent with a failed sign-in or unlock, from `CredentialType` on AAD Operational event 1250, as a number. SparkLogs does not decode it. |
 | `win.eventlog.identity_security.http_status` | int | HTTP status code the registration service returned, from `HttpStatus` on User Device Registration failure events 204 and 252. Tells a refusal by the service from a network failure. |
 | `win.eventlog.identity_security.directory_error_code` | int | Detail error code under a device registration failure, from `ErrorCode` on User Device Registration failure events that also carry an exit code. Events 220 and 221 carry only this code, and SparkLogs reports it as the result code of those events instead. |
 | `win.eventlog.identity_security.directory_error_subcode` | string | Sub-code the registration service gave with a failure, from `ErrorSubcode` on User Device Registration event 252, such as one for two devices claiming the same name. The only field that picks out the duplicate device case. |
@@ -101,6 +103,8 @@ Prefer these over the per-feed fields for anything that spans feeds.
 | LQL path | Family means |
 |---|---|
 | `sparklogs.throttle.window_s` |  |
+| `sparklogs.actor.name` | The initiator. Who wanted the thing done. |
+| `sparklogs.actor.type` | The initiator. Who wanted the thing done. |
 | `sparklogs.destination.host` | Where it was going. Both are present when the event names both ends. On sign-in events only the other machine is named, because the reporting machine is the near end. |
 
 ## Tail keys and where the value is queryable
@@ -171,20 +175,24 @@ The last column is different in kind: it is the author's account of the row or e
 | `dpapi_unprotect_failed` / `unprotect_incomplete` | 8196, 8198, 8202, 8204, 8205 | `win.eventlog.identity_security.dpapi_failure_reason` `win.eventlog.identity_security.dpapi_master_key_guid` |  |
 | `entra_device_certificate_update_failed` / `logon_or_network` | 1131, 1256 | `win.eventlog.identity_security.correlation_id` |  |
 | `entra_device_certificate_update_failed` / `other_status` | 1131, 1256 | `win.eventlog.identity_security.correlation_id` |  |
-| `entra_sign_in_failed` / `credential` | 1085, 1086, 1160, 1161, 1162 | **fields: none** |  |
-| `entra_sign_in_failed` / `unexplained` | 1085, 1086, 1160, 1161, 1162 | **fields: none** |  |
-| `entra_sign_in_failed` / `unreachable` | 1085, 1086, 1160, 1161, 1162 | **fields: none** |  |
-| `entra_token_acquisition_failed` / `account_state` | 1084, 1094, 1097, 1098, 1112, 1155, 1202, 1215 | `win.eventlog.identity_security.correlation_id` `win.eventlog.identity_security.entra_error_message` |  |
-| `entra_token_acquisition_failed` / `app_registration` | 1084, 1094, 1097, 1098, 1112, 1155, 1202, 1215 | `win.eventlog.identity_security.correlation_id` `win.eventlog.identity_security.entra_error_message` |  |
-| `entra_token_acquisition_failed` / `configuration` | 1084, 1094, 1097, 1098, 1112, 1155, 1202, 1215 | `win.eventlog.identity_security.correlation_id` `win.eventlog.identity_security.entra_error_message` |  |
-| `entra_token_acquisition_failed` / `device_key` | 1084, 1094, 1097, 1098, 1112, 1155, 1202, 1215 | `win.eventlog.identity_security.correlation_id` `win.eventlog.identity_security.entra_error_message` |  |
-| `entra_token_acquisition_failed` / `fallback_step` | 1084, 1094, 1097, 1098, 1112, 1155, 1202, 1215 | `win.eventlog.identity_security.correlation_id` `win.eventlog.identity_security.entra_error_message` |  |
-| `entra_token_acquisition_failed` / `first_party_preauthorization` | 1084, 1094, 1097, 1098, 1112, 1155, 1202, 1215 | `win.eventlog.identity_security.correlation_id` `win.eventlog.identity_security.entra_error_message` |  |
-| `entra_token_acquisition_failed` / `interaction_required` | 1084, 1094, 1097, 1098, 1112, 1155, 1202, 1215 | `win.eventlog.identity_security.correlation_id` `win.eventlog.identity_security.entra_error_message` |  |
-| `entra_token_acquisition_failed` / `non_failure_code` | 1084, 1094, 1097, 1098, 1112, 1155, 1202, 1215 | `win.eventlog.identity_security.correlation_id` `win.eventlog.identity_security.entra_error_message` |  |
-| `entra_token_acquisition_failed` / `not_registered` | 1084, 1094, 1097, 1098, 1112, 1155, 1202, 1215 | `win.eventlog.identity_security.correlation_id` `win.eventlog.identity_security.entra_error_message` |  |
-| `entra_token_acquisition_failed` / `transport` | 1084, 1094, 1097, 1098, 1112, 1155, 1202, 1215 | `win.eventlog.identity_security.correlation_id` `win.eventlog.identity_security.entra_error_message` |  |
-| `entra_token_acquisition_failed` / `unclassified` | 1084, 1094, 1097, 1098, 1112, 1155, 1202, 1215 | `win.eventlog.identity_security.correlation_id` `win.eventlog.identity_security.entra_error_message` |  |
+| `entra_sign_in_failed` / `account_not_found` | 1085, 1086, 1160, 1161, 1162, 1250 | `win.eventlog.identity_security.aadsts_code` `win.eventlog.identity_security.correlation_id` `win.eventlog.identity_security.credential_type` |  |
+| `entra_sign_in_failed` / `account_state` | 1085, 1086, 1160, 1161, 1162, 1250 | `win.eventlog.identity_security.aadsts_code` `win.eventlog.identity_security.correlation_id` `win.eventlog.identity_security.credential_type` |  |
+| `entra_sign_in_failed` / `credential` | 1085, 1086, 1160, 1161, 1162, 1250 | `win.eventlog.identity_security.aadsts_code` `win.eventlog.identity_security.correlation_id` `win.eventlog.identity_security.credential_type` |  |
+| `entra_sign_in_failed` / `unexplained` | 1085, 1086, 1160, 1161, 1162, 1250 | `win.eventlog.identity_security.aadsts_code` `win.eventlog.identity_security.correlation_id` `win.eventlog.identity_security.credential_type` |  |
+| `entra_sign_in_failed` / `unreachable` | 1085, 1086, 1160, 1161, 1162, 1250 | `win.eventlog.identity_security.aadsts_code` `win.eventlog.identity_security.correlation_id` `win.eventlog.identity_security.credential_type` |  |
+| `entra_token_acquisition_failed` / `account_not_found` | 1081, 1084, 1094, 1097, 1098, 1112, 1155, 1202, 1215 | `win.eventlog.identity_security.aadsts_code` `win.eventlog.identity_security.correlation_id` `win.eventlog.identity_security.entra_error_message` |  |
+| `entra_token_acquisition_failed` / `account_state` | 1081, 1084, 1094, 1097, 1098, 1112, 1155, 1202, 1215 | `win.eventlog.identity_security.aadsts_code` `win.eventlog.identity_security.correlation_id` `win.eventlog.identity_security.entra_error_message` |  |
+| `entra_token_acquisition_failed` / `app_registration` | 1081, 1084, 1094, 1097, 1098, 1112, 1155, 1202, 1215 | `win.eventlog.identity_security.aadsts_code` `win.eventlog.identity_security.correlation_id` `win.eventlog.identity_security.entra_error_message` |  |
+| `entra_token_acquisition_failed` / `configuration` | 1081, 1084, 1094, 1097, 1098, 1112, 1155, 1202, 1215 | `win.eventlog.identity_security.aadsts_code` `win.eventlog.identity_security.correlation_id` `win.eventlog.identity_security.entra_error_message` |  |
+| `entra_token_acquisition_failed` / `device_key` | 1081, 1084, 1094, 1097, 1098, 1112, 1155, 1202, 1215 | `win.eventlog.identity_security.aadsts_code` `win.eventlog.identity_security.correlation_id` `win.eventlog.identity_security.entra_error_message` |  |
+| `entra_token_acquisition_failed` / `fallback_step` | 1081, 1084, 1094, 1097, 1098, 1112, 1155, 1202, 1215 | `win.eventlog.identity_security.aadsts_code` `win.eventlog.identity_security.correlation_id` `win.eventlog.identity_security.entra_error_message` |  |
+| `entra_token_acquisition_failed` / `first_party_preauthorization` | 1081, 1084, 1094, 1097, 1098, 1112, 1155, 1202, 1215 | `win.eventlog.identity_security.aadsts_code` `win.eventlog.identity_security.correlation_id` `win.eventlog.identity_security.entra_error_message` |  |
+| `entra_token_acquisition_failed` / `interaction_required` | 1081, 1084, 1094, 1097, 1098, 1112, 1155, 1202, 1215 | `win.eventlog.identity_security.aadsts_code` `win.eventlog.identity_security.correlation_id` `win.eventlog.identity_security.entra_error_message` |  |
+| `entra_token_acquisition_failed` / `non_failure_code` | 1081, 1084, 1094, 1097, 1098, 1112, 1155, 1202, 1215 | `win.eventlog.identity_security.aadsts_code` `win.eventlog.identity_security.correlation_id` `win.eventlog.identity_security.entra_error_message` |  |
+| `entra_token_acquisition_failed` / `not_registered` | 1081, 1084, 1094, 1097, 1098, 1112, 1155, 1202, 1215 | `win.eventlog.identity_security.aadsts_code` `win.eventlog.identity_security.correlation_id` `win.eventlog.identity_security.entra_error_message` |  |
+| `entra_token_acquisition_failed` / `transport` | 1081, 1084, 1094, 1097, 1098, 1112, 1155, 1202, 1215 | `win.eventlog.identity_security.aadsts_code` `win.eventlog.identity_security.correlation_id` `win.eventlog.identity_security.entra_error_message` |  |
+| `entra_token_acquisition_failed` / `unclassified` | 1081, 1084, 1094, 1097, 1098, 1112, 1155, 1202, 1215 | `win.eventlog.identity_security.aadsts_code` `win.eventlog.identity_security.correlation_id` `win.eventlog.identity_security.entra_error_message` |  |
+| `entra_token_acquisition_failed` / `user_identity_changed` | 1081, 1084, 1094, 1097, 1098, 1112, 1155, 1202, 1215 | `win.eventlog.identity_security.aadsts_code` `win.eventlog.identity_security.correlation_id` `win.eventlog.identity_security.entra_error_message` |  |
 | `exploit_mitigation_audit_would_block` / `default` | 1, 3, 11 | `win.eventlog.identity_security.mitigation_process` |  |
 | `exploit_mitigation_blocked` / `designed_sandbox` | 2, 4, 6, 10, 12, 32, 34, 36 | `win.eventlog.identity_security.mitigation_process` |  |
 | `exploit_mitigation_blocked` / `unexpected_caller` | 2, 4, 6, 10, 12, 32, 34, 36 | `win.eventlog.identity_security.mitigation_process` |  |
@@ -235,9 +243,6 @@ A predicate over them uses the reason, the class, or the retained payload; there
 - `device_encryption_enable_failed` / `silent`
 - `device_encryption_enable_failed` / `silent_no_tpm`
 - `device_encryption_enable_failed` / `silent_no_winre`
-- `entra_sign_in_failed` / `credential`
-- `entra_sign_in_failed` / `unexplained`
-- `entra_sign_in_failed` / `unreachable`
 - `group_policy_processing_failed` / `sysvol_unreachable`
 - `laps_password_backup_failed` / `authentication`
 - `laps_password_backup_failed` / `backup_failed`

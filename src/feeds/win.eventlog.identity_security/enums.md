@@ -24,3 +24,12 @@ These sets are closed: a value outside them leaves its field unset rather than b
 | `11` | `signing_level_ngen` | Used only for signing the .NET native image compiler. |  |
 | `12` | `signing_level_windows` | Windows signed. |  |
 | `14` | `signing_level_windows_tcb` | Signed as part of the Windows trusted computing base. |  |
+
+## Portable vocabularies this module uses
+
+Library-wide closed sets, so the same token means the same thing on every data feed.
+
+### `sparklogs.actor.type`
+
+- `samaccountname`: bare logon name with no domain suffix (the ordinary Windows account name)
+- `upn`: user principal name (user@domain email-shaped identity)

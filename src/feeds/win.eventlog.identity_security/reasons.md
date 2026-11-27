@@ -31,7 +31,7 @@ Search for the heading "## `<code>`" or a word from the reason's label. Do not r
 | `device_registration_failed` | device registration failed | event | Info to Warning | `device_management` | benign possible | a domain PC will not finish Microsoft Entra hybrid join, dsregcmd /status shows it not joined, or the device never appears or stays pending in Entra ID. |
 | `dpapi_unprotect_failed` | dpapi unprotect failed | event | Notice | `certificates` |  | saved passwords, credentials or a certificate's private key cannot be opened after a password reset, a profile move or a new device, and a technician needs to know whether the protected data is lost. |
 | `entra_device_certificate_update_failed` | entra device certificate update failed | event | Notice to Warning | `device_management` |  | a technician needs to know why an Entra-joined device could not renew the certificate that proves its registration, before Conditional Access stops seeing it as a registered device. |
-| `entra_sign_in_failed` | entra sign in failed | event | Notice to Warning | `auth` |  | a user cannot sign in to an Entra-joined PC with a work account, and a technician needs to know whether the password was refused or Entra ID could not be reached. |
+| `entra_sign_in_failed` | entra sign in failed | event | Notice to Warning | `auth` |  | a user cannot sign in to an Entra-joined PC with a work account, at sign-in or at the lock screen, and a technician needs to know whether the password was refused, the account is unknown, disabled or locked, or Entra ID could not be reached. |
 | `entra_token_acquisition_failed` | entra token acquisition failed | event | Verbose to Warning | `auth` | benign possible | Outlook, Teams or OneDrive keeps asking a user to sign in again on a work PC, or single sign-on to Microsoft 365 apps stops working, and a technician needs the reason the token request failed. |
 | `exploit_mitigation_audit_would_block` | exploit mitigation audit would block | event | Info | `security_audit` | benign | Exploit protection settings are in audit mode and a technician needs to know which programs would break once a mitigation is enforced. |
 | `exploit_mitigation_blocked` | exploit mitigation blocked | event | Verbose to Notice | `security_audit` | benign possible | a program fails or stops working because a Windows exploit protection mitigation is enforced on it, and a technician needs to know which mitigation stopped which process. |
@@ -745,30 +745,33 @@ The device failed to refresh the certificate that proves its identity to the dir
 
 The Microsoft Entra sign-in plugin on this device refused a sign-in.
 
-**Use when:** a user cannot sign in to an Entra-joined PC with a work account, and a technician needs to know whether the password was refused or Entra ID could not be reached.
+**Use when:** a user cannot sign in to an Entra-joined PC with a work account, at sign-in or at the lock screen, and a technician needs to know whether the password was refused, the account is unknown, disabled or locked, or Entra ID could not be reached.
 
-**Keywords:** Entra sign-in failed, Azure AD sign-in failed on PC, work account sign-in refused, AAD login failed, cannot sign in to Entra joined PC, CloudAP sign-in failed, wrong password Entra joined PC, Entra ID unreachable at sign-in
+**Keywords:** Entra sign-in failed, Azure AD sign-in failed on PC, work account sign-in refused, AAD login failed, cannot sign in to Entra joined PC, CloudAP sign-in failed, wrong password Entra joined PC, Entra ID unreachable at sign-in, cannot unlock PC after UPN change, AADSTS50034 user does not exist, Windows Hello PIN stopped working after rename
 
-**Severity:** Notice for a wrong credential or an unreachable service, Warning for a refusal the event does not explain.
+**Severity:** Notice for a wrong credential or an unreachable service, Warning when the directory does not know the name or the account or device is disabled or locked, and Notice or Warning for a refusal the event does not explain.
 
-**Why it matters:** The user is not signed in. A wrong credential is a user event; an unreachable service is a connectivity problem outside authentication.
+**Why it matters:** The user is not signed in. A wrong credential is a user event; an unknown name or a disabled or locked account keeps failing until it is fixed; an unreachable service is a connectivity problem outside authentication.
 
-**In practice:** The Microsoft Entra plugin writes events 1085, 1086, 1160, 1161 and 1162 to the Microsoft-Windows-AAD/Operational log when a sign-in to Entra ID fails. The status code is the cause. STATUS_WRONG_PASSWORD (0xC000006A) means the credential was refused. STATUS_NETWORK_UNREACHABLE (0xC000023C) means the service was never reached, so the credential was not tested. Other codes ship as the raw number, and some belong to the plugin's own range with no public name.
+**In practice:** The Microsoft Entra plugin writes events 1085, 1086, 1160, 1161 and 1162 to the Microsoft-Windows-AAD/Operational log when a sign-in to Entra ID fails, and event 1250 with the request it sent. STATUS_WRONG_PASSWORD (0xC000006A) or AADSTS50126 means the credential was refused. STATUS_NETWORK_UNREACHABLE (0xC000023C) means the service was never reached, so the credential was not tested. AADSTS50034 on event 1250 means the name the device sent is not a user in the directory: most often the user principal name was renamed, sometimes the account was deleted or the name mistyped. AADSTS50057, AADSTS50053, AADSTS135011 and AADSTS130007 mean the account is disabled or locked, or the device is disabled. The status on 1085 and 1160 is the plugin's translation of the service answer and can mislead: 0xC0000072 (account disabled) also stands for AADSTS50034. Other codes ship as the raw number, and some belong to the plugin's own range with no public name.
 
 **When to ignore:** A single wrong-password record, or network-unreachable records from a device that was offline.
 
 **What to check:**
 
-- Read the status before anything else.
+- Trust the service code (`aadsts_code`) on event 1250 of the same attempt (same `correlation_id`) over the status on 1085 or 1160.
 - A wrong-password code is a user event. A burst across several accounts on one device is worth a look.
+- An unknown name (AADSTS50034): look for an earlier user_identity_changed token record, which marks a rename. At the sign-in screen choose Other user and sign in with the current user principal name and password (the same profile opens), then set up the Windows Hello PIN again. If that is not possible, change the user principal name back.
+- An unknown name may not appear in the tenant's sign-in logs, because the tenant could not resolve the user. The record on the device is the evidence.
+- A disabled account or device needs an administrator. A locked account clears after the lockout period or when an administrator unlocks it.
 - A network-unreachable code points at connectivity or a proxy, not the account.
 - For any other code, find the attempt in the Entra sign-in logs using the correlation ID on the event.
 
 **Related:**
 
-- `entra_token_acquisition_failed`: a token that was not obtained, rather than a credential refused
+- `entra_token_acquisition_failed`: a token that was not obtained, rather than a credential refused; a user_identity_changed record there can date a change, for example a renamed user principal name, behind an unknown name here
 
-**Example:** A user types their old password at the lock screen after a change, and the plugin reports STATUS_WRONG_PASSWORD.
+**Example:** An administrator renames a user's principal name, and the user's next sign-in at the laptop lock screen fails with AADSTS50034 because the device still sends the old name.
 
 **Docs:** https://sparklogs.com/docs/it-fleet-intelligence/reference/feeds/eventlog-identity-security#entra_sign_in_failed, https://sparklogs.com/reference/reasons/entra_sign_in_failed.json
 
@@ -782,9 +785,9 @@ The device failed to get a token for a cloud resource.
 
 **Severity:** Warning, Notice, Info or Verbose
 
-**Why it matters:** Depends on the cause. A disabled or locked account or device, or a device key fault, keeps the resource behind that token unavailable to the user until it is fixed (a lockout clears itself after its period), and a tenant configuration error affects every device in the tenant. A fallback step or a sign-in prompt is normal flow, and an application registration error affects only that application.
+**Why it matters:** Depends on the cause. A disabled or locked account or device, a user the directory does not know, or a device key fault, keeps the resource behind that token unavailable to the user until it is fixed (a lockout clears itself after its period), and a tenant configuration error affects every device in the tenant. A fallback step or a sign-in prompt is normal flow, and an application registration error affects only that application.
 
-**In practice:** The Microsoft Entra plugin writes events 1084, 1094, 1097, 1098, 1112, 1155, 1202 and 1215 to the Microsoft-Windows-AAD/Operational log when a token for a cloud resource was not obtained. The error message on the event, written by the authentication library, says why. The numeric code alone does not separate the cases. Most records are normal flow: one step of the fallback chain (refresh token, then primary refresh token, then Windows integrated authentication), or a request for the user to sign in again. On a device joined to Active Directory only, file not found (0x80070002) and 0xCAA9004D on event 1097 mean the device has no Entra registration, so there was no token to get. A disabled or locked user or device (AADSTS50057, AADSTS50053, AADSTS135011, AADSTS130007), or a device key the TPM could not use, is a real fault and ships at Warning.
+**In practice:** The Microsoft Entra plugin writes events 1084, 1094, 1097, 1098, 1112, 1155, 1202 and 1215 to the Microsoft-Windows-AAD/Operational log when a token for a cloud resource was not obtained, and event 1081 with the error the service returned to any token request. The error message on the event, written by the authentication library, says why. The numeric code alone does not separate the cases. Most records are normal flow: one step of the fallback chain (refresh token, then primary refresh token, then Windows integrated authentication), or a request for the user to sign in again. On a device joined to Active Directory only, file not found (0x80070002) and 0xCAA9004D on event 1097 mean the device has no Entra registration, so there was no token to get. A disabled or locked user or device (AADSTS50057, AADSTS50053, AADSTS135011, AADSTS130007), a user the directory does not know (AADSTS50034), or a device key the TPM could not use, is a real fault and ships at Warning. The service code rides `aadsts_code`. Where the record carries a `correlation_id` (1097, 1098 and 1112 carry none), it ties the record to the events of the same attempt that carry one.
 
 **When to ignore:** Fallback steps, sign-in prompts, transport errors on a device off the network, the not-registered record on a device joined to Active Directory only, and the Microsoft first-party preauthorization record, which ship at Info or Verbose.
 
@@ -792,6 +795,8 @@ The device failed to get a token for a cloud resource.
 
 - Read the error message, and group by it across a day on one device.
 - A disabled account or device needs an administrator. A locked account clears after the lockout period or when an administrator unlocks it.
+- A user the directory does not know (AADSTS50034): for example a renamed user principal name or a deleted user. If this is the account used to sign in to Windows, the next sign-in fails the same way.
+- A user_identity_changed record (0x8AA50159) marks when a key property of the user changed, for example a renamed user principal name. Use it to date the change behind a later unknown-user failure.
 - A key or TPM fault (0x80090016, 0x80090030, 0x80280909, 0x8009002C) needs the device repaired. Start with `dsregcmd /status` and the TPM.
 - A grant or parameter error that repeats on every device for one resource is a tenant setting, and no work on the device fixes it.
 - An application registration error names one application whose reply URL or scope Entra rejects. The owner of that app registration fixes it.
