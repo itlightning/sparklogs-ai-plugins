@@ -36,4 +36,4 @@ On both, the failing account is `sparklogs.actor.name` (LQL), not the target.
 Group the account's failures by `sparklogs.origin.ip` (LQL) to find the caller, and by `win.eventlog.security.status_meaning` (LQL) for the cause. The code tables are in `feeds/win.eventlog.security/enums.md`: **win_status_codes** for the NTSTATUS codes on 4625, **kerberos** for the result codes on 4771.
 From the lockout to the process still sending the old password: `feeds/win.eventlog.security/recipes.md` (**Find the machine holding the stale credential**).
 Many accounts failing or locking out from one address is password guessing.
-Entra ID smart lockout and cloud sign-in failures are recorded in the Entra sign-in logs.
+Entra ID smart lockout and cloud sign-in failures are decided in the tenant, but the device records the AADSTS code it was told (`win.eventlog.identity_security.aadsts_code` (LQL)) on `entra_sign_in_failed` (value) and `entra_token_acquisition_failed` (value): `playbooks/sign-in-failure.md`. Use the Entra sign-in logs for the policy behind it.

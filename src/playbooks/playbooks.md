@@ -58,6 +58,14 @@ One device or many: count the symptom's own signature across the client by `sour
 | Service crashing and restarting | `playbooks/service-failures.md` |
 | Automatic service stopped | `playbooks/service-failures.md` |
 | Print spooler stopped or will not start | `playbooks/service-failures.md` |
+| Sign-in failure | `playbooks/sign-in-failure.md` |
+| User cannot sign in | `playbooks/sign-in-failure.md` |
+| Account locked out | `playbooks/sign-in-failure.md` |
+| Password rejected or expired | `playbooks/sign-in-failure.md` |
+| Trust relationship between this workstation and the domain failed | `playbooks/sign-in-failure.md` |
+| Windows Hello PIN stopped working | `playbooks/sign-in-failure.md` |
+| Cannot sign in after a username or email change | `playbooks/sign-in-failure.md` |
+| Remote Desktop sign-in denied | `playbooks/sign-in-failure.md` |
 | Slow or freezing PC | `playbooks/slow-device.md` |
 | Slow server | `playbooks/slow-device.md` |
 | Slow boot or shutdown | `playbooks/slow-device.md` |
